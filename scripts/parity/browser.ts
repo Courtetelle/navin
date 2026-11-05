@@ -7,6 +7,7 @@ import type { Fixture, Scenario, Step } from './types.ts';
 
 export const DEFAULT_TIME = '2026-07-15T10:30:00+02:00';
 export const DEFAULT_SETTLE = 500;
+const BOOT_TIMEOUT = 60_000;
 // react-dom draws two Math.random() values when its module loads (internal
 // property keys), before any app code: hand it throwaway values so the app
 // sees the same random sequence as legacy.
@@ -94,6 +95,17 @@ export async function openApp(
   await page.clock.setFixedTime(new Date(scenario.time ?? DEFAULT_TIME));
   await page.goto(url);
   await page.waitForLoadState('load');
+  // The load event comes well before the boot screen is drawn: the dev server
+  // serves hundreds of modules, and a lazy page follows them.
+  await page
+    .waitForFunction(
+      () => (document.querySelector('#view')?.childElementCount ?? 0) > 0,
+      undefined,
+      { timeout: BOOT_TIMEOUT },
+    )
+    .catch(() => {
+      errors.push(`boot screen not drawn after ${BOOT_TIMEOUT} ms`);
+    });
   await page.waitForTimeout(scenario.settle ?? DEFAULT_SETTLE);
   return { page, errors, close: () => context.close() };
 }

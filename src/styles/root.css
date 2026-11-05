@@ -1,3 +1,8 @@
+/*
+ * The wrapper React renders into must stay invisible: no box, and transparent
+ * to `inherit`, because the stylesheet expects its children directly in <body>.
+ */
 #root {
   display: contents;
+  background: inherit;
 }

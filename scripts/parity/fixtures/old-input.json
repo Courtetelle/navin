@@ -1,0 +1,142 @@
+{
+  "ldb.settings": {
+    "theme": "night",
+    "noPopups": true,
+    "prefill": false,
+    "piedPilote": "0,8"
+  },
+  "ldb.index": [
+    {
+      "id": "old1",
+      "name": "Vieille sortie",
+      "created": "2025-06-01T08:00:00.000Z",
+      "type": "lac",
+      "duree": "jour"
+    },
+    {
+      "id": "old2",
+      "name": "Vieille croisière",
+      "created": "2025-05-01T08:00:00.000Z",
+      "type": "mer"
+    }
+  ],
+  "ldb.cruise.old1": {
+    "id": "old1",
+    "created": "2025-06-01T08:00:00.000Z",
+    "updated": "2025-06-02T08:00:00.000Z",
+    "type": "lac",
+    "duree": "jour",
+    "boatId": "savannah",
+    "info": {
+      "name": "Vieille sortie",
+      "boat": "Savannah",
+      "model": "Hanse 325, 2013",
+      "flag": "Suisse · Morges",
+      "displ": "5 422 kg",
+      "beam": "3,40"
+    },
+    "crew": [{ "nom": "Ana Test", "fonction": "Skipper" }],
+    "entries": [
+      {
+        "id": "oe1",
+        "t": "2025-06-01T09:00:00.000Z",
+        "v": {
+          "evt": ["Départ"],
+          "loch": 0,
+          "pos": { "lat": 46.5, "lon": 6.5 }
+        }
+      }
+    ],
+    "days": { "2025-06-01": { "moteurSoir": "1200" } }
+  },
+  "ldb.cruise.old2": {
+    "id": "old2",
+    "created": "2025-05-01T08:00:00.000Z",
+    "info": {
+      "name": "Vieille croisière",
+      "model": "Dufour 382 2016",
+      "flag": "France, La Rochelle"
+    },
+    "crew": [],
+    "entries": [],
+    "days": {}
+  },
+  "ldb.current": "\"old1\"",
+  "ldb.boats": [
+    {
+      "id": "savannah",
+      "info": {
+        "boat": "Savannah",
+        "model": "Hanse 325, 2013",
+        "power": "13,3 kW",
+        "anchor": "Delta 10 kg, 30 m de chaîne",
+        "sails": "45 m²",
+        "flag": "Suisse · Morges",
+        "displ": "5 422 kg",
+        "beam": "3,30"
+      },
+      "checklist": [{ "id": "c1", "label": "Couper la batterie du moteur" }],
+      "checklistDep": [
+        { "id": "d1", "label": "Ouvrir la batterie du moteur" },
+        { "id": "d2", "label": "Gilets de sauvetage pour tout l’équipage" },
+        { "id": "d3", "label": "Fermer le frigo" },
+        { "id": "d4", "label": "Niveau du réservoir :" },
+        { "id": "d5", "label": "Vérifier le carburant" }
+      ]
+    },
+    {
+      "info": { "boat": "Sans identifiant", "power": "20 kW" },
+      "checklist": "abîmé"
+    },
+    5,
+    null,
+    [1, 2]
+  ],
+  "ldb.members": [
+    {
+      "prenom": "Ana",
+      "nom": "Test",
+      "tel": "079 123 45 67",
+      "proche": "Paul Test 0041 79 765 43 21"
+    },
+    { "id": "mm2", "prenom": "Bob", "tel": "0033 6 12 34 56 78" },
+    7
+  ],
+  "ldb.crewSets": [
+    {
+      "id": "cs1",
+      "name": "Ancien",
+      "crew": [{ "memberId": "mm2", "fonction": "Skipper" }, null, 3]
+    },
+    { "id": "cs2", "crew": "abîmé" }
+  ],
+  "ldb.marks": [
+    {
+      "id": "mo1",
+      "n": 3,
+      "name": "M003",
+      "at": "2025-06-01T09:00:00.000Z",
+      "lat": 46.5,
+      "lon": 6.6,
+      "depth": "",
+      "note": ""
+    }
+  ],
+  "ldb.markSeq": 3,
+  "ldb.ckLib": [
+    {
+      "id": "lib1",
+      "name": "Ma base",
+      "items": [{ "label": "Point" }],
+      "at": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "ldb.tpl.mer": {
+    "checklistDep": [
+      { "id": "m1", "label": "Papiers du bateau, contrat et caution" },
+      { "id": "m2", "label": "Photos des dégâts existants avec le loueur" }
+    ],
+    "checklist": []
+  },
+  "ldb.zoneSim": "mer"
+}

@@ -1,0 +1,1766 @@
+{
+  "ldb.exBoats": true,
+  "ldb.inspiration": true,
+  "ldb.marks": [
+    {
+      "id": "exm1",
+      "n": 1,
+      "name": "M001",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 46.5,
+      "lon": 6.5,
+      "depth": "",
+      "note": "Bouée devant Morges"
+    },
+    {
+      "id": "exm2",
+      "n": 2,
+      "name": "M002",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 46.5,
+      "lon": 6.56,
+      "depth": "",
+      "note": "Large de Saint-Sulpice"
+    },
+    {
+      "id": "exm3",
+      "n": 3,
+      "name": "M003",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 46.45,
+      "lon": 6.55,
+      "depth": "",
+      "note": "Milieu du Grand-Lac"
+    },
+    {
+      "id": "exm4",
+      "n": 4,
+      "name": "M004",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 46.445,
+      "lon": 6.34,
+      "depth": "",
+      "note": "Large de Rolle"
+    },
+    {
+      "id": "exm5",
+      "n": 5,
+      "name": "M005",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 46.495,
+      "lon": 6.63,
+      "depth": "",
+      "note": "Large d’Ouchy"
+    },
+    {
+      "id": "exm6",
+      "n": 6,
+      "name": "M006",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 46.42,
+      "lon": 6.59,
+      "depth": "",
+      "note": "Large d’Évian"
+    },
+    {
+      "id": "exm7",
+      "n": 7,
+      "name": "M007",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 46.37,
+      "lon": 6.26,
+      "depth": "",
+      "note": "Large de Nyon"
+    },
+    {
+      "id": "exm8",
+      "n": 8,
+      "name": "M008",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 42.98,
+      "lon": 6.2,
+      "depth": "",
+      "note": "Sud de Porquerolles"
+    },
+    {
+      "id": "exm9",
+      "n": 9,
+      "name": "M009",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 43.085,
+      "lon": 5.94,
+      "depth": "",
+      "note": "Rade de Toulon"
+    },
+    {
+      "id": "exm10",
+      "n": 10,
+      "name": "M010",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 43.19,
+      "lon": 5.53,
+      "depth": "",
+      "note": "Large de Cassis"
+    },
+    {
+      "id": "exm11",
+      "n": 11,
+      "name": "M011",
+      "at": "2026-07-15T08:30:00.000Z",
+      "lat": 43.03,
+      "lon": 5.85,
+      "depth": "",
+      "note": "Large du cap Sicié"
+    },
+    {
+      "id": "mk-lake",
+      "n": 12,
+      "name": "M012",
+      "at": "2026-07-15T07:30:00.000Z",
+      "lat": 46.488,
+      "lon": 6.475,
+      "depth": "34",
+      "note": "Bouée de régate"
+    }
+  ],
+  "ldb.crewSeq": 3,
+  "ldb.membersIntl": true,
+  "ldb.iconData": {
+    "id": "navin1",
+    "url": "data:image/png;base64,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"
+  },
+  "ldb.markSeq": 12,
+  "ldb.boats": [
+    {
+      "id": "savannah",
+      "info": {
+        "boat": "Savannah",
+        "waters": "Eaux intérieures",
+        "model": "Hanse 325",
+        "year": "2013",
+        "pas": "Tribord",
+        "loaFt": "31,6",
+        "beam": "3,30",
+        "draft": "1,53",
+        "airDraft": "14,77",
+        "voilesAvant": "Foc, Génois volant, Spinnaker",
+        "hullColor": "Blanche",
+        "propType": "Gasoil",
+        "fuelCap": "90",
+        "conso": "1,5",
+        "waterCap": "240",
+        "builder": "HanseYachts AG, Greifswald (Allemagne)",
+        "architect": "Judel/Vrolijk & Co",
+        "hin": "DEH ANB 054 3F31 3",
+        "ceId": "CE DE-HAN B 0543 F 313 · Hanse 325/0543",
+        "flag": "Suisse",
+        "homePort": "Morges, baie de l’Église",
+        "flagNo": "Suisse",
+        "reg": "VD 27 713 · matricule 991.169.260",
+        "category": "A · 8 personnes au maximum",
+        "displ": "5 422",
+        "keelWeight": "1480",
+        "anchor": "Delta",
+        "anchorKg": "10",
+        "rig": "Voilier à moteur, coque fibre de verre",
+        "rigging": "Sloop fractionné 9/10 avec barres de flèche poussantes",
+        "sails": "45",
+        "engine": "Volvo Penta D1-20F (n° 5102368297W)",
+        "power": "13,3",
+        "base": "Association « Le Savannah », port de Morges, baie de l’Église.\nAssurance RC : AXA. Dernière expertise : 20.10.2021 (VD).\nLe permis de navigation doit être à bord.",
+        "tarifs": "Journée en semaine : CHF 120.–\nSoir dès 17h00 en semaine : CHF 60.–\nJournée le week-end : CHF 150.–\nSoir dès 17h00 le week-end : CHF 80.–",
+        "reglement": "Franchise d’assurance : CHF 500.– par sinistre couvert.\n• Location : entièrement à la charge du membre locataire.\n• Entraînement collectif : partagée à parts égales entre les membres présents, sauf si un responsable unique a été désigné avant la sortie (à noter dans le livre de bord).\n• Incident non accidentel (panne interne, usure, phénomène naturel) : la part non remboursée par l’assurance est à la charge du propriétaire.\nÀ noter au livre de bord à chaque sortie : membres présents, nature de la sortie, responsable unique éventuel.\n(Annexe au règlement d’utilisation et de location, AG du 07.04.2025)",
+        "contacts": "Urgence (Europe) : 112\nPolice, sauvetage sur le lac (Suisse) : 117\nAmbulance (Suisse) : 144\nRega, sauvetage aérien : 1414\nTox Info Suisse : 145"
+      },
+      "checklist": [
+        {
+          "id": "c1",
+          "label": "Couper la batterie du moteur"
+        },
+        {
+          "id": "c2",
+          "label": "Fermer tous les hublots"
+        },
+        {
+          "id": "c3",
+          "label": "Éteindre tous les appareils du panneau de commande au-dessus de la table à carte"
+        },
+        {
+          "id": "c4",
+          "label": "Laisser le frigo ouvert"
+        },
+        {
+          "id": "c5",
+          "label": "Couper le gaz à côté du four"
+        },
+        {
+          "id": "c6",
+          "label": "Couper le gaz sur la bonbonne du balcon arrière"
+        },
+        {
+          "id": "c7",
+          "label": "Remplir la fiche du livre de bord et en envoyer une photo sur le groupe WhatsApp « Savannah entraînement ou location »",
+          "action": "sheet"
+        },
+        {
+          "id": "c8",
+          "label": "Prendre toutes vos affaires ;o)"
+        }
+      ],
+      "infoSeeded": true,
+      "voilesUnseed": true,
+      "tarifsSeeded": true,
+      "checklistDep": [
+        {
+          "id": "d1",
+          "label": "Consulter la météo et les feux d’avis de tempête"
+        },
+        {
+          "id": "d2",
+          "label": "Gilets de sauvetage pour tout l’équipage"
+        },
+        {
+          "id": "d3",
+          "label": "Sortir la bouée fer à cheval"
+        },
+        {
+          "id": "rel-c",
+          "label": "Mettre le contact"
+        },
+        {
+          "id": "rel-moteurDebut",
+          "label": "Allumer le moteur et relever les heures moteur",
+          "unit": "h",
+          "key": "moteurDebut"
+        },
+        {
+          "id": "rel-carbPct",
+          "label": "Checker le niveau de carburant",
+          "unit": "%",
+          "key": "carbPct"
+        },
+        {
+          "id": "rel-batt1",
+          "label": "Tension de la batterie 1",
+          "unit": "V",
+          "key": "batt1"
+        },
+        {
+          "id": "rel-batt2",
+          "label": "Tension de la batterie 2",
+          "unit": "V",
+          "key": "batt2"
+        },
+        {
+          "id": "rel-eauPct",
+          "label": "Niveau d’eau potable",
+          "unit": "%",
+          "key": "eauPct"
+        }
+      ],
+      "checklistDepX": [
+        {
+          "id": "x1",
+          "label": "Consulter la météo et les feux d’avis de tempête"
+        },
+        {
+          "id": "x2",
+          "label": "Gilets de sauvetage pour tout l’équipage"
+        },
+        {
+          "id": "x3",
+          "label": "Sortir la bouée fer à cheval"
+        },
+        {
+          "id": "x4",
+          "label": "Vérifier le carburant"
+        },
+        {
+          "id": "x5",
+          "label": "Fermer le frigo"
+        },
+        {
+          "id": "x6",
+          "label": "Faire le plein d’eau douce"
+        },
+        {
+          "id": "x7",
+          "label": "Vérifier la réserve de gaz"
+        },
+        {
+          "id": "x8",
+          "label": "Ranger l’avitaillement"
+        },
+        {
+          "id": "x9",
+          "label": "Literie et sacs de couchage à bord"
+        },
+        {
+          "id": "x10",
+          "label": "Essayer les feux de navigation"
+        }
+      ],
+      "relSeeded": true,
+      "relSplit": true,
+      "noBattOpen": true,
+      "motLabel": true,
+      "ck383": true,
+      "ckColon": true,
+      "ck385": true,
+      "checklistX": [
+        {
+          "id": "y1",
+          "label": "Couper la batterie du moteur"
+        },
+        {
+          "id": "y2",
+          "label": "Fermer tous les hublots"
+        },
+        {
+          "id": "y3",
+          "label": "Éteindre tous les appareils du panneau de commande au-dessus de la table à carte"
+        },
+        {
+          "id": "y4",
+          "label": "Laisser le frigo ouvert"
+        },
+        {
+          "id": "y5",
+          "label": "Couper le gaz à côté du four"
+        },
+        {
+          "id": "y6",
+          "label": "Couper le gaz sur la bonbonne du balcon arrière"
+        },
+        {
+          "id": "y7",
+          "label": "Vider et nettoyer le frigo"
+        },
+        {
+          "id": "y8",
+          "label": "Vider les poubelles"
+        },
+        {
+          "id": "y9",
+          "label": "Nettoyer cabines, carré et WC"
+        },
+        {
+          "id": "y10",
+          "label": "Noter le niveau de diesel et d’eau"
+        },
+        {
+          "id": "y11",
+          "label": "Remplir la fiche du livre de bord et en envoyer une photo sur le groupe WhatsApp « Savannah entraînement ou location »",
+          "action": "sheet"
+        },
+        {
+          "id": "y12",
+          "label": "Prendre toutes vos affaires ;o)"
+        }
+      ]
+    },
+    {
+      "id": "exb1",
+      "info": {
+        "boat": "Alizé",
+        "waters": "Eaux maritimes",
+        "model": "Lagoon 42",
+        "year": "2019",
+        "pas": "Sans",
+        "loa": "12,80",
+        "beam": "7,70",
+        "draft": "1,25",
+        "airDraft": "20,5",
+        "voilesAvant": "Génois, Code 0",
+        "hullColor": "Blanche",
+        "propType": "Gasoil",
+        "fuelCap": "300",
+        "fuelCap2": "300",
+        "conso": "2,5",
+        "conso2": "2,5",
+        "waterCap": "600",
+        "engine": "2 × Yanmar 4JH57 (un par coque), transmission saildrive",
+        "power": "42",
+        "homePort": "Port fictif, Méditerranée",
+        "flag": "Suisse",
+        "category": "A · 12 personnes au maximum",
+        "displ": "12 500",
+        "anchor": "Delta",
+        "anchorKg": "25",
+        "rig": "Catamaran de croisière, coques fibre de verre",
+        "rigging": "Sloop en tête de mât",
+        "sails": "91",
+        "contacts": ""
+      },
+      "checklist": [],
+      "checklistDep": [],
+      "checklistX": [],
+      "checklistDepX": [],
+      "ckColon": true
+    },
+    {
+      "id": "exb2",
+      "info": {
+        "boat": "Bise Noire",
+        "waters": "Eaux intérieures",
+        "model": "Surprise",
+        "year": "1998",
+        "pas": "Bâbord",
+        "loa": "7,65",
+        "beam": "2,50",
+        "draft": "1,45",
+        "airDraft": "10,9",
+        "voilesAvant": "Foc, Spinnaker",
+        "hullColor": "Bleu marine",
+        "propType": "Gasoil",
+        "fuelCap": "12",
+        "conso": "0,8",
+        "waterCap": "20",
+        "engine": "Hors-bord Yamaha 6 ch, puits arrière",
+        "power": "4,4",
+        "homePort": "Port fictif, lac Léman",
+        "flag": "Suisse",
+        "displ": "1 350",
+        "keelWeight": "500",
+        "anchor": "Bruce",
+        "anchorKg": "6",
+        "rig": "Voilier de régate-croisière, coque fibre de verre",
+        "rigging": "Sloop fractionné",
+        "sails": "26",
+        "contacts": ""
+      },
+      "checklist": [],
+      "checklistDep": [],
+      "checklistX": [],
+      "checklistDepX": [],
+      "ckColon": true
+    },
+    {
+      "id": "exb3",
+      "info": {
+        "boat": "Mistral",
+        "waters": "Eaux maritimes",
+        "model": "Bavaria C42",
+        "year": "2021",
+        "pas": "Bâbord",
+        "loa": "12,35",
+        "beam": "4,29",
+        "draft": "2,10",
+        "airDraft": "19,6",
+        "voilesAvant": "Génois, Gennaker",
+        "hullColor": "Grise",
+        "propType": "Gasoil",
+        "fuelCap": "210",
+        "conso": "3",
+        "waterCap": "360",
+        "engine": "Volvo Penta D2-60, saildrive",
+        "power": "44",
+        "homePort": "Port fictif, Atlantique",
+        "flag": "Suisse",
+        "displ": "9 800",
+        "keelWeight": "2 800",
+        "anchor": "Delta",
+        "anchorKg": "20",
+        "rig": "Voilier de croisière, coque fibre de verre",
+        "rigging": "Sloop en tête de mât",
+        "sails": "86",
+        "contacts": ""
+      },
+      "checklist": [],
+      "checklistDep": [],
+      "checklistX": [],
+      "checklistDepX": [],
+      "ckColon": true
+    },
+    {
+      "id": "inspiration",
+      "info": {
+        "boat": "Inspiration",
+        "waters": "Eaux maritimes",
+        "model": "Dufour 530",
+        "year": "2024",
+        "pas": "Tribord",
+        "loaFt": "53",
+        "loa": "16,35",
+        "beam": "4,99",
+        "draft": "1,95",
+        "airDraft": "22,9",
+        "voilesAvant": "Génois",
+        "hullColor": "Blanche",
+        "propType": "Électrique",
+        "battKwh": "32",
+        "contacts": ""
+      },
+      "checklist": [],
+      "checklistDep": [],
+      "checklistX": [],
+      "checklistDepX": [],
+      "ckColon": true
+    }
+  ],
+  "ldb.wakeDef": true,
+  "ldb.exMarks": true,
+  "ldb.procheSplit": true,
+  "ldb.cruise.mrltkr40tkny6": {
+    "id": "mrltkr40tkny6",
+    "created": "2026-07-15T08:30:00.000Z",
+    "info": {
+      "name": "Entraînement du 15.07",
+      "contacts": "Urgence (Europe) : 112\nPolice, sauvetage sur le lac (Suisse) : 117\nAmbulance (Suisse) : 144\nRega, sauvetage aérien : 1414\nTox Info Suisse : 145",
+      "boat": "Savannah",
+      "waters": "Eaux intérieures",
+      "model": "Hanse 325",
+      "year": "2013",
+      "pas": "Tribord",
+      "loaFt": "31,6",
+      "beam": "3,30",
+      "draft": "1,53",
+      "airDraft": "14,77",
+      "voilesAvant": "Foc, Génois volant, Spinnaker",
+      "hullColor": "Blanche",
+      "propType": "Gasoil",
+      "fuelCap": "90",
+      "conso": "1,5",
+      "waterCap": "240",
+      "builder": "HanseYachts AG, Greifswald (Allemagne)",
+      "architect": "Judel/Vrolijk & Co",
+      "hin": "DEH ANB 054 3F31 3",
+      "ceId": "CE DE-HAN B 0543 F 313 · Hanse 325/0543",
+      "flag": "Suisse",
+      "homePort": "Morges, baie de l’Église",
+      "flagNo": "Suisse",
+      "reg": "VD 27 713 · matricule 991.169.260",
+      "category": "A · 8 personnes au maximum",
+      "displ": "5 422",
+      "keelWeight": "1480",
+      "anchor": "Delta",
+      "anchorKg": "10",
+      "rig": "Voilier à moteur, coque fibre de verre",
+      "rigging": "Sloop fractionné 9/10 avec barres de flèche poussantes",
+      "sails": "45",
+      "engine": "Volvo Penta D1-20F (n° 5102368297W)",
+      "power": "13,3",
+      "base": "Association « Le Savannah », port de Morges, baie de l’Église.\nAssurance RC : AXA. Dernière expertise : 20.10.2021 (VD).\nLe permis de navigation doit être à bord.",
+      "tarifs": "Journée en semaine : CHF 120.–\nSoir dès 17h00 en semaine : CHF 60.–\nJournée le week-end : CHF 150.–\nSoir dès 17h00 le week-end : CHF 80.–",
+      "reglement": "Franchise d’assurance : CHF 500.– par sinistre couvert.\n• Location : entièrement à la charge du membre locataire.\n• Entraînement collectif : partagée à parts égales entre les membres présents, sauf si un responsable unique a été désigné avant la sortie (à noter dans le livre de bord).\n• Incident non accidentel (panne interne, usure, phénomène naturel) : la part non remboursée par l’assurance est à la charge du propriétaire.\nÀ noter au livre de bord à chaque sortie : membres présents, nature de la sortie, responsable unique éventuel.\n(Annexe au règlement d’utilisation et de location, AG du 07.04.2025)",
+      "du": "2026-07-15",
+      "au": "2026-07-15"
+    },
+    "crew": [
+      {
+        "memberId": "ex2",
+        "nom": "Thomas Keller",
+        "fonction": "Skipper",
+        "sexe": "Homme",
+        "naissance": "02.03.1968",
+        "lieu": "Zurich",
+        "nationalite": "Suisse",
+        "tel": "+41 79 000 00 21",
+        "email": "thomas.keller@example.org",
+        "piece": "X0000002",
+        "expiration": "10.01.2027",
+        "permis": "D-00002-2",
+        "vhf": "000002",
+        "emisPar": "Office de la navigation, canton de Zurich",
+        "adresse": "Musterstrasse 2, CH-8000 Zurich",
+        "sante": "Diabète de type 2, insuline dans le sac bleu",
+        "procheNom": "Anna Keller",
+        "procheTel": "+41 79 000 00 22",
+        "proche2Nom": "Lukas Keller",
+        "proche2Tel": "+41 79 000 00 23",
+        "pieceType": "Passeport",
+        "lieuType": "Lieu de naissance"
+      },
+      {
+        "memberId": "ex1",
+        "nom": "Camille Rochat",
+        "fonction": "Second",
+        "sexe": "Femme",
+        "naissance": "15.06.1985",
+        "lieu": "Lausanne",
+        "nationalite": "Suisse",
+        "tel": "+41 79 000 00 11",
+        "email": "camille.rochat@example.org",
+        "piece": "X0000001",
+        "expiration": "31.12.2030",
+        "permis": "C-00001-1",
+        "vhf": "000001",
+        "emisPar": "Cruising Club Suisse (CCS)",
+        "adresse": "Rue de l’Exemple 1, CH-1000 Lausanne",
+        "sante": "Sensibilité au mal de mer",
+        "procheNom": "Dominique Rochat",
+        "procheTel": "+41 79 000 00 12",
+        "pieceType": "Carte d’identité",
+        "lieuType": "Lieu d’origine"
+      },
+      {
+        "memberId": "ex5",
+        "nom": "Noa Dubois",
+        "fonction": "Équipier",
+        "sexe": "Non genré",
+        "naissance": "30.04.2001",
+        "lieu": "Genève",
+        "nationalite": "Suisse",
+        "tel": "+41 79 000 00 51",
+        "email": "noa.dubois@example.org",
+        "piece": "X0000005",
+        "expiration": "15.08.2031",
+        "adresse": "Chemin de l’Exemple 5, CH-1200 Genève",
+        "sante": "Asthme léger, inhalateur sur soi",
+        "procheNom": "Claire Dubois",
+        "procheTel": "+41 79 000 00 52",
+        "pieceType": "Carte d’identité",
+        "lieuType": "Lieu de naissance"
+      }
+    ],
+    "entries": [
+      {
+        "id": "lk-e1",
+        "t": "2026-07-15T06:40:00.000Z",
+        "auto": true,
+        "v": {
+          "pos": {
+            "lat": 46.5049,
+            "lon": 6.4968
+          },
+          "sog": 0,
+          "loch": 0,
+          "evt": ["Départ"],
+          "twd": 225,
+          "tws": 8
+        },
+        "windSrc": "trace"
+      },
+      {
+        "id": "lk-e2",
+        "t": "2026-07-15T07:10:00.000Z",
+        "auto": true,
+        "needWx": true,
+        "v": {
+          "pos": {
+            "lat": 46.4925,
+            "lon": 6.4812
+          },
+          "sog": 4.8,
+          "cog": 222,
+          "loch": 1.2,
+          "evt": ["Changement de cap"]
+        }
+      },
+      {
+        "id": "lk-e3",
+        "t": "2026-07-15T07:25:00.000Z",
+        "v": {
+          "quart": "Thomas Keller",
+          "allure": "Près",
+          "gv": "Haute",
+          "avant": "Foc",
+          "twd": 230,
+          "tws": 12,
+          "feux": "Prudence",
+          "mer": "2",
+          "note": "Bise qui fraîchit, un ris préparé."
+        }
+      },
+      {
+        "id": "lk-e4",
+        "t": "2026-07-15T08:05:00.000Z",
+        "auto": true,
+        "v": {
+          "pos": {
+            "lat": 46.4811,
+            "lon": 6.4655
+          },
+          "sog": 5.4,
+          "cog": 238,
+          "loch": 2.9,
+          "evt": ["Virement"]
+        }
+      }
+    ],
+    "days": {
+      "2026-07-15": {
+        "typeSortie": "Entraînement",
+        "skipper": "Thomas Keller",
+        "coSkipper": "Camille Rochat",
+        "equipage": "Noa Dubois",
+        "moteurDebut": "1234,5",
+        "carbPct": "80",
+        "batt1": "12,6",
+        "batt2": "12,5",
+        "eauPct": "60",
+        "diesel": "3/4",
+        "observations": "Taquet avant tribord à resserrer.",
+        "checkDone": ["d1", "d2", "d3", "rel-c"],
+        "ckOpen": ["rel-moteurDebut"]
+      }
+    },
+    "type": "lac",
+    "duree": "jour",
+    "boatId": "savannah",
+    "purpose": "Entraînement",
+    "updated": "2026-07-15T08:30:00.000Z"
+  },
+  "ldb.flagSplit": true,
+  "ldb.displKg": true,
+  "ldb.sosLogs": [
+    {
+      "id": "mrltkr405l9e4",
+      "start": "2026-07-15T08:30:00.000Z",
+      "zone": "lac",
+      "nav": "Entraînement du 15.07",
+      "boat": "Savannah",
+      "events": [
+        {
+          "t": "2026-07-15T08:30:00.000Z",
+          "what": "Début du log SOS",
+          "type": "start"
+        },
+        {
+          "t": "2026-07-15T08:30:00.000Z",
+          "what": "🆘 Touche SOS",
+          "type": "sos"
+        },
+        {
+          "t": "2026-07-15T08:30:00.000Z",
+          "what": "Page VHF ouverte"
+        },
+        {
+          "t": "2026-07-15T08:30:00.000Z",
+          "what": "⏹ Fin de procédure SOS",
+          "type": "end"
+        }
+      ],
+      "last": "2026-07-15T08:30:00.000Z",
+      "end": "2026-07-15T08:30:00.000Z"
+    }
+  ],
+  "ldb.tpl.mer": {
+    "checklistDep": [
+      {
+        "id": "m1",
+        "label": "Papiers du bateau, contrat et caution"
+      },
+      {
+        "id": "m4",
+        "label": "Gilets de sauvetage (un par personne) et harnais"
+      },
+      {
+        "id": "m5",
+        "label": "Radeau de survie : date de révision"
+      },
+      {
+        "id": "m6",
+        "label": "Fusées et feux de détresse : dates de validité"
+      },
+      {
+        "id": "m9",
+        "label": "Moteur : huile, eau de refroidissement, courroie, filtre"
+      },
+      {
+        "id": "m10",
+        "label": "Niveaux : gasoil, eau douce, gaz"
+      },
+      {
+        "id": "m11",
+        "label": "Batteries et branchement de quai"
+      },
+      {
+        "id": "m12",
+        "label": "Guindeau, ancre et longueur de chaîne"
+      },
+      {
+        "id": "m13",
+        "label": "Voiles, enrouleur et bosses de ris"
+      },
+      {
+        "id": "m14",
+        "label": "VHF : essai radio, MMSI"
+      },
+      {
+        "id": "m16",
+        "label": "Pompes de cale manuelle et électrique"
+      },
+      {
+        "id": "m17",
+        "label": "WC et vannes de coque"
+      },
+      {
+        "id": "mrltkr40931ez",
+        "label": "Noter et si besoin photographier tous les dégâts, éraflures… à l’extérieur et à l’intérieur",
+        "note": "À signaler au loueur avant de prendre la mer, idéalement sur la fiche d’inventaire signée au départ."
+      },
+      {
+        "id": "mrltkr40367k8",
+        "label": "Vérifier l’inventaire selon la fiche remise par le loueur"
+      },
+      {
+        "id": "mrltkr40ks5mq",
+        "label": "Repérer les extincteurs et couvertures anti-feu, vérifier leur bon état"
+      },
+      {
+        "id": "mrltkr4080fhp",
+        "label": "État de l’accastillage, du gréement et des lignes de vie"
+      },
+      {
+        "id": "mrltkr40diusv",
+        "label": "Matériel d’amarrage : quantité et qualité"
+      },
+      {
+        "id": "mrltkr400x9di",
+        "label": "État des voiles, des drisses, des coulisseaux…",
+        "note": "La grand-voile peut s’user sur les barres de flèche."
+      },
+      {
+        "id": "mrltkr40g3ocs",
+        "label": "Bon fonctionnement de l’enrouleur"
+      },
+      {
+        "id": "mrltkr4049ivb",
+        "label": "Barre à roue : jeu, nombre de tours de bâbord à tribord, blocage"
+      },
+      {
+        "id": "mrltkr40vggnh",
+        "label": "Propreté et absence d’eau dans les fonds"
+      },
+      {
+        "id": "mrltkr40zt1nn",
+        "label": "Propreté sous le moteur"
+      },
+      {
+        "id": "mrltkr40upr0y",
+        "label": "Annexe et son moteur"
+      },
+      {
+        "id": "mrltkr40hzkx0",
+        "label": "Tous les hublots ferment correctement et sont en bon état"
+      },
+      {
+        "id": "mrltkr40n4172",
+        "label": "Chargeur de batteries, pompes à eau de cuisine, de cale, des douches…"
+      },
+      {
+        "id": "mrltkr40v0g3l",
+        "label": "Localiser les vannes, y compris la commutation des réservoirs d’eau"
+      },
+      {
+        "id": "mrltkr40lh0w6",
+        "label": "Les WC se vident correctement et ne sont pas bouchés"
+      },
+      {
+        "id": "mrltkr4039m1e",
+        "label": "Feux de navigation et de mouillage"
+      },
+      {
+        "id": "mrltkr4051pmm",
+        "label": "Indication du sondeur comparée à la profondeur réelle"
+      },
+      {
+        "id": "mrltkr40y7bbg",
+        "label": "Niveau d’huile moteur et de liquide de refroidissement"
+      },
+      {
+        "id": "mrltkr40xa824",
+        "label": "Niveau de carburant"
+      },
+      {
+        "id": "mrltkr40w0r2a",
+        "label": "Documents du bateau : acte de francisation, assurance, attestation du radeau, cartes, bloc marine, modes d’emploi"
+      },
+      {
+        "id": "mrltkr40jtgin",
+        "label": "Livre de bord à bord"
+      },
+      {
+        "id": "mrltkr406hy6h",
+        "label": "Noter les heures moteur et le loch au départ dans le livre de bord"
+      },
+      {
+        "id": "mrltkr40jswsd",
+        "label": "Noter les caractéristiques du bateau : dimensions, tirant d’eau, MMSI…",
+        "note": "Dans Plus › Bateau et croisière."
+      },
+      {
+        "id": "mrltkr409bmcr",
+        "label": "À la première baignade, vérifier la partie immergée et signaler tout défaut"
+      },
+      {
+        "id": "mrltkr40xyaa8",
+        "label": "Pendant la semaine, tenir la liste des réparations et de la vaisselle manquante"
+      }
+    ],
+    "checklist": [
+      {
+        "id": "r1",
+        "label": "Plein de gasoil (selon le contrat)"
+      },
+      {
+        "id": "r2",
+        "label": "Ranger et nettoyer cabines, carré et cuisine"
+      },
+      {
+        "id": "r3",
+        "label": "Vider le frigo et les poubelles"
+      },
+      {
+        "id": "r4",
+        "label": "Vider les eaux noires (si autorisé)"
+      },
+      {
+        "id": "r5",
+        "label": "Inventaire de restitution avec le loueur"
+      },
+      {
+        "id": "r6",
+        "label": "Signaler les avaries et les pertes"
+      },
+      {
+        "id": "r7",
+        "label": "Récupérer la caution"
+      },
+      {
+        "id": "r8",
+        "label": "Prendre toutes vos affaires"
+      }
+    ],
+    "prise2025": true
+  },
+  "ldb.members": [
+    {
+      "id": "ex1",
+      "prenom": "Camille",
+      "nom": "Rochat",
+      "sexe": "Femme",
+      "naissance": "15.06.1985",
+      "lieu": "Lausanne",
+      "lieuType": "Lieu d’origine",
+      "nationalite": "Suisse",
+      "tel": "+41 79 000 00 11",
+      "email": "camille.rochat@example.org",
+      "pieceType": "Carte d’identité",
+      "piece": "X0000001",
+      "expiration": "31.12.2030",
+      "permis": "C-00001-1",
+      "vhf": "000001",
+      "emisPar": "Cruising Club Suisse (CCS)",
+      "adresse": "Rue de l’Exemple 1, CH-1000 Lausanne",
+      "sante": "Sensibilité au mal de mer",
+      "procheNom": "Dominique Rochat",
+      "procheTel": "+41 79 000 00 12",
+      "proche": "Dominique Rochat +41 79 000 00 12"
+    },
+    {
+      "id": "ex2",
+      "prenom": "Thomas",
+      "nom": "Keller",
+      "sexe": "Homme",
+      "naissance": "02.03.1968",
+      "lieu": "Zurich",
+      "lieuType": "Lieu de naissance",
+      "nationalite": "Suisse",
+      "tel": "+41 79 000 00 21",
+      "email": "thomas.keller@example.org",
+      "pieceType": "Passeport",
+      "piece": "X0000002",
+      "expiration": "10.01.2027",
+      "permis": "D-00002-2",
+      "vhf": "000002",
+      "emisPar": "Office de la navigation, canton de Zurich",
+      "adresse": "Musterstrasse 2, CH-8000 Zurich",
+      "sante": "Diabète de type 2, insuline dans le sac bleu",
+      "procheNom": "Anna Keller",
+      "procheTel": "+41 79 000 00 22",
+      "proche2Nom": "Lukas Keller",
+      "proche2Tel": "+41 79 000 00 23",
+      "proche": "Anna Keller +41 79 000 00 22 · Lukas Keller +41 79 000 00 23"
+    },
+    {
+      "id": "ex3",
+      "prenom": "Sophie",
+      "nom": "Martin",
+      "sexe": "Femme",
+      "naissance": "21.09.1979",
+      "lieu": "Annecy",
+      "lieuType": "Lieu de naissance",
+      "nationalite": "Française",
+      "tel": "+33 6 00 00 00 31",
+      "email": "sophie.martin@example.org",
+      "pieceType": "Passeport",
+      "piece": "X0000003",
+      "expiration": "01.03.2025",
+      "permis": "F-00003",
+      "emisPar": "Affaires maritimes (France)",
+      "adresse": "3 rue de l’Exemple, F-74000 Annecy",
+      "sante": "Allergie aux piqûres de guêpe (stylo d’adrénaline dans sa trousse)",
+      "procheNom": "Paul Martin",
+      "procheTel": "+33 6 00 00 00 32",
+      "proche": "Paul Martin +33 6 00 00 00 32"
+    },
+    {
+      "id": "ex4",
+      "prenom": "Luca",
+      "nom": "Bernasconi",
+      "sexe": "Homme",
+      "naissance": "08.11.1992",
+      "lieu": "Lugano",
+      "lieuType": "Lieu d’origine",
+      "nationalite": "Suisse",
+      "tel": "+41 79 000 00 41",
+      "email": "luca.bernasconi@example.org",
+      "pieceType": "Carte d’identité",
+      "piece": "X0000004",
+      "expiration": "30.06.2029",
+      "permis": "C-00004-4",
+      "vhf": "000004",
+      "emisPar": "Sezione della circolazione, cantone Ticino",
+      "adresse": "Via Esempio 4, CH-6900 Lugano",
+      "sante": "Aucune",
+      "procheNom": "Giulia Bernasconi",
+      "procheTel": "+41 79 000 00 42",
+      "proche2Nom": "Marco Bernasconi",
+      "proche2Tel": "+41 79 000 00 43",
+      "proche3Nom": "Chiara Bernasconi",
+      "proche3Tel": "+41 79 000 00 44",
+      "proche": "Giulia Bernasconi +41 79 000 00 42 · Marco Bernasconi +41 79 000 00 43 · Chiara Bernasconi +41 79 000 00 44"
+    },
+    {
+      "id": "ex5",
+      "prenom": "Noa",
+      "nom": "Dubois",
+      "sexe": "Non genré",
+      "naissance": "30.04.2001",
+      "lieu": "Genève",
+      "lieuType": "Lieu de naissance",
+      "nationalite": "Suisse",
+      "tel": "+41 79 000 00 51",
+      "email": "noa.dubois@example.org",
+      "pieceType": "Carte d’identité",
+      "piece": "X0000005",
+      "expiration": "15.08.2031",
+      "adresse": "Chemin de l’Exemple 5, CH-1200 Genève",
+      "sante": "Asthme léger, inhalateur sur soi",
+      "procheNom": "Claire Dubois",
+      "procheTel": "+41 79 000 00 52",
+      "proche": "Claire Dubois +41 79 000 00 52"
+    },
+    {
+      "id": "ex6",
+      "prenom": "Elena",
+      "nom": "García",
+      "sexe": "Femme",
+      "naissance": "12.12.1958",
+      "lieu": "Valencia",
+      "lieuType": "Lieu de naissance",
+      "nationalite": "Espagnole",
+      "tel": "+34 600 000 061",
+      "email": "elena.garcia@example.org",
+      "pieceType": "Passeport",
+      "piece": "X0000006",
+      "expiration": "20.05.2028",
+      "permis": "PER-00006",
+      "vhf": "000006",
+      "emisPar": "Marina Mercante (Espagne)",
+      "adresse": "Calle Ejemplo 6, E-46001 Valencia",
+      "sante": "Ne sait pas nager : gilet en permanence",
+      "procheNom": "Javier García",
+      "procheTel": "+34 600 000 062",
+      "proche2Nom": "Lucía García",
+      "proche2Tel": "+34 600 000 063",
+      "proche": "Javier García +34 600 000 062 · Lucía García +34 600 000 063"
+    },
+    {
+      "id": "m-lea",
+      "prenom": "Léa",
+      "nom": "Favre",
+      "sexe": "Femme",
+      "tel": "+41 79 555 12 34",
+      "email": "lea.favre@example.org"
+    }
+  ],
+  "ldb.crewSets.at": "\"2026-07-15T08:30:00.000Z\"",
+  "ldb.mob2": {
+    "real": [
+      {
+        "title": "Tout de suite",
+        "steps": [
+          ["Crier « Homme à la mer ! »", ""],
+          [
+            "Un, si possible deux équipiers pointent la personne",
+            "Ils ne la quittent jamais des yeux et ne font que ça."
+          ],
+          [
+            "Lancer la bouée",
+            "Ou des objets flottants, tels que les coussins."
+          ],
+          [
+            "Le barreur appuie immédiatement sur MOB",
+            "Bouton MOB du GPS ou du traceur, pour enregistrer la position exacte."
+          ]
+        ]
+      },
+      {
+        "title": "Au près",
+        "allure": true,
+        "steps": [
+          [
+            "Virez de bord immédiatement sans toucher aux écoutes",
+            "Tournez la barre pour faire passer le nez du bateau dans le lit du vent. Ne touchez ni à l’écoute de génois, ni à celle de la grand-voile."
+          ],
+          [
+            "Démarrez le moteur",
+            "Lancez le moteur (au point mort) dès que le bateau traverse l’axe du vent."
+          ],
+          [
+            "Contrez à la barre",
+            "Une fois le nez du bateau passé de l’autre côté du vent, poussez la barre à fond du côté où se trouve la grand-voile (barre sous le vent)."
+          ],
+          [
+            "Le bateau est à la cape (arrêté)",
+            "Le génois resté sur l’ancien bord se retrouve à contre. Le voilier se stabilise instantanément à l’arrêt, face ou trois-quarts au vent, et se met en dérive de sécurité très lente (1 nœud)."
+          ],
+          [
+            "Affalage ou enroulage express",
+            "Les voiles n’étant plus sous tension, vous pouvez enrouler le génois et affaler la grand-voile en toute sécurité, directement face au vent."
+          ],
+          [
+            "Route au moteur",
+            "Vérifiez qu’aucun bout ne traîne à l’eau, remettez la barre au centre et embrayez la marche avant pour manœuvrer vers votre objectif."
+          ],
+          [
+            "Le brise-lame",
+            "Présentez le côté du bateau (le franc-bord) à la victime. Le voilier fait écran contre les vagues et le vent, créant une zone d’eau calme pour faciliter la récupération."
+          ]
+        ]
+      },
+      {
+        "title": "Au portant (génois)",
+        "allure": true,
+        "steps": [
+          [
+            "Lofez immédiatement",
+            "Tournez fermement la barre pour faire remonter le nez du bateau face au vent."
+          ],
+          [
+            "Ne touchez pas au génois",
+            "Laissez la voile d’avant bordée. Elle va passer à contre dès que le bateau aura traversé l’axe du vent."
+          ],
+          [
+            "Mettez le moteur en route",
+            "Profitez du moment où le bateau vire de bord pour démarrer le moteur (au point mort). Le moteur est prêt à être utilisé sans attendre."
+          ],
+          [
+            "Poussez et bloquez la barre",
+            "Une fois le virement effectué, tournez la barre à fond du côté opposé (sous le vent).\n• Vent faible à modéré : barre à fond sous le vent (du même côté que la voile d’avant à contre), bloquée avec un bout ou le bloqueur de barre. Le bateau oscille gentiment et reste stable.\n• Vent fort, brise : le vent dans la grand-voile pousse fortement le bateau à lofer. Barre à fond, il risque de revirer dans l’autre sens (sur-capage) : ne braquez qu’à moitié ou aux deux tiers.\n• Grand-voile : choquez-la aux deux tiers. Elle ne doit pas trop propulser le bateau, seulement l’aider à garder son angle (environ 50° du vent)."
+          ],
+          [
+            "Le bateau est stabilisé (à la cape)",
+            "Le génois à contre et la barre se contrarient. Le voilier s’arrête instantanément et dérive très lentement."
+          ],
+          [
+            "Affalez les voiles si nécessaire",
+            "Le bateau étant immobile et sécurisé, enroulez le génois et affalez la grand-voile sereinement."
+          ],
+          [
+            "Engagez la marche avant au moteur",
+            "Assurez-vous qu’aucun cordage ne traîne dans l’eau, puis faites route au moteur vers votre objectif."
+          ]
+        ]
+      },
+      {
+        "title": "Au portant sous spi asymétrique",
+        "allure": true,
+        "intro": "Le but est de tuer la puissance de la voile instantanément sans que rien ne tombe à l’eau.",
+        "steps": [
+          [
+            "Le barreur abat en grand (plein vent arrière)",
+            "Le bateau se met « plein cul ». La grand-voile, perpendiculaire au bateau, masque totalement le spi, qui se dégonfle d’un coup (déventé)."
+          ],
+          [
+            "Larguez totalement et d’un coup la bosse d’amure (le point avant)",
+            "Le spi ne tient plus que par son écoute et sa drisse. Il flotte comme un drapeau derrière la grand-voile, sans aucune force."
+          ],
+          [
+            "L’affalage express",
+            "Un équipier, à la descente ou dans le cockpit, attrape l’écoute de spi et tire la voile à l’abri derrière la grand-voile pour la faire descendre directement dans le bateau. Le pianiste file la drisse à la demande, en veillant à ce que la voile ne touche pas l’eau."
+          ],
+          [
+            "Sécurisation des cordages",
+            "Impératif absolu : ramassez toutes les écoutes et drisses qui traînent. Rien ne doit pendre à l’arrière ou sur les côtés, sous peine d’enrouler l’hélice."
+          ],
+          ["Mise en route", "Démarrez le moteur (au point mort)."],
+          [
+            "Enroulage du génois (si envoyé)",
+            "Si vous aviez un génois en plus du spi, enroulez-le immédiatement."
+          ],
+          [
+            "Le demi-tour (manœuvre du bouton de chemise)",
+            "Choquez la grand-voile en grand et affalez si possible."
+          ]
+        ]
+      },
+      {
+        "id": "recup3",
+        "title": "Méthode d’urgence absolue : victime inconsciente ou épuisée",
+        "intro": "Le plan incliné ou la voile. Hisser une masse inerte de 80 kg mouillée par-dessus un franc-bord élevé est impossible à la seule force des bras. La technique du filet (ou de la voile d’avant) :",
+        "steps": [
+          ["Affalez le génois ou utilisez une bâche ou un filet solide", ""],
+          [
+            "Fixez un côté au bastingage et jetez le reste à l’eau",
+            "Pour former une poche sous-marine."
+          ],
+          ["Glissez la victime dans cette poche", ""],
+          [
+            "Frappez l’autre extrémité de la voile sur une drisse et hissez au winch",
+            "La voile s’enroule et fait remonter la victime le long de la coque comme dans un hamac, sans effort horizontal."
+          ]
+        ]
+      },
+      {
+        "id": "hypo",
+        "title": "⚠️ Règle d’or médicale : l’hypothermie",
+        "steps": [
+          [
+            "Allongez immédiatement la victime à l’horizontale",
+            "Une fois la victime remontée, ne la forcez pas à se tenir debout. Le retour brutal du sang froid des extrémités vers le cœur (syndrome de l’hydrocution ou « afterdrop ») peut provoquer un arrêt cardiaque."
+          ]
+        ]
+      },
+      {
+        "title": "Si on la perd de vue",
+        "steps": [
+          [
+            "Si on la perd de vue, on alerte",
+            "MAYDAY en mer ; 117 / 112 / 18 sur le Léman."
+          ]
+        ]
+      }
+    ],
+    "train": [
+      {
+        "title": "Tout de suite",
+        "steps": [
+          ["Crier « Homme à la mer ! »", ""],
+          [
+            "Un, si possible deux équipiers pointent la personne",
+            "Ils ne la quittent jamais des yeux et ne font que ça."
+          ],
+          [
+            "Lancer la bouée",
+            "Ou des objets flottants, tels que les coussins."
+          ],
+          [
+            "Le barreur appuie immédiatement sur MOB",
+            "Bouton MOB du GPS ou du traceur, pour enregistrer la position exacte."
+          ]
+        ]
+      },
+      {
+        "title": "Manœuvre sous voile",
+        "steps": [
+          ["Virer de bord ou empanner", ""],
+          ["Lofer, virer foc à contre et continuer à abattre", ""],
+          ["Passer sous le vent de la personne", ""],
+          ["Empanner et remonter au près", ""],
+          [
+            "Attention à l’hélice",
+            "Vérifier qu’aucun bout ne traîne dans l’eau avant d’embrayer."
+          ],
+          ["Établir le contact", ""],
+          ["Récupérer la personne", ""]
+        ]
+      },
+      {
+        "title": "Si on la perd de vue",
+        "steps": [
+          [
+            "Si on la perd de vue, on alerte",
+            "MAYDAY en mer ; 117 / 112 / 18 sur le Léman."
+          ]
+        ]
+      }
+    ],
+    "recupAdded": true
+  },
+  "ldb.powerKw": true,
+  "ldb.anchorKg": true,
+  "ldb.settings": {
+    "icon": "compas",
+    "theme": "day",
+    "prefill": true,
+    "wake": true,
+    "autoPerHour": 1,
+    "autoTurn": 30,
+    "autoWeather": true,
+    "mapRadius": 50,
+    "vhf": {},
+    "windAlert": {
+      "on": true,
+      "basis": "gust"
+    },
+    "windOn423": true
+  },
+  "ldb.tipIdx": 1,
+  "ldb.index": [
+    {
+      "id": "mrltkr40tkny6",
+      "name": "Entraînement du 15.07",
+      "created": "2026-07-15T08:30:00.000Z",
+      "type": "lac",
+      "duree": "jour"
+    }
+  ],
+  "ldb.ckLib": [
+    {
+      "id": "base-brief",
+      "seed": "brief",
+      "name": "Briefing sécurité",
+      "cats": ["Sécurité", "Check-in"],
+      "items": [
+        {
+          "label": "Toilettes : ne rien y jeter, ni papier ni objet (grand danger d’obstruction)",
+          "note": "En arrivant à bord : distribuer ou montrer les sachets pour le papier."
+        },
+        {
+          "label": "Gilets : dès que le bateau bouge, on les porte ; les mettre avant de partir",
+          "note": "Distribuer les gilets, les ajuster sur chacun, demander qui nage bien."
+        },
+        {
+          "label": "Harnais : bateau en mouvement et hors du cockpit (dans le cockpit aussi, à la demande du skipper)",
+          "note": "Distribuer les harnais, faire le tour du bateau accroché à la ligne de vie."
+        },
+        {
+          "label": "Chaussures fermées : risque de blessure pieds nus",
+          "note": "Montrer les objets pointus : taquets, poulies, rails…"
+        },
+        {
+          "label": "Piano, winchs, poulies : garder les mains à distance",
+          "note": "Montrer comment faire."
+        },
+        {
+          "label": "Protéger le bateau : utiliser les pare-battages, ne pas pousser avec les mains ou les pieds"
+        },
+        {
+          "label": "Gaz : le sécuriser avant de partir",
+          "note": "Montrer la bonbonne, la vanne extérieure et éventuellement intérieure."
+        },
+        {
+          "label": "Four à gaz : système à bilame, vanne de gaz s’il y en a une",
+          "note": "Faire allumer une plaque avec l’allume-gaz ou des allumettes."
+        },
+        {
+          "label": "Feu à bord : cause la plus fréquente de naufrage",
+          "note": "Montrer l’extincteur et la couverture anti-feu."
+        },
+        {
+          "label": "Homme à la mer : procédure du skipper (quick stop, empannage, virement…), un équipier ne quitte pas la personne des yeux",
+          "note": "Simuler la manœuvre avec un pare-battage à la première sortie."
+        },
+        {
+          "label": "VHF et sécurité : qui parle et comment, canaux 16 et 72",
+          "note": "Montrer la touche rouge DISTRESS et tout l’équipement de sécurité (fusées…)."
+        },
+        {
+          "label": "Pompe de cale : emplacement de la manivelle",
+          "note": "Faire pomper les jeunes."
+        },
+        {
+          "label": "Nœuds utiles : chaise, cabestan, taquet",
+          "note": "Concours de nœuds, attacher les pare-battages."
+        }
+      ],
+      "at": "2026-10-31T00:00:00.000Z"
+    },
+    {
+      "id": "base-prise",
+      "seed": "prise",
+      "name": "Prise en main du bateau",
+      "cats": ["Check-in", "Croisière", "Mer"],
+      "items": [
+        {
+          "label": "Noter et si besoin photographier tous les dégâts, éraflures… à l’extérieur et à l’intérieur",
+          "note": "À signaler au loueur avant de prendre la mer, idéalement sur la fiche d’inventaire signée au départ."
+        },
+        {
+          "label": "Vérifier l’inventaire selon la fiche remise par le loueur"
+        },
+        {
+          "label": "Repérer les extincteurs et couvertures anti-feu, vérifier leur bon état"
+        },
+        {
+          "label": "État de l’accastillage, du gréement et des lignes de vie"
+        },
+        {
+          "label": "Matériel d’amarrage : quantité et qualité"
+        },
+        {
+          "label": "État des voiles, des drisses, des coulisseaux…",
+          "note": "La grand-voile peut s’user sur les barres de flèche."
+        },
+        {
+          "label": "Bon fonctionnement de l’enrouleur"
+        },
+        {
+          "label": "Barre à roue : jeu, nombre de tours de bâbord à tribord, blocage"
+        },
+        {
+          "label": "Propreté et absence d’eau dans les fonds"
+        },
+        {
+          "label": "Propreté sous le moteur"
+        },
+        {
+          "label": "Annexe et son moteur"
+        },
+        {
+          "label": "Tous les hublots ferment correctement et sont en bon état"
+        },
+        {
+          "label": "Chargeur de batteries, pompes à eau de cuisine, de cale, des douches…"
+        },
+        {
+          "label": "Localiser les vannes, y compris la commutation des réservoirs d’eau"
+        },
+        {
+          "label": "Les WC se vident correctement et ne sont pas bouchés"
+        },
+        {
+          "label": "Feux de navigation et de mouillage"
+        },
+        {
+          "label": "Indication du sondeur comparée à la profondeur réelle"
+        },
+        {
+          "label": "Niveau d’huile moteur et de liquide de refroidissement"
+        },
+        {
+          "label": "Niveau de carburant"
+        },
+        {
+          "label": "Documents du bateau : acte de francisation, assurance, attestation du radeau, cartes, bloc marine, modes d’emploi"
+        },
+        {
+          "label": "Livre de bord à bord"
+        },
+        {
+          "label": "Noter les heures moteur et le loch au départ dans le livre de bord"
+        },
+        {
+          "label": "Noter les caractéristiques du bateau : dimensions, tirant d’eau, MMSI…",
+          "note": "Dans Plus › Bateau et croisière."
+        },
+        {
+          "label": "À la première baignade, vérifier la partie immergée et signaler tout défaut"
+        },
+        {
+          "label": "Pendant la semaine, tenir la liste des réparations et de la vaisselle manquante"
+        }
+      ],
+      "at": "2026-10-31T00:00:00.000Z"
+    }
+  ],
+  "ldb.exCrews": true,
+  "ldb.prepUse": {
+    "boat": [
+      {
+        "id": "savannah",
+        "p": "Entraînement",
+        "at": "2026-07-15T08:30:00.000Z"
+      }
+    ],
+    "crew": []
+  },
+  "ldb.boatVers1": true,
+  "ldb.exMembers": true,
+  "ldb.mob2mer": {
+    "real": [
+      {
+        "title": "Tout de suite",
+        "steps": [
+          ["Crier « Homme à la mer ! »", ""],
+          [
+            "Un, si possible deux équipiers pointent la personne",
+            "Ils ne la quittent jamais des yeux et ne font que ça."
+          ],
+          [
+            "Lancer la bouée",
+            "Ou des objets flottants, tels que les coussins."
+          ],
+          [
+            "Le barreur appuie immédiatement sur MOB",
+            "Bouton MOB du GPS ou du traceur, pour enregistrer la position exacte."
+          ]
+        ]
+      },
+      {
+        "title": "Au près",
+        "allure": true,
+        "steps": [
+          [
+            "Virez de bord immédiatement sans toucher aux écoutes",
+            "Tournez la barre pour faire passer le nez du bateau dans le lit du vent. Ne touchez ni à l’écoute de génois, ni à celle de la grand-voile."
+          ],
+          [
+            "Démarrez le moteur",
+            "Lancez le moteur (au point mort) dès que le bateau traverse l’axe du vent."
+          ],
+          [
+            "Contrez à la barre",
+            "Une fois le nez du bateau passé de l’autre côté du vent, poussez la barre à fond du côté où se trouve la grand-voile (barre sous le vent)."
+          ],
+          [
+            "Le bateau est à la cape (arrêté)",
+            "Le génois resté sur l’ancien bord se retrouve à contre. Le voilier se stabilise instantanément à l’arrêt, face ou trois-quarts au vent, et se met en dérive de sécurité très lente (1 nœud)."
+          ],
+          [
+            "Affalage ou enroulage express",
+            "Les voiles n’étant plus sous tension, vous pouvez enrouler le génois et affaler la grand-voile en toute sécurité, directement face au vent."
+          ],
+          [
+            "Route au moteur",
+            "Vérifiez qu’aucun bout ne traîne à l’eau, remettez la barre au centre et embrayez la marche avant pour manœuvrer vers votre objectif."
+          ],
+          [
+            "Le brise-lame",
+            "Présentez le côté du bateau (le franc-bord) à la victime. Le voilier fait écran contre les vagues et le vent, créant une zone d’eau calme pour faciliter la récupération."
+          ]
+        ]
+      },
+      {
+        "title": "Au portant (génois)",
+        "allure": true,
+        "steps": [
+          [
+            "Lofez immédiatement",
+            "Tournez fermement la barre pour faire remonter le nez du bateau face au vent."
+          ],
+          [
+            "Ne touchez pas au génois",
+            "Laissez la voile d’avant bordée. Elle va passer à contre dès que le bateau aura traversé l’axe du vent."
+          ],
+          [
+            "Mettez le moteur en route",
+            "Profitez du moment où le bateau vire de bord pour démarrer le moteur (au point mort). Le moteur est prêt à être utilisé sans attendre."
+          ],
+          [
+            "Poussez et bloquez la barre",
+            "Une fois le virement effectué, tournez la barre à fond du côté opposé (sous le vent).\n• Vent faible à modéré : barre à fond sous le vent (du même côté que la voile d’avant à contre), bloquée avec un bout ou le bloqueur de barre. Le bateau oscille gentiment et reste stable.\n• Vent fort, brise : le vent dans la grand-voile pousse fortement le bateau à lofer. Barre à fond, il risque de revirer dans l’autre sens (sur-capage) : ne braquez qu’à moitié ou aux deux tiers.\n• Grand-voile : choquez-la aux deux tiers. Elle ne doit pas trop propulser le bateau, seulement l’aider à garder son angle (environ 50° du vent)."
+          ],
+          [
+            "Le bateau est stabilisé (à la cape)",
+            "Le génois à contre et la barre se contrarient. Le voilier s’arrête instantanément et dérive très lentement."
+          ],
+          [
+            "Affalez les voiles si nécessaire",
+            "Le bateau étant immobile et sécurisé, enroulez le génois et affalez la grand-voile sereinement."
+          ],
+          [
+            "Engagez la marche avant au moteur",
+            "Assurez-vous qu’aucun cordage ne traîne dans l’eau, puis faites route au moteur vers votre objectif."
+          ]
+        ]
+      },
+      {
+        "title": "Au portant sous spi asymétrique",
+        "allure": true,
+        "intro": "Le but est de tuer la puissance de la voile instantanément sans que rien ne tombe à l’eau.",
+        "steps": [
+          [
+            "Le barreur abat en grand (plein vent arrière)",
+            "Le bateau se met « plein cul ». La grand-voile, perpendiculaire au bateau, masque totalement le spi, qui se dégonfle d’un coup (déventé)."
+          ],
+          [
+            "Larguez totalement et d’un coup la bosse d’amure (le point avant)",
+            "Le spi ne tient plus que par son écoute et sa drisse. Il flotte comme un drapeau derrière la grand-voile, sans aucune force."
+          ],
+          [
+            "L’affalage express",
+            "Un équipier, à la descente ou dans le cockpit, attrape l’écoute de spi et tire la voile à l’abri derrière la grand-voile pour la faire descendre directement dans le bateau. Le pianiste file la drisse à la demande, en veillant à ce que la voile ne touche pas l’eau."
+          ],
+          [
+            "Sécurisation des cordages",
+            "Impératif absolu : ramassez toutes les écoutes et drisses qui traînent. Rien ne doit pendre à l’arrière ou sur les côtés, sous peine d’enrouler l’hélice."
+          ],
+          ["Mise en route", "Démarrez le moteur (au point mort)."],
+          [
+            "Enroulage du génois (si envoyé)",
+            "Si vous aviez un génois en plus du spi, enroulez-le immédiatement."
+          ],
+          [
+            "Le demi-tour (manœuvre du bouton de chemise)",
+            "Choquez la grand-voile en grand et affalez si possible."
+          ]
+        ]
+      },
+      {
+        "id": "recup3",
+        "title": "Méthode d’urgence absolue : victime inconsciente ou épuisée",
+        "intro": "Le plan incliné ou la voile. Hisser une masse inerte de 80 kg mouillée par-dessus un franc-bord élevé est impossible à la seule force des bras. La technique du filet (ou de la voile d’avant) :",
+        "steps": [
+          ["Affalez le génois ou utilisez une bâche ou un filet solide", ""],
+          [
+            "Fixez un côté au bastingage et jetez le reste à l’eau",
+            "Pour former une poche sous-marine."
+          ],
+          ["Glissez la victime dans cette poche", ""],
+          [
+            "Frappez l’autre extrémité de la voile sur une drisse et hissez au winch",
+            "La voile s’enroule et fait remonter la victime le long de la coque comme dans un hamac, sans effort horizontal."
+          ]
+        ]
+      },
+      {
+        "id": "hypo",
+        "title": "⚠️ Règle d’or médicale : l’hypothermie",
+        "steps": [
+          [
+            "Allongez immédiatement la victime à l’horizontale",
+            "Une fois la victime remontée, ne la forcez pas à se tenir debout. Le retour brutal du sang froid des extrémités vers le cœur (syndrome de l’hydrocution ou « afterdrop ») peut provoquer un arrêt cardiaque."
+          ]
+        ]
+      },
+      {
+        "title": "Si on la perd de vue",
+        "steps": [
+          [
+            "Si on la perd de vue, on alerte",
+            "MAYDAY en mer ; 117 / 112 / 18 sur le Léman."
+          ]
+        ]
+      }
+    ],
+    "train": [
+      {
+        "title": "Tout de suite",
+        "steps": [
+          ["Crier « Homme à la mer ! »", ""],
+          [
+            "Un, si possible deux équipiers pointent la personne",
+            "Ils ne la quittent jamais des yeux et ne font que ça."
+          ],
+          [
+            "Lancer la bouée",
+            "Ou des objets flottants, tels que les coussins."
+          ],
+          [
+            "Le barreur appuie immédiatement sur MOB",
+            "Bouton MOB du GPS ou du traceur, pour enregistrer la position exacte."
+          ]
+        ]
+      },
+      {
+        "title": "Manœuvre sous voile",
+        "steps": [
+          ["Virer de bord ou empanner", ""],
+          ["Lofer, virer foc à contre et continuer à abattre", ""],
+          ["Passer sous le vent de la personne", ""],
+          ["Empanner et remonter au près", ""],
+          [
+            "Attention à l’hélice",
+            "Vérifier qu’aucun bout ne traîne dans l’eau avant d’embrayer."
+          ],
+          ["Établir le contact", ""],
+          ["Récupérer la personne", ""]
+        ]
+      },
+      {
+        "title": "Si on la perd de vue",
+        "steps": [
+          [
+            "Si on la perd de vue, on alerte",
+            "MAYDAY en mer ; 117 / 112 / 18 sur le Léman."
+          ]
+        ]
+      }
+    ],
+    "recupAdded": true
+  },
+  "ldb.current": "\"mrltkr40tkny6\"",
+  "ldb.marks.at": "\"2026-07-15T08:30:00.000Z\"",
+  "ldb.members.at": "\"2026-07-15T08:30:00.000Z\"",
+  "ldb.crewSets": [
+    {
+      "id": "exc1",
+      "ident": "EQ001",
+      "name": "Régate du jeudi",
+      "crew": [
+        {
+          "memberId": "ex2",
+          "fonction": "Skipper"
+        },
+        {
+          "memberId": "ex1",
+          "fonction": "Second"
+        },
+        {
+          "memberId": "ex5",
+          "fonction": "Équipier"
+        }
+      ],
+      "at": "2026-07-15T08:30:00.000Z",
+      "_sig": "[\"Régate du jeudi\",[[\"ex2\",\"Skipper\"],[\"ex1\",\"Second\"],[\"ex5\",\"Équipier\"]]]"
+    },
+    {
+      "id": "exc2",
+      "ident": "EQ002",
+      "name": "Croisière en Méditerranée",
+      "crew": [
+        {
+          "memberId": "ex6",
+          "fonction": "Skipper"
+        },
+        {
+          "memberId": "ex4",
+          "fonction": "Second"
+        },
+        {
+          "memberId": "ex3",
+          "fonction": "Équipier"
+        },
+        {
+          "memberId": "ex2",
+          "fonction": "Équipier"
+        },
+        {
+          "memberId": "ex1",
+          "fonction": "Équipier"
+        }
+      ],
+      "at": "2026-07-15T08:30:00.000Z",
+      "_sig": "[\"Croisière en Méditerranée\",[[\"ex6\",\"Skipper\"],[\"ex4\",\"Second\"],[\"ex3\",\"Équipier\"],[\"ex2\",\"Équipier\"],[\"ex1\",\"Équipier\"]]]"
+    },
+    {
+      "id": "exc3",
+      "ident": "EQ003",
+      "name": "Sortie découverte",
+      "crew": [
+        {
+          "memberId": "ex4",
+          "fonction": "Skipper"
+        },
+        {
+          "memberId": "ex3",
+          "fonction": "Équipier"
+        }
+      ],
+      "at": "2026-07-15T08:30:00.000Z",
+      "_sig": "[\"Sortie découverte\",[[\"ex4\",\"Skipper\"],[\"ex3\",\"Équipier\"]]]"
+    },
+    {
+      "id": "cs-lake",
+      "name": "Équipe du mercredi",
+      "crew": [
+        {
+          "memberId": "ex2",
+          "fonction": "Skipper"
+        },
+        {
+          "memberId": "m-lea",
+          "fonction": "Équipier"
+        }
+      ],
+      "at": "2026-07-15T08:30:00.000Z",
+      "_sig": "[\"Équipe du mercredi\",[[\"ex2\",\"Skipper\"],[\"m-lea\",\"Équipier\"]]]"
+    }
+  ],
+  "ldb.modelSplit": true
+}

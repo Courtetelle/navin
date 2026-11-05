@@ -1,0 +1,38 @@
+{
+  "appui long sur la case pour la modifier": [
+    "long press on the field to change it",
+    "pressione lunga sul campo per modificarlo",
+    "pulsación larga en la casilla para modificarla"
+  ],
+  "sinon la valeur reste": [
+    "otherwise the value stays",
+    "altrimenti il valore resta",
+    "si no, el valor se mantiene"
+  ],
+  "relâchez puis saisissez": [
+    "release, then type",
+    "rilascia e poi digita",
+    "suelta y luego escribe"
+  ],
+  "appui long pour modifier": [
+    "long press to edit",
+    "pressione lunga per modificare",
+    "pulsación larga para modificar"
+  ],
+  "Appui long pour confirmer la suppression": [
+    "Long press to confirm deletion",
+    "Pressione lunga per confermare l’eliminazione",
+    "Pulsación larga para confirmar la eliminación"
+  ],
+  "Fiche supprimée": ["Sheet deleted", "Scheda eliminata", "Ficha eliminada"],
+  "Signature enregistrée": [
+    "Signature saved",
+    "Firma salvata",
+    "Firma guardada"
+  ],
+  "Signez sur l’écran avec le doigt": [
+    "Sign on the screen with your finger",
+    "Firma sullo schermo con il dito",
+    "Firma en la pantalla con el dedo"
+  ]
+}

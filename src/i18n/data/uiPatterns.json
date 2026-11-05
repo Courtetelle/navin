@@ -1,0 +1,298 @@
+[
+  ["^(.+) : (OUI|NON)$", "", ["$1: $2", "$1: $2", "$1: $2"]],
+  [
+    "^· (\\d+) actions?$",
+    "",
+    ["· $1 action(s)", "· $1 azione/i", "· $1 acción(es)"]
+  ],
+  ["^rayon (\\d+) km$", "", ["radius $1 km", "raggio $1 km", "radio $1 km"]],
+  [
+    "^Environ (\\d+) tuiles \\(plan \\+ balisage\\), ≈ (\\d+) Mo\\.$",
+    "",
+    [
+      "About $1 tiles (map + seamarks), ≈ $2 MB.",
+      "Circa $1 tasselli (mappa + segnalamenti), ≈ $2 MB.",
+      "Unas $1 teselas (plano + balizamiento), ≈ $2 MB."
+    ]
+  ],
+  [
+    "^(.+) : (\\d+) points$",
+    "",
+    ["$1: $2 items", "$1: $2 punti", "$1: $2 puntos"]
+  ],
+  [
+    "^(\\d+) à bord · (\\d+) groupes? enregistrés?$",
+    "",
+    [
+      "$1 on board · $2 saved group(s)",
+      "$1 a bordo · $2 gruppo/i salvato/i",
+      "$1 a bordo · $2 grupo(s) guardado(s)"
+    ]
+  ],
+  ["^(\\d+) à bord$", "", ["$1 on board", "$1 a bordo", "$1 a bordo"]],
+  [
+    "^Équipage · (\\d+) à bord$",
+    "",
+    [
+      "Crew · $1 on board",
+      "Equipaggio · $1 a bordo",
+      "Tripulación · $1 a bordo"
+    ]
+  ],
+  [
+    "^(\\d+) entrées? au journal$",
+    "",
+    [
+      "$1 log entry(ies)",
+      "$1 voce/i nel giornale",
+      "$1 entrada(s) en el diario"
+    ]
+  ],
+  ["^(\\d+) entrées?$", "", ["$1 entry(ies)", "$1 voce/i", "$1 entrada(s)"]],
+  [
+    "^(\\d+) équipages? avec les rôles$",
+    "",
+    [
+      "$1 crew(s) with roles",
+      "$1 equipaggio/i con i ruoli",
+      "$1 tripulación(es) con funciones"
+    ]
+  ],
+  [
+    "^(\\d+) bateaux?, données et check-lists$",
+    "",
+    [
+      "$1 boat(s), data and checklists",
+      "$1 barca/he, dati e checklist",
+      "$1 barco(s), datos y checklists"
+    ]
+  ],
+  [
+    "^(\\d+) bases? : modifier, compléter, effacer$",
+    "",
+    [
+      "$1 template(s): edit, complete, delete",
+      "$1 modello/i: modifica, completa, cancella",
+      "$1 plantilla(s): modificar, completar, borrar"
+    ]
+  ],
+  ["^(\\d+) points$", "", ["$1 points", "$1 punti", "$1 puntos"]],
+  ["^Journée du (.+)$", "", ["Day of $1", "Giornata del $1", "Día $1"]],
+  [
+    "^🖨 Créer le PDF \\((\\d+) pages?\\)$",
+    "",
+    [
+      "🖨 Create the PDF ($1 pages)",
+      "🖨 Crea il PDF ($1 pagine)",
+      "🖨 Crear el PDF ($1 páginas)"
+    ]
+  ],
+  [
+    "^Consommation \\((.+)\\)$",
+    "",
+    ["Consumption ($1)", "Consumo ($1)", "Consumo ($1)"]
+  ],
+  [
+    "^dont au moteur \\(heures × (.+) nd\\)$",
+    "",
+    [
+      "of which under engine (hours × $1 kn)",
+      "di cui a motore (ore × $1 nodi)",
+      "de ellas a motor (horas × $1 nudos)"
+    ]
+  ],
+  [
+    "^(Lundi|Mardi|Mercredi|Jeudi|Vendredi|Samedi|Dimanche) (\\d+\\/\\d+)((?: · (?:aujourd’hui|arrivée|départ))*)$",
+    "",
+    ["$1 $2$3", "$1 $2$3", "$1 $2$3"]
+  ],
+  [
+    "^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche) (\\d+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (\\d{4})$",
+    "",
+    ["$1 $3 $2, $4", "$1 $2 $3 $4", "$1 $2 de $3 de $4"]
+  ],
+  [
+    "^(\\d+)\\. (Équipier|Équipière) (\\d+)$",
+    "",
+    ["$1. $2 $3", "$1. $2 $3", "$1. $2 $3"]
+  ],
+  ["^(Équipier|Équipière) (\\d+)$", "", ["$1 $2", "$1 $2", "$1 $2"]],
+  [
+    "^Plan complet \\((\\d+) jours\\)$",
+    "",
+    [
+      "Full plan ($1 days)",
+      "Piano completo ($1 giorni)",
+      "Plan completo ($1 días)"
+    ]
+  ],
+  [
+    "^Renommer un bouton, changer la taille du texte, le retour à la ligne ou le texte déroulant\\. (\\d+) boutons? modifiés?\\.$",
+    "",
+    [
+      "Rename a button, change the text size, line wrapping or scrolling text. $1 button(s) changed.",
+      "Rinomina un pulsante, cambia la dimensione del testo, l’a capo o il testo scorrevole. $1 pulsante/i modificato/i.",
+      "Renombrar un botón, cambiar el tamaño del texto, el salto de línea o el texto desplazable. $1 botón(es) modificado(s)."
+    ]
+  ],
+  ["^(\\d+) restants?$", "", ["$1 left", "$1 rimanenti", "$1 pendientes"]],
+  [
+    "^(\\d+) fiches? ajoutées?$",
+    "",
+    ["$1 sheet(s) added", "$1 scheda/e aggiunta/e", "$1 ficha(s) añadida(s)"]
+  ],
+  [
+    "^Zone : (en eaux intérieures|maritime) · reste active jusqu’au retour sur GPS$",
+    "",
+    [
+      "Zone: $1 · stays on until you go back to GPS",
+      "Zona: $1 · resta attiva fino al ritorno su GPS",
+      "Zona: $1 · sigue activa hasta volver a GPS"
+    ]
+  ],
+  [
+    "^Zone : automatique par GPS$",
+    "",
+    [
+      "Zone: automatic by GPS",
+      "Zona: automatica da GPS",
+      "Zona: automática por GPS"
+    ]
+  ],
+  [
+    "^Modifier pour (.+) \\?$",
+    "",
+    ["Change to $1?", "Cambiare in $1?", "¿Cambiar a $1?"]
+  ],
+  [
+    "^✓ Modifié : (.+)$",
+    "",
+    ["✓ Changed: $1", "✓ Modificato: $1", "✓ Modificado: $1"]
+  ],
+  [
+    "^Pour modifier pour « (.+) » : appui long sur l’intitulé$",
+    "",
+    [
+      "To change to « $1 »: long press on the label",
+      "Per cambiare in « $1 »: pressione lunga sull’etichetta",
+      "Para cambiar a « $1 »: pulsación larga en la etiqueta"
+    ]
+  ],
+  [
+    "^Pour modifier pour « (.+) » : appui long sur la pastille$",
+    "",
+    [
+      "To change to « $1 »: long press on the pill",
+      "Per cambiare in « $1 »: pressione lunga sul pulsante",
+      "Para cambiar a « $1 »: pulsación larga en el botón"
+    ]
+  ],
+  [
+    "^sans appui long, « (.+) » reste$",
+    "",
+    [
+      "without a long press, « $1 » stays",
+      "senza pressione lunga, resta « $1 »",
+      "sin pulsación larga, se mantiene « $1 »"
+    ]
+  ],
+  [
+    "^(.+) : donnée de navigation protégée$",
+    "",
+    [
+      "$1: protected navigation data",
+      "$1: dato di navigazione protetto",
+      "$1: dato de navegación protegido"
+    ]
+  ],
+  [
+    "^(.+) : modification autorisée$",
+    "",
+    [
+      "$1: editing allowed",
+      "$1: modifica consentita",
+      "$1: modificación permitida"
+    ]
+  ],
+  [
+    "^Pas d’hélice : (.+) enregistré$",
+    "",
+    [
+      "Prop walk: $1 saved",
+      "Effetto elica: $1 salvato",
+      "Efecto de hélice: $1 guardado"
+    ]
+  ],
+  ["^✓ (.+)$", "", ["✓ $1", "✓ $1", "✓ $1"]],
+  ["^Appel : (.+)$", "", ["Call: $1", "Chiama: $1", "Llamar: $1"]],
+  ["^Courriel : (.+)$", "", ["Email: $1", "E-mail: $1", "Correo: $1"]],
+  [
+    "^Valeur entre (.+) et (.+)$",
+    "",
+    ["Value between $1 and $2", "Valore tra $1 e $2", "Valor entre $1 y $2"]
+  ],
+  [
+    "^(🔒 )?Fiche protégée : la personne fait partie de (?:l’équipage|ces équipages) (.+)\\. Retirez-la d’abord de (?:cette liste|ces listes)\\.$",
+    "",
+    [
+      "$1Protected sheet: this person belongs to crew $2. Remove them from it first.",
+      "$1Scheda protetta: la persona fa parte dell’equipaggio $2. Rimuovila prima dall’elenco.",
+      "$1Ficha protegida: la persona forma parte de la tripulación $2. Quítala primero de la lista."
+    ]
+  ],
+  [
+    "^(\\d+) bases? : créer, modifier, compléter, effacer$",
+    "",
+    [
+      "$1 template(s): create, edit, complete, delete",
+      "$1 modello/i: crea, modifica, completa, cancella",
+      "$1 plantilla(s): crear, modificar, completar, borrar"
+    ]
+  ],
+  [
+    "^(\\d+) bateaux?, données et check-lists du lac$",
+    "",
+    [
+      "$1 boat(s), lake data and checklists",
+      "$1 barca/he, dati e checklist del lago",
+      "$1 barco(s), datos y checklists del lago"
+    ]
+  ],
+  [
+    "^(\\d+) fiches? : les personnes et leurs caractéristiques$",
+    "",
+    [
+      "$1 sheet(s): people and their details",
+      "$1 scheda/e: le persone e le loro caratteristiche",
+      "$1 ficha(s): las personas y sus datos"
+    ]
+  ],
+  [
+    "^(\\d+) groupes? de navigants, avec les rôles$",
+    "",
+    [
+      "$1 crew group(s), with roles",
+      "$1 gruppo/i di naviganti, con i ruoli",
+      "$1 grupo(s) de navegantes, con sus funciones"
+    ]
+  ],
+  [
+    "^(\\d+) logs? SOS automatiques?$",
+    "",
+    [
+      "$1 automatic SOS log(s)",
+      "$1 log SOS automatico/i",
+      "$1 registro(s) SOS automático(s)"
+    ]
+  ],
+  [
+    "^(\\d+) marque\\(s\\), Go to$",
+    "",
+    ["$1 mark(s), Go to", "$1 segnaposto/i, Go to", "$1 marca(s), Go to"]
+  ],
+  [
+    "^(\\d+) points · (.+)$",
+    "",
+    ["$1 items · $2", "$1 punti · $2", "$1 puntos · $2"]
+  ]
+]
