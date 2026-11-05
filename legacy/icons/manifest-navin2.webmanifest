@@ -1,0 +1,29 @@
+{
+ "name": "NavIn, livre de bord",
+ "short_name": "NavIn",
+ "description": "Journal de bord pour bateau, utilisable hors réseau",
+ "lang": "fr",
+ "start_url": "../",
+ "scope": "../",
+ "display": "standalone",
+ "orientation": "any",
+ "background_color": "#ffffff",
+ "theme_color": "#0a2a5c",
+ "icons": [
+  {
+   "src": "navin2.svg",
+   "sizes": "any",
+   "type": "image/svg+xml"
+  },
+  {
+   "src": "navin2-180.png",
+   "sizes": "180x180",
+   "type": "image/png"
+  },
+  {
+   "src": "navin2-512.png",
+   "sizes": "512x512",
+   "type": "image/png"
+  }
+ ]
+}
