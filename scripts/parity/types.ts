@@ -24,6 +24,11 @@ export interface Scenario {
    * @default {}
    */
   fixture?: Fixture | string;
+  /**
+   * Keys set on top of the fixture, e.g. `{ 'ldb.tipIdx': '6' }` to skip the boot tip toast.
+   * @default {}
+   */
+  overrides?: Fixture;
   steps: Step[];
   /**
    * Fixed wall-clock time (ISO string).

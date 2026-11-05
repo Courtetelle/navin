@@ -77,8 +77,10 @@ process.exitCode = failed > 0 ? 1 : 0;
 async function runScenario(scenario: Scenario): Promise<SnapshotResult[]> {
   const directory = join(OUT, scenario.name.replaceAll(/[^\w.-]+/g, '_'));
   mkdirSync(directory, { recursive: true });
-  const legacy = await openApp(browser, LEGACY_URL, scenario);
-  const react = legacyOnly ? null : await openApp(browser, REACT_URL, scenario);
+  const legacy = await openApp(browser, LEGACY_URL, scenario, false);
+  const react = legacyOnly
+    ? null
+    : await openApp(browser, REACT_URL, scenario, true);
   const output: SnapshotResult[] = [];
   const settle = scenario.settle ?? DEFAULT_SETTLE;
   try {
@@ -102,8 +104,11 @@ async function runScenario(scenario: Scenario): Promise<SnapshotResult[]> {
       });
       const parsed: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(storage)) {
+        // Seeding stores strings as-is, so a JSON string value keeps its raw
+        // text (quotes included) to survive the round trip.
         try {
-          parsed[key] = JSON.parse(value) as unknown;
+          const json = JSON.parse(value) as unknown;
+          parsed[key] = typeof json === 'string' ? value : json;
         } catch {
           parsed[key] = value;
         }

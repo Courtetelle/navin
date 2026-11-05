@@ -11,7 +11,16 @@
  */
 export function serializeDom(ignoreAttributes: string | null): string {
   const ignored = ignoreAttributes ? new RegExp(ignoreAttributes) : null;
-  const skipped = new Set(['SCRIPT', 'STYLE', 'LINK', 'NOSCRIPT', 'TEMPLATE']);
+  // VIDEO: the invisible wake-lock fallback, whose place in <body> depends on
+  // when the refused Wake Lock request returns.
+  const skipped = new Set([
+    'SCRIPT',
+    'STYLE',
+    'LINK',
+    'NOSCRIPT',
+    'TEMPLATE',
+    'VIDEO',
+  ]);
   const lines: string[] = [];
 
   const attributesOf = (element: Element): string => {
