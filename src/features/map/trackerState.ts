@@ -8,6 +8,10 @@ import { leaflet } from './leaflet.ts';
 import { currentTrack } from './trackStats.ts';
 import { updateTrkDash } from './trackerDash.ts';
 
+/** The boat seen from above, bow up: it turns with the course. */
+const BOAT_ICON =
+  '<svg viewBox="0 0 34 34" width="34" height="34" aria-hidden="true"><path d="M17 1.5C23.5 9 25.5 17.5 23.5 27Q22.5 32 17 32T10.5 27C8.5 17.5 10.5 9 17 1.5Z" fill="#d00000" stroke="#fff" stroke-width="1.6"/><path d="M17 10Q25 17 19.5 27" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><circle cx="17" cy="10" r="1.8" fill="#fff"/></svg>';
+
 /** The tracker screen while it is open (legacy `trk`). */
 export interface TrackerHandle {
   map: LeafletMap | null;
@@ -94,7 +98,7 @@ export function trkFix(fix: TrackerFix): void {
     handle.me = L.marker(position, {
       icon: L.divIcon({
         className: 'trk-boat',
-        html: '<div class="trk-arrow">▲</div>',
+        html: `<div class="trk-arrow">${BOAT_ICON}</div>`,
         iconSize: [34, 34],
         iconAnchor: [17, 17],
       }),
