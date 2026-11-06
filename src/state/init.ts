@@ -12,6 +12,8 @@ import { loadChecklistLibrary } from './checklistLibrary.ts';
 import { loadCrewSets } from './crewSets.ts';
 import { openCruise } from './cruise.ts';
 import { data } from './data.ts';
+import { purgeExamples } from './examples.ts';
+import { examplesWanted } from './examplesWanted.ts';
 import { loadSosLogs } from './logs.ts';
 import { loadMarks } from './marks.ts';
 import { loadMembers } from './members.ts';
@@ -47,6 +49,7 @@ export function initState(backend?: Storage | null): void {
   loadCrewSets();
   loadSosLogs();
   data.mobLogs.value = store.get<MobLog[]>('ldb.mobLogs', []);
+  if (!examplesWanted()) purgeExamples();
   for (const record of Object.values(data)) freeze(record.value, true);
   freeze(preferences.settings.value, true);
   const current = store.get<string | null>('ldb.current', null);

@@ -4,6 +4,7 @@ import type { CrewSet, CrewSetLine } from '../model/types.ts';
 import { store } from '../storage/store.ts';
 
 import { data } from './data.ts';
+import { examplesWanted } from './examplesWanted.ts';
 import { memberName } from './members.ts';
 
 /** Example crews built from the example member cards: `[id, name, [memberId, role][]]`. */
@@ -40,6 +41,10 @@ const EXAMPLE_CREWS: ReadonlyArray<
   ],
 ];
 
+/** The example crews by id, with their name, to recognise them. */
+export const EXAMPLE_CREW_IDS: Readonly<Record<string, string>> =
+  Object.fromEntries(EXAMPLE_CREWS.map(([id, name]) => [id, name]));
+
 /**
  * Load the crew compositions (prep.js 25-52): each gets an identifier `EQ001`…
  * and its signature; the example crews are added once (members must be loaded first).
@@ -56,7 +61,7 @@ export function loadCrewSets(): void {
   }
   store.set('ldb.crewSets', sets);
   data.crewSets.value = sets;
-  if (store.get('ldb.exCrews', false)) return;
+  if (!examplesWanted() || store.get('ldb.exCrews', false)) return;
   let added = 0;
   for (const [id, name, lines] of EXAMPLE_CREWS) {
     const crew: CrewSetLine[] = lines

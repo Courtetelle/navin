@@ -9,6 +9,7 @@ import type { CrewMember, Member } from '../model/types.ts';
 import { store } from '../storage/store.ts';
 
 import { data } from './data.ts';
+import { examplesWanted } from './examplesWanted.ts';
 import { preferences } from './preferences.ts';
 
 /**
@@ -21,7 +22,7 @@ export function loadMembers(): void {
     return member;
   });
   data.members.value = members;
-  if (!store.get('ldb.exMembers', false)) {
+  if (examplesWanted() && !store.get('ldb.exMembers', false)) {
     let added = 0;
     for (const example of EXAMPLE_MEMBERS) {
       if (!members.some((member) => member.id === example.id)) {

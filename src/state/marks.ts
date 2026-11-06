@@ -4,6 +4,7 @@ import type { Mark } from '../model/types.ts';
 import { store } from '../storage/store.ts';
 
 import { data } from './data.ts';
+import { examplesWanted } from './examplesWanted.ts';
 
 /** Example marks: `[note, lat, lon]` (7 on Lake Geneva, 4 near Toulon). */
 const EXAMPLE_MARKS: ReadonlyArray<readonly [string, number, number]> = [
@@ -20,6 +21,12 @@ const EXAMPLE_MARKS: ReadonlyArray<readonly [string, number, number]> = [
   ['Large du cap Sicié', 43.03, 5.85],
 ];
 
+/** The example marks by id, with their note, to recognise them. */
+export const EXAMPLE_MARK_NOTES: Readonly<Record<string, string>> =
+  Object.fromEntries(
+    EXAMPLE_MARKS.map(([note], position) => [`exm${position + 1}`, note]),
+  );
+
 /**
  * Name of a mark from its number (legacy `markName`).
  * @param number - Sequence number.
@@ -33,7 +40,7 @@ export function markName(number: number): string {
 export function loadMarks(): void {
   const marks = store.arr<Mark>('ldb.marks');
   data.marks.value = marks;
-  if (store.get('ldb.exMarks', false)) return;
+  if (!examplesWanted() || store.get('ldb.exMarks', false)) return;
   let sequence = store.get('ldb.markSeq', 0);
   const now = new Date().toISOString();
   for (const [position, [note, lat, lon]] of EXAMPLE_MARKS.entries()) {

@@ -28,6 +28,7 @@ import {
   splitFlagPort,
   splitModelYear,
 } from './boatMigrations.ts';
+import { examplesWanted } from './examplesWanted.ts';
 import { migrateSavannahChecklists } from './savannahChecklists.ts';
 
 const emptyLists = () => ({
@@ -75,7 +76,7 @@ export function readBoats(): Boat[] {
     store.set('ldb.boats', boats);
     store.set('ldb.powerKw', true);
   }
-  if (!store.get('ldb.exBoats', false)) {
+  if (examplesWanted() && !store.get('ldb.exBoats', false)) {
     for (const example of EXAMPLE_BOATS) {
       if (!boats.some((boat) => boat.id === example.id)) {
         boats.push({
