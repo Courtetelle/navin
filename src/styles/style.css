@@ -8559,13 +8559,13 @@ html:not([data-theme='night'])
   border-radius: 4px;
   line-height: 1.2;
 }
-/* Boussole de la carte : nord en haut ou cap en haut */
+/* Boussole de la carte : visible quand le nord n'est pas en haut */
 .map-compass {
   position: absolute;
   top: calc(var(--topbar-h, 70px) + 10px);
   right: 10px;
   z-index: 1000;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   width: 44px;
@@ -8573,11 +8573,107 @@ html:not([data-theme='night'])
   border-radius: 50%;
   background: var(--surface, #fff);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
-.map-compass.course-up {
-  outline: 3px solid #d00000;
-  outline-offset: -3px;
+.course-up > .map-compass {
+  display: flex;
 }
 .map-compass svg {
   transition: transform 0.3s;
+}
+.course-up .map-locate-btn {
+  outline: 3px solid #d00000;
+  outline-offset: -3px;
+}
+/* Chevrons des barres : ouverte, il montre où elle se range ; fermée, où elle s'ouvre */
+.bar-chevron {
+  display: none;
+  position: absolute;
+  left: 50%;
+  width: 52px;
+  height: 22px;
+  margin-left: -26px;
+  padding: 0;
+  border: 0;
+  background: color-mix(in srgb, var(--surface, #fff) 85%, transparent);
+  cursor: pointer;
+  z-index: 1;
+}
+body.trk-mode .bar-chevron {
+  display: block;
+}
+.bar-chevron-top {
+  top: 100%;
+  border-radius: 0 0 12px 12px;
+}
+.bar-chevron-bottom {
+  bottom: 100%;
+  margin-bottom: 2px;
+  border-radius: 12px 12px 0 0;
+}
+.slide-handle.sh-top,
+html body .slide-handle.sh-bot {
+  height: 30px;
+}
+.bar-chevron::before,
+.slide-handle::before,
+.ctl-edge::before {
+  content: '';
+  position: absolute;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  border: solid rgba(11, 18, 32, 0.8);
+  border-width: 3px 3px 0 0;
+  filter: drop-shadow(0 0 1px #fff);
+}
+.bar-chevron::before {
+  left: 20px;
+}
+.bar-chevron-top::before {
+  top: 8px;
+  transform: rotate(-45deg);
+}
+.bar-chevron-bottom::before {
+  top: 2px;
+  transform: rotate(135deg);
+}
+.slide-handle::before {
+  left: 26px;
+}
+.slide-handle.sh-top::before {
+  top: 11px;
+  transform: rotate(135deg);
+}
+.slide-handle.sh-bot::before {
+  bottom: 9px;
+  transform: rotate(-45deg);
+}
+.ctl-edge::before {
+  left: 8px;
+  top: 50%;
+  margin-top: -6px;
+  transform: rotate(45deg);
+  transition: opacity 0.25s;
+}
+.ctl-edge::after {
+  left: 2px;
+}
+.ctl-auto.ctl-show .ctl-edge::before {
+  opacity: 0;
+}
+:root[data-theme='night'] .bar-chevron::before,
+:root[data-theme='night'] .slide-handle::before,
+:root[data-theme='night'] .ctl-edge::before {
+  border-color: #ff4040;
+  filter: none;
+}
+/* Bouton de position : toujours visible, même la colonne des boutons rangée */
+.ctl-auto .leaflet-control-container .leaflet-control.map-locate-btn {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.leaflet-top.ctl-col {
+  z-index: 1002;
 }

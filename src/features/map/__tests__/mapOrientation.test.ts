@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 
-import { bearingFor } from '../mapOrientation.ts';
+import { bearingFor, locateAction } from '../mapOrientation.ts';
 
 test('north up brings the map back to north', () => {
   expect(bearingFor('north', 300, 60, 5)).toBe(0);
@@ -26,4 +26,10 @@ test('a small change of course does not turn the map, even across north', () => 
   expect(bearingFor('course', 300, 62, 5)).toBeNull();
   expect(bearingFor('course', 359, 2, 5)).toBeNull();
   expect(bearingFor('course', 300, 70, 5)).toBe(290);
+});
+
+test('the position button recentres first, then changes the orientation', () => {
+  expect(locateAction(false, true)).toBe('recenter');
+  expect(locateAction(true, false)).toBe('recenter');
+  expect(locateAction(true, true)).toBe('orient');
 });

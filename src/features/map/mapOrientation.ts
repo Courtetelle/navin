@@ -1,6 +1,5 @@
 import type { Map as LeafletMap, MapOptions } from 'leaflet';
 
-import { buzz } from '../../lib/dom.ts';
 import { toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
@@ -102,35 +101,60 @@ export function orientMap(
 }
 
 /**
- * The compass of a map: it shows where north is; a tap changes between north up
- * and course up.
+ * What a tap on the position button does: first bring the boat back to the
+ * middle of the map; once it is there, change the orientation.
+ * @param follows - The map follows the boat.
+ * @param known - The position of the boat is known.
+ * @returns The action.
+ */
+export function locateAction(
+  follows: boolean,
+  known: boolean,
+): 'recenter' | 'orient' {
+  return follows && known ? 'orient' : 'recenter';
+}
+
+/**
+ * Change between north up and course up.
+ * @param map - Leaflet map.
+ */
+export function toggleOrientation(map: LeafletMap): void {
+  const next = mapOrientation() === 'course' ? 'north' : 'course';
+  store.setRaw(KEY, next);
+  toast(next === 'course' ? 'Cap en haut' : 'Nord en haut');
+  showOrientation(map);
+  const handle = tracker.current;
+  orientMap(map, handle?.lastCog, handle?.lastSog);
+  trkShowCourse(handle?.lastCog);
+}
+
+function showOrientation(map: LeafletMap): void {
+  const container = map.getContainer();
+  container.classList.toggle('course-up', mapOrientation() === 'course');
+  const button = container.querySelector('.map-locate-btn');
+  if (button) {
+    button.setAttribute(
+      'title',
+      mapOrientation() === 'course'
+        ? 'Recentrer, puis nord en haut'
+        : 'Recentrer, puis cap en haut',
+    );
+  }
+}
+
+/**
+ * The compass of a map, shown while the course is up, when north is not at the
+ * top of the screen: it only shows where north is.
  * @param map - Leaflet map.
  */
 export function addOrientationControl(map: LeafletMap): void {
-  const L = leaflet();
-  // Not a Leaflet control: those hide in the drawer, a compass must stay in view.
-  const button = L.DomUtil.create('a', 'map-compass', map.getContainer());
-  button.href = '#';
-  button.setAttribute('role', 'button');
-  button.innerHTML = COMPASS_ICON;
-  const label = () => {
-    button.title =
-      mapOrientation() === 'course' ? 'Cap en haut' : 'Nord en haut';
-    button.setAttribute('aria-label', button.title);
-    button.classList.toggle('course-up', mapOrientation() === 'course');
-  };
-  label();
-  L.DomEvent.on(button, 'click', (event) => {
-    L.DomEvent.stop(event);
-    buzz();
-    const next = mapOrientation() === 'course' ? 'north' : 'course';
-    store.setRaw(KEY, next);
-    label();
-    toast(next === 'course' ? 'Cap en haut' : 'Nord en haut');
-    const handle = tracker.current;
-    orientMap(map, handle?.lastCog, handle?.lastSog);
-    trkShowCourse(handle?.lastCog);
-  });
-  L.DomEvent.disableClickPropagation(button);
+  const compass = leaflet().DomUtil.create(
+    'div',
+    'map-compass',
+    map.getContainer(),
+  );
+  compass.setAttribute('aria-hidden', 'true');
+  compass.innerHTML = COMPASS_ICON;
+  showOrientation(map);
   orientMap(map, null, null);
 }

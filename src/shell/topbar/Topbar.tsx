@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { buzz } from '../../lib/dom.ts';
 import { state } from '../../state/index.ts';
+import { BarChevron } from '../BarChevron.tsx';
 import { hasBodyClass } from '../bodyClass.ts';
 import { goFromGear, navigation, voyageName } from '../router.ts';
 import { toggleTheme, toggleThemeFromGear } from '../theme.ts';
@@ -61,6 +62,7 @@ export function Topbar() {
       >
         {night ? '☾' : '☀︎'}
       </Button>
+      <BarChevron bar="top" />
     </header>
   );
 }

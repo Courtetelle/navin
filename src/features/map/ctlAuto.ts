@@ -8,6 +8,8 @@ const HIDE_ICON =
   '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 /** Moments, in ms after the map is created, when the controls added since are arranged. */
 const ARRANGE_DELAYS = [0, 300, 1200];
+/** Distance from the chevron of the edge, in pixels, where a tap opens the buttons. */
+const CHEVRON_REACH = 44;
 
 /**
  * Put every map button in one column on the left, the layer selector included
@@ -71,7 +73,18 @@ export function ctlAutoAttach(map: LeafletMap): void {
   const release = () => {
     start = null;
   };
-  edge.addEventListener('pointerup', release);
+  edge.addEventListener('pointerup', (event) => {
+    // A tap on the chevron opens too: elsewhere on the edge it may be an accident.
+    const box = edge.getBoundingClientRect();
+    if (
+      start &&
+      Math.hypot(event.clientX - start.x, event.clientY - start.y) < 10 &&
+      Math.abs(event.clientY - (box.top + box.height / 2)) < CHEVRON_REACH
+    ) {
+      show(map);
+    }
+    release();
+  });
   edge.addEventListener('pointercancel', release);
   for (const delay of ARRANGE_DELAYS) {
     whileMapLive(map, () => addHideButton(map, signal), delay);

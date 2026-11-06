@@ -6,6 +6,7 @@ import { herePos, toast } from '../../state/index.ts';
 
 import { leaflet } from './leaflet.ts';
 import { setMapFull } from './mapFull.ts';
+import { locateAction, toggleOrientation } from './mapOrientation.ts';
 import { setFollow, tracker } from './trackerState.ts';
 
 const FULL_ICON =
@@ -58,11 +59,18 @@ function addButton(
 
 function locate(map: LeafletMap, button: HTMLAnchorElement): void {
   buzz();
+  // A second tap, with the boat in the middle, changes the orientation.
+  const handle = tracker.current?.map === map ? tracker.current : null;
+  const boat = handle?.me?.getLatLng();
+  if (handle && locateAction(handle.follow, Boolean(boat)) === 'orient') {
+    toggleOrientation(map);
+    return;
+  }
   const center = (lat: number, lon: number) => {
     map.setView([lat, lon], Math.max(map.getZoom(), 14));
   };
   if (tracker.current?.map === map) setFollow(true);
-  const known = herePos();
+  const known = herePos() ?? (boat ? { lat: boat.lat, lon: boat.lng } : null);
   if (known) center(known.lat, known.lon);
   if (!navigator.geolocation) {
     if (!known) toast('GPS indisponible');
