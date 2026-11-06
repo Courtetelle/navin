@@ -4,6 +4,7 @@ import { rad } from '../../lib/geo.ts';
 
 import type { LatLngPair } from './constants.ts';
 import { leaflet } from './leaflet.ts';
+import { frameCanvas } from './overlayCanvas.ts';
 import { inShore, shoreDist, zonePopupHtml } from './shore.ts';
 
 /**
@@ -57,20 +58,13 @@ function drawBands(
   canvas: HTMLCanvasElement,
   rings: readonly LatLngPair[][],
 ): void {
-  const size = map.getSize();
-  const ratio = globalThis.devicePixelRatio || 1;
-  leaflet().DomUtil.setPosition(canvas, map.containerPointToLayerPoint([0, 0]));
-  canvas.width = size.x * ratio;
-  canvas.height = size.y * ratio;
-  canvas.style.width = `${size.x}px`;
-  canvas.style.height = `${size.y}px`;
-  const context = canvas.getContext('2d');
-  if (!context) return;
-  context.scale(ratio, ratio);
+  const frame = frameCanvas(map, canvas);
+  if (!frame) return;
+  const { context, toCanvas } = frame;
   const path = new Path2D();
   for (const ring of rings) {
     for (const [index, position] of ring.entries()) {
-      const point = map.latLngToContainerPoint(position);
+      const point = toCanvas(position);
       if (index) path.lineTo(point.x, point.y);
       else path.moveTo(point.x, point.y);
     }

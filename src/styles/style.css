@@ -8559,3 +8559,25 @@ html:not([data-theme='night'])
   border-radius: 4px;
   line-height: 1.2;
 }
+/* Boussole de la carte : nord en haut ou cap en haut */
+.map-compass {
+  position: absolute;
+  top: calc(var(--topbar-h, 70px) + 10px);
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--surface, #fff);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.map-compass.course-up {
+  outline: 3px solid #d00000;
+  outline-offset: -3px;
+}
+.map-compass svg {
+  transition: transform 0.3s;
+}

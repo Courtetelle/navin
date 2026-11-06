@@ -5,6 +5,7 @@ import { state } from '../../state/index.ts';
 
 import type { LatLngPair } from './constants.ts';
 import { leaflet } from './leaflet.ts';
+import { mapBearing, orientMap } from './mapOrientation.ts';
 import { currentTrack } from './trackStats.ts';
 import { updateTrkDash } from './trackerDash.ts';
 
@@ -104,16 +105,8 @@ export function trkFix(fix: TrackerFix): void {
       }),
     }).addTo(map);
   }
-  const arrow = handle.me.getElement()?.firstElementChild as HTMLElement | null;
-  const course = fix.cog;
-  if (
-    arrow &&
-    course !== null &&
-    course !== undefined &&
-    !Number.isNaN(course)
-  ) {
-    arrow.style.transform = `rotate(${Math.round(course)}deg)`;
-  }
+  orientMap(map, fix.cog, fix.sog);
+  trkShowCourse(fix.cog);
   if (handle.follow) {
     if (map.getZoom() < 13) map.setView(position, 15);
     else map.panTo(position, { animate: true });
@@ -121,6 +114,27 @@ export function trkFix(fix: TrackerFix): void {
   handle.lastSog = fix.sog ?? null;
   handle.lastCog = fix.cog ?? null;
   updateTrkDash();
+}
+
+/**
+ * Turn the boat to its course, as it appears on the screen.
+ * @param course - Course of the boat (degrees), if known.
+ */
+export function trkShowCourse(course: number | null | undefined): void {
+  const handle = tracker.current;
+  const arrow = handle?.me?.getElement()
+    ?.firstElementChild as HTMLElement | null;
+  if (
+    !handle?.map ||
+    !arrow ||
+    course === null ||
+    course === undefined ||
+    Number.isNaN(course)
+  ) {
+    return;
+  }
+  const angle = Math.round(course + mapBearing(handle.map)) % 360;
+  arrow.style.transform = `rotate(${angle}deg)`;
 }
 
 /** Called at every point of the automatic log (legacy `trackerTick`). */

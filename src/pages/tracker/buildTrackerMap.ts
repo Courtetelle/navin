@@ -15,6 +15,10 @@ import { createMap, leaflet } from '../../features/map/leaflet.ts';
 import { addFullscreenControl } from '../../features/map/mapControls.ts';
 import { whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
+import {
+  TURNING_MAP_OPTIONS,
+  addOrientationControl,
+} from '../../features/map/mapOrientation.ts';
 import { setMapWatch } from '../../features/map/mapWatch.ts';
 import { swissWhenOffline } from '../../features/map/offlineBase.ts';
 import { simChartWire, simSeaMode } from '../../features/map/simChart.ts';
@@ -43,7 +47,11 @@ const KNOTS_PER_METRE_SECOND = 1.943_844;
  */
 export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   const L = leaflet();
-  const map = createMap(box, { zoomControl: true, tap: true } as MapOptions);
+  const map = createMap(box, {
+    ...TURNING_MAP_OPTIONS,
+    zoomControl: true,
+    tap: true,
+  } as MapOptions);
   handle.map = map;
   setShownMap(map);
   const tiles = { maxZoom: 19, maxNativeZoom: 18 };
@@ -93,6 +101,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   }
   simChartWire(map, layers, [swiss, osm, zoneBase]);
   addFullscreenControl(map);
+  addOrientationControl(map);
   setFollow(!(simulatedSea && !here));
   let loaded = 0;
   let errors = 0;

@@ -31,10 +31,13 @@ export function loadLeaflet(): Promise<LeafletLibrary> {
     import('leaflet'),
     import('leaflet/dist/leaflet.css?inline'),
   ])
-    .then(([{ default: loaded }, { default: css }]) => {
+    .then(async ([{ default: loaded }, { default: css }]) => {
       const style = document.createElement('style');
       style.textContent = css;
       document.head.append(style);
+      // The rotation of the map extends the global Leaflet.
+      (globalThis as { L?: LeafletLibrary }).L = loaded;
+      await import('leaflet-rotate');
       library = loaded;
       return loaded;
     })

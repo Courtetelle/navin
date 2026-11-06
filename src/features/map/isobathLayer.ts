@@ -10,6 +10,8 @@ import { escapeHtml } from './escapeHtml.ts';
 import type { IsobathLine } from './isobath.ts';
 import { estimateDepth, nearDepths } from './isobath.ts';
 import { leaflet } from './leaflet.ts';
+import { mapBearing } from './mapOrientation.ts';
+import { frameCanvas } from './overlayCanvas.ts';
 
 /** Width and colour of a line. */
 function lineStyle(depth: number): { color: string; width: number } {
@@ -69,18 +71,11 @@ function drawLines(
   canvas: HTMLCanvasElement,
   lines: readonly IsobathLine[],
 ): void {
-  const L = leaflet();
-  const size = map.getSize();
-  const ratio = globalThis.devicePixelRatio || 1;
-  L.DomUtil.setPosition(canvas, map.containerPointToLayerPoint([0, 0]));
-  canvas.width = size.x * ratio;
-  canvas.height = size.y * ratio;
-  canvas.style.width = `${size.x}px`;
-  canvas.style.height = `${size.y}px`;
-  const context = canvas.getContext('2d');
-  if (!context) return;
-  context.scale(ratio, ratio);
-  const bounds = map.getBounds().pad(0.1);
+  const frame = frameCanvas(map, canvas);
+  if (!frame) return;
+  const { context, side, toCanvas } = frame;
+  // Wide enough for the corners of a map turned.
+  const bounds = map.getBounds().pad(0.6);
   const zoom = map.getZoom();
   const step = lineStep(zoom);
   const south = bounds.getSouth();
@@ -106,7 +101,7 @@ function drawLines(
     context.lineWidth = style.width;
     context.beginPath();
     for (const [index, position] of line.pts.entries()) {
-      const point = map.latLngToContainerPoint(position);
+      const point = toCanvas(position);
       if (index) context.lineTo(point.x, point.y);
       else context.moveTo(point.x, point.y);
     }
@@ -115,18 +110,19 @@ function drawLines(
     if (labelled && line.pts.length > 3) {
       const middle = line.pts[Math.floor(line.pts.length / 2)];
       if (!middle) continue;
-      const point = map.latLngToContainerPoint(middle);
-      if (point.x > 0 && point.y > 0 && point.x < size.x && point.y < size.y) {
+      const point = toCanvas(middle);
+      if (point.x > 0 && point.y > 0 && point.x < side && point.y < side) {
         labels.push([point, line.d]);
       }
     }
   }
-  drawLabels(context, labels);
+  drawLabels(context, labels, mapBearing(map));
 }
 
 function drawLabels(
   context: CanvasRenderingContext2D,
   labels: ReadonlyArray<[Point, number]>,
+  bearing: number,
 ): void {
   context.font = '600 11px system-ui, sans-serif';
   context.textAlign = 'center';
@@ -139,11 +135,16 @@ function drawLabels(
     );
     if (crowded) continue;
     placed.push(point);
+    // Upright on the screen, whichever way the map is turned.
+    context.save();
+    context.translate(point.x, point.y);
+    context.rotate((-bearing * Math.PI) / 180);
     context.lineWidth = 3;
     context.strokeStyle = 'rgba(255,255,255,0.9)';
-    context.strokeText(`${depth} m`, point.x, point.y);
+    context.strokeText(`${depth} m`, 0, 0);
     context.fillStyle = depth <= 3 ? '#b03000' : '#003c8c';
-    context.fillText(`${depth} m`, point.x, point.y);
+    context.fillText(`${depth} m`, 0, 0);
+    context.restore();
   }
 }
 
