@@ -75,7 +75,7 @@ export function Fiche({ id }: FicheProps) {
     if (!reading) return;
     const target = event.target as Element;
     if (!target.closest('.cf') || target.closest('.contact-on')) return;
-    toast('Touchez « Modifier » en haut pour changer la fiche');
+    toast('Touchez le crayon en haut pour changer la fiche');
   };
   const holdContacts = (event: PointerEvent) => {
     // A long press would open a phone or mail field of a read-only card.

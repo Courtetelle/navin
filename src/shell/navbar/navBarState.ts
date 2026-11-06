@@ -51,7 +51,7 @@ export const backTargets = signal<
 >([]);
 /** Page « Valider » buttons, moved up into the green ✔ (nav.js:1252). */
 export const validateTargets = signal<readonly NavTarget[]>([]);
-/** A page read-only until edited: the green ✔ becomes « Modifier » and runs this. */
+/** A page read-only until edited: the green ✔ becomes a pencil and runs this. */
 export const navEdit = signal<(() => void) | null>(null);
 /** Number of mounted pages declaring form fields (the green ✔ appears, nav.js:1255). */
 export const fieldOwners = signal(0);

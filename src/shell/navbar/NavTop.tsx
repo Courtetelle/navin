@@ -47,6 +47,17 @@ const sticky = signal<StickyNav>({
   lineHidden: true,
 });
 
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="32" height="32" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M3 21l1.2-5.2L15.6 4.4a2 2 0 0 1 2.8 0l1.2 1.2a2 2 0 0 1 0 2.8L8.2 19.8 3 21zm3-4.2-.5 2.7 2.7-.5L17.6 9.6l-2.2-2.2L6 16.8z"
+      />
+    </svg>
+  );
+}
+
 /**
  * The nav bar under the top bar (`#navtop`, nav.js:10-96 and 1242-1336):
  * « ◀ Retour » (the page's own back button or the history), the PréP pills and
@@ -141,7 +152,7 @@ export function NavTop() {
           navOk();
         }}
       >
-        {navEdit.value ? tr('✎ Modifier') : '✔'}
+        {navEdit.value ? <PencilIcon /> : '✔'}
       </Button>
       <Button
         className={exitHold.holding ? 'btn holding' : 'btn'}
