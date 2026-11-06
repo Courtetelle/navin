@@ -1,11 +1,19 @@
-import type { Circle, Map as LeafletMap, Marker, Polyline } from 'leaflet';
+import type {
+  Circle,
+  LatLng,
+  Map as LeafletMap,
+  Marker,
+  Polyline,
+} from 'leaflet';
 
 import { fmtTime } from '../../lib/format.ts';
 import { state } from '../../state/index.ts';
 
+import { glideBoat, stopGlide } from './boatFollow.ts';
 import type { LatLngPair } from './constants.ts';
 import { leaflet } from './leaflet.ts';
 import { mapBearing, orientMap } from './mapOrientation.ts';
+import { smoothLine } from './smoothLine.ts';
 import { currentTrack } from './trackStats.ts';
 import { updateTrkDash } from './trackerDash.ts';
 
@@ -18,6 +26,10 @@ export interface TrackerHandle {
   map: LeafletMap | null;
   /** Line of the recording in progress. */
   live: Polyline | null;
+  /** Points of the recording drawn on `live`. */
+  drawnPoints: number;
+  /** From the last recorded point to the boat. */
+  tail: Polyline | null;
   /** Boat arrow. */
   me: Marker | null;
   /** Accuracy circle. */
@@ -65,6 +77,8 @@ export function newTracker(): TrackerHandle {
   return {
     map: null,
     live: null,
+    drawnPoints: -1,
+    tail: null,
     me: null,
     acc: null,
     follow: true,
@@ -85,9 +99,8 @@ export function trkFix(fix: TrackerFix): void {
   if (!handle || !map || state.view.currentView.value !== 'tracker') return;
   const L = leaflet();
   const position: LatLngPair = [fix.lat, fix.lon];
+  const known = handle.me && handle.acc ? handle.me.getLatLng() : null;
   if (handle.me && handle.acc) {
-    handle.me.setLatLng(position);
-    handle.acc.setLatLng(position);
     if (fix.acc) handle.acc.setRadius(fix.acc);
   } else {
     handle.acc = L.circle(position, {
@@ -105,15 +118,38 @@ export function trkFix(fix: TrackerFix): void {
       }),
     }).addTo(map);
   }
-  orientMap(map, fix.cog, fix.sog);
-  trkShowCourse(fix.cog);
-  if (handle.follow) {
-    if (map.getZoom() < 13) map.setView(position, 15);
-    else map.panTo(position, { animate: true });
+  const target = L.latLng(position);
+  const tooFar = handle.follow && !map.getBounds().contains(target);
+  if (known && map.getZoom() >= 13 && !tooFar) {
+    glideBoat(
+      {
+        map,
+        place: (at) => placeBoat(handle, at),
+        turnBoat: trkShowCourse,
+        follows: () => handle.follow,
+      },
+      { from: known, to: target, course: fix.cog, speed: fix.sog },
+    );
+  } else {
+    stopGlide();
+    placeBoat(handle, target);
+    orientMap(map, fix.cog, fix.sog);
+    trkShowCourse(fix.cog);
+    if (handle.follow) {
+      const zoom = map.getZoom() < 13 ? 15 : map.getZoom();
+      map.setView(position, zoom, { animate: false });
+    }
   }
   handle.lastSog = fix.sog ?? null;
   handle.lastCog = fix.cog ?? null;
   updateTrkDash();
+}
+
+function placeBoat(handle: TrackerHandle, position: LatLng): void {
+  handle.me?.setLatLng(position);
+  handle.acc?.setLatLng(position);
+  const last = state.view.tracking.peek() ? currentTrack().at(-1) : undefined;
+  handle.tail?.setLatLngs(last ? [[last[1], last[2]], position] : []);
 }
 
 /**
@@ -141,15 +177,20 @@ export function trkShowCourse(course: number | null | undefined): void {
 export function trackerTick(): void {
   const handle = tracker.current;
   if (!handle || state.view.currentView.value !== 'tracker') return;
-  handle.live?.setLatLngs(currentTrackLine());
+  const line = currentTrackLine();
+  if (line.length !== handle.drawnPoints) {
+    handle.drawnPoints = line.length;
+    handle.live?.setLatLngs(smoothLine(line));
+  }
   const fix = state.view.lastFix.value;
   if (fix) {
+    // The course of this GPS point: the one of the detector covers many metres.
     const detector = state.view.trip.value?.det;
     trkFix({
       lat: fix.lat,
       lon: fix.lon,
-      sog: detector?.lastSog as number | null | undefined,
-      cog: detector?.lastCog as number | null | undefined,
+      sog: (fix.sog ?? detector?.lastSog) as number | null | undefined,
+      cog: (fix.cog ?? detector?.lastCog) as number | null | undefined,
     });
   } else {
     updateTrkDash();
@@ -188,6 +229,8 @@ export function trkReset(): void {
   handle.lastCog = null;
   simulatedPins.length = 0;
   handle.live?.setLatLngs([]);
+  handle.tail?.setLatLngs([]);
+  handle.drawnPoints = -1;
 }
 
 /**

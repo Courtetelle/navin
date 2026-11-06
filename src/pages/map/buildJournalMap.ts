@@ -20,6 +20,7 @@ import {
 } from '../../features/map/mapData.ts';
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
+import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
 import { isLake } from '../../state/index.ts';
 
@@ -106,7 +107,11 @@ export function buildJournalMap(
   addFullscreenControl(map);
   const points: LatLngExpression[] = [];
   for (const part of segments(data.line)) {
-    L.polyline(part, { color: '#d00000', weight: 5, opacity: 0.85 }).addTo(map);
+    L.polyline(smoothLine(part), {
+      color: '#d00000',
+      weight: 5,
+      opacity: 0.85,
+    }).addTo(map);
     for (const point of part) points.push(point);
   }
   for (const entry of data.ents) {

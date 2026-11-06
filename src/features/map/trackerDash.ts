@@ -68,8 +68,8 @@ export function updateTrkDash(): void {
   const handle = tracker.current;
   const span = stats.start && stats.end ? stats.end - stats.start : 0;
   trackerDash.value = trackerDashTexts({
-    sog: recording ? (recording.det.lastSog as number) : handle?.lastSog,
-    cog: recording ? (recording.det.lastCog as number) : handle?.lastCog,
+    sog: handle?.lastSog ?? (recording?.det.lastSog as number | undefined),
+    cog: handle?.lastCog ?? (recording?.det.lastCog as number | undefined),
     distance: recording ? (recording.det.dist as number) : stats.nm,
     duration: recording ? Date.now() - recording.start : span,
     top: stats.max,

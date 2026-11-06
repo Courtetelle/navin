@@ -1,4 +1,9 @@
-import type { LatLngExpression, Map as LeafletMap, Point } from 'leaflet';
+import type {
+  LatLng,
+  LatLngExpression,
+  Map as LeafletMap,
+  Point,
+} from 'leaflet';
 
 import { leaflet } from './leaflet.ts';
 
@@ -9,6 +14,46 @@ export interface CanvasFrame {
   side: number;
   /** A position in pixels of the canvas. */
   toCanvas: (position: LatLngExpression) => Point;
+}
+
+/** Spare pixels around the map, so that a slow boat does not redraw it all. */
+const MARGIN_PX = 96;
+
+/** What a canvas was drawn for. */
+interface Drawn {
+  zoom: number;
+  width: number;
+  height: number;
+  anchor: LatLng;
+  anchorPoint: Point;
+}
+
+const drawnFor = new WeakMap<HTMLCanvasElement, Drawn>();
+
+/**
+ * Whether a canvas must be drawn again: not while the map only moved a little.
+ * @param map - Leaflet map.
+ * @param canvas - The canvas.
+ * @returns The drawing no longer fits the map.
+ */
+export function canvasOutdated(
+  map: LeafletMap,
+  canvas: HTMLCanvasElement,
+): boolean {
+  const drawn = drawnFor.get(canvas);
+  if (!drawn) return true;
+  const size = map.getSize();
+  if (
+    drawn.zoom !== map.getZoom() ||
+    drawn.width !== size.x ||
+    drawn.height !== size.y
+  ) {
+    return true;
+  }
+  const point = map.latLngToLayerPoint(drawn.anchor);
+  if (point.distanceTo(drawn.anchorPoint) > 0.5) return true;
+  const center = map.latLngToLayerPoint(map.getCenter());
+  return center.distanceTo(point) > MARGIN_PX / 2;
 }
 
 /**
@@ -23,17 +68,23 @@ export function frameCanvas(
   canvas: HTMLCanvasElement,
 ): CanvasFrame | null {
   const size = map.getSize();
-  const side = Math.ceil(Math.hypot(size.x, size.y));
-  const origin = map
-    .latLngToLayerPoint(map.getCenter())
-    .subtract([side / 2, side / 2])
-    .round();
+  const side = Math.ceil(Math.hypot(size.x, size.y)) + MARGIN_PX;
+  const anchor = map.getCenter();
+  const anchorPoint = map.latLngToLayerPoint(anchor);
+  const origin = anchorPoint.subtract([side / 2, side / 2]).round();
   const ratio = globalThis.devicePixelRatio || 1;
   leaflet().DomUtil.setPosition(canvas, origin);
   canvas.width = side * ratio;
   canvas.height = side * ratio;
   canvas.style.width = `${side}px`;
   canvas.style.height = `${side}px`;
+  drawnFor.set(canvas, {
+    zoom: map.getZoom(),
+    width: size.x,
+    height: size.y,
+    anchor,
+    anchorPoint,
+  });
   const context = canvas.getContext('2d');
   if (!context) return null;
   context.scale(ratio, ratio);

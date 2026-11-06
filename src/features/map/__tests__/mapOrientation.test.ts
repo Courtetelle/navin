@@ -23,8 +23,8 @@ test('a course without a known speed still counts', () => {
 });
 
 test('a small change of course does not turn the map, even across north', () => {
-  expect(bearingFor('course', 300, 62, 5)).toBeNull();
-  expect(bearingFor('course', 359, 2, 5)).toBeNull();
+  expect(bearingFor('course', 300, 60.5, 5)).toBeNull();
+  expect(bearingFor('course', 359, 1.5, 5)).toBeNull();
   expect(bearingFor('course', 300, 70, 5)).toBe(290);
 });
 

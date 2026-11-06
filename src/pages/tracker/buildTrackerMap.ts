@@ -1,6 +1,7 @@
 import type { MapOptions } from 'leaflet';
 
 import { addLemanVector } from '../../features/map/addLemanVector.ts';
+import { keepBoatCentred } from '../../features/map/boatFollow.ts';
 import type { LatLngPair } from '../../features/map/constants.ts';
 import {
   LEMAN_CENTER,
@@ -22,6 +23,7 @@ import {
 } from '../../features/map/mapOrientation.ts';
 import { setMapWatch } from '../../features/map/mapWatch.ts';
 import { showPendingPlace } from '../../features/map/placeTarget.ts';
+import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
 import {
   drawTrace,
@@ -93,6 +95,9 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   keepTilesFilled(map, [osm, swiss]);
   addFullscreenControl(map);
   startOrientation(map);
+  keepBoatCentred(map, () =>
+    handle.follow && handle.me ? handle.me.getLatLng() : null,
+  );
   setFollow(!(simulatedSea && !here));
   // Moving the map stops following the boat; the blue arrow brings it back.
   map.on('dragstart', () => setFollow(false));
@@ -102,10 +107,15 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     opacity: 0.9,
   }).addTo(map);
   handle.live = live;
+  handle.tail = L.polyline([], {
+    color: '#d00000',
+    weight: 5,
+    opacity: 0.9,
+  }).addTo(map);
   const track = currentTrackLine();
   trkDrawPins();
   if (track.length > 1) {
-    live.setLatLngs(track);
+    live.setLatLngs(smoothLine(track));
     map.fitBounds(live.getBounds(), { padding: [30, 30], maxZoom: 15 });
   } else if (here) {
     map.setView(here, 14);

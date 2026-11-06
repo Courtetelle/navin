@@ -232,6 +232,6 @@ function startWatch(): void {
       toast('📍 Localisation refusée : trace impossible');
       drawTrkButtons();
     },
-    { enableHighAccuracy: true, maximumAge: 5000, timeout: 60_000 },
+    { enableHighAccuracy: true, maximumAge: 0, timeout: 60_000 },
   );
 }

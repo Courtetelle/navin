@@ -38,6 +38,8 @@ test('the first fix writes the departure, the next ones the track', async () => 
   expect(state.view.toast.value?.message).toBe('🛰 Départ enregistré');
   expect(trip().dep?.kind).toBe('Départ');
   expect(state.view.lastFix.value).toStrictEqual({
+    cog: 222,
+    sog: 5.1,
     lat: 46.5,
     lon: 6.6,
     at: new Date(NOW).toISOString(),

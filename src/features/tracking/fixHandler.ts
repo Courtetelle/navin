@@ -2,7 +2,7 @@ import { batch } from '@preact/signals-react';
 
 import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtTime, fr, uid } from '../../lib/format.ts';
-import { distNM } from '../../lib/geo.ts';
+import { angDiff, distNM } from '../../lib/geo.ts';
 import type { TrackPoint } from '../../state/index.ts';
 import {
   addEntry,
@@ -37,7 +37,12 @@ export interface FixInput {
 const GAP_MS = 3 * 60_000;
 const MIN_ACCURACY_M = 60;
 const SAMPLE_SPACING_MS = 10_000;
+/** In a turn, a point as soon as the course changed by this much. */
+const TURN_POINT_DEG = 8;
+const TURN_SPACING_MS = 2000;
 const { view } = state;
+/** Course at the last point of the track. */
+let lastPointCog: number | null = null;
 
 /**
  * Handle one position (legacy `onFix`): track point, gap note, detector,
@@ -57,6 +62,8 @@ export function onFix(fix: FixInput): void {
       lat: sample.lat,
       lon: sample.lon,
       at: new Date(sample.t).toISOString(),
+      ...(sample.cog === null ? {} : { cog: sample.cog }),
+      ...(sample.sog === null ? {} : { sog: sample.sog }),
     };
     recordSample(trip, buffer, sample);
     const events = detectorPush(trip.det, sample);
@@ -106,7 +113,15 @@ function recordSample(
   if (last && trip.det.lastPt && sample.t - last[0] > GAP_MS) {
     noteGap(trip, last, sample);
   }
-  if (last && sample.t - last[0] < SAMPLE_SPACING_MS) return;
+  if (last && sample.t - last[0] < SAMPLE_SPACING_MS) {
+    const turning =
+      sample.cog != null &&
+      lastPointCog !== null &&
+      sample.t - last[0] >= TURN_SPACING_MS &&
+      angDiff(sample.cog, lastPointCog) >= TURN_POINT_DEG;
+    if (!turning) return;
+  }
+  lastPointCog = sample.cog ?? lastPointCog;
   const point: TrackPoint = [
     sample.t,
     Math.round(sample.lat * 1e6) / 1e6,

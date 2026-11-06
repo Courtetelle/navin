@@ -4,7 +4,7 @@ import { rad } from '../../lib/geo.ts';
 
 import type { LatLngPair } from './constants.ts';
 import { leaflet } from './leaflet.ts';
-import { frameCanvas } from './overlayCanvas.ts';
+import { canvasOutdated, frameCanvas } from './overlayCanvas.ts';
 import { inShore, shoreDist, zonePopupHtml } from './shore.ts';
 
 /**
@@ -36,7 +36,9 @@ export function newShoreBands(rings: readonly LatLngPair[][]): Layer {
     }
 
     private readonly redraw = (): void => {
-      if (this.canvas) drawBands(this._map, this.canvas, rings);
+      if (this.canvas && canvasOutdated(this._map, this.canvas)) {
+        drawBands(this._map, this.canvas, rings);
+      }
     };
 
     private readonly onTap = (event: LeafletMouseEvent): void => {

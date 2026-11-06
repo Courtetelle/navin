@@ -11,7 +11,7 @@ import type { IsobathLine } from './isobath.ts';
 import { estimateDepth, nearDepths } from './isobath.ts';
 import { leaflet } from './leaflet.ts';
 import { mapBearing } from './mapOrientation.ts';
-import { frameCanvas } from './overlayCanvas.ts';
+import { canvasOutdated, frameCanvas } from './overlayCanvas.ts';
 
 /** Width and colour of a line. */
 function lineStyle(depth: number): { color: string; width: number } {
@@ -56,7 +56,9 @@ export function newIsobathLayer(lines: readonly IsobathLine[]): Layer {
     }
 
     private readonly redraw = (): void => {
-      if (this.canvas) drawLines(this._map, this.canvas, lines);
+      if (this.canvas && canvasOutdated(this._map, this.canvas)) {
+        drawLines(this._map, this.canvas, lines);
+      }
     };
 
     private readonly onTap = (event: LeafletMouseEvent): void => {

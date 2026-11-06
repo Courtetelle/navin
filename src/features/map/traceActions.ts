@@ -3,6 +3,7 @@ import { deliver, state, toast, trackToGpx } from '../../state/index.ts';
 
 import type { LatLngPair } from './constants.ts';
 import { leaflet } from './leaflet.ts';
+import { smoothLine } from './smoothLine.ts';
 import type { LakeTrack } from './trackStats.ts';
 import { allLakeTracks } from './trackStats.ts';
 import { setFollow, tracker } from './trackerState.ts';
@@ -62,7 +63,7 @@ export function drawTrace(track: LakeTrack): void {
   const line: LatLngPair[] = [];
   for (const [, lat, lon] of track.track) line.push([lat, lon]);
   const others = leaflet()
-    .polyline(line, { color: '#7b2cbf', weight: 4, opacity: 0.85 })
+    .polyline(smoothLine(line), { color: '#7b2cbf', weight: 4, opacity: 0.85 })
     .addTo(map);
   handle.others = others;
   setFollow(false);
