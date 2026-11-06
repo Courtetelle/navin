@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
 
+import { distNM } from '../../../lib/geo.ts';
 import { inFrenchLeman } from '../../../model/contacts.ts';
 import {
   LEMAN_FRENCH_MARKS,
@@ -23,24 +24,35 @@ function onAxis(ratio: number): { lat: number; lon: number } {
   };
 }
 
-test('on an axis the distance starts from the shore of the waters', () => {
+const kmPerLon = (lat: number) => 111.32 * Math.cos((lat * Math.PI) / 180);
+
+test('on an alignment the distance starts from the shore of the waters', () => {
   const french = onAxis(0.75);
   expect(inFrenchLeman(french)).toBe(true);
-  expect(sosPlaceWords(french)).toBe(
-    'Sur l’axe Évian – Ouchy, à 3 km d’Évian · eaux françaises',
+  expect(sosPlaceWords(french)).toMatch(
+    /^Nous nous situons sur l’alignement entre Évian et Ouchy, à \d,\d km de distance d’Évian · eaux françaises$/u,
   );
   const swiss = onAxis(0.3);
   expect(inFrenchLeman(swiss)).toBe(false);
-  expect(sosPlaceWords(swiss)).toBe(
-    'Sur l’axe Ouchy – Évian, à 3,6 km d’Ouchy · eaux suisses',
+  expect(sosPlaceWords(swiss)).toMatch(
+    /^Nous nous situons sur l’alignement entre Ouchy et Évian, à \d,\d km de distance d’Ouchy · eaux suisses$/u,
   );
 });
 
-test('off the axis it says the side, then the distance in brackets', () => {
+test('off the alignment it says how far and on which side first', () => {
   const { lat, lon } = onAxis(0.75);
-  const west = lon - 0.8 / (111.32 * Math.cos((lat * Math.PI) / 180));
+  const west = lon - 0.8 / kmPerLon(lat);
   expect(sosPlaceWords({ lat, lon: west })).toMatch(
-    /^Sur l’axe .+ – .+, à .+, mais plus à l’(?:est|ouest) \(\d+ m\) · eaux françaises$/u,
+    /^Nous nous situons \d+ m à l’(?:est|ouest) de l’alignement entre .+ et .+, à .+ de distance .+ · eaux françaises$/u,
+  );
+});
+
+test('the distance to the place is the true one, not along the alignment', () => {
+  const { lat, lon } = onAxis(0.75);
+  const away = { lat, lon: lon - 0.8 / kmPerLon(lat) };
+  const km = distNM(away, { lat: EVIAN[0], lon: EVIAN[1] }) * 1.852;
+  expect(sosPlaceWords(away)).toContain(
+    `à ${km.toFixed(1).replace('.', ',')} km de distance d’Évian`,
   );
 });
 

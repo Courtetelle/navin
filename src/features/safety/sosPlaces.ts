@@ -92,7 +92,6 @@ function lemanLineWords(position: LatLon): string {
     second: string;
     along: number;
     distance: number;
-    length: number;
     side: string;
   } | null = null;
   for (const [first, second] of LEMAN_LINES) {
@@ -117,8 +116,7 @@ function lemanLineWords(position: LatLon): string {
         second,
         along,
         distance,
-        length: Math.sqrt(squared),
-        side: pointX - along * lineX > 0 ? 'est' : 'ouest',
+        side: sideOf(pointX - along * lineX, pointY - along * lineY),
       };
     }
   }
@@ -132,15 +130,33 @@ function lemanLineWords(position: LatLon): string {
     firstAtHome === secondAtHome ? best.along <= 0.5 : firstAtHome;
   const home = fromFirst ? best.first : best.second;
   const other = fromFirst ? best.second : best.first;
-  const fromHome = (fromFirst ? best.along : 1 - best.along) * best.length;
+  const fromHome = distNM(position, placeOf(home)) * 1.852;
   const offset =
     best.distance < 1
       ? `${Math.round(best.distance * 10) * 100} m`
       : `${kmWord(best.distance)} km`;
-  const side =
-    best.distance > 0.3 ? `, mais plus à l’${best.side} (${offset})` : '';
-  const along = fromHome < 0.3 ? 'moins de 300 m' : `${kmWord(fromHome)} km`;
-  return `sur l’axe ${home} – ${other}, à ${along} ${ofPlace(home)}${side}`;
+  const where =
+    Math.round(best.distance * 10) === 0
+      ? 'sur'
+      : `${offset} ${best.side} de`;
+  return `Nous nous situons ${where} l’alignement entre ${home} et ${other}, à ${exactDistance(fromHome)} de distance ${ofPlace(home)}`;
+}
+
+function placeOf(name: string): LatLon {
+  const [lat, lon] = LEMAN_MARKS[name] as readonly [number, number];
+  return { lat, lon };
+}
+
+function sideOf(east: number, north: number): string {
+  if (Math.abs(east) >= Math.abs(north)) {
+    return east > 0 ? 'à l’est' : 'à l’ouest';
+  }
+  return north > 0 ? 'au nord' : 'au sud';
+}
+
+function exactDistance(km: number): string {
+  if (km < 1) return `${Math.round(km * 100) * 10} m`;
+  return `${km.toFixed(1).replace('.', ',')} km`;
 }
 
 function sosZoneWords(position: LatLon): string | null {
@@ -152,7 +168,7 @@ function sosZoneWords(position: LatLon): string | null {
   ) {
     const waters = inFrenchLeman(position) ? 'eaux françaises' : 'eaux suisses';
     const line = lemanLineWords(position);
-    if (line) return `${line[0]?.toUpperCase()}${line.slice(1)} · ${waters}`;
+    if (line) return `${line} · ${waters}`;
     const nearest = nearestMark(marksOfWaters(position), position);
     const km = nearest.nm * 1.852;
     const distance = km < 0.3 ? 'moins de 300 m' : `environ ${kmWord(km)} km`;
