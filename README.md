@@ -26,16 +26,17 @@ Then open <http://localhost:11106/>. The page reloads by itself each time you sa
 
 ## Everyday commands
 
-| Command                                       | What it does                                                     |
-| --------------------------------------------- | ---------------------------------------------------------------- |
-| `npm run dev`                                 | Starts the development server on <http://localhost:11106/>       |
-| `npm run build`                               | Builds the production site into `dist/`                          |
-| `npm run preview`                             | Serves `dist/` on <http://localhost:11105/>                      |
-| `npm run test`                                | Runs everything: tests with coverage, types, ESLint and Prettier |
-| `npm run test-only`                           | Runs the tests with coverage                                     |
-| `npm run check-types`                         | Checks the TypeScript types                                      |
-| `npm run eslint` / `npm run eslint-fix`       | Checks the code / fixes what can be fixed automatically          |
-| `npm run prettier` / `npm run prettier-write` | Checks the formatting / reformats the files                      |
+| Command                                       | What it does                                                                                   |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run dev`                                 | Starts the development server on <http://localhost:11106/>                                     |
+| `npm run build`                               | Builds the production site into `dist/`                                                        |
+| `npm run preview`                             | Serves `dist/` on <http://localhost:11105/>                                                    |
+| `npm run test`                                | Runs everything: tests with coverage, types, ESLint and Prettier                               |
+| `npm run test-only`                           | Runs the tests with coverage                                                                   |
+| `npm run smoke`                               | Drives the built app in Chrome, by day and night (needs `npm run build` and `npm run preview`) |
+| `npm run check-types`                         | Checks the TypeScript types                                                                    |
+| `npm run eslint` / `npm run eslint-fix`       | Checks the code / fixes what can be fixed automatically                                        |
+| `npm run prettier` / `npm run prettier-write` | Checks the formatting / reformats the files                                                    |
 
 To run some tests only, use `npx vitest run src/lib`. To re-run them on each change, use `npx vitest`.
 

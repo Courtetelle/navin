@@ -12,6 +12,7 @@
     "eslint-fix": "eslint . --fix",
     "prettier": "prettier --check .",
     "prettier-write": "prettier --write .",
+    "smoke": "node scripts/smoke/smoke.ts",
     "preview": "vite preview",
     "test": "npm run test-only && npm run check-types && npm run eslint && npm run prettier",
     "test-only": "vitest run --coverage"

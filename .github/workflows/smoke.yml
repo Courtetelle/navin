@@ -1,0 +1,30 @@
+name: Smoke test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Start the built site
+        run: |
+          npm run preview &
+          for attempt in $(seq 1 30); do
+            curl -sf http://localhost:11105/ > /dev/null && exit 0
+            sleep 1
+          done
+          echo "The preview server did not start" >&2
+          exit 1
+      - run: npm run smoke
