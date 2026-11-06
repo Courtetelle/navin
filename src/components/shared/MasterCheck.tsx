@@ -1,5 +1,8 @@
 import type { MouseEvent } from 'react';
 
+import { useTr } from '../../i18n/useTr.ts';
+
+import { Button } from './Button.tsx';
 import { masterState } from './masterState.ts';
 
 /** Props of {@link MasterCheck}. */
@@ -26,10 +29,11 @@ export function MasterCheck({
   attribute,
   onClick,
 }: MasterCheckProps) {
+  const tr = useTr();
   const state = masterState(checked, total);
   const data = { [attribute]: '1' };
   return (
-    <button
+    <Button
       type="button"
       className={`btn check ck-master ${state}`}
       {...data}
@@ -38,7 +42,8 @@ export function MasterCheck({
       <span className="box">
         {state === 'on' ? '✔' : state === 'part' ? '–' : ''}
       </span>
-      Tout<small>{`${checked} / ${total}`}</small>
-    </button>
+      {tr('Tout')}
+      <small>{`${checked} / ${total}`}</small>
+    </Button>
   );
 }

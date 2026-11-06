@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Button } from '../../../components/shared/Button.tsx';
 import { useTr } from '../../../i18n/useTr.ts';
 import { buzz } from '../../../lib/dom.ts';
+import { keyedItems } from '../../../lib/keyedItems.ts';
 import { PageBack } from '../../../shell/navbar/PageBack.tsx';
 
 /** Props of {@link PickCrew}. */
@@ -23,10 +24,10 @@ export interface PickCrewProps {
 export function PickCrew({ crew, onPick, onBack }: PickCrewProps) {
   const tr = useTr();
   const buttons: ReactNode[] = [];
-  for (const [index, name] of crew.entries()) {
+  for (const { key, item: name, index } of keyedItems(crew, (line) => line)) {
     buttons.push(
       <Button
-        key={index}
+        key={key}
         className="btn"
         data-c={index}
         onClick={() => {

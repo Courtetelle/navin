@@ -42,21 +42,20 @@ export function TidesField({ field }: { field: FieldDefinition }) {
   return (
     <Cell field={field} wide>
       <div className="tides">
-        {rows.map((row, index) => (
-          // The four lines never move: the position is their identity.
-          // eslint-disable-next-line react/no-array-index-key
-          <div key={index} className="tide" data-i={index}>
+        {[...rows.keys()].map((line) => (
+          <div key={line} className="tide" data-i={line}>
             <div className="chips small">
               {['PM', 'BM'].map((type) => (
                 <Button
                   key={type}
                   choice
-                  className={row.type === type ? 'btn on' : 'btn'}
+                  className={rows[line]?.type === type ? 'btn on' : 'btn'}
                   data-tt={type}
                   onClick={(event: MouseEvent) => {
                     event.preventDefault();
                     buzz();
-                    change(index, { type: row.type === type ? '' : type });
+                    const same = rows[line]?.type === type;
+                    change(line, { type: same ? '' : type });
                   }}
                 >
                   {tr(type)}
@@ -67,9 +66,9 @@ export function TidesField({ field }: { field: FieldDefinition }) {
               className="text"
               type="time"
               data-tf="h"
-              value={row.h ?? ''}
+              value={rows[line]?.h ?? ''}
               aria-label="Heure"
-              onChange={(event) => change(index, { h: event.target.value })}
+              onChange={(event) => change(line, { h: event.target.value })}
             />
             <MarqueeInput
               className="text"
@@ -77,9 +76,9 @@ export function TidesField({ field }: { field: FieldDefinition }) {
               inputMode="decimal"
               data-tf="m"
               placeholder={tr.placeholder('haut. m')}
-              value={row.m ?? ''}
+              value={rows[line]?.m ?? ''}
               aria-label="Hauteur"
-              onChange={(event) => change(index, { m: event.target.value })}
+              onChange={(event) => change(line, { m: event.target.value })}
             />
           </div>
         ))}

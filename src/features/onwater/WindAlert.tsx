@@ -3,14 +3,14 @@ import { useEffect } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { HelpText } from '../../components/shared/HelpText.tsx';
-import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { dayKey, fmtTime } from '../../lib/format.ts';
 import { windTxt } from '../../lib/wind.ts';
 import { BFT_KN } from '../../model/lists.ts';
 import { ensureDay, getDay, state } from '../../state/index.ts';
 
+import { BoxHelp } from './BoxHelp.tsx';
+import { useBoxTr } from './useBoxTr.ts';
 import type { WindAlertAction } from './windAlertClick.ts';
 import { windAlertClick } from './windAlertClick.ts';
 import type { WindConfig } from './windLogic.ts';
@@ -43,7 +43,7 @@ const FORCES = [4, 5, 6, 7, 8, 9, 10, 11, 12];
  */
 export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
   useSignals();
-  const tr = useTr();
+  const tr = useBoxTr(keep);
   const config = windConfig();
   const today = dayKey(new Date());
   useEffect(() => ensureDay(today), [today]);
@@ -51,11 +51,6 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
     ? (getDay(today).windWatch as WindWatch | undefined)
     : null;
   const watch = stored || windWatchLast.value;
-  const muted = windMuted();
-  const running = windTestRunning.value;
-  const muteText = muted
-    ? '🔕 Alertes coupées jusqu’à la fin de la trace · toucher pour les remettre'
-    : '🔕 Pas d’alertes jusqu’à la fin de la trace en cours';
   return (
     <div className="wind-alert">
       <p className="keep-help nav-hint">
@@ -77,56 +72,85 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
           )}
         </Button>
       </ButtonRow>
-      {config.on ? (
-        <ButtonRow className="row">
-          <Button
-            className={muted ? 'btn on danger' : 'btn'}
-            data-walert="mute"
-            onClick={click('mute')}
-          >
-            {tr(muteText)}
-          </Button>
-        </ButtonRow>
-      ) : null}
+      {config.on ? <MuteRow keep={keep} /> : null}
       {config.on && watch ? (
         <WatchLine watch={watch} config={config} keep={keep} />
       ) : null}
       {watch?.waveH == null ? null : (
         <p className="keep-help">
           {tr('🌊 État de la mer prévu ici : ')}
-          <b>{seaTxt(watch)}</b>
+          <b>{tr(seaTxt(watch))}</b>
           {tr(' (modèle Open-Meteo Marine)')}
         </p>
       )}
-      <div className="wind-legend">
-        {FORCES.map((force, index) => (
-          <span key={force}>
-            <i style={{ background: flashColor(index) }} />
-            {force} Bf · {BFT_KN[force - 1]}
-            {force < 12 ? `–${(BFT_KN[force] as number) - 1}` : '+'} nd
-          </span>
-        ))}
-      </div>
-      <HelpText keep={keep} nextIsRow={!noTest}>
+      <WindLegend keep={keep} />
+      <BoxHelp keep={keep} nextIsRow={!noTest}>
         En Suisse : stations MeteoSwiss. Ailleurs : modèle de prévision le plus
         fin de la région, à la position du bateau. Deux bips et deux flashs de
         couleur avec le vent exact (nœuds et Beaufort) à chaque nouveau degré
         Beaufort dès 4 Bf (11 nd), de plus en plus aigus et forts. Rappel toutes
         les 15 min. Appli ouverte et écran allumé seulement.
-      </HelpText>
-      {noTest ? null : (
-        <ButtonRow className="row">
-          <Button
-            className={running ? 'btn danger' : 'btn'}
-            data-walert="test"
-            onClick={click('test')}
-          >
-            {tr(running ? '⏹ Arrêter le test' : '▶ Test des alertes de vent')}
-          </Button>
-        </ButtonRow>
-      )}
+      </BoxHelp>
+      {noTest ? null : <TestRow keep={keep} />}
     </div>
   );
+}
+
+function MuteRow({ keep }: { keep: boolean }) {
+  useSignals();
+  const tr = useBoxTr(keep);
+  const muted = windMuted();
+  return (
+    <ButtonRow className="row">
+      <Button
+        className={muted ? 'btn on danger' : 'btn'}
+        data-walert="mute"
+        onClick={click('mute')}
+      >
+        {tr(
+          muted
+            ? '🔕 Alertes coupées jusqu’à la fin de la trace · toucher pour les remettre'
+            : '🔕 Pas d’alertes jusqu’à la fin de la trace en cours',
+        )}
+      </Button>
+    </ButtonRow>
+  );
+}
+
+function WindLegend({ keep }: { keep: boolean }) {
+  const tr = useBoxTr(keep);
+  return (
+    <div className="wind-legend">
+      {FORCES.map((force, index) => (
+        <span key={force}>
+          <i style={{ background: flashColor(index) }} />
+          {tr(legendText(force))}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function TestRow({ keep }: { keep: boolean }) {
+  useSignals();
+  const tr = useBoxTr(keep);
+  const running = windTestRunning.value;
+  return (
+    <ButtonRow className="row">
+      <Button
+        className={running ? 'btn danger' : 'btn'}
+        data-walert="test"
+        onClick={click('test')}
+      >
+        {tr(running ? '⏹ Arrêter le test' : '▶ Test des alertes de vent')}
+      </Button>
+    </ButtonRow>
+  );
+}
+
+function legendText(force: number): string {
+  const top = force < 12 ? `–${(BFT_KN[force] as number) - 1}` : '+';
+  return `${force} Bf · ${BFT_KN[force - 1]}${top} nd`;
 }
 
 function click(action: WindAlertAction): () => void {
@@ -145,6 +169,7 @@ function WatchLine({
   config: WindConfig;
   keep: boolean;
 }) {
+  const tr = useBoxTr(keep);
   const wind = windTxt(Math.round(windValue(watch.top, config.basis)));
   const time = fmtTime(new Date(watch.top.t));
   if (watch.src === 'model') {
@@ -155,17 +180,19 @@ function WatchLine({
       ? ` Seuils abaissés de ${watch.bias} nd (${watch.region}) : les modèles sous-estiment les accélérations entre les îles.`
       : '';
     return (
-      <HelpText keep={keep} text={`${head}${wind}, ${time}.${lowered}`}>
-        {head}
-        <b>{wind}</b>, {time}.{lowered}
-      </HelpText>
+      <BoxHelp keep={keep} text={`${head}${wind}, ${time}.${lowered}`}>
+        {tr(head, { help: true })}
+        <b>{tr(wind, { help: true })}</b>
+        {tr(`, ${time}.${lowered}`, { help: true })}
+      </BoxHelp>
     );
   }
   const head = `Le plus fort autour (${watch.n} station${watch.n > 1 ? 's' : ''} MeteoSwiss à moins de ${config.radius} km) : `;
   return (
-    <HelpText keep={keep} text={`${head}${wind} à ${watch.top.name}, ${time}.`}>
-      {head}
-      <b>{wind}</b> à {watch.top.name}, {time}.
-    </HelpText>
+    <BoxHelp keep={keep} text={`${head}${wind} à ${watch.top.name}, ${time}.`}>
+      {tr(head, { help: true })}
+      <b>{tr(wind, { help: true })}</b>
+      {tr(` à ${watch.top.name}, ${time}.`, { help: true })}
+    </BoxHelp>
   );
 }

@@ -2,6 +2,7 @@ import type L from 'leaflet';
 
 import { ctlAutoAttach } from './ctlAuto.ts';
 import { lpAttach } from './longPress.ts';
+import { followMapTexts } from './mapTexts.ts';
 
 /** The Leaflet library. */
 export type LeafletLibrary = typeof L;
@@ -55,5 +56,6 @@ export function createMap(box: HTMLElement, options: L.MapOptions): L.Map {
   const map = leaflet().map(box, options);
   lpAttach(map);
   ctlAutoAttach(map);
+  followMapTexts(map);
   return map;
 }

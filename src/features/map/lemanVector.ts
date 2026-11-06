@@ -47,14 +47,6 @@ const loaded: { vector: LemanVector | null; fetching: boolean } = {
 };
 
 /**
- * The vector chart already read (legacy `lemanVec`).
- * @returns The chart, or `null`.
- */
-export function lemanVector(): LemanVector | null {
-  return loaded.vector;
-}
-
-/**
  * Read the vector chart from the device (legacy `lemanVecLoad`).
  * @returns The chart, or `null`.
  */

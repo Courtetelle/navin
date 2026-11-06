@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
-import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
+
+import { PrintDrawn } from './PrintDrawn.tsx';
 
 /** Print stylesheet of the A4 portrait documents. */
 export const PRINT_CSS_A4_PORTRAIT =
@@ -51,9 +52,6 @@ export function printInHolder({
   const holder = document.createElement('div');
   holder.className = className;
   const root = createRoot(holder);
-  flushSync(() => {
-    root.render(content);
-  });
   document.body.append(holder);
   const style = document.createElement('style');
   style.textContent = css;
@@ -68,7 +66,15 @@ export function printInHolder({
     globalThis.removeEventListener('afterprint', cleanup);
   };
   globalThis.addEventListener('afterprint', cleanup);
-  setTimeout(() => {
-    globalThis.print();
-  }, delay);
+  root.render(
+    <PrintDrawn
+      onDrawn={() => {
+        setTimeout(() => {
+          globalThis.print();
+        }, delay);
+      }}
+    >
+      {content}
+    </PrintDrawn>,
+  );
 }

@@ -165,6 +165,10 @@ async function openScan(id: string): Promise<void> {
     return;
   }
   const response = await fetch(url);
+  if (!response.ok) {
+    toast('Scan introuvable');
+    return;
+  }
   openLink(URL.createObjectURL(await response.blob()));
 }
 

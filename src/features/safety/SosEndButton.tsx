@@ -44,12 +44,11 @@ export function SosEndButton({ onEnded }: SosEndButtonProps) {
       return () => clearTimeout(timer);
     }
     if (phase === 'leaving') {
-      const timer = setTimeout(() => {
-        setPhase('gone');
-        ended.current();
-      }, 600);
+      const timer = setTimeout(() => setPhase('gone'), 600);
       return () => clearTimeout(timer);
     }
+    // The page redraws once the button left: its scroll is the one without it.
+    if (phase === 'gone') ended.current();
     return undefined;
   }, [phase]);
   useEffect(() => {

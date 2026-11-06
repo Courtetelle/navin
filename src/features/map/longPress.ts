@@ -6,7 +6,7 @@ import { addMark, herePos, state, toast } from '../../state/index.ts';
 
 import { escapeHtml } from './escapeHtml.ts';
 import { wxNext } from './external.ts';
-import { gotoUpdate, setGoto, wantPos } from './goto.ts';
+import { setGoto, wantPos } from './goto.ts';
 import { depthAt } from './isobath.ts';
 import { leaflet } from './leaflet.ts';
 import { extrasOf, whileMapLive } from './mapExtras.ts';
@@ -192,10 +192,4 @@ function showWind(point: { lat: number; lon: number }): void {
       const box = document.querySelector('#lpWind');
       if (box) box.textContent = 'indisponible';
     });
-}
-
-/** Restart the Go to of a previous session (marks.js:195). */
-export function resumeGoto(): void {
-  wantPos(true);
-  gotoUpdate();
 }

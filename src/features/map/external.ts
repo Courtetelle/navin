@@ -8,6 +8,8 @@ const onwater = () => import('../onwater/index.ts');
 const prep = () => import('../prep/index.ts');
 const tracking = () => import('../tracking/index.ts');
 
+const instruments: { fresh: (() => boolean) | null } = { fresh: null };
+
 /**
  * Object store of the `ldb-docs` database (onwater domain).
  * @param mode - Transaction mode.
@@ -68,12 +70,18 @@ export async function startTracking(resume: boolean): Promise<void> {
 }
 
 /**
- * Whether the boat instruments give a fresh position (tracking domain).
+ * Whether the boat instruments give a fresh position (tracking domain). A GPS
+ * fix is shown at once: until the domain is there, no instrument can be connected.
  * @returns `true` when they do.
  */
-export async function nmeaPosFresh(): Promise<boolean> {
-  const domain = await tracking();
-  return domain.nmeaPosFresh();
+export function nmeaPosFresh(): boolean {
+  if (instruments.fresh) return instruments.fresh();
+  tracking()
+    .then((domain) => {
+      instruments.fresh = domain.nmeaPosFresh;
+    })
+    .catch(() => undefined);
+  return false;
 }
 
 /**

@@ -44,7 +44,7 @@ export function BaseEditScreen({
 }: BaseEditScreenProps) {
   const tr = useTr();
   useNavFields();
-  const [{ id, name }] = useState(base);
+  const [{ id, name }] = useState(() => base);
   useScreenLead(`📚 ${name}`);
   const [items] = useState(() => baseItems(base));
   const categories = base.cats ?? [];

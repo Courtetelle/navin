@@ -1,5 +1,6 @@
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { telOf } from '../../lib/phone.ts';
@@ -34,9 +35,9 @@ export function CrewOnBoard({ line, index }: CrewOnBoardProps) {
       <div className="crew-on-name">
         <b>{`${index + 1}. ${line.nom || '…'}`}</b>
         {phone ? (
-          <a className="btn crew-tel" href={`tel:${telOf(phone)}`}>
+          <LinkButton className="btn crew-tel" href={`tel:${telOf(phone)}`}>
             {`📞 ${phone}`}
-          </a>
+          </LinkButton>
         ) : null}
       </div>
       <ButtonRow className="row c3">

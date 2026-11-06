@@ -52,14 +52,13 @@ export function selectLeg(
 ): TrackEvent[] {
   const duration = arrival.t - departure.t;
   const budget = entryBudget(duration / 3_600_000);
-  const kept: TrackEvent[] = [];
+  const kept = new Set<TrackEvent>();
   if (budget > 0) {
     const slot = duration / (budget + 1);
     for (let rank = 1; rank <= budget; rank++) {
       const target = departure.t + rank * slot;
       const inWindow = candidates.filter(
-        (event) =>
-          Math.abs(event.t - target) <= slot / 2 && !kept.includes(event),
+        (event) => Math.abs(event.t - target) <= slot / 2 && !kept.has(event),
       );
       const manoeuvres = inWindow.filter((event) => event.kind);
       const pool = manoeuvres.length > 0 ? manoeuvres : inWindow;
@@ -67,13 +66,13 @@ export function selectLeg(
         (first, second) =>
           Math.abs(first.t - target) - Math.abs(second.t - target),
       );
-      if (closest) kept.push(closest);
+      if (closest) kept.add(closest);
     }
   }
   arrival.note = `Navigation ${fmtDur(duration)} · ${fr(arrival.dist - departure.dist)} NM`;
   return [
     departure,
-    ...kept.toSorted((first, second) => first.t - second.t),
+    ...[...kept].toSorted((first, second) => first.t - second.t),
     arrival,
   ];
 }

@@ -99,5 +99,6 @@ function caption(item: PhotoViewItem): string {
 
 async function sharePhoto(item: PhotoViewItem): Promise<void> {
   const reply = await fetch(item.src);
+  if (!reply.ok) return;
   await deliver(await reply.blob(), `photo-${item.id}.jpg`, 'image/jpeg');
 }

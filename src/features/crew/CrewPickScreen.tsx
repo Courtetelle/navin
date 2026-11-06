@@ -8,8 +8,9 @@ import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { textOf } from '../../lib/format.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import { MEMBER_KEYS } from '../../model/crewFields.ts';
-import type { Member } from '../../model/types.ts';
+import type { CrewMember, Member } from '../../model/types.ts';
 import { isLake, memberName, state } from '../../state/index.ts';
 import { membersByNav } from '../boats/index.ts';
 
@@ -54,14 +55,8 @@ export function CrewPickScreen({ lead }: CrewPickScreenProps) {
       {cruise.crew.length > 0 ? (
         <>
           <h2 className="sub-h">{tr('À bord')}</h2>
-          {cruise.crew.map((line, index) => (
-            <CrewOnBoard
-              // A line has no id and can be moved: the position is its identity.
-              // eslint-disable-next-line react/no-array-index-key
-              key={index}
-              line={line}
-              index={index}
-            />
+          {keyedItems(cruise.crew, crewLineName).map(({ key, item, index }) => (
+            <CrewOnBoard key={key} line={item} index={index} />
           ))}
         </>
       ) : null}
@@ -115,6 +110,10 @@ export function CrewPickScreen({ lead }: CrewPickScreenProps) {
       {publishing ? <CrewPublish onClose={() => setPublishing(false)} /> : null}
     </>
   );
+}
+
+function crewLineName(line: CrewMember): string {
+  return line.memberId ?? line.nom ?? '';
 }
 
 function isAboard(member: Member): boolean {

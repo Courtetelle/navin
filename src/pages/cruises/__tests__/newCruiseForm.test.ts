@@ -4,11 +4,13 @@ import {
   load,
   useHarnessClock,
 } from '../../../features/data/__tests__/fixtures.ts';
+import type { Cruise } from '../../../model/types.ts';
 import { state } from '../../../state/index.ts';
 import {
   enterForm,
   keepBoat,
   keepCrew,
+  keptBoatName,
   nameText,
   nameWithKeptBoat,
   newPlace,
@@ -110,4 +112,17 @@ test('the name counts the kept boat only if its button was on', () => {
   redrawForm(false);
 
   expect(nameWithKeptBoat.value).toBe(false);
+});
+
+test('the boat of a lake outing is not taken over in the name', () => {
+  const cruise = {
+    type: 'lac',
+    info: { boat: 'Savannah' },
+  } as unknown as Cruise;
+  const sea = { info: { boat: 'Mistral' } } as unknown as Cruise;
+
+  expect(keptBoatName(cruise, true)).toBe('');
+  expect(keptBoatName(sea, true)).toBe('Mistral');
+  expect(keptBoatName(sea, false)).toBe('');
+  expect(keptBoatName(null, true)).toBe('');
 });

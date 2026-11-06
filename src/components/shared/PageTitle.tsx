@@ -58,18 +58,10 @@ export function PageTitle({
     titleText ?? (typeof children === 'string' ? children : '');
   const fresh = useIntroLead(state.view.currentView.value, plainTitle);
   const lead = atTop && fresh;
-  const paragraphs: Array<{ key: string; text: string; popped: boolean }> = [];
+  const paragraphs = leadParagraphs(helps);
   const bubble: string[] = [];
-  for (const [index, entry] of helps.entries()) {
-    const help = typeof entry === 'string' ? { text: entry } : entry;
-    const split = help.keep ? null : splitEmptyHelp(help.text);
-    if (split) {
-      paragraphs.push({ key: `${index}a`, text: split.first, popped: false });
-    }
-    const text = split ? split.rest : help.text;
-    const popped = !keepHelp(text, split ? {} : help);
+  for (const { text, popped } of paragraphs) {
     if (popped) bubble.push(tr(text, { help: true }).trim());
-    paragraphs.push({ key: `${index}`, text, popped });
   }
   return (
     <>
@@ -90,10 +82,30 @@ export function PageTitle({
   );
 }
 
-function paragraphClass(
-  paragraph: { popped: boolean; key: string },
-  lead: boolean,
-): string {
+interface LeadParagraph {
+  key: string;
+  text: string;
+  popped: boolean;
+}
+
+function leadParagraphs(
+  helps: ReadonlyArray<string | LeadHelp>,
+): LeadParagraph[] {
+  const paragraphs: LeadParagraph[] = [];
+  for (const [index, entry] of helps.entries()) {
+    const help = typeof entry === 'string' ? { text: entry } : entry;
+    const split = help.keep ? null : splitEmptyHelp(help.text);
+    if (split) {
+      paragraphs.push({ key: `${index}a`, text: split.first, popped: false });
+    }
+    const text = split ? split.rest : help.text;
+    const popped = !keepHelp(text, split ? {} : help);
+    paragraphs.push({ key: `${index}`, text, popped });
+  }
+  return paragraphs;
+}
+
+function paragraphClass(paragraph: LeadParagraph, lead: boolean): string {
   const classes = ['help'];
   if (paragraph.popped) classes.push('help-pop');
   // The paragraph inserted by the empty-state split is not a lead paragraph.

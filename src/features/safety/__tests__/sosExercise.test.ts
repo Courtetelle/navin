@@ -27,7 +27,12 @@ beforeEach(() => {
   useHarnessWorld();
   actions.initState(createMemoryStorage(readFixture('sample-lake')));
   state.view.currentView.value = 'settings';
-  vi.stubGlobal('document', { querySelector: () => section });
+  vi.stubGlobal('document', {
+    querySelector: () => section,
+    documentElement: {
+      style: { getPropertyValue: () => '0px', setProperty: noFix },
+    },
+  });
 });
 afterEach(() => {
   leaveHarnessWorld();

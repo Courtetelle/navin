@@ -1,6 +1,8 @@
 import type { RefObject } from 'react';
 import { useEffect } from 'react';
 
+import { createTimerGroup } from '../../lib/timers.ts';
+
 const running = new WeakSet<HTMLInputElement>();
 
 /**
@@ -18,20 +20,19 @@ export function useMarquee(
     const input = reference.current;
     if (!input) return undefined;
     let seen = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timers = createTimerGroup();
     const check = () => {
       if (seen || !input.offsetParent) return;
       seen = true;
-      timer = setTimeout(() => runMarquee(input), 700);
+      timers.after(700, () => runMarquee(input));
     };
-    const onToggle = () => setTimeout(check, 50);
+    const onToggle = () => timers.after(50, check);
     const onPointerUp = () => runMarquee(input);
-    const initial = setTimeout(check, 120);
+    timers.after(120, check);
     document.addEventListener('toggle', onToggle, true);
     input.addEventListener('pointerup', onPointerUp);
     return () => {
-      clearTimeout(initial);
-      clearTimeout(timer);
+      timers.clear();
       document.removeEventListener('toggle', onToggle, true);
       input.removeEventListener('pointerup', onPointerUp);
     };

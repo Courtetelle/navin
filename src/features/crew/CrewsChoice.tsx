@@ -17,6 +17,8 @@ import { showCrewsEdit } from './screen.ts';
 export interface CrewsChoiceProps {
   /** Saved composition that was changed. */
   base: CrewSet;
+  /** The user tried to leave without choosing. */
+  flashed: boolean;
 }
 
 /**
@@ -25,11 +27,14 @@ export interface CrewsChoiceProps {
  * @param props - Saved composition.
  * @returns The choice block.
  */
-export function CrewsChoice({ base }: CrewsChoiceProps) {
+export function CrewsChoice({ base, flashed }: CrewsChoiceProps) {
   const tr = useTr();
   const ident = base.ident ?? '';
   return (
-    <div className="crew-choice" id="ceChoice">
+    <div
+      className={flashed ? 'crew-choice lab-flash' : 'crew-choice'}
+      id="ceChoice"
+    >
       <HelpText
         nextIsRow
         text={`Équipage ${ident} modifié (pas encore enregistré). Que faire ?`}

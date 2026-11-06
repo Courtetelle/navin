@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpPill, HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
@@ -104,7 +105,7 @@ function CartesContent({ onChange }: { onChange: () => void }) {
           Réseau nécessaire, s’ouvrent dans le navigateur.
         </HelpText>
         <ButtonRow>
-          <a
+          <LinkButton
             className="btn big link-btn"
             href={LEMAN_ARCGIS}
             target="_blank"
@@ -112,7 +113,7 @@ function CartesContent({ onChange }: { onChange: () => void }) {
           >
             {tr('🌐 Carte ArcGIS du Léman')}
             <small>{tr('carte en ligne, réseau nécessaire')}</small>
-          </a>
+          </LinkButton>
         </ButtonRow>
       </FoldSection>
     </>

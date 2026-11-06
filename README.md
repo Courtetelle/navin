@@ -2,7 +2,7 @@
 
 NavIn is a boat logbook that installs on a phone as a web app (PWA). It is made for Lake Geneva and for the sea: large buttons, day and night modes, and it works without a network. All data stay on the phone.
 
-> **Migration in progress.** The app is being rewritten from plain JavaScript to React. The original app is kept in [`legacy/`](legacy/) as the reference, and until the migration is finished some screens of the React version are incomplete. `legacy/` will be removed once the new version has been validated on the water.
+> **Rewritten in React, not yet validated on the water.** Every screen of the original plain JavaScript app now exists in React. The original app stays in [`legacy/`](legacy/) as the reference, and will be removed once the new version has been validated on a real phone, on the water.
 
 ## Start the app on your computer
 

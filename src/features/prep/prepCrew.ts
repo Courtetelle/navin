@@ -1,4 +1,5 @@
 import { uid } from '../../lib/format.ts';
+import { indexById } from '../../lib/indexById.ts';
 import type { CrewMember, CrewSet, CrewSetLine } from '../../model/types.ts';
 import {
   crewFromMember,
@@ -64,10 +65,9 @@ export function applyCrewSet(set: { crew: readonly CrewSetLine[] }): boolean {
   });
   if (!state.data.cruise.value) return false;
   const crew: CrewMember[] = [];
+  const members = indexById(state.data.members.value);
   for (const line of set.crew) {
-    const member = state.data.members.value.find(
-      (item) => item.id === line.memberId,
-    );
+    const member = members.get(line.memberId);
     if (member) crew.push(crewFromMember(member, line.fonction));
   }
   updateCruise((cruise) => {

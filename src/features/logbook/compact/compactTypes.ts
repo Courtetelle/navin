@@ -53,4 +53,10 @@ export interface CompactFormProps {
    * @default every key follows
    */
   followKeys?: readonly string[];
+  /**
+   * Identity of the form on its screen. Required when one screen shows several
+   * forms with the same fields (one per boat: pass the boat id).
+   * @default the keys of its fields
+   */
+  formKey?: string;
 }

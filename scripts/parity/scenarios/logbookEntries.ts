@@ -1,0 +1,113 @@
+import type { Scenario } from '../types.ts';
+
+import {
+  ARMED_END,
+  CLOCK_TICK,
+  QUIET,
+  emptyJournal,
+  field,
+  snap,
+  snapData,
+} from './logbookHelpers.ts';
+
+export const logbookEntriesScenarios: Scenario[] = [
+  {
+    name: 'logbook-edit-direct',
+    fixture: 'sample-sea',
+    overrides: QUIET,
+    steps: [
+      { go: 'log' },
+      { click: 'article[data-id="sea-e3"] [data-act="edit"]' },
+      ...snapData('edit'),
+    ],
+  },
+  {
+    name: 'logbook-edit-sea',
+    fixture: 'sample-sea',
+    overrides: QUIET,
+    steps: [
+      { go: 'new' },
+      { go: 'log' },
+      { click: 'article[data-id="sea-e3"] [data-act="edit"]' },
+      ...snapData('edit'),
+      { click: field('loch', '[data-step="1"]') },
+      { click: field('t', '[data-min="-5"]') },
+      { click: '#saveBtn' },
+      ...snapData('saved'),
+      { click: 'article[data-id="sea-e2"] [data-act="edit"]' },
+      { click: '#cancelBtn' },
+      ...snapData('cancelled'),
+      { click: 'article[data-id="sea-e5"] [data-act="edit"]' },
+      ...snapData('complete-auto'),
+      { click: '#saveBtn' },
+      ...snapData('auto-kept'),
+    ],
+  },
+  {
+    name: 'logbook-edit-lake',
+    fixture: 'sample-lake',
+    overrides: QUIET,
+    steps: [
+      { go: 'log' },
+      { click: 'article[data-id="lk-e3"] [data-act="edit"]' },
+      ...snapData('edit'),
+    ],
+  },
+  {
+    name: 'logbook-log-lake',
+    fixture: 'sample-lake',
+    overrides: QUIET,
+    steps: [{ go: 'log' }, ...snap('log')],
+  },
+  {
+    name: 'logbook-log-sea',
+    fixture: 'sample-sea',
+    overrides: QUIET,
+    steps: [{ go: 'log' }, ...snap('log')],
+  },
+  {
+    name: 'logbook-log-both',
+    fixture: 'sample',
+    overrides: QUIET,
+    steps: [{ wait: CLOCK_TICK }, { go: 'log' }, ...snap('log')],
+  },
+  {
+    name: 'logbook-log-empty',
+    fixture: emptyJournal(),
+    overrides: QUIET,
+    steps: [
+      { go: 'log' },
+      ...snap('log'),
+      { click: '#goNew' },
+      ...snap('first-entry'),
+    ],
+  },
+  {
+    name: 'logbook-log-actions',
+    fixture: 'sample-sea',
+    overrides: QUIET,
+    steps: [
+      { go: 'log' },
+      { click: 'article[data-id="sea-e4"] [data-act="del"]' },
+      ...snap('armed'),
+      { wait: ARMED_END },
+      ...snap('disarmed'),
+      { click: 'article[data-id="sea-e4"] [data-act="del"]' },
+      { click: 'article[data-id="sea-e4"] [data-act="del"]' },
+      ...snapData('deleted'),
+      { click: '.day-head [data-day="2026-07-14"]' },
+      ...snap('day'),
+      { go: 'log' },
+      { click: '.day-head [data-map="2026-07-14"]' },
+      { wait: 300 },
+      { go: 'log' },
+      ...snap('back'),
+    ],
+  },
+  {
+    name: 'logbook-log-english',
+    fixture: 'sample-sea',
+    overrides: { ...QUIET, 'ldb.lang': 'en' },
+    steps: [{ go: 'log' }, { wait: 300 }, ...snap('log')],
+  },
+];

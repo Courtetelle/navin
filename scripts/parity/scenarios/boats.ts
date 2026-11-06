@@ -3,9 +3,11 @@ import type { Scenario, Step } from '../types.ts';
 import { dossierScenarios } from './boatsDossier.ts';
 import { sheetScenarios } from './boatsSheet.ts';
 import {
+  ARMED_GONE,
   BOOT,
   FIRST_LOAD,
   LAKE_ID,
+  MARQUEE_DONE,
   QUIET,
   TOAST_GONE,
   boatsWith,
@@ -13,6 +15,7 @@ import {
   dump,
   seedPhotos,
   swipe,
+  swipeAndHold,
   versionBoat,
 } from './boatsSteps.ts';
 
@@ -96,7 +99,9 @@ const listScenarios: Scenario[] = [
       FIRST_LOAD,
       swipe('details[data-b="exb1"] > summary'),
       { snapshot: 'confirm' },
-      { longpress: '[data-swok]' },
+      { wait: 5500 },
+      { snapshot: 'closed' },
+      swipeAndHold('details[data-b="exb1"] > summary'),
       TOAST_GONE,
       dump('ldb.boats'),
       { snapshot: 'deleted' },
@@ -163,6 +168,8 @@ const listScenarios: Scenario[] = [
       { snapshot: 'versions' },
       { click: '[data-vput="0"]' },
       { snapshot: 'armed' },
+      ARMED_GONE,
+      { click: '[data-vput="0"]' },
       { click: '[data-vput="0"]' },
       TOAST_GONE,
       dump('ldb.boats', `ldb.cruise.${LAKE_ID}`),
@@ -178,6 +185,7 @@ const listScenarios: Scenario[] = [
       { go: 'boats', arg: 'savannah' },
       FIRST_LOAD,
       { click: '[data-fields="savannah"]' },
+      MARQUEE_DONE,
       { snapshot: 'fields' },
       { click: '#cBack' },
       { wait: 300 },
@@ -189,7 +197,9 @@ const listScenarios: Scenario[] = [
 /**
  * Before each snapshot: the random suffix of the form ids is dropped (a React
  * render restarted on a first visit draws a second series of them), and the
- * scroll position is written in the DOM, so that a snapshot compares it.
+ * scroll position is written in the DOM, so that a snapshot compares it. The
+ * page then goes back to the top: a full-page capture does not always place
+ * fixed elements at the scroll offset, whatever the app.
  */
 const beforeSnapshot: Step = {
   eval: `(() => {
@@ -207,14 +217,23 @@ const beforeSnapshot: Step = {
       document.body.append(scroll);
     }
     scroll.textContent = String(Math.round(globalThis.scrollY));
+    globalThis.scrollTo(0, 0);
   })()`,
+};
+
+/** Back to where the page was, for the steps that follow. */
+const afterSnapshot: Step = {
+  eval: `globalThis.scrollTo(
+    0,
+    Number(document.getElementById('parity-scroll').textContent),
+  )`,
 };
 
 function comparable(scenario: Scenario): Scenario {
   return {
     ...scenario,
     steps: scenario.steps.flatMap((step) =>
-      'snapshot' in step ? [beforeSnapshot, step] : [step],
+      'snapshot' in step ? [beforeSnapshot, step, afterSnapshot] : [step],
     ),
   };
 }

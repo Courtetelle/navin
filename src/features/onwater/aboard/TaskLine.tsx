@@ -4,7 +4,7 @@ import { useTr } from '../../../i18n/useTr.ts';
 import { buzz } from '../../../lib/dom.ts';
 import type { Task } from '../../../model/types.ts';
 import { updateTaskTpl } from '../../../state/index.ts';
-import { TextInput } from '../TextInput.tsx';
+import { MarqueeInput } from '../../logbook/index.ts';
 
 /** Props of {@link TaskLine}. */
 export interface TaskLineProps {
@@ -30,7 +30,7 @@ export function TaskLine({ task, index, onRebuilt }: TaskLineProps) {
   };
   return (
     <div className="ck-row tt-row">
-      <TextInput
+      <MarqueeInput
         className="text"
         data-tname={index}
         defaultValue={task.name}

@@ -36,10 +36,10 @@ export function SailsField({ field }: { field: FieldDefinition }) {
   const tr = useTr();
   const list = useRef<HTMLDivElement>(null);
   const [rows, setRows] = useState(() => initialRows(field, form.shown));
-  const [mainDescription, setMainDescription] = useState(
+  const [mainDescription, setMainDescription] = useState(() =>
     textOf(form.shown.gvDesc),
   );
-  const [mainColor, setMainColor] = useState(textOf(form.shown.gvColor));
+  const [mainColor, setMainColor] = useState(() => textOf(form.shown.gvColor));
 
   const save = (
     nextRows: readonly SailRow[],
@@ -81,6 +81,7 @@ export function SailsField({ field }: { field: FieldDefinition }) {
         <span className="sail-fixed">{tr('Grand-voile')}</span>
         <div className="sail-cd">
           <ColorButton
+            key={mainColor}
             color={mainColor}
             main
             onChange={(color) => {
@@ -121,6 +122,7 @@ export function SailsField({ field }: { field: FieldDefinition }) {
             />
             <div className="sail-cd">
               <ColorButton
+                key={row.color}
                 color={row.color}
                 onChange={(color) => editRow(row.id, { color })}
               />

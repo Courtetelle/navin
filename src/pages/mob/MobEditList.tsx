@@ -6,8 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
-import { MarqueeInput } from '../../features/safety/MarqueeInput.tsx';
-import { keyedItems } from '../../features/safety/keyedItems.ts';
+import { MarqueeInput } from '../../features/logbook/index.ts';
 import { MOB_KINDS } from '../../features/safety/mobDefaults.ts';
 import {
   mobKind,
@@ -17,6 +16,7 @@ import {
 } from '../../features/safety/mobProcedures.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import { PageBack, PageDone } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { toast } from '../../state/index.ts';

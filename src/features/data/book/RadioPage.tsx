@@ -2,9 +2,8 @@ import { Fragment } from 'react';
 
 import type { Cruise } from '../../../model/types.ts';
 import { lastKnownPos } from '../../../state/index.ts';
-
-import type { SosProcedure } from './external.ts';
-import { NATO, SOS, VOCAB, sosContext } from './external.ts';
+import type { SosProcedure } from '../../safety/index.ts';
+import { NATO, SOS, VOCAB, sosContext } from '../../safety/index.ts';
 
 /**
  * Radio messages: each procedure with its DSC steps and script, then the

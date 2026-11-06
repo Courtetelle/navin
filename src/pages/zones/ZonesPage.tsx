@@ -53,6 +53,7 @@ function ZonesContent({ onChange }: { onChange: () => void }) {
   const tr = useTr();
   const inCruise = Boolean(state.data.cruise.value);
   const backTo = inCruise ? 'map' : 'more';
+  const backLabel = inCruise ? '◀ Carte' : '◀ Plus';
   const box = useRef<HTMLDivElement>(null);
   const name = useRef<HTMLInputElement>(null);
   const [zoomMax, setZoomMax] = useState(14);
@@ -84,22 +85,25 @@ function ZonesContent({ onChange }: { onChange: () => void }) {
     };
     zoneBusy.current = true;
     setDownloading(true);
-    const result = await zoneDownload(zone, (done, all) => {
-      setProgress(`⬇ ${done} / ${all} tuiles…`);
-    });
-    zoneBusy.current = false;
-    if (!result.ok) {
+    try {
+      const result = await zoneDownload(zone, (done, all) => {
+        setProgress(`⬇ ${done} / ${all} tuiles…`);
+      });
+      if (!result.ok) {
+        toast('Téléchargement impossible');
+        return;
+      }
+      zoneSave([...zoneList(), { ...zone, ok: result.ok, ko: result.ko }]);
+      const missing = result.ko ? `, ${result.ko} manquantes` : '';
+      toast(
+        `Zone « ${zoneName} » gardée hors ligne (${result.ok} tuiles${missing})`,
+      );
+      onChange();
+    } finally {
+      zoneBusy.current = false;
       setDownloading(false);
       setProgress(null);
-      toast('Téléchargement impossible');
-      return;
     }
-    zoneSave([...zoneList(), { ...zone, ok: result.ok, ko: result.ko }]);
-    const missing = result.ko ? `, ${result.ko} manquantes` : '';
-    toast(
-      `Zone « ${zoneName} » gardée hors ligne (${result.ok} tuiles${missing})`,
-    );
-    onChange();
   };
 
   const removeZone = async (zone: Zone) => {
@@ -114,13 +118,15 @@ function ZonesContent({ onChange }: { onChange: () => void }) {
   return (
     <>
       <PageBack
-        label={`◀ ${tr(inCruise ? 'Carte' : 'Plus')}`}
+        label={backLabel}
         data-go={backTo}
         onClick={() => {
           buzz();
           go(backTo);
         }}
-      />
+      >
+        {tr(backLabel)}
+      </PageBack>
       <PageTitle helps={[HELP]}>Zones hors ligne</PageTitle>
       <div id="zoneMap" className="map" ref={box}>
         {unavailable ? (

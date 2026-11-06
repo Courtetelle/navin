@@ -1,6 +1,8 @@
 import { loadFixture } from '../browser.ts';
 import type { Scenario, Step } from '../types.ts';
 
+import { uiEditScenarios } from './uiEdits.ts';
+
 /**
  * Compare the chrome alone: empty `#view` in both apps (legacy: its nav bar
  * observers then resync as for an empty page; React: the page is unmounted)
@@ -229,4 +231,5 @@ export const scenarios: Scenario[] = [
       { snapshot: 'moved-bubble' },
     ],
   },
+  ...uiEditScenarios,
 ];

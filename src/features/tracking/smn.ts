@@ -175,8 +175,10 @@ export function parseMeasures(text: string): SmnRow[] {
   return rows;
 }
 
+// An error page parses to no rows, exactly like an empty file.
 async function fetchText(url: string): Promise<string> {
   const response = await fetch(url);
+  if (!response.ok) return '';
   return new TextDecoder('windows-1252').decode(await response.arrayBuffer());
 }
 

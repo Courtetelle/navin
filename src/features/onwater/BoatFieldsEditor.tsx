@@ -16,8 +16,8 @@ import {
   toast,
   updateBoat,
 } from '../../state/index.ts';
+import { MarqueeInput } from '../logbook/index.ts';
 
-import { TextInput } from './TextInput.tsx';
 import {
   addLabel,
   flatLabels,
@@ -136,7 +136,7 @@ export function BoatFieldsEditor({ boatId, onDone }: BoatFieldsEditorProps) {
           if (!cid) {
             return (
               <div key={key} className="lab-row lab-std">
-                <TextInput
+                <MarqueeInput
                   className="text"
                   data-slab={key}
                   defaultValue={label}
@@ -160,7 +160,7 @@ export function BoatFieldsEditor({ boatId, onDone }: BoatFieldsEditorProps) {
               }
               id={`lab_${cid}`}
             >
-              <TextInput
+              <MarqueeInput
                 className="text"
                 data-clab={cid}
                 defaultValue={label}

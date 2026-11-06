@@ -4,7 +4,6 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { TzTime } from '../../components/shared/TzTime.tsx';
-import { keyedItems } from '../../features/safety/keyedItems.ts';
 import type { MobLogRecord } from '../../features/safety/mobLog.ts';
 import { mobEventPositions } from '../../features/safety/mobLog.ts';
 import { mobLogText } from '../../features/safety/mobLogText.ts';
@@ -13,6 +12,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import type { LogEvent } from '../../model/types.ts';
 import { deliver, mobLogs, state } from '../../state/index.ts';
 

@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import {
+  LabelButton,
+  LinkButton,
+} from '../../components/shared/EditableLinks.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import {
   bathyAscImport,
@@ -61,7 +65,7 @@ export function MapExtras({ day, onShowDay }: MapExtrasProps) {
     <>
       {lake ? (
         <ButtonRow>
-          <a
+          <LinkButton
             className="btn link-btn"
             href={LEMAN_ARCGIS}
             target="_blank"
@@ -69,7 +73,7 @@ export function MapExtras({ day, onShowDay }: MapExtrasProps) {
           >
             {tr('🌐 Carte interactive du Léman (ArcGIS)')}
             <small>{tr('en ligne, s’ouvre dans le navigateur')}</small>
-          </a>
+          </LinkButton>
         </ButtonRow>
       ) : null}
       <ButtonRow>
@@ -117,7 +121,7 @@ export function MapExtras({ day, onShowDay }: MapExtrasProps) {
             </Button>
           </ButtonRow>
           <div className="row">
-            <label className="btn" id="mapAsc">
+            <LabelButton className="btn" id="mapAsc">
               {tr('⛰ Courbes 1 à 5 m (swissBATHY3D)')}
               <small>{tr('calculées sur l’appareil, hors ligne')}</small>
               <small id="mapAscSub">{tr(ascNote)}</small>
@@ -132,7 +136,7 @@ export function MapExtras({ day, onShowDay }: MapExtrasProps) {
                   void importFiles(files);
                 }}
               />
-            </label>
+            </LabelButton>
           </div>
           {store.get('ldb.bathyAscAt', null) ? (
             <ButtonRow>

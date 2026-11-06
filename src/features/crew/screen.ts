@@ -133,6 +133,7 @@ export function showCrewsEdit(): void {
  * @param view - Screen opened.
  */
 export function enterCrewView(view: string): void {
+  drawnTitle = '';
   if (view === 'crews') {
     showCrews();
     return;

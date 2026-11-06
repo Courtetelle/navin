@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { Children, cloneElement, isValidElement } from 'react';
 
 import type { UiEdit } from '../../model/logTypes.ts';
@@ -30,6 +30,10 @@ export function buttonTexts(children: ReactNode): ButtonTexts {
     ) {
       sub = textOf(child.props.children);
     }
+  }
+  if (parts.length === 0) {
+    const span = labelSpan(children);
+    if (span) parts.push(textOf(span.props.children));
   }
   return { text: normalizeLabel(parts.join(' ')), sub };
 }
@@ -82,7 +86,13 @@ export function editedChildren(children: ReactNode, edit: UiEdit): ReactNode[] {
   if (edit.sub && !smallDone) {
     output.push(<small key="ue-sub">{edit.sub}</small>);
   }
-  return output;
+  const span = labelled ? undefined : labelSpan(children);
+  if (!edit.label || !span) return output;
+  return output.map((child) =>
+    isValidElement(child) && child.key === span.key
+      ? cloneElement(span, {}, edit.label)
+      : child,
+  );
 }
 
 /**
@@ -97,6 +107,26 @@ export function editClasses(edit: UiEdit | undefined): string[] {
   if (textSize && textSize !== 'm') classes.push(`ue-${textSize}`);
   if (wrap === 'clip' || wrap === 'roll') classes.push(`ue-${wrap}`);
   return classes;
+}
+
+type SpanElement = ReactElement<{ children?: ReactNode }, 'span'>;
+
+// Without direct text, the label of a button is its first `<span>` holding only
+// text (tab labels, the emoji of a call link).
+function labelSpan(children: ReactNode): SpanElement | undefined {
+  const list = Children.toArray(children);
+  if (list.some((child) => typeof child === 'string' && child.trim())) {
+    return undefined;
+  }
+  return list.find(
+    (child): child is SpanElement =>
+      isValidElement<{ children?: ReactNode }>(child) &&
+      child.type === 'span' &&
+      Boolean(textOf(child.props.children).trim()) &&
+      Children.toArray(child.props.children).every(
+        (node) => !isValidElement(node),
+      ),
+  );
 }
 
 function textOf(node: ReactNode): string {

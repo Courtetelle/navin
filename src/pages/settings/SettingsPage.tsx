@@ -37,6 +37,7 @@ import {
   noteSectionToggle,
   openSections,
   redrawSettings,
+  settingsRedraws,
 } from './settingsState.ts';
 
 interface SettingsSectionProps {
@@ -113,6 +114,7 @@ function HelpBubblesRow() {
 }
 
 function TestsSection() {
+  useSignals();
   const tr = useTr();
   return (
     <>
@@ -134,7 +136,7 @@ function TestsSection() {
           {tr('▶ Test des alertes de vent')}
         </Button>
       </ButtonRow>
-      <DepthDev inAlerts />
+      <DepthDev key={settingsRedraws.value} inAlerts />
     </>
   );
 }
@@ -188,7 +190,7 @@ export function SettingsPage({ from }: PageProps) {
         </SettingsSection>
         <SettingsSection section="maps" title="🗺 Cartes">
           <MapRadiusRows />
-          <HelpText>{`🗺 Cartes intégrées : ${lakesNote()}`}</HelpText>
+          <HelpText nextIsRow>{`🗺 Cartes intégrées : ${lakesNote()}`}</HelpText>
           <MapLinksRow />
         </SettingsSection>
         <SettingsSection section="boats" title="🚤 Calculs des bateaux">

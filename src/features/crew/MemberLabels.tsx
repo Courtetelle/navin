@@ -6,11 +6,13 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { useMarquee } from '../../components/shared/useMarquee.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { MEMBER_FIELDS } from '../../model/crewFields.ts';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { state, toast } from '../../state/index.ts';
+import { MarqueeInput } from '../logbook/index.ts';
 
 import {
   addCustomLabel,
@@ -42,6 +44,7 @@ export function MemberLabels({ back, lead }: MemberLabelsProps) {
   const alias = settings.memberAlias ?? {};
   const custom = settings.memberCustom ?? [];
   const newLabel = useRef<HTMLInputElement>(null);
+  useMarquee(newLabel);
   const [flashed, setFlashed] = useState<string | null>(null);
   const [redrawn, setRedrawn] = useState(false);
   const flash = (id: string) => {
@@ -94,7 +97,7 @@ export function MemberLabels({ back, lead }: MemberLabelsProps) {
       <section className="field lab-order">
         {MEMBER_FIELDS.map((field) => (
           <div key={field.key} className="lab-row lab-std">
-            <input
+            <MarqueeInput
               className="text"
               data-mlab={field.key}
               defaultValue={alias[field.key] || field.label}
@@ -116,7 +119,7 @@ export function MemberLabels({ back, lead }: MemberLabelsProps) {
             }
             id={`mlab_${label.id}`}
           >
-            <input
+            <MarqueeInput
               className="text"
               data-mclab={label.id}
               defaultValue={label.label}

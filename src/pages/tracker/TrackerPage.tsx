@@ -6,7 +6,7 @@ import { setShownMap } from '../../features/map/mapFull.ts';
 import { stopMapWatch } from '../../features/map/mapWatch.ts';
 import {
   drawTrkButtons,
-  trackerOpen,
+  trackerOverlay,
 } from '../../features/map/trackerButtons.ts';
 import { updateTrkDash } from '../../features/map/trackerDash.ts';
 import {
@@ -34,8 +34,8 @@ export function TrackerPage() {
     stopMapWatch();
     const handle = newTracker();
     tracker.current = handle;
-    trackerOpen.current = true;
-    drawTrkButtons();
+    // A question asked right after `go` may come before the page is mounted.
+    if (trackerOverlay.value.kind !== 'choose') drawTrkButtons();
     updateTrkDash();
     let closed = false;
     loadLeaflet()
@@ -56,7 +56,6 @@ export function TrackerPage() {
       stopTrip();
       stopTracking();
       stopDenied();
-      trackerOpen.current = false;
       if (handle.map) disposeMap(handle.map);
       setShownMap(null);
       if (tracker.current === handle) tracker.current = null;

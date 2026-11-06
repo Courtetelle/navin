@@ -3,9 +3,10 @@ import { createPortal } from 'react-dom';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { PREP_STEPS } from '../../model/modes.ts';
+import { state } from '../../state/index.ts';
 
 import { PrepPills } from './PrepPills.tsx';
-import { prepBarShown } from './prepBarSync.ts';
+import { prepBarApplies } from './prepBarSync.ts';
 import { prepBarBack, prepBarNext } from './prepFlow.ts';
 import type { PrepFlow } from './prepTypes.ts';
 import { prepFlow } from './prepTypes.ts';
@@ -19,7 +20,7 @@ import { usePrepSteps } from './usePrepSteps.ts';
 export function PrepBarHost() {
   useSignals();
   const prep = prepFlow();
-  if (!prepBarShown.value || !prep) return null;
+  if (!prep || !prepBarApplies(state.view.currentView.value, prep)) return null;
   return createPortal(<PrepBar prep={prep} />, document.body);
 }
 

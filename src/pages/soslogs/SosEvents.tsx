@@ -1,9 +1,9 @@
 import { TzTime } from '../../components/shared/TzTime.tsx';
 import { localText } from '../../components/shared/timeText.ts';
-import { keyedItems } from '../../features/safety/keyedItems.ts';
 import { sosPlaceWords } from '../../features/safety/sosPlaces.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { fmtPos } from '../../lib/geo.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import type { LogEvent, SosLog } from '../../model/types.ts';
 
 /** Props of the components of a log. */

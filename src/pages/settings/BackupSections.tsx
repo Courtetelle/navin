@@ -12,14 +12,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { deliver, state, updateSettings } from '../../state/index.ts';
 
-const SYNC_HELP =
-  'Sans Internet : les deux appareils échangent un fichier par AirDrop (Wi-Fi et Bluetooth, de proche en proche). Chaque côté garde toutes les entrées des deux, et pour le reste c’est la modification la plus récente qui gagne.';
-const SYNC_STEPS = [
-  'Sur l’appareil A : Envoyer, puis AirDrop vers l’appareil B.',
-  'Sur B : touchez la notification AirDrop, puis « Enregistrer dans Fichiers ».',
-  'Sur B, dans l’appli : Recevoir et choisissez le fichier. B est à jour.',
-  'Pour que A soit aussi à jour : refaites la même chose de B vers A.',
-];
+import { SyncHelp } from './SyncHelp.tsx';
 
 async function exportEverything(): Promise<void> {
   buzz();
@@ -52,35 +45,7 @@ export function BackupSections() {
   return (
     <>
       <FoldSection id="sync" title="🔄 Synchroniser téléphone et tablette">
-        <HelpText text={SYNC_HELP}>
-          {tr('Sans Internet : les deux appareils échangent un fichier par ', {
-            help: true,
-          })}
-          <b>{tr('AirDrop', { help: true })}</b>
-          {tr(
-            ' (Wi-Fi et Bluetooth, de proche en proche). Chaque côté garde toutes les entrées des deux, et pour le reste c’est la modification la plus récente qui gagne.',
-            { help: true },
-          )}
-        </HelpText>
-        <HelpText
-          as="ol"
-          className="sync-steps"
-          items={SYNC_STEPS}
-          text={SYNC_STEPS.join(' ')}
-        >
-          <li>
-            {tr('Sur l’appareil A : ', { help: true })}
-            <b>{tr('Envoyer', { help: true })}</b>
-            {tr(', puis AirDrop vers l’appareil B.', { help: true })}
-          </li>
-          <li>{tr(SYNC_STEPS[1] as string, { help: true })}</li>
-          <li>
-            {tr('Sur B, dans l’appli : ', { help: true })}
-            <b>{tr('Recevoir', { help: true })}</b>
-            {tr(' et choisissez le fichier. B est à jour.', { help: true })}
-          </li>
-          <li>{tr(SYNC_STEPS[3] as string, { help: true })}</li>
-        </HelpText>
+        <SyncHelp />
         <ButtonRow className="row set-stack">
           <Button
             className={withPhotos ? 'btn big on' : 'btn big'}

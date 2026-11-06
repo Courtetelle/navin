@@ -28,6 +28,10 @@ export function printBook(ids: readonly string[]): void {
   const lake = isLake();
   const pages: ReactNode[] = [];
   for (const id of ids) pages.push(bookPage(id));
+  // Printing a sea day leaves the day sheet on today.
+  if (!lake && ids.some((id) => id.startsWith('day:'))) {
+    state.view.currentDay.value = null;
+  }
   printInHolder({
     className: 'print-only book',
     content: pages,

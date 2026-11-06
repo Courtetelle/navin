@@ -12,10 +12,12 @@ import { installFrameLinks } from './frameLinks.ts';
 import { preloadPages } from './pageRegistry.ts';
 import { installParityHook, parityStarted } from './parityHook.ts';
 import { addNavigationListener, go } from './router.ts';
+import { installTapScrollHold } from './scrollAnchor.ts';
 import { followTheme } from './theme.ts';
 import { scheduleBootTip } from './tips.ts';
 import { installToastListeners } from './toast/toastTouch.ts';
 import { tickClock } from './topbar/clockState.ts';
+import { followTabEdits } from './topbar/tabEdits.ts';
 import { refreshBase, resetTab } from './topbar/topMenuState.ts';
 import { followTopState } from './topbar/topState.ts';
 import { installRollListeners } from './uiEdit/rollListeners.ts';
@@ -41,6 +43,7 @@ function boot(): void {
   installUiEditCatch();
   installRollListeners();
   installFrameLinks();
+  installTapScrollHold();
   effect(() => {
     document.documentElement.classList.toggle(
       'no-help-i',
@@ -67,6 +70,7 @@ function start(): void {
   runBootHook('applyIcon');
   runBootHook('autoResumeTrip');
   go('tracker');
+  setTimeout(followTabEdits, 0);
   parityStarted();
   registerServiceWorker();
   navigator.storage?.persist?.().catch(() => undefined);

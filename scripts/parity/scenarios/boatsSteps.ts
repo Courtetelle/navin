@@ -90,7 +90,7 @@ export const catchBlobs: Step = {
 /** Show the size and digest of the last file produced in the DOM. */
 export const dumpBlob: Step = {
   eval: `(async () => {
-    const blob = window.parityBlobs.at(-1);
+    const blob = window.parityBlobs.at(-1) ?? new Blob([]);
     const bytes = await blob.arrayBuffer();
     const digest = await crypto.subtle.digest('SHA-256', bytes);
     const hex = [...new Uint8Array(digest)]
@@ -166,5 +166,34 @@ export const versionBoat = {
 
 export const BOOT: Step = { wait: 2000 };
 export const FIRST_LOAD: Step = { wait: 2500 };
+/** Wait until a button armed for a second tap has calmed down. */
+export const ARMED_GONE: Step = { wait: 3300 };
+/** Wait until the long texts of a form have finished scrolling. */
+export const MARQUEE_DONE: Step = { wait: 4000 };
 /** Wait until the toast of an action is gone. */
 export const TOAST_GONE: Step = { wait: 3000 };
+
+/**
+ * Slide a boat to the left, then hold the confirmation at once: in one step,
+ * because the confirmation closes by itself after 5 seconds.
+ */
+export function swipeAndHold(selector: string): Step {
+  const { eval: slide } = swipe(selector) as { eval: string };
+  return {
+    eval: `(async () => {
+      ${slide};
+      const pause = (ms) => new Promise((done) => setTimeout(done, ms));
+      let button = null;
+      for (let tries = 0; tries < 50 && !button; tries++) {
+        await pause(50);
+        button = document.querySelector('[data-swok]');
+      }
+      const fire = (type) => button.dispatchEvent(
+        new PointerEvent(type, { bubbles: true, cancelable: true, pointerId: 1 }),
+      );
+      fire('pointerdown');
+      await pause(900);
+      fire('pointerup');
+    })()`,
+  };
+}

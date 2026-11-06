@@ -91,21 +91,32 @@ export async function delPhoto(id: string): Promise<void> {
  * @param file - Image file or blob.
  * @returns The data URL.
  */
-export function shrinkPhoto(file: Blob): Promise<string> {
-  return new Promise<string>((resolve, reject) => {
+export async function shrinkPhoto(file: Blob): Promise<string> {
+  const url = URL.createObjectURL(file);
+  try {
+    const image = await loadImage(url);
+    const scale = Math.min(1, 1280 / Math.max(image.width, image.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(image.width * scale);
+    canvas.height = Math.round(image.height * scale);
+    canvas
+      .getContext('2d')
+      ?.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', 0.7);
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
+function loadImage(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
     const image = new Image();
     image.addEventListener('load', () => {
-      const scale = Math.min(1, 1280 / Math.max(image.width, image.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(image.width * scale);
-      canvas.height = Math.round(image.height * scale);
-      canvas
-        .getContext('2d')
-        ?.drawImage(image, 0, 0, canvas.width, canvas.height);
-      URL.revokeObjectURL(image.src);
-      resolve(canvas.toDataURL('image/jpeg', 0.7));
+      resolve(image);
     });
-    image.addEventListener('error', reject);
-    image.src = URL.createObjectURL(file);
+    image.addEventListener('error', () => {
+      reject(new Error('Unreadable image'));
+    });
+    image.src = url;
   });
 }

@@ -26,6 +26,9 @@
  * | `sosExOn`            | `sosExOn()`                                                |
  * | `window.sosSimStart` | `sosSimStart(kind)`                                        |
  * | `[data-sossim]`      | `sosSimToggle(kind)` (settings: `data-sossim` buttons)     |
+ * | `NATO`, `spell`      | `NATO`, `spell(text)`, `spellDigits(text)`                 |
+ * | `sosContext`         | `sosContext(source, nature)` (pure, `ScriptSource`)        |
+ * | `SOS`, `VOCAB`       | `SOS`, `SOS_KINDS`, `VOCAB`, type `SosProcedure`           |
  *
  * The settings screen may simply render `data-sosex="ch|fr|mer"` and
  * `data-sossim="ch|fr|mer"` on its buttons: the document listeners of this
@@ -46,7 +49,18 @@ export {
 export { SosEndButton } from './SosEndButton.tsx';
 export { SosLogBanner } from './SosLogBanner.tsx';
 export { SosPosBlock } from './SosPosBlock.tsx';
+export { NATO, spell, spellDigits } from './nato.ts';
+export type { ScriptSource } from './sosContext.ts';
+export { sosContext } from './sosContext.ts';
 export { sosLogStart } from './sosLogStart.ts';
+export type {
+  ScriptContext,
+  ScriptLine,
+  SosKind,
+  SosNature,
+  SosProcedure,
+} from './sosScripts.ts';
+export { SOS, SOS_KINDS, VOCAB } from './sosScripts.ts';
 export {
   sosExEnd,
   sosExOn,

@@ -3,7 +3,6 @@ import { Fragment } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { TzTime } from '../../components/shared/TzTime.tsx';
-import { keyedItems } from '../../features/safety/keyedItems.ts';
 import type { MobSection } from '../../features/safety/mobDefaults.ts';
 import type { MobLogRecord } from '../../features/safety/mobLog.ts';
 import {
@@ -14,6 +13,7 @@ import {
 import { mobAllure, mobSections } from '../../features/safety/mobProcedures.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 
 /** Props of {@link MobSteps}. */
 export interface MobStepsProps {

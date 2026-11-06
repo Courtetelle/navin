@@ -2,6 +2,7 @@ import { ArmedButton } from '../../components/shared/ArmedButton.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import { CK_UNITS } from '../../model/checklistSeeds.ts';
 
 import type { EditableItem } from './checklistEditing.ts';
@@ -31,9 +32,9 @@ export function ItemsEditor({ items, onUpdate, onRedraw }: ItemsEditorProps) {
     });
   };
   const rows = [];
-  for (const [index, item] of items.entries()) {
+  for (const { key, item, index } of keyedItems(items, itemName)) {
     rows.push(
-      <div className="ck-row" key={index}>
+      <div className="ck-row" key={key}>
         <textarea
           className="text"
           rows={2}
@@ -116,6 +117,10 @@ export function ItemsEditor({ items, onUpdate, onRedraw }: ItemsEditorProps) {
     );
   }
   return <div className="ck-edit">{rows}</div>;
+}
+
+function itemName(item: EditableItem): string {
+  return item.id ?? item.label;
 }
 
 function unitOption(unit: string): string {

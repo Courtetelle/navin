@@ -1,4 +1,5 @@
 import { uid } from '../../lib/format.ts';
+import { indexById } from '../../lib/indexById.ts';
 import type { CustomField } from '../../model/boatSheet.ts';
 import { BOAT_SECTIONS, boatSections } from '../../model/boatSheet.ts';
 import type { Boat } from '../../model/types.ts';
@@ -139,9 +140,10 @@ function anchorOf(line: LabelLine | undefined): string | undefined {
 }
 
 function reanchor(boat: Boat, lines: LabelLine[]): void {
+  const customs = indexById(boat.custom ?? []);
   for (const [index, line] of lines.entries()) {
     if (!line.cid) continue;
-    const custom = boat.custom?.find((item) => item.id === line.cid);
+    const custom = customs.get(line.cid);
     const previous = lines[index - 1];
     if (custom && previous) custom.after = anchorOf(previous);
   }

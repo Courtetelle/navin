@@ -2,12 +2,12 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
 import { HelpText } from '../../components/shared/HelpText.tsx';
-import { MarqueeInput } from '../../features/safety/MarqueeInput.tsx';
-import { keyedItems } from '../../features/safety/keyedItems.ts';
+import { MarqueeInput } from '../../features/logbook/index.ts';
 import { NATO, NATO_FR, NATO_KEYS } from '../../features/safety/nato.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { textOf } from '../../lib/format.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { go } from '../../shell/router.ts';

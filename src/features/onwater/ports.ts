@@ -211,6 +211,7 @@ async function reverseGeocode(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=12&lat=${lat}&lon=${lon}&accept-language=fr`,
       { signal: controller.signal },
     );
+    if (!reply.ok) return null;
     const json = (await reply.json()) as { address?: Record<string, string> };
     const address = json.address ?? {};
     return (

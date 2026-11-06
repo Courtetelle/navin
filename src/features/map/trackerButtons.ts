@@ -33,9 +33,6 @@ export const trackerOverlay = signal<TrackerOverlay>({
   framed: false,
 });
 
-/** Whether the tracker screen is on screen (legacy `$('#trkBtns')`). */
-export const trackerOpen = { current: false };
-
 /** Redraw the overlay of the tracker (legacy `drawTrkButtons`). */
 export function drawTrkButtons(): void {
   trackerOverlay.value = {
@@ -51,7 +48,7 @@ export function drawTrkButtons(): void {
  */
 export function trkChooseStart(): void {
   const last = store.get<Trip | null>(lastTripKey(), null);
-  if (!trackerOpen.current || !last) return;
+  if (state.view.currentView.value !== 'tracker' || !last) return;
   const end = last.end ? fmtTime(new Date(last.end)) : '';
   const distance = last.det ? (last.det.dist as number) : 0;
   const detail = end ? ` (arrivée à ${end}, ${fr(distance)} NM)` : '';

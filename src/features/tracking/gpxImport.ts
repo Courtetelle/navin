@@ -1,5 +1,6 @@
 import { signal } from '@preact/signals-react';
 
+import { indexById } from '../../lib/indexById.ts';
 import type { TrackPoint } from '../../state/index.ts';
 import {
   loadTrack,
@@ -70,8 +71,9 @@ export async function applyImport(
   const created = plan.fresh.map((event) => autoEntryFrom(event, lochBase));
   updateCruise((cruise) => {
     cruise.entries.push(...created);
+    const entries = indexById(cruise.entries);
     for (const { id, add } of plan.fills) {
-      const entry = cruise.entries.find((item) => item.id === id);
+      const entry = entries.get(id);
       if (!entry) continue;
       Object.assign(entry.v, add);
       if (add.tws != null) entry.windSrc = 'trace';

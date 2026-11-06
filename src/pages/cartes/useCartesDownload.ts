@@ -54,48 +54,50 @@ export function useCartesDownload(
     }
     setDisabled(true);
     setStatus('📍 Recherche de votre position…');
-    const position = await cartesPos();
-    if (!position) {
-      setDisabled(false);
-      setStatus('');
-      toast(
-        'Position GPS introuvable : autorisez la localisation puis réessayez',
+    try {
+      const position = await cartesPos();
+      if (!position) {
+        setStatus('');
+        toast(
+          'Position GPS introuvable : autorisez la localisation puis réessayez',
+        );
+        return;
+      }
+      const { lat, lon, old } = position;
+      const bounds = radiusBounds(lat, lon, km);
+      const zoomMax = radiusZoom(bounds);
+      const zone: Zone = {
+        id: Date.now().toString(36),
+        name: `Autour de moi · ${km} km`,
+        b: bounds,
+        zmax: zoomMax,
+        at: new Date().toISOString(),
+        center: [lat, lon],
+        km,
+      };
+      const origin = old ? 'Dernière position connue' : 'Position';
+      setStatus(
+        `${origin} : ${lat.toFixed(3)}, ${lon.toFixed(3)} · détail jusqu’au zoom ${zoomMax}`,
       );
-      return;
-    }
-    const { lat, lon, old } = position;
-    const bounds = radiusBounds(lat, lon, km);
-    const zoomMax = radiusZoom(bounds);
-    const zone: Zone = {
-      id: Date.now().toString(36),
-      name: `Autour de moi · ${km} km`,
-      b: bounds,
-      zmax: zoomMax,
-      at: new Date().toISOString(),
-      center: [lat, lon],
-      km,
-    };
-    const origin = old ? 'Dernière position connue' : 'Position';
-    setStatus(
-      `${origin} : ${lat.toFixed(3)}, ${lon.toFixed(3)} · détail jusqu’au zoom ${zoomMax}`,
-    );
-    zoneBusy.current = true;
-    const result = await zoneDownload(zone, (done, all) => {
-      setProgress(`⬇ ${done} / ${all} morceaux…`);
-    });
-    zoneBusy.current = false;
-    if (!result.ok) {
+      zoneBusy.current = true;
+      const result = await zoneDownload(zone, (done, all) => {
+        setProgress(`⬇ ${done} / ${all} morceaux…`);
+      });
+      if (!result.ok) {
+        toast('Chargement impossible');
+        return;
+      }
+      zoneSave([...zoneList(), { ...zone, ok: result.ok, ko: result.ko }]);
+      const missing = result.ko ? `, ${result.ko} manquants` : '';
+      toast(
+        `✓ Cartes chargées sur ${km} km autour de vous (${result.ok} morceaux${missing})`,
+      );
+      if (state.view.currentView.value === 'cartes') onDone();
+    } finally {
+      zoneBusy.current = false;
       setDisabled(false);
       setProgress(null);
-      toast('Chargement impossible');
-      return;
     }
-    zoneSave([...zoneList(), { ...zone, ok: result.ok, ko: result.ko }]);
-    const missing = result.ko ? `, ${result.ko} manquants` : '';
-    toast(
-      `✓ Cartes chargées sur ${km} km autour de vous (${result.ok} morceaux${missing})`,
-    );
-    if (state.view.currentView.value === 'cartes') onDone();
   };
 
   return { disabled, status, progress, start: () => void run() };

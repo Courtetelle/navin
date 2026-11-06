@@ -1,3 +1,5 @@
+import { ZONE_CACHE } from '../../serviceWorker/cacheNames.ts';
+
 import { SEAMARK_TILES } from './constants.ts';
 import { BASE_LAKES, lakeTileUrls } from './lakes.ts';
 import type { Zone } from './zoneStore.ts';
@@ -8,9 +10,6 @@ import {
   zoneTileXY,
   zoneUrl,
 } from './zoneStore.ts';
-
-/** Cache of the zones, never emptied automatically. */
-export const ZONE_CACHE = 'livre-de-bord-zones';
 
 /** A download is running: only one at a time, zones and maps alike. */
 export const zoneBusy = { current: false };

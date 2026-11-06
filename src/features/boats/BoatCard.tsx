@@ -55,7 +55,8 @@ export function BoatCard({
 }: BoatCardProps) {
   useSignals();
   const tr = useTr();
-  const [everOpened, setEverOpened] = useState(open);
+  const [opened, setOpened] = useState(false);
+  const everOpened = open || opened;
   // Legacy wrote these once; only the boat name followed the typing.
   const [drawn] = useState(() => ({
     sub: boatSub(boat.info),
@@ -83,7 +84,7 @@ export function BoatCard({
           open={open}
           onToggle={(event) => {
             const shown = event.currentTarget.open;
-            if (shown) setEverOpened(true);
+            if (shown) setOpened(true);
             onToggle(shown);
           }}
         >
@@ -121,6 +122,7 @@ export function BoatCard({
               )}
               data={boat.info}
               onChange={(next) => saveBoatInfo(boat.id, next)}
+              formKey={boat.id}
             />
           </div>
           <BoatPhotos boat={boat} onRefresh={onRefresh} />

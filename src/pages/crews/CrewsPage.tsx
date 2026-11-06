@@ -1,4 +1,4 @@
-import { CrewScreenHost } from '../../features/crew/CrewScreenHost.tsx';
+import { CrewScreenHost } from '../../features/crew/index.ts';
 
 /**
  * Screen `crews` (legacy `VIEWS.crews`, prep.js:770): the crew compositions.

@@ -1,14 +1,8 @@
 import { expect, test } from 'vitest';
 
-import { BASE_LAKES, lakeTileUrls, vdWmsTiles, wmsKey } from '../lakes.ts';
+import { BASE_LAKES, lakeTileUrls, vdWmsTiles } from '../lakes.ts';
 import { chaikin } from '../simChartData.ts';
 import { trackerDashTexts } from '../trackerDash.ts';
-
-test('wmsKey sorts the parameters and rounds the box to the metre', () => {
-  expect(
-    wmsKey('https://a.ch/wms?REQUEST=GetMap&bbox=1.4,2.6,3,4&Layers=a%20b'),
-  ).toBe('https://a.ch/wms?bbox=1%2C3%2C3%2C4&layers=a%20b&request=GetMap');
-});
 
 test('lakeTileUrls keeps zoom 8 and above, buoyage from zoom 9', () => {
   const [leman] = BASE_LAKES;

@@ -38,7 +38,7 @@ export interface BlankArbitrationProps {
 export function BlankArbitration({ received, clones }: BlankArbitrationProps) {
   useSignals();
   const tr = useTr();
-  const [target, setTarget] = useState(clones[0] as Member);
+  const [target, setTarget] = useState(() => clones[0] as Member);
   const [chosen, setChosen] = useState<ArbitrationPick>({});
   const [redrawn, setRedrawn] = useState(false);
   const diff = differingKeys(received, target);

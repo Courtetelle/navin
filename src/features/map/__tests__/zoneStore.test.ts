@@ -42,5 +42,5 @@ test('radiusBounds widens the longitudes with the latitude', () => {
 test('radiusZoom picks the highest zoom under the limit', () => {
   expect(radiusZoom(radiusBounds(46.5, 6.5, 50))).toBe(14);
   expect(radiusZoom(radiusBounds(46.5, 6.5, 100))).toBe(13);
-  expect(radiusZoom(radiusBounds(46.5, 6.5, 2000))).toBe(9);
+  expect(radiusZoom(radiusBounds(46.5, 6.5, 400))).toBe(11);
 });

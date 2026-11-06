@@ -1,6 +1,6 @@
 import { ArmedButton } from '../../components/shared/ArmedButton.tsx';
 import { Button } from '../../components/shared/Button.tsx';
-import { MarqueeInput } from '../../features/safety/MarqueeInput.tsx';
+import { MarqueeInput } from '../../features/logbook/index.ts';
 import type { MobSection, MobStep } from '../../features/safety/mobDefaults.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';

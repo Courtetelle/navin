@@ -23,7 +23,9 @@ export function SectionChecks({
   choice,
 }: ListOptionProps): ReactElement {
   const keys = sectionKeys(items);
-  const checked = keys.filter((key) => !choice.offSec.includes(key)).length;
+  const offSections = new Set(choice.offSec);
+  const offRows = new Set(choice.offRow);
+  const checked = keys.filter((key) => !offSections.has(key)).length;
   return (
     <>
       <p className="help lx-sec-h">
@@ -40,7 +42,7 @@ export function SectionChecks({
         />
       </div>
       {keys.map((key) => {
-        const on = !choice.offSec.includes(key);
+        const on = !offSections.has(key);
         const labels = sectionRowLabels(items, key);
         return (
           <SectionCheck
@@ -49,7 +51,7 @@ export function SectionChecks({
             sectionKey={key}
             on={on}
             labels={labels}
-            offRow={choice.offRow}
+            offRows={offRows}
           />
         );
       })}
@@ -62,13 +64,13 @@ function SectionCheck({
   sectionKey,
   on,
   labels,
-  offRow,
+  offRows,
 }: {
   kind: ListKind;
   sectionKey: string;
   on: boolean;
   labels: readonly string[];
-  offRow: readonly string[];
+  offRows: ReadonlySet<string>;
 }): ReactElement {
   return (
     <>
@@ -90,7 +92,7 @@ function SectionCheck({
             return (
               <CheckButton
                 key={id}
-                on={!offRow.includes(id)}
+                on={!offRows.has(id)}
                 data-lxr={id}
                 onClick={() => {
                   toggleRow(kind, id);

@@ -95,10 +95,11 @@ export async function deliver(
     }
   }
   const anchor = document.createElement('a');
-  anchor.href = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
+  anchor.href = url;
   anchor.download = name;
   document.body.append(anchor);
   anchor.click();
   anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(anchor.href), 5000);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
 }

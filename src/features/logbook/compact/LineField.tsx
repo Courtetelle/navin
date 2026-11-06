@@ -4,12 +4,14 @@ import { useEffect, useRef } from 'react';
 import { useMarquee } from '../../../components/shared/useMarquee.ts';
 import { useTr } from '../../../i18n/useTr.ts';
 import { textOf } from '../../../lib/format.ts';
+import { createTimerGroup } from '../../../lib/timers.ts';
 import { windConv } from '../../../lib/wind.ts';
 import type { FieldDefinition } from '../../../model/field.ts';
 
 import { Cell } from './Cell.tsx';
 import { FieldLabel } from './FieldLabel.tsx';
 import { isWide } from './cellRules.ts';
+import type { CompactFormContext } from './compactContext.ts';
 import { useCompactForm } from './compactContext.ts';
 import { expNote, expState } from './expiry.ts';
 import { isFilled } from './fieldChange.ts';
@@ -36,7 +38,7 @@ export function LineField({ field }: { field: FieldDefinition }) {
   const lock = useFieldLock(field, cell.text, cell.focused, input);
   useMarquee(input);
   useDependentPicker(field, input);
-  const { key, type, auto, manual, prefix, expiry, wind, minFrom } = field;
+  const { key, type, prefix, expiry, wind, minFrom } = field;
   const { inputmode, placeholder = '' } = field;
   const formStore = form.store;
   useEffect(() => {
@@ -44,16 +46,8 @@ export function LineField({ field }: { field: FieldDefinition }) {
     return () => formStore.register(key, null);
   }, [formStore, key]);
 
-  const stored = isFilled(form.shown[key]);
-  const classes = ['text'];
-  if (auto) {
-    if (manual ? manual(form.values) : stored) classes.push('auto-man');
-    if (!stored) classes.push('auto-calc');
-  }
-  classes.push(...lock.classes);
   const expired = expiry ? expState(cell.text) : '';
-  if (expired === 'warn') classes.push('exp-warn');
-  if (expired === 'bad') classes.push('exp-bad');
+  const classes = lineClasses(field, form, expired, lock.classes);
   const inputMode = type === 'num' ? 'decimal' : inputmode;
   const minimum = minFrom ? textOf(form.values[minFrom]) : '';
 
@@ -111,6 +105,24 @@ export function LineField({ field }: { field: FieldDefinition }) {
   );
 }
 
+function lineClasses(
+  { key, auto, manual }: FieldDefinition,
+  form: CompactFormContext,
+  expired: string,
+  lockClasses: readonly string[],
+): string[] {
+  const stored = isFilled(form.shown[key]);
+  const classes = ['text'];
+  if (auto) {
+    if (manual ? manual(form.values) : stored) classes.push('auto-man');
+    if (!stored) classes.push('auto-calc');
+  }
+  classes.push(...lockClasses);
+  if (expired === 'warn') classes.push('exp-warn');
+  if (expired === 'bad') classes.push('exp-bad');
+  return classes;
+}
+
 // An end date opens right after its start date was chosen.
 function useDependentPicker(
   field: FieldDefinition,
@@ -121,10 +133,10 @@ function useDependentPicker(
   useEffect(() => {
     const element = input.current;
     if (!element || !dependent) return undefined;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timers = createTimerGroup();
     const onNativeChange = () => {
       if (!element.value) return;
-      timer = setTimeout(() => {
+      timers.after(300, () => {
         const target = document.querySelector<HTMLInputElement>(
           `[data-k="${CSS.escape(dependent.key)}"]`,
         );
@@ -134,11 +146,11 @@ function useDependentPicker(
         } catch {
           target?.focus();
         }
-      }, 300);
+      });
     };
     element.addEventListener('change', onNativeChange);
     return () => {
-      clearTimeout(timer);
+      timers.clear();
       element.removeEventListener('change', onNativeChange);
     };
   }, [dependent, input]);

@@ -102,7 +102,7 @@ function DossierSheet({
   const tr = useTr();
   useNavFields();
   const [publishing, setPublishing] = useState(false);
-  const [versioned] = useState(boat);
+  const [versioned] = useState(() => boat);
   const name = boat.info.boat || 'Bateau sans nom';
   return (
     <>

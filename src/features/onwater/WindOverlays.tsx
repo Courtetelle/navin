@@ -21,9 +21,13 @@ const PAUSE_MS = 400;
  */
 export function WindFlashes() {
   useSignals();
-  return windFlashes.value.map((flash) => (
-    <OneFlash key={flash.id} flash={flash} />
-  ));
+  return (
+    <>
+      {windFlashes.value.map((flash) => (
+        <OneFlash key={flash.id} flash={flash} />
+      ))}
+    </>
+  );
 }
 
 function translate(text: string): string {

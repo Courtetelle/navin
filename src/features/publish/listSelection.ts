@@ -47,19 +47,24 @@ export function chosenItems(
   choice: ListChoice,
 ): PublishItem[] {
   const chosen: PublishItem[] = [];
+  const off = new Set(choice.off);
+  const offPhotos = new Set(choice.offPh);
+  const offSections = new Set(choice.offSec);
+  const offRows = new Set(choice.offRow);
+  const noPhotos = offSections.has('§photos');
+  const noFace = offSections.has('§face');
   for (const item of items) {
-    if (choice.off.includes(item.id)) continue;
-    const sections = keptSections(item, choice);
-    const noPhotos = choice.offSec.includes('§photos');
+    if (off.has(item.id)) continue;
+    const sections = keptSections(item, offSections, offRows);
     const photos = noPhotos
       ? []
-      : (item.photos ?? []).filter((photo) => !choice.offPh.includes(photo.id));
+      : (item.photos ?? []).filter((photo) => !offPhotos.has(photo.id));
     if (sections.length === 0 && photos.length === 0) continue;
     chosen.push({
       ...item,
       sections,
       photos,
-      face: choice.offSec.includes('§face') ? null : item.face,
+      face: noFace ? null : item.face,
     });
   }
   return chosen;
@@ -67,7 +72,8 @@ export function chosenItems(
 
 function keptSections(
   item: PublishItem,
-  { offSec, offRow }: ListChoice,
+  offSections: ReadonlySet<string>,
+  offRows: ReadonlySet<string>,
 ): PublishSection[] {
   const kept: PublishSection[] = [];
   for (const section of item.sections) {
@@ -76,9 +82,9 @@ function keptSections(
       if (section.rows.length > 0) kept.push(section);
       continue;
     }
-    if (offSec.includes(sk)) continue;
+    if (offSections.has(sk)) continue;
     const rows = section.rows.filter(
-      ([label]) => !offRow.includes(`${sk}|${label}`),
+      ([label]) => !offRows.has(`${sk}|${label}`),
     );
     if (rows.length > 0) kept.push({ ...section, rows });
   }

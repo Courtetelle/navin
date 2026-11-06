@@ -13,6 +13,7 @@ import { NavigationButtons } from './NavigationButtons.tsx';
 import { WeatherNowBlock } from './WeatherNowBlock.tsx';
 import { WindAlert } from './WindAlert.tsx';
 import { lakeRefresh, refreshLakeButtons } from './lakeRefresh.ts';
+import { useBoxTr } from './useBoxTr.ts';
 import { updateLakeWx } from './weather.ts';
 import type { WeatherNow } from './weatherLogic.ts';
 
@@ -44,6 +45,7 @@ export function LakeButtons({ inPopup = false }: LakeButtonsProps) {
 
 function LakeBox({ inPopup }: { inPopup: boolean }) {
   useSignals();
+  const tr = useBoxTr(inPopup);
   const lake = isLake();
   const today = dayKey(new Date());
   const weather = getDay(today).wxNow as WeatherNow | undefined;
@@ -84,7 +86,9 @@ function LakeBox({ inPopup }: { inPopup: boolean }) {
                 });
               }}
             >
-              {wxPhase === 'idle' ? '↻ Mettre à jour (réseau)' : '⏳ Météo…'}
+              {wxPhase === 'idle'
+                ? tr('↻ Mettre à jour (réseau)')
+                : '⏳ Météo…'}
             </Button>
           </ButtonRow>
           <WindAlert keep={inPopup} />
@@ -99,7 +103,7 @@ function LakeBox({ inPopup }: { inPopup: boolean }) {
         </Box>
       )}
       <Box inPopup={inPopup} className="field lake-btns" title="En navigation">
-        <NavigationButtons today={today} lake={lake} />
+        <NavigationButtons today={today} lake={lake} inPopup={inPopup} />
       </Box>
     </>
   );
@@ -116,6 +120,7 @@ function Box({
   title: string;
   children: ReactNode;
 }) {
+  const tr = useBoxTr(inPopup);
   if (inPopup) {
     return (
       <section className={className}>
@@ -129,7 +134,7 @@ function Box({
   return (
     <FoldSection
       className={className}
-      title={<span>{title}</span>}
+      title={<span>{tr(title)}</span>}
       titleText={title}
     >
       {children}

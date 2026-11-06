@@ -1,14 +1,15 @@
+import { untracked } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { TzTime } from '../../components/shared/TzTime.tsx';
 import { bearing, distNM, fmtPos } from '../../lib/geo.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import type { SosLog } from '../../model/types.ts';
 import { lastKnownPos, sosLogActive, state } from '../../state/index.ts';
 
-import { keyedItems } from './keyedItems.ts';
 import { sosExOn, sosSimulation } from './sosExercise.ts';
 import { sosPlaceWords } from './sosPlaces.ts';
 
@@ -27,9 +28,16 @@ interface ShownPosition {
  */
 export function SosPosBlock() {
   useSignals();
-  const log = sosLogActive();
+  // Decided when the screen is drawn: the block stays after the end of the
+  // procedure, until the screen redraws.
+  const [logId] = useState(() => untracked(sosLogActive)?.id);
+  const [shown] = useState(
+    () => Boolean(logId) || Boolean(untracked(sosSimulation)),
+  );
+  const log =
+    state.data.sosLogs.value.find((item) => item.id === logId) ?? null;
   const simulation = sosSimulation();
-  if (!log && !simulation) return null;
+  if (!shown) return null;
   const frozen = frozenPosition(log);
   const current = state.view.sosLive.value ?? lastKnownPos();
   return (

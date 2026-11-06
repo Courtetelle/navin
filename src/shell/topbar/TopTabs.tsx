@@ -1,12 +1,18 @@
 import { useSignals } from '@preact/signals-react/runtime';
+import type { ReactNode } from 'react';
 import { Fragment, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { markupToReact } from '../../components/shared/markupToReact.ts';
+import type { UiEdit } from '../../model/logTypes.ts';
 import { litTab } from '../litTab.ts';
 import { tipFocus } from '../tips.ts';
+import { RollTrack } from '../uiEdit/RollTrack.tsx';
+import { editClasses, editedChildren } from '../uiEdit/applyUiEdit.tsx';
 
+import type { TabDisplay } from './tabDisplays.ts';
 import { TAB_ORDER, tabDisplays } from './tabDisplays.ts';
+import { faceIsEdited, tabEdit, tabEditKey } from './tabEdits.ts';
 import type { TopTabKey } from './topMenuModel.ts';
 import { refreshBase } from './topMenuState.ts';
 import { sosSimulation } from './topState.ts';
@@ -16,6 +22,12 @@ import {
   tabKeyDown,
   tabPointerDown,
 } from './topTabGestures.ts';
+
+const TAB_ORIGINALS: Record<TopTabKey, string> = {
+  tracker: 'NavIn',
+  more: 'data',
+  sos: '',
+};
 
 const TAB_CLASS: Record<TopTabKey, string> = {
   tracker: 'tab top-tab',
@@ -65,9 +77,8 @@ function TopTab({ tab, active }: TopTabProps) {
   const display = tabDisplays[tab].value;
   const focused = tipFocus.value === tab;
   const reference = useRef<HTMLButtonElement>(null);
-  const { face, base, staged, stageStop, stopArmed, keyboardFocus, fits } =
-    display;
-  const { measuredStaged } = display;
+  const { face, base, fits, measuredStaged } = display;
+  const edit = tabEdit(tab);
   useLayoutEffect(() => {
     // The inline font size is measured, so it is written here, never by React.
     if (reference.current) fitFontSize(reference.current, measuredStaged);
@@ -75,31 +86,33 @@ function TopTab({ tab, active }: TopTabProps) {
   const classes = [
     TAB_CLASS[tab],
     active && 'active',
-    staged && 'staged',
-    stageStop && 'stage-stop',
-    stopArmed && 'stop-armed',
-    face.bare && 'bare',
-    face.box && 'ph-box',
-    face.vhfOn && 'vhf-on',
-    keyboardFocus && 'kbd-focus',
+    ...displayClasses(display),
     focused && 'tip-focus',
+    ...editClasses(edit),
   ];
+  const content = face.html
+    ? face.html.map((markup) => (
+        <Fragment key={markup}>{markupToReact(markup)}</Fragment>
+      ))
+    : face.label;
   return (
     <Button
       ref={reference}
       noUiEdit
       data-view={tab}
       data-base={base ?? undefined}
+      data-ue-key={tabEditKey(tab)}
+      data-ue-orig={TAB_ORIGINALS[tab]}
       className={classes.filter(Boolean).join(' ')}
       onPointerDown={() => tabPointerDown(tab)}
       onClick={() => tabClick(tab, active)}
       onContextMenu={(event) => event.preventDefault()}
     >
-      {face.html
-        ? face.html.map((markup) => (
-            <Fragment key={markup}>{markupToReact(markup)}</Fragment>
-          ))
-        : face.label}
+      {edit && faceIsEdited(tab, face) ? (
+        <EditedTab edit={edit}>{content}</EditedTab>
+      ) : (
+        content
+      )}
       {tab === 'sos' && sosSimulation.value ? (
         <span className="sos-simu-tag" aria-hidden="true">
           SIMULATION
@@ -107,6 +120,29 @@ function TopTab({ tab, active }: TopTabProps) {
       ) : null}
     </Button>
   );
+}
+
+function displayClasses({
+  face,
+  staged,
+  stageStop,
+  stopArmed,
+  keyboardFocus,
+}: TabDisplay): Array<string | false | undefined> {
+  return [
+    staged && 'staged',
+    stageStop && 'stage-stop',
+    stopArmed && 'stop-armed',
+    face.bare && 'bare',
+    face.box && 'ph-box',
+    face.vhfOn && 'vhf-on',
+    keyboardFocus && 'kbd-focus',
+  ];
+}
+
+function EditedTab({ edit, children }: { edit: UiEdit; children: ReactNode }) {
+  const edited = editedChildren(children, edit);
+  return edit.wrap === 'roll' ? <RollTrack>{edited}</RollTrack> : edited;
 }
 
 /**

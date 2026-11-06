@@ -9,7 +9,14 @@ import { boatSub } from '../../model/boatSheet.ts';
 import { go } from '../../shell/router.ts';
 import { state } from '../../state/index.ts';
 
-import { newBoat, newZone } from './newCruiseForm.ts';
+import {
+  keepBoat,
+  keepCrew,
+  newBoat,
+  newZone,
+  toggleKeepBoat,
+  toggleKeepCrew,
+} from './newCruiseForm.ts';
 
 const PURPOSES = [
   ['Entraînement', '🎯', 'entre membres'],
@@ -143,5 +150,57 @@ export function ZoneChoice({ zone, onRedraw }: ZoneChoiceProps) {
         ))}
       </ButtonRow>
     </>
+  );
+}
+
+/**
+ * Take over the boat, numbers and settings of the open cruise.
+ * @returns The row.
+ */
+export function KeepBoatRow() {
+  useSignals();
+  const tr = useTr();
+  const on = keepBoat.value;
+  return (
+    <div className="row">
+      <Button
+        className={on ? 'btn on' : 'btn'}
+        id="keepBoat"
+        data-on={on ? '1' : ''}
+        onClick={() => {
+          buzz();
+          toggleKeepBoat();
+        }}
+      >
+        {tr(
+          `Reprendre le bateau, les numéros et réglages : ${on ? 'OUI' : 'NON'}`,
+        )}
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * Take over the crew of the open cruise.
+ * @returns The row.
+ */
+export function KeepCrewRow() {
+  useSignals();
+  const tr = useTr();
+  const on = keepCrew.value;
+  return (
+    <div className="row row-stack">
+      <Button
+        className={on ? 'btn act-plain on' : 'btn act-plain'}
+        id="keepCrew"
+        data-on={on ? '1' : ''}
+        onClick={() => {
+          buzz();
+          toggleKeepCrew();
+        }}
+      >
+        {tr(`Reprendre l’équipage : ${on ? 'OUI' : 'NON'}`)}
+      </Button>
+    </div>
   );
 }

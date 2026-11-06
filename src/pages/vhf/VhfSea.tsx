@@ -4,13 +4,13 @@ import { Button } from '../../components/shared/Button.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
-import { keyedItems } from '../../features/safety/keyedItems.ts';
 import { openView } from '../../features/safety/openView.ts';
 import { VHF_CALLS, VHF_CALL_KEYS } from '../../features/safety/vhfCalls.ts';
 import { VHF_CHANNELS, vhfDialog } from '../../features/safety/vhfDialog.ts';
 import type { VhfCallKey } from '../../features/safety/vhfTypes.ts';
 import { buzz } from '../../lib/dom.ts';
 import { textOf } from '../../lib/format.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { state } from '../../state/index.ts';
 

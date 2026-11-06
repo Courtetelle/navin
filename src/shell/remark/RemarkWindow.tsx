@@ -2,6 +2,7 @@ import type { PointerEvent, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { Button } from '../../components/shared/Button.tsx';
 import { toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
@@ -123,15 +124,18 @@ function RemarkForm({
       return;
     }
     setBusy(true);
-    const outcome = await sendRemark(text, target, anchor);
-    if (outcome.toast) {
-      toast(outcome.message);
-      onClose();
-      return;
+    try {
+      const outcome = await sendRemark(text, target, anchor);
+      if (outcome.toast) {
+        toast(outcome.message);
+        onClose();
+        return;
+      }
+      setMessage(outcome.message);
+      if (outcome.sent) setPosted(true);
+    } finally {
+      setBusy(false);
     }
-    setMessage(outcome.message);
-    if (outcome.sent) setPosted(true);
-    else setBusy(false);
   };
   const where = target
     ? `« ${snippet(target) || target.tagName.toLowerCase()} »`
@@ -154,11 +158,11 @@ function RemarkForm({
         ref={textArea}
       />
       <div className="row">
-        <button
+        <Button
           type="button"
           className="btn big ck-pub"
           data-rem="send"
-          disabled={busy}
+          disabled={busy || posted}
           onClick={() => void send()}
         >
           {posted ? (
@@ -168,20 +172,20 @@ function RemarkForm({
               📨 Envoyer à Claude<small>avec la page et l’endroit visé</small>
             </>
           )}
-        </button>
+        </Button>
       </div>
       <div className="row c2">
-        <button type="button" className="btn" data-rem="list" onClick={onList}>
+        <Button type="button" className="btn" data-rem="list" onClick={onList}>
           {`📋 Mes remarques (${remarks().length})`}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           className="btn"
           data-rem="close"
           onClick={onClose}
         >
           Fermer
-        </button>
+        </Button>
       </div>
       <p className="help rem-msg" id="remMsg">
         {message}

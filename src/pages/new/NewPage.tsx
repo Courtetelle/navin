@@ -99,6 +99,7 @@ export function NewPage() {
       {editing ? null : (
         <div className="row" style={{ marginTop: '16px' }}>
           <ArmedButton
+            key={generation}
             className="btn"
             id="resetBtn"
             armedLabel="Toucher encore pour confirmer"

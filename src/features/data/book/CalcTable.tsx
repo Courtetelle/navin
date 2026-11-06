@@ -2,8 +2,7 @@ import { fmtDur, fmtTime, fr, textOf } from '../../../lib/format.ts';
 import type { FieldDefinition } from '../../../model/field.ts';
 import type { Cruise, Day } from '../../../model/types.ts';
 import { navForDay } from '../../../state/index.ts';
-
-import { engineFigures, milesFigures } from './external.ts';
+import { engineFigures, milesFigures } from '../../logbook/index.ts';
 
 interface FiguresProps {
   cruise: Cruise;

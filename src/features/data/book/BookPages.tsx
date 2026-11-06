@@ -9,8 +9,8 @@ import { TECH_FIELDS } from '../../../model/techFields.ts';
 import type { Cruise } from '../../../model/types.ts';
 import { constatKey } from '../../../model/views.ts';
 import { constatTitle } from '../../../state/index.ts';
+import { spell } from '../../safety/index.ts';
 
-import { spell } from './external.ts';
 import { kvRows } from './kvRows.tsx';
 
 const TITLE_SECTIONS: ReadonlySet<string> = new Set([

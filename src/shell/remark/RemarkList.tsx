@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Fragment, useState } from 'react';
 
+import { Button } from '../../components/shared/Button.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { toast } from '../../state/index.ts';
 
@@ -45,14 +46,14 @@ export function RemarkList({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <div className="row c2">
-        <button
+        <Button
           type="button"
           className="btn"
           data-rl="copy"
           onClick={() => void copy()}
         >
           📋 Tout copier
-        </button>
+        </Button>
         <HoldDeleteButton
           key={list.length}
           type="button"
@@ -67,9 +68,9 @@ export function RemarkList({ onClose }: { onClose: () => void }) {
         </HoldDeleteButton>
       </div>
       <div className="row">
-        <button type="button" className="btn" data-rl="close" onClick={onClose}>
+        <Button type="button" className="btn" data-rl="close" onClick={onClose}>
           Fermer
-        </button>
+        </Button>
       </div>
     </>
   );

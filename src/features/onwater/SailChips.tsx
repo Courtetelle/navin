@@ -5,6 +5,7 @@ import { toast } from '../../state/index.ts';
 
 import { noteLakeEvent } from './lakeActions.ts';
 import type { LakeState } from './lakeState.ts';
+import { useBoxTr } from './useBoxTr.ts';
 
 /** Props of {@link SailChips}. */
 export interface SailChipsProps {
@@ -17,6 +18,8 @@ export interface SailChipsProps {
   pending: string | null;
   /** Receives the key of the button touched. */
   onPick: (key: string) => void;
+  /** Shown outside `#view`. */
+  inPopup: boolean;
 }
 
 /**
@@ -31,7 +34,9 @@ export function SailChips({
   current,
   pending,
   onPick,
+  inPopup,
 }: SailChipsProps) {
+  const tr = useBoxTr(inPopup);
   const pick = (value: string) => {
     if (current[field] === value) {
       buzz();
@@ -66,7 +71,7 @@ export function SailChips({
           disabled={pending === `${field}|${option}`}
           onClick={() => pick(option)}
         >
-          {option}
+          {tr(option)}
         </Button>
       ))}
     </ButtonRow>

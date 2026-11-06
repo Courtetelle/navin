@@ -39,13 +39,15 @@ export function FicheListScreen({ lead }: FicheListScreenProps) {
     <>
       <PageBack
         id="flBack"
-        label={tr(backLabel)}
+        label={backLabel}
         onClick={() => {
           buzz();
           if (toData) go('more');
           else showCrewPick();
         }}
-      />
+      >
+        {tr(backLabel)}
+      </PageBack>
       <PageTitle
         atTop={lead}
         helps={[

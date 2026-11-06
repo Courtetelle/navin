@@ -35,6 +35,7 @@ interface StickyNav {
   hasSteps: boolean;
   pills: ReactNode;
   nextShown: boolean;
+  lineHidden: boolean;
 }
 
 const sticky = signal<StickyNav>({
@@ -42,6 +43,7 @@ const sticky = signal<StickyNav>({
   hasSteps: false,
   pills: null,
   nextShown: false,
+  lineHidden: true,
 });
 
 /**
@@ -73,11 +75,18 @@ export function NavTop() {
     hasSteps: Boolean(steps),
     pills: steps ? steps.pills : previous.pills,
     nextShown: Boolean(prepBar?.onNext),
+    lineHidden: !steps,
   };
   const nav = shown ? live : previous;
   const backLabel = tr(nav.backLabel);
   const backReference = useRef<HTMLButtonElement>(null);
-  const backRoll = useAutoRoll(backReference, backLabel, backLabel);
+  const backRoll = useAutoRoll(
+    backReference,
+    backLabel,
+    backLabel,
+    nav.backLabel,
+    okShown,
+  );
 
   useLayoutEffect(() => {
     setBodyClass('has-navtop', shown);
@@ -145,7 +154,7 @@ export function NavTop() {
       </Button>
       <Button className="btn primary" id="navAct" hidden />
       {lineContent === null ? null : (
-        <PrepLine hidden={!(shown && steps)}>{lineContent}</PrepLine>
+        <PrepLine hidden={nav.lineHidden}>{lineContent}</PrepLine>
       )}
     </div>
   );
@@ -156,7 +165,8 @@ function sameSticky(first: StickyNav, second: StickyNav): boolean {
     first.backLabel === second.backLabel &&
     first.hasSteps === second.hasSteps &&
     first.pills === second.pills &&
-    first.nextShown === second.nextShown
+    first.nextShown === second.nextShown &&
+    first.lineHidden === second.lineHidden
   );
 }
 

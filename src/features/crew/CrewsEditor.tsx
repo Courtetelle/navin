@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -48,6 +49,7 @@ export function CrewsEditor() {
       sorted: membersByNav(),
     };
   });
+  const [flashed, setFlashed] = useState(false);
   const nameInput = useRef<HTMLInputElement>(null);
   useMarquee(nameInput);
   useEffect(() => {
@@ -61,9 +63,8 @@ export function CrewsEditor() {
     const current = state.view.crewsEdit.peek();
     if (current && choicePending(current, crewSetById(current.id))) {
       toast('Choisissez : écraser, nouvel équipage ou annuler');
-      const choice = document.querySelector('#ceChoice');
-      choice?.scrollIntoView({ block: 'center' });
-      choice?.classList.add('lab-flash');
+      flushSync(() => setFlashed(true));
+      document.querySelector('#ceChoice')?.scrollIntoView({ block: 'center' });
       return;
     }
     if (edit.crew.length > 0) toast('Équipage enregistré');
@@ -73,9 +74,11 @@ export function CrewsEditor() {
   };
   return (
     <>
-      <PageBack id="ceBack" label={tr('◀ Équipages')} onClick={leave} />
+      <PageBack id="ceBack" label="◀ Équipages" onClick={leave}>
+        {tr('◀ Équipages')}
+      </PageBack>
       <PageTitle>{base ? crewSetName(base) : 'Nouvel équipage'}</PageTitle>
-      {pending && base ? <CrewsChoice base={base} /> : null}
+      {pending && base ? <CrewsChoice base={base} flashed={flashed} /> : null}
       <FoldSection title="Nom de l’équipage">
         <input
           ref={nameInput}

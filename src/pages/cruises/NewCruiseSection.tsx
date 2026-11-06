@@ -8,16 +8,21 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useMarquee } from '../../components/shared/useMarquee.ts';
 import { autoOutingName } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
-import { buzz } from '../../lib/dom.ts';
 import type { ModeKey } from '../../model/modes.ts';
 import { MODES } from '../../model/modes.ts';
 import { state } from '../../state/index.ts';
 
-import { BoatChoice, PurposeChoice, ZoneChoice } from './CruiseChoices.tsx';
+import {
+  BoatChoice,
+  KeepBoatRow,
+  KeepCrewRow,
+  PurposeChoice,
+  ZoneChoice,
+} from './CruiseChoices.tsx';
 import { createCruise } from './createCruise.ts';
 import {
   keepBoat,
-  keepCrew,
+  keptBoatName,
   nameText,
   nameWithKeptBoat,
   newBoat,
@@ -74,14 +79,11 @@ export function NewCruiseSection({ mode, onRedraw }: NewCruiseSectionProps) {
   }, [lake, boatId]);
   const boat = boats.find((item) => item.id === boatId);
   const showKeepBoat = Boolean(cruise) && mode === 'mer';
-  const boatName = (withKeptBoat: boolean) => {
-    if (lake) return boat?.info.boat || '';
-    const kept =
-      withKeptBoat && showKeepBoat && keepBoat.value && cruise?.type !== 'lac';
-    return (kept && cruise?.info.boat) || '';
+  const keptBoat = showKeepBoat && keepBoat.value ? cruise : null;
+  const autoName = (withKeptBoat: boolean) => {
+    const name = lake ? boat?.info.boat : keptBoatName(keptBoat, withKeptBoat);
+    return autoOutingName(mode, name || '', newPlace.value || '', zone);
   };
-  const autoName = (withKeptBoat: boolean) =>
-    autoOutingName(mode, boatName(withKeptBoat), newPlace.value || '', zone);
   const nameDirty = state.view.nameDirty.value;
   const shownName = nameDirty
     ? nameText.value
@@ -93,7 +95,7 @@ export function NewCruiseSection({ mode, onRedraw }: NewCruiseSectionProps) {
       boat,
       name: shownName.trim() || autoName(true),
       zone,
-      fromCruise: showKeepBoat && keepBoat.value ? cruise : null,
+      fromCruise: keptBoat,
     });
     if (!created) nameField.current?.focus();
   };
@@ -133,39 +135,8 @@ export function NewCruiseSection({ mode, onRedraw }: NewCruiseSectionProps) {
         }}
       />
       <HelpText style={{ marginTop: '4px' }}>{NAME_HELP}</HelpText>
-      {showKeepBoat ? (
-        <div className="row">
-          <Button
-            className={keepBoat.value ? 'btn on' : 'btn'}
-            id="keepBoat"
-            data-on={keepBoat.value ? '1' : ''}
-            onClick={() => {
-              buzz();
-              keepBoat.value = !keepBoat.value;
-              nameWithKeptBoat.value = true;
-            }}
-          >
-            {tr(
-              `Reprendre le bateau, les numéros et réglages : ${keepBoat.value ? 'OUI' : 'NON'}`,
-            )}
-          </Button>
-        </div>
-      ) : null}
-      {cruise ? (
-        <div className="row row-stack">
-          <Button
-            className={keepCrew.value ? 'btn act-plain on' : 'btn act-plain'}
-            id="keepCrew"
-            data-on={keepCrew.value ? '1' : ''}
-            onClick={() => {
-              buzz();
-              keepCrew.value = !keepCrew.value;
-            }}
-          >
-            {tr(`Reprendre l’équipage : ${keepCrew.value ? 'OUI' : 'NON'}`)}
-          </Button>
-        </div>
-      ) : null}
+      {showKeepBoat ? <KeepBoatRow /> : null}
+      {cruise ? <KeepCrewRow /> : null}
       <ButtonRow>
         <Button className="btn big primary" id="createBtn" onClick={create}>
           {tr('＋ Créer et ouvrir')}

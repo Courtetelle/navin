@@ -3,7 +3,7 @@ import { useLayoutEffect } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
-import { MarqueeInput } from '../../features/safety/MarqueeInput.tsx';
+import { MarqueeInput } from '../../features/logbook/index.ts';
 import { ScriptLines } from '../../features/safety/ScriptLines.tsx';
 import { TitleWithHelp } from '../../features/safety/TitleWithHelp.tsx';
 import { VHF_ASK, VHF_CALLS } from '../../features/safety/vhfCalls.ts';

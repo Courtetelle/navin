@@ -15,8 +15,13 @@ export function fitTextarea(area: HTMLTextAreaElement): void {
   area.value = text;
 }
 
-// A cell hidden by its propulsion rule keeps the height it will need once shown.
+// A cell hidden by its propulsion rule keeps the height it will need once shown,
+// unless it opens inside a folded boat.
 function fitOnceDrawn(area: HTMLTextAreaElement): void {
+  if (area.closest('details:not([open])')) {
+    fitTextarea(area);
+    return;
+  }
   const hidden: HTMLElement[] = [];
   let parent = area.parentElement?.closest<HTMLElement>('[hidden]');
   while (parent) {

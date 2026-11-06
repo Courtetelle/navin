@@ -18,7 +18,7 @@ import {
   toast,
   updateTaskTpl,
 } from '../../../state/index.ts';
-import { TextInput } from '../TextInput.tsx';
+import { MarqueeInput } from '../../logbook/index.ts';
 
 import { TaskLine } from './TaskLine.tsx';
 import { useKeepScroll } from './useKeepScroll.ts';
@@ -159,7 +159,7 @@ function EditContent({
         </label>
         <label className="cf wide">
           <span>{tr('Dernier jour, pour tout l’équipage')}</span>
-          <TextInput
+          <MarqueeInput
             className="text"
             id="ttEnd"
             defaultValue={template.end || ''}

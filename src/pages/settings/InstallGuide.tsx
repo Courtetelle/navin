@@ -21,8 +21,9 @@ import { redrawSettings } from './settingsState.ts';
 
 const SHARED_TEXT =
   'NavIn, le livre de bord du bateau, à installer sur ton téléphone :';
-const BEFORE_LEAVING =
-  'Avant de partir : ouvrez l’appli une fois avec du réseau. Elle fonctionne ensuite en mer sans connexion. Les mises à jour arrivent seules quand on l’ouvre avec du réseau, et les données saisies sont conservées.';
+const BEFORE_TITLE = 'Avant de partir :';
+const BEFORE_TEXT =
+  ' ouvrez l’appli une fois avec du réseau. Elle fonctionne ensuite en mer sans connexion. Les mises à jour arrivent seules quand on l’ouvre avec du réseau, et les données saisies sont conservées.';
 
 function chooseTab(tab: 'ios' | 'android'): void {
   buzz();
@@ -78,6 +79,8 @@ export function InstallGuide() {
   const tr = useTr();
   const tab = guideTab.value ?? (platform() === 'android' ? 'android' : 'ios');
   const standalone = isStandalone();
+  const beforeTitle = tr(BEFORE_TITLE, { help: true });
+  const beforeText = tr(BEFORE_TEXT, { help: true });
   return (
     <FoldSection id="installGuide" title="Installer l’appli sur un téléphone">
       {standalone ? (
@@ -121,12 +124,12 @@ export function InstallGuide() {
           <AndroidSteps host={APP_HOST} />
         )}
       </ol>
-      <HelpText text={BEFORE_LEAVING}>
-        <b>{tr('Avant de partir :', { help: true })}</b>
-        {tr(
-          ' ouvrez l’appli une fois avec du réseau. Elle fonctionne ensuite en mer sans connexion. Les mises à jour arrivent seules quand on l’ouvre avec du réseau, et les données saisies sont conservées.',
-          { help: true },
-        )}
+      <HelpText
+        text={`${BEFORE_TITLE}${BEFORE_TEXT}`}
+        items={[`${beforeTitle}${beforeText}`]}
+      >
+        <b>{beforeTitle}</b>
+        {beforeText}
       </HelpText>
       <ButtonRow className="row c2">
         <Button
@@ -148,9 +151,9 @@ export function InstallGuide() {
           {tr('Copier le lien')}
         </Button>
       </ButtonRow>
-      <p className="help" style={{ textAlign: 'center' }}>
+      <HelpText style={{ textAlign: 'center' }}>
         {APP_URL.replace('https://', '')}
-      </p>
+      </HelpText>
     </FoldSection>
   );
 }

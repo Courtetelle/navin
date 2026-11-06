@@ -25,32 +25,49 @@ export function drawFieldIds(fields: readonly FieldDefinition[]): FieldIds {
   return ids;
 }
 
-const screenIds = new Map<string, FieldIds>();
-let idsScreen = -1;
+/** The ids of a form, kept while the form is on screen. */
+export interface DrawnForm {
+  ids: FieldIds;
+  /** The form left the screen: it draws again if it comes back. */
+  released: boolean;
+}
+
+const drawnForms = new Map<string, DrawnForm>();
+let drawnScreen = -1;
 
 /**
  * Ids of a form, drawn once per form and per screen: React may start a render
- * again from scratch, which must not use more random values than legacy.
+ * again from scratch, losing the state of the form, and must not use more
+ * random values than legacy.
  * @param screen - Id of the navigation that opened the screen.
- * @param place - Stable identity of the form on the screen (`useId`).
+ * @param formKey - Identity of the form on the screen.
  * @param fields - Fields, in drawing order.
- * @returns Field key → id.
+ * @returns The drawn form.
  */
-export function screenFieldIds(
+export function drawnForm(
   screen: number,
-  place: string,
+  formKey: string,
   fields: readonly FieldDefinition[],
-): FieldIds {
-  if (screen !== idsScreen) {
-    screenIds.clear();
-    idsScreen = screen;
+): DrawnForm {
+  if (screen !== drawnScreen) {
+    drawnForms.clear();
+    drawnScreen = screen;
   }
-  let ids = screenIds.get(place);
-  if (!ids) {
-    ids = drawFieldIds(fields);
-    screenIds.set(place, ids);
+  let form = drawnForms.get(formKey);
+  if (!form || form.released) {
+    form = { ids: drawFieldIds(fields), released: false };
+    drawnForms.set(formKey, form);
   }
-  return ids;
+  return form;
+}
+
+/**
+ * Mark a form as on screen or gone.
+ * @param form - Drawn form.
+ * @param released - The form left the screen.
+ */
+export function markReleased(form: DrawnForm, released: boolean): void {
+  form.released = released;
 }
 
 function drawField(field: FieldDefinition, ids: Map<string, string>): void {

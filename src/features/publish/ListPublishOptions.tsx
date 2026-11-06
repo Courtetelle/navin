@@ -87,7 +87,8 @@ export function ItemChecks({
   choice,
 }: ListOptionProps): ReactElement | null {
   if (items.length < 2) return null;
-  const checked = items.filter((item) => !choice.off.includes(item.id)).length;
+  const off = new Set(choice.off);
+  const checked = items.filter((item) => !off.has(item.id)).length;
   return (
     <>
       <p className="help lx-sec-h">
@@ -108,7 +109,7 @@ export function ItemChecks({
         {items.map((item) => (
           <CheckButton
             key={item.id}
-            on={!choice.off.includes(item.id)}
+            on={!off.has(item.id)}
             data-lxi={item.id}
             onClick={() => {
               toggleItem(kind, item.id);
@@ -132,15 +133,15 @@ export function PhotoChecks({
   items,
   choice,
 }: ListOptionProps): ReactElement | null {
+  const off = new Set(choice.off);
   const photos = items
-    .filter((item) => !choice.off.includes(item.id))
+    .filter((item) => !off.has(item.id))
     .flatMap((item) =>
       (item.photos ?? []).map((photo) => ({ ...photo, who: item.name })),
     );
   if (photos.length < 2 || choice.offSec.includes('§photos')) return null;
-  const checked = photos.filter(
-    (photo) => !choice.offPh.includes(photo.id),
-  ).length;
+  const offPhotos = new Set(choice.offPh);
+  const checked = photos.filter((photo) => !offPhotos.has(photo.id)).length;
   return (
     <>
       <p className="help lx-sec-h">
@@ -150,7 +151,7 @@ export function PhotoChecks({
         {photos.map((photo) => (
           <CheckButton
             key={photo.id}
-            on={!choice.offPh.includes(photo.id)}
+            on={!offPhotos.has(photo.id)}
             data-lxp={photo.id}
             onClick={() => {
               togglePhoto(kind, photo.id);

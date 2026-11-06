@@ -30,6 +30,8 @@ export function prepareChecklists(view: string, arg: unknown): void {
 
 function readsProgress(view: string): boolean {
   if (!state.data.cruise.value) return false;
+  // Editing an entry shows no checklist banner, so nothing reads the lists.
+  if (view === 'new') return !state.data.draft.value?.id;
   return view !== 'prep' || !state.data.prep.value?.fresh;
 }
 

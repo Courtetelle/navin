@@ -84,7 +84,9 @@ export function Fiche({ id }: FicheProps) {
   };
   return (
     <>
-      <PageBack id="fBack" label={tr('◀ Retour')} onClick={leave} />
+      <PageBack id="fBack" label="◀ Retour" onClick={leave}>
+        {tr('◀ Retour')}
+      </PageBack>
       <div className="f-head">
         <h1>
           {record.isNew && !record.recordId ? tr(record.title) : record.title}

@@ -37,7 +37,8 @@ const VOLUME_CHOICES: ReadonlyArray<[number, string]> = [
 ];
 
 /**
- * Test of the depth alarm (legacy `depthDevHtml`).
+ * Test of the depth alarm (legacy `depthDevHtml`). Its text is read when it is
+ * mounted: the settings give it a new key at each redraw.
  * @param props - Where it is shown.
  * @returns The section.
  */
@@ -47,9 +48,9 @@ export function DepthDev({ inAlerts = false }: DepthDevProps) {
   useEffect(() => {
     depthTestState.value = '';
   }, []);
-  // Written once for the screen, like the rest of this text.
+  // Written once per drawing of the screen, whatever is typed meanwhile.
   const [start] = useState(depthStart);
-  const minimum = sondeMin();
+  const [minimum] = useState(sondeMin);
   const body = (
     <>
       {inAlerts ? null : <DepthToggle />}

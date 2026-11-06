@@ -8,6 +8,9 @@
  * Options:
  *   --only <regex>        run only scenarios whose name matches
  *   --legacy-only         replay in the legacy app only (explore its DOM)
+ *   --scroll              compare scrollY after every step, without captures
+ *                         (a full-page capture moves the page, and scenarios
+ *                         often scroll to the top before one)
  *   --dump <name>         after each scenario, save the legacy localStorage as
  *                         scripts/parity/fixtures/<name>.json (implies --legacy-only)
  */
@@ -16,6 +19,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
+import type { Page } from 'playwright-core';
 import { chromium } from 'playwright-core';
 
 import { DEFAULT_SETTLE, openApp, runStep } from './browser.ts';
@@ -36,6 +40,7 @@ const { values, positionals } = parseArgs({
   options: {
     only: { type: 'string' },
     'legacy-only': { type: 'boolean', default: false },
+    scroll: { type: 'boolean', default: false },
     dump: { type: 'string' },
   },
 });
@@ -86,12 +91,28 @@ async function runScenario(scenario: Scenario): Promise<SnapshotResult[]> {
   try {
     for (const step of scenario.steps) {
       if ('snapshot' in step) {
-        output.push(await snapshot(step.snapshot));
+        if (!values.scroll) output.push(await snapshot(step.snapshot));
         continue;
       }
-      await runStep(legacy.page, step, false);
-      if (react) await runStep(react.page, step, true);
+      // Both apps at the same moment: a toast or an armed button lasts a few
+      // seconds, so replaying them in turn compares different moments.
+      await Promise.all([
+        runStep(legacy.page, step, false),
+        react ? runStep(react.page, step, true) : undefined,
+      ]);
       await legacy.page.waitForTimeout(settle);
+      if (values.scroll && react) {
+        const readScroll = () => Math.round(globalThis.scrollY);
+        const [legacyScroll, reactScroll] = await Promise.all([
+          legacy.page.evaluate(readScroll),
+          react.page.evaluate(readScroll),
+        ]);
+        if (Math.abs(legacyScroll - reactScroll) > 2) {
+          process.stdout.write(
+            `SCROLL  ${scenario.name}  legacy:${legacyScroll} react:${reactScroll}  after ${JSON.stringify(step).slice(0, 90)}\n`,
+          );
+        }
+      }
     }
     if (values.dump) {
       const storage = await legacy.page.evaluate(() => {
@@ -141,16 +162,24 @@ async function runScenario(scenario: Scenario): Promise<SnapshotResult[]> {
   async function snapshot(name: string): Promise<SnapshotResult> {
     const base = join(directory, name.replaceAll(/[^\w.-]+/g, '_'));
     const ignore = scenario.ignoreAttributes ?? DEFAULT_IGNORE;
-    const legacyDom = await legacy.page.evaluate(serializeDom, ignore);
-    const legacyPng = await legacy.page.screenshot({
-      fullPage: true,
-      animations: 'disabled',
-      caret: 'hide',
-    });
+    const capture = async (page: Page) => {
+      const dom = await page.evaluate(serializeDom, ignore);
+      const png = await page.screenshot({
+        fullPage: true,
+        animations: 'disabled',
+        caret: 'hide',
+      });
+      return { dom, png };
+    };
+    const [legacyCapture, reactCapture] = await Promise.all([
+      capture(legacy.page),
+      react ? capture(react.page) : undefined,
+    ]);
+    const { dom: legacyDom, png: legacyPng } = legacyCapture;
     writeFileSync(`${base}.legacy.txt`, legacyDom);
     writeFileSync(`${base}.legacy.png`, legacyPng);
     const errors = [...legacy.errors.map((message) => `legacy: ${message}`)];
-    if (!react) {
+    if (!react || !reactCapture) {
       return {
         scenario: scenario.name,
         snapshot: name,
@@ -159,12 +188,7 @@ async function runScenario(scenario: Scenario): Promise<SnapshotResult[]> {
         error: errors.join(' | ') || undefined,
       };
     }
-    const reactDom = await react.page.evaluate(serializeDom, ignore);
-    const reactPng = await react.page.screenshot({
-      fullPage: true,
-      animations: 'disabled',
-      caret: 'hide',
-    });
+    const { dom: reactDom, png: reactPng } = reactCapture;
     writeFileSync(`${base}.react.txt`, reactDom);
     writeFileSync(`${base}.react.png`, reactPng);
     const { patch, changedLines } = diffDom(legacyDom, reactDom);

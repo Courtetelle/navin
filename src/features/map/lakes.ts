@@ -1,5 +1,7 @@
 import { signal } from '@preact/signals-react';
 
+import { ZONE_CACHE } from '../../serviceWorker/cacheNames.ts';
+import { tileKey } from '../../serviceWorker/tileKey.ts';
 import { toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
@@ -7,7 +9,7 @@ import type { GeoBox } from './constants.ts';
 import { LEMAN_BBOX, SEAMARK_TILES, SWISS_TILES } from './constants.ts';
 import { VD_WMS, vdIsobathLayers } from './vdIsobath.ts';
 import type { DownloadResult, TileJob } from './zoneDownload.ts';
-import { ZONE_CACHE, fetchTiles } from './zoneDownload.ts';
+import { fetchTiles } from './zoneDownload.ts';
 import { zoneTileXY, zoneUrl } from './zoneStore.ts';
 
 /** A lake whose maps are always kept in the app. */
@@ -62,31 +64,6 @@ export function lakeTileUrls(lake: BaseLake): TileJob[] {
     }
   }
   return jobs;
-}
-
-/**
- * Cache key of a WMS image, the same as in the service worker: sorted
- * parameters, box rounded to the metre (legacy `wmsKey`).
- * @param address - Image address.
- * @returns The key.
- */
-export function wmsKey(address: string): string {
-  const url = new URL(address);
-  const parameters = [...url.searchParams].map(
-    ([name, value]): [string, string] => {
-      const key = name.toLowerCase();
-      if (key !== 'bbox') return [key, value];
-      const rounded = value.split(',').map((part) => Math.round(Number(part)));
-      return [key, rounded.join(',')];
-    },
-  );
-  const sorted = parameters.toSorted((first, second) =>
-    first[0] < second[0] ? -1 : 1,
-  );
-  const query = sorted
-    .map(([name, value]) => `${name}=${encodeURIComponent(value)}`)
-    .join('&');
-  return `${url.origin}${url.pathname}?${query}`;
 }
 
 /**
@@ -157,7 +134,7 @@ export async function autoLakes(): Promise<void> {
     const jobs = vdWmsTiles(names).map((url): TileJob => ({
       url,
       mode: 'no-cors',
-      key: wmsKey(url),
+      key: tileKey(new URL(url), url),
     }));
     noteResult('vd2', await fetchTiles(cache, jobs, 3));
   }

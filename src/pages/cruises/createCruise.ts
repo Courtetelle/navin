@@ -32,7 +32,7 @@ export interface NewCruiseChoices {
 /**
  * Create a navigation, open it and go to its first screen (legacy `#createBtn`).
  * @param choices - The form.
- * @returns `false` when something is missing.
+ * @returns `false` when the name is missing: the form then focuses its field.
  */
 export function createCruise({
   mode,

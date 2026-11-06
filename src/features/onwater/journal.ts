@@ -106,7 +106,7 @@ function pickEntries(
   end: number,
   budget: number,
 ): Entry[] {
-  const picked: Entry[] = [];
+  const picked = new Set<Entry>();
   const step = (end - start) / budget;
   const score = (entry: Entry) =>
     (entry.auto ? 1 : 2) + ((entry.v.evt ?? []).length > 0 ? 0.5 : 0);
@@ -117,16 +117,16 @@ function pickEntries(
     const best = candidates
       .filter((entry) => {
         const time = Date.parse(entry.t);
-        return time >= from && time < to && !picked.includes(entry);
+        return time >= from && time < to && !picked.has(entry);
       })
       .toSorted(
         (a, b) =>
           score(b) - score(a) ||
           distanceFrom(a, middle) - distanceFrom(b, middle),
       )[0];
-    if (best) picked.push(best);
+    if (best) picked.add(best);
   }
-  return picked;
+  return [...picked];
 }
 
 function distanceFrom(entry: Entry, middle: number): number {

@@ -3,6 +3,7 @@ import { signal } from '@preact/signals-react';
 import { findStartPlace } from '../../features/onwater/index.ts';
 import type { ModeKey } from '../../model/modes.ts';
 import { MODES } from '../../model/modes.ts';
+import type { Cruise } from '../../model/types.ts';
 import { curMode, state } from '../../state/index.ts';
 
 /** Time between two searches of the place of departure. */
@@ -51,6 +52,28 @@ export function resolveMode(type: string | null): ModeKey {
 export function zoneNow(): string {
   const { lastZone } = state.preferences.settings.value;
   return newZone.value || (lastZone as string | undefined) || 'M';
+}
+
+/**
+ * Boat name the automatic name takes from the open cruise.
+ * @param cruise - Cruise whose boat is taken over, if any.
+ * @param counted - The name already counts it.
+ * @returns The name, `''` when not counted.
+ */
+export function keptBoatName(cruise: Cruise | null, counted: boolean): string {
+  if (!counted || !cruise || cruise.type === 'lac') return '';
+  return cruise.info.boat || '';
+}
+
+/** Touch on the button of the boat taken over: the name follows from now on. */
+export function toggleKeepBoat(): void {
+  keepBoat.value = !keepBoat.peek();
+  nameWithKeptBoat.value = true;
+}
+
+/** Touch on the button of the crew taken over. */
+export function toggleKeepCrew(): void {
+  keepCrew.value = !keepCrew.peek();
 }
 
 /**

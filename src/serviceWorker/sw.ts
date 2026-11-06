@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 /* Service worker: everything works offline once the app was opened (legacy sw.js). */
 import { APP_CACHE, TILE_CACHE, ZONE_CACHE } from './cacheNames.ts';
+import { staleFiles } from './staleFiles.ts';
 import { tileKey } from './tileKey.ts';
 
 declare const self: ServiceWorkerGlobalScope & {
@@ -19,7 +20,13 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     self.caches
       .open(APP_CACHE)
-      .then((cache) => cache.addAll(FILES))
+      // Past the HTTP cache: a stale start page would point to files that the
+      // activation drops, and the app would stay blank offline.
+      .then((cache) =>
+        cache.addAll(
+          FILES.map((file) => new Request(file, { cache: 'reload' })),
+        ),
+      )
       .then(() => self.skipWaiting()),
   );
 });
@@ -38,6 +45,7 @@ self.addEventListener('activate', (event) => {
             .map((key) => self.caches.delete(key)),
         ),
       )
+      .then(dropStaleFiles)
       .then(() => self.clients.claim()),
   );
 });
@@ -54,6 +62,12 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
   event.respondWith(appFileResponse(request));
 });
+
+async function dropStaleFiles(): Promise<void> {
+  const cache = await self.caches.open(APP_CACHE);
+  const stale = staleFiles(await cache.keys(), FILES, self.location.href);
+  await Promise.all(stale.map((request) => cache.delete(request)));
+}
 
 /** Tiles: downloaded areas first, then tiles already seen, then the network (kept). */
 async function tileResponse(request: Request, url: URL): Promise<Response> {

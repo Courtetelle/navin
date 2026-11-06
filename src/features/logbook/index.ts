@@ -13,11 +13,13 @@
  * | `expParse`, `expState`              | same names                                     |
  * | `cycTxt(show, v, opts)`             | `cycleText`                                    |
  */
+export { engineFigures, milesFigures } from './calc/calcValues.ts';
 export { CompactForm } from './compact/CompactForm.tsx';
 export type {
   CompactFormProps,
   CompactSection,
 } from './compact/compactTypes.ts';
+export { MarqueeInput } from './compact/MarqueeInput.tsx';
 export { SignatureOverlay } from './compact/SignatureOverlay.tsx';
 export type { SignatureOverlayProps } from './compact/SignatureOverlay.tsx';
 export { expParse, expState } from './compact/expiry.ts';

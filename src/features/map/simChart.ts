@@ -13,6 +13,7 @@ import { extrasOf, isMapLive, whileMapLive } from './mapExtras.ts';
 import { drawSimTile } from './simTile.ts';
 
 const SIMULATED_NAME = 'Carte maritime simulée';
+const SIMULATED_NOTE = 'Carte maritime simulée (aperçu)';
 
 /**
  * Whether the zone simulation is at sea (legacy `simSeaMode`).
@@ -122,7 +123,7 @@ function addRose(map: LeafletMap): void {
   extras.simRose = rose;
   const note = document.createElement('div');
   note.className = 'sim-note no-print';
-  note.textContent = 'Carte maritime simulée (aperçu)';
+  note.textContent = SIMULATED_NOTE;
   map.getContainer().append(note);
   extras.simNote = note;
 }

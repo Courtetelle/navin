@@ -3,10 +3,11 @@ import { useEffect, useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { MarqueeInput } from '../../features/logbook/index.ts';
 import { openListPublish } from '../../features/publish/index.ts';
-import { MarqueeInput } from '../../features/safety/MarqueeInput.tsx';
 import { sosDeleteId } from '../../features/safety/safetyState.ts';
 import { sosHash } from '../../features/safety/sosHash.ts';
+import { toastThenRedraw } from '../../features/safety/toastThenRedraw.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate, pad } from '../../lib/format.ts';
@@ -165,11 +166,12 @@ async function confirmDelete(
     toast('⚠ Mot de passe incorrect : rien n’est effacé');
     return;
   }
-  state.data.sosLogs.value = state.data.sosLogs.value.filter(
-    (log) => log.id !== id,
-  );
-  saveSosLogs();
-  sosDeleteId.value = null;
-  toast('Log SOS effacé');
-  onRedraw();
+  toastThenRedraw('Log SOS effacé', () => {
+    state.data.sosLogs.value = state.data.sosLogs.value.filter(
+      (log) => log.id !== id,
+    );
+    saveSosLogs();
+    sosDeleteId.value = null;
+    onRedraw();
+  });
 }

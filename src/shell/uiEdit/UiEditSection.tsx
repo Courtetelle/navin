@@ -5,6 +5,7 @@ import { ArmedButton } from '../../components/shared/ArmedButton.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { state, toast, updateUiEdits } from '../../state/index.ts';
 
@@ -19,6 +20,7 @@ import { startUiEditing } from './uiEditState.ts';
  */
 export function UiEditSection() {
   useSignals();
+  const tr = useTr();
   const count = Object.keys(state.data.uiEdits.value).length;
   const file = useRef<HTMLInputElement>(null);
   const plural = count > 1 ? 's' : '';
@@ -37,8 +39,8 @@ export function UiEditSection() {
             toast('Touchez un bouton pour le modifier');
           }}
         >
-          ✎ Activer le mode édition
-          <small>toucher ensuite un bouton pour le modifier</small>
+          {tr('✎ Activer le mode édition')}
+          <small>{tr('toucher ensuite un bouton pour le modifier')}</small>
         </Button>
         <Button
           className="btn big"
@@ -46,7 +48,8 @@ export function UiEditSection() {
           disabled={count === 0}
           onClick={exportEdits}
         >
-          ⇪ Exporter les modifications<small>fichier à envoyer à Claude</small>
+          {tr('⇪ Exporter les modifications')}
+          <small>{tr('fichier à envoyer à Claude')}</small>
         </Button>
         <Button
           className="btn big"
@@ -56,13 +59,14 @@ export function UiEditSection() {
             file.current?.click();
           }}
         >
-          ⇩ Importer<small>fichier de modifications</small>
+          {tr('⇩ Importer')}
+          <small>{tr('fichier de modifications')}</small>
         </Button>
         {count > 0 ? (
           <ArmedButton
             className="btn big danger"
             id="uiEditClear"
-            armedLabel="Toucher encore : tout remettre d’origine"
+            armedLabel={tr('Toucher encore : tout remettre d’origine')}
             onConfirm={() => {
               updateUiEdits((edits) => {
                 for (const key of Object.keys(edits)) {
@@ -72,8 +76,8 @@ export function UiEditSection() {
               globalThis.location.reload();
             }}
           >
-            ↺ Remettre tous les boutons d’origine
-            <small>efface les modifications</small>
+            {tr('↺ Remettre tous les boutons d’origine')}
+            <small>{tr('efface les modifications')}</small>
           </ArmedButton>
         ) : null}
       </div>

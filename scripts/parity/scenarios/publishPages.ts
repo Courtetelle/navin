@@ -51,15 +51,18 @@ export const pageScenarios: Scenario[] = [
       { go: 'people' },
       { wait: 1200 },
       { click: '[data-fiche="ex2"]' },
-      { wait: 600 },
+      // The long fields of the card scroll once: their phase is not comparable.
+      { wait: 8000 },
       { click: '#fImg' },
       { snapshot: 'window-one-card' },
     ],
   },
   {
+    // The fields of the boats screen take random ids, drawn in another order.
     name: 'publish-page-boats',
     fixture: 'sample-lake',
     overrides: QUIET,
+    ignoreAttributes: '^(?:data-.*|for|id)$',
     settle: 300,
     steps: [
       { go: 'boats', arg: 'exb1' },

@@ -1,6 +1,5 @@
 import type { CSSProperties, FocusEvent, ReactNode } from 'react';
-import { useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { useTr } from '../../i18n/useTr.ts';
@@ -34,6 +33,15 @@ export function FicheForm({ record }: FicheFormProps) {
   const [shown, setShown] = useState(() => shownRelatives(data));
   const shownCount = useRef(shown);
   const box = useRef<HTMLDivElement>(null);
+  const toFocus = useRef<string | null>(null);
+  useLayoutEffect(() => {
+    const name = toFocus.current;
+    toFocus.current = null;
+    if (name === null) return;
+    box.current
+      ?.querySelector<HTMLElement>(`[data-k="${CSS.escape(name)}"]`)
+      ?.focus();
+  }, [shown]);
   const show = (count: number) => {
     shownCount.current = count;
     setShown(count);
@@ -58,11 +66,8 @@ export function FicheForm({ record }: FicheFormProps) {
             event.preventDefault();
             buzz();
             const count = Math.min(PROCHES.length, shownCount.current + 1);
-            flushSync(() => show(count));
-            const name = PROCHES[count - 1]?.[0] ?? '';
-            box.current
-              ?.querySelector<HTMLElement>(`[data-k="${CSS.escape(name)}"]`)
-              ?.focus();
+            toFocus.current = PROCHES[count - 1]?.[0] ?? '';
+            show(count);
           }}
         >
           {tr('＋ Ajouter un proche')}

@@ -1,4 +1,3 @@
-import 'leaflet/dist/leaflet.css';
 import './styles/style.css';
 import './styles/root.css';
 

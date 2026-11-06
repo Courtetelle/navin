@@ -38,6 +38,15 @@ export function serializeDom(ignoreAttributes: string | null): string {
         const declarations: string[] = [];
         for (let index = 0; index < element.style.length; index++) {
           const property = element.style.item(index);
+          // Unobservable, and it varies from run to run in legacy, where the
+          // fit races with the rule that hides the cell.
+          if (
+            property === 'height' &&
+            element instanceof HTMLTextAreaElement &&
+            element.closest('[hidden]')
+          ) {
+            continue;
+          }
           const priority = element.style.getPropertyPriority(property);
           declarations.push(
             `${property}:${element.style.getPropertyValue(property)}${priority ? ' !important' : ''}`,
@@ -100,8 +109,12 @@ export function serializeDom(ignoreAttributes: string | null): string {
   };
 
   const rootParts: string[] = [];
-  for (const name of ['class', 'data-theme', 'lang']) {
-    const value = document.documentElement.getAttribute(name);
+  for (const name of ['class', 'data-theme', 'lang', 'style']) {
+    // The app suspends scroll anchoring for one frame after a tap: under the
+    // harness clock, a screen with many timers can stretch that frame.
+    const value = document.documentElement
+      .getAttribute(name)
+      ?.replace(/\s*overflow-anchor: none;/, '');
     if (value) {
       rootParts.push(`${name}="${value.split(/\s+/).toSorted().join(' ')}"`);
     }

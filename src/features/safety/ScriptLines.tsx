@@ -1,4 +1,5 @@
-import { keyedItems } from './keyedItems.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
+
 import type { ScriptLine } from './sosScripts.ts';
 
 /** Props of {@link ScriptLines}. */

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { fmtShortDate } from '../../lib/format.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import { state } from '../../state/index.ts';
 
 import { crewListCols, crewListHead, crewRole } from './crewList.ts';
@@ -15,9 +16,13 @@ export function CrewPrintPage() {
   const crew = state.data.cruise.value?.crew ?? [];
   const skipper = crew.find((member) => member.fonction === 'Skipper');
   const rows: ReactNode[] = [];
-  for (const [index, member] of crew.entries()) {
+  const lines = keyedItems(
+    crew,
+    (member) => member.memberId ?? member.nom ?? '',
+  );
+  for (const { key: lineKey, item: member, index } of lines) {
     rows.push(
-      <tr key={index}>
+      <tr key={lineKey}>
         <td>{index + 1}</td>
         {columns.map(([key]) => (
           <td key={key}>

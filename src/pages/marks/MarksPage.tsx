@@ -25,16 +25,19 @@ export function MarksPage() {
   const target = gotoTarget.value;
   const marks = state.data.marks.value.toSorted((a, b) => b.n - a.n);
   const backTo = inCruise ? 'more' : 'tracker';
+  const backLabel = inCruise ? '◀ Plus' : '◀ Traceur';
   return (
     <>
       <PageBack
-        label={`◀ ${tr(inCruise ? 'Plus' : 'Traceur')}`}
+        label={backLabel}
         data-go={backTo}
         onClick={() => {
           buzz();
           go(backTo);
         }}
-      />
+      >
+        {tr(backLabel)}
+      </PageBack>
       <PageTitle
         helps={[
           'Appui long d’un doigt sur la carte (traceur ou carte du journal) › « Enregistrer une marque ». Numérotées dans l’ordre, avec date, heure et position.',

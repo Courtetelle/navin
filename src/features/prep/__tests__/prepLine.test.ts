@@ -3,6 +3,7 @@ import { beforeEach, expect, test } from 'vitest';
 import type { Cruise } from '../../../model/types.ts';
 import { initState, state } from '../../../state/index.ts';
 import { createMemoryStorage } from '../../../storage/memoryStorage.ts';
+import { prepBarApplies } from '../prepBarSync.ts';
 import { prepLineItems, prepPills } from '../prepLine.ts';
 
 beforeEach(() => {
@@ -121,4 +122,13 @@ test('the crew being composed turns the title orange', () => {
     status: 'part',
     current: true,
   });
+});
+
+test('the PréP bar belongs to the crew page at step 3 and the check-in at step 4', () => {
+  expect(prepBarApplies('crew', { step: 3 })).toBe(true);
+  expect(prepBarApplies('checklist', { step: 4 })).toBe(true);
+  expect(prepBarApplies('crew', { step: 4 })).toBe(false);
+  expect(prepBarApplies('checklist', { step: 3 })).toBe(false);
+  expect(prepBarApplies('prep', { step: 3 })).toBe(false);
+  expect(prepBarApplies('crew', null)).toBe(false);
 });

@@ -144,6 +144,12 @@ export function gotoUpdate(): void {
   drawGotoLines();
 }
 
+/** Restart the Go to of a previous session (marks.js:195). */
+export function resumeGoto(): void {
+  wantPos(true);
+  gotoUpdate();
+}
+
 function signalArrival(target: GotoTarget, distance: number): void {
   const limit = Number(state.preferences.settings.value.gotoArrive) || 30;
   if (distance * 1852 >= limit || target.arrived) return;

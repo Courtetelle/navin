@@ -135,22 +135,17 @@ function showPosition(): void {
     setMapWatch(
       navigator.geolocation.watchPosition(
         ({ coords }) => {
-          const show = () =>
-            trkFix({
-              lat: coords.latitude,
-              lon: coords.longitude,
-              acc: coords.accuracy,
-              sog:
-                coords.speed !== null && coords.speed >= 0
-                  ? coords.speed * KNOTS_PER_METRE_SECOND
-                  : null,
-              cog: coords.heading,
-            });
-          nmeaPosFresh()
-            .then((fresh) => {
-              if (!fresh) show();
-            })
-            .catch(show);
+          if (nmeaPosFresh()) return;
+          trkFix({
+            lat: coords.latitude,
+            lon: coords.longitude,
+            acc: coords.accuracy,
+            sog:
+              coords.speed !== null && coords.speed >= 0
+                ? coords.speed * KNOTS_PER_METRE_SECOND
+                : null,
+            cog: coords.heading,
+          });
         },
         () => undefined,
         { enableHighAccuracy: true, maximumAge: 3000, timeout: 30_000 },

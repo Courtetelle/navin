@@ -15,10 +15,10 @@ import {
 } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
-import { addAutoEntry, lochBefore } from './autoEntries.ts';
-import type { TrackEvent, TrackSample } from './detector.ts';
+import { addArrival } from './arrival.ts';
+import { lochBefore } from './autoEntries.ts';
 import { newDetector } from './detector.ts';
-import { TICK_MIN, selectLeg } from './entrySelection.ts';
+import { TICK_MIN } from './entrySelection.ts';
 import { onFix } from './fixHandler.ts';
 import {
   drawTrkButtons,
@@ -234,27 +234,4 @@ function startWatch(): void {
     },
     { enableHighAccuracy: true, maximumAge: 5000, timeout: 60_000 },
   );
-}
-
-async function addArrival(
-  trip: LiveTrip,
-  departure: TrackEvent,
-  lastPoint: TrackSample,
-): Promise<void> {
-  const arrival: TrackEvent = {
-    kind: 'Arrivée',
-    t: Date.now(),
-    lat: lastPoint.lat,
-    lon: lastPoint.lon,
-    cog: null,
-    sog: 0,
-    dist: trip.det.dist,
-    twd: trip.det.lastTwd,
-    tws: trip.det.lastTws,
-  };
-  const leg = selectLeg(departure, trip.cands ?? [], arrival).slice(1);
-  /* eslint-disable no-await-in-loop -- entries are written in time order, each with its weather */
-  for (const event of leg) await addAutoEntry(event, trip.lochBase);
-  /* eslint-enable no-await-in-loop */
-  toast(`Arrivée : ${arrival.note}`);
 }

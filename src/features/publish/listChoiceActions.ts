@@ -57,9 +57,11 @@ export function toggleAllSections(
   keys: readonly string[],
 ): void {
   saved(kind, (choice) => {
-    const anyOff = keys.some((key) => choice.offSec.includes(key));
+    const off = new Set(choice.offSec);
+    const all = new Set(keys);
+    const anyOff = keys.some((key) => off.has(key));
     choice.offSec = anyOff
-      ? choice.offSec.filter((key) => !keys.includes(key))
+      ? choice.offSec.filter((key) => !all.has(key))
       : [...choice.offSec, ...keys];
   });
 }

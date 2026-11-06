@@ -2,6 +2,7 @@ import type { MouseEvent, ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { buzz } from '../../lib/dom.ts';
+import { holdScrollAnchoring } from '../../shell/scrollAnchor.ts';
 import { toast } from '../../state/index.ts';
 
 import type { ButtonProps } from './Button.tsx';
@@ -90,7 +91,10 @@ export function HoldDeleteButton({
         press.current = setTimeout(() => {
           buzz();
           setPhase('done');
-          setTimeout(() => action.current(), 300);
+          setTimeout(() => {
+            holdScrollAnchoring();
+            action.current();
+          }, 300);
         }, 650);
       }}
       onPointerUp={release}

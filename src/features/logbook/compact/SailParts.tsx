@@ -18,7 +18,8 @@ export interface ColorButtonProps {
 }
 
 /**
- * Colour of a sail: a touch shows the next colour.
+ * Colour of a sail: a touch shows the next colour. Give it a `key` that follows
+ * the colour: the button is replaced at each change and loses the focus.
  * @param props - Colour and change handler.
  * @returns The button.
  */

@@ -1,7 +1,12 @@
 import { afterEach, expect, test, vi } from 'vitest';
 
 import type { FieldDefinition } from '../../../../model/field.ts';
-import { drawFieldIds, newFieldId, screenFieldIds } from '../fieldIds.ts';
+import {
+  drawFieldIds,
+  drawnForm,
+  markReleased,
+  newFieldId,
+} from '../fieldIds.ts';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -48,11 +53,23 @@ test('every wrapping level draws one random value', () => {
 test('a form draws its ids once per screen', () => {
   const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
   const fields: FieldDefinition[] = [{ key: 'a', type: 'line' }];
-  const first = screenFieldIds(1, 'form', fields);
-  expect(screenFieldIds(1, 'form', fields)).toBe(first);
+  const first = drawnForm(1, 'form', fields);
+  expect(drawnForm(1, 'form', fields)).toBe(first);
   expect(random).toHaveBeenCalledTimes(1);
-  screenFieldIds(1, 'other', fields);
+  drawnForm(1, 'other', fields);
   expect(random).toHaveBeenCalledTimes(2);
-  screenFieldIds(2, 'form', fields);
+  drawnForm(2, 'form', fields);
   expect(random).toHaveBeenCalledTimes(3);
+});
+
+test('a form that left the screen draws again when it comes back', () => {
+  const random = vi.spyOn(Math, 'random').mockReturnValue(0.5);
+  const fields: FieldDefinition[] = [{ key: 'a', type: 'line' }];
+  const form = drawnForm(3, 'form', fields);
+  markReleased(form, true);
+  markReleased(form, false);
+  expect(drawnForm(3, 'form', fields)).toBe(form);
+  markReleased(form, true);
+  expect(drawnForm(3, 'form', fields)).not.toBe(form);
+  expect(random).toHaveBeenCalledTimes(2);
 });

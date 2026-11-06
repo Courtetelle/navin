@@ -10,7 +10,7 @@
  * | `moorNow()`             | {@link moorNow}                                            |
  * | `navPageRefresh()`      | {@link navPageRefresh} (no-op: `#navLive` no longer exists)|
  * | `deleteTrace(id)`       | {@link deleteTrace}                                        |
- * | `bindSwipeDelete`       | {@link SwipeRow}                                           |
+ * | `bindSwipeDelete`       | {@link SwipeRow}: render prop, handlers on the sliding row |
  *
  * `prep`, `prepUse`, `prepPaths`, `noteUse`, `byUse`, `crewSets`, `crewSig`,
  * `saveCrewSets`, `crewSetDate`, `crewSetName`, `memberLocks`, `memberLockMsg`

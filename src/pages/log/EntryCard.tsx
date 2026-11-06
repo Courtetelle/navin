@@ -30,9 +30,9 @@ export function EntryCard({ entry }: { entry: Entry }) {
     const text = fmtValue(field, entry.v[field.key]);
     if (text) rows.push({ key: field.key, label: field.label ?? '', text });
   }
-  const photoIds = entry.v.photos as readonly string[] | undefined;
+  const photoIds = new Set(entry.v.photos as readonly string[] | undefined);
   const allPhotos = (state.data.cruise.value?.photos ?? []) as CruisePhoto[];
-  const photos = allPhotos.filter((photo) => photoIds?.includes(photo.id));
+  const photos = allPhotos.filter((photo) => photoIds.has(photo.id));
   const source = weatherSource(entry);
   return (
     <article className={entry.auto ? 'entry auto' : 'entry'} data-id={entry.id}>

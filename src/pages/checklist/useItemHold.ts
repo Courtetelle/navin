@@ -36,6 +36,7 @@ export function useItemHold(): ItemHold {
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => {
     const view = document.querySelector('#view');
+    if (!view) return undefined;
     const release = () => {
       if (holdFired) {
         holdFired = false;
@@ -44,10 +45,13 @@ export function useItemHold(): ItemHold {
       clearTimeout(timer.current);
       setHoldingId(null);
     };
-    const events = ['pointerup', 'pointercancel', 'pointerleave'];
-    for (const name of events) view?.addEventListener(name, release);
+    view.addEventListener('pointerup', release);
+    view.addEventListener('pointercancel', release);
+    view.addEventListener('pointerleave', release);
     return () => {
-      for (const name of events) view?.removeEventListener(name, release);
+      view.removeEventListener('pointerup', release);
+      view.removeEventListener('pointercancel', release);
+      view.removeEventListener('pointerleave', release);
       clearTimeout(timer.current);
     };
   }, []);

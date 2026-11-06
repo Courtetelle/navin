@@ -11,6 +11,7 @@ import { PageTitle } from '../../../components/shared/PageTitle.tsx';
 import { useTr } from '../../../i18n/useTr.ts';
 import { buzz } from '../../../lib/dom.ts';
 import { dayKey } from '../../../lib/format.ts';
+import { keyedItems } from '../../../lib/keyedItems.ts';
 import { TASK_TPL_DEFAULT } from '../../../model/taskTemplate.ts';
 import type { Cruise } from '../../../model/types.ts';
 import { go } from '../../../shell/router.ts';
@@ -53,8 +54,8 @@ export function AboardPlanView({ onEdit, onPick }: AboardPlanViewProps) {
 
 function crewLines(crew: readonly string[]): ReactNode[] {
   const lines: ReactNode[] = [];
-  for (const [index, name] of crew.entries()) {
-    lines.push(<li key={index}>{name}</li>);
+  for (const { key, item } of keyedItems(crew, (name) => name)) {
+    lines.push(<li key={key}>{item}</li>);
   }
   return lines;
 }

@@ -17,13 +17,16 @@
  * come from `src/state/index.ts`; `LAKE_ROLES`, `SEA_ROLES`, `roleLabel`,
  * `MEMBER_FIELDS` from `src/model/crewFields.ts`.
  *
- * Legacy swapped these sub-screens inside `#view` without `go`: `CrewPick` and
- * `FicheList` keep doing it, so a page only renders one of them.
+ * Legacy swapped these sub-screens inside `#view` without `go`: `CrewPick`,
+ * `FicheList` and `CrewScreenHost` are the same host of those sub-screens, so a
+ * page renders only one of them; the entry of `people`, `crew` and `crews` is
+ * run by the `go` listener of `init.ts`.
  */
 export { memberAvatar } from './avatar.ts';
 export { blankPdf } from './blankPdf.tsx';
 export { blankImport, blankSend } from './blankSheet.ts';
 export { CrewPick } from './CrewPick.tsx';
+export { CrewScreenHost } from './CrewScreenHost.tsx';
 export { openCrewSet } from './crewsEdit.ts';
 export { Fiche } from './Fiche.tsx';
 export type { FicheProps } from './Fiche.tsx';

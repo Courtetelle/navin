@@ -6,6 +6,7 @@ import type { Cruise } from '../../../model/types.ts';
 import { state } from '../../../state/index.ts';
 import { BlankPage, CrewListPage, SafetyPage } from '../book/BookPages.tsx';
 import { DayPage } from '../book/DayPage.tsx';
+import { RadioPage } from '../book/RadioPage.tsx';
 import { kvRows } from '../book/kvRows.tsx';
 
 import { load, useHarnessClock } from './fixtures.ts';
@@ -87,4 +88,17 @@ test('a day without journey has no navigation block', () => {
   expect(html).not.toContain('Durée de navigation');
   expect(html).not.toContain('class="hourly"');
   expect(html).toContain('<table class="sign">');
+});
+
+test('the radio page has a block per procedure with the boat in its script', () => {
+  const html = renderToStaticMarkup(<RadioPage cruise={seaCruise()} />);
+
+  expect(html.match(/<div class="blk">/g)).toHaveLength(5);
+  expect(html).toContain(
+    '<h3>MAYDAY · Détresse : danger grave et imminent</h3>',
+  );
+  expect(html).toContain('<p>Nature : Incendie = <i>We are on fire.</i> · ');
+  expect(html).toContain('<p>0 Zero · 1 One');
+  expect(html).toContain(' · 9 Niner · A Alfa · B Bravo');
+  expect(html).toContain('[nature de la détresse]');
 });

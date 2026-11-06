@@ -29,6 +29,7 @@ export function applyIcon(): void {
 async function fetchTouchIcon(): Promise<void> {
   try {
     const response = await fetch(`icons/${ICON_ID}-180.png`);
+    if (!response.ok) throw new Error(`icon: ${response.status}`);
     const url = await readAsDataUrl(await response.blob());
     store.set('ldb.iconData', { id: ICON_ID, url });
     setTouchIcon(url);

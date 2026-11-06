@@ -1,11 +1,16 @@
-import { HelpText } from '../../components/shared/HelpText.tsx';
 import { TzTime } from '../../components/shared/TzTime.tsx';
 import { utcText } from '../../components/shared/timeText.ts';
 import { fr, pad } from '../../lib/format.ts';
 import { bft, kmh, knOk, windParts } from '../../lib/wind.ts';
 import { state } from '../../state/index.ts';
 
-import type { ForecastRow, WeatherNow } from './weatherLogic.ts';
+import { BoxHelp } from './BoxHelp.tsx';
+import { useBoxTr } from './useBoxTr.ts';
+import type {
+  ForecastRow,
+  WeatherMeasure,
+  WeatherNow,
+} from './weatherLogic.ts';
 import {
   capeRisk,
   directionText,
@@ -30,13 +35,17 @@ export interface WeatherNowBlockProps {
  * @param props - Weather and context.
  * @returns The block.
  */
-export function WeatherNowBlock({ weather, keep }: WeatherNowBlockProps) {
+export function WeatherNowBlock({
+  weather,
+  keep = false,
+}: WeatherNowBlockProps) {
+  const tr = useBoxTr(keep);
   if (!weather) {
     return (
-      <HelpText keep={keep} nextIsRow>
+      <BoxHelp keep={keep} nextIsRow>
         Pas encore de météo aujourd’hui. Touchez « Mettre à jour » quand il y a
         du réseau.
-      </HelpText>
+      </BoxHelp>
     );
   }
   const measure = weather.meas;
@@ -46,32 +55,32 @@ export function WeatherNowBlock({ weather, keep }: WeatherNowBlockProps) {
       {measure ? (
         <>
           <div className="wx-now">
-            <WindValue knots={measure.tws} /> du {directionText(measure.twd)} ·
-            rafales <WindValue knots={measure.gust} />
-            {measure.air == null ? '' : ` · ${fr(measure.air)} °C`}
-            {measure.baro == null ? '' : ` · ${Math.round(measure.baro)} hPa`}
+            <WindValue knots={measure.tws} keep={keep} />
+            {tr(` du ${directionText(measure.twd)} · rafales `)}
+            <WindValue knots={measure.gust} keep={keep} />
+            {tr(measureTail(measure))}
           </div>
-          <HelpText className="wx-src" keep={keep}>
+          <BoxHelp className="wx-src" keep={keep}>
             {measure.src}
-          </HelpText>
+          </BoxHelp>
         </>
       ) : (
-        <HelpText keep={keep}>
+        <BoxHelp keep={keep}>
           Aucune station MeteoSwiss proche ne répond.
-        </HelpText>
+        </BoxHelp>
       )}
       {forecast ? (
         <>
           <table className="wx-fc">
             <tbody>
               {forecastRows(weather).map((row) => (
-                <ForecastLine key={row.t} row={row} />
+                <ForecastLine key={row.t} row={row} keep={keep} />
               ))}
             </tbody>
           </table>
-          <HelpText className="wx-src" keep={keep}>
+          <BoxHelp className="wx-src" keep={keep}>
             {forecast.src}
-          </HelpText>
+          </BoxHelp>
         </>
       ) : null}
       <UpdatedAt at={weather.at} keep={keep} />
@@ -79,52 +88,62 @@ export function WeatherNowBlock({ weather, keep }: WeatherNowBlockProps) {
   );
 }
 
-function UpdatedAt({ at, keep }: { at: number; keep: boolean | undefined }) {
+function UpdatedAt({ at, keep }: { at: number; keep: boolean }) {
+  const tr = useBoxTr(keep);
   const date = new Date(at);
   const shown = state.view.tzLocalOnly.value
     ? ''
     : `${utcText(date, false)}UTC`;
   const tail = '. Les feux d’avis de tempête restent à vérifier sur place.';
   return (
-    <HelpText keep={keep} nextIsRow text={`Mis à jour à ${shown}${tail}`}>
-      Mis à jour à <TzTime date={date} />
-      {tail}
-    </HelpText>
+    <BoxHelp keep={keep} nextIsRow text={`Mis à jour à ${shown}${tail}`}>
+      {tr('Mis à jour à ', { help: true })}
+      <TzTime date={date} />
+      {tr(tail, { help: true })}
+    </BoxHelp>
   );
 }
 
-function ForecastLine({ row }: { row: ForecastRow }) {
+function measureTail(measure: WeatherMeasure): string {
+  const air = measure.air == null ? '' : ` · ${fr(measure.air)} °C`;
+  const pressure =
+    measure.baro == null ? '' : ` · ${Math.round(measure.baro)} hPa`;
+  return `${air}${pressure}`;
+}
+
+function ForecastLine({ row, keep }: { row: ForecastRow; keep: boolean }) {
+  const tr = useBoxTr(keep);
   return (
     <tr>
-      <th>{forecastTime(row)}</th>
+      <th>{tr(forecastTime(row))}</th>
       <td>
-        <WindValue knots={row.tws} />
+        <WindValue knots={row.tws} keep={keep} />
         {knOk(row.gust) ? (
           <>
             <br />
             <small className="kmh">
-              raf. {Math.round(row.gust as number)} nd · {bft(row.gust)} Bf ·{' '}
-              {kmh(row.gust)} km/h
+              {tr(
+                `raf. ${Math.round(row.gust as number)} nd · ${bft(row.gust)} Bf · ${kmh(row.gust)} km/h`,
+              )}
             </small>
           </>
         ) : null}
       </td>
-      <td>{row.twd == null ? '' : `${pad(Math.round(row.twd), 3)}°`}</td>
-      <td>{row.rain ? `${fr(row.rain)} mm` : ''}</td>
-      <td>{capeRisk(row.cape)}</td>
+      <td>{row.twd == null ? '' : tr(`${pad(Math.round(row.twd), 3)}°`)}</td>
+      <td>{row.rain ? tr(`${fr(row.rain)} mm`) : ''}</td>
+      <td>{tr(capeRisk(row.cape))}</td>
     </tr>
   );
 }
 
-function WindValue({ knots }: { knots: unknown }) {
+function WindValue({ knots, keep }: { knots: unknown; keep: boolean }) {
+  const tr = useBoxTr(keep);
   const parts = windParts(knots);
   if (!parts) return '…';
   return (
     <>
-      <b>
-        {parts.knots} nd · {parts.beaufort} Bf
-      </b>{' '}
-      <small className="kmh">{parts.kmh} km/h</small>
+      <b>{tr(`${parts.knots} nd · ${parts.beaufort} Bf`)}</b>{' '}
+      <small className="kmh">{tr(`${parts.kmh} km/h`)}</small>
     </>
   );
 }

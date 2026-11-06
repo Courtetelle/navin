@@ -3,7 +3,6 @@ import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { CallButton, ContactButtons } from '../../features/safety/Contacts.tsx';
 import type { CallItem } from '../../features/safety/contacts.ts';
 import { contactItems } from '../../features/safety/contacts.ts';
-import { keyedItems } from '../../features/safety/keyedItems.ts';
 import { spell, spellDigits } from '../../features/safety/nato.ts';
 import { openView } from '../../features/safety/openView.ts';
 import type { SosKind } from '../../features/safety/sosScripts.ts';
@@ -11,6 +10,7 @@ import { SOS, SOS_KINDS, VOCAB } from '../../features/safety/sosScripts.ts';
 import { radioDesc } from '../../lib/boatDescription.ts';
 import { buzz } from '../../lib/dom.ts';
 import { textOf } from '../../lib/format.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import type { CruiseInfo } from '../../model/types.ts';
 
 /**

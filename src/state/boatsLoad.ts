@@ -1,4 +1,5 @@
 import { textOf, uid } from '../lib/format.ts';
+import { indexById } from '../lib/indexById.ts';
 import {
   EXAMPLE_BOATS,
   INSPIRATION_INFO,
@@ -209,11 +210,10 @@ function migrateBoatChecklists(boat: Boat, boats: Boat[]): void {
 function keepCruiseCopiesAsVersions(boats: Boat[]): void {
   if (store.get('ldb.boatVers1', false)) return;
   try {
+    const byId = indexById(boats);
     for (const meta of store.get<CruiseMeta[]>('ldb.index', [])) {
       const cruise = store.get<Cruise | null>(`ldb.cruise.${meta.id}`, null);
-      const boat = cruise?.boatId
-        ? boats.find((item) => item.id === cruise.boatId)
-        : undefined;
+      const boat = cruise?.boatId ? byId.get(cruise.boatId) : undefined;
       if (!cruise || !boat) continue;
       const info = boatInfoOf(boat, cruise.info);
       if (infoDiffKeys(info, boatInfoOf(boat, boat.info)).length > 0) {

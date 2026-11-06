@@ -5,15 +5,16 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
-import { MarqueeInput } from '../../features/safety/MarqueeInput.tsx';
-import { keyedItems } from '../../features/safety/keyedItems.ts';
+import { MarqueeInput } from '../../features/logbook/index.ts';
 import type { MobSection } from '../../features/safety/mobDefaults.ts';
 import {
   mobSections,
   updateMobSections,
 } from '../../features/safety/mobProcedures.ts';
+import { toastThenRedraw } from '../../features/safety/toastThenRedraw.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { keyedItems } from '../../lib/keyedItems.ts';
 import { PageBack, PageDone } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { toast } from '../../state/index.ts';
@@ -168,8 +169,7 @@ export function MobEditSection({
               edit((target) => {
                 target.steps.splice(at, 0, [title, details]);
               });
-              toast('Étape ajoutée');
-              onRedraw();
+              toastThenRedraw('Étape ajoutée', onRedraw);
             }}
           >
             {tr('＋ Ajouter l’étape')}

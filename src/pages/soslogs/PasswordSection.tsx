@@ -2,8 +2,9 @@ import { useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
-import { MarqueeInput } from '../../features/safety/MarqueeInput.tsx';
+import { MarqueeInput } from '../../features/logbook/index.ts';
 import { sosHash } from '../../features/safety/sosHash.ts';
+import { toastThenRedraw } from '../../features/safety/toastThenRedraw.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { toast } from '../../state/index.ts';
@@ -44,8 +45,7 @@ export function PasswordSection({
       return;
     }
     store.set('ldb.sosPwd', await sosHash(password));
-    toast('Mot de passe enregistré');
-    onRedraw();
+    toastThenRedraw('Mot de passe enregistré', onRedraw);
   };
   return (
     <details className="section">

@@ -7,7 +7,6 @@ import { gotoBar, gotoTarget, gotoUpdate, setGoto } from '../goto.ts';
 import {
   chooseCancel,
   drawTrkButtons,
-  trackerOpen,
   trackerOverlay,
   trkChooseStart,
 } from '../trackerButtons.ts';
@@ -21,7 +20,6 @@ beforeEach(() => {
   gotoTarget.value = null;
   gotoBar.value = null;
   tracker.current = null;
-  trackerOpen.current = false;
   vi.stubGlobal('document', {
     documentElement: { classList: { contains: () => false } },
   });
@@ -99,9 +97,10 @@ test('trkChooseStart needs the tracker on screen and a previous track', () => {
     end: Date.parse('2026-07-15T10:30:00+02:00'),
     det: { dist: 1.25 },
   });
+  state.view.currentView.value = 'more';
   trkChooseStart();
   expect(trackerOverlay.value.kind).toBe('idle');
-  trackerOpen.current = true;
+  state.view.currentView.value = 'tracker';
   trkChooseStart();
   expect(trackerOverlay.value).toStrictEqual({
     kind: 'choose',

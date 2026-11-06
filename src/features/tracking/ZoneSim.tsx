@@ -34,16 +34,21 @@ export function ZoneSim() {
   useSignals();
   const tr = useTr();
   const zone = state.view.zoneSimV.value || 'auto';
-  const text = (choice: string): ReactNode => {
+  // Legacy translates text nodes: outside the lake icon, the prefix and the
+  // zone are a single node, and that sentence is not in the dictionary.
+  const text = (prefix: string, choice: string): ReactNode => {
     if (choice === 'lac') {
       return (
         <>
+          {tr(prefix)}
           <LemanIcon />
           {tr(' En eaux intérieures')}
         </>
       );
     }
-    return tr(choice === 'mer' ? '🌊 Maritime' : '🛰️ Automatique par GPS');
+    const zoneName =
+      choice === 'mer' ? '🌊 Maritime' : '🛰️ Automatique par GPS';
+    return tr(`${prefix}${zoneName}`);
   };
   return (
     <section className="field zone-set">
@@ -56,12 +61,8 @@ export function ZoneSim() {
             cycleZone();
           }}
         >
-          {tr('Passer à : ')}
-          {text(nextZone(zone))}
-          <small>
-            {tr('zone de navigation actuelle : ')}
-            {text(zone)}
-          </small>
+          {text('Passer à : ', nextZone(zone))}
+          <small>{text('zone de navigation actuelle : ', zone)}</small>
         </Button>
       </ButtonRow>
       <HelpText>

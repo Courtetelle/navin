@@ -8,7 +8,8 @@ let mounted = false;
 /**
  * Mount the PréP bar legacy appended to `<body>`: it follows the flow across
  * the crew and check-in screens, so it lives in its own React root, whose host
- * stays out of the document (the bar is a portal into `<body>`).
+ * stays out of the document (the bar is a portal into `<body>`). The PréP page
+ * calls it: every flow goes through that page first.
  */
 export function mountPrepBar(): void {
   if (mounted) return;

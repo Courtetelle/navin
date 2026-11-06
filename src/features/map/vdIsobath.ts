@@ -39,6 +39,7 @@ export async function vdIsobathLayers(): Promise<VdLayer[]> {
     const response = await fetch(
       `${VD_WMS}?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0`,
     );
+    if (!response.ok) return known?.layers ?? [];
     const found = depthLayers(await response.text());
     if (found.length > 0) {
       store.set('ldb.vdIsobath', { at: Date.now(), layers: found });
