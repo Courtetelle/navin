@@ -6,6 +6,7 @@ import { clearHistory, go, goBackInHistory } from '../router.ts';
 
 import {
   firstInDocument,
+  navEdit,
   navSteps,
   pageBackTarget,
   validateTargets,
@@ -60,6 +61,11 @@ export function navExit(): void {
  */
 export function navOk(): void {
   buzz();
+  const edit = navEdit.peek();
+  if (edit) {
+    edit();
+    return;
+  }
   const active = document.activeElement;
   if (active instanceof HTMLElement && active !== document.body) active.blur();
   const validate = firstInDocument(validateTargets.value);

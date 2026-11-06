@@ -332,6 +332,58 @@ async function follow(page: Page, theme: string): Promise<void> {
   }
 }
 
+async function crewCard(page: Page, theme: string): Promise<void> {
+  const button = page.locator('#navOk');
+  const name = page.locator('#fPrenom');
+  const shown = async () => {
+    const text = await button.textContent();
+    return text?.trim();
+  };
+  await page.getByText('data', { exact: true }).first().click();
+  await page.locator('[data-tile="people"]').click();
+  await page.locator('#mNew').click();
+  check(theme, 'a new crew card has the green tick', (await shown()) === '✔');
+  check(theme, 'it can be typed in', !(await name.getAttribute('readonly')));
+  await name.fill('Marie');
+  await button.click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'validated, the tick becomes Modifier',
+    (await shown())?.includes('Modifier') === true,
+  );
+  check(
+    theme,
+    'and the card is read-only',
+    (await name.getAttribute('readonly')) !== null,
+  );
+  await page.locator('#navBack').click();
+  await page.waitForTimeout(300);
+  await page.locator('[data-fiche]').first().click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'it opens read-only again',
+    (await name.getAttribute('readonly')) !== null,
+  );
+  await button.click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'Modifier makes it editable, with the tick back',
+    (await name.getAttribute('readonly')) === null && (await shown()) === '✔',
+  );
+  await name.fill('Marie-Claire');
+  await button.click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'the change is kept',
+    (await name.inputValue()) === 'Marie-Claire' &&
+      (await name.getAttribute('readonly')) !== null,
+  );
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
@@ -343,6 +395,7 @@ for (const theme of ['day', 'night']) {
     await search(page, theme);
     await landmarks(page, theme);
     await myMaps(page, theme);
+    await crewCard(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }

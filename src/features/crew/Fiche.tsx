@@ -1,6 +1,6 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { MouseEvent } from 'react';
-import { useState } from 'react';
+import type { MouseEvent, PointerEvent } from 'react';
+import { useLayoutEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -9,7 +9,8 @@ import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { useIntroLead } from '../../components/shared/introLead.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { PageBack } from '../../shell/navbar/PageBack.tsx';
+import { PageBack, PageValidate } from '../../shell/navbar/PageBack.tsx';
+import { navEdit } from '../../shell/navbar/navBarState.ts';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import {
   crewFromMember,
@@ -48,17 +49,37 @@ export function Fiche({ id }: FicheProps) {
   const record = useFicheRecord(id);
   useIntroLead(state.view.currentView.value, '');
   const [locked] = useState(() => !record.isNew && memberLocks(id).length > 0);
-  // A card already saved opens for reading: a long press on the name edits it.
+  // A card already validated opens read-only: « Modifier » edits it again.
   const [reading, setReading] = useState(!record.isNew);
-  const startEditing = () => {
-    setReading(false);
-    toast('Fiche en modification');
+  useLayoutEffect(() => {
+    if (!reading) return undefined;
+    navEdit.value = () => {
+      setReading(false);
+    };
+    return () => {
+      navEdit.value = null;
+    };
+  }, [reading]);
+  const validate = () => {
+    const card = record.persist();
+    if (!card) {
+      toast('Le prénom est obligatoire');
+      record.prenomInput.current?.focus();
+      return;
+    }
+    setReading(true);
+    globalThis.scrollTo(0, 0);
+    toast(`Fiche de ${memberName(card)} validée`);
   };
   const explain = (event: MouseEvent) => {
     if (!reading) return;
     const target = event.target as Element;
     if (!target.closest('.cf') || target.closest('.contact-on')) return;
-    toast('Appui long sur le prénom ou le nom pour modifier');
+    toast('Touchez « Modifier » en haut pour changer la fiche');
+  };
+  const holdContacts = (event: PointerEvent) => {
+    // A long press would open a phone or mail field of a read-only card.
+    if (reading) event.stopPropagation();
   };
   const cruise = state.data.cruise.value;
   const leave = () => {
@@ -100,7 +121,16 @@ export function Fiche({ id }: FicheProps) {
       <PageBack id="fBack" label="◀ Retour" onClick={leave}>
         {tr('◀ Retour')}
       </PageBack>
-      <div className={reading ? 'fiche-reading' : undefined} onClick={explain}>
+      {reading ? null : (
+        <PageValidate label="Valider" onClick={validate} hidden>
+          {tr('Valider')}
+        </PageValidate>
+      )}
+      <div
+        className={reading ? 'fiche-reading' : undefined}
+        onClick={explain}
+        onPointerDownCapture={holdContacts}
+      >
         <div className="f-head">
           <h1>
             {record.isNew && !record.recordId ? tr(record.title) : record.title}
@@ -124,16 +154,7 @@ export function Fiche({ id }: FicheProps) {
             ✎
           </Button>
         </div>
-        {reading ? (
-          <p className="fiche-read-hint">
-            Fiche en lecture · appui long sur le prénom ou le nom pour modifier
-          </p>
-        ) : null}
-        <FicheIdentity
-          record={record}
-          reading={reading}
-          onEdit={startEditing}
-        />
+        <FicheIdentity record={record} reading={reading} />
         <details className="section" open={!record.isNew}>
           <summary>{tr('Informations complémentaires')}</summary>
           <FicheForm record={record} />

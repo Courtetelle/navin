@@ -8869,7 +8869,7 @@ body:not(.trk-mode) #searchBtn {
   cursor: pointer;
 }
 
-/* A card already saved opens for reading: a long press on the name edits it. */
+/* A validated card is read-only: « Modifier » in the nav bar edits it again. */
 .fiche-reading
   :is(
     .cf input:not(.contact-on),
@@ -8881,17 +8881,25 @@ body:not(.trk-mode) #searchBtn {
   ) {
   pointer-events: none;
 }
-.fiche-reading [data-frame='ident'] {
-  -webkit-user-select: none;
-  user-select: none;
-  -webkit-touch-callout: none;
-  touch-action: pan-y;
+.fiche-reading .cf :is(input, select, textarea) {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  padding-left: 0;
+  font-weight: 600;
 }
 .fiche-reading :is(#fEdit, #fAddProche, #fPhAdd, .photo-del, #fDel) {
   display: none !important;
 }
-.fiche-read-hint {
-  margin: 8px 0 0;
-  font-size: 15px;
-  opacity: 0.8;
+#navtop #navOk.nav-edit {
+  flex: 0 0 auto;
+  max-width: none;
+  padding: 0 10px !important;
+  font-size: 16px !important;
+  font-weight: 700;
+  white-space: nowrap;
+}
+:root:not([data-theme='night']) #navtop #navOk.nav-edit {
+  background: #0b3d91 !important;
+  color: #fff !important;
 }

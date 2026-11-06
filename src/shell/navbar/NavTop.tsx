@@ -22,6 +22,7 @@ import {
   firstInDocument,
   navBackLabel,
   navBarShown,
+  navEdit,
   navSteps,
   pageBackTarget,
   prepLineContent,
@@ -131,16 +132,16 @@ export function NavTop() {
         {tr('Suivant')}
       </Button>
       <Button
-        className="btn"
+        className={navEdit.value ? 'btn nav-edit' : 'btn'}
         id="navOk"
         hidden={!okShown}
-        aria-label="Valider"
+        aria-label={navEdit.value ? 'Modifier' : 'Valider'}
         onClick={(event) => {
           event.stopPropagation();
           navOk();
         }}
       >
-        ✔
+        {navEdit.value ? tr('✎ Modifier') : '✔'}
       </Button>
       <Button
         className={exitHold.holding ? 'btn holding' : 'btn'}

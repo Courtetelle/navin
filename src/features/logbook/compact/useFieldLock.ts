@@ -91,7 +91,7 @@ export function useFieldLock(
           const value = text.trim();
           const tel = field.contact === 'tel';
           toast(
-            `${tel ? 'Appel' : 'Courriel'} : ${value} · appui long pour modifier`,
+            `${tel ? 'Appel' : 'Courriel'} : ${value}${input.current?.closest('.fiche-reading') ? '' : ' · appui long pour modifier'}`,
           );
           openLink(
             tel ? `tel:${value.replaceAll(/[^\d+]/g, '')}` : `mailto:${value}`,
