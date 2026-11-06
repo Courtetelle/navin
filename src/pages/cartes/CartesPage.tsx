@@ -19,8 +19,10 @@ import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
 import { state, toast } from '../../state/index.ts';
 
+import { OfflineMaps } from './OfflineMaps.tsx';
+
 const HELP =
-  'Le chargement de cartes hors ligne est en cours de remplacement : les zones déjà enregistrées peuvent ne pas contenir de vraie carte, vous pouvez les supprimer ici. Sans réseau, les cartes déjà consultées restent affichées.';
+  'Importez un fichier de carte (.pmtiles) depuis Fichiers, kDrive ou Google Drive : il reste sur cet appareil et s’affiche sans réseau. Quand la carte en ligne ne charge plus, elle prend le relais toute seule.';
 
 /**
  * Screen `cartes`: load the maps around me in one touch (legacy `VIEWS.cartes`).
@@ -51,18 +53,23 @@ function CartesContent({ onChange }: { onChange: () => void }) {
       <p className={fresh ? 'help help-pop help-lead' : 'help help-pop'}>
         {help}
       </p>
-      <section className="field">
-        <h2>{tr('Zones chargées')}</h2>
-        {zones.length > 0 ? (
-          zones.map((zone) => (
-            <ZoneRow key={zone.id} zone={zone} onChange={onChange} />
-          ))
-        ) : (
+      <OfflineMaps />
+      {zones.length > 0 ? (
+        <section className="field">
+          <h2>{tr('Anciennes zones')}</h2>
           <p className="help">
-            {tr('Aucune carte chargée pour l’instant.', { help: true })}
+            {tr(
+              'Elles peuvent ne pas contenir de vraie carte : supprimez-les.',
+              {
+                help: true,
+              },
+            )}
           </p>
-        )}
-      </section>
+          {zones.map((zone) => (
+            <ZoneRow key={zone.id} zone={zone} onChange={onChange} />
+          ))}
+        </section>
+      ) : null}
       <FoldSection title="🌐 Cartes en ligne">
         <HelpText nextIsRow>
           Réseau nécessaire, s’ouvrent dans le navigateur.

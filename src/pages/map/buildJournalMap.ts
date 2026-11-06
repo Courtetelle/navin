@@ -20,6 +20,7 @@ import {
 } from '../../features/map/mapData.ts';
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
+import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
 import { isLake } from '../../state/index.ts';
@@ -104,6 +105,7 @@ export function buildJournalMap(
     .addTo(map);
   if (useSwiss) void addLemanVector(map, layers);
   keepTilesFilled(map, [osm, swiss]);
+  void addOfflineMaps(map, layers, osm);
   addFullscreenControl(map);
   const points: LatLngExpression[] = [];
   for (const part of segments(data.line)) {
