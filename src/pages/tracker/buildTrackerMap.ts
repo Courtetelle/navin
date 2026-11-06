@@ -99,7 +99,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     swissWhenOffline(map, osm, swiss);
     void addLemanVector(map, layers);
   }
-  simChartWire(map, layers, [swiss, osm, zoneBase]);
+  simChartWire(map, layers, [swiss, osm, zoneBase], swiss);
   addFullscreenControl(map);
   addOrientationControl(map);
   setFollow(!(simulatedSea && !here));

@@ -2,6 +2,7 @@ import { angDiff, bearing, distNM } from '../../lib/geo.ts';
 import { inFrenchLeman } from '../../model/contacts.ts';
 
 import {
+  LEMAN_FRENCH_MARKS,
   LEMAN_LINES,
   LEMAN_MARKS,
   SEA_ZONE1_MARKS,
@@ -122,17 +123,24 @@ function lemanLineWords(position: LatLon): string {
     }
   }
   if (!best || best.distance > 1.5) return '';
-  const near = best.along <= 0.5 ? best.first : best.second;
-  const fromNear =
-    (best.along <= 0.5 ? best.along : 1 - best.along) * best.length;
+  // The distance starts from the shore of the country whose waters the boat is in.
+  const firstAtHome =
+    LEMAN_FRENCH_MARKS.has(best.first) === inFrenchLeman(position);
+  const secondAtHome =
+    LEMAN_FRENCH_MARKS.has(best.second) === inFrenchLeman(position);
+  const fromFirst =
+    firstAtHome === secondAtHome ? best.along <= 0.5 : firstAtHome;
+  const home = fromFirst ? best.first : best.second;
+  const other = fromFirst ? best.second : best.first;
+  const fromHome = (fromFirst ? best.along : 1 - best.along) * best.length;
   const offset =
     best.distance < 1
       ? `${Math.round(best.distance * 10) * 100} m`
       : `${kmWord(best.distance)} km`;
   const side =
-    best.distance > 0.3 ? `, à ${offset} à l’${best.side} de l’axe` : '';
-  const along = fromNear < 0.3 ? 'moins de 300 m' : `${kmWord(fromNear)} km`;
-  return `dans l’axe entre ${best.first} et ${best.second}, à ${along} ${ofPlace(near)}${side}`;
+    best.distance > 0.3 ? `, mais plus à l’${best.side} (${offset})` : '';
+  const along = fromHome < 0.3 ? 'moins de 300 m' : `${kmWord(fromHome)} km`;
+  return `sur l’axe ${home} – ${other}, à ${along} ${ofPlace(home)}${side}`;
 }
 
 function sosZoneWords(position: LatLon): string | null {
@@ -145,7 +153,7 @@ function sosZoneWords(position: LatLon): string | null {
     const waters = inFrenchLeman(position) ? 'eaux françaises' : 'eaux suisses';
     const line = lemanLineWords(position);
     if (line) return `${line[0]?.toUpperCase()}${line.slice(1)} · ${waters}`;
-    const nearest = nearestMark(LEMAN_MARKS, position);
+    const nearest = nearestMark(marksOfWaters(position), position);
     const km = nearest.nm * 1.852;
     const distance = km < 0.3 ? 'moins de 300 m' : `environ ${kmWord(km)} km`;
     return `À ${distance} ${directionFrom(nearest.from)} ${ofPlace(nearest.name)} · ${waters}`;
@@ -158,6 +166,17 @@ function sosZoneWords(position: LatLon): string | null {
     .replace('.', ',');
   const heading = String(Math.round(mark.from) % 360).padStart(3, '0');
   return `À ${miles} mille${mark.nm >= 1.95 ? 's' : ''} dans le ${heading}° ${ofPlace(mark.name)}`;
+}
+
+function marksOfWaters(
+  position: LatLon,
+): Record<string, readonly [number, number]> {
+  const french = inFrenchLeman(position);
+  return Object.fromEntries(
+    Object.entries(LEMAN_MARKS).filter(
+      ([name]) => LEMAN_FRENCH_MARKS.has(name) === french,
+    ),
+  );
 }
 
 function nearestMark(

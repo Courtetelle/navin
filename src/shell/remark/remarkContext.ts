@@ -1,3 +1,4 @@
+import { BUILD_ID } from '../../model/buildId.ts';
 import { APP_VERSION } from '../../model/taskTemplate.ts';
 import { state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
@@ -133,7 +134,7 @@ export function remarkContext(element: Element | null): string {
     .trim()
     .slice(0, 60);
   const target = element ? ` · élément « ${targetName(element)} »` : '';
-  return `[NavIn ${APP_VERSION} · page « ${title || view} » (${view})${target}]`;
+  return `[NavIn ${APP_VERSION} (${BUILD_ID}) · page « ${title || view} » (${view})${target}]`;
 }
 
 /** The comments capability of the claude.ai preview (`window.claude.use('comments')`). */

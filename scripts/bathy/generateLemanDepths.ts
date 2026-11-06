@@ -4,7 +4,8 @@
  * asset esriasciigrid: tiles of 1 km, cells of 2 m):
  * - public/leman-depth/<east>_<north>.bin: the shallow cells, for the depth alarm;
  * - src/features/map/lemanDepthTiles.json: the list of these tiles;
- * - src/features/map/lemanIsobaths.json: the depth lines to draw, down to 20 m.
+ * - src/features/map/lemanIsobaths.json: the depth lines to draw, down to 20 m;
+ * - src/features/map/lemanIsobathsDeep.json: the deeper lines, for the full layer.
  *
  *   node --max-old-space-size=10000 scripts/bathy/generateLemanDepths.ts <grid.zip>
  */
@@ -34,6 +35,13 @@ const LINES = 'src/features/map/lemanIsobaths.json';
 const LEVELS = [1, 2, 3, 4, 5, 10, 15, 20];
 /** The lines are drawn from one cell out of this many: 4 m is enough to see. */
 const LINE_STEP = 2;
+const DEEP_LINES = 'src/features/map/lemanIsobathsDeep.json';
+const DEEP_LEVELS = [
+  25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160,
+  170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 270, 280, 290, 300,
+];
+/** The deep lines come from one cell out of this many: 10 m is enough there. */
+const DEEP_STEP = 5;
 const CELL = 2;
 const KM_CELLS = 1000 / CELL;
 const MAX_BYTES = 64 * 1024 * 1024;
@@ -61,6 +69,9 @@ const southKm = Math.min(...northings);
 const width = (Math.max(...eastings) + 1 - westKm) * KM_CELLS;
 const height = (northKm - southKm) * KM_CELLS;
 const grid = new Uint8Array(width * height).fill(DEPTH_NONE);
+const deepWidth = Math.ceil(width / DEEP_STEP);
+const deepHeight = Math.ceil(height / DEEP_STEP);
+const deepGrid = new Float32Array(deepWidth * deepHeight).fill(Number.NaN);
 
 for (const entry of entries) {
   const text = execFileSync('unzip', ['-p', zip, entry], {
@@ -87,6 +98,12 @@ for (const entry of entries) {
       const altitude = Number(value);
       if (altitude === noData || altitude < -9000) continue;
       const depth = LAKE_LEVEL - altitude;
+      const cellRow = row0 + row;
+      const cellColumn = column0 + column;
+      if (cellRow % DEEP_STEP === 0 && cellColumn % DEEP_STEP === 0) {
+        deepGrid[(cellRow / DEEP_STEP) * deepWidth + cellColumn / DEEP_STEP] =
+          depth;
+      }
       // Rounded down: the alarm must never see more water than there is.
       grid[(row0 + row) * width + column0 + column] =
         depth > DEPTH_MAX
@@ -155,6 +172,31 @@ const lines = toWgsLines(
   LINE_STEP,
 );
 writeFileSync(LINES, JSON.stringify(lines));
+
+// The deep lines, for the full layer.
+const deepBuilder = new ContourBuilder(DEEP_LEVELS);
+for (let row = 1; row < deepHeight; row++) {
+  marchRow(
+    deepBuilder,
+    deepGrid.subarray((row - 1) * deepWidth, row * deepWidth),
+    deepGrid.subarray(row * deepWidth, (row + 1) * deepWidth),
+    row,
+    deepWidth,
+  );
+}
+const deepLines = toWgsLines(
+  deepBuilder,
+  {
+    columns: width,
+    rows: height,
+    xCorner: westKm * 1000,
+    yCorner: southKm * 1000,
+    cell: CELL,
+    noData: Number.NaN,
+  },
+  DEEP_STEP,
+);
+writeFileSync(DEEP_LINES, JSON.stringify(deepLines));
 
 let points = 0;
 for (const line of lines) points += (line.length - 1) / 2;

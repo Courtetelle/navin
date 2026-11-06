@@ -12,6 +12,7 @@ import { WindAlert, windAlertClick } from '../../features/onwater/index.ts';
 import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { BUILD_ID } from '../../model/buildId.ts';
 import type { PageProps } from '../../shell/pageTypes.ts';
 import { toggleTheme } from '../../shell/theme.ts';
 import { UiEditSection } from '../../shell/uiEdit/UiEditSection.tsx';
@@ -213,6 +214,9 @@ export function SettingsPage({ from }: PageProps) {
           <UiEditSection />
         </SettingsSection>
       </div>
+      <p className="help" id="buildId">
+        Version {BUILD_ID}
+      </p>
     </>
   );
 }

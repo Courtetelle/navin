@@ -80,22 +80,18 @@ function onPointerUp(event: PointerEvent): void {
   start = null;
   const dy = event.clientY - begun.y;
   const dx = Math.abs(event.clientX - begun.x);
-  if (Math.abs(dy) < (begun.top ? 18 : 30) || dx > Math.abs(dy)) {
-    if (begun.handle) {
-      setBodyClass(begun.handle === 'top' ? 'top-hidden' : 'bot-hidden', false);
-    }
+  // On a handle a finger that moves a little still means « bring it back ».
+  if (begun.handle) {
+    setBodyClass(begun.handle === 'top' ? 'top-hidden' : 'bot-hidden', false);
     return;
   }
+  if (Math.abs(dy) < (begun.top ? 18 : 30) || dx > Math.abs(dy)) return;
   if (begun.top && dy < 0) {
     setBodyClass('top-hidden', true);
     swallow = true;
   } else if (begun.bottom && dy > 0) {
     setBodyClass('bot-hidden', true);
     swallow = true;
-  } else if (begun.handle === 'top' && dy > 0) {
-    setBodyClass('top-hidden', false);
-  } else if (begun.handle === 'bottom' && dy < 0) {
-    setBodyClass('bot-hidden', false);
   }
   if (swallow) {
     setTimeout(() => {

@@ -155,9 +155,11 @@ test('the 360 routine VHF calls are character-identical to legacy', () => {
   }
 });
 
-test('positions in words are identical to legacy', () => {
+// On Lake Geneva the wording and the axes were changed on purpose: see sosPlaces.test.ts.
+test('positions in words outside Lake Geneva are identical to legacy', () => {
   expect(golden.places).toHaveLength(369);
   for (const [lat, lon, expected] of golden.places) {
+    if (lat > 46.19 && lat < 46.56 && lon > 6.1 && lon < 6.96) continue;
     expect(sosPlaceWords({ lat, lon })).toBe(expected);
   }
   expect(sosPlaceWords(null)).toBe('');

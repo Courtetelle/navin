@@ -122,7 +122,7 @@ export function buildJournalMap(
     swissWhenOffline(map, osm, swiss);
     void addLemanVector(map, layers);
   }
-  simChartWire(map, layers, [swiss, osm, zoneBase]);
+  simChartWire(map, layers, [swiss, osm, zoneBase], swiss);
   addFullscreenControl(map);
   let loaded = 0;
   let errors = 0;

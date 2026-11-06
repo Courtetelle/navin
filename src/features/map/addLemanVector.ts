@@ -5,7 +5,8 @@ import { SWISS_BOUNDS } from './constants.ts';
 import { isobathLoad } from './isobath.ts';
 import { newIsobathLayer } from './isobathLayer.ts';
 import { leaflet } from './leaflet.ts';
-import { lemanIsobaths } from './lemanIsobaths.ts';
+import { newLemanAxesLayer } from './lemanAxes.ts';
+import { lemanFullIsobaths, lemanIsobaths } from './lemanIsobaths.ts';
 import { lemanVecLoad } from './lemanVector.ts';
 import { isMapLive } from './mapExtras.ts';
 import { newShoreBands } from './shoreBands.ts';
@@ -36,9 +37,11 @@ export async function addLemanVector(
     attribution: '© swisstopo swissBATHY3D',
   });
   layersControl.addOverlay(bathy, 'Relief du fond (swissBATHY3D)');
+  layersControl.addOverlay(newLemanAxesLayer(), 'Axes de position du Léman');
   const vector = await lemanVecLoad();
   if (!isMapLive(map)) return;
-  const lines = await lemanIsobaths(await isobathLoad());
+  const device = await isobathLoad();
+  const lines = await lemanIsobaths(device);
   if (lines.length > 0 && isMapLive(map)) {
     const layer = newIsobathLayer(lines);
     layersControl.addOverlay(
@@ -46,6 +49,13 @@ export async function addLemanVector(
       'Isobathes du Léman, jusqu’à 20 m (swissBATHY3D)',
     );
     layer.addTo(map);
+    const full = await lemanFullIsobaths(device);
+    if (isMapLive(map)) {
+      layersControl.addOverlay(
+        newIsobathLayer(full),
+        'Isobathes complètes, 1 à 300 m (swissBATHY3D)',
+      );
+    }
   }
   void addVdIsobath(map, layersControl);
   const buoyage = lemanVecLayer(vector);

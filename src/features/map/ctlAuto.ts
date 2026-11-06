@@ -9,7 +9,7 @@ const HIDE_ICON =
 /** Moments, in ms after the map is created, when the controls added since are arranged. */
 const ARRANGE_DELAYS = [0, 300, 1200];
 /** Distance from the chevron of the edge, in pixels, where a tap opens the buttons. */
-const CHEVRON_REACH = 44;
+const CHEVRON_REACH = 70;
 
 /**
  * Put every map button in one column on the left, the layer selector included
@@ -78,7 +78,7 @@ export function ctlAutoAttach(map: LeafletMap): void {
     const box = edge.getBoundingClientRect();
     if (
       start &&
-      Math.hypot(event.clientX - start.x, event.clientY - start.y) < 10 &&
+      Math.hypot(event.clientX - start.x, event.clientY - start.y) < 20 &&
       Math.abs(event.clientY - (box.top + box.height / 2)) < CHEVRON_REACH
     ) {
       show(map);

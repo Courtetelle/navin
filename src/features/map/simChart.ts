@@ -8,12 +8,15 @@ import type {
 
 import { state } from '../../state/index.ts';
 
+import { inSwissArea } from './constants.ts';
 import { leaflet } from './leaflet.ts';
 import { extrasOf, isMapLive, whileMapLive } from './mapExtras.ts';
 import { drawSimTile } from './simTile.ts';
 
 const SIMULATED_NAME = 'Carte maritime simulée';
 const SIMULATED_NOTE = 'Carte maritime simulée (aperçu)';
+/** Without any tile after this long, the next background is tried. */
+const SWAP_DELAY_MS = 4000;
 
 /**
  * Whether the zone simulation is at sea (legacy `simSeaMode`).
@@ -24,17 +27,20 @@ export function simSeaMode(): boolean {
 }
 
 /**
- * Add the simulated chart to the layer selector, and use it when the real
- * background gives no tile (legacy `simChartWire`).
+ * Add the simulated chart to the layer selector, and use it as a last resort
+ * when the real background gives no tile (legacy `simChartWire`): in Switzerland,
+ * the Swiss map, often kept on the device, is tried first.
  * @param map - Leaflet map.
  * @param layersControl - Its layer selector.
  * @param bases - Real background layers.
+ * @param swiss - The Swiss map, when one of the bases.
  * @returns The simulated layer.
  */
 export function simChartWire(
   map: LeafletMap,
   layersControl: Control.Layers,
   bases: readonly GridLayer[],
+  swiss?: GridLayer,
 ): GridLayer {
   const simulated = simChartLayer(map);
   layersControl.addBaseLayer(simulated, SIMULATED_NAME);
@@ -51,12 +57,26 @@ export function simChartWire(
   let loaded = 0;
   let errors = 0;
   let done = false;
+  let triedSwiss = false;
   const swap = () => {
     if (done || loaded) return;
-    done = true;
     for (const base of bases) {
       if (map.hasLayer(base)) map.removeLayer(base);
     }
+    const { lat, lng } = map.getCenter();
+    if (
+      swiss &&
+      !triedSwiss &&
+      !simSeaMode() &&
+      inSwissArea({ lat, lon: lng })
+    ) {
+      triedSwiss = true;
+      errors = 0;
+      swiss.addTo(map);
+      whileMapLive(map, swap, SWAP_DELAY_MS);
+      return;
+    }
+    done = true;
     simulated.addTo(map);
   };
   const onLoad = () => {
@@ -71,7 +91,7 @@ export function simChartWire(
     base.on('tileerror', onError);
   }
   // Tiles blocked without any error: swap all the same.
-  whileMapLive(map, swap, 4000);
+  whileMapLive(map, swap, SWAP_DELAY_MS);
   return simulated;
 }
 
