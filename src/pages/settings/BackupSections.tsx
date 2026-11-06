@@ -106,6 +106,13 @@ export function BackupSections() {
           choisissez ce fichier. Les navigations déjà présentes sont fusionnées
           avec celles du fichier.
         </HelpText>
+        <HelpText>
+          Le bouton ci-dessous ouvre le choix de fichier du téléphone. Sur
+          iPhone, touchez Parcourir puis Google Drive ou kDrive. S’ils
+          n’apparaissent pas : ouvrez l’app Fichiers, Parcourir, le bouton ⋯,
+          Modifier, et activez-les (leurs apps doivent être installées). Sur
+          Android, ils sont dans le menu ☰ du choix de fichier.
+        </HelpText>
         <ButtonRow>
           <Button
             className="btn big"

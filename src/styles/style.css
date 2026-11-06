@@ -2581,7 +2581,6 @@ a.btn.link-btn small {
   width: 34px;
   height: 34px;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
-  transition: transform 0.3s;
 }
 .trk-arrow svg {
   display: block;
@@ -8868,4 +8867,31 @@ body:not(.trk-mode) #searchBtn {
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
+}
+
+/* A card already saved opens for reading: a long press on the name edits it. */
+.fiche-reading
+  :is(
+    .cf input:not(.contact-on),
+    .cf select,
+    .cf textarea,
+    .cf button,
+    .cf label,
+    .f-av
+  ) {
+  pointer-events: none;
+}
+.fiche-reading [data-frame='ident'] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: pan-y;
+}
+.fiche-reading :is(#fEdit, #fAddProche, #fPhAdd, .photo-del, #fDel) {
+  display: none !important;
+}
+.fiche-read-hint {
+  margin: 8px 0 0;
+  font-size: 15px;
+  opacity: 0.8;
 }

@@ -4,8 +4,6 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useTr } from '../../i18n/useTr.ts';
-import { buzz } from '../../lib/dom.ts';
-import { go } from '../../shell/router.ts';
 import { state } from '../../state/index.ts';
 
 import { changeSetting } from './settingsState.ts';
@@ -15,11 +13,6 @@ const AUTO_RATES = [
   [1, 'Normal', '≈ 1 / h'],
   [2, 'Détaillé', '≈ 2 / h'],
 ] as const;
-
-function open(view: string): void {
-  buzz();
-  go(view);
-}
 
 /** Props of {@link OptionButtons}. */
 interface OptionButtonsProps {
@@ -190,24 +183,6 @@ export function WeatherRow() {
         {tr(
           `Météo du modèle ajoutée avec du réseau : ${autoWeather ? 'OUI' : 'NON'}`,
         )}
-      </Button>
-    </ButtonRow>
-  );
-}
-
-/**
- * Links to the offline zones and the marks (legacy `links`).
- * @returns The row.
- */
-export function MapLinksRow() {
-  const tr = useTr();
-  return (
-    <ButtonRow className="row c2">
-      <Button className="btn" data-go="cartes" onClick={() => open('cartes')}>
-        {tr('🗺 Mes cartes')}
-      </Button>
-      <Button className="btn" data-go="marks" onClick={() => open('marks')}>
-        {tr('📌 Mes marques')}
       </Button>
     </ButtonRow>
   );

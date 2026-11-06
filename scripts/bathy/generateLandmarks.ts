@@ -36,9 +36,9 @@ const CHOSEN: ReadonlyArray<readonly [string, string, string]> = [
   ['Rochers de Naye', 'Sommet', 'Rochers de Naye'],
   ['Dents du Midi', 'Sommet', 'Haute Cime'],
   ['Le Grammont', 'Sommet', 'Le Grammont'],
-  ['Cornettes de Bise', 'Sommet', 'Cornettes de Bise'],
+  ['Cornettes de Bise', 'Sommet', 'Les Cornettes de Bise'],
   ['Dent d’Oche', 'Sommet', "Dent d'Oche"],
-  ['Le Salève', 'Sommet', 'Grand Piton'],
+  ['Le Salève', 'Sommet', 'Le Grand Piton'],
   ['La Dôle', 'Sommet', 'La Dôle'],
 ];
 

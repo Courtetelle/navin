@@ -4,10 +4,8 @@ import { useLayoutEffect, useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { installPrompt } from '../../features/data/install.ts';
-import { lakesNote } from '../../features/map/index.ts';
 import { WindAlert, windAlertClick } from '../../features/onwater/index.ts';
 import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -26,7 +24,6 @@ import { SimulationSection } from './SimulationSection.tsx';
 import {
   AutoLogRows,
   GotoArrivalRows,
-  MapLinksRow,
   PrefillRow,
   WakeRow,
   WeatherRow,
@@ -188,11 +185,10 @@ export function SettingsPage({ from }: PageProps) {
         <SettingsSection section="tests" title="🧪 Tests">
           <TestsSection />
         </SettingsSection>
-        <SettingsSection section="maps" title="🗺 Mes cartes">
-          <HelpText nextIsRow>{`🗺 Cartes intégrées : ${lakesNote()}`}</HelpText>
-          <MapLinksRow />
-        </SettingsSection>
-        <SettingsSection section="boats" title="🚤 Calculs des bateaux">
+        <SettingsSection
+          section="boats"
+          title="🚤 Marges de sécurité et rapports de longueurs"
+        >
           <MarginRows />
         </SettingsSection>
         <SettingsSection
