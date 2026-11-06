@@ -24,6 +24,8 @@ export interface PlaceEntry {
   name: string;
   lat: number;
   lon: number;
+  /** South, north, west, east, for a country or a region. */
+  bounds?: [number, number, number, number];
 }
 
 const MAX_RESULTS = 8;
@@ -130,6 +132,7 @@ interface NominatimPlace {
   display_name?: string;
   lat?: string;
   lon?: string;
+  boundingbox?: [string, string, string, string];
 }
 
 /**
@@ -155,7 +158,17 @@ export async function onlinePlaces(
       const lon = Number(place.lon);
       if (place.display_name && Number.isFinite(lat) && Number.isFinite(lon)) {
         const name = place.display_name.split(',').slice(0, 3).join(',');
-        places.push({ name, lat, lon });
+        const box = place.boundingbox?.map(Number);
+        places.push(
+          box?.length === 4 && box.every(Number.isFinite)
+            ? {
+                name,
+                lat,
+                lon,
+                bounds: box as [number, number, number, number],
+              }
+            : { name, lat, lon },
+        );
       }
     }
     return places;

@@ -62,6 +62,7 @@ test('online places are read, and a failure gives nothing', async () => {
               display_name: 'Bonifacio, Sartène, Corse, France',
               lat: '41.4',
               lon: '9.2',
+              boundingbox: ['41', '42', '9', '10'],
             },
             { display_name: 'sans position' },
           ]),
@@ -69,7 +70,12 @@ test('online places are read, and a failure gives nothing', async () => {
     ),
   );
   await expect(onlinePlaces('bonifacio', signal)).resolves.toStrictEqual([
-    { name: 'Bonifacio, Sartène, Corse', lat: 41.4, lon: 9.2 },
+    {
+      name: 'Bonifacio, Sartène, Corse',
+      lat: 41.4,
+      lon: 9.2,
+      bounds: [41, 42, 9, 10],
+    },
   ]);
   vi.stubGlobal(
     'fetch',

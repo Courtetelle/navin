@@ -11,6 +11,8 @@ export interface PlaceTarget {
   name: string;
   lat: number;
   lon: number;
+  /** South, north, west, east: a country or a region is framed whole. */
+  bounds?: [number, number, number, number];
 }
 
 const ZOOM = 13;
@@ -26,10 +28,20 @@ function reveal(map: LeafletMap, place: PlaceTarget): void {
       color: '#d00000',
       weight: 3,
       fillOpacity: 0.15,
+      // It only points: what lies under it can still be touched.
+      interactive: false,
     })
     .bindTooltip(place.name, { permanent: true, direction: 'top' })
     .addTo(map);
-  map.setView([place.lat, place.lon], Math.max(map.getZoom(), ZOOM));
+  if (place.bounds) {
+    const [south, north, west, east] = place.bounds;
+    map.fitBounds([
+      [south, west],
+      [north, east],
+    ]);
+  } else {
+    map.setView([place.lat, place.lon], Math.max(map.getZoom(), ZOOM));
+  }
 }
 
 /**

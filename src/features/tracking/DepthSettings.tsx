@@ -55,13 +55,13 @@ export function DepthDev({ inAlerts = false }: DepthDevProps) {
     <>
       {inAlerts ? null : <DepthToggle />}
       <HelpText
-        text={`Sonde min. selon traceur : ${minimumText(minimum)}. L’alarme démarre ${frN(start)} m au-dessus et monte jusqu’à la sonde min. Réglages : roue dentée de NavIn. Il faut les courbes 1 à 5 m (swissBATHY3D) chargées dans la carte.`}
+        text={`Sonde min. selon traceur : ${minimumText(minimum)}. L’alarme démarre ${frN(start)} m au-dessus et monte jusqu’à la sonde min. Réglages : bouton Réglages de NavIn. Il faut les courbes 1 à 5 m (swissBATHY3D) chargées dans la carte.`}
       >
         <>
           {tr('Sonde min. selon traceur : ', { help: true })}
           <b>{tr(minimumText(minimum), { help: true })}</b>
           {tr(
-            `. L’alarme démarre ${frN(start)} m au-dessus et monte jusqu’à la sonde min. Réglages : roue dentée de NavIn. Il faut les courbes 1 à 5 m (swissBATHY3D) chargées dans la carte.`,
+            `. L’alarme démarre ${frN(start)} m au-dessus et monte jusqu’à la sonde min. Réglages : bouton Réglages de NavIn. Il faut les courbes 1 à 5 m (swissBATHY3D) chargées dans la carte.`,
             { help: true },
           )}
         </>

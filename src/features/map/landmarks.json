@@ -1,0 +1,133 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.15589, 46.20738] },
+      "properties": {
+        "kind": "Fontaine",
+        "name": "Jet d’eau de Genève",
+        "height": 140
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.15693, 46.21] },
+      "properties": {
+        "kind": "Phare",
+        "name": "Phare des Pâquis",
+        "height": 18.7
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.15599, 46.20801] },
+      "properties": { "kind": "Phare", "name": "Phare des Eaux-Vives" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.1485, 46.2011] },
+      "properties": {
+        "kind": "Cathédrale",
+        "name": "Cathédrale Saint-Pierre, Genève"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.19186, 46.31713] },
+      "properties": { "kind": "Château", "name": "Château de Coppet" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.24067, 46.382] },
+      "properties": { "kind": "Château", "name": "Château de Nyon" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.2518, 46.39415] },
+      "properties": { "kind": "Château", "name": "Château de Prangins" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.34133, 46.45867] },
+      "properties": { "kind": "Château", "name": "Château de Rolle" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.4967, 46.50669] },
+      "properties": { "kind": "Château", "name": "Château de Morges" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.63537, 46.52261] },
+      "properties": { "kind": "Cathédrale", "name": "Cathédrale de Lausanne" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.62761, 46.50672] },
+      "properties": { "kind": "Château", "name": "Château d’Ouchy" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.78694, 46.47419] },
+      "properties": { "kind": "Château", "name": "Château de Glérolles" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.85508, 46.45265] },
+      "properties": { "kind": "Château", "name": "Château de La Tour-de-Peilz" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.92873, 46.4143] },
+      "properties": {
+        "kind": "Château",
+        "name": "Château de Chillon",
+        "height": 383
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.32633, 46.37127] },
+      "properties": { "kind": "Château", "name": "Château d’Yvoire" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.48567, 46.38765] },
+      "properties": { "kind": "Château", "name": "Château de Ripaille" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.97605, 46.43182] },
+      "properties": {
+        "kind": "Sommet",
+        "name": "Rochers de Naye",
+        "height": 2042
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.92299, 46.16106] },
+      "properties": {
+        "kind": "Sommet",
+        "name": "Dents du Midi",
+        "height": 3257
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.7889, 46.36945] },
+      "properties": { "kind": "Sommet", "name": "Le Grammont" }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.73132, 46.35298] },
+      "properties": { "kind": "Sommet", "name": "Dent d’Oche", "height": 2221 }
+    },
+    {
+      "type": "Feature",
+      "geometry": { "type": "Point", "coordinates": [6.09928, 46.42582] },
+      "properties": { "kind": "Sommet", "name": "La Dôle" }
+    }
+  ]
+}

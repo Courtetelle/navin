@@ -4,6 +4,7 @@ import { bathLayer } from './bathLayer.ts';
 import { BATHY_TILES, SWISS_BOUNDS } from './constants.ts';
 import { isobathLoad } from './isobath.ts';
 import { newIsobathLayer } from './isobathLayer.ts';
+import { newLandmarkLayer } from './landmarkLayer.ts';
 import { leaflet } from './leaflet.ts';
 import { newLemanAxesLayer } from './lemanAxes.ts';
 import { lemanFullIsobaths, lemanIsobaths } from './lemanIsobaths.ts';
@@ -35,6 +36,7 @@ export async function addLemanVector(
   });
   layersControl.addOverlay(bathy, 'Relief du fond (swissBATHY3D)');
   layersControl.addOverlay(newLemanAxesLayer(), 'Axes de position du Léman');
+  layersControl.addOverlay(newLandmarkLayer(map), 'Amers remarquables');
   const vector = await lemanVecLoad();
   if (!isMapLive(map)) return;
   const device = await isobathLoad();

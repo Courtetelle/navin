@@ -102,7 +102,7 @@ export function BackupSections() {
           </Button>
         </ButtonRow>
         <HelpText>
-          Sur le nouvel appareil, installez l’appli, ouvrez la roue dentée ⚙︎ et
+          Sur le nouvel appareil, installez l’appli, ouvrez les Réglages et
           choisissez ce fichier. Les navigations déjà présentes sont fusionnées
           avec celles du fichier.
         </HelpText>

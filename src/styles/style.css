@@ -8845,3 +8845,27 @@ body:not(.trk-mode) #searchBtn {
   font-weight: 700;
   text-align: right;
 }
+
+/* Bulles de la carte en mode nuit */
+:root[data-theme='night'] .leaflet-popup-content-wrapper,
+:root[data-theme='night'] .leaflet-popup-tip {
+  background: #200000;
+  color: #ff4040;
+}
+:root[data-theme='night'] .leaflet-tooltip {
+  background: #200000;
+  border-color: #600000;
+  color: #ff4040;
+}
+
+.search-back {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--fg, #111);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}

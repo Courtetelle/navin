@@ -60,7 +60,63 @@ interface OnlineAnswer {
   places: PlaceEntry[];
 }
 
+type SearchMode = 'place' | 'function';
+
 function SearchWindow({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<SearchMode | null>(null);
+  return createPortal(
+    <div
+      className="ck-ask search-modal no-print"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="ck-ask-box">
+        {mode ? (
+          <SearchField
+            key={mode}
+            mode={mode}
+            onClose={onClose}
+            onBack={() => setMode(null)}
+          />
+        ) : (
+          <>
+            <button
+              type="button"
+              className="btn big primary"
+              data-search="place"
+              onClick={() => setMode('place')}
+            >
+              📍 Un lieu, un pays, une région
+            </button>
+            <button
+              type="button"
+              className="btn big primary"
+              data-search="function"
+              onClick={() => setMode('function')}
+            >
+              ⚙️ Une fonction de l’application
+            </button>
+          </>
+        )}
+        <button type="button" className="btn" onClick={onClose}>
+          Fermer
+        </button>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+function SearchField({
+  mode,
+  onClose,
+  onBack,
+}: {
+  mode: SearchMode;
+  onClose: () => void;
+  onBack: () => void;
+}) {
   const [query, setQuery] = useState('');
   const [answer, setAnswer] = useState<OnlineAnswer | null>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -68,7 +124,9 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
     input.current?.focus();
   }, []);
   const asksOnline =
-    query.trim().length >= MIN_ONLINE_LETTERS && navigator.onLine;
+    mode === 'place' &&
+    query.trim().length >= MIN_ONLINE_LETTERS &&
+    navigator.onLine;
   useEffect(() => {
     if (!asksOnline) return undefined;
     const controller = new AbortController();
@@ -84,12 +142,18 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
   }, [query, asksOnline]);
   const online = answer?.query === query ? answer.places : [];
   const waiting = asksOnline && answer?.query !== query;
-  const functions = matches(
-    query,
-    functionEntries(),
-    (entry) => `${entry.title} ${entry.sub}`,
-  );
-  const places = matches(query, placeEntries(), (entry) => entry.name);
+  const functions =
+    mode === 'function'
+      ? matches(
+          query,
+          functionEntries(),
+          (entry) => `${entry.title} ${entry.sub}`,
+        )
+      : [];
+  const places =
+    mode === 'place'
+      ? matches(query, placeEntries(), (entry) => entry.name)
+      : [];
   const openFunction = (entry: FunctionEntry) => {
     onClose();
     go(entry.key);
@@ -102,70 +166,64 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
     query.trim() &&
     !waiting &&
     functions.length + places.length + online.length === 0;
-  return createPortal(
-    <div
-      className="ck-ask search-modal no-print"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <div className="ck-ask-box">
-        <input
-          className="text"
-          id="searchInput"
-          type="search"
-          placeholder="Fonction ou lieu…"
-          autoComplete="off"
-          ref={input}
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-        />
-        {functions.length > 0 ? <h3>Fonctions</h3> : null}
-        {functions.map((entry) => (
-          <button
-            type="button"
-            className="search-hit"
-            key={entry.key}
-            onClick={() => openFunction(entry)}
-          >
-            {entry.title}
-          </button>
-        ))}
-        {places.length > 0 ? <h3>Lieux</h3> : null}
-        {places.map((place) => (
-          <button
-            type="button"
-            className="search-hit"
-            key={place.name}
-            onClick={() => openPlace(place)}
-          >
-            📍 {place.name}
-          </button>
-        ))}
-        {online.length > 0 ? <h3>Lieux en ligne</h3> : null}
-        {online.map((place) => (
-          <button
-            type="button"
-            className="search-hit"
-            key={`${place.name}${place.lat}`}
-            onClick={() => openPlace(place)}
-          >
-            🌐 {place.name}
-          </button>
-        ))}
-        {waiting ? <p className="help">Recherche en ligne…</p> : null}
-        {empty ? (
-          <p className="help">
-            {navigator.onLine
-              ? 'Rien trouvé.'
-              : 'Rien trouvé sur l’appareil. Les lieux en ligne demandent du réseau.'}
-          </p>
-        ) : null}
-        <button type="button" className="btn" onClick={onClose}>
-          Fermer
+  return (
+    <>
+      <button type="button" className="search-back" onClick={onBack}>
+        ◀ Changer de recherche
+      </button>
+      <input
+        className="text"
+        id="searchInput"
+        type="search"
+        placeholder={
+          mode === 'place'
+            ? 'Lieu, pays, région…'
+            : 'Fonction de l’application…'
+        }
+        autoComplete="off"
+        ref={input}
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+      />
+      {functions.map((entry) => (
+        <button
+          type="button"
+          className="search-hit"
+          key={entry.key}
+          onClick={() => openFunction(entry)}
+        >
+          {entry.title}
         </button>
-      </div>
-    </div>,
-    document.body,
+      ))}
+      {places.map((place) => (
+        <button
+          type="button"
+          className="search-hit"
+          key={place.name}
+          onClick={() => openPlace(place)}
+        >
+          📍 {place.name}
+        </button>
+      ))}
+      {online.length > 0 ? <h3>En ligne</h3> : null}
+      {online.map((place) => (
+        <button
+          type="button"
+          className="search-hit"
+          key={`${place.name}${place.lat}`}
+          onClick={() => openPlace(place)}
+        >
+          🌐 {place.name}
+        </button>
+      ))}
+      {waiting ? <p className="help">Recherche en ligne…</p> : null}
+      {empty ? (
+        <p className="help">
+          {mode === 'place' && !navigator.onLine
+            ? 'Rien trouvé sur l’appareil. Les pays et régions demandent du réseau.'
+            : 'Rien trouvé.'}
+        </p>
+      ) : null}
+    </>
   );
 }
