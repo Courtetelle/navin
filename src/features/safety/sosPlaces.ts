@@ -136,9 +136,7 @@ function lemanLineWords(position: LatLon): string {
       ? `${Math.round(best.distance * 10) * 100} m`
       : `${kmWord(best.distance)} km`;
   const where =
-    Math.round(best.distance * 10) === 0
-      ? 'sur'
-      : `${offset} ${best.side} de`;
+    Math.round(best.distance * 10) === 0 ? 'sur' : `${offset} ${best.side} de`;
   return `Nous nous situons ${where} l’alignement entre ${home} et ${other}, à ${exactDistance(fromHome)} de distance ${ofPlace(home)}`;
 }
 
