@@ -188,7 +188,7 @@ export function SettingsPage({ from }: PageProps) {
         <SettingsSection section="tests" title="🧪 Tests">
           <TestsSection />
         </SettingsSection>
-        <SettingsSection section="maps" title="🗺 Cartes">
+        <SettingsSection section="maps" title="🗺 Mes cartes">
           <HelpText nextIsRow>{`🗺 Cartes intégrées : ${lakesNote()}`}</HelpText>
           <MapLinksRow />
         </SettingsSection>

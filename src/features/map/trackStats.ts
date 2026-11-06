@@ -1,4 +1,7 @@
 import { distNM } from '../../lib/geo.ts';
+import { sunEvents } from '../../lib/sun.ts';
+import type { CrewSet } from '../../model/recordTypes.ts';
+import type { Cruise } from '../../model/types.ts';
 import type { TrackPoint } from '../../state/index.ts';
 import { loadTrack, state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
@@ -23,6 +26,8 @@ export interface LakeTrack {
   id: string;
   name: string;
   track: TrackPoint[];
+  /** The outing it belongs to, when still stored. */
+  cruise?: Cruise | null;
 }
 
 /**
@@ -62,6 +67,116 @@ export function trackStats(track: readonly TrackPoint[]): TrackStatsResult {
   };
 }
 
+const PURPOSE_CODES: Record<string, string> = {
+  Entraînement: 'Ent',
+  Location: 'Loc',
+  Invitation: 'Inv',
+};
+const BOAT_LETTERS = 5;
+const CREW_LETTERS = 4;
+
+/**
+ * The saved crew made of exactly the people aboard an outing.
+ * @param cruise - The outing.
+ * @param sets - The saved crews.
+ * @returns Its name, empty when no saved crew matches.
+ */
+function crewNameOf(cruise: Cruise, sets: readonly CrewSet[]): string {
+  const aboard = new Set(
+    cruise.crew.map((line) => line.memberId).filter(Boolean),
+  );
+  if (aboard.size === 0) return '';
+  const match = sets.find(
+    (set) =>
+      set.crew.length === aboard.size &&
+      set.crew.every((line) => aboard.has(line.memberId)),
+  );
+  return match?.name ?? '';
+}
+
+/**
+ * Short name of a track: date, boat, type of outing and saved crew, abbreviated,
+ * e.g. `20260226_Savan Ent-Réga`.
+ * @param cruise - The outing.
+ * @param time - Start of the track, epoch ms.
+ * @param sets - The saved crews.
+ * @returns The name.
+ */
+export function traceTitle(
+  cruise: Cruise,
+  time: number,
+  sets: readonly CrewSet[] = state.data.crewSets.value,
+): string {
+  const date = new Date(time);
+  const day = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
+  const boat = (cruise.info.boat ?? '').trim().slice(0, BOAT_LETTERS);
+  const purpose =
+    (cruise.purpose && PURPOSE_CODES[cruise.purpose]) ||
+    (cruise.type === 'lac' ? 'Lac' : 'Mer');
+  const crew = crewNameOf(cruise, sets).trim().slice(0, CREW_LETTERS);
+  return `${day}_${boat} ${crew ? `${purpose}-${crew}` : purpose}`;
+}
+
+/** What a sheet of a track shows. */
+export interface TraceSheet {
+  /** Duration in ms. */
+  duration: number;
+  nm: number;
+  /** Knots. */
+  maxSpeed: number;
+  /** Knots, over the whole duration. */
+  meanSpeed: number;
+  /** True wind in knots, `null` when not recorded. */
+  maxWind: number | null;
+  meanWind: number | null;
+  /** Apparent wind in knots, `null` when not recorded. */
+  maxApparent: number | null;
+  meanApparent: number | null;
+  sun: Array<{ kind: 'rise' | 'set'; at: number }>;
+}
+
+function windRange(
+  track: readonly TrackPoint[],
+  column: 3 | 4,
+): { max: number | null; mean: number | null } {
+  let count = 0;
+  let total = 0;
+  let max = 0;
+  for (const point of track) {
+    const value = point[column];
+    if (value !== null && value !== undefined) {
+      count++;
+      total += value;
+      max = Math.max(max, value);
+    }
+  }
+  return count > 0 ? { max, mean: total / count } : { max: null, mean: null };
+}
+
+/**
+ * The statistics of the sheet of a track.
+ * @param track - Points in time order.
+ * @returns The sheet.
+ */
+export function traceSheet(track: readonly TrackPoint[]): TraceSheet {
+  const { nm, max, start, end } = trackStats(track);
+  const duration = (end ?? 0) - (start ?? 0);
+  const wind = windRange(track, 3);
+  const apparent = windRange(track, 4);
+  const first = track[0];
+  return {
+    duration,
+    nm,
+    maxSpeed: max,
+    meanSpeed: duration > 0 ? nm / (duration / 3_600_000) : 0,
+    maxWind: wind.max,
+    meanWind: wind.mean,
+    maxApparent: apparent.max,
+    meanApparent: apparent.mean,
+    sun: first ? sunEvents(first[0], end ?? first[0], first[1], first[2]) : [],
+  };
+}
+
 /**
  * Every recorded track of every cruise, newest first; a cruise may hold
  * several tracks, whose starts are in `ldb.trkSegs.<id>` (legacy `allLakeTracks`).
@@ -79,10 +194,15 @@ export function allLakeTracks(): LakeTrack[] {
       const part = track.slice(start, bounds[rank + 1] ?? track.length);
       if (part.length < 2) continue;
       const several = bounds.length > 1;
+      const cruise = store.get<Cruise | null>(`ldb.cruise.${meta.id}`, null);
+      const title = cruise
+        ? traceTitle(cruise, (part[0] as TrackPoint)[0])
+        : meta.name;
       tracks.push({
         id: several ? `${meta.id}#${rank}` : meta.id,
-        name: several ? `${meta.name} · trace ${rank + 1}` : meta.name,
+        name: several ? `${title} · trace ${rank + 1}` : title,
         track: part,
+        cruise,
       });
     }
   }

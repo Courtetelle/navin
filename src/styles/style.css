@@ -8811,3 +8811,37 @@ body:not(.trk-mode) #searchBtn {
   left: 12px;
   right: auto;
 }
+
+/* Fiche d'une trace */
+.trk-open {
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.trk-sheet {
+  display: grid;
+  gap: 4px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--btn, #eee);
+}
+.trk-sheet > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.trk-sheet dt {
+  color: var(--muted);
+  font-weight: 600;
+}
+.trk-sheet dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}

@@ -4,7 +4,13 @@ import type { TrackPoint } from '../../../state/index.ts';
 import { initState, state } from '../../../state/index.ts';
 import { createMemoryStorage } from '../../../storage/memoryStorage.ts';
 import { setStorageBackend, store } from '../../../storage/store.ts';
-import { allLakeTracks, currentTrack, trackStats } from '../trackStats.ts';
+import {
+  allLakeTracks,
+  currentTrack,
+  traceSheet,
+  traceTitle,
+  trackStats,
+} from '../trackStats.ts';
 
 beforeEach(() => {
   const storage = createMemoryStorage({});
@@ -90,4 +96,68 @@ test('currentTrack shows only the recording in progress', () => {
     [9_950_000, 2, 2],
   ];
   expect(currentTrack()).toStrictEqual([[9_950_000, 2, 2]]);
+});
+
+test('traceTitle gives date, boat, type and saved crew', () => {
+  const cruise = {
+    id: 'a',
+    created: '',
+    info: { boat: 'Savannah' },
+    crew: [{ memberId: 'm1' }, { memberId: 'm2' }],
+    entries: [],
+    days: {},
+    type: 'lac',
+    purpose: 'Entraînement',
+  } as const;
+  const time = new Date(2026, 1, 26, 14).getTime();
+  const sets = [
+    { id: 's1', name: 'Autre', crew: [{ memberId: 'm1' }] },
+    {
+      id: 's2',
+      name: 'Régate',
+      crew: [{ memberId: 'm2' }, { memberId: 'm1' }],
+    },
+  ];
+  expect(traceTitle(cruise as never, time, sets)).toBe(
+    '20260226_Savan Ent-Réga',
+  );
+  expect(traceTitle(cruise as never, time, [])).toBe('20260226_Savan Ent');
+  expect(
+    traceTitle(
+      { ...cruise, purpose: 'Location', crew: [] } as never,
+      time,
+      sets,
+    ),
+  ).toBe('20260226_Savan Loc');
+  expect(
+    traceTitle(
+      { ...cruise, purpose: undefined, type: 'mer' } as never,
+      time,
+      [],
+    ),
+  ).toBe('20260226_Savan Mer');
+});
+
+test('traceSheet gives speeds, wind when recorded, and the sun during the track', () => {
+  const start = Date.UTC(2026, 5, 21, 17);
+  const hour = 3_600_000;
+  const withWind = traceSheet([
+    [start, 46.5, 6.6, 10, 12],
+    [start + hour * 2, 46.5, 6.7, 20, 24],
+    [start + hour * 5, 46.55, 6.7],
+  ]);
+  expect(withWind.duration).toBe(hour * 5);
+  expect(withWind.maxWind).toBe(20);
+  expect(withWind.meanWind).toBe(15);
+  expect(withWind.maxApparent).toBe(24);
+  expect(withWind.meanApparent).toBe(18);
+  expect(withWind.meanSpeed).toBeCloseTo(withWind.nm / 5);
+  expect(withWind.sun.map((event) => event.kind)).toStrictEqual(['set']);
+  const without = traceSheet([
+    [start, 46.5, 6.6],
+    [start + hour, 46.5, 6.61],
+  ]);
+  expect(without.maxWind).toBeNull();
+  expect(without.maxApparent).toBeNull();
+  expect(without.sun).toStrictEqual([]);
 });

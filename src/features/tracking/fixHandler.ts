@@ -15,7 +15,7 @@ import {
 import { addAutoEntry } from './autoEntries.ts';
 import type { TrackSample } from './detector.ts';
 import { detectorPush } from './detector.ts';
-import { nmeaPosFresh, nmeaWind } from './nmeaLive.ts';
+import { nmeaFresh, nmeaLink, nmeaPosFresh, nmeaWind } from './nmeaLive.ts';
 import type { LiveTrip } from './tripState.ts';
 import { liveTrip, publishTrip } from './tripState.ts';
 
@@ -107,11 +107,16 @@ function recordSample(
     noteGap(trip, last, sample);
   }
   if (last && sample.t - last[0] < SAMPLE_SPACING_MS) return;
-  buffer.push([
+  const point: TrackPoint = [
     sample.t,
     Math.round(sample.lat * 1e6) / 1e6,
     Math.round(sample.lon * 1e6) / 1e6,
-  ]);
+  ];
+  const apparent = nmeaFresh('aws') ? (nmeaLink.live.aws ?? null) : null;
+  if (sample.tws != null || apparent !== null) {
+    point.push(sample.tws ?? null, apparent);
+  }
+  buffer.push(point);
   if (buffer.length % 6 === 0) saveTrack(buffer);
 }
 

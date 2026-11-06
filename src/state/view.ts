@@ -57,8 +57,17 @@ export interface CrewsEdit {
   [key: string]: unknown;
 }
 
-/** One stored track point: `[epoch ms, lat, lon]`. */
-export type TrackPoint = [number, number, number];
+/**
+ * One stored track point: `[epoch ms, lat, lon]`, then, when the instruments give
+ * them, the true wind and the apparent wind in knots.
+ */
+export type TrackPoint = [
+  number,
+  number,
+  number,
+  (number | null)?,
+  (number | null)?,
+];
 
 /**
  * Ephemeral UI state (legacy cross-file globals). Nothing here is persisted,
