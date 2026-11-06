@@ -1,4 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
+import type { MouseEvent } from 'react';
 import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
@@ -47,6 +48,18 @@ export function Fiche({ id }: FicheProps) {
   const record = useFicheRecord(id);
   useIntroLead(state.view.currentView.value, '');
   const [locked] = useState(() => !record.isNew && memberLocks(id).length > 0);
+  // A card already saved opens for reading: a long press on the name edits it.
+  const [reading, setReading] = useState(!record.isNew);
+  const startEditing = () => {
+    setReading(false);
+    toast('Fiche en modification');
+  };
+  const explain = (event: MouseEvent) => {
+    if (!reading) return;
+    const target = event.target as Element;
+    if (!target.closest('.cf') || target.closest('.contact-on')) return;
+    toast('Appui long sur le prénom ou le nom pour modifier');
+  };
   const cruise = state.data.cruise.value;
   const leave = () => {
     buzz();
@@ -87,79 +100,94 @@ export function Fiche({ id }: FicheProps) {
       <PageBack id="fBack" label="◀ Retour" onClick={leave}>
         {tr('◀ Retour')}
       </PageBack>
-      <div className="f-head">
-        <h1>
-          {record.isNew && !record.recordId ? tr(record.title) : record.title}
-        </h1>
-        <FicheAvatar record={record} />
-        <Button
-          type="button"
-          className="btn ck-editbtn no-navact"
-          id="fEdit"
-          aria-label="Modifier les libellés"
-          onClick={() => {
-            buzz();
-            record.persist();
-            const back = state.view.crewFicheBack.value;
-            showLabels(() => {
-              state.view.crewFicheBack.value = back;
-              showFiche(record.latestId() ?? 'new');
-            });
-          }}
+      <div className={reading ? 'fiche-reading' : undefined} onClick={explain}>
+        <div className="f-head">
+          <h1>
+            {record.isNew && !record.recordId ? tr(record.title) : record.title}
+          </h1>
+          <FicheAvatar record={record} />
+          <Button
+            type="button"
+            className="btn ck-editbtn no-navact"
+            id="fEdit"
+            aria-label="Modifier les libellés"
+            onClick={() => {
+              buzz();
+              record.persist();
+              const back = state.view.crewFicheBack.value;
+              showLabels(() => {
+                state.view.crewFicheBack.value = back;
+                showFiche(record.latestId() ?? 'new');
+              });
+            }}
+          >
+            ✎
+          </Button>
+        </div>
+        {reading ? (
+          <p className="fiche-read-hint">
+            Fiche en lecture · appui long sur le prénom ou le nom pour modifier
+          </p>
+        ) : null}
+        <FicheIdentity
+          record={record}
+          reading={reading}
+          onEdit={startEditing}
+        />
+        <details className="section" open={!record.isNew}>
+          <summary>{tr('Informations complémentaires')}</summary>
+          <FicheForm record={record} />
+        </details>
+        <FichePhotos record={record} />
+        {record.isNew && cruise && !reading ? (
+          <ButtonRow>
+            <Button
+              className="btn big primary"
+              id="fBoard"
+              onClick={putOnBoard}
+            >
+              {tr('＋ Mettre à bord')}
+            </Button>
+          </ButtonRow>
+        ) : null}
+        <ButtonRow
+          className="row ck-pub-row"
+          id="fImgRow"
+          hidden={!record.recordId}
         >
-          ✎
-        </Button>
-      </div>
-      <FicheIdentity record={record} />
-      <details className="section" open={!record.isNew}>
-        <summary>{tr('Informations complémentaires')}</summary>
-        <FicheForm record={record} />
-      </details>
-      <FichePhotos record={record} />
-      {record.isNew && cruise ? (
-        <ButtonRow>
-          <Button className="btn big primary" id="fBoard" onClick={putOnBoard}>
-            {tr('＋ Mettre à bord')}
+          <Button
+            className="btn big ck-pub no-navact"
+            id="fImg"
+            onClick={() => {
+              buzz();
+              record.persist();
+              const savedId = record.latestId();
+              if (savedId) openListPublish('people', savedId);
+            }}
+          >
+            {tr('📤 Publier')}
+            <small>
+              {tr(
+                'la fiche en image ou PDF, pour un dernier contrôle par la personne',
+              )}
+            </small>
           </Button>
         </ButtonRow>
-      ) : null}
-      <ButtonRow
-        className="row ck-pub-row"
-        id="fImgRow"
-        hidden={!record.recordId}
-      >
-        <Button
-          className="btn big ck-pub no-navact"
-          id="fImg"
-          onClick={() => {
-            buzz();
-            record.persist();
-            const savedId = record.latestId();
-            if (savedId) openListPublish('people', savedId);
-          }}
-        >
-          {tr('📤 Publier')}
-          <small>
-            {tr(
-              'la fiche en image ou PDF, pour un dernier contrôle par la personne',
-            )}
-          </small>
-        </Button>
-      </ButtonRow>
-      {locked ? (
-        <HelpText className="fiche-lock">{`🔒 ${memberLockMsg(id)}`}</HelpText>
-      ) : (
-        <ButtonRow id="fDelRow" hidden={!record.recordId}>
-          <HoldDeleteButton
-            className="btn danger"
-            id="fDel"
-            onClick={buzz}
-            onDelete={() => deleteFiche(record.latestId())}
-          >
-            {tr('Supprimer la fiche')}
-          </HoldDeleteButton>
-        </ButtonRow>
-      )}
+        {locked ? (
+          <HelpText className="fiche-lock">{`🔒 ${memberLockMsg(id)}`}</HelpText>
+        ) : (
+          <ButtonRow id="fDelRow" hidden={!record.recordId}>
+            <HoldDeleteButton
+              className="btn danger"
+              id="fDel"
+              onClick={buzz}
+              onDelete={() => deleteFiche(record.latestId())}
+            >
+              {tr('Supprimer la fiche')}
+            </HoldDeleteButton>
+          </ButtonRow>
+        )}
+      </div>
     </>
   );
 }

@@ -1,3 +1,4 @@
+import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { useMarquee } from '../../components/shared/useMarquee.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { textOf } from '../../lib/format.ts';
@@ -10,6 +11,10 @@ import type { FicheRecord } from './useFicheRecord.ts';
 export interface FicheIdentityProps {
   /** The card. */
   record: FicheRecord;
+  /** The card is open for reading. */
+  reading: boolean;
+  /** A long press on the name asks to edit it. */
+  onEdit: () => void;
 }
 
 /**
@@ -18,7 +23,8 @@ export interface FicheIdentityProps {
  * @param props - The card.
  * @returns The section.
  */
-export function FicheIdentity({ record }: FicheIdentityProps) {
+export function FicheIdentity({ record, reading, onEdit }: FicheIdentityProps) {
+  const press = useLongPress(onEdit);
   const tr = useTr();
   const { data, prenomInput, nomInput, persist, change } = record;
   useMarquee(prenomInput);
@@ -27,7 +33,11 @@ export function FicheIdentity({ record }: FicheIdentityProps) {
   return (
     <section className="field">
       <div className="cgrid">
-        <div className="cf wide cf-pair cf-frame" data-frame="ident">
+        <div
+          className="cf wide cf-pair cf-frame"
+          data-frame="ident"
+          {...(reading ? press.handlers : {})}
+        >
           <div className="cf">
             <label htmlFor="fPrenom">
               {tr('Prénom ')}
@@ -38,6 +48,7 @@ export function FicheIdentity({ record }: FicheIdentityProps) {
               className="text"
               id="fPrenom"
               type="text"
+              readOnly={reading}
               autoComplete="off"
               defaultValue={textOf(data.prenom)}
               onChange={() => persist()}
@@ -61,6 +72,7 @@ export function FicheIdentity({ record }: FicheIdentityProps) {
               className="text"
               id="fNom"
               type="text"
+              readOnly={reading}
               autoComplete="off"
               defaultValue={textOf(data.nom)}
               onChange={() => persist()}
