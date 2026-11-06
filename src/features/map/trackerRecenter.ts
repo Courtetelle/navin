@@ -1,9 +1,16 @@
 import { isLake, state } from '../../state/index.ts';
 
-import { LEMAN_CENTER, inSwissArea } from './constants.ts';
+import { LEMAN_CENTER, SEA_CENTER, inSwissArea } from './constants.ts';
 import { isMapLive } from './mapExtras.ts';
-import { SIM_MED_CENTER } from './simChartData.ts';
 import { setFollow, tracker } from './trackerState.ts';
+
+/**
+ * Whether the zone simulation is at sea (legacy `simSeaMode`).
+ * @returns `true` on a simulated sea.
+ */
+export function simSeaMode(): boolean {
+  return state.view.zoneSimV.value === 'mer';
+}
 
 /**
  * Recentre the open tracker after a zone change: simulated sea on the
@@ -17,7 +24,7 @@ export function trkZoneRecenter(zone: string): void {
   const swissFix = inSwissArea(fix);
   if (zone === 'mer') {
     setFollow(Boolean(fix && !swissFix));
-    if (swissFix || !fix) map.setView(SIM_MED_CENTER, 9);
+    if (swissFix || !fix) map.setView(SEA_CENTER, 9);
     else map.setView([fix.lat, fix.lon], 14);
   } else if (zone === 'lac') {
     if (swissFix && fix) {
@@ -31,7 +38,7 @@ export function trkZoneRecenter(zone: string): void {
     setFollow(true);
     map.setView([fix.lat, fix.lon], 14);
   } else if (state.data.cruise.value && !isLake()) {
-    map.setView(SIM_MED_CENTER, 9);
+    map.setView(SEA_CENTER, 9);
   } else {
     map.setView(LEMAN_CENTER, 10);
   }

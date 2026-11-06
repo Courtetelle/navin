@@ -6,6 +6,7 @@ import {
   LEMAN_CENTER,
   OSM_TILES,
   SEAMARK_TILES,
+  SEA_CENTER,
   SWISS_BOUNDS,
   SWISS_TILES,
   inSwissArea,
@@ -17,16 +18,18 @@ import { whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
 import {
   TURNING_MAP_OPTIONS,
-  addOrientationControl,
+  startOrientation,
 } from '../../features/map/mapOrientation.ts';
 import { setMapWatch } from '../../features/map/mapWatch.ts';
-import { swissWhenOffline } from '../../features/map/offlineBase.ts';
-import { simChartWire, simSeaMode } from '../../features/map/simChart.ts';
-import { SIM_MED_CENTER } from '../../features/map/simChartData.ts';
+import {
+  swissWhenNoTiles,
+  swissWhenOffline,
+} from '../../features/map/offlineBase.ts';
 import {
   drawTrace,
   takePendingTrace,
 } from '../../features/map/traceActions.ts';
+import { simSeaMode } from '../../features/map/trackerRecenter.ts';
 import type { TrackerHandle } from '../../features/map/trackerState.ts';
 import {
   currentTrackLine,
@@ -99,9 +102,9 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     swissWhenOffline(map, osm, swiss);
     void addLemanVector(map, layers);
   }
-  simChartWire(map, layers, [swiss, osm, zoneBase], swiss);
+  swissWhenNoTiles(map, [swiss, osm, zoneBase], swiss);
   addFullscreenControl(map);
-  addOrientationControl(map);
+  startOrientation(map);
   setFollow(!(simulatedSea && !here));
   let loaded = 0;
   let errors = 0;
@@ -133,7 +136,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   } else if (useSwiss) {
     map.setView(LEMAN_CENTER, 10);
   } else {
-    map.setView(SIM_MED_CENTER, 9);
+    map.setView(SEA_CENTER, 9);
   }
   showPosition();
   whileMapLive(map, () => map.invalidateSize(), 100);

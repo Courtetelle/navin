@@ -7,8 +7,6 @@ export interface MapExtras {
   removed: boolean;
   gotoLine: LayerGroup | null;
   marks: LayerGroup | null;
-  simRose: HTMLElement | null;
-  simNote: HTMLElement | null;
 }
 
 const extras = new WeakMap<LeafletMap, MapExtras>();
@@ -26,8 +24,6 @@ export function extrasOf(map: LeafletMap): MapExtras {
       removed: false,
       gotoLine: null,
       marks: null,
-      simRose: null,
-      simNote: null,
     };
     extras.set(map, found);
   }

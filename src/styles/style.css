@@ -6214,7 +6214,7 @@ body.zone-auto
 :root[data-theme='night'] .leaflet-container {
   background: #05080d;
 }
-:root[data-theme='night'] .leaflet-tile-pane .leaflet-layer:not(.sim-tiles) {
+:root[data-theme='night'] .leaflet-tile-pane .leaflet-layer {
   filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(1.45)
     saturate(0.8);
 } /* v409 (Corban) : plus clair et plus contrasté la nuit */
@@ -8005,30 +8005,6 @@ details[data-b]:not([open]) > summary .b-editbtn {
     display: none !important;
   }
 }
-/* v407 carte maritime simulée */
-.sim-rose {
-  position: absolute;
-  right: 8px;
-  top: 120px;
-  z-index: 450;
-  pointer-events: none;
-}
-.sim-note {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 66px;
-  z-index: 450;
-  pointer-events: none;
-  background: rgba(255, 255, 255, 0.8);
-  color: #5a4a2a;
-  font-size: 11px;
-  padding: 1px 8px;
-  border-radius: 8px;
-}
-.leaflet-container:has(.sim-note) {
-  background: #fdfdf8;
-}
 /* v409 instruments NMEA */
 .nm-status {
   display: flex;
@@ -8076,16 +8052,6 @@ details[data-b]:not([open]) > summary .b-editbtn {
   font-size: 0.92em;
   line-height: 1.35;
   color: var(--muted, #556);
-}
-:root[data-theme='night'] .sim-note {
-  background: rgba(0, 0, 0, 0.65);
-  color: #f0d080;
-}
-:root[data-theme='night'] .sim-rose {
-  filter: invert(1) hue-rotate(180deg) brightness(1.1);
-}
-:root[data-theme='night'] .leaflet-container:has(.sim-note) {
-  background: #0d2236;
 }
 /* 2026-11-04 : pastilles d'aide « i » (réglage Bulles d'aide (i)) */
 .no-help-i .help-i {
@@ -8559,31 +8525,26 @@ html:not([data-theme='night'])
   border-radius: 4px;
   line-height: 1.2;
 }
-/* Boussole de la carte : visible quand le nord n'est pas en haut */
-.map-compass {
-  position: absolute;
-  top: calc(var(--topbar-h, 70px) + 10px);
-  right: 10px;
-  z-index: 1000;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--surface, #fff);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-  pointer-events: none;
+/* Bouton de position en mode cap en haut : rouge, sa flèche pointe vers le haut */
+.course-up .ctl-col > .map-locate-btn {
+  color: #d00000 !important;
 }
-.course-up > .map-compass {
-  display: flex;
+.course-up .ctl-col > .map-locate-btn.on {
+  background: #d00000 !important;
+  color: #fff !important;
 }
-.map-compass svg {
+.map-locate-btn svg {
   transition: transform 0.3s;
 }
-.course-up .map-locate-btn {
-  outline: 3px solid #d00000;
-  outline-offset: -3px;
+.course-up .map-locate-btn svg {
+  transform: rotate(-45deg) scale(1.15);
+}
+:root[data-theme='night'] .course-up .ctl-col > .map-locate-btn {
+  color: #ff4040 !important;
+}
+:root[data-theme='night'] .course-up .ctl-col > .map-locate-btn.on {
+  background: #6a0000 !important;
+  color: #ff4040 !important;
 }
 /* Chevrons des barres : ouverte, il montre où elle se range ; fermée, où elle s'ouvre */
 .bar-chevron {
@@ -8722,9 +8683,4 @@ html body .slide-handle.sh-bot {
 }
 .ctl-edge {
   width: 48px;
-}
-
-/* Le bandeau de la carte simulée passe sous le chevron de la barre du haut */
-body.trk-mode .sim-note {
-  top: calc(var(--topbar-h, 62px) + 28px);
 }

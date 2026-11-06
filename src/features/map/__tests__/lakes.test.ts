@@ -1,7 +1,6 @@
 import { expect, test } from 'vitest';
 
 import { BASE_LAKES, lakeTileUrls, vdWmsTiles } from '../lakes.ts';
-import { chaikin } from '../simChartData.ts';
 import { trackerDashTexts } from '../trackerDash.ts';
 
 test('lakeTileUrls keeps zoom 8 and above, buoyage from zoom 9', () => {
@@ -19,17 +18,6 @@ test('vdWmsTiles covers the lake from zoom 10 to 15', () => {
   const tiles = vdWmsTiles('a,b');
   expect(tiles).toHaveLength(5006);
   expect(tiles[0]?.includes('layers=a%2Cb')).toBe(true);
-});
-
-test('chaikin doubles the points at each pass', () => {
-  const ring: Array<[number, number]> = [
-    [0, 0],
-    [0, 4],
-    [4, 4],
-  ];
-  expect(chaikin(ring, 1)).toHaveLength(6);
-  expect(chaikin(ring, 1)[0]).toStrictEqual([0, 1]);
-  expect(chaikin(ring, 3)).toHaveLength(24);
 });
 
 test('trackerDashTexts shows dashes without values', () => {

@@ -20,8 +20,10 @@ import {
 } from '../../features/map/mapData.ts';
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
-import { swissWhenOffline } from '../../features/map/offlineBase.ts';
-import { simChartWire } from '../../features/map/simChart.ts';
+import {
+  swissWhenNoTiles,
+  swissWhenOffline,
+} from '../../features/map/offlineBase.ts';
 import { zoneLayer } from '../../features/map/zoneLayer.ts';
 import { zoneAt } from '../../features/map/zoneStore.ts';
 import { isLake, state } from '../../state/index.ts';
@@ -122,7 +124,7 @@ export function buildJournalMap(
     swissWhenOffline(map, osm, swiss);
     void addLemanVector(map, layers);
   }
-  simChartWire(map, layers, [swiss, osm, zoneBase], swiss);
+  swissWhenNoTiles(map, [swiss, osm, zoneBase], swiss);
   addFullscreenControl(map);
   let loaded = 0;
   let errors = 0;

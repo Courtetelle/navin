@@ -3,7 +3,6 @@ import type { Map as LeafletMap, MapOptions } from 'leaflet';
 import { toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
-import { leaflet } from './leaflet.ts';
 import { tracker, trkShowCourse } from './trackerState.ts';
 
 /** North up, or the course of the boat up. */
@@ -20,8 +19,6 @@ const KEY = 'ldb.mapOrientation';
 const MIN_SPEED_KN = 1;
 /** A smaller change of course does not turn the map, so that it stays calm. */
 const MIN_TURN_DEG = 3;
-const COMPASS_ICON =
-  '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 2 16 12H8Z" fill="#d00000"/><path d="M12 22 8 12h8Z" fill="#8a94a6"/></svg>';
 
 /** The options of a map that can turn, with gestures left as they are. */
 export const TURNING_MAP_OPTIONS = {
@@ -75,7 +72,7 @@ export function mapBearing(map: LeafletMap): number {
 }
 
 /**
- * Turn a map as the orientation asks, then show its bearing on the compass.
+ * Turn a map as the orientation asks.
  * @param map - Leaflet map.
  * @param course - Course of the boat (degrees), if known.
  * @param speed - Speed in knots, if known.
@@ -94,10 +91,6 @@ export function orientMap(
     speed,
   );
   if (bearing !== null) turning.setBearing(bearing);
-  const needle = map
-    .getContainer()
-    .querySelector<HTMLElement>('.map-compass svg');
-  if (needle) needle.style.transform = `rotate(${turning.getBearing()}deg)`;
 }
 
 /**
@@ -143,18 +136,10 @@ function showOrientation(map: LeafletMap): void {
 }
 
 /**
- * The compass of a map, shown while the course is up, when north is not at the
- * top of the screen: it only shows where north is.
+ * Show the orientation chosen on a map that has just opened.
  * @param map - Leaflet map.
  */
-export function addOrientationControl(map: LeafletMap): void {
-  const compass = leaflet().DomUtil.create(
-    'div',
-    'map-compass',
-    map.getContainer(),
-  );
-  compass.setAttribute('aria-hidden', 'true');
-  compass.innerHTML = COMPASS_ICON;
+export function startOrientation(map: LeafletMap): void {
   showOrientation(map);
   orientMap(map, null, null);
 }

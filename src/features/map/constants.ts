@@ -27,6 +27,8 @@ export const LEMAN_CENTER: LatLngPair = [46.43, 6.55];
 /** Online interactive chart of Lake Geneva. */
 export const LEMAN_ARCGIS =
   'https://www.arcgis.com/apps/instant/sidebar/index.html?appid=37cabc11c62a446faa17e32a035850c0&locale=fr&center=6.5218;46.366&level=10';
+/** Where the map opens on a simulated sea: the Mediterranean off Toulon. */
+export const SEA_CENTER: LatLngPair = [43, 5.95];
 /** Box around Lake Geneva. */
 export const LEMAN_BBOX: GeoBox = { s: 46.18, n: 46.56, w: 6.1, e: 6.95 };
 
