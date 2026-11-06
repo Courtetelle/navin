@@ -29,11 +29,16 @@ export function offlineMapCovers(
   );
 }
 
-async function newLayer(stored: OfflineMap): Promise<GridLayer> {
+async function newLayer(
+  stored: OfflineMap,
+  reader: PMTiles,
+  zIndex: number,
+): Promise<GridLayer> {
   // It extends the global Leaflet when called: it must load after Leaflet.
   const library = await import('protomaps-leaflet');
   return library.leafletLayer({
-    url: new PMTiles(offlineMapSource(stored)),
+    url: reader,
+    zIndex,
     maxDataZoom: stored.maxZoom,
     maxZoom: 19,
     bounds: [
@@ -50,8 +55,9 @@ async function newLayer(stored: OfflineMap): Promise<GridLayer> {
 }
 
 /**
- * Offer the map files of this device as backgrounds. When the online map cannot
- * load, the map file that covers the place takes over.
+ * Offer the map files of this device as backgrounds, and draw them at once under
+ * the online map, which is slower: its tiles cover them as they arrive. When the
+ * online map cannot load, the map file that covers the place takes over.
  * @param map - Leaflet map.
  * @param control - Layer chooser.
  * @param online - The online background that shows by default.
@@ -64,12 +70,28 @@ export async function addOfflineMaps(
   const stored = await offlineMaps().catch(() => []);
   if (stored.length === 0 || !isMapLive(map)) return;
   const layers = await Promise.all(
-    stored.map(async (item) => ({ item, layer: await newLayer(item) })),
+    stored.map(async (item) => {
+      const reader = new PMTiles(offlineMapSource(item));
+      return {
+        item,
+        layer: await newLayer(item, reader, 1),
+        under: await newLayer(item, reader, 0),
+      };
+    }),
   );
   if (!isMapLive(map)) return;
   for (const { item, layer } of layers) {
     control.addBaseLayer(layer, `Hors ligne · ${item.name}`);
   }
+  const showUnder = () => {
+    for (const { under } of layers) under.addTo(map);
+  };
+  const hideUnder = () => {
+    for (const { under } of layers) map.removeLayer(under);
+  };
+  online.on('add', showUnder);
+  online.on('remove', hideUnder);
+  if (map.hasLayer(online)) showUnder();
   const takeOver = () => {
     if (!isMapLive(map) || !map.hasLayer(online)) return;
     const { lat, lng } = map.getCenter();
