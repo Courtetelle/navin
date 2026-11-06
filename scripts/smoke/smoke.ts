@@ -350,7 +350,7 @@ async function crewCard(page: Page, theme: string): Promise<void> {
   check(
     theme,
     'validated, the tick becomes Modifier',
-    (await shown())?.includes('Modifier') === true,
+    String(await shown()).includes('Modifier'),
   );
   check(
     theme,
