@@ -22,6 +22,7 @@ import {
   startOrientation,
 } from '../../features/map/mapOrientation.ts';
 import { setMapWatch } from '../../features/map/mapWatch.ts';
+import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
 import { showPendingPlace } from '../../features/map/placeTarget.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
@@ -93,6 +94,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     .addTo(map);
   if (useSwiss) void addLemanVector(map, layers);
   keepTilesFilled(map, [osm, swiss]);
+  void addOfflineMaps(map, layers, osm);
   addFullscreenControl(map);
   startOrientation(map);
   keepBoatCentred(map, () =>
