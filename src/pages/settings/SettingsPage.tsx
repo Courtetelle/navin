@@ -27,7 +27,6 @@ import {
   AutoLogRows,
   GotoArrivalRows,
   MapLinksRow,
-  MapRadiusRows,
   PrefillRow,
   WakeRow,
   WeatherRow,
@@ -190,7 +189,6 @@ export function SettingsPage({ from }: PageProps) {
           <TestsSection />
         </SettingsSection>
         <SettingsSection section="maps" title="🗺 Cartes">
-          <MapRadiusRows />
           <HelpText nextIsRow>{`🗺 Cartes intégrées : ${lakesNote()}`}</HelpText>
           <MapLinksRow />
         </SettingsSection>

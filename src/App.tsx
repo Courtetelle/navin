@@ -4,6 +4,7 @@ import { SlideHandles } from './shell/SlideHandles.tsx';
 import { WakeVideo } from './shell/WakeVideo.tsx';
 import { NavTop } from './shell/navbar/NavTop.tsx';
 import { RemarkPill } from './shell/remark/RemarkPill.tsx';
+import { SearchButton } from './shell/search/SearchButton.tsx';
 import { Toast } from './shell/toast/Toast.tsx';
 import { Topbar } from './shell/topbar/Topbar.tsx';
 import { UiEditor } from './shell/uiEdit/UiEditor.tsx';
@@ -28,6 +29,7 @@ export function App() {
       <WakeVideo />
       <LangFab />
       <SlideHandles />
+      <SearchButton />
       <RemarkPill />
       <UiEditor />
     </>

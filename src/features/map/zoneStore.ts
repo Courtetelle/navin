@@ -1,4 +1,3 @@
-import { state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 import type { GeoBox, LatLngPair } from './constants.ts';
@@ -110,45 +109,6 @@ export function zoneEstimate(tiles: number): string {
   }
   const size = Math.max(1, Math.round(tiles * 2 * 0.018));
   return `Environ ${tiles * 2} tuiles (plan + balisage), ≈ ${size} Mo.`;
-}
-
-/**
- * Radius of « Mes cartes » in km, 50 by default (legacy `mapRadius`).
- * @returns The radius.
- */
-export function mapRadius(): number {
-  return state.preferences.settings.value.mapRadius || 50;
-}
-
-/**
- * Box around a position (legacy `radiusBounds`).
- * @param lat - Latitude.
- * @param lon - Longitude.
- * @param km - Radius in km.
- * @returns The box.
- */
-export function radiusBounds(lat: number, lon: number, km: number): GeoBox {
-  const latSpan = km / 111.32;
-  const lonSpan =
-    km / (111.32 * Math.max(0.2, Math.cos((lat * Math.PI) / 180)));
-  return {
-    s: lat - latSpan,
-    n: lat + latSpan,
-    w: lon - lonSpan,
-    e: lon + lonSpan,
-  };
-}
-
-/**
- * Highest zoom whose tile count fits the limit, 14 down to 9 (legacy `radiusZoom`).
- * @param box - Geographic box.
- * @returns The zoom.
- */
-export function radiusZoom(box: GeoBox): number {
-  for (let zoom = 14; zoom >= 9; zoom--) {
-    if (zoneTileXY(box, zoom).length <= ZONE_MAX) return zoom;
-  }
-  return 9;
 }
 
 function tileX(lon: number, zoom: number): number {

@@ -160,7 +160,7 @@ export function tilesWithCruise(): MoreTile[] {
       key: 'map',
       title: `🗺 ${lake ? 'Carte du Léman' : 'Carte'}`,
       sub: lake
-        ? 'carte nationale suisse, profondeurs, position GPS'
+        ? 'OpenStreetMap, profondeurs, position GPS'
         : 'trace et entrées sur la carte',
     },
     NMEA,
@@ -203,10 +203,9 @@ function marksTile(count: number): MoreTile {
 }
 
 function chartsTile(): MoreTile {
-  const radius = state.preferences.settings.value.mapRadius || 50;
   return {
     key: 'cartes',
     title: '🗺 Mes cartes',
-    sub: `OpenStreetMap et OpenSeaMap chargées autour de moi (${radius} km), sans réseau`,
+    sub: 'zones enregistrées sur l’appareil',
   };
 }

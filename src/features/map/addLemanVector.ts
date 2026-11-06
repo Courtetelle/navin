@@ -1,7 +1,7 @@
 import type { Control, Map as LeafletMap } from 'leaflet';
 
 import { bathLayer } from './bathLayer.ts';
-import { SWISS_BOUNDS } from './constants.ts';
+import { BATHY_TILES, SWISS_BOUNDS } from './constants.ts';
 import { isobathLoad } from './isobath.ts';
 import { newIsobathLayer } from './isobathLayer.ts';
 import { leaflet } from './leaflet.ts';
@@ -12,9 +12,6 @@ import { isMapLive } from './mapExtras.ts';
 import { newShoreBands } from './shoreBands.ts';
 import { addVdIsobath } from './vdIsobath.ts';
 import { lemanVecLayer } from './vectorLayers.ts';
-
-const BATHY_TILES =
-  'https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissbathy3d-reliefschattierung/default/current/3857/{z}/{x}/{y}.png';
 
 /**
  * Add the vector layers of Lake Geneva to a map and to its layer selector

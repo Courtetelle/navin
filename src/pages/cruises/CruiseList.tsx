@@ -76,53 +76,50 @@ export function CruiseList({ mode, lines }: CruiseListProps) {
         const current = openId === id;
         return (
           <SwipeRow key={id} id={id} name={name} onDelete={removeCruise}>
-            {(swipe) => (
-              <article
-                className={current ? 'entry current' : 'entry'}
-                data-id={id}
-                {...swipe}
-              >
-                <div className="when">
-                  <span>{name}</span>
-                  {current ? <span>{tr('● en cours')}</span> : null}
-                </div>
-                <HelpText>{summary(line)}</HelpText>
-                <div className="actions">
-                  {current ? (
-                    <Button
-                      className="btn"
-                      data-act="info"
-                      onClick={() => {
-                        buzz();
-                        go('info');
-                      }}
-                    >
-                      {tr('Modifier')}
-                    </Button>
-                  ) : (
-                    <Button
-                      className="btn primary"
-                      data-act="open"
-                      onClick={() => open(id)}
-                    >
-                      {tr('Ouvrir')}
-                    </Button>
-                  )}
-                  <HoldDeleteButton
-                    className="btn danger"
-                    data-act="del"
-                    onClick={buzz}
-                    onDelete={() => {
-                      removeCruise(id);
-                      toast('Supprimée');
-                      go('cruises');
+            <article
+              className={current ? 'entry current' : 'entry'}
+              data-id={id}
+            >
+              <div className="when">
+                <span>{name}</span>
+                {current ? <span>{tr('● en cours')}</span> : null}
+              </div>
+              <HelpText>{summary(line)}</HelpText>
+              <div className="actions">
+                {current ? (
+                  <Button
+                    className="btn"
+                    data-act="info"
+                    onClick={() => {
+                      buzz();
+                      go('info');
                     }}
                   >
-                    {tr('Supprimer')}
-                  </HoldDeleteButton>
-                </div>
-              </article>
-            )}
+                    {tr('Modifier')}
+                  </Button>
+                ) : (
+                  <Button
+                    className="btn primary"
+                    data-act="open"
+                    onClick={() => open(id)}
+                  >
+                    {tr('Ouvrir')}
+                  </Button>
+                )}
+                <HoldDeleteButton
+                  className="btn danger"
+                  data-act="del"
+                  onClick={buzz}
+                  onDelete={() => {
+                    removeCruise(id);
+                    toast('Supprimée');
+                    go('cruises');
+                  }}
+                >
+                  {tr('Supprimer')}
+                </HoldDeleteButton>
+              </div>
+            </article>
           </SwipeRow>
         );
       })}

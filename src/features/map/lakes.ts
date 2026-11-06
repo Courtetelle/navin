@@ -6,7 +6,7 @@ import { toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 import type { GeoBox } from './constants.ts';
-import { LEMAN_BBOX, SEAMARK_TILES, SWISS_TILES } from './constants.ts';
+import { BATHY_TILES, LEMAN_BBOX, SEAMARK_TILES } from './constants.ts';
 import { VD_WMS, vdIsobathLayers } from './vdIsobath.ts';
 import type { DownloadResult, TileJob } from './zoneDownload.ts';
 import { fetchTiles } from './zoneDownload.ts';
@@ -50,7 +50,7 @@ export const lakesNoteVersion = signal(0);
 const download = { busy: false };
 
 /**
- * Tiles of a lake: Swiss map from zoom 8, buoyage from zoom 9 (legacy `lakeTileUrls`).
+ * Tiles of a lake: relief of the bed from zoom 8, buoyage from zoom 9 (legacy `lakeTileUrls`).
  * @param lake - The lake.
  * @returns The jobs.
  */
@@ -58,7 +58,7 @@ export function lakeTileUrls(lake: BaseLake): TileJob[] {
   const jobs: TileJob[] = [];
   for (const tile of zoneTileXY(lake.b, LEMAN_ZMAX)) {
     if (tile[0] < 8) continue;
-    jobs.push({ url: zoneUrl(SWISS_TILES, tile), mode: 'cors' });
+    jobs.push({ url: zoneUrl(BATHY_TILES, tile), mode: 'cors' });
     if (tile[0] >= 9) {
       jobs.push({ url: zoneUrl(SEAMARK_TILES, tile), mode: 'no-cors' });
     }

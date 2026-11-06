@@ -90,7 +90,7 @@ function BoatList({
       <PageTitle
         atTop={fresh}
         helps={[
-          'Les données d’un bateau sont reprises à chaque sortie lacustre. Enregistrement automatique. Glisser un bateau vers la gauche : le supprimer (avec confirmation).',
+          'Les données d’un bateau sont reprises à chaque sortie lacustre. Enregistrement automatique. 🗑 : le supprimer (avec confirmation).',
         ]}
       >
         Mes bateaux

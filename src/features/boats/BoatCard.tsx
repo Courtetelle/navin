@@ -40,7 +40,7 @@ export interface BoatCardProps {
 
 /**
  * One boat of Mes bateaux (`details[data-b]`): sheet, photos, publishing,
- * deletion by long press or swipe.
+ * deletion by long press or 🗑.
  * @param props - Boat and actions.
  * @returns The card.
  */
@@ -71,99 +71,92 @@ export function BoatCard({
   return (
     <SwipeRow
       id={boat.id}
-      name=""
+      name={boat.info.boat || 'ce bateau'}
       onDelete={(id) => {
         removeBoat(id);
         onRemoved();
       }}
     >
-      {(swipe) => (
-        <details
-          className="section"
-          data-b={boat.id}
-          open={open}
-          onToggle={(event) => {
-            const shown = event.currentTarget.open;
-            if (shown) setOpened(true);
-            onToggle(shown);
-          }}
+      <details
+        className="section"
+        data-b={boat.id}
+        open={open}
+        onToggle={(event) => {
+          const shown = event.currentTarget.open;
+          if (shown) setOpened(true);
+          onToggle(shown);
+        }}
+      >
+        <summary>
+          {thumb ? <PhotoImg className="b-thumb" photoId={thumb} /> : '🚤 '}
+          <span className="b-nm">
+            {boat.info.boat || tr('Nouveau bateau')}
+          </span>{' '}
+          <small>{drawn.sub}</small>
+          <Button
+            type="button"
+            className="btn ck-editbtn b-editbtn no-navact"
+            data-fields={boat.id}
+            aria-label="Modifier les libellés"
+            onClick={(event) => {
+              event.preventDefault();
+              buzz();
+              onFields();
+            }}
+          >
+            ✎
+          </Button>
+        </summary>
+        <HelpText
+          style={{ padding: '12px 14px 0', margin: 0 }}
+          introLead={everOpened}
         >
-          <summary {...swipe}>
-            {thumb ? <PhotoImg className="b-thumb" photoId={thumb} /> : '🚤 '}
-            <span className="b-nm">
-              {boat.info.boat || tr('Nouveau bateau')}
-            </span>{' '}
-            <small>{drawn.sub}</small>
-            <Button
-              type="button"
-              className="btn ck-editbtn b-editbtn no-navact"
-              data-fields={boat.id}
-              aria-label="Modifier les libellés"
-              onClick={(event) => {
-                event.preventDefault();
-                buzz();
-                onFields();
-              }}
-            >
-              ✎
-            </Button>
-          </summary>
-          <HelpText
-            style={{ padding: '12px 14px 0', margin: 0 }}
-            introLead={everOpened}
+          Informations du bateau : touchez une case pour saisir ou corriger
+          (enregistrement automatique).
+        </HelpText>
+        <div data-form={boat.id}>
+          <CompactForm
+            sections={boatSections(boat).filter(
+              (section) => section.title !== 'Numéros utiles (page SOS)',
+            )}
+            data={boat.info}
+            onChange={(next) => saveBoatInfo(boat.id, next)}
+            formKey={boat.id}
+          />
+        </div>
+        <BoatPhotos boat={boat} onRefresh={onRefresh} />
+        <ButtonRow className="row ck-pub-row" style={{ padding: '0 14px' }}>
+          <Button
+            className="btn big ck-pub"
+            data-bpub={boat.id}
+            onClick={(event) => {
+              event.preventDefault();
+              buzz();
+              openListPublish('boats', boat.id);
+            }}
           >
-            Informations du bateau : touchez une case pour saisir ou corriger
-            (enregistrement automatique).
-          </HelpText>
-          <div data-form={boat.id}>
-            <CompactForm
-              sections={boatSections(boat).filter(
-                (section) => section.title !== 'Numéros utiles (page SOS)',
-              )}
-              data={boat.info}
-              onChange={(next) => saveBoatInfo(boat.id, next)}
-              formKey={boat.id}
-            />
-          </div>
-          <BoatPhotos boat={boat} onRefresh={onRefresh} />
-          <ButtonRow className="row ck-pub-row" style={{ padding: '0 14px' }}>
-            <Button
-              className="btn big ck-pub"
-              data-bpub={boat.id}
-              onClick={(event) => {
-                event.preventDefault();
-                buzz();
-                openListPublish('boats', boat.id);
-              }}
-            >
-              {tr('📤 Publier')}
-              <small>
-                {tr('cette fiche en image ou PDF, avec les photos')}
-              </small>
-            </Button>
-          </ButtonRow>
-          <BoatVersionsButton boat={drawn.versions} onOpen={onVersions} />
-          <ButtonRow
-            className="row b-delrow"
-            style={{ padding: '0 14px 14px' }}
+            {tr('📤 Publier')}
+            <small>{tr('cette fiche en image ou PDF, avec les photos')}</small>
+          </Button>
+        </ButtonRow>
+        <BoatVersionsButton boat={drawn.versions} onOpen={onVersions} />
+        <ButtonRow className="row b-delrow" style={{ padding: '0 14px 14px' }}>
+          <HoldDeleteButton
+            className="btn danger"
+            data-del={boat.id}
+            onClick={(event) => {
+              event.preventDefault();
+              buzz();
+            }}
+            onDelete={() => {
+              removeBoat(boat.id);
+              onRemoved();
+            }}
           >
-            <HoldDeleteButton
-              className="btn danger"
-              data-del={boat.id}
-              onClick={(event) => {
-                event.preventDefault();
-                buzz();
-              }}
-              onDelete={() => {
-                removeBoat(boat.id);
-                onRemoved();
-              }}
-            >
-              {tr(drawn.deleteLabel)}
-            </HoldDeleteButton>
-          </ButtonRow>
-        </details>
-      )}
+            {tr(drawn.deleteLabel)}
+          </HoldDeleteButton>
+        </ButtonRow>
+      </details>
     </SwipeRow>
   );
 }

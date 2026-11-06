@@ -4321,12 +4321,6 @@ input.text.contact-on {
 .trk-item {
   touch-action: pan-y;
 }
-.sw-moving {
-  transition: none;
-  box-shadow:
-    8px 0 0 #d32f2f inset,
-    0 0 0 2px #d32f2f;
-}
 .sw-confirm {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -7122,10 +7116,11 @@ html body .row.row-stack > .btn.act-plain {
 }
 /* v361 (Corban : dégager les boutons ne marchait pas au doigt) — sur téléphone, le navigateur prenait le glissement pour un défilement
    et annulait le geste ; on lui interdit de défiler sur la barre du haut, le tableau du bas et les poignées. */
-body.trk-mode header.topbar,
-body.trk-mode #trkDash,
 .slide-handle {
-  touch-action: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  touch-action: manipulation;
 }
 body.trk-mode:not(.top-hidden) .ctl-edge {
   top: var(--topbar-h, 72px);
@@ -8683,4 +8678,136 @@ html body .slide-handle.sh-bot {
 }
 .ctl-edge {
   width: 48px;
+}
+
+/* Loupe : une fonction de l'appli ou un lieu */
+#searchBtn {
+  position: fixed;
+  top: calc(var(--topbar-h, 70px) + 10px);
+  right: 10px;
+  z-index: 2300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: var(--surface, #fff);
+  color: #0a2a5c;
+  box-shadow: 0 2px 8px rgba(11, 18, 32, 0.28);
+  cursor: pointer;
+}
+body.top-hidden #searchBtn {
+  top: 30px;
+}
+.search-modal {
+  align-items: start;
+}
+.search-modal .ck-ask-box {
+  grid-template-columns: minmax(0, 1fr);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+.search-modal h3 {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--muted, #667);
+}
+.search-hit {
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--btn, #eee);
+  color: var(--fg, #111);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+:root[data-theme='night'] #searchBtn {
+  background: #200000;
+  color: #ff4040;
+}
+:root[data-theme='night'] .search-hit {
+  background: #200000;
+  color: #ff4040;
+}
+/* Fond sans carte : seulement où rien n'est chargé, et l'appli le dit */
+.map-missing {
+  position: absolute;
+  left: 50%;
+  bottom: 110px;
+  z-index: 1000;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0a2a5c;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(11, 18, 32, 0.28);
+}
+.map-missing[hidden] {
+  display: none;
+}
+.map-missing button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #0050d0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+:root[data-theme='night'] .map-missing {
+  background: #200000;
+  color: #ff4040;
+}
+:root[data-theme='night'] .map-missing button {
+  background: #6a0000;
+  color: #ff4040;
+}
+
+.cartes-z .btn {
+  flex: none;
+  min-width: 48px;
+  min-height: 48px;
+}
+
+/* Bouton de suppression d'une ligne de liste */
+.row-delete {
+  display: block;
+  margin: -6px 0 10px auto;
+  min-width: 48px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--btn, #eee);
+  color: #c62828;
+  font-size: 20px;
+  cursor: pointer;
+}
+:root[data-theme='night'] .row-delete {
+  background: #200000;
+  color: #ff4040;
+}
+
+/* Hors de la carte, la loupe laisse la barre de navigation libre */
+body:not(.trk-mode) #searchBtn {
+  top: auto;
+  bottom: calc(14px + env(safe-area-inset-bottom));
+  left: 12px;
+  right: auto;
 }

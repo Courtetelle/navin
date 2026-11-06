@@ -28,7 +28,7 @@ export function ctlArrange(map: LeafletMap): void {
 }
 
 /**
- * Hide the map buttons: a swipe from the left edge shows them until the ‹
+ * Hide the map buttons: a tap on the chevron of the left edge shows them until the ‹
  * button puts them away (legacy `ctlAutoAttach`).
  * @param map - Leaflet map.
  */
@@ -59,15 +59,6 @@ export function ctlAutoAttach(map: LeafletMap): void {
       edge.setPointerCapture(event.pointerId);
     } catch {
       // The pointer is already gone.
-    }
-  });
-  edge.addEventListener('pointermove', (event) => {
-    if (!start) return;
-    event.stopPropagation();
-    const moved = event.clientX - start.x;
-    if (moved > 40 && Math.abs(event.clientY - start.y) < 90) {
-      start = null;
-      show(map);
     }
   });
   const release = () => {

@@ -10,7 +10,7 @@
  * | `moorNow()`             | {@link moorNow}                                            |
  * | `navPageRefresh()`      | {@link navPageRefresh} (no-op: `#navLive` no longer exists)|
  * | `deleteTrace(id)`       | {@link deleteTrace}                                        |
- * | `bindSwipeDelete`       | {@link SwipeRow}: render prop, handlers on the sliding row |
+ * | `bindSwipeDelete`       | {@link SwipeRow}: the row with its 🗑 button               |
  *
  * `prep`, `prepUse`, `prepPaths`, `noteUse`, `byUse`, `crewSets`, `crewSig`,
  * `saveCrewSets`, `crewSetDate`, `crewSetName`, `memberLocks`, `memberLockMsg`
@@ -23,5 +23,5 @@ export { prepBarSync } from './prepBarSync.ts';
 export { prepStart } from './prepFlow.ts';
 export { PrepTrail } from './PrepTrail.tsx';
 export { quickStart } from './quickStart.ts';
-export type { SwipeHandlers, SwipeRowProps } from './swipe/SwipeRow.tsx';
+export type { SwipeRowProps } from './swipe/SwipeRow.tsx';
 export { SwipeRow } from './swipe/SwipeRow.tsx';

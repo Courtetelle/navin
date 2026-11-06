@@ -20,13 +20,8 @@ import {
 } from '../../features/map/mapData.ts';
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
-import {
-  swissWhenNoTiles,
-  swissWhenOffline,
-} from '../../features/map/offlineBase.ts';
-import { zoneLayer } from '../../features/map/zoneLayer.ts';
-import { zoneAt } from '../../features/map/zoneStore.ts';
-import { isLake, state } from '../../state/index.ts';
+import { keepTilesFilled } from '../../features/map/tileFallback.ts';
+import { isLake } from '../../state/index.ts';
 
 import { followPosition } from './followPosition.ts';
 
@@ -58,15 +53,6 @@ function chooseSwiss({ line, ents }: MapDataResult): boolean {
   return first ? inSwissArea(first.v.pos) : false;
 }
 
-function lastPosition({ line, ents }: MapDataResult): LatLngPair | null {
-  const last = line.at(-1);
-  if (last) return [last.lat, last.lon];
-  const first = ents[0];
-  if (first) return [first.v.pos.lat, first.v.pos.lon];
-  const fix = state.view.lastFix.value;
-  return fix ? [fix.lat, fix.lon] : null;
-}
-
 /**
  * Create the map of the logbook: backgrounds, track, entries, position followed (legacy `drawLeaflet`).
  * @param box - The `#map` element.
@@ -92,55 +78,32 @@ export function buildJournalMap(
     crossOrigin: true,
     attribution: '© OpenStreetMap',
   });
+  const seamark = L.tileLayer(SEAMARK_TILES, {
+    ...tiles,
+    attribution: '© OpenSeaMap',
+  });
+  const useSwiss = chooseSwiss(data);
   const swiss = L.tileLayer(SWISS_TILES, {
     ...tiles,
     crossOrigin: true,
     bounds: SWISS_BOUNDS,
     attribution: '© swisstopo',
   });
-  const seamark = L.tileLayer(SEAMARK_TILES, {
-    ...tiles,
-    attribution: '© OpenSeaMap',
-  });
-  const useSwiss = chooseSwiss(data);
-  const zoneBase = zoneLayer();
-  let base = osm;
-  if (useSwiss) base = navigator.onLine ? osm : swiss;
-  else if (zoneAt(lastPosition(data))) base = zoneBase;
-  base.addTo(map);
+  osm.addTo(map);
   seamark.addTo(map);
   const layers = L.control
     .layers(
       {
-        'Carte nationale suisse (Léman)': swiss,
         'Plan OpenStreetMap': osm,
-        'Plan des zones hors ligne': zoneBase,
+        'Carte nationale suisse': swiss,
       },
       { 'Balisage OpenSeaMap': seamark },
       { position: 'topright' },
     )
     .addTo(map);
-  if (useSwiss) {
-    swissWhenOffline(map, osm, swiss);
-    void addLemanVector(map, layers);
-  }
-  swissWhenNoTiles(map, [swiss, osm, zoneBase], swiss);
+  if (useSwiss) void addLemanVector(map, layers);
+  keepTilesFilled(map, [osm, swiss]);
   addFullscreenControl(map);
-  let loaded = 0;
-  let errors = 0;
-  swiss.on('tileload', () => {
-    loaded++;
-  });
-  swiss.on('tileerror', () => {
-    errors++;
-    if (errors === 6 && !loaded && navigator.onLine && map.hasLayer(swiss)) {
-      map.removeLayer(swiss);
-      osm.addTo(map);
-      events.onNote(
-        'Carte suisse indisponible pour le moment : plan OpenStreetMap affiché.',
-      );
-    }
-  });
   const points: LatLngExpression[] = [];
   for (const part of segments(data.line)) {
     L.polyline(part, { color: '#d00000', weight: 5, opacity: 0.85 }).addTo(map);

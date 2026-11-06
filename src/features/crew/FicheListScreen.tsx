@@ -25,7 +25,7 @@ export interface FicheListScreenProps {
 
 /**
  * List of the member cards (legacy `renderFicheList`, lake.js:2005): a tap opens
- * a card, a swipe to the left deletes it.
+ * a card; 🗑 deletes it.
  * @param props - Drawing context.
  * @returns The screen.
  */
@@ -51,7 +51,7 @@ export function FicheListScreen({ lead }: FicheListScreenProps) {
       <PageTitle
         atTop={lead}
         helps={[
-          'Touchez une fiche pour la compléter ou la modifier. Glisser une fiche vers la gauche : la supprimer (avec confirmation).',
+          'Touchez une fiche pour la compléter ou la modifier. 🗑 : la supprimer (avec confirmation).',
         ]}
       >
         Les coéquipiers·ères
@@ -94,20 +94,17 @@ function CardButton({ member }: { member: Member }) {
       block={memberLockMsg}
       onDelete={deleteMemberCard}
     >
-      {(swipe) => (
-        <Button
-          {...swipe}
-          className="btn"
-          data-fiche={member.id}
-          onClick={() => {
-            buzz();
-            openFiche(member.id, 'list');
-          }}
-        >
-          {name}
-          <small>{contacts}</small>
-        </Button>
-      )}
+      <Button
+        className="btn"
+        data-fiche={member.id}
+        onClick={() => {
+          buzz();
+          openFiche(member.id, 'list');
+        }}
+      >
+        {name}
+        <small>{contacts}</small>
+      </Button>
     </SwipeRow>
   );
 }

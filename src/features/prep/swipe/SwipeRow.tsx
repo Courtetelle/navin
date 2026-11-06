@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { MouseEvent, PointerEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useEffect, useId, useLayoutEffect, useRef } from 'react';
 
 import { Button } from '../../../components/shared/Button.tsx';
@@ -7,20 +7,11 @@ import { HoldDeleteButton } from '../../../components/shared/HoldDeleteButton.ts
 import { buzz } from '../../../lib/dom.ts';
 import { toast } from '../../../state/index.ts';
 
-import { consumeSwipedClick, startSwipe } from './swipeGesture.ts';
 import { closeSwipeRow, openRowToken, openSwipeRow } from './swipeState.ts';
-
-/** Handlers to spread on the element that slides. */
-export interface SwipeHandlers {
-  /** Starts following the finger. */
-  onPointerDownCapture: (event: PointerEvent<HTMLElement>) => void;
-  /** Swallows the click that ends a swipe. */
-  onClickCapture: (event: MouseEvent<HTMLElement>) => void;
-}
 
 /** Props of {@link SwipeRow}. */
 export interface SwipeRowProps {
-  /** Id of the item; without one, a swipe does nothing. */
+  /** Id of the item; without one, the row cannot be deleted. */
   id: string | null | undefined;
   /** Name shown in the confirmation button (cut to 60 characters). */
   name: string;
@@ -40,24 +31,15 @@ export interface SwipeRowProps {
    */
   silent?: boolean;
   /** Renders the row; spread the handlers on the element that slides. */
-  children: (swipe: SwipeHandlers) => ReactNode;
+  children: ReactNode;
 }
 
 /**
- * Delete by swipe, with a confirmation every time (prep.js:1195-1269): sliding
- * the row to the left opens « 🗑 Supprimer … ? » right after it; a long press
- * on that button deletes, « Annuler » or 5 s without a touch closes it.
- *
- * ```tsx
- * <SwipeRow id={meta.id} name={title} onDelete={removeCruise}>
- *   {(swipe) => <article className="entry" data-id={meta.id} {...swipe}>…</article>}
- * </SwipeRow>
- * ```
- *
- * For a boat, spread the handlers on the `summary`: the confirmation still
- * comes after the whole `details`.
+ * A row with its 🗑 button, with a confirmation every time: the button opens
+ * « 🗑 Supprimer … ? » right after the row; a long press on it deletes,
+ * « Annuler » or 5 s without a touch closes it.
  * @param props - Item, deletion and row.
- * @returns The row and its confirmation.
+ * @returns The row, its button and its confirmation.
  */
 export function SwipeRow({
   id,
@@ -75,7 +57,7 @@ export function SwipeRow({
     },
     [token],
   );
-  const onSwiped = () => {
+  const askDeletion = () => {
     if (!id) return;
     const blocked = block?.(id);
     if (blocked) {
@@ -89,16 +71,21 @@ export function SwipeRow({
   };
   return (
     <>
-      {children({
-        onPointerDownCapture: (event) => {
-          startSwipe(event.currentTarget, event, onSwiped);
-        },
-        onClickCapture: (event) => {
-          if (!consumeSwipedClick()) return;
-          event.stopPropagation();
-          event.preventDefault();
-        },
-      })}
+      {children}
+      {id ? (
+        <button
+          type="button"
+          className="row-delete"
+          aria-label={`Supprimer ${name}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            askDeletion();
+          }}
+        >
+          🗑
+        </button>
+      ) : null}
       {id && openRowToken.value === token ? (
         <SwipeConfirm
           name={name}

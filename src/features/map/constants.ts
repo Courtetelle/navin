@@ -9,15 +9,18 @@ export interface GeoBox {
   e: number;
 }
 
-/** Colour Swiss national map (swisstopo): shows the depth lines of the lakes. */
+/** Colour Swiss national map (swisstopo): an option, never chosen by itself. */
 export const SWISS_TILES =
   'https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/3857/{z}/{x}/{y}.jpeg';
+/** Shaded relief of the lake beds (swissBATHY3D, swisstopo). */
+export const BATHY_TILES =
+  'https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissbathy3d-reliefschattierung/default/current/3857/{z}/{x}/{y}.png';
 /** OpenStreetMap plan, online only (its servers forbid bulk downloads). */
 export const OSM_TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 /** OpenSeaMap buoyage overlay. */
 export const SEAMARK_TILES =
   'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png';
-/** Area covered by the Swiss national map. */
+/** Area covered by the Swiss data. */
 export const SWISS_BOUNDS: [LatLngPair, LatLngPair] = [
   [45.75, 5.85],
   [47.9, 10.6],
@@ -33,7 +36,7 @@ export const SEA_CENTER: LatLngPair = [43, 5.95];
 export const LEMAN_BBOX: GeoBox = { s: 46.18, n: 46.56, w: 6.1, e: 6.95 };
 
 /**
- * Whether a position lies in the area of the Swiss national map (legacy `inSwissArea`).
+ * Whether a position lies in the area of the Swiss data (legacy `inSwissArea`).
  * @param position - Position, or nothing.
  * @returns `true` inside the area.
  */

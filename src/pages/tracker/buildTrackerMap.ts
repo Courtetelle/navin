@@ -21,10 +21,8 @@ import {
   startOrientation,
 } from '../../features/map/mapOrientation.ts';
 import { setMapWatch } from '../../features/map/mapWatch.ts';
-import {
-  swissWhenNoTiles,
-  swissWhenOffline,
-} from '../../features/map/offlineBase.ts';
+import { showPendingPlace } from '../../features/map/placeTarget.ts';
+import { keepTilesFilled } from '../../features/map/tileFallback.ts';
 import {
   drawTrace,
   takePendingTrace,
@@ -37,8 +35,6 @@ import {
   trkDrawPins,
   trkFix,
 } from '../../features/map/trackerState.ts';
-import { zoneLayer } from '../../features/map/zoneLayer.ts';
-import { zoneAt } from '../../features/map/zoneStore.ts';
 import { isLake, state } from '../../state/index.ts';
 
 const KNOTS_PER_METRE_SECOND = 1.943_844;
@@ -58,12 +54,6 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   handle.map = map;
   setShownMap(map);
   const tiles = { maxZoom: 19, maxNativeZoom: 18 };
-  const swiss = L.tileLayer(SWISS_TILES, {
-    ...tiles,
-    crossOrigin: true,
-    bounds: SWISS_BOUNDS,
-    attribution: '© swisstopo',
-  });
   const osm = L.tileLayer(OSM_TILES, {
     ...tiles,
     crossOrigin: true,
@@ -73,7 +63,12 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     ...tiles,
     attribution: '© OpenSeaMap',
   });
-  const zoneBase = zoneLayer();
+  const swiss = L.tileLayer(SWISS_TILES, {
+    ...tiles,
+    crossOrigin: true,
+    bounds: SWISS_BOUNDS,
+    attribution: '© swisstopo',
+  });
   const simulatedSea = simSeaMode();
   const fix = state.view.lastFix.value;
   const cruise = state.data.cruise.value;
@@ -82,42 +77,23 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   if (simulatedSea && inSwissArea(fix)) here = null;
   const inSwissWaters = here ? inSwissArea(fix) : !cruise;
   const useSwiss = !simulatedSea && ((cruise && isLake()) || inSwissWaters);
-  let base = osm;
-  if (useSwiss) base = navigator.onLine ? osm : swiss;
-  else if (zoneAt(here)) base = zoneBase;
-  base.addTo(map);
+  osm.addTo(map);
   seamark.addTo(map);
   const layers = L.control
     .layers(
       {
-        'Carte nationale suisse': swiss,
         'Plan OpenStreetMap': osm,
-        'Plan des zones hors ligne': zoneBase,
+        'Carte nationale suisse': swiss,
       },
       { 'Balisage OpenSeaMap': seamark },
       { position: 'topright' },
     )
     .addTo(map);
-  if (useSwiss) {
-    swissWhenOffline(map, osm, swiss);
-    void addLemanVector(map, layers);
-  }
-  swissWhenNoTiles(map, [swiss, osm, zoneBase], swiss);
+  if (useSwiss) void addLemanVector(map, layers);
+  keepTilesFilled(map, [osm, swiss]);
   addFullscreenControl(map);
   startOrientation(map);
   setFollow(!(simulatedSea && !here));
-  let loaded = 0;
-  let errors = 0;
-  swiss.on('tileload', () => {
-    loaded++;
-  });
-  swiss.on('tileerror', () => {
-    errors++;
-    if (errors === 6 && !loaded && navigator.onLine && map.hasLayer(swiss)) {
-      map.removeLayer(swiss);
-      osm.addTo(map);
-    }
-  });
   // Moving the map stops following the boat; the blue arrow brings it back.
   map.on('dragstart', () => setFollow(false));
   const live = L.polyline([], {
@@ -140,6 +116,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   }
   showPosition();
   whileMapLive(map, () => map.invalidateSize(), 100);
+  showPendingPlace(map);
   const pending = takePendingTrace();
   if (pending) whileMapLive(map, () => drawTrace(pending), 200);
 }

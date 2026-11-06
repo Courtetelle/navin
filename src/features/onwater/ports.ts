@@ -12,7 +12,7 @@ export const ZONES: ReadonlyArray<readonly [string, string]> = [
 ];
 
 // Known ports, to name the place of departure without network.
-const PORTS: ReadonlyArray<readonly [string, number, number]> = [
+export const PORTS: ReadonlyArray<readonly [string, number, number]> = [
   ['Genève', 46.208, 6.153],
   ['Genève Port-Noir', 46.213, 6.17],
   ['Versoix', 46.283, 6.168],

@@ -69,19 +69,16 @@ export function CrewOnBoard({ line, index }: CrewOnBoardProps) {
             block={memberLockMsg}
             onDelete={deleteMemberCard}
           >
-            {(swipe) => (
-              <Button
-                {...swipe}
-                className="btn act-plain"
-                data-fiche={line.memberId}
-                onClick={() => {
-                  buzz();
-                  openFiche(line.memberId ?? '', null);
-                }}
-              >
-                {tr('✎ Fiche')}
-              </Button>
-            )}
+            <Button
+              className="btn act-plain"
+              data-fiche={line.memberId}
+              onClick={() => {
+                buzz();
+                openFiche(line.memberId ?? '', null);
+              }}
+            >
+              {tr('✎ Fiche')}
+            </Button>
           </SwipeRow>
         ) : (
           <span />

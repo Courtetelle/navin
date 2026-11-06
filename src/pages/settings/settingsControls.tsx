@@ -196,23 +196,6 @@ export function WeatherRow() {
 }
 
 /**
- * Radius of the maps loaded around the boat (legacy `mapRad`).
- * @returns The setting.
- */
-export function MapRadiusRows() {
-  return (
-    <>
-      <HelpText nextIsRow>Cartes : rayon chargé autour de moi</HelpText>
-      <OptionButtons
-        settingKey="mapRadius"
-        values={[20, 50, 100, 150]}
-        unit=" km"
-      />
-    </>
-  );
-}
-
-/**
  * Links to the offline zones and the marks (legacy `links`).
  * @returns The row.
  */
@@ -220,8 +203,8 @@ export function MapLinksRow() {
   const tr = useTr();
   return (
     <ButtonRow className="row c2">
-      <Button className="btn" data-go="zones" onClick={() => open('zones')}>
-        {tr('🗺 Zones hors ligne')}
+      <Button className="btn" data-go="cartes" onClick={() => open('cartes')}>
+        {tr('🗺 Mes cartes')}
       </Button>
       <Button className="btn" data-go="marks" onClick={() => open('marks')}>
         {tr('📌 Mes marques')}

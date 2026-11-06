@@ -16,7 +16,7 @@ export function TracesPage() {
     <>
       <PageTitle
         helps={[
-          'Toutes les traces enregistrées. 🗺 l’affiche en violet sur la carte de NavIn, GPX l’exporte. Glisser une trace vers la gauche : la supprimer (avec confirmation).',
+          'Toutes les traces enregistrées. 🗺 l’affiche en violet sur la carte de NavIn, GPX l’exporte. 🗑 : la supprimer (avec confirmation).',
         ]}
       >
         🛰 Mes traces

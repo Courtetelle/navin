@@ -47,38 +47,36 @@ function TraceItem({ track }: { track: LakeTrack }) {
       silent
       onDelete={deleteAndRefresh}
     >
-      {(swipe) => (
-        <div className="trk-item" {...swipe}>
-          <div>
-            <b>{track.name}</b>
-            <small>
-              {tr(
-                `${fmtShortDate(new Date(start))} · ${fr(stats.nm)} NM · ${fmtDur(end - start)}${top}`,
-              )}
-            </small>
-          </div>
-          <Button
-            className="btn"
-            data-show={track.id}
-            onClick={() => {
-              buzz();
-              showTrace(track);
-            }}
-          >
-            🗺
-          </Button>
-          <Button
-            className="btn"
-            data-gpx={track.id}
-            onClick={() => {
-              buzz();
-              exportTrace(track);
-            }}
-          >
-            GPX
-          </Button>
+      <div className="trk-item">
+        <div>
+          <b>{track.name}</b>
+          <small>
+            {tr(
+              `${fmtShortDate(new Date(start))} · ${fr(stats.nm)} NM · ${fmtDur(end - start)}${top}`,
+            )}
+          </small>
         </div>
-      )}
+        <Button
+          className="btn"
+          data-show={track.id}
+          onClick={() => {
+            buzz();
+            showTrace(track);
+          }}
+        >
+          🗺
+        </Button>
+        <Button
+          className="btn"
+          data-gpx={track.id}
+          onClick={() => {
+            buzz();
+            exportTrace(track);
+          }}
+        >
+          GPX
+        </Button>
+      </div>
     </SwipeRow>
   );
 }

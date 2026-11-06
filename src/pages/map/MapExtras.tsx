@@ -20,10 +20,8 @@ import {
   lemanVecNote,
   lemanVecProgress,
 } from '../../features/map/lemanVector.ts';
-import { zoneList } from '../../features/map/zoneStore.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { go } from '../../shell/router.ts';
 import { isLake } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
@@ -47,7 +45,6 @@ export function MapExtras({ day, onShowDay }: MapExtrasProps) {
   useSignals();
   const tr = useTr();
   const lake = isLake();
-  const zones = zoneList();
   const [ascNote, setAscNote] = useState(bathyAscNote);
   const note = lakesNote();
   useEffect(
@@ -76,28 +73,6 @@ export function MapExtras({ day, onShowDay }: MapExtrasProps) {
           </LinkButton>
         </ButtonRow>
       ) : null}
-      <ButtonRow>
-        <Button
-          className="btn"
-          data-go="zones"
-          onClick={() => {
-            buzz();
-            go('zones');
-          }}
-        >
-          {tr('🗺 Zones hors ligne')}
-          <small>
-            {tr(
-              'plan OpenStreetMap + balisage OpenSeaMap, zone choisie à la main',
-            )}
-          </small>
-          <small>
-            {zones.length > 0
-              ? zones.map((zone) => zone.name).join(', ')
-              : tr('aucune zone enregistrée')}
-          </small>
-        </Button>
-      </ButtonRow>
       {lake ? (
         <>
           <ButtonRow>
