@@ -21,6 +21,7 @@ import {
   startDepthWatch,
 } from '../depthAlarm.ts';
 import { depthOverlayState } from '../depthOverlayState.ts';
+import { nmeaLink, nmeaSet } from '../nmeaLive.ts';
 
 const audio = vi.hoisted(() => ({
   dangerBuzz: vi.fn(),
@@ -30,10 +31,12 @@ const audio = vi.hoisted(() => ({
   sirenOn: vi.fn(),
 }));
 const contours = vi.hoisted(() => ({ isobathLoad: vi.fn() }));
+const cells = vi.hoisted(() => ({ lemanDepthAt: vi.fn() }));
 
 vi.mock('../depthAudio.ts', () => audio);
 vi.mock('../depthOverlay.ts', () => ({ showDepthOverlay: vi.fn() }));
 vi.mock('../trackerLink.ts', () => contours);
+vi.mock('../../map/lemanDepth.ts', () => cells);
 
 const NOW = Date.UTC(2026, 6, 15, 8);
 
@@ -43,6 +46,9 @@ beforeEach(() => {
   vi.useFakeTimers({ now: NOW });
   vi.clearAllMocks();
   contours.isobathLoad.mockResolvedValue([]);
+  cells.lemanDepthAt.mockResolvedValue(undefined);
+  nmeaLink.at = {};
+  nmeaLink.live = {};
 });
 
 afterEach(() => {
@@ -237,4 +243,81 @@ test('the watch stops with an old position, at sea, or when switched off', async
   });
   await watchOnce();
   expect(depthOverlayState.value.on).toBe(false);
+});
+
+test('the Lake Geneva cells give the depth, without any contour', async () => {
+  shallowLake();
+  contours.isobathLoad.mockResolvedValue([]);
+  cells.lemanDepthAt.mockResolvedValue(1.5);
+  startDepthWatch();
+  await watchOnce();
+  expect(depthOverlayState.value).toMatchObject({
+    on: true,
+    danger: true,
+    title: 'Fond ≈ 1,5 m',
+  });
+});
+
+test('over deep water the cells keep the alarm off', async () => {
+  shallowLake();
+  cells.lemanDepthAt.mockResolvedValue(null);
+  contours.isobathLoad.mockResolvedValue([]);
+  startDepthWatch();
+  await watchOnce();
+  expect(depthOverlayState.value.on).toBe(false);
+});
+
+test('unreadable cells fall back on the contours', async () => {
+  shallowLake();
+  cells.lemanDepthAt.mockRejectedValue(new Error('offline'));
+  startDepthWatch();
+  await watchOnce();
+  expect(depthOverlayState.value).toMatchObject({
+    on: true,
+    title: 'Fond ≈ 2 m',
+  });
+});
+
+test('with both sources the alarm follows the least water', async () => {
+  shallowLake();
+  cells.lemanDepthAt.mockResolvedValue(10);
+  nmeaSet('depth', 1.5);
+  startDepthWatch();
+  await watchOnce();
+  expect(depthOverlayState.value).toMatchObject({
+    on: true,
+    danger: true,
+    title: 'Fond ≈ 1,5 m · sondeur',
+  });
+  cells.lemanDepthAt.mockResolvedValue(1.2);
+  await watchOnce();
+  expect(depthOverlayState.value).toMatchObject({
+    on: true,
+    title: 'Fond ≈ 1,2 m · carte',
+  });
+});
+
+test('an old sounder value no longer counts', async () => {
+  shallowLake();
+  cells.lemanDepthAt.mockResolvedValue(null);
+  nmeaSet('depth', 1.5);
+  startDepthWatch();
+  await watchOnce();
+  expect(depthOverlayState.value.on).toBe(true);
+  vi.setSystemTime(NOW + 16_000);
+  await watchOnce();
+  expect(depthOverlayState.value.on).toBe(false);
+});
+
+test('the sounder alarms at sea and without any position', async () => {
+  shallowLake();
+  setZoneSim('mer');
+  state.view.lastFix.value = null;
+  nmeaSet('depth', 1.5);
+  startDepthWatch();
+  await watchOnce();
+  expect(depthOverlayState.value).toMatchObject({
+    on: true,
+    title: 'Fond ≈ 1,5 m · sondeur',
+  });
 });

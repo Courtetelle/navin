@@ -75,6 +75,29 @@ export function estimateDepth(
   return Math.round(interpolated * 10) / 10;
 }
 
+/** A depth and where it comes from. */
+export interface DepthReading {
+  /** Water under the boat (m). */
+  depth: number;
+  source: 'chart' | 'sounder';
+}
+
+/**
+ * The reading to alarm on: the least water of the chart and of the sounder.
+ * @param chart - Depth from the chart (m), or `null`.
+ * @param sounder - Fresh depth from the sounder (m), or `null`.
+ * @returns The reading, or `null` when neither gives a depth.
+ */
+export function lowestDepth(
+  chart: number | null,
+  sounder: number | null,
+): DepthReading | null {
+  if (sounder !== null && (chart === null || sounder <= chart)) {
+    return { depth: sounder, source: 'sounder' };
+  }
+  return chart === null ? null : { depth: chart, source: 'chart' };
+}
+
 /**
  * Minimum sounding of the plotter: the boat value, else the draft plus the
  * pilot foot (legacy `sondeMin`). Uses the open cruise, else the first boat.

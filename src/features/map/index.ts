@@ -33,7 +33,7 @@
  * | `bathyAscImport(files, sub)`      | {@link bathyAscImport}`(files, say)`                       |
  * | `bathyAscShare()`                 | {@link bathyAscShare}                                      |
  * | `vdIsobathLayers()`               | {@link vdIsobathLayers}                                    |
- * | `addLemanVector(map, ctrl, sea)`  | {@link addLemanVector}                                     |
+ * | `addLemanVector(map, ctrl)`       | {@link addLemanVector}                                     |
  * | `depthAt(lat, lon)`               | {@link depthAt}                                            |
  * | `marks`, `mergeMarks`, `herePos`  | `src/state/index.ts`                                       |
  */

@@ -1,10 +1,11 @@
-import type { Control, Layer, Map as LeafletMap } from 'leaflet';
+import type { Control, Map as LeafletMap } from 'leaflet';
 
 import { bathLayer } from './bathLayer.ts';
 import { SWISS_BOUNDS } from './constants.ts';
 import { isobathLoad } from './isobath.ts';
 import { newIsobathLayer } from './isobathLayer.ts';
 import { leaflet } from './leaflet.ts';
+import { lemanIsobaths } from './lemanIsobaths.ts';
 import { lemanVecLoad } from './lemanVector.ts';
 import { isMapLive } from './mapExtras.ts';
 import { newShoreBands } from './shoreBands.ts';
@@ -16,15 +17,14 @@ const BATHY_TILES =
 
 /**
  * Add the vector layers of Lake Geneva to a map and to its layer selector
- * (legacy `addLemanVector`); the vector buoyage replaces the OpenSeaMap tiles.
+ * (legacy `addLemanVector`). The OpenSeaMap tiles stay on: the vector buoyage,
+ * which holds the same marks, is only offered in the selector.
  * @param map - Leaflet map.
  * @param layersControl - Its layer selector.
- * @param seamark - OpenSeaMap layer.
  */
 export async function addLemanVector(
   map: LeafletMap,
   layersControl: Control.Layers,
-  seamark: Layer,
 ): Promise<void> {
   const L = leaflet();
   const bathy = L.tileLayer(BATHY_TILES, {
@@ -38,10 +38,13 @@ export async function addLemanVector(
   layersControl.addOverlay(bathy, 'Relief du fond (swissBATHY3D)');
   const vector = await lemanVecLoad();
   if (!isMapLive(map)) return;
-  const lines = await isobathLoad();
+  const lines = await lemanIsobaths(await isobathLoad());
   if (lines.length > 0 && isMapLive(map)) {
     const layer = newIsobathLayer(lines);
-    layersControl.addOverlay(layer, 'Courbes 1 à 5 m (swissBATHY3D)');
+    layersControl.addOverlay(
+      layer,
+      'Isobathes du Léman, jusqu’à 20 m (swissBATHY3D)',
+    );
     layer.addTo(map);
   }
   void addVdIsobath(map, layersControl);
@@ -61,6 +64,4 @@ export async function addLemanVector(
   }
   if (!buoyage) return;
   layersControl.addOverlay(buoyage, 'Balises et ports (vectoriel, hors ligne)');
-  buoyage.addTo(map);
-  if (map.hasLayer(seamark)) map.removeLayer(seamark);
 }

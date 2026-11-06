@@ -45,11 +45,21 @@ const CASES: ReadonlyArray<ReadonlyArray<readonly [number, number]>> = [
  */
 export class ContourBuilder {
   readonly lines: ContourLine[] = [];
-  private readonly ends = ASC_LEVELS.map(newEnds);
+  /** Depths followed, in metres. */
+  readonly levels: readonly number[];
+  private readonly ends: Array<Map<number, ContourLine>>;
+
+  /**
+   * @param levels - Depths to follow, in metres.
+   */
+  constructor(levels: readonly number[] = ASC_LEVELS) {
+    this.levels = levels;
+    this.ends = levels.map(newEnds);
+  }
 
   /**
    * Add a segment.
-   * @param level - Index in {@link ASC_LEVELS}.
+   * @param level - Index in the levels of the builder.
    * @param firstKey - Key of the first grid edge.
    * @param first - First point.
    * @param secondKey - Key of the second grid edge.
@@ -67,7 +77,7 @@ export class ContourBuilder {
     const atSecond = ends.get(secondKey);
     if (!atFirst && !atSecond) {
       const line: ContourLine = {
-        d: ASC_LEVELS[level] as number,
+        d: this.levels[level] as number,
         pts: [first, second],
         head: firstKey,
         tail: secondKey,
@@ -117,8 +127,8 @@ export function marchRow(
     const d = current[column] as number;
     // A missing depth is NaN: nothing is guessed around it.
     if (Number.isNaN(a + b + c + d)) continue;
-    for (let level = 0; level < ASC_LEVELS.length; level++) {
-      const depth = ASC_LEVELS[level] as number;
+    for (let level = 0; level < builder.levels.length; level++) {
+      const depth = builder.levels[level] as number;
       const mask =
         (a >= depth ? 8 : 0) |
         (b >= depth ? 4 : 0) |

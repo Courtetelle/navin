@@ -2,7 +2,7 @@ import { dpSimplifyXY, lv95ToWgs } from './bathyGeometry.ts';
 import { ContourBuilder, marchRow } from './bathyMarching.ts';
 
 /** Mean level of Lake Geneva in metres: depth = level − altitude of the bottom. */
-const LAKE_LEVEL = 372;
+export const LAKE_LEVEL = 372;
 /** Characters of a header before giving up. */
 const MAX_HEADER = 4096;
 
@@ -16,7 +16,8 @@ export interface AscSource {
 /** Progress of a reading: ratio read, row reached, rows in all. */
 export type AscProgress = (ratio: number, row: number, rows: number) => void;
 
-interface GridHeader {
+/** Description of an ESRI ASCII grid. */
+export interface GridHeader {
   columns: number;
   rows: number;
   xCorner: number;
@@ -121,10 +122,13 @@ class GridReader {
   private dot = false;
   private exponent = false;
 
-  constructor(
-    private readonly builder: ContourBuilder,
-    private readonly step: number,
-  ) {}
+  private readonly builder: ContourBuilder;
+  private readonly step: number;
+
+  constructor(builder: ContourBuilder, step: number) {
+    this.builder = builder;
+    this.step = step;
+  }
 
   start(header: GridHeader): void {
     this.header = header;
@@ -205,8 +209,14 @@ function modeOf(number: number): 'alt' | 'neg' | 'pos' {
   return number < 0 ? 'neg' : 'pos';
 }
 
-// Grid to LV95 to WGS84, simplified to 3 m, without the noise under 40 m.
-function toWgsLines(
+/**
+ * Grid to LV95 to WGS84, simplified to 3 m, without the noise under 40 m.
+ * @param builder - Holds the contours.
+ * @param header - The grid.
+ * @param step - One cell kept out of `step`.
+ * @returns Lines `[depth, lat, lon, lat, lon, …]`.
+ */
+export function toWgsLines(
   builder: ContourBuilder,
   header: GridHeader,
   step: number,

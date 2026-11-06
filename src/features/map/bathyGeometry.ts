@@ -26,6 +26,31 @@ export function lv95ToWgs(east: number, north: number): LatLngPair {
 }
 
 /**
+ * WGS84 to Swiss LV95 coordinates (swisstopo approximate formulas, about 1 m).
+ * @param lat - Latitude.
+ * @param lon - Longitude.
+ * @returns `[east, north]` in metres.
+ */
+export function wgsToLv95(lat: number, lon: number): [number, number] {
+  const phi = (lat * 3600 - 169_028.66) / 10_000;
+  const lambda = (lon * 3600 - 26_782.5) / 10_000;
+  const east =
+    2_600_072.37 +
+    211_455.93 * lambda -
+    10_938.51 * lambda * phi -
+    0.36 * lambda * phi * phi -
+    44.54 * lambda * lambda * lambda;
+  const north =
+    1_200_147.07 +
+    308_807.95 * phi +
+    3745.25 * lambda * lambda +
+    76.63 * phi * phi -
+    194.56 * lambda * lambda * phi +
+    119.79 * phi * phi * phi;
+  return [east, north];
+}
+
+/**
  * Douglas-Peucker simplification of a line in metres (legacy `dpSimplifyXY`).
  * @param points - `[x, y]` points.
  * @param tolerance - Largest distance allowed.

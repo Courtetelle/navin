@@ -72,7 +72,6 @@ export async function addVdIsobath(
     attribution: '© État de Vaud',
   });
   layersControl.addOverlay(wms, 'Isobathes (canton de Vaud)');
-  wms.addTo(map);
 }
 
 function depthLayers(xml: string): VdLayer[] {

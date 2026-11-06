@@ -2,6 +2,7 @@ import { signal } from '@preact/signals-react';
 
 import { frN } from '../../lib/format.ts';
 import { navZone, state, toast } from '../../state/index.ts';
+import { lemanDepthAt } from '../map/lemanDepth.ts';
 
 import {
   dangerBuzz,
@@ -10,9 +11,15 @@ import {
   sirenOff,
   sirenOn,
 } from './depthAudio.ts';
-import { depthIntensity, estimateDepth, sondeMin } from './depthEstimate.ts';
+import {
+  depthIntensity,
+  estimateDepth,
+  lowestDepth,
+  sondeMin,
+} from './depthEstimate.ts';
 import { showDepthOverlay } from './depthOverlay.ts';
 import { depthOverlayState } from './depthOverlayState.ts';
+import { nmeaFresh, nmeaLink } from './nmeaLive.ts';
 import { isobathLoad } from './trackerLink.ts';
 
 /** A scenario of the alarm test. */
@@ -77,12 +84,14 @@ export function depthStart(): number {
  * @param depth - Water under the boat (m).
  * @param minimum - Minimum sounding (m).
  * @param test - The alarm test is running.
+ * @param origin - Where the depth comes from, when there are two sources.
  */
 export function depthAlarmSet(
   intensity: number,
   depth?: number | null,
   minimum?: number | null,
   test = false,
+  origin = '',
 ): void {
   level = intensity;
   showDepthOverlay();
@@ -107,7 +116,7 @@ export function depthAlarmSet(
       : `hsl(${Math.round(55 - 55 * intensity)}, 100%, 50%)`,
     opacity: danger ? '0.9' : (0.25 + 0.55 * intensity).toFixed(2),
     period: danger ? '0.25s' : `${(1.2 - 0.95 * intensity).toFixed(2)}s`,
-    title: `${test ? 'TEST · ' : ''}Fond ≈ ${frN(depth)} m`,
+    title: `${test ? 'TEST · ' : ''}Fond ≈ ${frN(depth)} m${origin}`,
     subtitle: marginText(depth, minimum),
   };
   if (danger && Date.now() > muteUntil) sirenOn();
@@ -167,7 +176,8 @@ export function depthTestStop(finished: boolean): void {
 }
 
 /**
- * Real watch: every 2 s, with the last fresh GPS position, on a lake only.
+ * Real watch, every 2 s: the least water of the chart (last fresh GPS position,
+ * on a lake only) and of the sounder (fresh value, anywhere).
  */
 export function startDepthWatch(): void {
   setInterval(() => {
@@ -184,20 +194,52 @@ async function watchDepth(): Promise<void> {
     clear();
     return;
   }
+  const minimum = sondeMin();
+  if (minimum === null) {
+    clear();
+    return;
+  }
+  const sounder = nmeaFresh('depth') ? (nmeaLink.live.depth ?? null) : null;
+  const reading = lowestDepth(await chartDepth(), sounder);
+  if (!reading) {
+    clear();
+    return;
+  }
+  let origin = '';
+  if (sounder !== null) {
+    origin = reading.source === 'sounder' ? ' · sondeur' : ' · carte';
+  }
+  depthAlarmSet(
+    depthIntensity(reading.depth, minimum, depthStart()),
+    reading.depth,
+    minimum,
+    false,
+    origin,
+  );
+}
+
+/**
+ * Depth from the chart at the last fresh GPS position, on a lake only: the
+ * swissBATHY3D cells on Lake Geneva, else the lines computed on the device.
+ * @returns The depth (m), or `null`.
+ */
+async function chartDepth(): Promise<number | null> {
   const position = state.view.lastFix.peek() ?? state.view.sosPos.peek();
   if (
     !position?.at ||
     Date.now() - new Date(position.at).getTime() > 15_000 ||
     navZone() !== 'lac'
   ) {
-    clear();
-    return;
+    return null;
   }
-  const minimum = sondeMin();
-  if (minimum === null) return;
+  try {
+    const depth = await lemanDepthAt(position.lat, position.lon);
+    if (depth !== undefined) return depth;
+  } catch {
+    // Cells not readable: the lines of the device still help.
+  }
   const contours = await isobathLoad();
-  const depth = estimateDepth(contours, position.lat, position.lon);
-  depthAlarmSet(depthIntensity(depth, minimum, depthStart()), depth, minimum);
+  return estimateDepth(contours, position.lat, position.lon);
 }
 
 function marginText(depth: number, minimum: number): string {

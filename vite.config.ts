@@ -18,7 +18,7 @@ export default defineConfig({
       injectRegister: false,
       manifest: false,
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,png,svg,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,png,svg,webmanifest,bin}'],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       },
     }),

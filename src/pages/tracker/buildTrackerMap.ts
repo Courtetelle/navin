@@ -16,6 +16,7 @@ import { addFullscreenControl } from '../../features/map/mapControls.ts';
 import { whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
 import { setMapWatch } from '../../features/map/mapWatch.ts';
+import { swissWhenOffline } from '../../features/map/offlineBase.ts';
 import { simChartWire, simSeaMode } from '../../features/map/simChart.ts';
 import { SIM_MED_CENTER } from '../../features/map/simChartData.ts';
 import {
@@ -71,7 +72,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   const inSwissWaters = here ? inSwissArea(fix) : !cruise;
   const useSwiss = !simulatedSea && ((cruise && isLake()) || inSwissWaters);
   let base = osm;
-  if (useSwiss) base = swiss;
+  if (useSwiss) base = navigator.onLine ? osm : swiss;
   else if (zoneAt(here)) base = zoneBase;
   base.addTo(map);
   seamark.addTo(map);
@@ -86,7 +87,10 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
       { position: 'topright' },
     )
     .addTo(map);
-  if (useSwiss) void addLemanVector(map, layers, seamark);
+  if (useSwiss) {
+    swissWhenOffline(map, osm, swiss);
+    void addLemanVector(map, layers);
+  }
   simChartWire(map, layers, [swiss, osm, zoneBase]);
   addFullscreenControl(map);
   setFollow(!(simulatedSea && !here));

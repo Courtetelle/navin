@@ -20,6 +20,7 @@ import {
 } from '../../features/map/mapData.ts';
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
+import { swissWhenOffline } from '../../features/map/offlineBase.ts';
 import { simChartWire } from '../../features/map/simChart.ts';
 import { zoneLayer } from '../../features/map/zoneLayer.ts';
 import { zoneAt } from '../../features/map/zoneStore.ts';
@@ -102,7 +103,7 @@ export function buildJournalMap(
   const useSwiss = chooseSwiss(data);
   const zoneBase = zoneLayer();
   let base = osm;
-  if (useSwiss) base = swiss;
+  if (useSwiss) base = navigator.onLine ? osm : swiss;
   else if (zoneAt(lastPosition(data))) base = zoneBase;
   base.addTo(map);
   seamark.addTo(map);
@@ -117,7 +118,10 @@ export function buildJournalMap(
       { position: 'topright' },
     )
     .addTo(map);
-  if (useSwiss) void addLemanVector(map, layers, seamark);
+  if (useSwiss) {
+    swissWhenOffline(map, osm, swiss);
+    void addLemanVector(map, layers);
+  }
   simChartWire(map, layers, [swiss, osm, zoneBase]);
   addFullscreenControl(map);
   let loaded = 0;
