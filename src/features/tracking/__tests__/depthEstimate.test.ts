@@ -1,6 +1,12 @@
 import { beforeEach, expect, test } from 'vitest';
 
-import { blankCruise, setCruise, updateCruise } from '../../../state/index.ts';
+import {
+  blankCruise,
+  setCruise,
+  setZoneSim,
+  state,
+  updateCruise,
+} from '../../../state/index.ts';
 import { initState } from '../../../state/init.ts';
 import { createMemoryStorage } from '../../../storage/memoryStorage.ts';
 import type { DepthContour } from '../depthEstimate.ts';
@@ -11,6 +17,7 @@ import {
   sondeMin,
 } from '../depthEstimate.ts';
 
+const SAVANNAH_SOUNDING = 2.2;
 const LAT = 46.5;
 const LON = 6.6;
 const METRES_PER_LON = 111_320 * Math.cos((LAT * Math.PI) / 180);
@@ -93,6 +100,26 @@ test('the minimum sounding is the boat value, else the draft plus the pilot foot
     cruise.info.draft = '1,5';
   });
   expect(sondeMin()).toBe(2.1);
+  updateCruise((cruise) => {
+    cruise.info.draftPilot = '2,8';
+  });
+  expect(sondeMin()).toBe(2.8);
+});
+
+test('without an outing, a lake uses the draft of Savannah', () => {
+  const [first, ...others] = state.data.boats.value;
+  const savannah = others.find((boat) => boat.id === 'savannah') ?? first;
+  if (!first || !savannah) throw new Error('missing boats');
+  state.data.boats.value = [
+    { ...first, id: 'autre', info: { ...first.info, draftPilot: '9' } },
+    { ...savannah, id: 'savannah', info: { draft: '1,53' } },
+  ];
+  setZoneSim('lac');
+  expect(sondeMin()).toBe(SAVANNAH_SOUNDING);
+  setZoneSim('mer');
+  expect(sondeMin()).toBe(9);
+  setZoneSim('lac');
+  setCruise(blankCruise('Essai'));
   updateCruise((cruise) => {
     cruise.info.draftPilot = '2,8';
   });

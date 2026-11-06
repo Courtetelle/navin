@@ -1,6 +1,6 @@
 import { autoAdd, marginVal, roundStep } from '../../lib/boatValues.ts';
 import { num } from '../../lib/format.ts';
-import { state } from '../../state/index.ts';
+import { navZone, state } from '../../state/index.ts';
 
 /** One depth contour: bounding box `[south, west, north, east]`, level and `[lat, lon]` points. */
 export interface DepthContour {
@@ -14,6 +14,8 @@ export interface DepthContour {
 const SEARCH_RADIUS = 250;
 const METRES_PER_LAT = 110_540;
 const ON_CONTOUR_M = 15;
+/** The boat of the lake: its draft serves when no outing is open. */
+const LAKE_BOAT_ID = 'savannah';
 
 /**
  * Distance from a point to a segment, in metres (legacy `segDist`).
@@ -100,12 +102,18 @@ export function lowestDepth(
 
 /**
  * Minimum sounding of the plotter: the boat value, else the draft plus the
- * pilot foot (legacy `sondeMin`). Uses the open cruise, else the first boat.
+ * pilot foot (legacy `sondeMin`). Uses the open cruise; without one, Savannah
+ * on a lake, else the first boat.
  * @returns The sounding (m), or `null`.
  */
 export function sondeMin(): number | null {
+  const boats = state.data.boats.value;
+  const lakeBoat =
+    navZone() === 'lac'
+      ? boats.find((boat) => boat.id === LAKE_BOAT_ID)
+      : undefined;
   const info: Record<string, unknown> =
-    state.data.cruise.value?.info ?? state.data.boats.value[0]?.info ?? {};
+    state.data.cruise.value?.info ?? lakeBoat?.info ?? boats[0]?.info ?? {};
   const stored = num(info.draftPilot);
   if (stored !== null) return stored;
   const settings = state.preferences.settings.value;
