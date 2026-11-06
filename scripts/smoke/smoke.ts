@@ -351,6 +351,8 @@ async function crewCard(page: Page, theme: string): Promise<void> {
   check(theme, 'a new crew card has the green tick', (await shown()) === '✔');
   check(theme, 'it can be typed in', !(await name.getAttribute('readonly')));
   await name.fill('Marie');
+  await page.locator('#view details.section > summary').click();
+  await page.locator('[data-k="nationalite"]').fill('Suisse');
   await button.click();
   await page.waitForTimeout(300);
   check(
@@ -362,6 +364,22 @@ async function crewCard(page: Page, theme: string): Promise<void> {
     theme,
     'and the card is read-only',
     (await name.getAttribute('readonly')) !== null,
+  );
+  const labels = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>('#view .cf label')]
+        .filter((item) => item.offsetParent !== null)
+        .map((item) => item.textContent.trim().replaceAll(' *', '')),
+    );
+  check(
+    theme,
+    'read-only, only what is filled shows',
+    JSON.stringify(await labels()) === '["Prénom","Nationalité"]',
+  );
+  check(
+    theme,
+    'no empty photo section',
+    !(await page.locator('.f-photos').isVisible()),
   );
   await page.locator('#navBack').click();
   await page.waitForTimeout(300);
@@ -379,6 +397,8 @@ async function crewCard(page: Page, theme: string): Promise<void> {
     'the pencil makes it editable, with the tick back',
     (await name.getAttribute('readonly')) === null && (await shown()) === '✔',
   );
+  const editing = await labels();
+  check(theme, 'editing shows every field again', editing.length > 5);
   await name.fill('Marie-Claire');
   await button.click();
   await page.waitForTimeout(300);

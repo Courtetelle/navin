@@ -39,6 +39,7 @@ export function CompactForm({
   onChange,
   flat = false,
   cellStyle,
+  filledOnly = false,
   afterCell,
   followKeys,
   formKey,
@@ -81,6 +82,7 @@ export function CompactForm({
     revealed,
     inland,
     cellStyle,
+    filledOnly,
     store,
     latest: store.latest,
     set: (key, value, choice = false) => {

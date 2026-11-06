@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef } from 'react';
+
 import { useMarquee } from '../../components/shared/useMarquee.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { textOf } from '../../lib/format.ts';
@@ -25,6 +27,13 @@ export function FicheIdentity({ record, reading }: FicheIdentityProps) {
   const { data, prenomInput, nomInput, persist, change } = record;
   useMarquee(prenomInput);
   useMarquee(nomInput);
+  const nomCell = useRef<HTMLDivElement>(null);
+  // The name lives in its input: without one, a read-only card does not show it.
+  useLayoutEffect(() => {
+    if (nomCell.current) {
+      nomCell.current.hidden = reading && !nomInput.current?.value;
+    }
+  }, [reading, nomInput]);
   const sex = memberFieldsX().filter((field) => field.key === 'sexe');
   return (
     <section className="field">
@@ -46,9 +55,10 @@ export function FicheIdentity({ record, reading }: FicheIdentityProps) {
               onChange={() => persist()}
             />
           </div>
-          <div className="cf f-sexe" id="fSexe">
+          <div className="cf f-sexe" id="fSexe" hidden={reading && !data.sexe}>
             <CompactForm
               flat
+              filledOnly={reading}
               sections={[{ fields: sex }]}
               data={data}
               onChange={(next) => {
@@ -57,7 +67,7 @@ export function FicheIdentity({ record, reading }: FicheIdentityProps) {
               }}
             />
           </div>
-          <div className="cf wide f-nom">
+          <div ref={nomCell} className="cf wide f-nom">
             <label htmlFor="fNom">{tr('Nom')}</label>
             <input
               ref={nomInput}

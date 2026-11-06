@@ -34,6 +34,8 @@ export interface CompactFormContext {
   store: FormStore;
   /** Inline style of a frame. */
   cellStyle?: (key: string) => CSSProperties | undefined;
+  /** The fields without a value are not drawn. */
+  filledOnly: boolean;
 }
 
 const Context = createContext<CompactFormContext | null>(null);

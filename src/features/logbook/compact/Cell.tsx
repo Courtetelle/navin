@@ -14,6 +14,7 @@ import {
   InFrameContext,
   useCompactForm,
 } from './compactContext.ts';
+import { isFilled } from './fieldChange.ts';
 
 /** Props of {@link Cell}. */
 export interface CellProps extends HTMLAttributes<HTMLDivElement> {
@@ -56,7 +57,10 @@ export function Cell({
     <div
       {...rest}
       className={classes.join(' ')}
-      hidden={isCellHidden(field, form.values, groupValue)}
+      hidden={
+        isCellHidden(field, form.values, groupValue) ||
+        (form.filledOnly && !isFilled(value))
+      }
       style={inFrame ? undefined : form.cellStyle?.(field.key)}
     >
       {children}

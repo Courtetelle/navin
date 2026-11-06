@@ -8895,3 +8895,24 @@ body:not(.trk-mode) #searchBtn {
   background: #0b3d91 !important;
   color: #fff !important;
 }
+
+/* Read-only card: only what is filled, stacked. */
+.fiche-reading :is(.cgrid, .cgrid > .cf.cf-pair) {
+  grid-template-columns: 1fr;
+}
+.fiche-reading .cf[hidden] {
+  display: none !important;
+}
+.fiche-reading :is(details > summary, .more-add, .req) {
+  display: none !important;
+}
+.fiche-reading details.section {
+  padding-top: 14px;
+}
+.fiche-reading .f-photos:not(:has(figure)) {
+  display: none;
+}
+:root[data-theme='night'] .fiche-reading input.contact-on {
+  color: #ff4040 !important;
+  -webkit-text-fill-color: #ff4040;
+}

@@ -16,6 +16,8 @@ import type { FicheRecord } from './useFicheRecord.ts';
 export interface FicheFormProps {
   /** The card. */
   record: FicheRecord;
+  /** The card is open for reading: only what is filled shows. */
+  reading: boolean;
 }
 
 const HIDDEN: CSSProperties = { display: 'none' };
@@ -27,7 +29,7 @@ const HIDDEN: CSSProperties = { display: 'none' };
  * @param props - The card.
  * @returns `div#fForm`.
  */
-export function FicheForm({ record }: FicheFormProps) {
+export function FicheForm({ record, reading }: FicheFormProps) {
   const tr = useTr();
   const { data, change, persist, latest } = record;
   const [shown, setShown] = useState(() => shownRelatives(data));
@@ -100,6 +102,7 @@ export function FicheForm({ record }: FicheFormProps) {
     <div ref={box} id="fForm" onBlur={onBlur}>
       <CompactForm
         flat
+        filledOnly={reading}
         sections={[
           {
             fields: memberFieldsX().filter((field) => field.key !== 'sexe'),

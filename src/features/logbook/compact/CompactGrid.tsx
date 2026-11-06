@@ -7,7 +7,7 @@ import { isCellHidden } from './cellRules.ts';
 import { InFrameContext, useCompactForm } from './compactContext.ts';
 import type { CompactFormProps } from './compactTypes.ts';
 import type { GridItem } from './fieldChange.ts';
-import { gridItems } from './fieldChange.ts';
+import { gridItems, isFilled } from './fieldChange.ts';
 
 /** Props of {@link Grid}. */
 export interface GridProps {
@@ -57,9 +57,27 @@ function GridBody({ item }: { item: GridItem }) {
     <FieldCell key={field.key} field={field} />
   ));
   if (item.kind === 'pair') {
-    return <div className="cf wide cf-pair">{cells}</div>;
+    return <PairCell fields={item.fields}>{cells}</PairCell>;
   }
   return <FrameCell item={item}>{cells}</FrameCell>;
+}
+
+function PairCell({
+  fields,
+  children,
+}: {
+  fields: readonly FieldDefinition[];
+  children: ReactNode;
+}) {
+  const form = useCompactForm();
+  const empty =
+    form.filledOnly &&
+    fields.every((field) => !isFilled(form.shown[field.key]));
+  return (
+    <div className="cf wide cf-pair" hidden={empty}>
+      {children}
+    </div>
+  );
 }
 
 function FrameCell({
@@ -72,7 +90,11 @@ function FrameCell({
   const form = useCompactForm();
   const hidden =
     item.fields.length > 0 &&
-    item.fields.every((field) => isCellHidden(field, form.values, undefined));
+    item.fields.every(
+      (field) =>
+        isCellHidden(field, form.values, undefined) ||
+        (form.filledOnly && !isFilled(form.shown[field.key])),
+    );
   return (
     <div
       className="cf wide cf-pair cf-frame"

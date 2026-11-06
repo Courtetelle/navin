@@ -42,6 +42,11 @@ export interface CompactFormProps {
    */
   cellStyle?: (key: string) => CSSProperties | undefined;
   /**
+   * Read-only view: the fields without a value are not drawn.
+   * @default false
+   */
+  filledOnly?: boolean;
+  /**
    * Extra cell placed after the frame of a field.
    * @default undefined
    */

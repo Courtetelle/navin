@@ -14,6 +14,7 @@ import { navEdit } from '../../shell/navbar/navBarState.ts';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import {
   crewFromMember,
+  memberFieldsX,
   memberLockMsg,
   memberLocks,
   memberName,
@@ -21,6 +22,7 @@ import {
   toast,
   updateCruise,
 } from '../../state/index.ts';
+import { isFilled } from '../logbook/compact/fieldChange.ts';
 import { openListPublish } from '../publish/index.ts';
 
 import { FicheAvatar } from './FicheAvatar.tsx';
@@ -82,6 +84,9 @@ export function Fiche({ id }: FicheProps) {
     if (reading) event.stopPropagation();
   };
   const cruise = state.data.cruise.value;
+  const hasDetails = memberFieldsX().some(
+    ({ key }) => key !== 'sexe' && isFilled(record.latest()[key]),
+  );
   const leave = () => {
     buzz();
     const prenom = record.prenomInput.current?.value.trim() ?? '';
@@ -155,10 +160,12 @@ export function Fiche({ id }: FicheProps) {
           </Button>
         </div>
         <FicheIdentity record={record} reading={reading} />
-        <details className="section" open={!record.isNew}>
-          <summary>{tr('Informations complémentaires')}</summary>
-          <FicheForm record={record} />
-        </details>
+        {reading && !hasDetails ? null : (
+          <details className="section" open={reading || !record.isNew}>
+            <summary>{tr('Informations complémentaires')}</summary>
+            <FicheForm record={record} reading={reading} />
+          </details>
+        )}
         <FichePhotos record={record} />
         {record.isNew && cruise && !reading ? (
           <ButtonRow>
