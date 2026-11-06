@@ -5,7 +5,8 @@ import { Button } from '../../components/shared/Button.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { toast } from '../../state/index.ts';
 
-import { remarks, saveRemarks } from './remarkContext.ts';
+import type { Remark } from './remarkContext.ts';
+import { remarks, remarksDigest, saveRemarks } from './remarkContext.ts';
 
 /**
  * « 📋 Mes remarques » in the remark window (nav.js:1462-1475): newest first,
@@ -17,11 +18,11 @@ export function RemarkList({ onClose }: { onClose: () => void }) {
   const [list, setList] = useState(remarks);
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(
-        remarks()
-          .map((remark) => remark.text)
-          .join('\n\n――――\n\n'),
-      );
+      const all = remarks();
+      await navigator.clipboard.writeText(remarksDigest(all));
+      const copied = all.map((remark) => ({ ...remark, copied: true }));
+      saveRemarks(copied);
+      setList(copied);
       toast('Remarques copiées');
     } catch {
       toast('Copie impossible ici');
@@ -39,7 +40,7 @@ export function RemarkList({ onClose }: { onClose: () => void }) {
           >
             <small>
               {new Date(remark.t).toLocaleString('fr-CH')}
-              {remark.sent ? ' · envoyée ✓' : ' · pas envoyée'}
+              {statusLabel(remark)}
             </small>
             <div>{lines(remark.text)}</div>
           </div>
@@ -74,6 +75,11 @@ export function RemarkList({ onClose }: { onClose: () => void }) {
       </div>
     </>
   );
+}
+
+function statusLabel(remark: Remark): string {
+  if (remark.sent) return ' · envoyée ✓';
+  return remark.copied ? ' · copiée' : ' · en attente';
 }
 
 function lines(text: string) {

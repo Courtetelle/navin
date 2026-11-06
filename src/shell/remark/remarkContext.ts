@@ -10,6 +10,8 @@ export interface Remark {
   text: string;
   /** Delivered to Claude. */
   sent: boolean;
+  /** Copied to be pasted in the conversation. */
+  copied?: boolean;
 }
 
 const LIST = 'ldb.remarks';
@@ -82,6 +84,39 @@ export function snippet(element: Element | null): string {
   return raw.replaceAll('ⓘ', '').replaceAll(/\s+/g, ' ').trim().slice(0, 140);
 }
 
+/** Longest text still read as the name of one item of the map. */
+const MAP_ITEM_LENGTH = 30;
+
+/**
+ * Name of an element for the reader. The text of the whole map is only a run of
+ * mark and layer names, so it is simply called « Carte »; a mark keeps its name.
+ * @param element - Element aimed at.
+ * @returns The name, empty when the element has no text.
+ */
+export function targetName(element: Element | null): string {
+  const text = snippet(element);
+  if (!element?.closest('.leaflet-container')) return text;
+  return text && text.length <= MAP_ITEM_LENGTH ? text : 'Carte';
+}
+
+/**
+ * Text to paste in the conversation.
+ * @param list - Remarks to join.
+ * @returns One text, remarks separated by a line.
+ */
+export function remarksDigest(list: readonly Remark[]): string {
+  return list.map((remark) => remark.text).join('\n\n――――\n\n');
+}
+
+/**
+ * Remarks not yet given to Claude.
+ * @param list - Remarks.
+ * @returns Those neither sent nor copied.
+ */
+export function pendingRemarks(list: readonly Remark[]): Remark[] {
+  return list.filter((remark) => !remark.sent && !remark.copied);
+}
+
 /**
  * Context line appended to a remark (nav.js:1398-1403): version, page title
  * and view, element aimed at.
@@ -97,7 +132,7 @@ export function remarkContext(element: Element | null): string {
     .replaceAll(/\s+/g, ' ')
     .trim()
     .slice(0, 60);
-  const target = element ? ` · élément « ${snippet(element)} »` : '';
+  const target = element ? ` · élément « ${targetName(element)} »` : '';
   return `[NavIn ${APP_VERSION} · page « ${title || view} » (${view})${target}]`;
 }
 

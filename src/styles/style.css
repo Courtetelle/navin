@@ -3781,10 +3781,10 @@ body.trk-mode .topbar {
   left: 0;
   right: 0;
   top: 0;
-  background: transparent !important;
+  background: color-mix(in srgb, var(--bg) 35%, transparent) !important;
   border-bottom: 0 !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  backdrop-filter: blur(10px) !important;
   z-index: 1000;
 }
 body.trk-mode .topbar .clock,
@@ -7950,16 +7950,39 @@ details[data-b]:not([open]) > summary .b-editbtn {
   outline-offset: 2px;
 }
 .rem-modal .ck-ask-box {
+  /* minmax(0, 1fr): a long word must not widen the column past the window. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
   max-height: calc(100dvh - 32px);
+  overflow-x: hidden;
   overflow-y: auto;
 }
 .rem-modal .rem-where {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
   font-weight: 400;
-  font-size: 14px;
+  font-size: 15px;
   margin: -6px 0 0;
+}
+.rem-modal textarea.text {
+  font-size: 18px;
+  min-height: 110px;
+}
+.rem-modal .row + .row {
+  margin-top: 0;
+}
+.rem-modal .row.c2 .btn {
+  font-size: 18px;
+}
+.rem-modal .rem-msg:empty {
+  display: none;
 }
 .rem-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
 }
 .rem-it {
@@ -7967,6 +7990,7 @@ details[data-b]:not([open]) > summary .b-editbtn {
   border-radius: 10px;
   padding: 8px;
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 .rem-it small {
   color: var(--muted, #888);
@@ -8430,13 +8454,16 @@ details.set-sec .set-body .row.set-stack {
 }
 /* v442 (Corban) : fenêtre « Remarque » déplaçable */
 .rem-modal .rem-handle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   cursor: grab;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
 }
 .rem-modal .rem-grip {
-  float: right;
   opacity: 0.6;
 }
 .rem-modal.rem-moved {

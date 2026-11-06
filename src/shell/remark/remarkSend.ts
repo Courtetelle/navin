@@ -1,7 +1,9 @@
 import {
   commentsApi,
+  pendingRemarks,
   remarkContext,
   remarks,
+  remarksDigest,
   saveRemarks,
 } from './remarkContext.ts';
 
@@ -61,6 +63,41 @@ export async function sendRemark(
       toast: false,
     };
   }
+}
+
+/**
+ * Keep a remark on the phone, without sending it.
+ * @param text - Remark typed.
+ * @param element - Element aimed at.
+ */
+export function keepRemark(text: string, element: Element | null): void {
+  saveRemarks([
+    ...remarks(),
+    {
+      t: new Date().toISOString(),
+      text: `${text}\n\n${remarkContext(element)}`,
+      sent: false,
+    },
+  ]);
+}
+
+/**
+ * Copy the remarks waiting to be given to Claude, then mark them as copied so
+ * that the next copy holds only the new ones. They stay marked as waiting when
+ * the copy fails.
+ * @returns How many remarks were copied.
+ */
+export async function copyPendingRemarks(): Promise<number> {
+  const list = remarks();
+  const pending = pendingRemarks(list);
+  if (pending.length === 0) return 0;
+  await navigator.clipboard.writeText(remarksDigest(pending));
+  saveRemarks(
+    list.map((remark) =>
+      pending.includes(remark) ? { ...remark, copied: true } : remark,
+    ),
+  );
+  return pending.length;
 }
 
 async function deliverToClaude(

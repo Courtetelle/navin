@@ -47,7 +47,7 @@ export function RemarkPill() {
     Math.min(size.width - 52, position.x ?? size.width - 60),
   );
   const top = Math.max(
-    60,
+    4,
     Math.min(size.height - 56, position.y ?? size.height - 140),
   );
   const open = () => {

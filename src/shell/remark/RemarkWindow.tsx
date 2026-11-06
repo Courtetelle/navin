@@ -7,8 +7,13 @@ import { toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 import { RemarkList } from './RemarkList.tsx';
-import { remarks, snippet } from './remarkContext.ts';
-import { sendRemark } from './remarkSend.ts';
+import {
+  commentsApi,
+  pendingRemarks,
+  remarks,
+  targetName,
+} from './remarkContext.ts';
+import { copyPendingRemarks, keepRemark, sendRemark } from './remarkSend.ts';
 
 interface RemarkWindowProps {
   /** Element aimed at by the pill. */
@@ -117,6 +122,36 @@ function RemarkForm({
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
   const [posted, setPosted] = useState(false);
+  const typed = () => (textArea.current?.value ?? '').trim();
+  const keep = () => {
+    const text = typed();
+    if (!text) {
+      setMessage('Écrivez d’abord la remarque.');
+      return;
+    }
+    keepRemark(text, target);
+    toast('Remarque gardée');
+    onClose();
+  };
+  const copy = async () => {
+    const text = typed();
+    if (!text && pendingRemarks(remarks()).length === 0) {
+      setMessage('Écrivez d’abord la remarque.');
+      return;
+    }
+    if (text) keepRemark(text, target);
+    try {
+      const count = await copyPendingRemarks();
+      toast(
+        count === 1
+          ? 'Remarque copiée : collez-la dans la conversation'
+          : `${count} remarques copiées : collez-les dans la conversation`,
+      );
+    } catch {
+      toast('Copie impossible ici : remarque gardée dans « Mes remarques »');
+    }
+    onClose();
+  };
   const send = async () => {
     const text = (textArea.current?.value ?? '').trim();
     if (!text) {
@@ -137,9 +172,6 @@ function RemarkForm({
       setBusy(false);
     }
   };
-  const where = target
-    ? `« ${snippet(target) || target.tagName.toLowerCase()} »`
-    : 'Page entière';
   return (
     <>
       <p className="rem-handle" {...grip}>
@@ -148,7 +180,7 @@ function RemarkForm({
           ✥
         </span>
       </p>
-      <p className="help rem-where">{where}</p>
+      <p className="help rem-where">{targetLabel(target)}</p>
       <textarea
         className="text"
         id="remTxt"
@@ -157,23 +189,49 @@ function RemarkForm({
         placeholder="Ce qui doit changer ou être amélioré ici… (micro du clavier pour dicter)"
         ref={textArea}
       />
-      <div className="row">
-        <Button
-          type="button"
-          className="btn big ck-pub"
-          data-rem="send"
-          disabled={busy || posted}
-          onClick={() => void send()}
-        >
-          {posted ? (
-            '✓ Posée'
-          ) : (
-            <>
-              📨 Envoyer à Claude<small>avec la page et l’endroit visé</small>
-            </>
-          )}
-        </Button>
-      </div>
+      {commentsApi() ? (
+        <div className="row">
+          <Button
+            type="button"
+            className="btn big ck-pub"
+            data-rem="send"
+            disabled={busy || posted}
+            onClick={() => void send()}
+          >
+            {posted ? (
+              '✓ Posée'
+            ) : (
+              <>
+                📨 Envoyer à Claude<small>avec la page et l’endroit visé</small>
+              </>
+            )}
+          </Button>
+        </div>
+      ) : (
+        <>
+          <div className="row">
+            <Button
+              type="button"
+              className="btn"
+              data-rem="keep"
+              onClick={keep}
+            >
+              💾 Garder pour plus tard
+            </Button>
+          </div>
+          <div className="row">
+            <Button
+              type="button"
+              className="btn big ck-pub"
+              data-rem="copy"
+              onClick={() => void copy()}
+            >
+              📋 Copier pour Claude
+              <small>toutes les remarques en attente</small>
+            </Button>
+          </div>
+        </>
+      )}
       <div className="row c2">
         <Button type="button" className="btn" data-rem="list" onClick={onList}>
           {`📋 Mes remarques (${remarks().length})`}
@@ -192,6 +250,16 @@ function RemarkForm({
       </p>
     </>
   );
+}
+
+/**
+ * Name of the element aimed at, for the window.
+ * @param target - Element aimed at, or null for the whole page.
+ * @returns The text to show.
+ */
+function targetLabel(target: Element | null): string {
+  if (!target) return 'Page entière';
+  return `« ${targetName(target) || target.tagName.toLowerCase()} »`;
 }
 
 function initialOffset(): { x: number; y: number } {
