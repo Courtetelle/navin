@@ -14,7 +14,6 @@ export const VIEW_LABELS: Readonly<Record<string, string>> = {
   mob: 'Homme à la mer',
   soslogs: 'SOS · logs',
   more: 'data',
-  zones: 'Zones hors ligne',
   marks: 'Mes marques',
   checklist: 'Check-lists',
   crew: 'Équipage',

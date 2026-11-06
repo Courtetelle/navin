@@ -206,6 +206,6 @@ function chartsTile(): MoreTile {
   return {
     key: 'cartes',
     title: '🗺 Mes cartes',
-    sub: 'zones enregistrées sur l’appareil',
+    sub: 'cartes gardées sur l’appareil',
   };
 }

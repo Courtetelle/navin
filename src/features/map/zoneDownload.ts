@@ -2,7 +2,6 @@ import { ZONE_CACHE } from '../../serviceWorker/cacheNames.ts';
 
 import { SEAMARK_TILES } from './constants.ts';
 import { BASE_LAKES, lakeTileUrls } from './lakes.ts';
-import type { Zone } from './zoneStore.ts';
 import {
   ZONE_BASE,
   zoneList,
@@ -10,9 +9,6 @@ import {
   zoneTileXY,
   zoneUrl,
 } from './zoneStore.ts';
-
-/** A download is running: only one at a time, zones and maps alike. */
-export const zoneBusy = { current: false };
 
 /** Result of a download. */
 export interface DownloadResult {
@@ -76,29 +72,6 @@ export async function fetchTiles(
   for (let index = 0; index < workers; index++) running.push(worker());
   await Promise.all(running);
   return { ok, ko, n: jobs.length };
-}
-
-/**
- * Download a zone: plan, and buoyage from zoom 9 (legacy `zoneDownload`).
- * @param zone - The zone.
- * @param onProgress - Told every 20 tiles and at the end.
- * @returns How many tiles succeeded and failed.
- */
-export async function zoneDownload(
-  zone: Pick<Zone, 'b' | 'zmax'>,
-  onProgress: (done: number, total: number) => void,
-): Promise<DownloadResult> {
-  const jobs: TileJob[] = [];
-  for (const tile of zoneTileXY(zone.b, zone.zmax)) {
-    jobs.push({ url: zoneUrl(ZONE_BASE, tile), mode: 'cors' });
-    if (tile[0] >= 9) {
-      jobs.push({ url: zoneUrl(SEAMARK_TILES, tile), mode: 'no-cors' });
-    }
-  }
-  const cache = await globalThis.caches.open(ZONE_CACHE);
-  const result = await fetchTiles(cache, jobs, 4, onProgress);
-  onProgress(jobs.length, jobs.length);
-  return result;
 }
 
 /**

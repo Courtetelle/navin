@@ -151,7 +151,6 @@ const DATA_BACK_VIEWS = new Set([
   'tasktpl',
   'dossier',
   'marks',
-  'zones',
   'cartes',
   'lists',
   'settings',

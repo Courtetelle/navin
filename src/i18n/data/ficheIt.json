@@ -1530,5 +1530,14 @@
   "Carte": "Carta",
   "Traceur": "Plotter",
   "(ONI annexe 15)": "(ONI allegato 15)",
-  "Ajoutez l’équipage pour voir les prénoms.": "Aggiungi l’equipaggio per vedere i nomi."
+  "Ajoutez l’équipage pour voir les prénoms.": "Aggiungi l’equipaggio per vedere i nomi.",
+  "Cartes hors ligne": "Mappe offline",
+  "⬆ Importer une carte": "⬆ Importa una mappa",
+  "Import en cours…": "Importazione…",
+  "Aucune carte sur cet appareil pour l’instant.": "Ancora nessuna mappa su questo dispositivo.",
+  "Anciennes zones": "Vecchie zone",
+  "Elles peuvent ne pas contenir de vraie carte : supprimez-les.": "Potrebbero non contenere una vera mappa: eliminale.",
+  "Importez un fichier de carte (.pmtiles) depuis Fichiers, kDrive ou Google Drive : il reste sur cet appareil et s’affiche sans réseau. Quand la carte en ligne ne charge plus, elle prend le relais toute seule.": "Importa un file di mappa (.pmtiles) da File, kDrive o Google Drive: resta su questo dispositivo e si vede senza rete. Quando la mappa online non si carica più, subentra da sola.",
+  "Le bouton ci-dessous ouvre le choix de fichier du téléphone. Sur iPhone, touchez Parcourir puis Google Drive ou kDrive. S’ils n’apparaissent pas : ouvrez l’app Fichiers, Parcourir, le bouton ⋯, Modifier, et activez-les (leurs apps doivent être installées). Sur Android, ils sont dans le menu ☰ du choix de fichier.": "Il pulsante qui sotto apre la scelta dei file del telefono. Su iPhone, tocca Sfoglia e poi Google Drive o kDrive. Se non compaiono: apri l’app File, Sfoglia, il pulsante ⋯, Modifica, e attivali (le loro app devono essere installate). Su Android, sono nel menu ☰ della scelta dei file.",
+  "cartes gardées sur l’appareil": "mappe conservate sul dispositivo"
 }

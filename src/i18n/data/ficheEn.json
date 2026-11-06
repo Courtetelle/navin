@@ -1530,5 +1530,14 @@
   "Carte": "Map",
   "Traceur": "Plotter",
   "(ONI annexe 15)": "(ONI annex 15)",
-  "Ajoutez l’équipage pour voir les prénoms.": "Add the crew to see the first names."
+  "Ajoutez l’équipage pour voir les prénoms.": "Add the crew to see the first names.",
+  "Cartes hors ligne": "Offline maps",
+  "⬆ Importer une carte": "⬆ Import a map",
+  "Import en cours…": "Importing…",
+  "Aucune carte sur cet appareil pour l’instant.": "No map on this device yet.",
+  "Anciennes zones": "Old zones",
+  "Elles peuvent ne pas contenir de vraie carte : supprimez-les.": "They may not hold a real map: delete them.",
+  "Importez un fichier de carte (.pmtiles) depuis Fichiers, kDrive ou Google Drive : il reste sur cet appareil et s’affiche sans réseau. Quand la carte en ligne ne charge plus, elle prend le relais toute seule.": "Import a map file (.pmtiles) from Files, kDrive or Google Drive: it stays on this device and shows without network. When the online map stops loading, it takes over by itself.",
+  "Le bouton ci-dessous ouvre le choix de fichier du téléphone. Sur iPhone, touchez Parcourir puis Google Drive ou kDrive. S’ils n’apparaissent pas : ouvrez l’app Fichiers, Parcourir, le bouton ⋯, Modifier, et activez-les (leurs apps doivent être installées). Sur Android, ils sont dans le menu ☰ du choix de fichier.": "The button below opens the phone’s file picker. On iPhone, tap Browse then Google Drive or kDrive. If they do not appear: open the Files app, Browse, the ⋯ button, Edit, and turn them on (their apps must be installed). On Android, they are in the ☰ menu of the file picker.",
+  "cartes gardées sur l’appareil": "maps kept on the device"
 }

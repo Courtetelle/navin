@@ -1,6 +1,6 @@
 /*
  * Drives the built app in Chrome, by day and by night, through what must keep
- * working: map, bars, position button, search, landmarks, my maps, tracks.
+ * working: map, bars, position button, search, buoyage, my maps, tracks.
  * Nothing leaves the machine: map servers are answered with nothing.
  *
  *   npm run build && npm run smoke
@@ -170,22 +170,23 @@ async function search(page: Page, theme: string): Promise<void> {
   );
 }
 
-async function landmarks(page: Page, theme: string): Promise<void> {
+async function buoyage(page: Page, theme: string): Promise<void> {
+  // Map servers answer nothing here: the buoyage of the app must take over.
+  await page.waitForTimeout(800);
   await page.evaluate(() => {
-    const label = [
-      ...document.querySelectorAll('.leaflet-control-layers-overlays label'),
-    ].find((item) => item.textContent?.includes('Amers'));
-    label?.querySelector('input')?.click();
+    const box = document.querySelector('.leaflet-control-zoom-in');
+    (box as HTMLElement | null)?.click();
   });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(800);
   const dot = await page.evaluate(() => {
-    const paths = [
-      ...document.querySelectorAll('path.leaflet-interactive[fill="#d00000"]'),
-    ];
-    const box = paths[0]?.getBoundingClientRect();
+    const seen = [...document.querySelectorAll('.vec-port')].find((item) => {
+      const { x, y } = item.getBoundingClientRect();
+      return x > 60 && x < 330 && y > 200 && y < 700;
+    });
+    const box = seen?.getBoundingClientRect();
     return box ? [box.x + box.width / 2, box.y + box.height / 2] : null;
   });
-  check(theme, 'landmarks show', dot !== null);
+  check(theme, 'without network the buoyage shows', dot !== null);
   if (!dot) return;
   await page.mouse.click(dot[0] as number, dot[1] as number);
   await page.waitForTimeout(400);
@@ -194,9 +195,10 @@ async function landmarks(page: Page, theme: string): Promise<void> {
   );
   check(
     theme,
-    'a tap names the landmark, not the depth',
+    'a tap names the mark, not the depth',
     text !== '' && !text.includes('Profondeur'),
   );
+  await page.keyboard.press('Escape');
 }
 
 async function myMaps(page: Page, theme: string): Promise<void> {
@@ -339,6 +341,10 @@ async function crewCard(page: Page, theme: string): Promise<void> {
     const text = await button.textContent();
     return text?.trim();
   };
+  const isPencil = async () =>
+    (await button.getAttribute('aria-label')) === 'Modifier' &&
+    (await button.locator('svg').count()) === 1 &&
+    (await shown()) === '';
   await page.getByText('data', { exact: true }).first().click();
   await page.locator('[data-tile="people"]').click();
   await page.locator('#mNew').click();
@@ -349,8 +355,8 @@ async function crewCard(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(300);
   check(
     theme,
-    'validated, the tick becomes Modifier',
-    String(await shown()).includes('Modifier'),
+    'validated, the tick becomes a pencil, without text',
+    await isPencil(),
   );
   check(
     theme,
@@ -370,7 +376,7 @@ async function crewCard(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(300);
   check(
     theme,
-    'Modifier makes it editable, with the tick back',
+    'the pencil makes it editable, with the tick back',
     (await name.getAttribute('readonly')) === null && (await shown()) === '✔',
   );
   await name.fill('Marie-Claire');
@@ -393,7 +399,7 @@ for (const theme of ['day', 'night']) {
     await bars(page, theme);
     await layers(page, theme);
     await search(page, theme);
-    await landmarks(page, theme);
+    await buoyage(page, theme);
     await myMaps(page, theme);
     await crewCard(page, theme);
   } catch (error) {

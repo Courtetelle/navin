@@ -5198,7 +5198,7 @@ small.exp-note:empty {
 /* v238 (Corban) : bouton FR ⇄ EN des fiches */
 .lang-fab {
   position: fixed;
-  right: 14px;
+  right: 72px;
   bottom: calc(84px + env(safe-area-inset-bottom));
   z-index: 60;
   display: flex;
@@ -8890,14 +8890,6 @@ body:not(.trk-mode) #searchBtn {
 }
 .fiche-reading :is(#fEdit, #fAddProche, #fPhAdd, .photo-del, #fDel) {
   display: none !important;
-}
-#navtop #navOk.nav-edit {
-  flex: 0 0 auto;
-  max-width: none;
-  padding: 0 10px !important;
-  font-size: 16px !important;
-  font-weight: 700;
-  white-space: nowrap;
 }
 :root:not([data-theme='night']) #navtop #navOk.nav-edit {
   background: #0b3d91 !important;

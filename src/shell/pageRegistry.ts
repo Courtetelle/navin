@@ -164,10 +164,6 @@ export const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/vhf/VhfPage.tsx').then((module) => ({
       default: module.VhfPage,
     })),
-  zones: () =>
-    import('../pages/zones/ZonesPage.tsx').then((module) => ({
-      default: module.ZonesPage,
-    })),
 };
 
 /**

@@ -103,7 +103,7 @@ export function buildJournalMap(
       { position: 'topright' },
     )
     .addTo(map);
-  if (useSwiss) void addLemanVector(map, layers);
+  if (useSwiss) void addLemanVector(map, layers, osm);
   keepTilesFilled(map, [osm, swiss]);
   void addOfflineMaps(map, layers, osm);
   addFullscreenControl(map);

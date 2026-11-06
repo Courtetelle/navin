@@ -1,4 +1,4 @@
-import type { Canvas, LayerGroup } from 'leaflet';
+import type { LayerGroup, Renderer } from 'leaflet';
 
 import type { LatLngPair } from './constants.ts';
 import { escapeHtml } from './escapeHtml.ts';
@@ -14,14 +14,17 @@ interface PointFeature {
 }
 
 /**
- * Canvas layer of the buoyage and harbours, fast on a phone (legacy `lemanVecLayer`).
- * @param vector - The vector chart.
+ * Layer of the buoyage and harbours (legacy `lemanVecLayer`), in SVG: a Leaflet
+ * canvas does not follow the map when it turns.
+ * @param vector - The features.
  * @returns The layer, or `null` without features.
  */
-export function lemanVecLayer(vector: LemanVector | null): LayerGroup | null {
+export function lemanVecLayer(
+  vector: Pick<LemanVector, 'feats'> | null,
+): LayerGroup | null {
   if (!vector || vector.feats.length === 0) return null;
   const L = leaflet();
-  const renderer = L.canvas({ padding: 0.3 });
+  const renderer = L.svg({ padding: 0.3 });
   const group = L.layerGroup();
   const points: PointFeature[] = [];
   for (const feature of vector.feats) {
@@ -29,6 +32,7 @@ export function lemanVecLayer(vector: LemanVector | null): LayerGroup | null {
     if (feature.k === 'pier' && feature.g !== 'p') {
       L.polyline(feature.c as LatLngPair[], {
         renderer,
+        bubblingMouseEvents: false,
         color: '#5b4636',
         weight: 4,
         opacity: 0.9,
@@ -41,6 +45,7 @@ export function lemanVecLayer(vector: LemanVector | null): LayerGroup | null {
       const zone = /restricted|fairway|anchorage/.test(type);
       L.polygon(feature.c as LatLngPair[], {
         renderer,
+        bubblingMouseEvents: false,
         color: zone ? '#c0006a' : '#0050d0',
         weight: 2,
         dashArray: zone ? '6 6' : undefined,
@@ -59,6 +64,7 @@ export function lemanVecLayer(vector: LemanVector | null): LayerGroup | null {
     if (feature.g === 'l') {
       L.polyline(feature.c as LatLngPair[], {
         renderer,
+        bubblingMouseEvents: false,
         color: /cable|pipeline/.test(type) ? '#8a2be2' : '#c0006a',
         weight: 2,
         dashArray: '6 6',
@@ -79,7 +85,7 @@ export function lemanVecLayer(vector: LemanVector | null): LayerGroup | null {
 
 function addPoint(
   group: LayerGroup,
-  renderer: Canvas,
+  renderer: Renderer,
   { feature, position, colours }: PointFeature,
 ): void {
   const L = leaflet();
@@ -126,6 +132,7 @@ function addPoint(
   const ring = colours?.[1];
   L.circleMarker(position, {
     renderer,
+    bubblingMouseEvents: false,
     radius,
     color: ring ?? '#000',
     weight: ring ? 4 : 2,
@@ -137,6 +144,7 @@ function addPoint(
   if (light && colours && fill !== '#ffd400') {
     L.circleMarker(position, {
       renderer,
+      bubblingMouseEvents: false,
       radius: radius + 5,
       color: '#ffd400',
       weight: 2,

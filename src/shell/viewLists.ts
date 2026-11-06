@@ -39,7 +39,6 @@ export const VIEW_NAMES = [
   'traces',
   'tracker',
   'vhf',
-  'zones',
 ] as const;
 
 /** A screen name. */
@@ -78,7 +77,6 @@ export const NO_CRUISE_VIEWS: readonly string[] = [
   'mob',
   'tasktpl',
   'dossier',
-  'zones',
   'marks',
   'people',
   'crews',
