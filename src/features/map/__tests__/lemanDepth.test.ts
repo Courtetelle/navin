@@ -1,8 +1,13 @@
-import { expect, test, vi } from 'vitest';
+import { beforeEach, expect, test, vi } from 'vitest';
 
 import { lv95ToWgs, wgsToLv95 } from '../bathyGeometry.ts';
-import { lemanDepthAt } from '../lemanDepth.ts';
+import { forgetDepthTiles, lemanDepthAt } from '../lemanDepth.ts';
 import { DEPTH_DEEP, DEPTH_TILE_CELLS } from '../lemanDepthFormat.ts';
+import { inLemanPort } from '../lemanPorts.ts';
+
+beforeEach(() => {
+  forgetDepthTiles();
+});
 
 function position(east: number, north: number) {
   const [lat, lon] = lv95ToWgs(east, north);
@@ -37,19 +42,56 @@ test('a tile without shallow water is deep, and is not read', async () => {
   expect(load).not.toHaveBeenCalled();
 });
 
-test('it gives the least water of the nine cells around the position', async () => {
-  // In the first shipped tile holding shallow water, cell by cell.
-  const { default: shallow } = await import('../lemanDepthTiles.json');
-  const key = shallow[0] as string;
-  const [tileEast, tileNorth] = key.split('_').map(Number) as [number, number];
-  const east = tileEast * 1000 + 501;
-  const north = tileNorth * 1000 + 501;
-  const { lat, lon } = position(east, north);
-  const [gotEast, gotNorth] = wgsToLv95(lat, lon);
-  const row = DEPTH_TILE_CELLS - 1 - Math.floor((gotNorth % 1000) / 2);
-  const column = Math.floor((gotEast % 1000) / 2);
-  const deep = vi.fn(() =>
-    Promise.resolve(tile(DEPTH_DEEP, [[row, column, 42]])),
+/**
+ * A position, and a loader giving one shallow cell a distance north of it.
+ * @param lat - Latitude.
+ * @param lon - Longitude.
+ * @param metresNorth - Distance to the shallow cell.
+ * @returns The loader.
+ */
+function shallowCellNorth(lat: number, lon: number, metresNorth: number) {
+  const [east, north] = wgsToLv95(lat, lon);
+  const column = Math.floor(east / 2);
+  const row = Math.floor(north / 2) + metresNorth / 2;
+  const key = `${Math.floor(column / 500)}_${Math.floor(row / 500)}`;
+  const cell: [number, number, number] = [
+    DEPTH_TILE_CELLS - 1 - (row % DEPTH_TILE_CELLS),
+    column % DEPTH_TILE_CELLS,
+    42,
+  ];
+  return vi.fn((asked: string) =>
+    Promise.resolve(tile(DEPTH_DEEP, asked === key ? [cell] : [])),
   );
-  await expect(lemanDepthAt(lat, lon, deep)).resolves.toBe(4.2);
+}
+
+// Off Morges, in a tile with shallow water, out of any port.
+const OPEN = { lat: 46.4985, lon: 6.5 };
+// In the port of Ouchy.
+const PORT = { lat: 46.505, lon: 6.6265 };
+
+test('positions used by these tests', () => {
+  expect(inLemanPort(OPEN.lat, OPEN.lon)).toBe(false);
+  expect(inLemanPort(PORT.lat, PORT.lon)).toBe(true);
+});
+
+test('off a port the least water within 10 m counts', async () => {
+  const { lat, lon } = OPEN;
+  await expect(
+    lemanDepthAt(lat, lon, shallowCellNorth(lat, lon, 8)),
+  ).resolves.toBe(4.2);
+  forgetDepthTiles();
+  await expect(
+    lemanDepthAt(lat, lon, shallowCellNorth(lat, lon, 14)),
+  ).resolves.toBeNull();
+});
+
+test('in a port only the cells around the position count', async () => {
+  const { lat, lon } = PORT;
+  await expect(
+    lemanDepthAt(lat, lon, shallowCellNorth(lat, lon, 2)),
+  ).resolves.toBe(4.2);
+  forgetDepthTiles();
+  await expect(
+    lemanDepthAt(lat, lon, shallowCellNorth(lat, lon, 8)),
+  ).resolves.toBeNull();
 });

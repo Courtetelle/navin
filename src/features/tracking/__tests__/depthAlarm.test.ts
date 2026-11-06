@@ -321,3 +321,55 @@ test('the sounder alarms at sea and without any position', async () => {
     title: 'Fond ≈ 1,5 m · sondeur',
   });
 });
+
+test('the alarm follows the GPS by itself, without any recording', async () => {
+  shallowLake();
+  state.view.lastFix.value = null;
+  cells.lemanDepthAt.mockResolvedValue(1.5);
+  type OnFix = (fix: {
+    coords: { latitude: number; longitude: number; accuracy: number };
+  }) => void;
+  const gps: { onFix?: OnFix } = {};
+  const clearWatch = vi.fn();
+  vi.stubGlobal('navigator', {
+    geolocation: {
+      clearWatch,
+      watchPosition: vi.fn((success: OnFix) => {
+        gps.onFix = success;
+        return 7;
+      }),
+    },
+  });
+  startDepthWatch();
+  await watchOnce();
+  expect(depthOverlayState.value.on).toBe(false);
+  const coords = { latitude: 46.5, longitude: 6.5 };
+  gps.onFix?.({ coords: { ...coords, accuracy: 200 } });
+  await watchOnce();
+  expect(depthOverlayState.value.on).toBe(false);
+  gps.onFix?.({ coords: { ...coords, accuracy: 8 } });
+  await watchOnce();
+  expect(depthOverlayState.value).toMatchObject({
+    on: true,
+    title: 'Fond ≈ 1,5 m',
+  });
+  vi.setSystemTime(NOW + 60_000);
+  await watchOnce();
+  expect(depthOverlayState.value.on).toBe(false);
+  setZoneSim('mer');
+  await watchOnce();
+  expect(clearWatch).toHaveBeenCalledWith(7);
+  vi.unstubAllGlobals();
+});
+
+test('the position of the boat serves the alarm too', async () => {
+  shallowLake();
+  state.view.lastFix.value = null;
+  cells.lemanDepthAt.mockResolvedValue(1.5);
+  nmeaSet('lat', 46.5);
+  nmeaSet('lon', 6.5);
+  startDepthWatch();
+  await watchOnce();
+  expect(cells.lemanDepthAt).toHaveBeenCalledWith(46.5, 6.5);
+  expect(depthOverlayState.value.on).toBe(true);
+});

@@ -66,6 +66,21 @@ let level = 0;
 let muteUntil = 0;
 let beepTimer: ReturnType<typeof setTimeout> | undefined;
 let testTimer: ReturnType<typeof setInterval> | undefined;
+/** The alarm's own GPS watch: the track only follows the position when recording. */
+let gpsWatch: number | null = null;
+let gpsFix: DepthPosition | null = null;
+
+/** A position usable by the alarm. */
+interface DepthPosition {
+  lat: number;
+  lon: number;
+  /** ISO time. @default undefined */
+  at?: string;
+}
+
+/** A position worse than this says nothing about 10 m around the boat. */
+const MAX_ACCURACY_M = 60;
+const FRESH_POSITION_MS = 15_000;
 
 /**
  * Margin above the minimum sounding where the alarm starts (legacy `depthStart`).
@@ -191,10 +206,12 @@ async function watchDepth(): Promise<void> {
     if (level) depthAlarmSet(0);
   };
   if (state.preferences.settings.peek().depthAlarm === false) {
+    followGps(false);
     clear();
     return;
   }
   const minimum = sondeMin();
+  followGps(minimum !== null && navZone() === 'lac');
   if (minimum === null) {
     clear();
     return;
@@ -224,14 +241,9 @@ async function watchDepth(): Promise<void> {
  * @returns The depth (m), or `null`.
  */
 async function chartDepth(): Promise<number | null> {
-  const position = state.view.lastFix.peek() ?? state.view.sosPos.peek();
-  if (
-    !position?.at ||
-    Date.now() - new Date(position.at).getTime() > 15_000 ||
-    navZone() !== 'lac'
-  ) {
-    return null;
-  }
+  if (navZone() !== 'lac') return null;
+  const position = freshPosition();
+  if (!position) return null;
   try {
     const depth = await lemanDepthAt(position.lat, position.lon);
     if (depth !== undefined) return depth;
@@ -240,6 +252,55 @@ async function chartDepth(): Promise<number | null> {
   }
   const contours = await isobathLoad();
   return estimateDepth(contours, position.lat, position.lon);
+}
+
+/**
+ * The most reliable fresh position: the boat's GPS, the track, the alarm's own
+ * watch, then the position of an SOS.
+ * @returns The position, or `null`.
+ */
+function freshPosition(): DepthPosition | null {
+  const { lat, lon } = nmeaLink.live;
+  if (nmeaFresh('lat') && nmeaFresh('lon') && lat != null && lon != null) {
+    return { lat, lon };
+  }
+  const candidates = [
+    state.view.lastFix.peek(),
+    gpsFix,
+    state.view.sosPos.peek(),
+  ];
+  for (const position of candidates) {
+    if (
+      position?.at &&
+      Date.now() - new Date(position.at).getTime() <= FRESH_POSITION_MS
+    ) {
+      return position;
+    }
+  }
+  return null;
+}
+
+function followGps(wanted: boolean): void {
+  if (!('geolocation' in navigator)) return;
+  if (!wanted) {
+    if (gpsWatch !== null) navigator.geolocation.clearWatch(gpsWatch);
+    gpsWatch = null;
+    gpsFix = null;
+    return;
+  }
+  if (gpsWatch !== null) return;
+  gpsWatch = navigator.geolocation.watchPosition(
+    ({ coords }) => {
+      if (coords.accuracy > MAX_ACCURACY_M) return;
+      gpsFix = {
+        lat: coords.latitude,
+        lon: coords.longitude,
+        at: new Date().toISOString(),
+      };
+    },
+    () => undefined,
+    { enableHighAccuracy: true, maximumAge: 3000, timeout: 30_000 },
+  );
 }
 
 function marginText(depth: number, minimum: number): string {

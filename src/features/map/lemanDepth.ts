@@ -7,6 +7,7 @@ import {
   DEPTH_TILE_CELLS,
 } from './lemanDepthFormat.ts';
 import tiles from './lemanDepthTiles.json' with { type: 'json' };
+import { inLemanPort } from './lemanPorts.ts';
 
 /** Reads the cells of a tile, row 0 to the north. */
 export type DepthTileLoader = (key: string) => Promise<Uint8Array>;
@@ -15,6 +16,15 @@ const SHALLOW_TILES: ReadonlySet<string> = new Set(tiles);
 /** A boat stays in few tiles: enough to read them only once in a while. */
 const CACHED_TILES = 12;
 const cache = new Map<string, Uint8Array>();
+/** Distance around the position searched for the least water, in metres. */
+const MARGIN_M = 10;
+/** In a port: only the cells around the position, so not the quays and shores. */
+const PORT_SPAN_CELLS = 1;
+
+/** Forget the tiles read so far. */
+export function forgetDepthTiles(): void {
+  cache.clear();
+}
 
 async function fetchTile(key: string): Promise<Uint8Array> {
   const response = await fetch(
@@ -42,8 +52,8 @@ async function tileCells(
 
 /**
  * Depth of Lake Geneva from the swissBATHY3D cells of 2 m, down to 20 m: the
- * least water of the cell under the position and of the eight around it, as a
- * position is never known exactly.
+ * least water within 10 m of the position, as a GPS is never exact. In a port,
+ * only the cell under the position and the eight around it count.
  * @param lat - Latitude.
  * @param lon - Longitude.
  * @param load - Reads a tile.
@@ -60,10 +70,13 @@ export async function lemanDepthAt(
   const [east, north] = wgsToLv95(lat, lon);
   const column = Math.floor(east / DEPTH_CELL_M);
   const row = Math.floor(north / DEPTH_CELL_M);
+  const port = inLemanPort(lat, lon);
+  const span = port ? PORT_SPAN_CELLS : Math.ceil(MARGIN_M / DEPTH_CELL_M);
   let lowest = DEPTH_DEEP;
-  /* eslint-disable no-await-in-loop -- nine cells, nearly always in a cached tile */
-  for (let dy = -1; dy <= 1; dy++) {
-    for (let dx = -1; dx <= 1; dx++) {
+  /* eslint-disable no-await-in-loop -- few cells, nearly always in a cached tile */
+  for (let dy = -span; dy <= span; dy++) {
+    for (let dx = -span; dx <= span; dx++) {
+      if (!port && Math.hypot(dx, dy) * DEPTH_CELL_M > MARGIN_M) continue;
       const tileEast = Math.floor((column + dx) / DEPTH_TILE_CELLS);
       const tileNorth = Math.floor((row + dy) / DEPTH_TILE_CELLS);
       const key = `${tileEast}_${tileNorth}`;
