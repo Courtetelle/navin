@@ -7,7 +7,7 @@ import { isCellHidden } from './cellRules.ts';
 import { InFrameContext, useCompactForm } from './compactContext.ts';
 import type { CompactFormProps } from './compactTypes.ts';
 import type { GridItem } from './fieldChange.ts';
-import { gridItems, isFilled } from './fieldChange.ts';
+import { fieldHasValue, gridItems } from './fieldChange.ts';
 
 /** Props of {@link Grid}. */
 export interface GridProps {
@@ -72,7 +72,7 @@ function PairCell({
   const form = useCompactForm();
   const empty =
     form.filledOnly &&
-    fields.every((field) => !isFilled(form.shown[field.key]));
+    fields.every((field) => !fieldHasValue(field, form.shown));
   return (
     <div className="cf wide cf-pair" hidden={empty}>
       {children}
@@ -93,7 +93,7 @@ function FrameCell({
     item.fields.every(
       (field) =>
         isCellHidden(field, form.values, undefined) ||
-        (form.filledOnly && !isFilled(form.shown[field.key])),
+        (form.filledOnly && !fieldHasValue(field, form.shown)),
     );
   return (
     <div

@@ -23,6 +23,11 @@ export interface DocumentKindProps {
   label: string;
   /** Draw the sheet again. */
   onRefresh: () => void;
+  /**
+   * Read-only: nothing shown without a photo.
+   * @default false
+   */
+  reading?: boolean;
 }
 
 /**
@@ -35,11 +40,13 @@ export function DocumentKind({
   kind,
   label,
   onRefresh,
+  reading = false,
 }: DocumentKindProps) {
   const tr = useTr();
   const documents = boatDocs(boat).filter(
     (document) => document.kind === kind && !document.pdf,
   );
+  if (reading && documents.length === 0) return null;
   return (
     <>
       <h3 className="sub-h">{tr(label)}</h3>

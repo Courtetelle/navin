@@ -400,13 +400,122 @@ async function crewCard(page: Page, theme: string): Promise<void> {
   const editing = await labels();
   check(theme, 'editing shows every field again', editing.length > 5);
   await name.fill('Marie-Claire');
+  const address = page.locator('[data-k="adresse"]');
+  await address.fill(
+    'Chemin de la très longue adresse postale 123, 1000 Lausanne, Suisse romande',
+  );
   await button.click();
-  await page.waitForTimeout(300);
+  await page.waitForTimeout(1800);
+  check(
+    theme,
+    'read-only, a long text scrolls',
+    await address.evaluate((field) => field.scrollLeft > 0),
+  );
   check(
     theme,
     'the change is kept',
     (await name.inputValue()) === 'Marie-Claire' &&
       (await name.getAttribute('readonly')) !== null,
+  );
+}
+
+async function crewAndBoat(page: Page, theme: string): Promise<void> {
+  const button = page.locator('#navOk');
+  const isPencil = async () =>
+    (await button.getAttribute('aria-label')) === 'Modifier';
+  // A crew: built, then read-only.
+  await page.getByText('data', { exact: true }).first().click();
+  await page.locator('[data-tile="crews"]').click();
+  await page.locator('#csNew').click();
+  await page.locator('[data-cem]').first().click();
+  await page.waitForTimeout(200);
+  await button.click();
+  await page.waitForTimeout(300);
+  check(theme, 'a validated crew is read-only', await isPencil());
+  check(
+    theme,
+    'it lists its members, without the pick list',
+    (await page.locator('.crew-read-line').count()) === 1 &&
+      (await page.locator('[data-cem]').count()) === 0,
+  );
+  await button.click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'the pencil opens the crew for editing',
+    (await page.locator('[data-cem]').count()) > 0 && !(await isPencil()),
+  );
+  await button.click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'the tick brings the crew back to reading',
+    (await page.locator('#ceRead').count()) === 1 && (await isPencil()),
+  );
+  // A boat: filled, then only what is filled.
+  await page.getByText('data', { exact: true }).first().click();
+  await page.locator('[data-tile="boats"]').click();
+  await page.locator('#addBoat').click();
+  await page.waitForTimeout(300);
+  const details = page.locator('#boatList [data-k="boat"]').first();
+  await details.fill('Savannah');
+  const before = await page.locator('#boatList .cf:visible').count();
+  await button.click();
+  await page.waitForTimeout(300);
+  const after = await page.locator('#boatList .cf:visible').count();
+  check(theme, 'a validated boat shows a pencil', await isPencil());
+  check(
+    theme,
+    'and only what is filled',
+    after > 0 && after < before && (await details.inputValue()) === 'Savannah',
+  );
+  check(
+    theme,
+    'and no delete button',
+    !(await page.locator('[data-del]').first().isVisible()),
+  );
+  await button.click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'the pencil opens the boat for editing',
+    (await page.locator('#boatList .cf:visible').count()) === before,
+  );
+}
+
+async function swipeToDelete(page: Page, theme: string): Promise<void> {
+  await page.getByText('data', { exact: true }).first().click();
+  await page.locator('[data-tile="people"]').click();
+  await page.waitForTimeout(300);
+  const row = page.locator('[data-fiche]').first();
+  check(
+    theme,
+    'no bin on the rows',
+    (await page.locator('.row-delete').count()) === 0,
+  );
+  const box = await row.boundingBox();
+  if (!box) return;
+  check(theme, 'rows keep their full width', box.width > 300);
+  const y = box.y + box.height / 2;
+  await page.mouse.move(box.x + box.width - 20, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width - 60, y, { steps: 4 });
+  await page.mouse.move(box.x + box.width - 140, y, { steps: 4 });
+  await page.mouse.move(-10, y, { steps: 2 });
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+  const back = await row.boundingBox();
+  check(theme, 'the row slides back', back?.x === box.x);
+  check(
+    theme,
+    'swiping left asks to confirm the deletion',
+    await page.locator('.sw-confirm').isVisible(),
+  );
+  await page.locator('[data-swno]').click();
+  check(
+    theme,
+    'and cancelling keeps the row',
+    (await page.locator('[data-fiche]').count()) > 0,
   );
 }
 
@@ -422,6 +531,8 @@ for (const theme of ['day', 'night']) {
     await buoyage(page, theme);
     await myMaps(page, theme);
     await crewCard(page, theme);
+    await swipeToDelete(page, theme);
+    await crewAndBoat(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }

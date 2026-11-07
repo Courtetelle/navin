@@ -7088,8 +7088,9 @@ html body .row.row-stack > .btn.act-plain {
   border: 2px solid #ff4040 !important;
 }
 #view .checks > [data-fiche],
+#view .swipe-slide > [data-fiche],
 #view [data-cs],
-#view #boatList > details > summary,
+#view #boatList details[data-b] > summary,
 #view [data-m],
 #view [data-cem],
 #view [data-pick='crewSet'],
@@ -7407,7 +7408,7 @@ html {
   border-color: #c62828;
 }
 /* v379 (Corban) : Mes bateaux : plus de flèche à droite (le bateau s'ouvre par appui long, appui simple = sélection). */
-#boatList > details.section > summary::after {
+#boatList details[data-b].section > summary::after {
   content: none !important;
   display: none !important;
 } /* v424 (Corban) : les rubriques de la fiche gardent leur chevron */
@@ -8785,23 +8786,6 @@ body.top-hidden #searchBtn {
 }
 
 /* Bouton de suppression d'une ligne de liste */
-.row-delete {
-  display: block;
-  margin: -6px 0 10px auto;
-  min-width: 48px;
-  min-height: 44px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--btn, #eee);
-  color: #c62828;
-  font-size: 20px;
-  cursor: pointer;
-}
-:root[data-theme='night'] .row-delete {
-  background: #200000;
-  color: #ff4040;
-}
 
 /* Hors de la carte, la loupe laisse la barre de navigation libre */
 body:not(.trk-mode) #searchBtn {
@@ -8903,7 +8887,8 @@ body:not(.trk-mode) #searchBtn {
 .fiche-reading .cf[hidden] {
   display: none !important;
 }
-.fiche-reading :is(details > summary, .more-add, .req) {
+.fiche-reading > details.section > summary,
+.fiche-reading :is(.more-add, .req) {
   display: none !important;
 }
 .fiche-reading details.section {
@@ -8915,4 +8900,64 @@ body:not(.trk-mode) #searchBtn {
 :root[data-theme='night'] .fiche-reading input.contact-on {
   color: #ff4040 !important;
   -webkit-text-fill-color: #ff4040;
+}
+/* Read-only boats. */
+#view
+  .fiche-reading
+  :is(
+    .b-editbtn,
+    .b-delrow,
+    .bp-del,
+    .bp-thumb,
+    .photo-del,
+    [data-bpadd],
+    [data-dadd]
+  ) {
+  display: none !important;
+}
+.fiche-reading .bp-cap {
+  pointer-events: none;
+}
+.boat-pics[hidden] {
+  display: none;
+}
+/* Read-only crews. */
+.crew-read-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 20px;
+}
+.crew-read-line small {
+  opacity: 0.75;
+}
+/* Read-only: one line per text; a longer one scrolls. */
+.fiche-reading .cf textarea {
+  white-space: pre;
+  overflow: hidden;
+  resize: none;
+  height: auto !important;
+}
+/* A row is deleted by swiping it to the left. */
+.swipe-row {
+  touch-action: pan-y;
+  min-width: 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.swipe-row input,
+.swipe-row textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+.swipe-row > .swipe-slide {
+  display: grid;
+  min-width: 0;
+  transition: transform 0.15s;
+}
+.swipe-row.swiping > .swipe-slide {
+  transition: none;
 }

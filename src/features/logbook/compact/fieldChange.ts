@@ -17,6 +17,23 @@ export function isFilled(value: unknown): boolean {
 }
 
 /**
+ * Whether a field shows something in a read-only view.
+ * @param field - The field.
+ * @param shown - The values shown.
+ * @returns `true` when it holds a value.
+ */
+export function fieldHasValue(
+  field: FieldDefinition,
+  shown: Readonly<Record<string, unknown>>,
+): boolean {
+  if (field.fields) {
+    return field.fields.some((sub) => fieldHasValue(sub, shown));
+  }
+  const value = shown[field.key];
+  return field.type === 'check' ? Boolean(value) : isFilled(value);
+}
+
+/**
  * Next values of a form after one change (legacy `set` of `compactForm`): an
  * empty value is removed, a value equal to its computed one is removed too (the
  * field goes back to automatic), and the first filled field of a pair (m ⇄ ft)

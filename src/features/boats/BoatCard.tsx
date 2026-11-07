@@ -26,6 +26,8 @@ export interface BoatCardProps {
   boat: Boat;
   /** The card starts open. */
   open: boolean;
+  /** Read-only: only what is filled shows. */
+  reading: boolean;
   /** The card was opened or closed. */
   onToggle: (open: boolean) => void;
   /** Draw the list again with this boat open. */
@@ -47,6 +49,7 @@ export interface BoatCardProps {
 export function BoatCard({
   boat,
   open,
+  reading,
   onToggle,
   onRefresh,
   onRemoved,
@@ -107,24 +110,27 @@ export function BoatCard({
             ✎
           </Button>
         </summary>
-        <HelpText
-          style={{ padding: '12px 14px 0', margin: 0 }}
-          introLead={everOpened}
-        >
-          Informations du bateau : touchez une case pour saisir ou corriger
-          (enregistrement automatique).
-        </HelpText>
+        {reading ? null : (
+          <HelpText
+            style={{ padding: '12px 14px 0', margin: 0 }}
+            introLead={everOpened}
+          >
+            Informations du bateau : touchez une case pour saisir ou corriger
+            (enregistrement automatique).
+          </HelpText>
+        )}
         <div data-form={boat.id}>
           <CompactForm
             sections={boatSections(boat).filter(
               (section) => section.title !== 'Numéros utiles (page SOS)',
             )}
             data={boat.info}
+            filledOnly={reading}
             onChange={(next) => saveBoatInfo(boat.id, next)}
             formKey={boat.id}
           />
         </div>
-        <BoatPhotos boat={boat} onRefresh={onRefresh} />
+        <BoatPhotos boat={boat} reading={reading} onRefresh={onRefresh} />
         <ButtonRow className="row ck-pub-row" style={{ padding: '0 14px' }}>
           <Button
             className="btn big ck-pub"

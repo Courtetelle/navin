@@ -72,7 +72,7 @@ export function LineField({ field }: { field: FieldDefinition }) {
       inputMode={inputMode as 'text' | undefined}
       placeholder={tr.placeholder(placeholder)}
       value={cell.text}
-      readOnly={lock.readOnly}
+      readOnly={lock.readOnly || form.filledOnly}
       onChange={onChange}
       onFocus={cell.onFocus}
       onBlur={() => {

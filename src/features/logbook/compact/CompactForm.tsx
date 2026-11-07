@@ -17,6 +17,7 @@ import type { CompactFormProps } from './compactTypes.ts';
 import {
   applyFieldChange,
   drawnSections,
+  fieldHasValue,
   gridItems,
   isFilled,
 } from './fieldChange.ts';
@@ -111,7 +112,14 @@ export function CompactForm({
           <Grid fields={drawn[0]?.fields ?? []} afterCell={afterCell} />
         </div>
       ) : (
-        keyedItems(drawn, sectionTitle).map(({ key, item: section, index }) => (
+        keyedItems(
+          filledOnly
+            ? drawn.filter((section) =>
+                section.fields.some((field) => fieldHasValue(field, shown)),
+              )
+            : drawn,
+          sectionTitle,
+        ).map(({ key, item: section, index }) => (
           <details
             key={key}
             className={
@@ -119,7 +127,7 @@ export function CompactForm({
                 ? 'section waters-hide'
                 : 'section'
             }
-            open={!section.collapsed}
+            open={filledOnly || !section.collapsed}
             data-s={index}
           >
             <summary>{tr(section.title ?? '')}</summary>

@@ -28,6 +28,8 @@ export interface BoatPhotosProps {
   boat: Boat;
   /** The list must be drawn again with this boat open. */
   onRefresh: () => void;
+  /** Read-only: nothing to add, and nothing shown without a photo. */
+  reading?: boolean;
 }
 
 /**
@@ -36,11 +38,15 @@ export interface BoatPhotosProps {
  * @param props - Boat and refresh.
  * @returns The section.
  */
-export function BoatPhotos({ boat, onRefresh }: BoatPhotosProps) {
+export function BoatPhotos({ boat, reading, onRefresh }: BoatPhotosProps) {
   const tr = useTr();
   const documents = boatDocs(boat);
   return (
-    <section className="boat-pics" data-bp={boat.id}>
+    <section
+      className="boat-pics"
+      data-bp={boat.id}
+      hidden={reading && documents.length === 0}
+    >
       <h3 className="sub-h">{tr('📷 Photos et papiers officiels')}</h3>
       {documents.length > 0 ? (
         <div className="bp-list photo-strip">

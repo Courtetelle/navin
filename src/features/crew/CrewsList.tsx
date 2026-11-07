@@ -77,7 +77,12 @@ export function CrewsList() {
           id="csNew"
           onClick={() => {
             buzz();
-            state.view.crewsEdit.value = { id: null, name: '', crew: [] };
+            state.view.crewsEdit.value = {
+              id: null,
+              name: '',
+              crew: [],
+              editing: true,
+            };
             showCrewsEdit();
           }}
         >

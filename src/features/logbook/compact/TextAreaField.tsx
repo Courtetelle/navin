@@ -37,6 +37,7 @@ export function TextAreaField({ field }: { field: FieldDefinition }) {
         rows={grow ? 1 : field.rows || 3}
         inputMode={grow ? inputMode : undefined}
         placeholder={tr.placeholder(field.placeholder ?? '')}
+        readOnly={form.filledOnly}
         value={cell.text}
         onChange={(event: ChangeEvent<HTMLTextAreaElement>) => {
           const { value } = event.target;

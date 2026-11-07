@@ -1,17 +1,18 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import type { MouseEvent, PointerEvent } from 'react';
-import { useLayoutEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { useIntroLead } from '../../components/shared/introLead.ts';
+import { useReadingMarquee } from '../../components/shared/useReadingMarquee.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { PageBack, PageValidate } from '../../shell/navbar/PageBack.tsx';
-import { navEdit } from '../../shell/navbar/navBarState.ts';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
+import { useNavEdit } from '../../shell/navbar/useNavEdit.ts';
 import {
   crewFromMember,
   memberFieldsX,
@@ -53,15 +54,9 @@ export function Fiche({ id }: FicheProps) {
   const [locked] = useState(() => !record.isNew && memberLocks(id).length > 0);
   // A card already validated opens read-only: « Modifier » edits it again.
   const [reading, setReading] = useState(!record.isNew);
-  useLayoutEffect(() => {
-    if (!reading) return undefined;
-    navEdit.value = () => {
-      setReading(false);
-    };
-    return () => {
-      navEdit.value = null;
-    };
-  }, [reading]);
+  useNavEdit(reading, () => setReading(false));
+  const sheet = useRef<HTMLDivElement>(null);
+  useReadingMarquee(reading, sheet);
   const validate = () => {
     const card = record.persist();
     if (!card) {
@@ -77,6 +72,9 @@ export function Fiche({ id }: FicheProps) {
     if (!reading) return;
     const target = event.target as Element;
     if (!target.closest('.cf') || target.closest('.contact-on')) return;
+    const field = target.closest('.cf')?.querySelector('input, textarea');
+    // A text too long for its field scrolls instead.
+    if (field && field.scrollWidth - field.clientWidth > 4) return;
     toast('Touchez le crayon en haut pour changer la fiche');
   };
   const holdContacts = (event: PointerEvent) => {
@@ -132,6 +130,7 @@ export function Fiche({ id }: FicheProps) {
         </PageValidate>
       )}
       <div
+        ref={sheet}
         className={reading ? 'fiche-reading' : undefined}
         onClick={explain}
         onPointerDownCapture={holdContacts}
