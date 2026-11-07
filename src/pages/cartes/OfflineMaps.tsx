@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import type { OfflineMap } from '../../features/map/offlineMapStore.ts';
 import {
   deleteOfflineMap,
@@ -10,6 +9,7 @@ import {
   offlineMaps,
 } from '../../features/map/offlineMapStore.ts';
 import { showPlace } from '../../features/map/placeTarget.ts';
+import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
@@ -52,39 +52,37 @@ export function OfflineMaps() {
     <section className="field" id="offlineMaps">
       <h2>{tr('Cartes hors ligne')}</h2>
       {maps?.map((map) => (
-        <div className="cartes-z" key={map.id} data-offline-map={map.id}>
-          <div>
-            <b>{map.name}</b>
-            <small>
-              {`${fmtShortDate(new Date(map.at))} · ${Math.round(map.size / BYTES_PER_MB)} Mo`}
-            </small>
+        <SwipeRow
+          key={map.id}
+          id={map.id}
+          name={map.name}
+          onDelete={(id) => {
+            void deleteOfflineMap(id).then(refresh);
+          }}
+        >
+          <div className="cartes-z" data-offline-map={map.id}>
+            <div>
+              <b>{map.name}</b>
+              <small>
+                {`${fmtShortDate(new Date(map.at))} · ${Math.round(map.size / BYTES_PER_MB)} Mo`}
+              </small>
+            </div>
+            <Button
+              className="btn"
+              aria-label={`Voir ${map.name} sur la carte`}
+              onClick={() => {
+                buzz();
+                showPlace({
+                  name: map.name,
+                  lat: (map.south + map.north) / 2,
+                  lon: (map.west + map.east) / 2,
+                });
+              }}
+            >
+              🗺
+            </Button>
           </div>
-          <Button
-            className="btn"
-            aria-label={`Voir ${map.name} sur la carte`}
-            onClick={() => {
-              buzz();
-              showPlace({
-                name: map.name,
-                lat: (map.south + map.north) / 2,
-                lon: (map.west + map.east) / 2,
-              });
-            }}
-          >
-            🗺
-          </Button>
-          <HoldDeleteButton
-            className="btn danger"
-            onDelete={() => {
-              void deleteOfflineMap(map.id).then(() => {
-                toast('Carte supprimée de l’appareil');
-                refresh();
-              });
-            }}
-          >
-            🗑
-          </HoldDeleteButton>
-        </div>
+        </SwipeRow>
       ))}
       {maps?.length === 0 ? (
         <p className="help">

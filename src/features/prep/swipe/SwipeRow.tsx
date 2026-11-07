@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { ReactNode } from 'react';
+import type { PointerEvent, ReactNode } from 'react';
 import { useEffect, useId, useLayoutEffect, useRef } from 'react';
 
 import { Button } from '../../../components/shared/Button.tsx';
@@ -30,16 +30,22 @@ export interface SwipeRowProps {
    * @default false
    */
   silent?: boolean;
-  /** Renders the row; spread the handlers on the element that slides. */
+  /** The row. */
   children: ReactNode;
 }
 
+/** Swiped this far to the left, in pixels, the row asks for its deletion. */
+const SWIPE_ASK_PX = 70;
+const SWIPE_MAX_PX = 110;
+/** A finger moved this far has chosen a direction. */
+const SWIPE_START_PX = 10;
+
 /**
- * A row with its 🗑 button, with a confirmation every time: the button opens
- * « 🗑 Supprimer … ? » right after the row; a long press on it deletes,
- * « Annuler » or 5 s without a touch closes it.
+ * A row deleted by swiping it to the left, with a confirmation every time: the
+ * swipe opens « 🗑 Supprimer … ? » right after the row; a long press on it
+ * deletes, « Annuler » or 5 s without a touch closes it.
  * @param props - Item, deletion and row.
- * @returns The row, its button and its confirmation.
+ * @returns The row and its confirmation.
  */
 export function SwipeRow({
   id,
@@ -69,23 +75,71 @@ export function SwipeRow({
     openSwipeRow(token);
     toast('Appui long sur « Supprimer » pour confirmer · sinon rien dans 5 s');
   };
+  const slide = useRef<HTMLDivElement>(null);
+  const gesture = useRef<{ x: number; y: number; moving: boolean } | null>(
+    null,
+  );
+  const swallowClick = useRef(false);
+  const place = (shift: number, moving: boolean) => {
+    const element = slide.current;
+    if (!element) return;
+    element.style.transform = shift ? `translateX(${shift}px)` : '';
+    element.parentElement?.classList.toggle('swiping', moving);
+  };
+  const finish = (event: PointerEvent, cancelled: boolean) => {
+    const start = gesture.current;
+    gesture.current = null;
+    place(0, false);
+    if (!start?.moving) return;
+    swallowClick.current = true;
+    setTimeout(() => {
+      swallowClick.current = false;
+    }, 300);
+    if (!cancelled && start.x - event.clientX >= SWIPE_ASK_PX) askDeletion();
+  };
   return (
     <>
-      {children}
-      {id ? (
-        <button
-          type="button"
-          className="row-delete"
-          aria-label={`Supprimer ${name}`}
-          onClick={(event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            askDeletion();
-          }}
-        >
-          🗑
-        </button>
-      ) : null}
+      <div
+        className="swipe-row"
+        onPointerDown={(event) => {
+          const inField = (event.target as Element).closest(
+            'input, textarea, select',
+          );
+          gesture.current =
+            id && !inField
+              ? { x: event.clientX, y: event.clientY, moving: false }
+              : null;
+        }}
+        onPointerMove={(event) => {
+          const start = gesture.current;
+          if (!start) return;
+          const left = start.x - event.clientX;
+          const down = Math.abs(event.clientY - start.y);
+          if (!start.moving) {
+            if (down > SWIPE_START_PX && down > left) {
+              gesture.current = null;
+            } else if (left > SWIPE_START_PX) {
+              start.moving = true;
+              // The finger or the mouse may leave the row before it lifts.
+              event.currentTarget.setPointerCapture(event.pointerId);
+            }
+            return;
+          }
+          place(-Math.min(SWIPE_MAX_PX, Math.max(0, left)), true);
+        }}
+        onPointerUp={(event) => finish(event, false)}
+        onPointerCancel={(event) => finish(event, true)}
+        onClickCapture={(event) => {
+          if (!swallowClick.current) return;
+          swallowClick.current = false;
+          event.preventDefault();
+          event.stopPropagation();
+        }}
+      >
+        <div ref={slide} className="swipe-slide">
+          {children}
+        </div>
+      </div>
       {id && openRowToken.value === token ? (
         <SwipeConfirm
           name={name}

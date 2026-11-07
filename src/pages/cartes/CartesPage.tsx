@@ -6,7 +6,6 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpPill, HelpText } from '../../components/shared/HelpText.tsx';
-import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { helpBubbleText } from '../../components/shared/helpRules.ts';
 import { useIntroLead } from '../../components/shared/introLead.ts';
 import { LEMAN_ARCGIS } from '../../features/map/constants.ts';
@@ -14,10 +13,11 @@ import { showPlace } from '../../features/map/placeTarget.ts';
 import { zoneDelete } from '../../features/map/zoneDownload.ts';
 import type { Zone } from '../../features/map/zoneStore.ts';
 import { zoneList } from '../../features/map/zoneStore.ts';
+import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
-import { state, toast } from '../../state/index.ts';
+import { state } from '../../state/index.ts';
 
 import { OfflineMaps } from './OfflineMaps.tsx';
 
@@ -94,42 +94,38 @@ function ZoneRow({ zone, onChange }: { zone: Zone; onChange: () => void }) {
   const tr = useTr();
   const missing = zone.ko ? ` (${zone.ko} manquants)` : '';
   return (
-    <div className="cartes-z">
-      <div>
-        <b>{zone.name}</b>
-        <small>
-          {tr(
-            `${fmtShortDate(new Date(zone.at))} · détail ${zone.zmax} · ${zone.ok || 0} morceaux${missing}`,
-          )}
-        </small>
+    <SwipeRow
+      id={zone.id}
+      name={zone.name}
+      onDelete={(id) => {
+        void zoneDelete(id).then(onChange);
+      }}
+    >
+      <div className="cartes-z">
+        <div>
+          <b>{zone.name}</b>
+          <small>
+            {tr(
+              `${fmtShortDate(new Date(zone.at))} · détail ${zone.zmax} · ${zone.ok || 0} morceaux${missing}`,
+            )}
+          </small>
+        </div>
+        <Button
+          className="btn"
+          data-cshow={zone.id}
+          aria-label={`Voir ${zone.name} sur la carte`}
+          onClick={() => {
+            buzz();
+            showPlace({
+              name: zone.name,
+              lat: (zone.b.s + zone.b.n) / 2,
+              lon: (zone.b.w + zone.b.e) / 2,
+            });
+          }}
+        >
+          🗺
+        </Button>
       </div>
-      <Button
-        className="btn"
-        data-cshow={zone.id}
-        aria-label={`Voir ${zone.name} sur la carte`}
-        onClick={() => {
-          buzz();
-          showPlace({
-            name: zone.name,
-            lat: (zone.b.s + zone.b.n) / 2,
-            lon: (zone.b.w + zone.b.e) / 2,
-          });
-        }}
-      >
-        🗺
-      </Button>
-      <HoldDeleteButton
-        className="btn danger"
-        data-cdel={zone.id}
-        onDelete={() => {
-          void zoneDelete(zone.id).then(() => {
-            toast('Carte supprimée de l’appareil');
-            onChange();
-          });
-        }}
-      >
-        🗑
-      </HoldDeleteButton>
-    </div>
+    </SwipeRow>
   );
 }
