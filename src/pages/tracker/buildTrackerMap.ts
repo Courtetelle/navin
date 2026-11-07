@@ -24,6 +24,7 @@ import {
 import { setMapWatch } from '../../features/map/mapWatch.ts';
 import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
 import { showPendingPlace } from '../../features/map/placeTarget.ts';
+import { recenterAfterDrag } from '../../features/map/recenterAfterDrag.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
 import {
@@ -101,8 +102,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     handle.follow && handle.me ? handle.me.getLatLng() : null,
   );
   setFollow(!(simulatedSea && !here));
-  // Moving the map stops following the boat; the blue arrow brings it back.
-  map.on('dragstart', () => setFollow(false));
+  recenterAfterDrag(map, handle);
   const live = L.polyline([], {
     color: '#d00000',
     weight: 5,

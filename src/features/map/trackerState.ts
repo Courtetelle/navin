@@ -36,6 +36,8 @@ export interface TrackerHandle {
   acc: Circle | null;
   /** The map follows the boat. */
   follow: boolean;
+  /** Moved by hand away from the boat: the map will come back to it. */
+  drifted: boolean;
   /** Old track shown in purple. */
   others: Polyline | null;
   lastSog: number | null;
@@ -82,6 +84,7 @@ export function newTracker(): TrackerHandle {
     me: null,
     acc: null,
     follow: true,
+    drifted: false,
     others: null,
     lastSog: null,
     lastCog: null,
@@ -215,6 +218,7 @@ export function setFollow(follow: boolean): void {
   const handle = tracker.current;
   if (!handle) return;
   handle.follow = follow;
+  handle.drifted = false;
   handle.map
     ?.getContainer()
     .querySelector('.map-locate-btn')

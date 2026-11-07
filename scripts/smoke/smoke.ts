@@ -334,6 +334,41 @@ async function follow(page: Page, theme: string): Promise<void> {
   }
 }
 
+async function recenter(page: Page, theme: string): Promise<void> {
+  await page.evaluate(() => {
+    (
+      globalThis as unknown as {
+        fakeGps: (lat: number, lon: number, heading: number) => void;
+      }
+    ).fakeGps(46.45, 6.6, 0);
+  });
+  await page.waitForTimeout(500);
+  const box = await page.locator('#trkMap').boundingBox();
+  if (!box) return;
+  const x = box.x + box.width / 2;
+  const y = box.y + box.height / 2;
+  const followed = () =>
+    page.locator('.map-locate-btn.on').count().then(Boolean);
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x - 60, y - 60, { steps: 6 });
+  await page.mouse.move(x - 120, y - 120, { steps: 6 });
+  await page.waitForTimeout(300);
+  await page.mouse.up();
+  await page.waitForTimeout(5000);
+  check(
+    theme,
+    'a map moved by hand stays there for a while',
+    (await boatOffCentre(page)) > 50 && !(await followed()),
+  );
+  await page.waitForTimeout(2800);
+  check(
+    theme,
+    'and comes back to the boat after 7 s',
+    (await boatOffCentre(page)) < 3 && (await followed()),
+  );
+}
+
 async function crewCard(page: Page, theme: string): Promise<void> {
   const button = page.locator('#navOk');
   const name = page.locator('#fPrenom');
@@ -525,6 +560,7 @@ for (const theme of ['day', 'night']) {
   const { context, page, errors } = await open(browser, theme);
   try {
     await follow(page, theme);
+    await recenter(page, theme);
     await bars(page, theme);
     await layers(page, theme);
     await search(page, theme);
