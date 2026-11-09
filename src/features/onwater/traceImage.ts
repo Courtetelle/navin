@@ -171,7 +171,7 @@ async function drawTile(
   top: number,
 ): Promise<boolean> {
   const image = await loadTile(
-    `https://tile.openstreetmap.org/${zoom}/${column}/${row}.png`,
+    `https://${'abc'[(column + row) % 3]}.tile.openstreetmap.fr/osmfr/${zoom}/${column}/${row}.png`,
   );
   if (!image) return false;
   context.drawImage(image, column * TILE - left, row * TILE - top);
@@ -205,7 +205,7 @@ function drawLegend(
   context.fillText(' arrivée', second + 16, baseline);
   if (!withAttribution) return;
   context.font = '500 16px Arial, sans-serif';
-  const attribution = '© OpenStreetMap';
+  const attribution = '© OpenStreetMap France';
   const width = context.measureText(attribution).width;
   context.fillStyle = 'rgba(255,255,255,.85)';
   context.fillRect(WIDTH - width - 18, HEIGHT - 26, width + 14, 22);

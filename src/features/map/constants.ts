@@ -15,8 +15,12 @@ export const SWISS_TILES =
 /** Shaded relief of the lake beds (swissBATHY3D, swisstopo). */
 export const BATHY_TILES =
   'https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swissbathy3d-reliefschattierung/default/current/3857/{z}/{x}/{y}.png';
-/** OpenStreetMap plan, online only (its servers forbid bulk downloads). */
-export const OSM_TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+/**
+ * OpenStreetMap plan of OpenStreetMap France: place names in French where they
+ * exist (Rome, Ombrie…), online only (its servers forbid bulk downloads).
+ */
+export const OSM_TILES =
+  'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png';
 /** OpenSeaMap buoyage overlay. */
 export const SEAMARK_TILES =
   'https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png';

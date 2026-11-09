@@ -77,8 +77,9 @@ export function buildJournalMap(
   const tiles = { maxZoom: 19, maxNativeZoom: 18 };
   const osm = L.tileLayer(OSM_TILES, {
     ...tiles,
+    subdomains: 'abc',
     crossOrigin: true,
-    attribution: '© OpenStreetMap',
+    attribution: '© OpenStreetMap France',
   });
   const seamark = L.tileLayer(SEAMARK_TILES, {
     ...tiles,

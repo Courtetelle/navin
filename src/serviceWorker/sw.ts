@@ -10,7 +10,7 @@ declare const self: ServiceWorkerGlobalScope & {
 
 const MAX_TILES = 10_000;
 const TILE_HOSTS =
-  /tile\.openstreetmap\.org|tiles\.openseamap\.org|basemaps\.cartocdn\.com|wmts\.geo\.admin\.ch|ogc\.vd\.ch/;
+  /tile\.openstreetmap\.(?:org|fr)|tiles\.openseamap\.org|basemaps\.cartocdn\.com|wmts\.geo\.admin\.ch|ogc\.vd\.ch/;
 
 // The build's file list replaces legacy's hand-written one; './' is the start URL.
 const FILES = ['./', ...self.__WB_MANIFEST.map((entry) => entry.url)];
