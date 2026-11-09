@@ -17,7 +17,7 @@ import { installTapScrollHold } from './scrollAnchor.ts';
 import { followTheme } from './theme.ts';
 import { scheduleBootTip } from './tips.ts';
 import { installToastListeners } from './toast/toastTouch.ts';
-import { tickClock } from './topbar/clockState.ts';
+import { endSunTimes, tickClock } from './topbar/clockState.ts';
 import { followTabEdits } from './topbar/tabEdits.ts';
 import { refreshBase, resetTab } from './topbar/topMenuState.ts';
 import { followTopState } from './topbar/topState.ts';
@@ -62,6 +62,7 @@ function boot(): void {
     resetTab('more');
   }, 0);
   addNavigationListener((event) => {
+    if (event.phase === 'before') endSunTimes();
     if (event.phase === 'after') setTimeout(refreshBase, 0);
   });
   scheduleBootTip();

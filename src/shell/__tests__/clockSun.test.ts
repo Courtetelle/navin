@@ -2,7 +2,13 @@ import { afterEach, expect, test, vi } from 'vitest';
 
 import { sunTimes } from '../../lib/sun.ts';
 import { state } from '../../state/index.ts';
-import { clockFace, showSunTimes, sunPlace } from '../topbar/clockState.ts';
+import {
+  clockFace,
+  endSunTimes,
+  showSunTimes,
+  sunPlace,
+  toggleClock,
+} from '../topbar/clockState.ts';
 
 const NOW = Date.parse('2026-06-21T12:00:00Z');
 const hhmm = (at: number) => new Date(at).toISOString().slice(11, 16);
@@ -50,5 +56,26 @@ test('a long press shows sunrise and sunset in turn, four times each, 2 s at a t
     ['set', hhmm(times.set)],
   ];
   expect(seen).toStrictEqual([...pair, ...pair, ...pair, ...pair]);
+  expect(clockFace.value.sun).toBeUndefined();
+});
+
+test('a tap during the sun times brings the time back, without switching', () => {
+  vi.useFakeTimers({ now: NOW });
+  clockFace.value = { local: false, time: '12:00', tick: 0 };
+  showSunTimes(NOW);
+  expect(clockFace.value.sun).toBe('rise');
+  toggleClock();
+  expect(clockFace.value.sun).toBeUndefined();
+  vi.advanceTimersByTime(4000);
+  expect(clockFace.value.sun).toBeUndefined();
+});
+
+test('another screen brings the time back', () => {
+  vi.useFakeTimers({ now: NOW });
+  clockFace.value = { local: false, time: '12:00', tick: 0 };
+  showSunTimes(NOW);
+  endSunTimes();
+  expect(clockFace.value.sun).toBeUndefined();
+  vi.advanceTimersByTime(4000);
   expect(clockFace.value.sun).toBeUndefined();
 });

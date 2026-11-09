@@ -72,6 +72,7 @@ export function tickClock(now = Date.now()): void {
  * these 5 s switches back at once (app.js:604).
  */
 export function toggleClock(): void {
+  // A tap during the sunrise and sunset brings the time back, nothing else.
   if (stopSun()) {
     tickClock();
     return;
@@ -150,6 +151,13 @@ export function showSunTimes(now = Date.now()): void {
   };
   show();
   sunTimer = setInterval(show, SUN_STEP_MS);
+}
+
+/**
+ * Back to the time when another screen opens.
+ */
+export function endSunTimes(): void {
+  if (stopSun()) tickClock();
 }
 
 /**
