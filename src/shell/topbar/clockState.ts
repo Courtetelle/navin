@@ -6,6 +6,7 @@ import {
   shownMapCenter,
 } from '../../features/map/shownMap.ts';
 import { pad } from '../../lib/format.ts';
+import { placeTimeText } from '../../lib/placeZone.ts';
 import { sunTimes } from '../../lib/sun.ts';
 import { lastKnownPos, navZone, state, toast } from '../../state/index.ts';
 import { setBodyClass } from '../bodyClass.ts';
@@ -58,9 +59,7 @@ export function tickClock(now = Date.now()): void {
   }
   const local = inland !== now < localUntil;
   const date = new Date(now);
-  const time = local
-    ? `${pad(date.getHours())}:${pad(date.getMinutes())}`
-    : `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+  const time = clockText(date, local, sunPlace(now));
   batch(() => {
     clockFace.value = { local, time, tick: clockFace.value.tick + 1 };
     setBodyClass('zone-lac', inland);
@@ -88,7 +87,20 @@ export function toggleClock(): void {
 }
 
 /**
- * Where the sun times are computed: the GPS position when it is on, else the
+ * `HH:MM` of the clock: the legal time of the place (Zone Time), else UTC.
+ * @param date - Moment.
+ * @param local - Zone Time.
+ * @param place - Place of the Zone Time.
+ * @returns The text.
+ */
+function clockText(date: Date, local: boolean, place: Place): string {
+  return local
+    ? placeTimeText(date, place.lat, place.lon)
+    : `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
+}
+
+/**
+ * Where the clock's Zone Time and the sun times are computed: the GPS position when it is on, else the
  * centre of the map last shown, else the last known position, else where the
  * map opens.
  * @param now - Current time (ms).
@@ -119,12 +131,7 @@ export function showSunTimes(now = Date.now()): void {
     return;
   }
   const local = clockFace.value.local;
-  const text = (at: number) => {
-    const date = new Date(at);
-    return local
-      ? `${pad(date.getHours())}:${pad(date.getMinutes())}`
-      : `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
-  };
+  const text = (at: number) => clockText(new Date(at), local, place);
   let step = 0;
   const show = () => {
     if (step >= SUN_STEPS) {
