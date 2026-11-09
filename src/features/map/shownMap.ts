@@ -2,7 +2,8 @@ import type { Map as LeafletMap } from 'leaflet';
 
 import { store } from '../../storage/store.ts';
 
-import { LEMAN_CENTER, SEA_CENTER } from './constants.ts';
+import { LEMAN_CENTER } from './constants.ts';
+import { seaCenter } from './seaCenter.ts';
 
 /** Centre of the map last shown, kept from one start to the next. */
 const CENTER_KEY = 'ldb.mapCenter';
@@ -48,6 +49,6 @@ export function shownMapCenter(): Place | null {
  * @returns The place.
  */
 export function defaultMapCenter(lake: boolean): Place {
-  const [lat, lon] = lake ? LEMAN_CENTER : SEA_CENTER;
+  const [lat, lon] = lake ? LEMAN_CENTER : seaCenter();
   return { lat, lon };
 }

@@ -621,6 +621,19 @@ details.section > summary small {
   min-height: 60px;
   padding: 10px 12px;
 }
+/* Centre de la carte en mer : le lieu et le bouton Chercher sur une ligne */
+.sea-center-row {
+  display: flex;
+  gap: 8px;
+}
+.sea-center-row input.text {
+  flex: 1;
+  min-width: 0;
+}
+.sea-center-row .btn {
+  flex: none;
+  width: auto;
+}
 .chips {
   display: flex;
   flex-wrap: wrap;

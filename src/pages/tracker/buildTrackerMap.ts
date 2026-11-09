@@ -7,7 +7,6 @@ import {
   LEMAN_CENTER,
   OSM_TILES,
   SEAMARK_TILES,
-  SEA_CENTER,
   SWISS_BOUNDS,
   SWISS_TILES,
   inSwissArea,
@@ -25,6 +24,7 @@ import { setMapWatch } from '../../features/map/mapWatch.ts';
 import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
 import { showPendingPlace } from '../../features/map/placeTarget.ts';
 import { recenterAfterDrag } from '../../features/map/recenterAfterDrag.ts';
+import { SEA_ZOOM, seaCenter } from '../../features/map/seaCenter.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
 import {
@@ -125,7 +125,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   } else if (useSwiss) {
     map.setView(LEMAN_CENTER, 10);
   } else {
-    map.setView(SEA_CENTER, 9);
+    map.setView(seaCenter(), SEA_ZOOM);
   }
   showPosition();
   whileMapLive(map, () => map.invalidateSize(), 100);

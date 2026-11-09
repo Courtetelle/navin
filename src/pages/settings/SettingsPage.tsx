@@ -20,6 +20,7 @@ import { BackupSections } from './BackupSections.tsx';
 import { InstallGuide } from './InstallGuide.tsx';
 import { MarginRows } from './MarginRows.tsx';
 import { OfflineSection } from './OfflineSection.tsx';
+import { SeaCenterRow } from './SeaCenterRow.tsx';
 import { SimulationSection } from './SimulationSection.tsx';
 import {
   AutoLogRows,
@@ -165,6 +166,7 @@ export function SettingsPage({ from }: PageProps) {
         <SettingsSection section="zone" title="🧭 Zone et écran">
           {nightOK() ? <ThemeRow /> : null}
           <ZoneSim />
+          <SeaCenterRow />
           <WakeRow />
           <HelpBubblesRow />
         </SettingsSection>

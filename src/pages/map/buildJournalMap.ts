@@ -21,13 +21,12 @@ import {
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
 import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
+import { SEA_ZOOM, seaCenter } from '../../features/map/seaCenter.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
 import { isLake } from '../../state/index.ts';
 
 import { followPosition } from './followPosition.ts';
-
-const DEFAULT_SEA: LatLngPair = [43.1, 5.9];
 
 /** What the map tells its page. */
 export interface JournalMapEvents {
@@ -139,7 +138,7 @@ export function buildJournalMap(
     } else if (useSwiss) {
       map.setView(LEMAN_CENTER, 10);
     } else {
-      map.setView(DEFAULT_SEA, 8);
+      map.setView(seaCenter(), SEA_ZOOM);
     }
   };
   fit();
