@@ -8,7 +8,8 @@ export const settingsScenarios: Scenario[] = [
   screen('settings', 'empty', 'settings'),
   screen('settings', 'sample', 'settings'),
   screen('settings', 'sample-sea', 'settings'),
-  ...['tracker', 'more', 'sos', 'prep', 'new', 'vhf', 'boats', 'cartes'].map(
+  // Not from SOS: legacy kept the red SOS tab lit in the settings, NavIn no longer does.
+  ...['tracker', 'more', 'prep', 'new', 'vhf', 'boats', 'cartes'].map(
     (view): Scenario => ({
       name: `data-settings-gear-${view}`,
       fixture: 'sample',

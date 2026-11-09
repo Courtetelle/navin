@@ -100,7 +100,9 @@ export function activeTab(
     context.settingsFrom &&
     context.settingsFrom !== 'settings'
   ) {
-    return tabOf(context.settingsFrom, context);
+    const left = tabOf(context.settingsFrom, context);
+    // The red SOS stays for the distress screens only, never in the settings.
+    return left === 'sos' ? null : left;
   }
   return tabFor(view, context);
 }

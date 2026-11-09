@@ -34,14 +34,17 @@ test('tabOf lights data for nmea and nothing for unknown values', () => {
   expect(tabOf('day', sea)).toBe('more');
 });
 
-test('nonav lights the tab of the screen asked for, settings the tab left', () => {
+test('nonav lights the tab of the screen asked for, settings the tab left but SOS', () => {
   const context = { ...sea, settingsFrom: null };
   expect(activeTab('nonav', 'new', context)).toBe('tracker');
   expect(activeTab('nonav', 'log', context)).toBe('more');
   expect(activeTab('settings', null, context)).toBe('more');
-  expect(activeTab('settings', null, { ...context, settingsFrom: 'sos' })).toBe(
-    'sos',
-  );
+  expect(
+    activeTab('settings', null, { ...context, settingsFrom: 'sos' }),
+  ).toBeNull();
+  expect(
+    activeTab('settings', null, { ...context, settingsFrom: 'mob' }),
+  ).toBeNull();
   expect(activeTab('settings', null, { ...context, settingsFrom: 'vhf' })).toBe(
     'tracker',
   );
