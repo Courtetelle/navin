@@ -3245,6 +3245,11 @@ time.tz.tz-local,
 }
 .clock {
   cursor: pointer;
+  /* Appui long : lever et coucher du soleil, sans bulle iOS */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 .zone-pop ul {
   margin: 6px 0 0;

@@ -1,6 +1,10 @@
 import { batch, signal } from '@preact/signals-react';
 
-import { shownMapCenter } from '../../features/map/shownMap.ts';
+import type { Place } from '../../features/map/shownMap.ts';
+import {
+  defaultMapCenter,
+  shownMapCenter,
+} from '../../features/map/shownMap.ts';
 import { pad } from '../../lib/format.ts';
 import { sunTimes } from '../../lib/sun.ts';
 import { lastKnownPos, navZone, state, toast } from '../../state/index.ts';
@@ -83,18 +87,19 @@ export function toggleClock(): void {
 
 /**
  * Where the sun times are computed: the GPS position when it is on, else the
- * centre of the map last shown, else the last known position.
+ * centre of the map last shown, else the last known position, else where the
+ * map opens.
  * @param now - Current time (ms).
- * @returns The place, or `null`.
+ * @returns The place.
  */
-export function sunPlace(
-  now = Date.now(),
-): { lat: number; lon: number } | null {
+export function sunPlace(now = Date.now()): Place {
   const live = state.view.myPos.value;
   if (live && now - live.t < GPS_FRESH_MS) return live;
   const fix = state.view.lastFix.value;
   if (fix?.at && now - Date.parse(fix.at) < GPS_FRESH_MS) return fix;
-  return shownMapCenter() ?? lastKnownPos();
+  return (
+    shownMapCenter() ?? lastKnownPos() ?? defaultMapCenter(navZone() === 'lac')
+  );
 }
 
 /**
@@ -106,10 +111,6 @@ export function sunPlace(
 export function showSunTimes(now = Date.now()): void {
   stopSun();
   const place = sunPlace(now);
-  if (!place) {
-    toast('Position inconnue : activez le GPS ou ouvrez la carte');
-    return;
-  }
   const times = sunTimes(now, place.lat, place.lon);
   if (!times) {
     toast("Pas de lever ni de coucher du soleil aujourd'hui");

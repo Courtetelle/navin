@@ -12,11 +12,10 @@ const PHASE_KEY = 'ldb.themeAuto';
  * Whether it is night for the theme: from 2 h after sunset to 1 h before
  * sunrise, at the GPS position, else the map shown, else the last position.
  * @param now - Current time (ms).
- * @returns `'night'` or `'day'`, or `null` without place or sunrise.
+ * @returns `'night'` or `'day'`, or `null` without sunrise.
  */
 export function sunPhase(now = Date.now()): 'day' | 'night' | null {
   const place = sunPlace(now);
-  if (!place) return null;
   const times = sunTimes(now, place.lat, place.lon);
   if (!times) return null;
   const night = now >= times.set + 2 * HOUR_MS || now < times.rise - HOUR_MS;
@@ -41,11 +40,8 @@ export function autoNightTick(now = Date.now()): void {
   });
 }
 
-/**
- * Check the phase now, once the first map is up, then every minute.
- */
+/** Check the phase now, then every minute. */
 export function followAutoNight(): void {
   autoNightTick();
-  setTimeout(autoNightTick, 3000);
   setInterval(autoNightTick, 60_000);
 }
