@@ -6060,11 +6060,36 @@ body.is-tracking .top-tab.bare.stop-armed {
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
-/* Soleil derrière l'heure du lever, lune derrière celle du coucher */
+/* Soleil en filigrane derrière l'heure du lever, lune derrière celle du
+   coucher : en grand, sans élargir l'horloge */
+.clock {
+  position: relative;
+}
+.clock .clock-t,
+.clock .clock-utc {
+  position: relative;
+  z-index: 1;
+}
 .clock .clock-sun-icon {
-  font-size: 0.7em;
-  margin-left: 0.12em;
-  vertical-align: 0.08em;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.3em;
+  line-height: 1;
+  opacity: 0.45;
+  pointer-events: none;
+  overflow: visible;
+}
+.clock .clock-sun-icon.rise {
+  color: #f0a000;
+}
+.clock .clock-sun-icon.set {
+  color: #4a6fa5;
+}
+:root[data-theme='night'] .clock .clock-sun-icon {
+  color: inherit;
 }
 .topbar .clock .clock-utc {
   font-family:

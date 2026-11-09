@@ -7,7 +7,7 @@ import { tipFocus } from '../tips.ts';
 import { clockFace, showSunTimes, toggleClock } from './clockState.ts';
 
 const SUN_LABELS = { rise: 'Lever', set: 'Coucher' } as const;
-/** Sun after the sunrise, moon after the sunset (text glyphs, never emoji). */
+/** Sun behind the sunrise, moon behind the sunset (text glyphs, never emoji). */
 const SUN_ICONS = { rise: '\u2600\uFE0E', set: '\u263E' } as const;
 
 /**
@@ -44,15 +44,15 @@ export function Clock() {
     >
       <span className="clock-t" ref={timeReference}>
         {face.time}
-        {face.sun ? (
-          <span className="clock-sun-icon" aria-hidden="true">
-            {SUN_ICONS[face.sun]}
-          </span>
-        ) : null}
       </span>
       <small className="clock-utc" ref={labelReference}>
         {label}
       </small>
+      {face.sun ? (
+        <span className={`clock-sun-icon ${face.sun}`} aria-hidden="true">
+          {SUN_ICONS[face.sun]}
+        </span>
+      ) : null}
     </div>
   );
 }
