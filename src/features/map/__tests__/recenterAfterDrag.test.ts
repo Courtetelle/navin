@@ -1,7 +1,12 @@
 import type { Map as LeafletMap } from 'leaflet';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
-import { RECENTER_DELAY_MS, recenterAfterDrag } from '../recenterAfterDrag.ts';
+import { state } from '../../../state/index.ts';
+import {
+  RECENTER_DELAY_MS,
+  RECENTER_IDLE_DELAY_MS,
+  recenterAfterDrag,
+} from '../recenterAfterDrag.ts';
 import type { TrackerHandle } from '../trackerState.ts';
 import { newTracker, setFollow, tracker } from '../trackerState.ts';
 
@@ -33,14 +38,16 @@ function openTracker() {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  state.view.tracking.value = true;
 });
 
 afterEach(() => {
   vi.useRealTimers();
   tracker.current = null;
+  state.view.tracking.value = false;
 });
 
-test('the map comes back to the boat 7 s after the finger left it', () => {
+test('while recording, the map comes back to the boat 7 s after the finger left it', () => {
   const { handle, setView, fire } = openTracker();
   fire('dragstart');
   expect(handle.follow).toBe(false);
@@ -137,4 +144,19 @@ test('a map gone from the screen does not move', () => {
     () => ({ isConnected: false });
   vi.advanceTimersByTime(RECENTER_DELAY_MS);
   expect(setView).not.toHaveBeenCalled();
+});
+
+test('without a track, the map comes back 20 s after the last move', () => {
+  state.view.tracking.value = false;
+  const { setView, fire } = openTracker();
+  fire('dragstart');
+  fire('dragend');
+  vi.advanceTimersByTime(RECENTER_DELAY_MS);
+  expect(setView).not.toHaveBeenCalled();
+  fire('dragstart');
+  fire('dragend');
+  vi.advanceTimersByTime(RECENTER_IDLE_DELAY_MS - 1);
+  expect(setView).not.toHaveBeenCalled();
+  vi.advanceTimersByTime(1);
+  expect(setView).toHaveBeenCalledWith(BOAT, 15);
 });
