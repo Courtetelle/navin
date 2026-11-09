@@ -25,7 +25,7 @@ test('a fresh GPS position gives the place of the sun times', () => {
   expect(sunPlace(NOW + 200_000)).not.toMatchObject({ lat: 46.4, lon: 6.5 });
 });
 
-test('a long press shows sunrise and sunset in turn for 6 s', () => {
+test('a long press shows sunrise and sunset in turn, four times each, 2 s at a time', () => {
   vi.useFakeTimers({ now: NOW });
   state.view.myPos.value = {
     lat: 46.4,
@@ -39,17 +39,16 @@ test('a long press shows sunrise and sunset in turn for 6 s', () => {
   clockFace.value = { local: false, time: '12:00', tick: 0 };
   showSunTimes(NOW);
   const seen: Array<[string | undefined, string]> = [];
-  for (let second = 0; second < 6; second++) {
+  for (let step = 0; step < 8; step++) {
     seen.push([clockFace.value.sun, clockFace.value.time]);
     vi.advanceTimersByTime(1000);
+    expect(clockFace.value.time).toBe(seen.at(-1)?.[1]);
+    vi.advanceTimersByTime(1000);
   }
-  expect(seen).toStrictEqual([
+  const pair: Array<[string, string]> = [
     ['rise', hhmm(times.rise)],
     ['set', hhmm(times.set)],
-    ['rise', hhmm(times.rise)],
-    ['set', hhmm(times.set)],
-    ['rise', hhmm(times.rise)],
-    ['set', hhmm(times.set)],
-  ]);
+  ];
+  expect(seen).toStrictEqual([...pair, ...pair, ...pair, ...pair]);
   expect(clockFace.value.sun).toBeUndefined();
 });

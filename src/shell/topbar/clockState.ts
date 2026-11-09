@@ -36,8 +36,10 @@ let localUntil = 0;
 let toggleTimer: ReturnType<typeof setTimeout> | undefined;
 let sunTimer: ReturnType<typeof setInterval> | undefined;
 
-/** How long the sun times stay on the clock, one second each. */
-const SUN_STEPS = 6;
+/** Sunrise and sunset shown four times each, in turn. */
+const SUN_STEPS = 8;
+/** How long each sun time stays on the clock. */
+const SUN_STEP_MS = 2000;
 /** A GPS position younger than this means the GPS is on. */
 const GPS_FRESH_MS = 120_000;
 
@@ -103,9 +105,9 @@ export function sunPlace(now = Date.now()): Place {
 }
 
 /**
- * A long press on the clock shows today's sunrise and sunset in turn, one
- * second each for 6 s, in the time the clock shows (UTC or zone time), then
- * the time again.
+ * A long press on the clock shows today's sunrise and sunset in turn, four
+ * times each, 2 s at a time (16 s), in the time the clock shows (UTC or zone
+ * time), then the time again.
  * @param now - Current time (ms).
  */
 export function showSunTimes(now = Date.now()): void {
@@ -140,7 +142,7 @@ export function showSunTimes(now = Date.now()): void {
     };
   };
   show();
-  sunTimer = setInterval(show, 1000);
+  sunTimer = setInterval(show, SUN_STEP_MS);
 }
 
 /**

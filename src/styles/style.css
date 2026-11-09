@@ -6060,6 +6060,12 @@ body.is-tracking .top-tab.bare.stop-armed {
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
+/* Soleil derrière l'heure du lever, lune derrière celle du coucher */
+.clock .clock-sun-icon {
+  font-size: 0.7em;
+  margin-left: 0.12em;
+  vertical-align: 0.08em;
+}
 .topbar .clock .clock-utc {
   font-family:
     -apple-system, 'SF Pro Text', system-ui, 'Helvetica Neue', Arial, sans-serif;

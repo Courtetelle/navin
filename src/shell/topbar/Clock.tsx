@@ -7,11 +7,13 @@ import { tipFocus } from '../tips.ts';
 import { clockFace, showSunTimes, toggleClock } from './clockState.ts';
 
 const SUN_LABELS = { rise: 'Lever', set: 'Coucher' } as const;
+/** Sun after the sunrise, moon after the sunset (text glyphs, never emoji). */
+const SUN_ICONS = { rise: '\u2600\uFE0E', set: '\u263E' } as const;
 
 /**
  * The top bar clock (`#clock`): UTC or zone time, the small label never wider
  * than the time above it. A tap switches UTC / zone time, a long press shows
- * the sunrise and sunset in turn for 6 s.
+ * the sunrise (☀︎) and sunset (☾) in turn, four times each, 2 s at a time.
  * @returns The clock element.
  */
 export function Clock() {
@@ -42,6 +44,11 @@ export function Clock() {
     >
       <span className="clock-t" ref={timeReference}>
         {face.time}
+        {face.sun ? (
+          <span className="clock-sun-icon" aria-hidden="true">
+            {SUN_ICONS[face.sun]}
+          </span>
+        ) : null}
       </span>
       <small className="clock-utc" ref={labelReference}>
         {label}
