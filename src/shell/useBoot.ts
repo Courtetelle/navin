@@ -5,6 +5,7 @@ import { installDecimalComma } from '../components/shared/decimalComma.ts';
 import { state } from '../state/index.ts';
 import { attachErrorLog } from '../storage/errLog.ts';
 
+import { followAutoNight } from './autoNight.ts';
 import { runBootHook } from './bootHooks.ts';
 import { loadDomains } from './domainInit.ts';
 import { errorContext } from './errorContext.ts';
@@ -51,6 +52,7 @@ function boot(): void {
     );
   });
   followTheme();
+  followAutoNight();
   followTopState();
   tickClock();
   setInterval(tickClock, 10_000);
