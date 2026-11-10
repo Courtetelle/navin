@@ -7,6 +7,7 @@ import { fmtTime } from '../../lib/format.ts';
 import { bft, windTxt } from '../../lib/wind.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 
+import { SeaBlock } from './SeaBlock.tsx';
 import { WindTrendChart } from './WindTrendChart.tsx';
 import { ageText, compassPoint, forceText, windColors } from './liveText.ts';
 
@@ -106,6 +107,7 @@ export function StationCard({
           ))}
         </tbody>
       </table>
+      <SeaBlock lat={station.lat} lon={station.lon} />
       <ButtonRow className="row">
         <Button className="btn" onClick={onRefresh} disabled={loading}>
           {tr(loading ? 'Actualisation…' : '↻ Actualiser maintenant')}

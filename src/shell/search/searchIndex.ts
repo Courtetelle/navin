@@ -47,7 +47,7 @@ const OTHER_FUNCTIONS: readonly FunctionEntry[] = [
   { key: 'marks', title: '◆ Mes repères', sub: 'points marques' },
   {
     key: 'meteo',
-    title: '🌬 Conditions météo, live',
+    title: '🌬 Live météo',
     sub: 'vent stations mesures rafales',
   },
   { key: 'beaufort', title: '💨 Échelle de Beaufort', sub: 'vent' },

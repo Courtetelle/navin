@@ -5,9 +5,10 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { defaultMapCenter } from '../../features/map/shownMap.ts';
-import type { LiveStation } from '../../features/onwater/index.ts';
+import type { LiveStation, MfTally } from '../../features/onwater/index.ts';
 import {
   liveStations,
+  newMfTally,
   stationKey,
   windConfig,
   windWatchPlace,
@@ -21,6 +22,7 @@ import { isLake, lastKnownPos } from '../../state/index.ts';
 
 import { StationCard } from './StationCard.tsx';
 import { StationList } from './StationList.tsx';
+import { mfTallyText } from './liveText.ts';
 import type { LivePlace } from './useLiveMap.ts';
 import { useLiveMap } from './useLiveMap.ts';
 
@@ -51,6 +53,7 @@ export function MeteoPage() {
   const [readFor, setReadFor] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [at, setAt] = useState<number | null>(null);
+  const [tally, setTally] = useState<MfTally | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now);
   const box = useRef<HTMLDivElement>(null);
@@ -68,10 +71,12 @@ export function MeteoPage() {
   const loading = refreshing || readFor !== searchKey;
   const load = useCallback(() => {
     let closed = false;
-    liveStations(center, radius, config.mfKey)
+    const counted = newMfTally();
+    liveStations(center, radius, config.mfKey, counted)
       .then((found) => {
         if (closed) return;
         setStations(found);
+        setTally(config.mfKey ? counted : null);
         setAt(Date.now());
       })
       .catch(() => undefined)
@@ -121,7 +126,7 @@ export function MeteoPage() {
       >
         {tr('◀ data')}
       </PageBack>
-      <h1>{tr('🌬 Conditions météo, live')}</h1>
+      <h1>{tr('🌬 Live météo')}</h1>
       {station ? (
         <StationCard
           station={station}
@@ -141,6 +146,9 @@ export function MeteoPage() {
         <p className="keep-help live-status" role="status">
           {status}
         </p>
+        {tally ? (
+          <p className="keep-help live-mf">{tr(mfTallyText(tally, radius))}</p>
+        ) : null}
         <div id="liveMap" className="map live-map" ref={box}>
           {live.noMap ? (
             <div className="empty-state">

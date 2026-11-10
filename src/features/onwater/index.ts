@@ -40,6 +40,12 @@ export {
   windTrend,
 } from './stationHistory.ts';
 export type { WindPoint, WindTrend } from './stationHistory.ts';
+export { newMfTally } from './coastStations.ts';
+export { seaNow } from './seaNow.ts';
+export type { SeaNow, WaveTrain } from './seaNow.ts';
+export { douglasOfH as seaDegree } from './windLogic.ts';
+export { seaTxt as seaSentence } from './windLogic.ts';
+export type { MfTally } from './coastStations.ts';
 export { distKm } from '../../lib/geo.ts';
 
 export { BoatFieldsEditor } from './BoatFieldsEditor.tsx';

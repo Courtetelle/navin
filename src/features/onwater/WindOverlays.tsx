@@ -124,7 +124,7 @@ export function WindPopup() {
         <div className="wp-desc">{translate(row?.[4] ?? '')}</div>
         {content.onLive ? (
           <Button className="btn primary wp-live" noUiEdit>
-            {translate('🌬 Conditions météo, live')}
+            {translate('🌬 Live météo')}
           </Button>
         ) : null}
         <div className="wp-close">

@@ -9157,6 +9157,17 @@ body:not(.trk-mode) #searchBtn {
   width: 100%;
   margin-top: 12px;
 }
+.live-sea h2 {
+  margin: 16px 0 4px;
+  font-size: 20px;
+}
+.live-sea-txt {
+  margin: 0 0 6px;
+  font-weight: 700;
+}
+.live-mf {
+  margin-top: 0;
+}
 .live-trend {
   margin: 12px 0;
 }

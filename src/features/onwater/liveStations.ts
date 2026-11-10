@@ -1,5 +1,6 @@
 import { distKm } from '../../lib/geo.ts';
 
+import type { MfTally } from './coastStations.ts';
 import { mfReadings, owmReadings } from './coastStations.ts';
 import { smnNow, smnStations } from './externals.ts';
 import { rememberReadings } from './stationHistory.ts';
@@ -27,17 +28,19 @@ export type LiveStation = WindReading & {
  * @param center - Place searched around.
  * @param radius - Radius in km.
  * @param mfKey - Météo-France key, empty without one.
+ * @param tally - Filled with what the Météo-France stations answered.
  * @returns The stations with a recent measurement.
  */
 export async function liveStations(
   center: { lat: number; lon: number },
   radius: number,
   mfKey: string,
+  tally: MfTally | null = null,
 ): Promise<LiveStation[]> {
   const [swiss, beacons, french] = await Promise.all([
     smnLive(center, radius).catch(() => []),
     owmReadings(center, radius, LIVE_MOST).catch(() => []),
-    mfReadings(center, radius, mfKey, LIVE_MOST).catch(() => []),
+    mfReadings(center, radius, mfKey, LIVE_MOST, tally).catch(() => []),
   ]);
   const live = [...swiss, ...beacons, ...french]
     .filter(isLive)

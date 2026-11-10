@@ -15,6 +15,9 @@ const MF_HOST = 'https://public-api.meteofrance.fr';
 const MF_CONTEXT = '/public/DPObs/v1';
 const OWM_KEY = 'ldb.owm.stations';
 const MF_KEY = 'ldb.mf.stations';
+/** Météo-France stations that measure no wind, skipped for a week. */
+const MF_NO_WIND_KEY = 'ldb.mf.noWind';
+const MF_NO_WIND_MS = 7 * 86_400_000;
 const OWM_LIST_MAX_AGE_MS = 86_400_000;
 const MF_LIST_MAX_AGE_MS = 30 * 86_400_000;
 /** A measurement older than this is not the wind of now. */
@@ -258,21 +261,64 @@ export async function mfReadings(
   radius: number,
   key: string,
   most = MAX_STATIONS,
+  tally: MfTally | null = null,
 ): Promise<WindReading[]> {
   if (!key) return [];
   const stations = await listOf(MF_KEY, MF_LIST_MAX_AGE_MS, async () => {
     const response = await mfFetch(`${mfBase(key)}liste-stations`, key);
     return response.ok ? mfStations(await response.text()) : [];
   });
-  const near = nearCoastStations(stations, position, radius, most);
+  const now = Date.now();
+  const noWind = store.get<Record<string, number>>(MF_NO_WIND_KEY, {});
+  const windy = stations.filter(
+    ([id]) => !(now - (noWind[id] ?? 0) < MF_NO_WIND_MS),
+  );
+  const near = nearCoastStations(windy, position, radius, most);
+  if (tally) {
+    tally.near = nearCoastStations(stations, position, radius, Infinity).length;
+  }
   /* eslint-disable no-await-in-loop -- Météo-France allows 50 requests a minute */
   const readings: WindReading[] = [];
   for (const { station, km } of near) {
-    const { reading } = await mfStationWind(station, km, key);
+    const { reading, status, fields } = await mfStationWind(station, km, key);
     if (reading) readings.push(placed(reading, station));
+    if (tally) count(tally, reading, status);
+    if (status === 200 && fields.length > 0 && !fields.includes('ff')) {
+      noWind[station[0]] = now;
+    }
   }
+  store.set(
+    MF_NO_WIND_KEY,
+    Object.fromEntries(
+      Object.entries(noWind).filter(([, at]) => now - at < MF_NO_WIND_MS),
+    ),
+  );
   /* eslint-enable no-await-in-loop */
   return readings;
+}
+
+/** What the Météo-France stations of a search answered. */
+export interface MfTally {
+  /** Stations of the list within the radius (the closest are read). */
+  near: number;
+  /** Stations read. */
+  read: number;
+  /** With a recent wind. */
+  wind: number;
+  /** Answered, without wind or with an old one. */
+  noWind: number;
+  /** Refused, by HTTP status. */
+  refused: Record<string, number>;
+  /** No answer in time, or no network. */
+  failed: number;
+}
+
+/**
+ * An empty tally.
+ * @returns The tally to fill.
+ */
+export function newMfTally(): MfTally {
+  return { near: 0, read: 0, wind: 0, noWind: 0, refused: {}, failed: 0 };
 }
 
 /** Result of {@link mfCheck}. */
@@ -400,6 +446,19 @@ export async function mfRows(
   if (!response.ok) return [];
   const rows: unknown = await response.json();
   return Array.isArray(rows) ? (rows as Array<Record<string, unknown>>) : [];
+}
+
+function count(tally: MfTally, reading: WindReading | null, status: number) {
+  tally.read += 1;
+  if (reading) {
+    tally.wind += 1;
+  } else if (status >= 200 && status < 300) {
+    tally.noWind += 1;
+  } else if (status > 0) {
+    tally.refused[status] = (tally.refused[status] ?? 0) + 1;
+  } else {
+    tally.failed += 1;
+  }
 }
 
 async function mfStationWind(

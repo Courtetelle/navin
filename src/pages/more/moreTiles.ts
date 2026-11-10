@@ -23,7 +23,7 @@ const CHECKLIST_BASES: MoreTile = {
 };
 const METEO: MoreTile = {
   key: 'meteo',
-  title: '🌬 Conditions météo, live',
+  title: '🌬 Live météo',
   sub: 'vent mesuré par les stations autour, carte',
 };
 const LISTS: MoreTile = {

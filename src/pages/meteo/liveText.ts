@@ -1,4 +1,4 @@
-import type { LiveStation } from '../../features/onwater/index.ts';
+import type { LiveStation, MfTally } from '../../features/onwater/index.ts';
 import {
   flashColor,
   flashInk,
@@ -76,4 +76,35 @@ export function forceText(knots: number): string {
  */
 export function byDistance(stations: readonly LiveStation[]): LiveStation[] {
   return stations.toSorted((a, b) => (a.km ?? 0) - (b.km ?? 0));
+}
+
+/**
+ * What the Météo-France stations of the search answered, in one line.
+ * @param tally - The tally.
+ * @param radius - Radius searched, in km.
+ * @returns `Météo-France : 14 stations à moins de 30 km, 6 lues…`.
+ */
+export function mfTallyText(tally: MfTally, radius: number): string {
+  if (tally.near === 0) {
+    return `Météo-France : aucune station à moins de ${radius} km`;
+  }
+  const parts = [
+    `${tally.near} station${tally.near > 1 ? 's' : ''} à moins de ${radius} km`,
+  ];
+  if (tally.read < tally.near) parts.push(`${tally.read} plus proches lues`);
+  parts.push(`${tally.wind} avec vent`);
+  if (tally.noWind > 0) {
+    parts.push(
+      `${tally.noWind} sans vent mesuré (pas d’anémomètre ou mesure ancienne)`,
+    );
+  }
+  for (const [status, n] of Object.entries(tally.refused)) {
+    parts.push(
+      status === '429'
+        ? `${n} refusée${n > 1 ? 's' : ''} : trop de demandes (429), réessayer dans 1 min`
+        : `${n} refusée${n > 1 ? 's' : ''} (code ${status})`,
+    );
+  }
+  if (tally.failed > 0) parts.push(`${tally.failed} sans réponse`);
+  return `Météo-France : ${parts.join(' · ')}`;
 }
