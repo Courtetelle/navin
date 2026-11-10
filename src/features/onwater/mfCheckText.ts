@@ -20,18 +20,19 @@ export function checkText(check: MfCheck): string {
     return `⚠️ Clé valide (${check.stations} stations) mais aucun vent récent près de ${check.near} · codes ${check.status}`;
   }
   if (check.kind === 'refused') {
-    if (check.status !== 403) {
-      return `❌ Clé refusée par Météo-France (code ${check.status}) · vérifiez le type « API Key » et l’abonnement à « Données Publiques Observation »`;
+    const { apis, detail, status } = check;
+    const why = detail ? ` · ${detail}` : '';
+    if (status === 403 && apis?.includes('DonneesPubliquesObservation')) {
+      return `❌ Clé refusée (code 403) alors qu’elle contient bien « Données Publiques Observation »${why}`;
     }
-    const { apis } = check;
-    let opens = '';
-    if (apis) {
-      opens =
-        apis.length > 0
+    if (status === 403) {
+      const opens =
+        apis && apis.length > 0
           ? ` · cette clé ouvre seulement : ${apis.join(', ')}`
-          : ' · cette clé n’ouvre aucune API';
+          : '';
+      return `❌ Clé reconnue mais pas autorisée pour « Données Publiques Observation » (code 403)${opens} · abonnez-vous à cette API, puis générez une NOUVELLE clé « API Key » et collez-la ici${why}`;
     }
-    return `❌ Clé reconnue mais pas autorisée pour « Données Publiques Observation » (code 403)${opens} · abonnez-vous à cette API, puis générez une NOUVELLE clé « API Key » et collez-la ici`;
+    return `❌ Clé refusée par Météo-France (code ${status}) · vérifiez le type « API Key » et l’abonnement à « Données Publiques Observation »${why}`;
   }
   if (check.kind === 'empty') {
     return `❌ Réponse inattendue de Météo-France (code ${check.status}) · ${check.sample}`;

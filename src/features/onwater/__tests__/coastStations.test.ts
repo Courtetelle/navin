@@ -5,6 +5,7 @@ import {
   METEO_FRANCE,
   OPEN_WIND_MAP,
   keyApis,
+  keyLimits,
   mfReading,
   mfStations,
   nearCoastStations,
@@ -142,9 +143,9 @@ describe('Météo-France key check', () => {
   });
 
   it('says a refused key', () => {
-    expect(checkText({ kind: 'refused', status: 401, apis: null })).toContain(
-      'Clé refusée',
-    );
+    expect(
+      checkText({ kind: 'refused', status: 401, apis: null, detail: '' }),
+    ).toContain('Clé refusée');
   });
 
   it('lists what a forbidden key opens', () => {
@@ -161,8 +162,28 @@ describe('Météo-France key check', () => {
       kind: 'refused',
       status: 403,
       apis: ['DonneesPubliquesClimatologie'],
+      detail: '',
     });
     expect(text).toContain('ouvre seulement : DonneesPubliquesClimatologie');
     expect(text).toContain('NOUVELLE clé');
+  });
+
+  it('reads the limits of a key', () => {
+    const payload = btoa(
+      JSON.stringify({
+        subscribedAPIs: [
+          {
+            name: 'DonneesPubliquesObservation',
+            context: '/public/DPObs/v1',
+            version: 'v1',
+          },
+        ],
+        permittedReferer: 'portail-api.meteofrance.fr',
+        permittedIP: '',
+      }),
+    );
+    expect(keyLimits(`head.${payload}.sign`)).toBe(
+      'API /public/DPObs/v1 v1 · sites autorisés : portail-api.meteofrance.fr',
+    );
   });
 });

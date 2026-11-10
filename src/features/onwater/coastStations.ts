@@ -240,7 +240,13 @@ export async function mfReadings(
 export type MfCheck =
   | { kind: 'ok'; stations: number; reading: WindReading }
   | { kind: 'noWind'; stations: number; near: string; status: string }
-  | { kind: 'refused'; status: number; apis: string[] | null }
+  | {
+      kind: 'refused';
+      status: number;
+      apis: string[] | null;
+      /** Why, as Météo-France and the key say. */
+      detail: string;
+    }
   | { kind: 'empty'; status: number; sample: string }
   | { kind: 'offline' };
 
@@ -264,7 +270,12 @@ export async function mfCheck(
     return { kind: 'offline' };
   }
   if (response.status === 401 || response.status === 403) {
-    return { kind: 'refused', status: response.status, apis: keyApis(key) };
+    return {
+      kind: 'refused',
+      status: response.status,
+      apis: keyApis(key),
+      detail: await refusalDetail(response, key),
+    };
   }
   const text = response.ok ? await response.text() : '';
   const list = mfStations(text);
@@ -391,15 +402,79 @@ function titleCase(name: string): string {
  * @returns The API names, null when the key cannot be read.
  */
 export function keyApis(key: string): string[] | null {
+  const payload = keyPayload(key);
+  if (!Array.isArray(payload?.subscribedAPIs)) return null;
+  return payload.subscribedAPIs.map((api) => api.name ?? '?');
+}
+
+interface KeyPayload {
+  subscribedAPIs?: Array<{ name?: string; context?: string; version?: string }>;
+  permittedReferer?: string;
+  permittedIP?: string;
+}
+
+function keyPayload(key: string): KeyPayload | null {
   try {
     const part = key.split('.', 2)[1] ?? '';
     const json = atob(part.replaceAll('-', '+').replaceAll('_', '/'));
-    const payload = JSON.parse(json) as {
-      subscribedAPIs?: Array<{ name?: string }>;
-    };
-    if (!Array.isArray(payload.subscribedAPIs)) return null;
-    return payload.subscribedAPIs.map((api) => api.name ?? '?');
+    return JSON.parse(json) as KeyPayload;
   } catch {
     return null;
   }
+}
+
+/**
+ * What the key holds that can refuse a call: the address of the observation
+ * API, and the sites or addresses the key is limited to.
+ * @param key - The key.
+ * @returns The text, empty when there is nothing to say.
+ */
+export function keyLimits(key: string): string {
+  const payload = keyPayload(key);
+  if (!payload) return '';
+  const parts: string[] = [];
+  const api = payload.subscribedAPIs?.find(
+    (item) => item.name === 'DonneesPubliquesObservation',
+  );
+  if (api) parts.push(`API ${api.context ?? '?'} ${api.version ?? ''}`.trim());
+  if (payload.permittedReferer) {
+    parts.push(`sites autorisés : ${payload.permittedReferer}`);
+  }
+  if (payload.permittedIP) parts.push(`IP autorisées : ${payload.permittedIP}`);
+  return parts.join(' · ');
+}
+
+async function refusalDetail(response: Response, key: string): Promise<string> {
+  let said = '';
+  try {
+    const body = (await response.json()) as {
+      code?: string | number;
+      message?: string;
+      description?: string;
+    };
+    said = [body.code, body.message, body.description]
+      .filter((part) => part != null && part !== '')
+      .join(' ')
+      .slice(0, 220);
+  } catch {
+    // No reason given.
+  }
+  // Another resource of the same API (Paris-Montsouris), to know if the whole API is closed.
+  let probe = 'injoignable';
+  try {
+    const other = await fetch(
+      `${MF_BASE}station/infrahoraire-6m?id_station=75114001&format=json`,
+      { headers: { apikey: key } },
+    );
+    probe = String(other.status);
+  } catch {
+    // Unreachable.
+  }
+  return [
+    said && `Météo-France : ${said}`,
+    `essai station Paris : ${probe}`,
+    keyLimits(key),
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
