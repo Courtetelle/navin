@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { LinkButton } from '../../components/shared/EditableLinks.tsx';
-import { windConfig } from '../../features/onwater/index.ts';
 import type { Forecast } from '../../features/tracking/index.ts';
 import { wxNext } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -15,9 +14,13 @@ import { go } from '../../shell/router.ts';
 import { isLake, state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 import { boatPlace, liveBack } from '../meteo/boatPlace.ts';
-import { compassPoint, windColors } from '../meteo/liveText.ts';
+import {
+  BEAUFORT_COLORS,
+  compassPoint,
+  scaleColors,
+} from '../meteo/liveText.ts';
 
-import { forecastPeak, weatherChecks } from './weatherChecks.ts';
+import { weatherChecks } from './weatherChecks.ts';
 
 function openLive() {
   buzz();
@@ -40,7 +43,6 @@ export function WeatherPage() {
   const tr = useTr();
   const lake = isLake();
   const tracking = state.view.tracking.value;
-  const config = windConfig();
   const [forecast, setForecast] = useState<Forecast | null | 'loading'>(
     'loading',
   );
@@ -97,7 +99,7 @@ export function WeatherPage() {
       {live}
       <section className="wx-fc">
         <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>
-        <ForecastStrip forecast={forecast} basis={config.basis} />
+        <ForecastStrip forecast={forecast} />
       </section>
       <section className="wx-checks">
         <h2>
@@ -170,10 +172,8 @@ export function WeatherPage() {
 
 function ForecastStrip({
   forecast,
-  basis,
 }: {
   forecast: Forecast | null | 'loading';
-  basis: string;
 }) {
   const tr = useTr();
   if (forecast === 'loading') {
@@ -186,23 +186,13 @@ function ForecastStrip({
       </p>
     );
   }
-  const peak = forecastPeak(forecast.rows);
   return (
     <>
-      {peak ? (
-        <p className="wx-peak">
-          {tr(
-            `Le plus fort : ${Math.round(peak.tws)} nd${peak.gust == null ? '' : `, rafales ${Math.round(peak.gust)} nd`} vers ${fmtTime(new Date(peak.t))}`,
-          )}
-        </p>
-      ) : null}
       <div className="wx-strip">
         {forecast.rows.map((row) => {
           const tws = row.tws ?? 0;
           const gust = row.gust ?? null;
-          const { color, ink } = windColors(
-            basis === 'gust' ? (gust ?? tws) : tws,
-          );
+          const { color, ink } = scaleColors(tws);
           return (
             <div
               key={row.t}
@@ -224,9 +214,19 @@ function ForecastStrip({
           );
         })}
       </div>
+      <div className="wx-scale" aria-hidden="true">
+        {BEAUFORT_COLORS.map(([from, color]) => (
+          <span
+            key={from}
+            style={{ background: color, color: scaleColors(from).ink }}
+          >
+            {from}
+          </span>
+        ))}
+      </div>
       <p className="keep-help">
         {tr(
-          `${forecast.src} à la position du bateau : PRÉVISION, pas une mesure · en gras le vent moyen, en petit les rafales (nd) · la flèche montre où va le vent.`,
+          `${forecast.src} à la position du bateau : PRÉVISION, pas une mesure · couleur et chiffre en gras : vent moyen (échelle de Beaufort, nd) · en petit : rafales · la flèche montre où va le vent.`,
         )}
       </p>
     </>

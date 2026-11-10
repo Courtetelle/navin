@@ -1,5 +1,3 @@
-import type { ForecastRow } from '../../features/tracking/index.ts';
-
 /** One step of the weather check before leaving. */
 export interface WeatherCheck {
   id: string;
@@ -48,34 +46,4 @@ export function weatherChecks(lake: boolean): WeatherCheck[] {
       text: 'Abri de repli choisi, heure de retour fixée et donnée à terre',
     },
   ];
-}
-
-/** The strongest hour of a forecast. */
-export interface ForecastPeak {
-  /** Epoch milliseconds. */
-  t: number;
-  /** Mean wind, knots. */
-  tws: number;
-  /** Gusts, knots, null when unknown. */
-  gust: number | null;
-}
-
-/**
- * The hour with the strongest wind (gusts first, else the mean wind).
- * @param rows - Forecast hours.
- * @returns The peak, null without wind.
- */
-export function forecastPeak(
-  rows: readonly ForecastRow[],
-): ForecastPeak | null {
-  let peak: ForecastPeak | null = null;
-  for (const row of rows) {
-    if (row.tws == null) continue;
-    const gust = row.gust ?? null;
-    const strength = gust ?? row.tws;
-    if (!peak || strength > (peak.gust ?? peak.tws)) {
-      peak = { t: row.t, tws: row.tws, gust };
-    }
-  }
-  return peak;
 }

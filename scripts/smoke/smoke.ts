@@ -221,10 +221,17 @@ async function myMaps(page: Page, theme: string): Promise<void> {
   const title = (await page.locator('main h1').first().textContent()) ?? '';
   check(theme, 'data leads to my maps', title.includes('Mes cartes'));
   const box = await page.locator('#searchBtn').boundingBox();
+  const back = await page.locator('#navBack').boundingBox();
+  const exit = await page.locator('#navExit').boundingBox();
   check(
     theme,
-    'the magnifier leaves the top nav bar free',
-    (box?.y ?? 0) > 400,
+    'the magnifier sits in the nav bar, between ◀ and Sortir',
+    box !== null &&
+      back !== null &&
+      exit !== null &&
+      box.x >= back.x + back.width &&
+      box.x + box.width <= exit.x &&
+      Math.abs(box.y + box.height / 2 - (back.y + back.height / 2)) < 6,
   );
 }
 

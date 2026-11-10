@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { ageText, compassPoint, mfTallyText, windColors } from '../liveText.ts';
+import {
+  ageText,
+  compassPoint,
+  mfTallyText,
+  scaleColors,
+  windColors,
+} from '../liveText.ts';
 
 describe('live weather texts', () => {
   it('names the compass point of a wind', () => {
@@ -44,5 +50,14 @@ describe('mfTallyText', () => {
     expect(text).toContain('4 avec vent');
     expect(text).toContain('25 plus proches lues');
     expect(text).toContain('trop de demandes (429)');
+  });
+});
+
+describe('scaleColors', () => {
+  it('follows the usual Beaufort colours', () => {
+    expect(scaleColors(2).color).toBe('#b9e3f7');
+    expect(scaleColors(12).color).toBe('#7dcc3f');
+    expect(scaleColors(25).color).toBe('#f5a524');
+    expect(scaleColors(60).color).toBe('#6b1d9a');
   });
 });

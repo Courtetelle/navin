@@ -108,3 +108,31 @@ export function mfTallyText(tally: MfTally, radius: number): string {
   if (tally.failed > 0) parts.push(`${tally.failed} sans réponse`);
   return `Météo-France : ${parts.join(' · ')}`;
 }
+
+/**
+ * Usual colours of the wind by Beaufort force: light blue for calm, then
+ * green, yellow, orange, red and purple for a storm. `[from knots, colour]`.
+ */
+export const BEAUFORT_COLORS: ReadonlyArray<readonly [number, string]> = [
+  [0, '#b9e3f7'],
+  [4, '#7cc8ee'],
+  [7, '#4fc6a0'],
+  [11, '#7dcc3f'],
+  [17, '#f2d43d'],
+  [22, '#f5a524'],
+  [28, '#ee6b2a'],
+  [34, '#dc2f2f'],
+  [41, '#b0198f'],
+  [48, '#6b1d9a'],
+];
+
+/**
+ * Colours of a wind on the usual Beaufort scale.
+ * @param knots - Wind in knots.
+ * @returns Background and text colours.
+ */
+export function scaleColors(knots: number): { color: string; ink: string } {
+  let color = BEAUFORT_COLORS[0]?.[1] ?? '#fff';
+  for (const [from, shade] of BEAUFORT_COLORS) if (knots >= from) color = shade;
+  return { color, ink: flashInk(color) };
+}

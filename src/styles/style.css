@@ -9325,9 +9325,21 @@ body.has-navtop #view > h1.live-title,
   margin: 18px 0 6px;
   font-size: 20px;
 }
-.wx-peak {
-  margin: 0 0 8px;
+.wx-scale {
+  display: flex;
+  margin: 8px 0 4px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.wx-scale span {
+  flex: 1;
+  padding: 2px 0;
+  font-size: 11px;
   font-weight: 700;
+  text-align: center;
+}
+:root[data-theme='night'] .wx-scale {
+  filter: brightness(0.7);
 }
 .wx-strip {
   display: grid;
@@ -9428,4 +9440,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   color: var(--btn-fg);
   width: 52px;
   height: 52px;
+}
+.wx-links a.btn {
+  text-decoration: none;
 }
