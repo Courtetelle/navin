@@ -21,7 +21,10 @@ export interface LivePlace {
 export interface LiveMap {
   /** Centre of the map now, to search there. */
   center: () => LivePlace | null;
-  /** Give the map its size again once shown after being hidden. */
+  /**
+   * Back to the map: its size again once shown after being hidden, and the
+   * whole circle searched in view, as when it opened.
+   */
   invalidate: () => void;
   /** Centre a station and show it alone for a moment, to see where it is. */
   focus: (key: string) => void;
@@ -205,7 +208,17 @@ export function useLiveMap(
       const middle = shown.getCenter();
       return { lat: middle.lat, lon: middle.lng };
     },
-    invalidate: () => map.current?.invalidateSize(),
+    invalidate: () => {
+      const shown = map.current;
+      if (!shown) return;
+      shown.invalidateSize();
+      shown.fitBounds(
+        leaflet()
+          .latLng(lat, lon)
+          .toBounds(2 * radius * KM_TO_M),
+        { padding: [10, 10], animate: false },
+      );
+    },
     focus: (key) => {
       const shown = map.current;
       const marker = markers.current.get(key);
