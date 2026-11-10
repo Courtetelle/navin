@@ -371,11 +371,11 @@ async function recenter(page: Page, theme: string): Promise<void> {
     'a map moved by hand stays there for a while',
     (await boatOffCentre(page)) > 50 && !(await followed()),
   );
-  await page.waitForTimeout(15_800);
+  await page.waitForTimeout(16_000);
   check(
     theme,
-    'and comes back to the boat after 20 s without a track',
-    (await boatOffCentre(page)) < 3 && (await followed()),
+    'without a track it does not come back to the boat by itself',
+    (await boatOffCentre(page)) > 50 && !(await followed()),
   );
 }
 

@@ -2,11 +2,7 @@ import type { Map as LeafletMap } from 'leaflet';
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 
 import { state } from '../../../state/index.ts';
-import {
-  RECENTER_DELAY_MS,
-  RECENTER_IDLE_DELAY_MS,
-  recenterAfterDrag,
-} from '../recenterAfterDrag.ts';
+import { RECENTER_DELAY_MS, recenterAfterDrag } from '../recenterAfterDrag.ts';
 import type { TrackerHandle } from '../trackerState.ts';
 import { newTracker, setFollow, tracker } from '../trackerState.ts';
 
@@ -146,17 +142,21 @@ test('a map gone from the screen does not move', () => {
   expect(setView).not.toHaveBeenCalled();
 });
 
-test('without a track, the map comes back 20 s after the last move', () => {
+test('without a track, the map stays where the finger left it', () => {
   state.view.tracking.value = false;
+  const { handle, setView, fire } = openTracker();
+  fire('dragstart');
+  fire('dragend');
+  vi.advanceTimersByTime(10 * 60_000);
+  expect(setView).not.toHaveBeenCalled();
+  expect(handle.follow).toBe(false);
+});
+
+test('a track ending during the wait leaves the map where it is', () => {
   const { setView, fire } = openTracker();
   fire('dragstart');
   fire('dragend');
+  state.view.tracking.value = false;
   vi.advanceTimersByTime(RECENTER_DELAY_MS);
   expect(setView).not.toHaveBeenCalled();
-  fire('dragstart');
-  fire('dragend');
-  vi.advanceTimersByTime(RECENTER_IDLE_DELAY_MS - 1);
-  expect(setView).not.toHaveBeenCalled();
-  vi.advanceTimersByTime(1);
-  expect(setView).toHaveBeenCalledWith(BOAT, 15);
 });
