@@ -80,6 +80,12 @@ export function tabClick(key: TopTabKey, active: boolean): void {
     return;
   }
   const onItsPage = active && state.view.currentView.value !== 'settings';
+  // NavIn only bringing back the map (tablet): a scale at each touch.
+  if (key === 'tracker' && menuItems(key).length < 2) {
+    for (const other of TAB_ORDER) if (other !== key) resetTab(other);
+    topMenuDomainActions().scaleTap(state.view.currentView.value === 'tracker');
+    return;
+  }
   const index = tabDisplays[key].value.index;
   if (!onItsPage && !(index > 0)) {
     for (const other of TAB_ORDER) if (other !== key) resetTab(other);

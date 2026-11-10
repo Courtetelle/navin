@@ -45,6 +45,11 @@ export interface TopMenuDomainActions {
   cycleZone: () => void;
   /** SOS tab tap before opening the SOS page (`sosLogStart`, prep.js:312). */
   sosTap: () => void;
+  /**
+   * NavIn when it only brings back the map (landscape tablet): the map at
+   * 2 NM, or on the map the next scale.
+   */
+  scaleTap: (onMap: boolean) => void;
 }
 
 const noop = () => {
@@ -60,6 +65,7 @@ export const domainActions: TopMenuDomainActions = {
   afterStop: noop,
   cycleZone: noop,
   sosTap: noop,
+  scaleTap: noop,
 };
 
 export function fitted(

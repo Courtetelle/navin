@@ -9,6 +9,7 @@ import { autoLakes } from './lakes.ts';
 import { exitMapFull, onFullscreenChange } from './mapFull.ts';
 import { stopMapWatch } from './mapWatch.ts';
 import { closeNavPop } from './navPop.ts';
+import { navinScaleTap } from './navinScale.ts';
 import { drawTrkButtons } from './trackerButtons.ts';
 import { trkPointNow } from './trackerPoint.ts';
 
@@ -16,7 +17,10 @@ const AUTO_LAKES_DELAY_MS = 6000;
 const ONLINE_DELAY_MS = 3000;
 const RESUME_GOTO_DELAY_MS = 500;
 
-setTopMenuActions({ pointNow: () => void trkPointNow() });
+setTopMenuActions({
+  pointNow: () => void trkPointNow(),
+  scaleTap: navinScaleTap,
+});
 addNavigationListener(({ phase, to }) => {
   if (phase !== 'before') return;
   closeNavPop();
