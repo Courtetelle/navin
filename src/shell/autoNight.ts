@@ -4,13 +4,14 @@ import { store } from '../storage/store.ts';
 
 import { sunPlace } from './topbar/clockState.ts';
 
-const HOUR_MS = 3_600_000;
+/** Night starts this long after sunset and ends this long before sunrise. */
+const MARGIN_MS = 20 * 60_000;
 /** The phase of the last automatic switch, `'day'` or `'night'`. */
 const PHASE_KEY = 'ldb.themeAuto';
 
 /**
- * Whether it is night for the theme: from 2 h after sunset to 1 h before
- * sunrise, at the GPS position, else the map shown, else the last position.
+ * Whether it is night for the theme: from 20 min after sunset to 20 min
+ * before sunrise, at the GPS position, else the map shown, else the last position.
  * @param now - Current time (ms).
  * @returns `'night'` or `'day'`, or `null` without sunrise.
  */
@@ -18,7 +19,7 @@ export function sunPhase(now = Date.now()): 'day' | 'night' | null {
   const place = sunPlace(now);
   const times = sunTimes(now, place.lat, place.lon);
   if (!times) return null;
-  const night = now >= times.set + 2 * HOUR_MS || now < times.rise - HOUR_MS;
+  const night = now >= times.set + MARGIN_MS || now < times.rise - MARGIN_MS;
   return night ? 'night' : 'day';
 }
 

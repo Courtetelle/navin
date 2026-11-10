@@ -43,11 +43,11 @@ afterEach(() => {
   state.view.myPos.value = null;
 });
 
-test('night runs from 2 h after sunset to 1 h before sunrise', () => {
-  expect(sunPhase(at('17:00'))).toBe('day');
-  expect(sunPhase(at('18:30'))).toBe('night');
-  expect(sunPhase(at('05:00'))).toBe('night');
-  expect(sunPhase(at('05:45'))).toBe('day');
+test('night runs from 20 min after sunset to 20 min before sunrise', () => {
+  expect(sunPhase(at('16:20'))).toBe('day');
+  expect(sunPhase(at('16:35'))).toBe('night');
+  expect(sunPhase(at('06:00'))).toBe('night');
+  expect(sunPhase(at('06:12'))).toBe('day');
 });
 
 test('the theme follows the phase, a switch by hand holds until the next one', () => {
