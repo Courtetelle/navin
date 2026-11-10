@@ -9932,3 +9932,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     font-size: 34px !important;
   }
 }
+.rail-start .rail-label {
+  color: #12a150;
+  font-weight: 900;
+}

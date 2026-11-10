@@ -13,11 +13,7 @@ import { PrepBoatStep } from './PrepBoatStep.tsx';
 import { PrepCrewEditStep } from './PrepCrewEditStep.tsx';
 import { PrepCrewStep } from './PrepCrewStep.tsx';
 import { PrepDepartStep } from './PrepDepartStep.tsx';
-import {
-  PrepDureeStep,
-  PrepPurposeStep,
-  PrepTypeStep,
-} from './PrepFirstSteps.tsx';
+import { PrepDureeStep, PrepPurposeStep } from './PrepFirstSteps.tsx';
 import { PrepNav } from './PrepNav.tsx';
 import { PrepTarifStep } from './PrepTarifStep.tsx';
 
@@ -48,7 +44,7 @@ export function PrepPage() {
 }
 
 function title({ step, sub }: PrepFlow): string | undefined {
-  if (step === 0 && sub === 'purpose') return 'Sortie de type';
+  if (step === 0) return 'Sortie de type';
   if (step === 2 && sub === 'tarif') return 'Tarif';
   if (step === 3 && sub === 'crewEdit') return 'Nouvel équipage';
   return PREP_STEPS[step];
@@ -57,13 +53,8 @@ function title({ step, sub }: PrepFlow): string | undefined {
 function PrepStep({ prep }: { prep: PrepFlow }) {
   useSignals();
   const { step, sub, crewDraft } = prep;
-  if (step === 0) {
-    return sub === 'purpose' ? (
-      <PrepPurposeStep prep={prep} />
-    ) : (
-      <PrepTypeStep prep={prep} />
-    );
-  }
+  // Always the three choices first, never « Lac ou Mer ».
+  if (step === 0) return <PrepPurposeStep prep={prep} />;
   if (step === 1) return <PrepDureeStep prep={prep} />;
   if (step === 2) {
     return sub === 'tarif' ? (

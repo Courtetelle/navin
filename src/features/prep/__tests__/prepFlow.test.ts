@@ -179,3 +179,13 @@ test('back from the departure goes to the check-in', () => {
   prepBack();
   expect(prepFlow()?.step).toBe(4);
 });
+
+test('reset without a zone known never asks lake or sea first', () => {
+  setPrep({ step: 3 });
+  prepReset();
+  const prep = state.data.prep.value;
+  expect(prep?.type === 'lac' || prep?.type === 'mer').toBe(true);
+  expect(prep?.type === 'lac' ? prep.sub : prep?.step).toBe(
+    prep?.type === 'lac' ? 'purpose' : 1,
+  );
+});

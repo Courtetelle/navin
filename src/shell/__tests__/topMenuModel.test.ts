@@ -82,9 +82,10 @@ test('the phone pictogram exists in a day and a night version', () => {
 const labelsWide = (wide: boolean) =>
   topMenu('tracker', { ...idle, wide }, actions).map((item) => item.label);
 
-test('on a landscape tablet, the NavIn menu leaves Météo to its own button', () => {
+test('on a landscape tablet, NavIn only brings back the map', () => {
   const labels = labelsWide;
   expect(labels(false)).toContain('Météo');
   expect(labels(true)).not.toContain('Météo');
-  expect(labels(true)).toContain('PréP');
+  // PréP and START have their own buttons: NavIn only brings back the map.
+  expect(labels(true)).toHaveLength(1);
 });

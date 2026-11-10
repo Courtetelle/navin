@@ -45,6 +45,8 @@ export function prepStart(): void {
         boatName: '',
         purpose: null,
       };
+  // Never « Lac ou Mer » first: the zone sailed in, and the three choices.
+  prep.type ??= navZone() === 'lac' ? 'lac' : 'mer';
   if (!fill) {
     if (prep.type === 'lac') prep.sub = 'purpose';
     else prep.step = 1;
@@ -89,7 +91,7 @@ export function prepJump(step: number): void {
   if (!prepFlow()) return;
   buzz();
   updatePrepFlow((prep) => {
-    prep.sub = step === 0 && prep.type === 'lac' ? 'purpose' : null;
+    prep.sub = step === 0 ? 'purpose' : null;
     prep.crewDraft = null;
     prep.newCrew = false;
   });
@@ -135,10 +137,16 @@ export function prepReset(): void {
   const purpose = current?.purpose;
   const type = current?.type;
   prepPathDrop(purpose);
-  const prep: PrepFlow = type
-    ? { step: 0, type, sub: type === 'lac' ? 'purpose' : null, fresh: true }
-    : { step: 0, fresh: true };
-  if (type === 'mer') prep.step = 1;
+  const prep: PrepFlow = {
+    step: 0,
+    type: type ?? (navZone() === 'lac' ? 'lac' : 'mer'),
+    sub: 'purpose',
+    fresh: true,
+  };
+  if (prep.type === 'mer') {
+    prep.step = 1;
+    prep.sub = null;
+  }
   setPrep(prep);
   buzz();
   toast(

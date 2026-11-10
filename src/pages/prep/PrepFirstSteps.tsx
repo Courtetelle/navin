@@ -2,11 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { prepPathSub } from '../../features/prep/prepPaths.ts';
-import {
-  pickDuree,
-  pickPurpose,
-  pickType,
-} from '../../features/prep/prepPicks.ts';
+import { pickDuree, pickPurpose } from '../../features/prep/prepPicks.ts';
 import type { PrepFlow } from '../../features/prep/prepTypes.ts';
 import { PREP_PURPOSES } from '../../model/modes.ts';
 
@@ -43,37 +39,6 @@ export function PrepPurposeStep({ prep }: PrepStepProps) {
             </Button>
           );
         })}
-      </div>
-      <PrepNav />
-    </>
-  );
-}
-
-/**
- * Lake or sea, when a quick navigation is being completed.
- * @param props - PréP flow.
- * @returns The two choices.
- */
-export function PrepTypeStep({ prep }: PrepStepProps) {
-  return (
-    <>
-      <div className="row c2">
-        <Button
-          className={`btn big ${prep.type === 'lac' ? 'on' : ''}`}
-          data-pick="type"
-          data-v="lac"
-          onClick={() => pickType('lac')}
-        >
-          🏞 Lac
-        </Button>
-        <Button
-          className={`btn big ${prep.type === 'mer' ? 'on' : ''}`}
-          data-pick="type"
-          data-v="mer"
-          onClick={() => pickType('mer')}
-        >
-          ⛵ Mer
-        </Button>
       </div>
       <PrepNav />
     </>

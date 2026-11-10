@@ -219,9 +219,12 @@ function trackerMenu(
       fin,
     ];
   }
+  // Landscape tablet: PréP, START, Météo and VHF have their own buttons;
+  // NavIn only brings back the map.
+  if (context.wide) return [base];
   return [
     base,
-    ...(context.wide ? [] : [weatherItem(actions, false)]),
+    weatherItem(actions, false),
     {
       label: 'PréP',
       html: [FLAG_SVG],

@@ -13,6 +13,7 @@ import { useWide } from '../../lib/useWide.ts';
 import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
+import { domainActions } from '../../shell/topbar/tabDisplays.ts';
 import { addMark, navZone, state, toast } from '../../state/index.ts';
 
 import { RailIcon } from './railIcons.tsx';
@@ -114,6 +115,7 @@ export function SideRails() {
     <>
       {(['left', 'right'] as const).map((side) => (
         <div key={side} className={`side-rail side-rail-${side}`}>
+          {side === 'left' ? <DepartButtons /> : null}
           {side === 'right' ? <CommButton /> : null}
           {rails[side].slice(0, slotsOf(side)).map((key, index) => {
             const entry = key ? known.get(key) : undefined;
@@ -155,6 +157,54 @@ function slotsOf(side: RailSide): number {
 function openCalls(zone: 'ext' | 'int'): void {
   buzz();
   go('vhf', zone);
+}
+
+/**
+ * First of the left column while no track is recorded: PréP opens the
+ * preparation, a long press on START starts the track at once (a short touch
+ * only says so, against a start by mistake).
+ * @returns The two buttons, or nothing during a track.
+ */
+function DepartButtons() {
+  useSignals();
+  const tr = useTr();
+  const start = useLongPress(() => {
+    buzz();
+    domainActions.quickStart();
+  });
+  if (state.view.tracking.value) return null;
+  return (
+    <>
+      <Button
+        type="button"
+        noUiEdit
+        className="rail-btn rail-prep"
+        onClick={() => {
+          buzz();
+          domainActions.prepStart();
+        }}
+      >
+        <span className="rail-icon">
+          <RailIcon name="prep" />
+        </span>
+        <span className="rail-label">{tr('PréP')}</span>
+      </Button>
+      <Button
+        type="button"
+        noUiEdit
+        className={
+          start.hit ? 'rail-btn rail-start lp-hit' : 'rail-btn rail-start'
+        }
+        onClick={() => toast(tr('START : appui long pour démarrer la trace'))}
+        {...start.handlers}
+      >
+        <span className="rail-icon">
+          <RailIcon name="start" />
+        </span>
+        <span className="rail-label">{tr('START')}</span>
+      </Button>
+    </>
+  );
 }
 
 /**
