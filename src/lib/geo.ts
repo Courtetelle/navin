@@ -48,6 +48,31 @@ export function bearing(a: LatLon, b: LatLon): number {
 }
 
 /**
+ * The point reached from a place on a course, over a distance.
+ * @param from - Start.
+ * @param course - True course, degrees.
+ * @param nm - Distance, nautical miles.
+ * @returns The point reached.
+ */
+export function destination(from: LatLon, course: number, nm: number): LatLon {
+  const angle = nm / R_NM;
+  const heading = rad(course);
+  const lat1 = rad(from.lat);
+  const lon1 = rad(from.lon);
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(angle) +
+      Math.cos(lat1) * Math.sin(angle) * Math.cos(heading),
+  );
+  const lon2 =
+    lon1 +
+    Math.atan2(
+      Math.sin(heading) * Math.sin(angle) * Math.cos(lat1),
+      Math.cos(angle) - Math.sin(lat1) * Math.sin(lat2),
+    );
+  return { lat: (lat2 * 180) / Math.PI, lon: (lon2 * 180) / Math.PI };
+}
+
+/**
  * Absolute difference between two bearings, 0-180° (legacy `angDiff`).
  * @param a - First bearing.
  * @param b - Second bearing.

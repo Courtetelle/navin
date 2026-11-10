@@ -7,9 +7,11 @@ import type {
 } from 'leaflet';
 
 import { buzz } from '../../lib/dom.ts';
+import { bearing, destination, distNM } from '../../lib/geo.ts';
 import { state } from '../../state/index.ts';
 
 import { leaflet } from './leaflet.ts';
+import { openRulerEditor } from './rulerEditor.ts';
 import { rulerText } from './rulerText.ts';
 import { tracker } from './trackerState.ts';
 
@@ -155,6 +157,33 @@ export function addRulerControl(map: LeafletMap): void {
     return { marker, onBoat };
   };
 
+  /** A touch on the label: type the course and the distance of the arrow. */
+  const editCourse = () => {
+    if (!ends) return;
+    const from = ends[1 - target]?.marker.getLatLng();
+    const to = ends[target]?.marker.getLatLng();
+    const arrow = ends[target];
+    if (!from || !to || !arrow) return;
+    buzz();
+    const start = { lat: from.lat, lon: from.lng };
+    const end = { lat: to.lat, lon: to.lng };
+    openRulerEditor(
+      Math.round(bearing(start, end)) % 360,
+      distNM(start, end),
+      (course, nm) => {
+        const reached = destination(start, course, nm);
+        arrow.marker.setLatLng(L.latLng(reached.lat, reached.lon));
+        arrow.onBoat = false;
+        redraw();
+        if (!map.getBounds().contains([reached.lat, reached.lon])) {
+          map.fitBounds(L.latLngBounds([from, [reached.lat, reached.lon]]), {
+            padding: [60, 60],
+          });
+        }
+      },
+    );
+  };
+
   const show = () => {
     const boat = boatLatLng();
     const boatSeen = boat !== null && map.getBounds().contains(boat);
@@ -169,7 +198,12 @@ export function addRulerControl(map: LeafletMap): void {
       dashArray: '8 6',
       interactive: false,
     }).addTo(map);
-    label = L.marker(first, { interactive: false, keyboard: false }).addTo(map);
+    label = L.marker(first, {
+      keyboard: false,
+      zIndexOffset: 2100,
+      bubblingMouseEvents: false,
+    }).addTo(map);
+    label.on('click', () => editCourse());
     target = 1;
     ends = [makeEnd(first, boatSeen), makeEnd(second, false)];
     redraw();

@@ -9857,7 +9857,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   background: rgba(18, 161, 80, 0.25);
 }
 .ruler-label {
-  pointer-events: none;
+  cursor: pointer;
 }
 .ruler-label span {
   display: inline-block;
@@ -10001,4 +10001,52 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body .trk-full .leaflet-top.leaflet-left:not(.ctl-col) {
     visibility: hidden;
   }
+}
+
+/* Dividers: course and distance typed on a touch of the label */
+.ruler-label span {
+  pointer-events: auto;
+}
+.ruler-edit {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+.ruler-edit-box {
+  display: grid;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+}
+.ruler-edit-box label {
+  display: grid;
+  gap: 4px;
+  font-weight: 700;
+}
+.ruler-edit-box input {
+  min-height: 52px;
+  padding: 0 12px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface, var(--bg));
+  color: inherit;
+  font: inherit;
+  font-size: 26px;
+  font-weight: 800;
+}
+.ruler-edit-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.ruler-edit-bad input {
+  border-color: #d00000;
 }
