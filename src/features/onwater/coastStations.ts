@@ -240,7 +240,7 @@ export async function mfReadings(
 export type MfCheck =
   | { kind: 'ok'; stations: number; reading: WindReading }
   | { kind: 'noWind'; stations: number; near: string; status: string }
-  | { kind: 'refused'; status: number }
+  | { kind: 'refused'; status: number; apis: string[] | null }
   | { kind: 'empty'; status: number; sample: string }
   | { kind: 'offline' };
 
@@ -264,7 +264,7 @@ export async function mfCheck(
     return { kind: 'offline' };
   }
   if (response.status === 401 || response.status === 403) {
-    return { kind: 'refused', status: response.status };
+    return { kind: 'refused', status: response.status, apis: keyApis(key) };
   }
   const text = response.ok ? await response.text() : '';
   const list = mfStations(text);
@@ -382,4 +382,24 @@ function titleCase(name: string): string {
       /(?<before>^|[\s'-])(?<letter>\p{L})/gu,
       (_match, before: string, letter: string) => before + letter.toUpperCase(),
     );
+}
+
+/**
+ * The APIs a Météo-France "API Key" opens: the key is a JWT listing the
+ * subscriptions of the moment it was generated.
+ * @param key - The key.
+ * @returns The API names, null when the key cannot be read.
+ */
+export function keyApis(key: string): string[] | null {
+  try {
+    const part = key.split('.', 2)[1] ?? '';
+    const json = atob(part.replaceAll('-', '+').replaceAll('_', '/'));
+    const payload = JSON.parse(json) as {
+      subscribedAPIs?: Array<{ name?: string }>;
+    };
+    if (!Array.isArray(payload.subscribedAPIs)) return null;
+    return payload.subscribedAPIs.map((api) => api.name ?? '?');
+  } catch {
+    return null;
+  }
 }

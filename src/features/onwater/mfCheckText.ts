@@ -20,7 +20,18 @@ export function checkText(check: MfCheck): string {
     return `⚠️ Clé valide (${check.stations} stations) mais aucun vent récent près de ${check.near} · codes ${check.status}`;
   }
   if (check.kind === 'refused') {
-    return `❌ Clé refusée par Météo-France (code ${check.status}) · vérifiez le type « API Key » et l’abonnement à « Données Publiques Observation »`;
+    if (check.status !== 403) {
+      return `❌ Clé refusée par Météo-France (code ${check.status}) · vérifiez le type « API Key » et l’abonnement à « Données Publiques Observation »`;
+    }
+    const { apis } = check;
+    let opens = '';
+    if (apis) {
+      opens =
+        apis.length > 0
+          ? ` · cette clé ouvre seulement : ${apis.join(', ')}`
+          : ' · cette clé n’ouvre aucune API';
+    }
+    return `❌ Clé reconnue mais pas autorisée pour « Données Publiques Observation » (code 403)${opens} · abonnez-vous à cette API, puis générez une NOUVELLE clé « API Key » et collez-la ici`;
   }
   if (check.kind === 'empty') {
     return `❌ Réponse inattendue de Météo-France (code ${check.status}) · ${check.sample}`;

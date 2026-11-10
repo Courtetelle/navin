@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   METEO_FRANCE,
   OPEN_WIND_MAP,
+  keyApis,
   mfReading,
   mfStations,
   nearCoastStations,
@@ -141,8 +142,27 @@ describe('Météo-France key check', () => {
   });
 
   it('says a refused key', () => {
-    expect(checkText({ kind: 'refused', status: 401 })).toContain(
+    expect(checkText({ kind: 'refused', status: 401, apis: null })).toContain(
       'Clé refusée',
     );
+  });
+
+  it('lists what a forbidden key opens', () => {
+    const payload = btoa(
+      JSON.stringify({
+        subscribedAPIs: [{ name: 'DonneesPubliquesClimatologie' }],
+      }),
+    );
+    expect(keyApis(`head.${payload}.sign`)).toEqual([
+      'DonneesPubliquesClimatologie',
+    ]);
+    expect(keyApis('not a key')).toBeNull();
+    const text = checkText({
+      kind: 'refused',
+      status: 403,
+      apis: ['DonneesPubliquesClimatologie'],
+    });
+    expect(text).toContain('ouvre seulement : DonneesPubliquesClimatologie');
+    expect(text).toContain('NOUVELLE clé');
   });
 });
