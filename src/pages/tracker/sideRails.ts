@@ -12,19 +12,25 @@ export interface Rails {
 
 /** Places in each column. */
 export const RAIL_SLOTS = 6;
-const RAILS_KEY = 'ldb.rails.v2';
+const RAILS_KEY = 'ldb.rails.v3';
 
 /** Actions on the map itself, beside the screens of the app. */
 export const MAP_ACTIONS: readonly FunctionEntry[] = [
   { key: 'act:zoomin', title: '➕ Zoom avant', sub: 'carte agrandir' },
   { key: 'act:zoomout', title: '➖ Zoom arrière', sub: 'carte réduire' },
   { key: 'act:locate', title: '📍 Bateau', sub: 'centrer position gps' },
+  {
+    key: 'act:point',
+    title: '📌 Point ici',
+    sub: 'marque punaise position bateau journal',
+  },
+  { key: 'act:photo', title: '📷 Photo', sub: 'appareil photo journal' },
 ];
 
 /** The columns of a first start, to show the idea. */
 export const DEFAULT_RAILS: Rails = {
   left: ['weather', 'meteo', 'marks', 'vhf', 'mob', ''],
-  right: ['', '', '', '', '', ''],
+  right: ['act:point', 'act:photo', '', '', '', ''],
 };
 
 function fit(keys: unknown): string[] {

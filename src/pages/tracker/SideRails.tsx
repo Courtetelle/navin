@@ -2,18 +2,24 @@ import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
+import { trkPointNow } from '../../features/map/trackerPoint.ts';
 import { tracker } from '../../features/map/trackerState.ts';
+import { takePhoto } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { useWide } from '../../lib/useWide.ts';
 import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
-import { toast } from '../../state/index.ts';
+import { addMark, state, toast } from '../../state/index.ts';
 import { liveBack } from '../meteo/boatPlace.ts';
 
+import { RailIcon } from './railIcons.tsx';
 import type { RailSide, Rails } from './sideRails.ts';
 import { MAP_ACTIONS, loadRails, setRail, splitTitle } from './sideRails.ts';
+
+/** A GPS position older than this is read again. */
+const FRESH_FIX_MS = 30_000;
 
 /** A place being chosen: its column and its rank. */
 interface Picking {
@@ -25,6 +31,33 @@ function choices(): FunctionEntry[] {
   return [...MAP_ACTIONS, ...functionEntries()];
 }
 
+/**
+ * A pin where the boat is now: a point of the journal during a recording,
+ * otherwise a mark of « Mes repères ».
+ */
+function pinHere(): void {
+  if (state.view.tracking.value) {
+    void trkPointNow();
+    return;
+  }
+  const fix = state.view.lastFix.value;
+  if (fix?.at && Date.now() - Date.parse(fix.at) < FRESH_FIX_MS) {
+    markAt(fix.lat, fix.lon);
+    return;
+  }
+  toast('📌 Lecture de la position GPS…');
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => markAt(coords.latitude, coords.longitude),
+    () => toast('📌 Pas de position GPS : la marque n’est pas enregistrée.'),
+    { enableHighAccuracy: true, timeout: 15_000, maximumAge: 10_000 },
+  );
+}
+
+function markAt(lat: number, lon: number): void {
+  const mark = addMark(lat, lon);
+  toast(`📌 ${mark.name} enregistrée à la position du bateau`);
+}
+
 function run(key: string): void {
   buzz();
   const map = tracker.current?.map;
@@ -34,6 +67,15 @@ function run(key: string): void {
   }
   if (key === 'act:zoomout') {
     map?.zoomOut();
+    return;
+  }
+  if (key === 'act:point') {
+    pinHere();
+    return;
+  }
+  if (key === 'act:photo') {
+    if (state.data.cruise.value) takePhoto('nav', undefined, undefined, true);
+    else toast('Photo : ouvrez d’abord une sortie (PréP), elle y sera rangée.');
     return;
   }
   if (key === 'act:locate') {
@@ -114,6 +156,7 @@ function RailButton({
     );
   }
   const { icon, label } = splitTitle(entry.title);
+  const drawn = entry.key === 'act:point' || entry.key === 'act:photo';
   return (
     <Button
       type="button"
@@ -122,7 +165,9 @@ function RailButton({
       onClick={() => run(entry.key)}
       {...press.handlers}
     >
-      <span className="rail-icon">{icon || '•'}</span>
+      <span className="rail-icon">
+        {drawn ? <RailIcon name={entry.key} /> : icon || '•'}
+      </span>
       <span className="rail-label">{tr(label)}</span>
     </Button>
   );

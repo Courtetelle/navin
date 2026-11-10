@@ -9761,3 +9761,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
     right: 140px;
   }
 }
+.rail-svg {
+  display: block;
+  width: 34px;
+  height: 34px;
+}

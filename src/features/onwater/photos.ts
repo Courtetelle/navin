@@ -51,16 +51,19 @@ export function photosFor(
  * @param context - Moment: `dep`, `nav`, `quit` or a checklist.
  * @param done - Runs after the photos are stored.
  * @param item - Checklist item the photos belong to.
+ * @param camera - Open the back camera straight away, for one photo.
  */
 export function takePhoto(
   context: string,
   done?: () => void,
   item?: string,
+  camera = false,
 ): void {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
-  input.multiple = true;
+  input.multiple = !camera;
+  if (camera) input.setAttribute('capture', 'environment');
   input.addEventListener('change', () => {
     void storePhotos([...(input.files ?? [])], context, item, done);
   });
