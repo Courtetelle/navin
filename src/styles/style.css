@@ -9773,7 +9773,12 @@ body.nav-search:not(.trk-mode) #searchBtn {
 /* Tablet in landscape, every screen: the page between the two columns; the
    magnifier stays in the right column, not in the nav bar. */
 @media (min-width: 1000px) and (orientation: landscape) {
-  html body main#view {
+  html body.trk-mode main#view {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  html body:not(.trk-mode) main#view {
     max-width: none !important;
     margin: 0 140px !important;
     padding-top: 12px;
