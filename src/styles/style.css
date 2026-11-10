@@ -9921,10 +9921,6 @@ body.nav-search:not(.trk-mode) #searchBtn {
     text-align: center;
   }
 }
-.rail-bare .rail-svg {
-  width: 72px;
-  height: 60px;
-}
 
 /* Tablet in landscape: « data » a little larger, same proportions */
 @media (min-width: 1000px) and (orientation: landscape) {
@@ -9935,4 +9931,33 @@ body.nav-search:not(.trk-mode) #searchBtn {
 .rail-start .rail-label {
   color: #12a150;
   font-weight: 900;
+}
+
+/* Tablet columns: every drawing the same size; the map shows through each
+   pill, blurred, only inside its frame (NavIn keeps its own colour). */
+@media (min-width: 1000px) and (orientation: landscape) {
+  html body .rail-btn .rail-svg {
+    width: 50px;
+    height: 50px;
+  }
+  html body .rail-btn .rail-icon {
+    font-size: 36px;
+  }
+  html body .rail-comm .rail-badge .rail-svg {
+    width: 20px;
+    height: 20px;
+  }
+  html body header.topbar.topbar #clock,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data,
+  html body header.topbar.topbar #gearBtn.theme-btn,
+  html body #searchBtn.no-print,
+  html body .rail-btn.rail-btn {
+    background: color-mix(
+      in srgb,
+      var(--surface, #fff) 38%,
+      transparent
+    ) !important;
+    -webkit-backdrop-filter: blur(9px) saturate(1.15) !important;
+    backdrop-filter: blur(9px) saturate(1.15) !important;
+  }
 }

@@ -138,6 +138,19 @@ function Flag() {
         strokeWidth="1.6"
         strokeLinejoin="round"
       />
+      <text
+        x="29"
+        y="37.6"
+        textAnchor="middle"
+        fontSize="11"
+        fontWeight="900"
+        fill="currentColor"
+        fontFamily="Arial, Helvetica, sans-serif"
+        textLength="26"
+        lengthAdjust="spacingAndGlyphs"
+      >
+        PréP
+      </text>
     </svg>
   );
 }
@@ -169,6 +182,20 @@ function Start() {
         stroke="#fff"
         strokeWidth="1.2"
       />
+      <rect x="1" y="27.5" width="34" height="12" rx="3" fill="#12a150" />
+      <text
+        x="18"
+        y="37.3"
+        textAnchor="middle"
+        fontSize="10"
+        fontWeight="900"
+        fill="#fff"
+        fontFamily="Arial, Helvetica, sans-serif"
+        textLength="28"
+        lengthAdjust="spacingAndGlyphs"
+      >
+        START
+      </text>
     </svg>
   );
 }

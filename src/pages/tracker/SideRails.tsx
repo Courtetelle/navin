@@ -179,6 +179,7 @@ function DepartButtons() {
         type="button"
         noUiEdit
         className="rail-btn rail-prep"
+        aria-label={tr('PréP')}
         onClick={() => {
           buzz();
           domainActions.prepStart();
@@ -187,7 +188,6 @@ function DepartButtons() {
         <span className="rail-icon">
           <RailIcon name="prep" />
         </span>
-        <span className="rail-label">{tr('PréP')}</span>
       </Button>
       <Button
         type="button"
@@ -195,13 +195,13 @@ function DepartButtons() {
         className={
           start.hit ? 'rail-btn rail-start lp-hit' : 'rail-btn rail-start'
         }
+        aria-label={tr('START : appui long pour démarrer la trace')}
         onClick={() => toast(tr('START : appui long pour démarrer la trace'))}
         {...start.handlers}
       >
         <span className="rail-icon">
           <RailIcon name="start" />
         </span>
-        <span className="rail-label">{tr('START')}</span>
       </Button>
     </>
   );
@@ -223,12 +223,12 @@ function CommButton() {
         type="button"
         noUiEdit
         className="rail-btn rail-comm"
+        aria-label={tr('Téléphone')}
         onClick={() => openCalls('int')}
       >
         <span className="rail-icon">
           <RailIcon name="phone" />
         </span>
-        <span className="rail-label">{tr('Téléphone')}</span>
       </Button>
     );
   }
@@ -244,7 +244,6 @@ function CommButton() {
       <span className="rail-icon">
         <RailIcon name="vhf" />
       </span>
-      <span className="rail-label">{tr('VHF')}</span>
       <span className="rail-badge" aria-hidden="true">
         <RailIcon name="phone" />
       </span>
@@ -269,8 +268,8 @@ function RailButton({
       : entry;
   const { icon, label } = splitTitle(shown.title);
   const drawn = DRAWN.has(shown.key);
-  // The Météo drawing speaks for itself: no word, a bigger picture.
-  const bare = shown.key === 'weather';
+  // A clear drawing speaks for itself: no word under it.
+  const bare = drawn;
   const classes = ['rail-btn'];
   if (bare) classes.push('rail-bare');
   if (press.hit) classes.push('lp-hit');
