@@ -47,6 +47,43 @@ function Camera() {
   );
 }
 
+/** A handheld VHF: body in the text colour, green screen. */
+function Vhf() {
+  return (
+    <svg className="rail-svg" viewBox="0 0 40 40" aria-hidden="true">
+      <rect
+        x="15"
+        y="1.5"
+        width="3.4"
+        height="12"
+        rx="1.7"
+        fill="currentColor"
+      />
+      <rect x="12" y="11" width="17" height="27" rx="3.5" fill="currentColor" />
+      <rect x="15" y="14.5" width="11" height="7" rx="1.2" fill="#8fd19e" />
+      <path
+        d="M15.5 26h10M15.5 29.2h10M15.5 32.4h10"
+        stroke="#fff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+    </svg>
+  );
+}
+
+/** A green phone handset. */
+function Phone() {
+  return (
+    <svg className="rail-svg" viewBox="0 0 40 40" aria-hidden="true">
+      <path
+        d="M11.5 4.6c1.9-1 4.2-.2 5.1 1.8l2.2 5c.6 1.4.2 3-1 4l-2.2 1.7c1.6 3.5 4.2 6.2 7.6 8l1.6-2.2c.9-1.2 2.6-1.6 4-1l5 2.2c2 .9 2.8 3.2 1.8 5.1l-1.2 2.3c-1.2 2.3-3.8 3.5-6.4 2.9C16.3 32.4 8 24 5.9 13.4c-.5-2.5.7-5 3-6.2z"
+        fill="#12a150"
+      />
+    </svg>
+  );
+}
+
 /**
  * The drawn icon of a function, where the columns have one.
  * @param props - The function key.
@@ -56,5 +93,7 @@ function Camera() {
 export function RailIcon({ name }: { name: string }) {
   if (name === 'act:point') return <PushPin />;
   if (name === 'act:photo') return <Camera />;
+  if (name === 'vhf') return <Vhf />;
+  if (name === 'phone') return <Phone />;
   return null;
 }

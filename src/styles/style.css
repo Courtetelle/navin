@@ -9766,3 +9766,15 @@ body.nav-search:not(.trk-mode) #searchBtn {
   width: 34px;
   height: 34px;
 }
+.rail-comm {
+  position: relative;
+}
+.rail-badge {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+}
+.rail-badge .rail-svg {
+  width: 20px;
+  height: 20px;
+}

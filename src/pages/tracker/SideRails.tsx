@@ -1,3 +1,4 @@
+import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
@@ -11,12 +12,18 @@ import { useWide } from '../../lib/useWide.ts';
 import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
-import { addMark, state, toast } from '../../state/index.ts';
+import { addMark, navZone, state, toast } from '../../state/index.ts';
 import { liveBack } from '../meteo/boatPlace.ts';
 
 import { RailIcon } from './railIcons.tsx';
 import type { RailSide, Rails } from './sideRails.ts';
-import { MAP_ACTIONS, loadRails, setRail, splitTitle } from './sideRails.ts';
+import {
+  MAP_ACTIONS,
+  RAIL_SLOTS,
+  loadRails,
+  setRail,
+  splitTitle,
+} from './sideRails.ts';
 
 /** A GPS position older than this is read again. */
 const FRESH_FIX_MS = 30_000;
@@ -108,7 +115,8 @@ export function SideRails() {
     <>
       {(['left', 'right'] as const).map((side) => (
         <div key={side} className={`side-rail side-rail-${side}`}>
-          {rails[side].map((key, index) => (
+          {side === 'right' ? <CommButton /> : null}
+          {rails[side].slice(0, slotsOf(side)).map((key, index) => (
             <RailButton
               // eslint-disable-next-line react/no-array-index-key -- the places are fixed
               key={index}
@@ -129,6 +137,61 @@ export function SideRails() {
         />
       ) : null}
     </>
+  );
+}
+
+/** The right column gives its first place to the VHF / phone button. */
+function slotsOf(side: RailSide): number {
+  return side === 'right' ? RAIL_SLOTS - 1 : RAIL_SLOTS;
+}
+
+function openCalls(zone: 'ext' | 'int'): void {
+  buzz();
+  go('vhf', zone);
+}
+
+/**
+ * Always shown, first of the right column: at sea the VHF, a long press opens
+ * the phone numbers; on a lake the phone.
+ * @returns The button.
+ */
+function CommButton() {
+  useSignals();
+  const tr = useTr();
+  const lake = navZone() === 'lac';
+  const press = useLongPress(() => openCalls('int'));
+  if (lake) {
+    return (
+      <Button
+        type="button"
+        noUiEdit
+        className="rail-btn rail-comm"
+        onClick={() => openCalls('int')}
+      >
+        <span className="rail-icon">
+          <RailIcon name="phone" />
+        </span>
+        <span className="rail-label">{tr('Téléphone')}</span>
+      </Button>
+    );
+  }
+  return (
+    <Button
+      type="button"
+      noUiEdit
+      className={press.hit ? 'rail-btn rail-comm lp-hit' : 'rail-btn rail-comm'}
+      aria-label={tr('VHF · appui long : téléphone')}
+      onClick={() => openCalls('ext')}
+      {...press.handlers}
+    >
+      <span className="rail-icon">
+        <RailIcon name="vhf" />
+      </span>
+      <span className="rail-label">{tr('VHF')}</span>
+      <span className="rail-badge" aria-hidden="true">
+        <RailIcon name="phone" />
+      </span>
+    </Button>
   );
 }
 
