@@ -2,6 +2,7 @@ import { distKm } from '../../lib/geo.ts';
 import type { Position } from '../../model/types.ts';
 import { isLake } from '../../state/index.ts';
 
+import { mfReadings, owmReadings } from './coastStations.ts';
 import { smnNow, smnStations } from './externals.ts';
 import type { WindConfig } from './windLogic.ts';
 import { windLevel, windValue } from './windLogic.ts';
@@ -59,6 +60,38 @@ export async function stationWind(
 }
 
 /**
+ * Strongest measured wind of the OpenWindMap beacons and the Météo-France
+ * stations (with a key) around the boat, outside Switzerland.
+ * @param config - Alert configuration.
+ * @param position - Boat position.
+ * @returns The wind, null when no station answers.
+ */
+export async function coastWind(
+  config: WindConfig,
+  position: Position,
+): Promise<WindCheck | null> {
+  const [beacons, official] = await Promise.all([
+    owmReadings(position, config.radius).catch(() => []),
+    mfReadings(position, config.radius, config.mfKey).catch(() => []),
+  ]);
+  const readings = [...official, ...beacons];
+  if (readings.length === 0) return null;
+  const top = strongest(readings, config.basis);
+  const sea = isLake() ? null : await seaStateAt(position);
+  return {
+    top,
+    level: windLevel(windValue(top, config.basis)),
+    meta: {
+      n: readings.length,
+      src: 'stations',
+      nets: [...new Set(readings.map((reading) => reading.net ?? ''))],
+      radius: config.radius,
+      ...sea,
+    },
+  };
+}
+
+/**
  * Wind forecast at the boat's position, outside Switzerland.
  * @param config - Alert configuration.
  * @param position - Boat position.
@@ -80,6 +113,7 @@ export async function modelWind(
     meta: {
       n: readings.length,
       src: 'model',
+      radius: config.radius,
       region: region ? region.name : '',
       bias,
       names: readings.map((reading) => reading.name),

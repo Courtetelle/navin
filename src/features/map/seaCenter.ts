@@ -1,7 +1,6 @@
 import type { Settings } from '../../model/settings.ts';
 import { state, updateSettings } from '../../state/index.ts';
 
-
 import type { LatLngPair } from './constants.ts';
 
 /** A place the sea map opens on (`settings.seaPlace`). */

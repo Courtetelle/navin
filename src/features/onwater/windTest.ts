@@ -1,6 +1,6 @@
 import { signal } from '@preact/signals-react';
 
-import { BEAUFORT_TBL } from '../../model/lists.ts';
+import { BEAUFORT_TBL, BFT_KN } from '../../model/lists.ts';
 
 import { playAlarm } from './windAudio.ts';
 import { WIND_POP_DELAY, testSeaTxt, waveOmmTxt } from './windLogic.ts';
@@ -40,16 +40,19 @@ function playLevel(level: number): void {
     return;
   }
   const force = level + 4;
-  playAlarm(level);
+  // Gusts are about 1.4 times the mean wind.
+  const other = `vent moyen ${Math.round((BFT_KN[force - 1] as number) / 1.4)} nd`;
+  playAlarm(level, undefined, { other });
   timer = setTimeout(() => {
     if (!windTestRunning.value) return;
     showWindPopup({
       bf: force,
       kn: `${BEAUFORT_TBL[force]?.[1]} nd`,
+      other,
       where: 'essai',
       sea: testSeaTxt(force),
       omm: waveOmmTxt(force),
-      note: 'Essai : la valeur du modèle est inventée pour l’exemple. En navigation, elle vient du modèle de prévision à la position du bateau.',
+      note: 'Essai : la valeur du modèle est inventée pour l’exemple. En navigation, elle vient des stations de mesure autour du bateau, ou à défaut d’un modèle de prévision, signalé « PRÉVISION ».',
       closeTxt:
         level + 1 > LAST_LEVEL
           ? 'Toucher pour fermer'

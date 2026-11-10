@@ -60,9 +60,14 @@ export function resumeAudio(): void {
  * Two beeps and two colour flashes showing the wind (legacy `playAlarm`).
  * @param level - Alert level, sets the tone, the volume and the colour.
  * @param knots - Wind shown; the level's threshold by default.
+ * @param shown - Forecast wind (the flash says so) and the other wind, in small.
  */
-export function playAlarm(level: number, knots?: number): void {
-  showFlash(level, knots);
+export function playAlarm(
+  level: number,
+  knots?: number,
+  shown: FlashExtra = {},
+): void {
+  showFlash(level, knots, shown);
   const context = audioContext;
   if (context?.state === 'running') {
     playTones(level);
@@ -81,7 +86,25 @@ function playPending(): void {
   if (Date.now() - at < PENDING_MS) playTones(level);
 }
 
-function showFlash(level: number, knots: number | undefined): void {
+/** What the flash adds under the wind. */
+export interface FlashExtra {
+  /**
+   * The wind is forecast, not measured.
+   * @default false
+   */
+  forecast?: boolean;
+  /**
+   * The other wind in small: the mean wind under the gusts, or the gusts.
+   * @default undefined
+   */
+  other?: string;
+}
+
+function showFlash(
+  level: number,
+  knots: number | undefined,
+  { forecast = false, other = '' }: FlashExtra,
+): void {
   const color = flashColor(level);
   const shown =
     knots != null && !Number.isNaN(knots)
@@ -92,6 +115,8 @@ function showFlash(level: number, knots: number | undefined): void {
     ink: flashInk(color),
     knots: shown,
     force: bft(shown),
+    forecast,
+    other,
   });
   navigator.vibrate?.([SIGNAL_MS, PAUSE_MS, SIGNAL_MS]);
 }

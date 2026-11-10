@@ -17,6 +17,8 @@ export interface WindConfig {
   basis: string;
   /** Station search radius in km. */
   radius: number;
+  /** Météo-France API key, empty without one. */
+  mfKey: string;
   [key: string]: unknown;
 }
 
@@ -61,7 +63,13 @@ const DOUGLAS_H = [0, 0.1, 0.5, 1.25, 2.5, 4, 6, 9, 14];
  * @returns The configuration.
  */
 export function windAlertConfig(settings: Settings): WindConfig {
-  return { on: true, basis: 'gust', radius: 30, ...settings.windAlert };
+  return {
+    on: true,
+    basis: 'gust',
+    radius: 30,
+    mfKey: '',
+    ...settings.windAlert,
+  };
 }
 
 /**
@@ -186,8 +194,8 @@ export function windAlertNote(top: WindReading, meta: WindMeta): string {
   const lowered = meta.bias ? `, seuils abaissés de ${meta.bias} nd` : '';
   const where =
     meta.src === 'model'
-      ? `à la position du bateau (prévision ${top.name}${lowered})`
-      : `à ${top.name} (mesure MeteoSwiss)`;
+      ? `PRÉVISION ${top.name} à la position du bateau, pas une mesure (aucune station à moins de ${meta.radius ?? 30} km${lowered})`
+      : `mesuré à ${top.name} (station ${top.net ?? 'MeteoSwiss'}${top.km == null ? '' : `, ${Math.round(top.km)} km`})`;
   const sea = meta.waveH == null ? '' : ` ; ${seaTxt(meta)}`;
   return `${windTxt(top.avg)}, rafales ${gust}${direction} ${where}${sea}`;
 }

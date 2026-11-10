@@ -27,7 +27,7 @@ import {
   windValue,
 } from './windLogic.ts';
 import { showWindPopup } from './windOverlayState.ts';
-import { modelWind, stationWind } from './windReadings.ts';
+import { coastWind, modelWind, stationWind } from './windReadings.ts';
 import type {
   WindMeta,
   WindReading,
@@ -97,10 +97,13 @@ export function windCheck(): void {
   if (!config.on || !navigator.onLine) return;
   lakeFix((position) => {
     if (!position) return;
+    // Measured wind first; the forecast only where no station answers.
     const check =
       isLake() || inSwissArea(position)
         ? stationWind(config, position)
-        : modelWind(config, position);
+        : coastWind(config, position).then(
+            (measured) => measured ?? modelWind(config, position),
+          );
     check
       .then((wind) => {
         if (wind) fireWind(config, wind.top, wind.level, wind.meta);
@@ -139,7 +142,10 @@ function fireWind(
       return;
     }
     const knots = windValue(top, config.basis);
-    playAlarm(level, knots);
+    playAlarm(level, knots, {
+      forecast: meta.src === 'model',
+      other: otherWind(config, top),
+    });
     setTimeout(() => showAlertPopup(config, top, meta, knots), WIND_POP_DELAY);
     if (open) {
       noteAlert({
@@ -167,11 +173,35 @@ function showAlertPopup(
 ): void {
   const force = bft(Math.round(knots));
   const basis = config.basis === 'gust' ? 'en rafales' : 'de vent moyen';
+  const forecast = meta.src === 'model';
+  const network = top.net ?? 'MeteoSwiss';
   showWindPopup({
     bf: force,
-    kn: `${Math.round(knots)} nd ${basis}`,
-    where: meta.src === 'model' ? `prévu ici (${top.name})` : `à ${top.name}`,
+    kn: `${Math.round(knots)} nd ${basis}${forecast ? ' PRÉVUS' : ''}`,
+    other: otherWind(config, top),
+    where: forecast
+      ? `PRÉVISION ${top.name}, pas une mesure`
+      : `mesuré à ${top.name} (${network})`,
     sea: meta.waveH == null ? '' : `modèle ici : ${seaTxt(meta)}`,
     omm: isLake() ? '' : waveOmmTxt(force),
+    ...(forecast
+      ? {
+          note: `⚠️ Aucune station de mesure à moins de ${meta.radius ?? config.radius} km : vent calculé par un modèle de prévision. Le vent réel peut être plus fort ou plus faible.`,
+        }
+      : {}),
   });
+}
+
+/**
+ * The other wind, shown in small: the mean wind under the gusts, the gusts
+ * under the mean wind.
+ * @param config - Alert configuration.
+ * @param top - Reading signalled.
+ * @returns The text, empty without gusts.
+ */
+export function otherWind(config: WindConfig, top: WindReading): string {
+  if (config.basis === 'gust') {
+    return top.gust == null ? '' : `vent moyen ${Math.round(top.avg)} nd`;
+  }
+  return top.gust == null ? '' : `rafales ${Math.round(top.gust)} nd`;
 }

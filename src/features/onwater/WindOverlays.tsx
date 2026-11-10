@@ -63,6 +63,10 @@ function OneFlash({ flash }: { flash: WindFlash }) {
       <div className="wf-txt">
         <b>{flash.knots} nd</b>
         <span>{flash.force} Beaufort</span>
+        {flash.other ? (
+          <span className="wf-other">{translate(flash.other)}</span>
+        ) : null}
+        {flash.forecast ? <span className="wf-fc">PRÉVISION</span> : null}
       </div>
     </div>,
     document.body,
@@ -102,6 +106,9 @@ export function WindPopup() {
         <div className="wp-big">
           💨 {content.bf} Bf · {content.kn}
         </div>
+        {content.other ? (
+          <div className="wp-other">{translate(content.other)}</div>
+        ) : null}
         <div className="wp-name">
           {translate(row?.[2] ?? '')}
           {content.where ? ` · ${translate(content.where)}` : ''}

@@ -2315,6 +2315,18 @@ dl.vocab dd {
   margin-top: 4vh;
   white-space: nowrap;
 }
+.wind-flash .wf-txt .wf-other {
+  font-size: 7vw;
+  margin-top: 2vh;
+  font-weight: 700;
+}
+.wind-flash .wf-txt .wf-fc {
+  font-size: 9vw;
+  margin-top: 3vh;
+  padding: 0.1em 0.4em;
+  border: 0.12em solid currentColor;
+  border-radius: 0.2em;
+}
 :root[data-theme='night'] .wind-flash.on {
   opacity: 0.7;
 }
@@ -8142,6 +8154,11 @@ h1 .help-i.help-i-h1 {
   font-size: 34px;
   font-weight: 800;
   line-height: 1.15;
+}
+.wind-pop .wp-other {
+  font-size: 18px;
+  font-weight: 600;
+  opacity: 0.9;
 }
 .wind-pop .wp-name {
   font-size: 20px;

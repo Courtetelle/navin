@@ -14,6 +14,10 @@ export interface WindFlash {
   knots: number;
   /** Beaufort force. */
   force: number;
+  /** Forecast wind, not measured. */
+  forecast: boolean;
+  /** The other wind, in small (mean wind under the gusts, or the gusts). */
+  other: string;
 }
 
 /** Content of the wind bubble (legacy `windPopShow`). */
@@ -44,6 +48,11 @@ export interface WindPopupContent {
    * @default 'Toucher pour fermer'
    */
   closeTxt?: string;
+  /**
+   * The other wind, in small under the big line.
+   * @default undefined
+   */
+  other?: string;
   /**
    * Stop button of the test mode.
    * @default undefined

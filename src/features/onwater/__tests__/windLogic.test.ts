@@ -30,13 +30,14 @@ test('the configuration defaults to gusts within 30 km', () => {
     on: true,
     basis: 'gust',
     radius: 30,
+    mfKey: '',
   });
   expect(
     windAlertConfig({
       ...SETTINGS_DEFAULTS,
       windAlert: { on: false, basis: 'avg' },
     }),
-  ).toStrictEqual({ on: false, basis: 'avg', radius: 30 });
+  ).toStrictEqual({ on: false, basis: 'avg', radius: 30, mfKey: '' });
 });
 
 test('windValue reads the gusts, or the mean wind without them', () => {
@@ -91,7 +92,7 @@ test('signalDue: first signal, stronger, other degree after a minute, reminder',
 
 test('journal notes of an alert', () => {
   expect(windAlertNote(STATION, { n: 2, src: 'smn' })).toBe(
-    '15 nd · 4 Bf (28 km/h), rafales 22 nd · 6 Bf (41 km/h) du 045° à Bouveret (mesure MeteoSwiss)',
+    '15 nd · 4 Bf (28 km/h), rafales 22 nd · 6 Bf (41 km/h) du 045° mesuré à Bouveret (station MeteoSwiss, 3 km)',
   );
   expect(
     windAlertNote(
@@ -99,7 +100,7 @@ test('journal notes of an alert', () => {
       { n: 1, src: 'model', bias: 5, waveH: 1.3, douglas: 4 },
     ),
   ).toBe(
-    '20 nd · 5 Bf (37 km/h), rafales … à la position du bateau (prévision ECMWF IFS 9 km, seuils abaissés de 5 nd) ; mer 4 agitée, vagues 1,3 m',
+    '20 nd · 5 Bf (37 km/h), rafales … PRÉVISION ECMWF IFS 9 km à la position du bateau, pas une mesure (aucune station à moins de 30 km, seuils abaissés de 5 nd) ; mer 4 agitée, vagues 1,3 m',
   );
   expect(windMutedNote(STATION)).toBe(
     '15 nd · 4 Bf (28 km/h), rafales 22 nd · 6 Bf (41 km/h) (alerte non diffusée jusqu’à la fin de la trace)',

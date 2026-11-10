@@ -10,6 +10,7 @@ import { BFT_KN } from '../../model/lists.ts';
 import { ensureDay, getDay, state } from '../../state/index.ts';
 
 import { BoxHelp } from './BoxHelp.tsx';
+import { MfKeyRow } from './MfKeyRow.tsx';
 import { useBoxTr } from './useBoxTr.ts';
 import type { WindAlertAction } from './windAlertClick.ts';
 import { windAlertClick } from './windAlertClick.ts';
@@ -85,13 +86,15 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
       )}
       <WindLegend keep={keep} />
       <BoxHelp keep={keep} nextIsRow={!noTest}>
-        En Suisse : stations MeteoSwiss. Ailleurs : modèle de prévision le plus
-        fin de la région, à la position du bateau. Deux bips et deux flashs de
-        couleur avec le vent exact (nœuds et Beaufort) à chaque nouveau degré
-        Beaufort dès 4 Bf (11 nd), de plus en plus aigus et forts. Rappel toutes
-        les 15 min. Appli ouverte et écran allumé seulement.
+        Vent mesuré d’abord : stations MeteoSwiss en Suisse, ailleurs balises
+        OpenWindMap et stations Météo-France (avec une clé). Sans station à
+        moins de 30 km, modèle de prévision le plus fin de la région à la
+        position du bateau, signalé « PRÉVISION » dans l’alerte. Deux bips et
+        deux flashs de couleur avec le vent exact (nœuds et Beaufort) à chaque
+        nouveau degré Beaufort dès 4 Bf (11 nd), de plus en plus aigus et forts.
+        Rappel toutes les 15 min. Appli ouverte et écran allumé seulement.
       </BoxHelp>
-      {noTest ? null : <TestRow keep={keep} />}
+      {noTest ? <MfKeyRow /> : <TestRow keep={keep} />}
     </div>
   );
 }
@@ -172,10 +175,24 @@ function WatchLine({
   const tr = useBoxTr(keep);
   const wind = windTxt(Math.round(windValue(watch.top, config.basis)));
   const time = fmtTime(new Date(watch.top.t));
+  if (watch.src === 'stations') {
+    const nets = (watch.nets ?? []).join(' et ');
+    const head = `Mesure, le plus fort autour (${watch.n} station${watch.n > 1 ? 's' : ''} ${nets} à moins de ${watch.radius ?? config.radius} km) : `;
+    return (
+      <BoxHelp
+        keep={keep}
+        text={`${head}${wind} à ${watch.top.name}, ${time}.`}
+      >
+        {tr(head, { help: true })}
+        <b>{tr(wind, { help: true })}</b>
+        {tr(` à ${watch.top.name}, ${time}.`, { help: true })}
+      </BoxHelp>
+    );
+  }
   if (watch.src === 'model') {
     const names = watch.names ? watch.names.join(' et ') : watch.top.name;
     const strongest = watch.n > 1 ? ', le plus fort retenu' : '';
-    const head = `Prévision à la position du bateau (${names}${strongest}) : `;
+    const head = `PRÉVISION, pas une mesure : aucune station à moins de ${watch.radius ?? config.radius} km. Modèle à la position du bateau (${names}${strongest}) : `;
     const lowered = watch.bias
       ? ` Seuils abaissés de ${watch.bias} nd (${watch.region}) : les modèles sous-estiment les accélérations entre les îles.`
       : '';

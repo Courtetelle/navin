@@ -19,6 +19,11 @@ export interface WindReading {
    * @default undefined
    */
   model?: string;
+  /**
+   * Network of a measuring station outside Switzerland (`OpenWindMap`, `Météo-France`).
+   * @default undefined
+   */
+  net?: string;
 }
 
 /** Sea state from the marine model. */
@@ -33,7 +38,7 @@ export interface SeaState {
 export interface WindMeta extends Partial<SeaState> {
   /** Readings compared. */
   n: number;
-  /** `'smn'` (stations) or `'model'`. */
+  /** `'smn'` (MeteoSwiss), `'stations'` (other networks) or `'model'` (forecast). */
   src: string;
   /**
    * Region of the model.
@@ -50,6 +55,16 @@ export interface WindMeta extends Partial<SeaState> {
    * @default undefined
    */
   names?: string[];
+  /**
+   * Networks of the stations read.
+   * @default undefined
+   */
+  nets?: string[];
+  /**
+   * Radius searched for stations, in km.
+   * @default undefined
+   */
+  radius?: number;
 }
 
 /** The last wind check, kept in `day.windWatch` (legacy `windWatchLast`). */
