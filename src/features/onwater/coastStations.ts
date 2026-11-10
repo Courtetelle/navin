@@ -383,6 +383,25 @@ export async function mfCheck(
   };
 }
 
+/**
+ * Rows of a Météo-France station (`station/infrahoraire-6m`).
+ * @param id - Station id.
+ * @param key - Météo-France key.
+ * @returns The rows, empty when refused or empty.
+ */
+export async function mfRows(
+  id: string,
+  key: string,
+): Promise<Array<Record<string, unknown>>> {
+  const response = await mfFetch(
+    `${mfBase(key)}station/infrahoraire-6m?id_station=${encodeURIComponent(id)}&format=json`,
+    key,
+  );
+  if (!response.ok) return [];
+  const rows: unknown = await response.json();
+  return Array.isArray(rows) ? (rows as Array<Record<string, unknown>>) : [];
+}
+
 async function mfStationWind(
   station: CoastStation,
   km: number,

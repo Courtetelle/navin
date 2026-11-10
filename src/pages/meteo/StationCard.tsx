@@ -7,6 +7,7 @@ import { fmtTime } from '../../lib/format.ts';
 import { bft, windTxt } from '../../lib/wind.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 
+import { WindTrendChart } from './WindTrendChart.tsx';
 import { ageText, compassPoint, forceText, windColors } from './liveText.ts';
 
 /** Props of {@link StationCard}. */
@@ -14,6 +15,8 @@ export interface StationCardProps {
   station: LiveStation;
   /** Wind the colour follows, `'gust'` or `'avg'`. */
   basis: string;
+  /** Météo-France key, for the past of its stations. */
+  mfKey: string;
   /** Epoch milliseconds, for the age of the measurement. */
   now: number;
   /** The stations are being read again. */
@@ -32,6 +35,7 @@ export interface StationCardProps {
 export function StationCard({
   station,
   basis,
+  mfKey,
   now,
   loading,
   onBack,
@@ -91,6 +95,7 @@ export function StationCard({
           {tr(`${forceText(station.avg)} · ${row?.[2] ?? ''}`)}
         </div>
       </div>
+      <WindTrendChart station={station} mfKey={mfKey} />
       <table className="live-tbl">
         <tbody>
           {rows.map(([label, value]) => (

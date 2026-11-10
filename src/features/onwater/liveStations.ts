@@ -2,6 +2,7 @@ import { distKm } from '../../lib/geo.ts';
 
 import { mfReadings, owmReadings } from './coastStations.ts';
 import { smnNow, smnStations } from './externals.ts';
+import { rememberReadings } from './stationHistory.ts';
 import type { StationRow } from './windModels.ts';
 import { stationReading } from './windModels.ts';
 import type { WindReading } from './windTypes.ts';
@@ -38,9 +39,11 @@ export async function liveStations(
     owmReadings(center, radius, LIVE_MOST).catch(() => []),
     mfReadings(center, radius, mfKey, LIVE_MOST).catch(() => []),
   ]);
-  return [...swiss, ...beacons, ...french]
+  const live = [...swiss, ...beacons, ...french]
     .filter(isLive)
     .toSorted((a, b) => (a.km ?? 0) - (b.km ?? 0));
+  rememberReadings(live, Date.now());
+  return live;
 }
 
 /**

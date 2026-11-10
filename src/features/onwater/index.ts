@@ -33,6 +33,13 @@
  * | `hasAboard()`, `taskTpl`             | `src/state/index.ts` (`hasAboard`, `state.data.taskTpl`)     |
  * | `putPhoto`, `getPhoto`, `delPhoto`, `shrinkPhoto`, `PHOTO_CTX` | `src/storage/photos.ts`            |
  */
+export {
+  HISTORY_MS,
+  rememberReadings,
+  stationHistory,
+  windTrend,
+} from './stationHistory.ts';
+export type { WindPoint, WindTrend } from './stationHistory.ts';
 export { distKm } from '../../lib/geo.ts';
 
 export { BoatFieldsEditor } from './BoatFieldsEditor.tsx';

@@ -126,6 +126,7 @@ export function MeteoPage() {
         <StationCard
           station={station}
           basis={config.basis}
+          mfKey={config.mfKey}
           now={now}
           loading={loading}
           onBack={showMap}
