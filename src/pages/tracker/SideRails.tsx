@@ -105,6 +105,7 @@ export function SideRails() {
   const [picking, setPicking] = useState<Picking | null>(null);
   if (!wide) return null;
   const known = new Map(choices().map((entry) => [entry.key, entry]));
+  const weather = known.get('weather');
   const pick = (key: string) => {
     if (!picking) return;
     buzz();
@@ -115,7 +116,13 @@ export function SideRails() {
     <>
       {(['left', 'right'] as const).map((side) => (
         <div key={side} className={`side-rail side-rail-${side}`}>
-          {side === 'left' ? <DepartButtons /> : null}
+          {side === 'left' ? (
+            <>
+              {weather ? <RailButton entry={weather} onPick={noPick} /> : null}
+              <DepartButtons />
+              <div className="rail-data-place" aria-hidden="true" />
+            </>
+          ) : null}
           {side === 'right' ? <CommButton /> : null}
           {rails[side].slice(0, slotsOf(side)).map((key, index) => {
             const entry = key ? known.get(key) : undefined;
@@ -146,13 +153,22 @@ export function SideRails() {
   );
 }
 
+function noPick(): void {
+  // The fixed places of the left column are not chosen.
+}
+
 /** Functions shown with a drawing rather than their emoji. */
 const DRAWN = new Set(['act:point', 'act:photo', 'weather']);
 
-/** The right column gives its first place to the VHF / phone button. */
+/**
+ * Places left for the sailor's buttons: the right column gives its first to
+ * the VHF / phone button, the left one has Météo, PréP, START and data first.
+ */
 function slotsOf(side: RailSide): number {
-  return side === 'right' ? RAIL_SLOTS - 1 : RAIL_SLOTS;
+  return side === 'right' ? RAIL_SLOTS - 1 : LEFT_SLOTS;
 }
+
+const LEFT_SLOTS = 3;
 
 function openCalls(zone: 'ext' | 'int'): void {
   buzz();
@@ -172,9 +188,10 @@ function DepartButtons() {
     buzz();
     domainActions.quickStart();
   });
-  if (state.view.tracking.value) return null;
+  // During a track their places stay empty, so data never moves.
+  const hidden = state.view.tracking.value;
   return (
-    <>
+    <div className={hidden ? 'rail-depart rail-hidden' : 'rail-depart'}>
       <Button
         type="button"
         noUiEdit
@@ -203,7 +220,7 @@ function DepartButtons() {
           <RailIcon name="start" />
         </span>
       </Button>
-    </>
+    </div>
   );
 }
 

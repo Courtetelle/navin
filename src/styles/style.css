@@ -6111,6 +6111,8 @@ body.is-tracking .top-tab.bare.stop-armed {
   color: #f0a000;
   /* The sun glyph is drawn smaller than the moon: brought to the same size. */
   font-size: 4.4em;
+  /* A little higher, rising above the time. */
+  transform: translateY(-14%);
 }
 .clock .clock-sun-icon.set {
   color: #4a6fa5;
@@ -9681,7 +9683,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     height: 62px !important;
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data {
-    top: calc(144px + env(safe-area-inset-top)) !important;
+    top: calc(384px + env(safe-area-inset-top)) !important;
     left: 10px !important;
     height: 56px !important;
   }
@@ -9721,7 +9723,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body .side-rail {
-    top: calc(212px + env(safe-area-inset-top));
+    top: calc(144px + env(safe-area-inset-top));
     width: 96px;
   }
   html body .side-rail-right {
@@ -9959,5 +9961,41 @@ body.nav-search:not(.trk-mode) #searchBtn {
     ) !important;
     -webkit-backdrop-filter: blur(9px) saturate(1.15) !important;
     backdrop-filter: blur(9px) saturate(1.15) !important;
+  }
+}
+
+/* Tablet left column: Météo, PréP, START, then the place of data */
+.rail-depart {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rail-depart.rail-hidden {
+  visibility: hidden;
+}
+.rail-data-place {
+  height: 56px;
+  flex: none;
+}
+
+/* Tablet columns: only the pills catch a touch, never the gaps between */
+.side-rail {
+  pointer-events: none;
+}
+.side-rail .rail-btn {
+  pointer-events: auto;
+}
+.side-rail .rail-hidden .rail-btn {
+  pointer-events: none;
+}
+@media (min-width: 1000px) and (orientation: landscape) {
+  /* PréP fills its pill, as its flag did before */
+  html body .rail-btn.rail-prep .rail-svg {
+    width: 74px;
+    height: 62px;
+  }
+  /* While the map is being built, its buttons stay hidden until placed */
+  html body .trk-full .leaflet-top.leaflet-left:not(.ctl-col) {
+    visibility: hidden;
   }
 }
