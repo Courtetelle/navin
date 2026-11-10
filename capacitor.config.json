@@ -1,0 +1,12 @@
+{
+  "appId": "io.github.courtetelle.navin",
+  "appName": "NavIn",
+  "webDir": "dist",
+  "server": {
+    "url": "https://courtetelle.github.io/navin/",
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#000000"
+  }
+}
