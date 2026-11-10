@@ -12,7 +12,7 @@ export interface Rails {
 
 /** Places in each column. */
 export const RAIL_SLOTS = 6;
-const RAILS_KEY = 'ldb.rails';
+const RAILS_KEY = 'ldb.rails.v2';
 
 /** Actions on the map itself, beside the screens of the app. */
 export const MAP_ACTIONS: readonly FunctionEntry[] = [
@@ -23,8 +23,8 @@ export const MAP_ACTIONS: readonly FunctionEntry[] = [
 
 /** The columns of a first start, to show the idea. */
 export const DEFAULT_RAILS: Rails = {
-  left: ['weather', 'meteo', 'act:zoomin', 'act:zoomout', '', ''],
-  right: ['marks', 'vhf', 'mob', '', '', ''],
+  left: ['weather', 'meteo', 'marks', 'vhf', 'mob', ''],
+  right: ['', '', '', '', '', ''],
 };
 
 function fit(keys: unknown): string[] {

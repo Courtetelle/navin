@@ -44,7 +44,13 @@ export function RemarkPill() {
   }, []);
   const left = Math.max(
     4,
-    Math.min(size.width - 52, position.x ?? size.width - 60),
+    Math.min(
+      size.width - 52,
+      // On a landscape tablet, clear of the right column of buttons.
+      position.x ??
+        size.width -
+          (size.width >= 1000 && size.width > size.height ? 260 : 60),
+    ),
   );
   const top = Math.max(
     4,
