@@ -24,6 +24,7 @@ import { setMapWatch } from '../../features/map/mapWatch.ts';
 import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
 import { showPendingPlace } from '../../features/map/placeTarget.ts';
 import { recenterAfterDrag } from '../../features/map/recenterAfterDrag.ts';
+import { addRulerControl } from '../../features/map/rulerTool.ts';
 import { SEA_ZOOM, seaCenter } from '../../features/map/seaCenter.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
@@ -98,6 +99,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   keepTilesFilled(map, [osm, swiss]);
   void addOfflineMaps(map, layers, osm);
   addFullscreenControl(map);
+  addRulerControl(map);
   startOrientation(map);
   keepBoatCentred(map, () =>
     handle.follow && handle.me ? handle.me.getLatLng() : null,

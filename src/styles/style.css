@@ -9663,7 +9663,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     box-sizing: border-box;
   }
   html body header.topbar #clock {
-    top: 8px !important;
+    top: calc(8px + env(safe-area-inset-top)) !important;
     left: 10px !important;
     height: 50px;
     padding: 2px 0;
@@ -9674,12 +9674,12 @@ body.nav-search:not(.trk-mode) #searchBtn {
     backdrop-filter: blur(6px);
   }
   html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
-    top: 64px !important;
+    top: calc(64px + env(safe-area-inset-top)) !important;
     left: 10px !important;
     height: 62px !important;
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data {
-    top: 132px !important;
+    top: calc(132px + env(safe-area-inset-top)) !important;
     left: 10px !important;
     height: 56px !important;
   }
@@ -9690,12 +9690,12 @@ body.nav-search:not(.trk-mode) #searchBtn {
     height: 64px !important;
   }
   html body header.topbar #gearBtn {
-    top: 8px !important;
+    top: calc(8px + env(safe-area-inset-top)) !important;
     right: 10px !important;
     height: 52px !important;
   }
   html body #searchBtn {
-    top: 68px !important;
+    top: calc(68px + env(safe-area-inset-top)) !important;
     right: 10px !important;
     left: auto !important;
     bottom: auto !important;
@@ -9719,11 +9719,11 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body .side-rail {
-    top: 200px;
+    top: calc(200px + env(safe-area-inset-top));
     width: 120px;
   }
   html body .side-rail-right {
-    top: 130px;
+    top: calc(130px + env(safe-area-inset-top));
   }
   html body .trk-full .trk-dash {
     left: 140px;
@@ -9738,7 +9738,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     filter: none !important;
   }
   html body .trk-full .leaflet-top.ctl-col {
-    top: 8px !important;
+    top: calc(8px + env(safe-area-inset-top)) !important;
     left: auto !important;
     right: 138px !important;
     padding-top: 0 !important;
@@ -9793,6 +9793,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
   html body #navtop {
     top: 0 !important;
+    padding-top: calc(8px + env(safe-area-inset-top)) !important;
     max-width: min(760px, calc(100vw - 280px)) !important;
   }
   html body #navSearchSlot,
@@ -9833,4 +9834,87 @@ body.nav-search:not(.trk-mode) #searchBtn {
   font-size: 15px;
   font-weight: 600;
   color: var(--muted);
+}
+
+/* Dividers: two points to move with a finger, distance and course between */
+.ruler-end {
+  border: 4px solid #e6007e;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35);
+}
+.ruler-end.on-boat {
+  border-color: #12a150;
+  background: rgba(18, 161, 80, 0.25);
+}
+.ruler-label {
+  pointer-events: none;
+}
+.ruler-label span {
+  display: inline-block;
+  transform: translate(-50%, -150%);
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111;
+  font-size: 16px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+}
+:root[data-theme='night'] .ruler-label span {
+  background: rgba(20, 0, 0, 0.9);
+  color: #ff4040;
+}
+:root[data-theme='night'] .ruler-end {
+  border-color: #ff4040;
+  background: rgba(40, 0, 0, 0.5);
+}
+.ruler-btn.on {
+  color: #e6007e !important;
+}
+.ruler-end.ruler-arrow {
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.ruler-arrow span {
+  display: block;
+  width: 34px;
+  height: 34px;
+}
+.ruler-arrow svg {
+  display: block;
+  fill: #e6007e;
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.45));
+}
+.ruler-arrow.on-boat svg {
+  fill: #12a150;
+}
+:root[data-theme='night'] .ruler-arrow svg {
+  fill: #ff4040;
+  stroke: #300;
+}
+
+/* Tablet in landscape: the time in the middle of its pill */
+@media (min-width: 1000px) and (orientation: landscape) {
+  html body header.topbar.topbar #clock {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  html body header.topbar.topbar #clock > * {
+    margin: 0 !important;
+    left: auto !important;
+    text-align: center;
+  }
+}
+.rail-bare .rail-svg {
+  width: 72px;
+  height: 60px;
 }

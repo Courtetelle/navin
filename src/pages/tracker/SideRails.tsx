@@ -219,18 +219,24 @@ function RailButton({
       : entry;
   const { icon, label } = splitTitle(shown.title);
   const drawn = DRAWN.has(shown.key);
+  // The Météo drawing speaks for itself: no word, a bigger picture.
+  const bare = shown.key === 'weather';
+  const classes = ['rail-btn'];
+  if (bare) classes.push('rail-bare');
+  if (press.hit) classes.push('lp-hit');
   return (
     <Button
       type="button"
       noUiEdit
-      className={press.hit ? 'rail-btn lp-hit' : 'rail-btn'}
+      className={classes.join(' ')}
+      aria-label={bare ? tr(label) : undefined}
       onClick={() => run(shown.key)}
       {...press.handlers}
     >
       <span className="rail-icon">
         {drawn ? <RailIcon name={shown.key} /> : icon || '•'}
       </span>
-      <span className="rail-label">{tr(label)}</span>
+      {bare ? null : <span className="rail-label">{tr(label)}</span>}
     </Button>
   );
 }

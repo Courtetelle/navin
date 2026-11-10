@@ -21,6 +21,7 @@ import {
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
 import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
+import { addRulerControl } from '../../features/map/rulerTool.ts';
 import { SEA_ZOOM, seaCenter } from '../../features/map/seaCenter.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
 import { keepTilesFilled } from '../../features/map/tileFallback.ts';
@@ -107,6 +108,7 @@ export function buildJournalMap(
   keepTilesFilled(map, [osm, swiss]);
   void addOfflineMaps(map, layers, osm);
   addFullscreenControl(map);
+  addRulerControl(map);
   const points: LatLngExpression[] = [];
   for (const part of segments(data.line)) {
     L.polyline(smoothLine(part), {
