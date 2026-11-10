@@ -6109,6 +6109,8 @@ body.is-tracking .top-tab.bare.stop-armed {
 }
 .clock .clock-sun-icon.rise {
   color: #f0a000;
+  /* The sun glyph is drawn smaller than the moon: brought to the same size. */
+  font-size: 3.4em;
 }
 .clock .clock-sun-icon.set {
   color: #4a6fa5;
