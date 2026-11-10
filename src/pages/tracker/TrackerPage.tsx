@@ -17,6 +17,7 @@ import {
 import { useBodyClass } from '../../shell/bodyClass.ts';
 import { state } from '../../state/index.ts';
 
+import { SideRails } from './SideRails.tsx';
 import { TrackerDash } from './TrackerDash.tsx';
 import { TrackerOverlay } from './TrackerOverlay.tsx';
 import { buildTrackerMap } from './buildTrackerMap.ts';
@@ -70,6 +71,7 @@ export function TrackerPage() {
       </div>
       <TrackerDash />
       <TrackerOverlay />
+      <SideRails />
     </div>
   );
 }
