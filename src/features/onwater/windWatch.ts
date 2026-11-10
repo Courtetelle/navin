@@ -2,6 +2,7 @@ import { signal } from '@preact/signals-react';
 
 import { dayKey, uid } from '../../lib/format.ts';
 import { bft } from '../../lib/wind.ts';
+import { go } from '../../shell/router.ts';
 import {
   addEntry,
   isLake,
@@ -34,6 +35,9 @@ import type {
   WindSignal,
   WindWatch,
 } from './windTypes.ts';
+
+/** Where the last wind check read the wind: the live screen opens there. */
+export const windWatchPlace = signal<{ lat: number; lon: number } | null>(null);
 
 /** Last wind check, also kept without an open cruise (legacy `windWatchLast`). */
 export const windWatchLast = signal<WindWatch | null>(null);
@@ -97,6 +101,7 @@ export function windCheck(): void {
   if (!config.on || !navigator.onLine) return;
   lakeFix((position) => {
     if (!position) return;
+    windWatchPlace.value = { lat: position.lat, lon: position.lon };
     // Measured wind first; the forecast only where no station answers.
     const check =
       isLake() || inSwissArea(position)
@@ -184,6 +189,7 @@ function showAlertPopup(
       : `mesuré à ${top.name} (${network})`,
     sea: meta.waveH == null ? '' : `modèle ici : ${seaTxt(meta)}`,
     omm: isLake() ? '' : waveOmmTxt(force),
+    onLive: () => go('meteo'),
     ...(forecast
       ? {
           note: `⚠️ Aucune station de mesure à moins de ${meta.radius ?? config.radius} km : vent calculé par un modèle de prévision. Le vent réel peut être plus fort ou plus faible.`,

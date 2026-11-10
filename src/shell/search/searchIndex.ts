@@ -45,6 +45,11 @@ const OTHER_FUNCTIONS: readonly FunctionEntry[] = [
     sub: 'alarme profondeur sonde mode nuit sauvegarde',
   },
   { key: 'marks', title: '◆ Mes repères', sub: 'points marques' },
+  {
+    key: 'meteo',
+    title: '🌬 Conditions météo, live',
+    sub: 'vent stations mesures rafales',
+  },
   { key: 'beaufort', title: '💨 Échelle de Beaufort', sub: 'vent' },
   { key: 'douglas', title: '🌊 Échelle de Douglas', sub: 'mer vagues' },
   { key: 'alpha', title: '🔤 Alphabet phonétique', sub: 'épeler radio' },

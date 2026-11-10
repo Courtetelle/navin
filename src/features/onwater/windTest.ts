@@ -1,6 +1,7 @@
 import { signal } from '@preact/signals-react';
 
 import { BEAUFORT_TBL, BFT_KN } from '../../model/lists.ts';
+import { go } from '../../shell/router.ts';
 
 import { playAlarm } from './windAudio.ts';
 import { WIND_POP_DELAY, testSeaTxt, waveOmmTxt } from './windLogic.ts';
@@ -58,6 +59,10 @@ function playLevel(level: number): void {
           ? 'Toucher pour fermer'
           : 'Toucher pour le niveau suivant',
       onStop: windTestStop,
+      onLive: () => {
+        windTestStop();
+        go('meteo');
+      },
       onClose: () => playLevel(level + 1),
     });
   }, WIND_POP_DELAY);

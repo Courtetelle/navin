@@ -13,7 +13,7 @@ import {
 const sea = { cruiseOpen: true, alphaBack: 'more' };
 
 test('there is one legacy view per page folder', () => {
-  expect(VIEW_NAMES).toHaveLength(39);
+  expect(VIEW_NAMES).toHaveLength(40);
 });
 
 test('the tab of a screen follows app.js:662', () => {

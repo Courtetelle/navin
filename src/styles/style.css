@@ -9027,3 +9027,138 @@ body:not(.trk-mode) #searchBtn {
 .swipe-row.swiping > .swipe-slide {
   transition: none;
 }
+
+/* Live weather conditions (screen `meteo`). */
+.live-map-part.hidden {
+  display: none;
+}
+.live-status {
+  margin: 4px 0 8px;
+}
+.map.live-map {
+  height: calc(100vh - 430px);
+  min-height: 320px;
+}
+.live-mk-wrap {
+  background: none;
+  border: 0;
+}
+.live-mk {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 2px 6px;
+  border: 2px solid #000;
+  border-radius: 12px;
+  background: var(--c);
+  color: var(--ink);
+  font-weight: 900;
+  font-size: 16px;
+  line-height: 1.1;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+.live-mk i {
+  display: inline-block;
+  font-style: normal;
+  font-size: 14px;
+}
+.live-mk small {
+  font-size: 11px;
+  font-weight: 700;
+}
+.live-list {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.btn.live-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  justify-content: flex-start;
+}
+.live-badge {
+  flex: none;
+  min-width: 46px;
+  padding: 6px 4px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 20px;
+  text-align: center;
+}
+.live-row-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.live-row-txt small {
+  font-weight: 500;
+  white-space: normal;
+}
+.live-head {
+  margin: 12px 0;
+  padding: 16px;
+  border: 3px solid #000;
+  border-radius: var(--radius);
+  text-align: center;
+}
+.live-name {
+  font-size: 22px;
+  font-weight: 800;
+}
+.live-big {
+  font-size: 30px;
+  font-weight: 700;
+  margin-top: 6px;
+}
+.live-big b {
+  font-size: 64px;
+  font-weight: 900;
+}
+.live-big i {
+  display: inline-block;
+  font-style: normal;
+  margin-right: 8px;
+}
+.live-big small {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+}
+.live-force {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.live-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 17px;
+}
+.live-tbl th,
+.live-tbl td {
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.live-tbl th {
+  font-weight: 600;
+  width: 48%;
+}
+.wind-pop .wp-live {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+}
+:root[data-theme='night'] .live-mk,
+:root[data-theme='night'] .live-badge,
+:root[data-theme='night'] .live-head {
+  filter: brightness(0.7);
+}

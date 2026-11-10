@@ -92,6 +92,10 @@ export const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/marks/MarksPage.tsx').then((module) => ({
       default: module.MarksPage,
     })),
+  meteo: () =>
+    import('../pages/meteo/MeteoPage.tsx').then((module) => ({
+      default: module.MeteoPage,
+    })),
   mob: () =>
     import('../pages/mob/MobPage.tsx').then((module) => ({
       default: module.MobPage,

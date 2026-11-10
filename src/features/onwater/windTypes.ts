@@ -24,6 +24,31 @@ export interface WindReading {
    * @default undefined
    */
   net?: string;
+  /**
+   * Station id in its network.
+   * @default undefined
+   */
+  id?: string;
+  /**
+   * Station latitude.
+   * @default undefined
+   */
+  lat?: number;
+  /**
+   * Station longitude.
+   * @default undefined
+   */
+  lon?: number;
+  /**
+   * Air temperature in °C.
+   * @default undefined
+   */
+  air?: number | null;
+  /**
+   * Sea-level pressure in hPa.
+   * @default undefined
+   */
+  baro?: number | null;
 }
 
 /** Sea state from the marine model. */

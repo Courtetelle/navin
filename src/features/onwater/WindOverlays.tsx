@@ -95,10 +95,9 @@ export function WindPopup() {
       onClick={(event) => {
         event.stopPropagation();
         windPopup.value = null;
-        const stop =
-          event.target instanceof Element &&
-          event.target.closest('.wp-stop') !== null;
-        if (stop) content.onStop?.();
+        const target = event.target instanceof Element ? event.target : null;
+        if (target?.closest('.wp-stop')) content.onStop?.();
+        else if (target?.closest('.wp-live')) content.onLive?.();
         else content.onClose?.();
       }}
     >
@@ -123,6 +122,11 @@ export function WindPopup() {
           <div className="wp-note">{translate(content.note)}</div>
         ) : null}
         <div className="wp-desc">{translate(row?.[4] ?? '')}</div>
+        {content.onLive ? (
+          <Button className="btn primary wp-live" noUiEdit>
+            {translate('🌬 Conditions météo, live')}
+          </Button>
+        ) : null}
         <div className="wp-close">
           {translate(content.closeTxt ?? 'Toucher pour fermer')}
         </div>

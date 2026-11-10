@@ -49,6 +49,11 @@ export interface WindPopupContent {
    */
   closeTxt?: string;
   /**
+   * Opens the live weather conditions screen, from its button.
+   * @default undefined
+   */
+  onLive?: () => void;
+  /**
    * The other wind, in small under the big line.
    * @default undefined
    */

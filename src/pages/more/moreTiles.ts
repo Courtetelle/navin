@@ -21,6 +21,11 @@ const CHECKLIST_BASES: MoreTile = {
   title: '✅ Mes check-lists',
   sub: 'check-in, bases modèles',
 };
+const METEO: MoreTile = {
+  key: 'meteo',
+  title: '🌬 Conditions météo, live',
+  sub: 'vent mesuré par les stations autour, carte',
+};
 const LISTS: MoreTile = {
   key: 'lists',
   title: '📋 Listes',
@@ -51,6 +56,7 @@ export function tilesWithoutCruise(): MoreTile[] {
   const boatCount = boats.value.length;
   const tiles = [
     TRACES,
+    METEO,
     CHECKLIST_BASES,
     {
       key: 'boats',
@@ -108,6 +114,7 @@ export function tilesWithCruise(): MoreTile[] {
     { key: 'log', title: '📜 Journal', sub: 'toutes les entrées' },
     sosLogsTile(),
     TRACES,
+    METEO,
   ];
   if (hasAboard()) {
     tiles.push({

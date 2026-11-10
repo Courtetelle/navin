@@ -1,5 +1,4 @@
 import { distKm } from '../../lib/geo.ts';
-import type { Position } from '../../model/types.ts';
 import { store } from '../../storage/store.ts';
 
 import type { WindReading } from './windTypes.ts';
@@ -37,6 +36,7 @@ interface OwmLive {
     wind_speed_avg?: number | null;
     // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
     wind_speed_max?: number | null;
+    pressure?: number | null;
   };
 }
 
@@ -87,6 +87,7 @@ export function nearCoastStations(
   stations: readonly CoastStation[],
   position: { lat: number; lon: number },
   radius: number,
+  most = MAX_STATIONS,
 ): Array<{ station: CoastStation; km: number }> {
   return stations
     .map((station) => ({
@@ -95,7 +96,7 @@ export function nearCoastStations(
     }))
     .filter(({ km }) => km < radius)
     .toSorted((a, b) => a.km - b.km)
-    .slice(0, MAX_STATIONS);
+    .slice(0, most);
 }
 
 /**
@@ -143,6 +144,7 @@ export function owmReading(
         ? null
         : measure.wind_speed_max * KMH_TO_KN,
     dir: measure.wind_heading ?? null,
+    baro: measure.pressure ?? null,
     net: OPEN_WIND_MAP,
   };
 }
@@ -200,6 +202,8 @@ export function mfReading(
     avg: (row.ff ?? 0) * MS_TO_KN,
     gust: gust == null ? null : gust * MS_TO_KN,
     dir: row.dd ?? null,
+    air: typeof row.t === 'number' ? row.t - 273.15 : null,
+    baro: typeof row.pmer === 'number' ? row.pmer / 100 : null,
     net: METEO_FRANCE,
   };
 }
@@ -211,8 +215,9 @@ export function mfReading(
  * @returns The readings, empty without network.
  */
 export async function owmReadings(
-  position: Position,
+  position: { lat: number; lon: number },
   radius: number,
+  most = MAX_STATIONS,
 ): Promise<WindReading[]> {
   const stations = await listOf(OWM_KEY, OWM_LIST_MAX_AGE_MS, async () => {
     const response = await fetch(`${OWM_BASE}all`, {
@@ -220,7 +225,7 @@ export async function owmReadings(
     });
     return response.ok ? owmStations(await response.json()) : [];
   });
-  const near = nearCoastStations(stations, position, radius);
+  const near = nearCoastStations(stations, position, radius, most);
   const readings = await Promise.all(
     near.map(async ({ station, km }) => {
       try {
@@ -229,7 +234,10 @@ export async function owmReadings(
         });
         if (!response.ok) return null;
         const reply = (await response.json()) as { data?: OwmLive };
-        return reply.data ? owmReading(reply.data, km, Date.now()) : null;
+        const reading = reply.data
+          ? owmReading(reply.data, km, Date.now())
+          : null;
+        return reading && placed(reading, station);
       } catch {
         return null;
       }
@@ -246,21 +254,22 @@ export async function owmReadings(
  * @returns The readings, empty without key or network.
  */
 export async function mfReadings(
-  position: Position,
+  position: { lat: number; lon: number },
   radius: number,
   key: string,
+  most = MAX_STATIONS,
 ): Promise<WindReading[]> {
   if (!key) return [];
   const stations = await listOf(MF_KEY, MF_LIST_MAX_AGE_MS, async () => {
     const response = await mfFetch(`${mfBase(key)}liste-stations`, key);
     return response.ok ? mfStations(await response.text()) : [];
   });
-  const near = nearCoastStations(stations, position, radius);
+  const near = nearCoastStations(stations, position, radius, most);
   /* eslint-disable no-await-in-loop -- Météo-France allows 50 requests a minute */
   const readings: WindReading[] = [];
   for (const { station, km } of near) {
     const { reading } = await mfStationWind(station, km, key);
-    if (reading) readings.push(reading);
+    if (reading) readings.push(placed(reading, station));
   }
   /* eslint-enable no-await-in-loop */
   return readings;
@@ -585,4 +594,8 @@ async function coastCheck(
   }
   /* eslint-enable no-await-in-loop */
   return null;
+}
+
+function placed(reading: WindReading, station: CoastStation): WindReading {
+  return { ...reading, id: station[0], lat: station[2], lon: station[3] };
 }

@@ -44,6 +44,7 @@ const COMMON_TABS: Record<string, string> = {
   lists: 'more',
   beaufort: 'more',
   douglas: 'more',
+  meteo: 'more',
 };
 
 /**

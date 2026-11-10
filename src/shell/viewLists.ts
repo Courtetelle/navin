@@ -21,6 +21,7 @@ export const VIEW_NAMES = [
   'log',
   'map',
   'marks',
+  'meteo',
   'mob',
   'more',
   'new',
@@ -86,4 +87,5 @@ export const NO_CRUISE_VIEWS: readonly string[] = [
   'lists',
   'beaufort',
   'douglas',
+  'meteo',
 ];
