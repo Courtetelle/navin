@@ -220,7 +220,7 @@ async function myMaps(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(500);
   const title = (await page.locator('main h1').first().textContent()) ?? '';
   check(theme, 'data leads to my maps', title.includes('Mes cartes'));
-  const box = await page.locator('#searchBtn').boundingBox();
+  const box = await page.locator('#navSearch').boundingBox();
   const back = await page.locator('#navBack').boundingBox();
   const exit = await page.locator('#navExit').boundingBox();
   check(

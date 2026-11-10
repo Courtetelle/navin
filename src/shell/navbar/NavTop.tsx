@@ -8,6 +8,7 @@ import { useAutoRoll } from '../../components/shared/useAutoRoll.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { state } from '../../state/index.ts';
 import { hasBodyClass, setBodyClass } from '../bodyClass.ts';
+import { MagnifierButton } from '../search/SearchButton.tsx';
 
 import { PrepLine } from './PrepLine.tsx';
 import {
@@ -159,7 +160,9 @@ export function NavTop() {
       >
         {navEdit.value ? <PencilIcon /> : '✔'}
       </Button>
-      <div id="navSearchSlot" aria-hidden="true" />
+      <div id="navSearchSlot">
+        <MagnifierButton id="navSearch" />
+      </div>
       <Button
         className={exitHold.holding ? 'btn holding' : 'btn'}
         id="navExit"

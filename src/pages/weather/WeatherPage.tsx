@@ -96,76 +96,82 @@ export function WeatherPage() {
         {tr('◀ NavIn')}
       </PageBack>
       <h1>{tr('🌤 Météo')}</h1>
-      {live}
-      <section className="wx-fc">
-        <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>
-        <ForecastStrip forecast={forecast} />
-      </section>
-      <section className="wx-checks">
-        <h2>
-          {tr(
-            tracking
-              ? `Procédure météo · ${done}/${checks.length}`
-              : `Avant le départ · ${done}/${checks.length}`,
-          )}
-        </h2>
-        <ul className="wx-list">
-          {checks.map((check) => {
-            const on = ticked.includes(check.id);
-            return (
-              <li key={check.id}>
-                <Button
-                  className={on ? 'btn wx-check on' : 'btn wx-check'}
-                  aria-pressed={on}
-                  onClick={() => toggle(check.id)}
-                >
-                  <span className="wx-box">{on ? '✔' : ''}</span>
-                  <span>{tr(check.text)}</span>
-                </Button>
-              </li>
-            );
-          })}
-        </ul>
-        {done === checks.length ? (
-          <p className="wx-done">{tr('✅ Météo vérifiée pour aujourd’hui')}</p>
-        ) : null}
-        <p className="keep-help">
-          {tr('Les coches valent pour la journée et repartent à zéro demain.')}
-        </p>
-      </section>
-      <section className="wx-links">
-        <h2>{tr('Sources officielles')}</h2>
-        <ButtonRow className="row c2">
-          {lake ? (
-            <LinkButton
+      <div className="wx-page">
+        {live}
+        <section className="wx-fc">
+          <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>
+          <ForecastStrip forecast={forecast} />
+        </section>
+        <section className="wx-checks">
+          <h2>
+            {tr(
+              tracking
+                ? `Procédure météo · ${done}/${checks.length}`
+                : `Avant le départ · ${done}/${checks.length}`,
+            )}
+          </h2>
+          <ul className="wx-list">
+            {checks.map((check) => {
+              const on = ticked.includes(check.id);
+              return (
+                <li key={check.id}>
+                  <Button
+                    className={on ? 'btn wx-check on' : 'btn wx-check'}
+                    aria-pressed={on}
+                    onClick={() => toggle(check.id)}
+                  >
+                    <span className="wx-box">{on ? '✔' : ''}</span>
+                    <span>{tr(check.text)}</span>
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+          {done === checks.length ? (
+            <p className="wx-done">
+              {tr('✅ Météo vérifiée pour aujourd’hui')}
+            </p>
+          ) : null}
+          <p className="keep-help">
+            {tr(
+              'Les coches valent pour la journée et repartent à zéro demain.',
+            )}
+          </p>
+        </section>
+        <section className="wx-links">
+          <h2>{tr('Sources officielles')}</h2>
+          <ButtonRow className="row c2">
+            {lake ? (
+              <LinkButton
+                className="btn"
+                href="https://www.meteosuisse.admin.ch/meteo/dangers.html"
+                target="_blank"
+                rel="noopener"
+              >
+                {tr('⚠️ Alertes MeteoSwiss')}
+              </LinkButton>
+            ) : (
+              <LinkButton
+                className="btn"
+                href="https://meteofrance.com/meteo-marine"
+                target="_blank"
+                rel="noopener"
+              >
+                {tr('⚓ Météo marine Météo-France')}
+              </LinkButton>
+            )}
+            <Button
               className="btn"
-              href="https://www.meteosuisse.admin.ch/meteo/dangers.html"
-              target="_blank"
-              rel="noopener"
+              onClick={() => {
+                buzz();
+                go(lake ? 'beaufort' : 'douglas');
+              }}
             >
-              {tr('⚠️ Alertes MeteoSwiss')}
-            </LinkButton>
-          ) : (
-            <LinkButton
-              className="btn"
-              href="https://meteofrance.com/meteo-marine"
-              target="_blank"
-              rel="noopener"
-            >
-              {tr('⚓ Météo marine Météo-France')}
-            </LinkButton>
-          )}
-          <Button
-            className="btn"
-            onClick={() => {
-              buzz();
-              go(lake ? 'beaufort' : 'douglas');
-            }}
-          >
-            {tr(lake ? '💨 Échelle de Beaufort' : '🌊 Échelle de Douglas')}
-          </Button>
-        </ButtonRow>
-      </section>
+              {tr(lake ? '💨 Échelle de Beaufort' : '🌊 Échelle de Douglas')}
+            </Button>
+          </ButtonRow>
+        </section>
+      </div>
     </>
   );
 }

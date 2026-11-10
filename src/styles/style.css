@@ -9430,17 +9430,79 @@ body.nav-search #navtop #navBack {
   flex: 1 1 0;
 }
 body.nav-search:not(.trk-mode) #searchBtn {
-  top: calc(var(--topbar-h, 72px) + 10px);
-  bottom: auto;
-  left: 50%;
-  right: auto;
-  transform: translateX(-50%);
-  box-shadow: none;
-  background: var(--btn);
-  color: var(--btn-fg);
+  display: none;
+}
+#navSearch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 52px;
   height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: var(--btn);
+  color: var(--btn-fg);
+  cursor: pointer;
 }
 .wx-links a.btn {
   text-decoration: none;
+}
+
+/* Tablet in landscape (iPad, Sailproof SP10X): the live map on the left,
+   the controls, the list or the station card on the right */
+@media (min-width: 1000px) and (orientation: landscape) {
+  .live-page {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(360px, 2fr);
+    column-gap: 16px;
+    align-items: start;
+  }
+  .live-page .live-map-part,
+  .live-page .live-map-part.hidden {
+    display: contents;
+  }
+  .live-page .live-map-part > *,
+  .live-page > .live-card {
+    grid-column: 2;
+  }
+  .live-page .live-map-part > .live-map-wrap {
+    grid-column: 1;
+    grid-row: 1 / span 40;
+    position: sticky;
+    top: calc(var(--topbar-h, 72px) + var(--navtop-h, 68px) + 8px);
+  }
+  .live-page.picked .live-map-part > :not(.live-map-wrap) {
+    display: none;
+  }
+  .map.live-map {
+    height: calc(
+      100dvh - var(--topbar-h, 72px) - var(--navtop-h, 68px) - 24px -
+        env(safe-area-inset-bottom)
+    );
+    margin-top: 0;
+  }
+  .live-page .live-card .row:first-child {
+    margin-top: 0;
+  }
+}
+
+/* Tablet in landscape: the forecast on the left, the checks on the right */
+@media (min-width: 1000px) and (orientation: landscape) {
+  .wx-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 24px;
+    align-items: start;
+  }
+  .wx-page > * {
+    grid-column: 1;
+  }
+  .wx-page > .wx-checks {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+  .wx-checks h2 {
+    margin-top: 0;
+  }
 }

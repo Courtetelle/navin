@@ -1,3 +1,5 @@
+import { signal } from '@preact/signals-react';
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -21,36 +23,60 @@ const MIN_ONLINE_LETTERS = 3;
  * @returns The button and its window.
  */
 export function SearchButton() {
-  const [open, setOpen] = useState(false);
+  useSignals();
   return (
     <>
-      <button
-        type="button"
-        id="searchBtn"
-        className="no-print no-navact"
-        aria-label="Rechercher une fonction ou un lieu"
-        onClick={() => setOpen(true)}
-      >
-        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-          <circle
-            cx="10.5"
-            cy="10.5"
-            r="6.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.6"
-          />
-          <path
-            d="m15.5 15.5 5.5 5.5"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.8"
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
-      {open ? <SearchWindow onClose={() => setOpen(false)} /> : null}
+      <MagnifierButton id="searchBtn" />
+      {searchOpen.value ? (
+        <SearchWindow
+          onClose={() => {
+            searchOpen.value = false;
+          }}
+        />
+      ) : null}
     </>
+  );
+}
+
+/** The search window is open. */
+const searchOpen = signal(false);
+
+/**
+ * The magnifier button; the nav bar shows one between ◀ and Sortir, the
+ * floating one hides then.
+ * @param props - Button id.
+ * @param props.id - `searchBtn` (floating) or `navSearch` (in the nav bar).
+ * @returns The button.
+ */
+export function MagnifierButton({ id }: { id: string }) {
+  return (
+    <button
+      type="button"
+      id={id}
+      className="no-print no-navact"
+      aria-label="Rechercher une fonction ou un lieu"
+      onClick={() => {
+        searchOpen.value = true;
+      }}
+    >
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <circle
+          cx="10.5"
+          cy="10.5"
+          r="6.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.6"
+        />
+        <path
+          d="m15.5 15.5 5.5 5.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    </button>
   );
 }
 

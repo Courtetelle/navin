@@ -22,6 +22,8 @@ export interface StationCardProps {
   now: number;
   /** The stations are being read again. */
   loading: boolean;
+  /** Text of the back button. */
+  backLabel: string;
   /** Back to the map. */
   onBack: () => void;
   /** Back to the map, centred on this station alone for a moment. */
@@ -41,6 +43,7 @@ export function StationCard({
   mfKey,
   now,
   loading,
+  backLabel,
   onBack,
   onLocate,
   onRefresh,
@@ -79,7 +82,7 @@ export function StationCard({
     <section className="live-card" aria-live="polite">
       <ButtonRow className="row">
         <Button className="btn primary" onClick={onBack}>
-          {tr('◀ Revenir à la carte des stations')}
+          {tr(backLabel)}
         </Button>
       </ButtonRow>
       <Button

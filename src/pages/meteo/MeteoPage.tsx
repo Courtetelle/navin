@@ -14,6 +14,7 @@ import {
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtTime } from '../../lib/format.ts';
+import { useWide } from '../../lib/useWide.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
 
@@ -40,6 +41,7 @@ export function MeteoPage() {
   const tr = useTr();
   const config = windConfig();
   const back = liveBack.value;
+  const wide = useWide();
   const [center, setCenter] = useState<LivePlace>(boatPlace);
   const [radius, setRadius] = useState(config.radius);
   const [stations, setStations] = useState<LiveStation[]>([]);
@@ -123,107 +125,117 @@ export function MeteoPage() {
         {tr(back.label)}
       </PageBack>
       <h1 className="live-title">{tr('🌬 Live météo')}</h1>
-      {station ? (
-        <StationCard
-          station={station}
-          basis={config.basis}
-          mfKey={config.mfKey}
-          now={now}
-          loading={loading}
-          onBack={showMap}
-          onLocate={() => {
-            const key = stationKey(station);
-            showMap();
-            requestAnimationFrame(() => live.focus(key));
-          }}
-          onRefresh={() => {
-            buzz();
-            setRefreshing(true);
-            load();
-          }}
-        />
-      ) : null}
-      <div className={station ? 'live-map-part hidden' : 'live-map-part'}>
-        <div className="live-map-wrap">
-          <div id="liveMap" className="map live-map" ref={box}>
-            {live.noMap ? (
-              <div className="empty-state">
-                {tr(
-                  'Carte indisponible sans réseau : la liste reste ci-dessous.',
-                )}
-              </div>
-            ) : null}
+      <div className={station ? 'live-page picked' : 'live-page'}>
+        {station ? (
+          <StationCard
+            station={station}
+            basis={config.basis}
+            mfKey={config.mfKey}
+            now={now}
+            loading={loading}
+            backLabel={
+              wide
+                ? '◀ Revenir à la liste des stations'
+                : '◀ Revenir à la carte des stations'
+            }
+            onBack={showMap}
+            onLocate={() => {
+              const key = stationKey(station);
+              // On a tablet the map stays beside the card.
+              if (!wide) showMap();
+              requestAnimationFrame(() => live.focus(key));
+            }}
+            onRefresh={() => {
+              buzz();
+              setRefreshing(true);
+              load();
+            }}
+          />
+        ) : null}
+        <div className={station ? 'live-map-part hidden' : 'live-map-part'}>
+          <div className="live-map-wrap">
+            <div id="liveMap" className="map live-map" ref={box}>
+              {live.noMap ? (
+                <div className="empty-state">
+                  {tr(
+                    'Carte indisponible sans réseau : la liste reste ci-dessous.',
+                  )}
+                </div>
+              ) : null}
+            </div>
           </div>
-        </div>
-        <ButtonRow className="row c3">
-          {RADII.map((value) => (
+          <ButtonRow className="row c3">
+            {RADII.map((value) => (
+              <Button
+                key={value}
+                className={value === radius ? 'btn on' : 'btn'}
+                onClick={() => {
+                  buzz();
+                  setRadius(value);
+                }}
+              >
+                {tr(`${value} km`)}
+              </Button>
+            ))}
+          </ButtonRow>
+          <ButtonRow className="row c2 live-tools">
             <Button
-              key={value}
-              className={value === radius ? 'btn on' : 'btn'}
+              className="btn primary"
               onClick={() => {
                 buzz();
-                setRadius(value);
+                const middle = live.center();
+                if (middle) setCenter(middle);
               }}
             >
-              {tr(`${value} km`)}
+              {tr('🔍 Chercher au centre')}
             </Button>
-          ))}
-        </ButtonRow>
-        <ButtonRow className="row c2 live-tools">
-          <Button
-            className="btn primary"
-            onClick={() => {
-              buzz();
-              const middle = live.center();
-              if (middle) setCenter(middle);
-            }}
-          >
-            {tr('🔍 Chercher au centre')}
-          </Button>
-          <Button
-            className="btn"
-            onClick={() => {
-              buzz();
-              setCenter(boatPlace());
-            }}
-          >
-            {tr('📍 Autour du bateau')}
-          </Button>
-        </ButtonRow>
-        <p className="keep-help live-status" role="status">
-          {status}
-        </p>
-        {tally ? (
-          <p className="keep-help live-mf">{tr(mfTallyText(tally, radius))}</p>
-        ) : null}
-        {!loading && stations.length === 0 ? (
-          <p className="keep-help">
-            {tr(
-              config.mfKey
-                ? 'Aucune station ne mesure le vent ici : élargissez le rayon ou déplacez la carte.'
-                : 'Aucune station ne mesure le vent ici : élargissez le rayon, déplacez la carte, ou ajoutez la clé Météo-France dans les réglages (stations françaises).',
-            )}
+            <Button
+              className="btn"
+              onClick={() => {
+                buzz();
+                setCenter(boatPlace());
+              }}
+            >
+              {tr('📍 Autour du bateau')}
+            </Button>
+          </ButtonRow>
+          <p className="keep-help live-status" role="status">
+            {status}
           </p>
-        ) : null}
-        <StationList
-          stations={stations}
-          basis={config.basis}
-          now={now}
-          onPick={(key) => {
-            buzz();
-            setPicked(key);
-            globalThis.scrollTo({ top: 0 });
-          }}
-        />
-        <HelpText>
-          Vent mesuré maintenant par les stations MeteoSwiss, les balises
-          OpenWindMap et les stations Météo-France (avec la clé des réglages).
-          Chiffre en gras : vent moyen ; en petit : rafales ; flèche : sens vers
-          lequel souffle le vent. Couleur des alertes de vent. Toucher une
-          station pour ses mesures en direct ; déplacer la carte puis « Chercher
-          au centre de la carte » pour d’autres stations. Mise à jour toutes les
-          2 min.
-        </HelpText>
+          {tally ? (
+            <p className="keep-help live-mf">
+              {tr(mfTallyText(tally, radius))}
+            </p>
+          ) : null}
+          {!loading && stations.length === 0 ? (
+            <p className="keep-help">
+              {tr(
+                config.mfKey
+                  ? 'Aucune station ne mesure le vent ici : élargissez le rayon ou déplacez la carte.'
+                  : 'Aucune station ne mesure le vent ici : élargissez le rayon, déplacez la carte, ou ajoutez la clé Météo-France dans les réglages (stations françaises).',
+              )}
+            </p>
+          ) : null}
+          <StationList
+            stations={stations}
+            basis={config.basis}
+            now={now}
+            onPick={(key) => {
+              buzz();
+              setPicked(key);
+              globalThis.scrollTo({ top: 0 });
+            }}
+          />
+          <HelpText>
+            Vent mesuré maintenant par les stations MeteoSwiss, les balises
+            OpenWindMap et les stations Météo-France (avec la clé des réglages).
+            Chiffre en gras : vent moyen ; en petit : rafales ; flèche : sens
+            vers lequel souffle le vent. Couleur des alertes de vent. Toucher
+            une station pour ses mesures en direct ; déplacer la carte puis «
+            Chercher au centre de la carte » pour d’autres stations. Mise à jour
+            toutes les 2 min.
+          </HelpText>
+        </div>
       </div>
     </>
   );
