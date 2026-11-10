@@ -188,14 +188,18 @@ export async function owmReadings(
   radius: number,
 ): Promise<WindReading[]> {
   const stations = await listOf(OWM_KEY, OWM_LIST_MAX_AGE_MS, async () => {
-    const response = await fetch(`${OWM_BASE}all`);
+    const response = await fetch(`${OWM_BASE}all`, {
+      signal: AbortSignal.timeout(20_000),
+    });
     return response.ok ? owmStations(await response.json()) : [];
   });
   const near = nearCoastStations(stations, position, radius);
   const readings = await Promise.all(
     near.map(async ({ station, km }) => {
       try {
-        const response = await fetch(`${OWM_BASE}${station[0]}`);
+        const response = await fetch(`${OWM_BASE}${station[0]}`, {
+          signal: AbortSignal.timeout(10_000),
+        });
         if (!response.ok) return null;
         const reply = (await response.json()) as { data?: OwmLive };
         return reply.data ? owmReading(reply.data, km, Date.now()) : null;
@@ -221,9 +225,7 @@ export async function mfReadings(
 ): Promise<WindReading[]> {
   if (!key) return [];
   const stations = await listOf(MF_KEY, MF_LIST_MAX_AGE_MS, async () => {
-    const response = await fetch(`${mfBase(key)}liste-stations`, {
-      headers: { apikey: key },
-    });
+    const response = await mfFetch(`${mfBase(key)}liste-stations`, key);
     return response.ok ? mfStations(await response.text()) : [];
   });
   const near = nearCoastStations(stations, position, radius);
@@ -249,36 +251,57 @@ export type MfCheck =
       detail: string;
     }
   | { kind: 'empty'; status: number; sample: string }
+  | { kind: 'timeout'; step: string }
   | { kind: 'offline' };
+
+/** Longest wait of one Météo-France request. */
+const MF_TIMEOUT_MS = 15_000;
+
+function mfFetch(url: string, key: string): Promise<Response> {
+  return fetch(url, {
+    headers: { apikey: key },
+    signal: AbortSignal.timeout(MF_TIMEOUT_MS),
+  });
+}
+
+function timedOut(error: unknown): boolean {
+  return (
+    error instanceof DOMException &&
+    (error.name === 'TimeoutError' || error.name === 'AbortError')
+  );
+}
 
 /**
  * Try a Météo-France key: the list of stations, then the wind of the closest
  * stations to a place.
  * @param key - The key.
  * @param position - Place near which a wind is read.
+ * @param onStep - Told each step, to show the progress.
  * @returns What Météo-France answered.
  */
 export async function mfCheck(
   key: string,
   position: { lat: number; lon: number },
+  onStep: (step: string) => void = () => undefined,
 ): Promise<MfCheck> {
   let response: Response;
+  let text: string;
+  const step = 'liste des stations';
+  onStep(`${step} (${mfBase(key).replace(MF_HOST, '')})`);
   try {
-    response = await fetch(`${mfBase(key)}liste-stations`, {
-      headers: { apikey: key },
-    });
-  } catch {
-    return { kind: 'offline' };
+    response = await mfFetch(`${mfBase(key)}liste-stations`, key);
+    if (response.status === 401 || response.status === 403) {
+      return {
+        kind: 'refused',
+        status: response.status,
+        apis: keyApis(key),
+        detail: await refusalDetail(response, key),
+      };
+    }
+    text = response.ok ? await response.text() : '';
+  } catch (error) {
+    return timedOut(error) ? { kind: 'timeout', step } : { kind: 'offline' };
   }
-  if (response.status === 401 || response.status === 403) {
-    return {
-      kind: 'refused',
-      status: response.status,
-      apis: keyApis(key),
-      detail: await refusalDetail(response, key),
-    };
-  }
-  const text = response.ok ? await response.text() : '';
   const list = mfStations(text);
   if (list.length === 0) {
     return {
@@ -288,13 +311,14 @@ export async function mfCheck(
     };
   }
   store.set(MF_KEY, { at: Date.now(), list });
-  const near = nearCoastStations(list, position, 80).slice(0, 5);
+  const near = nearCoastStations(list, position, 80).slice(0, 3);
   const codes: string[] = [];
   /* eslint-disable no-await-in-loop -- the next station only when the closer one has no wind */
   for (const { station, km } of near) {
+    onStep(`${list.length} stations · vent de ${station[1]}`);
     const { reading, status } = await mfStationWind(station, km, key);
     if (reading) return { kind: 'ok', stations: list.length, reading };
-    codes.push(String(status));
+    codes.push(status === -1 ? 'délai dépassé' : String(status));
   }
   /* eslint-enable no-await-in-loop */
   return {
@@ -311,9 +335,9 @@ async function mfStationWind(
   key: string,
 ): Promise<{ reading: WindReading | null; status: number }> {
   try {
-    const response = await fetch(
+    const response = await mfFetch(
       `${mfBase(key)}station/infrahoraire-6m?id_station=${encodeURIComponent(station[0])}&format=json`,
-      { headers: { apikey: key } },
+      key,
     );
     if (!response.ok) return { reading: null, status: response.status };
     const rows = (await response.json()) as MfRow[];
@@ -323,8 +347,8 @@ async function mfStationWind(
         : null,
       status: response.status,
     };
-  } catch {
-    return { reading: null, status: 0 };
+  } catch (error) {
+    return { reading: null, status: timedOut(error) ? -1 : 0 };
   }
 }
 
@@ -463,9 +487,9 @@ async function refusalDetail(response: Response, key: string): Promise<string> {
   // Another resource of the same API (Paris-Montsouris), to know if the whole API is closed.
   let probe = 'injoignable';
   try {
-    const other = await fetch(
+    const other = await mfFetch(
       `${mfBase(key)}station/infrahoraire-6m?id_station=75114001&format=json`,
-      { headers: { apikey: key } },
+      key,
     );
     probe = String(other.status);
   } catch {

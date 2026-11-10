@@ -40,7 +40,11 @@ export function MfKeyRow() {
     setBusy(true);
     setResult('Vérification de la clé auprès de Météo-France…');
     const place = lastKnownPos() ?? seaPlace();
-    const text = checkText(await mfCheck(value, place));
+    const text = checkText(
+      await mfCheck(value, place, (step) =>
+        setResult(`Vérification auprès de Météo-France : ${step}…`),
+      ),
+    );
     setBusy(false);
     setResult(text);
     toast(text.split(' · ', 1)[0] ?? text);

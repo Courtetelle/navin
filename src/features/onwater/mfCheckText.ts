@@ -37,5 +37,8 @@ export function checkText(check: MfCheck): string {
   if (check.kind === 'empty') {
     return `❌ Réponse inattendue de Météo-France (code ${check.status}) · ${check.sample}`;
   }
+  if (check.kind === 'timeout') {
+    return `⏳ Météo-France ne répond pas (${check.step}, plus de 15 s) · réessayez plus tard ou sur un autre réseau`;
+  }
   return '📵 Pas de réseau · clé enregistrée, vérification impossible';
 }
