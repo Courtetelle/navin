@@ -9043,6 +9043,47 @@ body:not(.trk-mode) #searchBtn {
   min-height: 320px;
   max-height: 70vh;
 }
+.live-locate {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.8;
+}
+/* A station shown alone for a moment, ringed and pulsing */
+.live-focus .live-mk-wrap:not(.live-focused) {
+  visibility: hidden;
+}
+.live-focused {
+  z-index: 1000 !important;
+}
+.live-focused .live-mk {
+  transform: translate(-50%, -50%) scale(1.6);
+  box-shadow:
+    0 0 0 4px #fff,
+    0 0 0 8px #d0021b;
+  animation: live-pulse 0.8s ease-in-out infinite alternate;
+}
+.live-focused .live-mk::after {
+  content: attr(data-name);
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 50%;
+  transform: translateX(-50%) scale(0.625);
+  transform-origin: top center;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: #fff;
+  color: #000;
+  font-size: 18px;
+  white-space: nowrap;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+@keyframes live-pulse {
+  to {
+    box-shadow:
+      0 0 0 4px #fff,
+      0 0 0 16px rgba(208, 2, 27, 0.35);
+  }
+}
 .live-tools {
   position: absolute;
   left: 8px;
@@ -9128,6 +9169,10 @@ body:not(.trk-mode) #searchBtn {
   white-space: normal;
 }
 .live-head {
+  display: block;
+  width: 100%;
+  font: inherit;
+  cursor: pointer;
   margin: 12px 0;
   padding: 16px;
   border: 3px solid #000;

@@ -1,4 +1,4 @@
-import type { Circle, LayerGroup, Map as LeafletMap } from 'leaflet';
+import type { Circle, LayerGroup, Map as LeafletMap, Marker } from 'leaflet';
 import type { RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -22,6 +22,8 @@ export interface LiveMap {
   center: () => LivePlace | null;
   /** Give the map its size again once shown after being hidden. */
   invalidate: () => void;
+  /** Centre a station and show it alone for a moment, to see where it is. */
+  focus: (key: string) => void;
   /** Leaflet could not load. */
   noMap: boolean;
   /** Touch screen: the map moves with two fingers, one finger scrolls the page. */
@@ -34,6 +36,14 @@ function coarsePointer(): boolean {
 }
 
 const KM_TO_M = 1000;
+
+function escapeHtml(text: string): string {
+  return text.replaceAll(/[&<>"']/gu, (char) => `&#${char.codePointAt(0)};`);
+}
+/** How long a station is shown alone. */
+const FOCUS_MS = 4000;
+/** Closest zoom kept when a station is centred. */
+const FOCUS_ZOOM = 12;
 
 /**
  * The map of the stations: one coloured badge per station (mean wind, gusts
@@ -58,6 +68,11 @@ export function useLiveMap(
   const layer = useRef<LayerGroup | null>(null);
   const circle = useRef<Circle | null>(null);
   const pick = useRef(onPick);
+  const markers = useRef(new Map<string, Marker>());
+  const focused = useRef<{
+    key: string;
+    timer: ReturnType<typeof setTimeout>;
+  } | null>(null);
   useEffect(() => {
     pick.current = onPick;
   });
@@ -96,6 +111,7 @@ export function useLiveMap(
       });
     return () => {
       closed = true;
+      if (focused.current) clearTimeout(focused.current.timer);
       if (map.current) disposeMap(map.current);
       map.current = null;
       layer.current = null;
@@ -129,6 +145,7 @@ export function useLiveMap(
     if (!ready || !group) return;
     const L = leaflet();
     group.clearLayers();
+    markers.current.clear();
     L.circleMarker([lat, lon], {
       radius: 6,
       color: '#fff',
@@ -148,10 +165,10 @@ export function useLiveMap(
           ? ''
           : `<i style="transform:rotate(${Math.round(station.dir)}deg)">↓</i>`;
       const key = stationKey(station);
-      L.marker([station.lat, station.lon], {
+      const marker = L.marker([station.lat, station.lon], {
         icon: L.divIcon({
           className: 'live-mk-wrap',
-          html: `<div class="live-mk" style="--c:${color};--ink:${ink}">${arrow}<b>${Math.round(station.avg)}</b>${gust}</div>`,
+          html: `<div class="live-mk" data-name="${escapeHtml(station.name)}" style="--c:${color};--ink:${ink}">${arrow}<b>${Math.round(station.avg)}</b>${gust}</div>`,
           iconSize: [0, 0],
         }),
         keyboard: false,
@@ -159,6 +176,10 @@ export function useLiveMap(
       })
         .on('click', () => pick.current(key))
         .addTo(group);
+      markers.current.set(key, marker);
+      if (focused.current?.key === key) {
+        marker.getElement()?.classList.add('live-focused');
+      }
     }
   }, [ready, stations, basis, lat, lon]);
   return {
@@ -169,6 +190,32 @@ export function useLiveMap(
       return { lat: middle.lat, lon: middle.lng };
     },
     invalidate: () => map.current?.invalidateSize(),
+    focus: (key) => {
+      const shown = map.current;
+      const marker = markers.current.get(key);
+      if (!shown || !marker) return;
+      shown.invalidateSize();
+      shown.setView(marker.getLatLng(), Math.max(shown.getZoom(), FOCUS_ZOOM), {
+        animate: false,
+      });
+      if (focused.current) clearTimeout(focused.current.timer);
+      const box = shown.getContainer();
+      for (const element of box.querySelectorAll('.live-focused')) {
+        element.classList.remove('live-focused');
+      }
+      marker.getElement()?.classList.add('live-focused');
+      box.classList.add('live-focus');
+      focused.current = {
+        key,
+        timer: globalThis.setTimeout(() => {
+          box.classList.remove('live-focus');
+          for (const element of box.querySelectorAll('.live-focused')) {
+            element.classList.remove('live-focused');
+          }
+          focused.current = null;
+        }, FOCUS_MS),
+      };
+    },
     noMap,
     twoFingers: coarsePointer(),
   };

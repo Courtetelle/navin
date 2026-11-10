@@ -131,6 +131,11 @@ export function MeteoPage() {
           now={now}
           loading={loading}
           onBack={showMap}
+          onLocate={() => {
+            const key = stationKey(station);
+            showMap();
+            requestAnimationFrame(() => live.focus(key));
+          }}
           onRefresh={() => {
             buzz();
             setRefreshing(true);
