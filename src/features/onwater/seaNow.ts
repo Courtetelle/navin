@@ -16,6 +16,8 @@ export interface SeaNow {
   windSea: WaveTrain | null;
   /** The swell, come from afar. */
   swell: WaveTrain | null;
+  /** Surface current: knots and the direction it flows to, null when unknown. */
+  current: { knots: number; toward: number | null } | null;
   /** Water temperature in °C, null when unknown. */
   water: number | null;
   /** Epoch milliseconds of the model step. */
@@ -33,6 +35,8 @@ const FIELDS = [
   'swell_wave_direction',
   'swell_wave_period',
   'sea_surface_temperature',
+  'ocean_current_velocity',
+  'ocean_current_direction',
 ];
 
 /**
@@ -69,6 +73,7 @@ export function seaOf(reply: unknown): SeaNow | null {
     total,
     windSea: train(current, 'wind_'),
     swell: train(current, 'swell_'),
+    current: currentOf(current),
     water: numberOr(current.sea_surface_temperature),
     t: typeof time === 'string' ? Date.parse(`${time}Z`) : Date.now(),
   };
@@ -89,4 +94,15 @@ function train(
 
 function numberOr(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function currentOf(
+  current: Record<string, unknown>,
+): { knots: number; toward: number | null } | null {
+  const kmh = numberOr(current.ocean_current_velocity);
+  if (kmh == null) return null;
+  return {
+    knots: kmh / 1.852,
+    toward: numberOr(current.ocean_current_direction),
+  };
 }

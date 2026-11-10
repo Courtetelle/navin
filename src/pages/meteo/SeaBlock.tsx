@@ -14,7 +14,7 @@ export interface SeaBlockProps {
 
 /**
  * The sea near a station: height, direction and period of the whole sea, the
- * wind sea and the swell. The wind stations measure no sea: these come from a
+ * wind sea and the swell, and the surface current. The wind stations measure no sea: these come from a
  * model, and say so. Nothing on a lake or inland.
  * @param props - The place.
  * @returns The block, or nothing.
@@ -42,6 +42,13 @@ export function SeaBlock({ lat, lon }: SeaBlockProps) {
   const rows: Array<[string, string]> = [['Mer totale', trainText(sea.total)]];
   if (sea.windSea) rows.push(['Mer du vent', trainText(sea.windSea)]);
   if (sea.swell) rows.push(['Houle', trainText(sea.swell)]);
+  if (sea.current) {
+    const { knots, toward } = sea.current;
+    rows.push([
+      'Courant',
+      `${knots.toFixed(1).replace('.', ',')} nd${toward == null ? '' : ` · porte vers ${compassPoint(toward)}`}`,
+    ]);
+  }
   if (sea.water != null) {
     rows.push(['Eau', `${sea.water.toFixed(1).replace('.', ',')} °C`]);
   }
@@ -63,7 +70,7 @@ export function SeaBlock({ lat, lon }: SeaBlockProps) {
       </table>
       <p className="keep-help">
         {tr(
-          'PRÉVISION du modèle de vagues Open-Meteo près de la station, pas une mesure : les stations de vent ne mesurent pas la mer.',
+          'PRÉVISION des modèles de vagues et de courants Open-Meteo près de la station, pas une mesure : les stations de vent ne mesurent pas la mer. Le courant de surface du modèle est grossier près des côtes.',
         )}
       </p>
     </section>
