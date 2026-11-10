@@ -6,6 +6,7 @@ import {
   OPEN_WIND_MAP,
   keyApis,
   keyLimits,
+  mfBase,
   mfReading,
   mfStations,
   nearCoastStations,
@@ -184,6 +185,24 @@ describe('Météo-France key check', () => {
     );
     expect(keyLimits(`head.${payload}.sign`)).toBe(
       'API /public/DPObs/v1 v1 · sites autorisés : portail-api.meteofrance.fr',
+    );
+  });
+});
+
+describe('Météo-France API address', () => {
+  it('follows the version the key opens', () => {
+    const payload = btoa(
+      JSON.stringify({
+        subscribedAPIs: [
+          { name: 'DonneesPubliquesObservation', context: '/public/DPObs/v2' },
+        ],
+      }),
+    );
+    expect(mfBase(`head.${payload}.sign`)).toBe(
+      'https://public-api.meteofrance.fr/public/DPObs/v2/',
+    );
+    expect(mfBase('not a key')).toBe(
+      'https://public-api.meteofrance.fr/public/DPObs/v1/',
     );
   });
 });

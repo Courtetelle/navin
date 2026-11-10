@@ -12,7 +12,8 @@ export const OPEN_WIND_MAP = 'OpenWindMap';
 export const METEO_FRANCE = 'Météo-France';
 
 const OWM_BASE = 'https://api.pioupiou.fr/v1/live/';
-const MF_BASE = 'https://public-api.meteofrance.fr/public/DPObs/v1/';
+const MF_HOST = 'https://public-api.meteofrance.fr';
+const MF_CONTEXT = '/public/DPObs/v1';
 const OWM_KEY = 'ldb.owm.stations';
 const MF_KEY = 'ldb.mf.stations';
 const OWM_LIST_MAX_AGE_MS = 86_400_000;
@@ -220,7 +221,7 @@ export async function mfReadings(
 ): Promise<WindReading[]> {
   if (!key) return [];
   const stations = await listOf(MF_KEY, MF_LIST_MAX_AGE_MS, async () => {
-    const response = await fetch(`${MF_BASE}liste-stations`, {
+    const response = await fetch(`${mfBase(key)}liste-stations`, {
       headers: { apikey: key },
     });
     return response.ok ? mfStations(await response.text()) : [];
@@ -263,7 +264,7 @@ export async function mfCheck(
 ): Promise<MfCheck> {
   let response: Response;
   try {
-    response = await fetch(`${MF_BASE}liste-stations`, {
+    response = await fetch(`${mfBase(key)}liste-stations`, {
       headers: { apikey: key },
     });
   } catch {
@@ -311,7 +312,7 @@ async function mfStationWind(
 ): Promise<{ reading: WindReading | null; status: number }> {
   try {
     const response = await fetch(
-      `${MF_BASE}station/infrahoraire-6m?id_station=${encodeURIComponent(station[0])}&format=json`,
+      `${mfBase(key)}station/infrahoraire-6m?id_station=${encodeURIComponent(station[0])}&format=json`,
       { headers: { apikey: key } },
     );
     if (!response.ok) return { reading: null, status: response.status };
@@ -463,7 +464,7 @@ async function refusalDetail(response: Response, key: string): Promise<string> {
   let probe = 'injoignable';
   try {
     const other = await fetch(
-      `${MF_BASE}station/infrahoraire-6m?id_station=75114001&format=json`,
+      `${mfBase(key)}station/infrahoraire-6m?id_station=75114001&format=json`,
       { headers: { apikey: key } },
     );
     probe = String(other.status);
@@ -477,4 +478,18 @@ async function refusalDetail(response: Response, key: string): Promise<string> {
   ]
     .filter(Boolean)
     .join(' · ');
+}
+
+/**
+ * Address of the observation API the key opens (its version changes over
+ * time: v1, v2…), the v1 address when the key does not say.
+ * @param key - The key.
+ * @returns The base URL, ending with `/`.
+ */
+export function mfBase(key: string): string {
+  const context = keyPayload(key)?.subscribedAPIs?.find(
+    (api) => api.name === 'DonneesPubliquesObservation',
+  )?.context;
+  const safe = context && /^\/[\w/.-]+$/u.test(context) ? context : MF_CONTEXT;
+  return `${MF_HOST}${safe.replace(/\/$/u, '')}/`;
 }
