@@ -55,6 +55,8 @@ export function onFix(fix: FixInput): void {
     const trip = liveTrip();
     const buffer = view.trackBuf.peek();
     if (!view.tracking.peek() || !trip || !buffer) return;
+    // On pause, the boat still shows on the map but the track does not grow.
+    if (view.trackPaused.peek()) return;
     if (!fix.nmea && nmeaPosFresh()) return;
     if (fix.coords.accuracy > MIN_ACCURACY_M) return;
     const sample = sampleOf(fix);

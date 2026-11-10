@@ -137,3 +137,15 @@ test('the true wind of the instruments is added to the points', () => {
   expect(trip().det.lastTwd).toBe(0);
   expect(trip().det.lastTws).toBe(12.3);
 });
+
+test('on pause the track does not grow, and grows again once resumed', () => {
+  startTracking();
+  onFix(fix(0));
+  expect(state.view.trackBuf.value).toHaveLength(1);
+  state.view.trackPaused.value = true;
+  onFix(fix(1));
+  expect(state.view.trackBuf.value).toHaveLength(1);
+  state.view.trackPaused.value = false;
+  onFix(fix(2));
+  expect(state.view.trackBuf.value).toHaveLength(2);
+});

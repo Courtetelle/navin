@@ -118,6 +118,8 @@ export const view = {
   zoneSimV: signal<string>(''),
   /** A track is being recorded. */
   tracking: signal<boolean>(false),
+  /** The track is on pause: positions are not added to it. */
+  trackPaused: signal<boolean>(false),
   /** Last GPS fix of the tracker. */
   lastFix: signal<Fix | null>(null),
   /** Geolocation was refused. */
@@ -159,6 +161,7 @@ export function resetView(): void {
   view.sosLive.value = null;
   view.zoneSimV.value = store.raw('ldb.zoneSim') || '';
   view.tracking.value = false;
+  view.trackPaused.value = false;
   view.lastFix.value = null;
   view.gpsDenied.value = false;
   view.trip.value = null;

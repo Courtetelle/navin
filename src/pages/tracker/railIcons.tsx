@@ -114,92 +114,6 @@ function Weather() {
   );
 }
 
-/** The chequered flag of PréP, as in the NavIn menu. */
-function Flag() {
-  return (
-    <svg className="rail-svg" viewBox="-2 -1 52 42" aria-hidden="true">
-      <defs>
-        <pattern id="railck" width="8" height="8" patternUnits="userSpaceOnUse">
-          <rect width="8" height="8" fill="#fff" />
-          <rect width="4" height="4" fill="#111" />
-          <rect x="4" y="4" width="4" height="4" fill="#111" />
-        </pattern>
-      </defs>
-      <path
-        d="M9 3v35"
-        stroke="#5b3a1e"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
-      <path
-        d="M10 5c8-4 15 4 23 1s10-2 12-2v20c-3 0-5-1-12 2s-15-5-23-1z"
-        fill="url(#railck)"
-        stroke="#111"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <text
-        x="29"
-        y="37.6"
-        textAnchor="middle"
-        fontSize="11"
-        fontWeight="900"
-        fill="currentColor"
-        fontFamily="Arial, Helvetica, sans-serif"
-        textLength="26"
-        lengthAdjust="spacingAndGlyphs"
-      >
-        PréP
-      </text>
-    </svg>
-  );
-}
-
-/** The green start of a track, as in the NavIn menu. */
-function Start() {
-  return (
-    <svg className="rail-svg" viewBox="0 0 48 40" aria-hidden="true">
-      <path
-        d="M14 25c6-1 8-10 15-10s10-7 16-10"
-        stroke="#0b3d91"
-        strokeWidth="3"
-        fill="none"
-        strokeLinecap="round"
-        strokeDasharray="1 5"
-      />
-      <path
-        d="M12 25V3"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <path d="M13 3l10 4.5L13 12z" fill="#12a150" />
-      <circle
-        cx="12"
-        cy="25"
-        r="3.2"
-        fill="#12a150"
-        stroke="#fff"
-        strokeWidth="1.2"
-      />
-      <rect x="1" y="27.5" width="34" height="12" rx="3" fill="#12a150" />
-      <text
-        x="18"
-        y="37.3"
-        textAnchor="middle"
-        fontSize="10"
-        fontWeight="900"
-        fill="#fff"
-        fontFamily="Arial, Helvetica, sans-serif"
-        textLength="28"
-        lengthAdjust="spacingAndGlyphs"
-      >
-        START
-      </text>
-    </svg>
-  );
-}
-
 /**
  * The drawn icon of a function, where the columns have one.
  * @param props - The function key.
@@ -211,8 +125,6 @@ export function RailIcon({ name }: { name: string }) {
   if (name === 'act:photo') return <Camera />;
   if (name === 'vhf') return <Vhf />;
   if (name === 'weather') return <Weather />;
-  if (name === 'prep') return <Flag />;
-  if (name === 'start') return <Start />;
   if (name === 'phone') return <Phone />;
   return null;
 }

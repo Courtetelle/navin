@@ -9970,7 +9970,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   flex-direction: column;
   gap: 10px;
 }
-.rail-depart.rail-hidden {
+.rail-depart .rail-hidden {
   visibility: hidden;
 }
 .rail-data-place {
@@ -9985,14 +9985,17 @@ body.nav-search:not(.trk-mode) #searchBtn {
 .side-rail .rail-btn {
   pointer-events: auto;
 }
-.side-rail .rail-hidden .rail-btn {
+.side-rail .rail-btn.rail-hidden {
   pointer-events: none;
 }
 @media (min-width: 1000px) and (orientation: landscape) {
-  /* PréP fills its pill, as its flag did before */
-  html body .rail-btn.rail-prep .rail-svg {
-    width: 74px;
-    height: 62px;
+  /* PréP, START and the track keep the drawings and proportions of the
+     phone's NavIn button, scaled to the pill */
+  html body .rail-btn .tb-ico {
+    display: block;
+    height: 54px;
+    width: auto;
+    max-width: 86px;
   }
   /* While the map is being built, its buttons stay hidden until placed */
   html body .trk-full .leaflet-top.leaflet-left:not(.ctl-col) {

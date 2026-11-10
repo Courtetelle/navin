@@ -2,6 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { markupToReact } from '../../components/shared/markupToReact.ts';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { shownMap } from '../../features/map/mapFull.ts';
 import { trkPointNow } from '../../features/map/trackerPoint.ts';
@@ -14,8 +15,10 @@ import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
 import { domainActions } from '../../shell/topbar/tabDisplays.ts';
+import { FLAG_SVG, START_SVG } from '../../shell/topbar/tabIcons.ts';
 import { addMark, navZone, state, toast } from '../../state/index.ts';
 
+import { TrackRailButton } from './TrackRailButton.tsx';
 import { RailIcon } from './railIcons.tsx';
 import type { RailSide, Rails } from './sideRails.ts';
 import {
@@ -188,38 +191,39 @@ function DepartButtons() {
     buzz();
     domainActions.quickStart();
   });
-  // During a track their places stay empty, so data never moves.
-  const hidden = state.view.tracking.value;
+  const tracking = state.view.tracking.value;
   return (
-    <div className={hidden ? 'rail-depart rail-hidden' : 'rail-depart'}>
+    <div className="rail-depart">
       <Button
         type="button"
         noUiEdit
-        className="rail-btn rail-prep"
+        className={
+          tracking ? 'rail-btn rail-prep rail-hidden' : 'rail-btn rail-prep'
+        }
         aria-label={tr('PréP')}
         onClick={() => {
           buzz();
           domainActions.prepStart();
         }}
       >
-        <span className="rail-icon">
-          <RailIcon name="prep" />
-        </span>
+        <span className="rail-icon">{markupToReact(FLAG_SVG)}</span>
       </Button>
-      <Button
-        type="button"
-        noUiEdit
-        className={
-          start.hit ? 'rail-btn rail-start lp-hit' : 'rail-btn rail-start'
-        }
-        aria-label={tr('START : appui long pour démarrer la trace')}
-        onClick={() => toast(tr('START : appui long pour démarrer la trace'))}
-        {...start.handlers}
-      >
-        <span className="rail-icon">
-          <RailIcon name="start" />
-        </span>
-      </Button>
+      {tracking ? (
+        <TrackRailButton />
+      ) : (
+        <Button
+          type="button"
+          noUiEdit
+          className={
+            start.hit ? 'rail-btn rail-start lp-hit' : 'rail-btn rail-start'
+          }
+          aria-label={tr('START : appui long pour démarrer la trace')}
+          onClick={() => toast(tr('START : appui long pour démarrer la trace'))}
+          {...start.handlers}
+        >
+          <span className="rail-icon">{markupToReact(START_SVG)}</span>
+        </Button>
+      )}
     </div>
   );
 }

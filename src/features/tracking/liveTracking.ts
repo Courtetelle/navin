@@ -73,6 +73,7 @@ export function startTracking(resume = false, auto = false): void {
   saveTrip();
   view.trackBuf.value = loadTrack();
   view.tracking.value = true;
+  view.trackPaused.value = false;
   void applyWake();
   startWatch();
   toast(startMessage(resume, auto));
@@ -93,6 +94,7 @@ export async function stopTracking(withArrival: boolean): Promise<void> {
   watchId = null;
   stopping.value = view.tracking.peek();
   view.tracking.value = false;
+  view.trackPaused.value = false;
   windMuteEnd();
   const buffer = view.trackBuf.peek();
   if (buffer) saveTrack(buffer);
