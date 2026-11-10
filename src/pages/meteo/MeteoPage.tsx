@@ -16,11 +16,11 @@ import { buzz } from '../../lib/dom.ts';
 import { fmtTime } from '../../lib/format.ts';
 import { useWide } from '../../lib/useWide.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
-import { go } from '../../shell/router.ts';
+import { go, navigation } from '../../shell/router.ts';
 
 import { StationCard } from './StationCard.tsx';
 import { StationList } from './StationList.tsx';
-import { boatPlace, liveBack } from './boatPlace.ts';
+import { boatPlace, liveBackFrom, mapPlace } from './boatPlace.ts';
 import { mfTallyText } from './liveText.ts';
 import type { LivePlace } from './useLiveMap.ts';
 import { useLiveMap } from './useLiveMap.ts';
@@ -40,9 +40,9 @@ export function MeteoPage() {
   useSignals();
   const tr = useTr();
   const config = windConfig();
-  const back = liveBack.value;
+  const [back] = useState(() => liveBackFrom(navigation.peek().from));
   const wide = useWide();
-  const [center, setCenter] = useState<LivePlace>(boatPlace);
+  const [center, setCenter] = useState<LivePlace>(mapPlace);
   const [radius, setRadius] = useState(config.radius);
   const [stations, setStations] = useState<LiveStation[]>([]);
   const [readFor, setReadFor] = useState<string | null>(null);
@@ -96,7 +96,6 @@ export function MeteoPage() {
     const timer = setInterval(() => setNow(Date.now()), 30_000);
     return () => {
       clearInterval(timer);
-      liveBack.value = { view: 'more', label: '◀ data' };
     };
   }, []);
   const station = stations.find((item) => stationKey(item) === picked) ?? null;
@@ -230,10 +229,11 @@ export function MeteoPage() {
             Vent mesuré maintenant par les stations MeteoSwiss, les balises
             OpenWindMap et les stations Météo-France (avec la clé des réglages).
             Chiffre en gras : vent moyen ; en petit : rafales ; flèche : sens
-            vers lequel souffle le vent. Couleur des alertes de vent. Toucher
-            une station pour ses mesures en direct ; déplacer la carte puis «
-            Chercher au centre de la carte » pour d’autres stations. Mise à jour
-            toutes les 2 min.
+            vers lequel souffle le vent. Couleur des alertes de vent. S’ouvre là
+            où montrait la carte de NavIn ; « Autour du bateau » revient au
+            bateau. Toucher une station pour ses mesures en direct ; déplacer la
+            carte puis « Chercher au centre de la carte » pour d’autres
+            stations. Mise à jour toutes les 2 min.
           </HelpText>
         </div>
       </div>

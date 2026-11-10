@@ -14,7 +14,6 @@ import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
 import { addMark, navZone, state, toast } from '../../state/index.ts';
-import { liveBack } from '../meteo/boatPlace.ts';
 
 import { RailIcon } from './railIcons.tsx';
 import type { RailSide, Rails } from './sideRails.ts';
@@ -90,7 +89,6 @@ function run(key: string): void {
     document.querySelector<HTMLElement>('.map-locate-btn')?.click();
     return;
   }
-  if (key === 'meteo') liveBack.value = { view: 'tracker', label: '◀ NavIn' };
   go(key);
 }
 
@@ -208,16 +206,22 @@ function RailButton({
   entry: FunctionEntry;
   onPick: () => void;
 }) {
+  useSignals();
   const tr = useTr();
   const press = useLongPress(onPick);
-  const { icon, label } = splitTitle(entry.title);
+  // During a track, the Météo menu gives way to Live météo.
+  const shown =
+    entry.key === 'weather' && state.view.tracking.value
+      ? (functionEntries().find((one) => one.key === 'meteo') ?? entry)
+      : entry;
+  const { icon, label } = splitTitle(shown.title);
   const drawn = entry.key === 'act:point' || entry.key === 'act:photo';
   return (
     <Button
       type="button"
       noUiEdit
       className={press.hit ? 'rail-btn lp-hit' : 'rail-btn'}
-      onClick={() => run(entry.key)}
+      onClick={() => run(shown.key)}
       {...press.handlers}
     >
       <span className="rail-icon">

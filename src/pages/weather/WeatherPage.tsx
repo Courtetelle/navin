@@ -10,10 +10,11 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { dayKey, fmtTime } from '../../lib/format.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
+import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
 import { isLake, state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
-import { boatPlace, liveBack } from '../meteo/boatPlace.ts';
+import { boatPlace } from '../meteo/boatPlace.ts';
 import {
   BEAUFORT_COLORS,
   compassPoint,
@@ -24,21 +25,74 @@ import { weatherChecks } from './weatherChecks.ts';
 
 function openLive() {
   buzz();
-  liveBack.value = { view: 'weather', label: '◀ Météo' };
   go('meteo');
 }
+
+function openForecast() {
+  buzz();
+  go('weather', FORECAST);
+}
+
+/** Argument of the screen for the forecast part. */
+const FORECAST = 'forecast';
 
 /** Hours of forecast shown. */
 const HOURS = 12;
 const CHECKS_KEY = 'ldb.wx.checks';
 
 /**
- * The Météo screen of the NavIn menu: Live météo, the forecast of the next
- * hours drawn simply, and the weather checks before leaving, ticked for the
- * day. During a track, Live météo comes first.
+ * The Météo screen of the NavIn menu: an entry to its two menus, the
+ * forecast (with the checks before leaving) and Live météo.
+ * @param props - Page props: `forecast` opens the forecast menu.
  * @returns The screen content.
  */
-export function WeatherPage() {
+export function WeatherPage({ arg }: PageProps) {
+  return arg === FORECAST ? <ForecastPage /> : <WeatherMenu />;
+}
+
+function WeatherMenu() {
+  const tr = useTr();
+  return (
+    <>
+      <PageBack
+        label="◀ NavIn"
+        data-go="tracker"
+        onClick={() => {
+          buzz();
+          go('tracker');
+        }}
+      >
+        {tr('◀ NavIn')}
+      </PageBack>
+      <h1>{tr('🌤 Météo')}</h1>
+      <div className="wx-menu">
+        <Button className="btn big wx-entry" onClick={openForecast}>
+          <span className="wx-entry-ico">📈</span>
+          <span>
+            <b>{tr('Prévisions')}</b>
+            <small>
+              {tr('les prochaines heures et la procédure avant le départ')}
+            </small>
+          </span>
+        </Button>
+        <Button className="btn big wx-entry" onClick={openLive}>
+          <span className="wx-entry-ico">🌬</span>
+          <span>
+            <b>{tr('Live météo')}</b>
+            <small>{tr('le vent mesuré maintenant par les stations')}</small>
+          </span>
+        </Button>
+      </div>
+    </>
+  );
+}
+
+/**
+ * The forecast of the next hours drawn simply, and the weather checks before
+ * leaving, ticked for the day.
+ * @returns The screen content.
+ */
+function ForecastPage() {
   useSignals();
   const tr = useTr();
   const lake = isLake();
@@ -76,28 +130,20 @@ export function WeatherPage() {
   };
   const checks = weatherChecks(lake);
   const done = checks.filter((check) => ticked.includes(check.id)).length;
-  const live = (
-    <ButtonRow className="row">
-      <Button className="btn primary wx-live" onClick={openLive}>
-        {tr('🌬 Live météo : le vent mesuré maintenant')}
-      </Button>
-    </ButtonRow>
-  );
   return (
     <>
       <PageBack
-        label="◀ NavIn"
-        data-go="tracker"
+        label="◀ Météo"
+        data-go="weather"
         onClick={() => {
           buzz();
-          go('tracker');
+          go('weather');
         }}
       >
-        {tr('◀ NavIn')}
+        {tr('◀ Météo')}
       </PageBack>
-      <h1>{tr('🌤 Météo')}</h1>
+      <h1>{tr('📈 Prévisions')}</h1>
       <div className="wx-page">
-        {live}
         <section className="wx-fc">
           <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>
           <ForecastStrip forecast={forecast} />

@@ -152,15 +152,22 @@ function vhfItem(
 }
 
 function weatherItem(actions: TopMenuActions, tracking: boolean): TopMenuItem {
-  return {
-    label: 'Météo',
-    html: [WEATHER_SVG],
-    bare: true,
-    hint: tracking
-      ? 'Toucher encore : menu suivant · appui long : météo et Live météo'
-      : 'Toucher encore : menu suivant · appui long : météo et procédure avant le départ',
-    act: () => actions.go('weather'),
-  };
+  // During a track, Live météo straight away, in place of the Météo menu.
+  return tracking
+    ? {
+        label: 'Live météo',
+        html: [WEATHER_SVG],
+        bare: true,
+        hint: 'Toucher encore : menu suivant · appui long : Live météo, le vent mesuré maintenant',
+        act: () => actions.go('meteo'),
+      }
+    : {
+        label: 'Météo',
+        html: [WEATHER_SVG],
+        bare: true,
+        hint: 'Toucher encore : menu suivant · appui long : prévisions et Live météo',
+        act: () => actions.go('weather'),
+      };
 }
 
 function trackerMenu(

@@ -9793,3 +9793,31 @@ body.nav-search:not(.trk-mode) #searchBtn {
     right: 150px !important;
   }
 }
+
+/* Météo: the entry to its two menus */
+.wx-menu {
+  display: grid;
+  gap: 12px;
+  max-width: 720px;
+}
+.wx-entry {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 92px;
+  text-align: left;
+}
+.wx-entry-ico {
+  font-size: 40px;
+  line-height: 1;
+}
+.wx-entry b {
+  display: block;
+  font-size: 22px;
+}
+.wx-entry small {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
