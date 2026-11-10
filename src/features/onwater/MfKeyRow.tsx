@@ -41,7 +41,7 @@ export function MfKeyRow() {
     setResult('Vérification de la clé auprès de Météo-France…');
     const place = lastKnownPos() ?? seaPlace();
     const text = checkText(
-      await mfCheck(value, place, (step) =>
+      await mfCheck(value, place, seaPlace(), (step) =>
         setResult(`Vérification auprès de Météo-France : ${step}…`),
       ),
     );

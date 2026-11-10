@@ -48,6 +48,32 @@ interface MfRow {
   ff?: number | null;
   fxi10?: number | null;
   dd?: number | null;
+  [field: string]: unknown;
+}
+
+/** Names of the gusts in the Météo-France replies, the 10-minute one first. */
+const GUST_FIELDS = ['fxi10', 'fxi', 'fxi3s', 'fxy', 'fx'];
+
+/**
+ * The gusts of a Météo-France row, whatever their name (`fx…`).
+ * @param row - The row.
+ * @returns Gusts in m/s, null when the station gives none.
+ */
+export function mfGust(row: Readonly<Record<string, unknown>>): number | null {
+  const known = GUST_FIELDS.map((name) => row[name]).find(
+    (value) => typeof value === 'number' && Number.isFinite(value),
+  );
+  if (typeof known === 'number') return known;
+  for (const [name, value] of Object.entries(row)) {
+    if (
+      name.startsWith('fx') &&
+      typeof value === 'number' &&
+      Number.isFinite(value)
+    ) {
+      return value;
+    }
+  }
+  return null;
 }
 
 /**
@@ -166,12 +192,13 @@ export function mfReading(
   }
   if (!last || !(now - last.t < STATION_MAX_AGE_MS)) return null;
   const { row, t } = last;
+  const gust = mfGust(row);
   return {
     name,
     km,
     t,
     avg: (row.ff ?? 0) * MS_TO_KN,
-    gust: row.fxi10 == null ? null : row.fxi10 * MS_TO_KN,
+    gust: gust == null ? null : gust * MS_TO_KN,
     dir: row.dd ?? null,
     net: METEO_FRANCE,
   };
@@ -241,7 +268,15 @@ export async function mfReadings(
 
 /** Result of {@link mfCheck}. */
 export type MfCheck =
-  | { kind: 'ok'; stations: number; reading: WindReading }
+  | {
+      kind: 'ok';
+      stations: number;
+      reading: WindReading;
+      /** Fields of the last measurement, to know the names of the reply. */
+      fields: string[];
+      /** A second station, by the sea. */
+      coast: { reading: WindReading; fields: string[] } | null;
+    }
   | { kind: 'noWind'; stations: number; near: string; status: string }
   | {
       kind: 'refused';
@@ -276,12 +311,14 @@ function timedOut(error: unknown): boolean {
  * stations to a place.
  * @param key - The key.
  * @param position - Place near which a wind is read.
+ * @param coast - A place by the sea, where a second station is read.
  * @param onStep - Told each step, to show the progress.
  * @returns What Météo-France answered.
  */
 export async function mfCheck(
   key: string,
   position: { lat: number; lon: number },
+  coast: { lat: number; lon: number } | null = null,
   onStep: (step: string) => void = () => undefined,
 ): Promise<MfCheck> {
   let response: Response;
@@ -316,8 +353,16 @@ export async function mfCheck(
   /* eslint-disable no-await-in-loop -- the next station only when the closer one has no wind */
   for (const { station, km } of near) {
     onStep(`${list.length} stations · vent de ${station[1]}`);
-    const { reading, status } = await mfStationWind(station, km, key);
-    if (reading) return { kind: 'ok', stations: list.length, reading };
+    const { reading, status, fields } = await mfStationWind(station, km, key);
+    if (reading) {
+      return {
+        kind: 'ok',
+        stations: list.length,
+        reading,
+        fields,
+        coast: coast ? await coastCheck(list, coast, key, onStep) : null,
+      };
+    }
     codes.push(status === -1 ? 'délai dépassé' : String(status));
   }
   /* eslint-enable no-await-in-loop */
@@ -333,22 +378,27 @@ async function mfStationWind(
   station: CoastStation,
   km: number,
   key: string,
-): Promise<{ reading: WindReading | null; status: number }> {
+): Promise<{ reading: WindReading | null; status: number; fields: string[] }> {
   try {
     const response = await mfFetch(
       `${mfBase(key)}station/infrahoraire-6m?id_station=${encodeURIComponent(station[0])}&format=json`,
       key,
     );
-    if (!response.ok) return { reading: null, status: response.status };
+    if (!response.ok) {
+      return { reading: null, status: response.status, fields: [] };
+    }
     const rows = (await response.json()) as MfRow[];
+    const list = Array.isArray(rows) ? rows : [];
+    const last = list.at(-1) ?? {};
     return {
-      reading: Array.isArray(rows)
-        ? mfReading(rows, station[1], km, Date.now())
-        : null,
+      reading: mfReading(list, station[1], km, Date.now()),
       status: response.status,
+      fields: Object.keys(last)
+        .filter((name) => last[name] != null)
+        .toSorted(),
     };
   } catch (error) {
-    return { reading: null, status: timedOut(error) ? -1 : 0 };
+    return { reading: null, status: timedOut(error) ? -1 : 0, fields: [] };
   }
 }
 
@@ -516,4 +566,23 @@ export function mfBase(key: string): string {
   )?.context;
   const safe = context && /^\/[\w/.-]+$/u.test(context) ? context : MF_CONTEXT;
   return `${MF_HOST}${safe.replace(/\/$/u, '')}/`;
+}
+
+async function coastCheck(
+  list: readonly CoastStation[],
+  coast: { lat: number; lon: number },
+  key: string,
+  onStep: (step: string) => void,
+): Promise<{ reading: WindReading; fields: string[] } | null> {
+  /* eslint-disable no-await-in-loop -- the next station only when the closer one has no wind */
+  for (const { station, km } of nearCoastStations(list, coast, 40).slice(
+    0,
+    3,
+  )) {
+    onStep(`vent de ${station[1]}, en bord de mer`);
+    const { reading, fields } = await mfStationWind(station, km, key);
+    if (reading) return { reading, fields };
+  }
+  /* eslint-enable no-await-in-loop */
+  return null;
 }

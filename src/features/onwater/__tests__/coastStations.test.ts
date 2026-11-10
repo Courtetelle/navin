@@ -7,6 +7,7 @@ import {
   keyApis,
   keyLimits,
   mfBase,
+  mfGust,
   mfReading,
   mfStations,
   nearCoastStations,
@@ -137,6 +138,8 @@ describe('Météo-France key check', () => {
       kind: 'ok',
       stations: 1100,
       reading: { name: 'Dinard', t: NOW, avg: 14, gust: 19, dir: 250, km: 6 },
+      fields: ['dd', 'ff', 'fxi10'],
+      coast: null,
     });
     expect(text).toContain(
       '✅ Clé Météo-France valide · 1100 stations · Dinard (6 km)',
@@ -204,5 +207,14 @@ describe('Météo-France API address', () => {
     expect(mfBase('not a key')).toBe(
       'https://public-api.meteofrance.fr/public/DPObs/v1/',
     );
+  });
+});
+
+describe('Météo-France gusts', () => {
+  it('finds the gusts whatever their name', () => {
+    expect(mfGust({ ff: 3, fxi10: 5 })).toBe(5);
+    expect(mfGust({ ff: 3, fxi: 6 })).toBe(6);
+    expect(mfGust({ ff: 3, fx3s: 7 })).toBe(7);
+    expect(mfGust({ ff: 3, fxi10: null })).toBeNull();
   });
 });

@@ -2,6 +2,7 @@ import { fmtTime } from '../../lib/format.ts';
 import { windTxt } from '../../lib/wind.ts';
 
 import type { MfCheck } from './coastStations.ts';
+import type { WindReading } from './windTypes.ts';
 
 /**
  * What a key check means for the sailor.
@@ -10,11 +11,11 @@ import type { MfCheck } from './coastStations.ts';
  */
 export function checkText(check: MfCheck): string {
   if (check.kind === 'ok') {
-    const { reading, stations } = check;
-    const gust =
-      reading.gust == null ? '' : `, rafales ${windTxt(reading.gust)}`;
-    const km = reading.km == null ? '' : ` (${Math.round(reading.km)} km)`;
-    return `✅ Clé Météo-France valide · ${stations} stations · ${reading.name}${km} : ${windTxt(reading.avg)}${gust}, mesuré à ${fmtTime(new Date(reading.t))}`;
+    const { reading, stations, fields, coast } = check;
+    const seaside = coast
+      ? ` · en bord de mer : ${windText(coast.reading)} (champs : ${coast.fields.join(', ')})`
+      : '';
+    return `✅ Clé Météo-France valide · ${stations} stations · ${windText(reading)} (champs : ${fields.join(', ')})${seaside}`;
   }
   if (check.kind === 'noWind') {
     return `⚠️ Clé valide (${check.stations} stations) mais aucun vent récent près de ${check.near} · codes ${check.status}`;
@@ -41,4 +42,13 @@ export function checkText(check: MfCheck): string {
     return `⏳ Météo-France ne répond pas (${check.step}, plus de 15 s) · réessayez plus tard ou sur un autre réseau`;
   }
   return '📵 Pas de réseau · clé enregistrée, vérification impossible';
+}
+
+function windText(reading: WindReading): string {
+  const gust =
+    reading.gust == null
+      ? ', pas de rafales'
+      : `, rafales ${windTxt(reading.gust)}`;
+  const km = reading.km == null ? '' : ` (${Math.round(reading.km)} km)`;
+  return `${reading.name}${km} : ${windTxt(reading.avg)}${gust}, mesuré à ${fmtTime(new Date(reading.t))}`;
 }
