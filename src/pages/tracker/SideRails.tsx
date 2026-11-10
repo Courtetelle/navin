@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
+import { shownMap } from '../../features/map/mapFull.ts';
 import { trkPointNow } from '../../features/map/trackerPoint.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { takePhoto } from '../../features/onwater/index.ts';
@@ -67,7 +68,7 @@ function markAt(lat: number, lon: number): void {
 
 function run(key: string): void {
   buzz();
-  const map = tracker.current?.map;
+  const map = tracker.current?.map ?? shownMap();
   if (key === 'act:zoomin') {
     map?.zoomIn();
     return;
@@ -116,23 +117,28 @@ export function SideRails() {
       {(['left', 'right'] as const).map((side) => (
         <div key={side} className={`side-rail side-rail-${side}`}>
           {side === 'right' ? <CommButton /> : null}
-          {rails[side].slice(0, slotsOf(side)).map((key, index) => (
-            <RailButton
-              // eslint-disable-next-line react/no-array-index-key -- the places are fixed
-              key={index}
-              entry={key ? (known.get(key) ?? null) : null}
-              onPick={() => {
-                buzz();
-                setPicking({ side, index });
-              }}
-            />
-          ))}
+          {rails[side].slice(0, slotsOf(side)).map((key, index) => {
+            const entry = key ? known.get(key) : undefined;
+            return entry ? (
+              <RailButton
+                // eslint-disable-next-line react/no-array-index-key -- the places are fixed
+                key={index}
+                entry={entry}
+                onPick={() => {
+                  buzz();
+                  setPicking({ side, index });
+                }}
+              />
+            ) : null;
+          })}
         </div>
       ))}
       {picking ? (
         <RailPicker
           current={rails[picking.side][picking.index] ?? ''}
           onPick={pick}
+          onAdd={addPlaceOf(rails, picking.side)}
+          onMove={(index) => setPicking({ side: picking.side, index })}
           onClose={() => setPicking(null)}
         />
       ) : null}
@@ -199,25 +205,11 @@ function RailButton({
   entry,
   onPick,
 }: {
-  entry: FunctionEntry | null;
+  entry: FunctionEntry;
   onPick: () => void;
 }) {
   const tr = useTr();
   const press = useLongPress(onPick);
-  if (!entry) {
-    return (
-      <Button
-        type="button"
-        noUiEdit
-        choice
-        className="rail-btn rail-free"
-        aria-label={tr('Place libre : choisir un bouton')}
-        onClick={onPick}
-      >
-        ＋
-      </Button>
-    );
-  }
   const { icon, label } = splitTitle(entry.title);
   const drawn = entry.key === 'act:point' || entry.key === 'act:photo';
   return (
@@ -236,13 +228,23 @@ function RailButton({
   );
 }
 
+function addPlaceOf(rails: Rails, side: RailSide): number {
+  return rails[side].slice(0, slotsOf(side)).findIndex((key) => !key);
+}
+
 function RailPicker({
   current,
   onPick,
+  onAdd,
+  onMove,
   onClose,
 }: {
   current: string;
   onPick: (key: string) => void;
+  /** A free place of the column, -1 when it is full. */
+  onAdd: number;
+  /** Choose for another place of the column. */
+  onMove: (index: number) => void;
   onClose: () => void;
 }) {
   const tr = useTr();
@@ -275,6 +277,19 @@ function RailPicker({
               }}
             >
               {tr('Retirer ce bouton')}
+            </Button>
+          ) : null}
+          {current && onAdd >= 0 ? (
+            <Button
+              type="button"
+              noUiEdit
+              className="btn"
+              onClick={() => {
+                buzz();
+                onMove(onAdd);
+              }}
+            >
+              {tr('＋ Ajouter un bouton dans cette colonne')}
             </Button>
           ) : null}
           <Button type="button" noUiEdit className="btn" onClick={onClose}>

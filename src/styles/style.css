@@ -9532,9 +9532,9 @@ body.nav-search:not(.trk-mode) #searchBtn {
 /* Tablet in landscape: two columns of buttons beside the map, chosen by the
    sailor (＋ on a free place, long press to change) */
 .side-rail {
-  position: absolute;
+  position: fixed;
   top: calc(var(--topbar-h, 72px) + 76px);
-  z-index: 790;
+  z-index: 1500;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -9627,11 +9627,11 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
 }
 
-/* Tablet in landscape, map screen: no top bar. The clock, NavIn and data
+/* Tablet in landscape, every screen: no top bar. The clock, NavIn and data
    head the left column, SOS, the settings and the magnifier the right one;
    the map takes the whole height. */
 @media (min-width: 1000px) and (orientation: landscape) {
-  html body.trk-mode header.topbar {
+  html body header.topbar.topbar {
     position: fixed !important;
     inset: 0 auto auto 0 !important;
     width: 0 !important;
@@ -9643,17 +9643,17 @@ body.nav-search:not(.trk-mode) #searchBtn {
     opacity: 1 !important;
     pointer-events: none;
   }
-  html body.trk-mode header.topbar > *,
-  html body.trk-mode header.topbar nav.topnav .top-tab.top-tab {
+  html body header.topbar > *,
+  html body header.topbar nav.topnav .top-tab.top-tab {
     pointer-events: auto;
   }
-  html body.trk-mode header.topbar nav.topnav {
+  html body header.topbar nav.topnav {
     display: contents !important;
   }
-  html body.trk-mode header.topbar #clock,
-  html body.trk-mode header.topbar nav.topnav .top-tab.top-tab,
-  html body.trk-mode header.topbar #gearBtn,
-  html body.trk-mode #searchBtn {
+  html body header.topbar #clock,
+  html body header.topbar nav.topnav .top-tab.top-tab,
+  html body header.topbar #gearBtn,
+  html body #searchBtn {
     position: fixed !important;
     width: 120px !important;
     min-width: 0 !important;
@@ -9662,7 +9662,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     margin: 0 !important;
     box-sizing: border-box;
   }
-  html body.trk-mode header.topbar #clock {
+  html body header.topbar #clock {
     top: 8px !important;
     left: 10px !important;
     height: 50px;
@@ -9673,39 +9673,35 @@ body.nav-search:not(.trk-mode) #searchBtn {
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
   }
-  html
-    body.trk-mode
-    header.topbar
-    nav.topnav
-    .top-tab.top-tab[data-view='tracker'] {
+  html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
     top: 64px !important;
     left: 10px !important;
     height: 62px !important;
   }
-  html body.trk-mode header.topbar nav.topnav .top-tab.top-tab.tab-data {
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data {
     top: 132px !important;
     left: 10px !important;
     height: 56px !important;
   }
-  html body.trk-mode header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
     top: 8px !important;
     right: 10px !important;
     height: 64px !important;
   }
-  html body.trk-mode header.topbar #gearBtn {
+  html body header.topbar #gearBtn {
     top: 78px !important;
     right: 10px !important;
     height: 52px !important;
   }
-  html body.trk-mode #searchBtn {
+  html body #searchBtn {
     top: 136px !important;
     right: 10px !important;
     left: auto !important;
     bottom: auto !important;
     height: 52px !important;
   }
-  html body.trk-mode header.topbar #gearBtn,
-  html body.trk-mode #searchBtn {
+  html body header.topbar.topbar #gearBtn.theme-btn,
+  html body #searchBtn.no-print {
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -9717,46 +9713,41 @@ body.nav-search:not(.trk-mode) #searchBtn {
       transparent
     ) !important;
   }
-  html body.trk-mode .bar-chevron-top,
-  html body.trk-mode .slide-handle.sh-top {
+  html body .bar-chevron-top,
+  html body .slide-handle.sh-top {
     display: none !important;
   }
-  html body.trk-mode .side-rail {
+  html body .side-rail {
     top: 200px;
     width: 120px;
   }
-  html body.trk-mode .rail-btn {
+  html body .rail-btn {
     width: 120px;
   }
-  html body.trk-mode header.topbar {
+  html body header.topbar.topbar {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
     filter: none !important;
   }
-  html body.trk-mode .trk-full .leaflet-top.ctl-col {
+  html body .trk-full .leaflet-top.ctl-col {
     top: 8px !important;
     left: auto !important;
     right: 138px !important;
     padding-top: 0 !important;
     margin-top: 0 !important;
   }
-  html
-    body.trk-mode
-    .trk-full
-    .ctl-auto
-    .leaflet-control-container
-    .leaflet-control,
-  html body.trk-mode .trk-full .leaflet-control-container .leaflet-control {
+  html body .trk-full .ctl-auto .leaflet-control-container .leaflet-control,
+  html body .trk-full .leaflet-control-container .leaflet-control {
     opacity: 1 !important;
     pointer-events: auto !important;
     transform: none !important;
   }
-  html body.trk-mode .trk-full .ctl-col > .ctl-hide-btn,
-  html body.trk-mode .trk-full .ctl-edge,
-  html body.trk-mode .slide-handle.sh-left {
+  html body .trk-full .ctl-col > .ctl-hide-btn,
+  html body .trk-full .ctl-edge,
+  html body .slide-handle.sh-left {
     display: none !important;
   }
-  html body.trk-mode .trk-full .trk-over {
+  html body .trk-full .trk-over {
     left: 140px;
     right: 140px;
   }
@@ -9777,4 +9768,28 @@ body.nav-search:not(.trk-mode) #searchBtn {
 .rail-badge .rail-svg {
   width: 20px;
   height: 20px;
+}
+
+/* Tablet in landscape, every screen: the page between the two columns; the
+   magnifier stays in the right column, not in the nav bar. */
+@media (min-width: 1000px) and (orientation: landscape) {
+  html body main#view {
+    max-width: none !important;
+    margin: 0 140px !important;
+    padding-top: 12px;
+  }
+  html body #navtop {
+    top: 0 !important;
+    max-width: min(760px, calc(100vw - 280px)) !important;
+  }
+  html body #navSearchSlot,
+  html body #navSearch {
+    display: none !important;
+  }
+  html body.nav-search #searchBtn {
+    display: flex !important;
+  }
+  html body .lang-fab {
+    right: 150px !important;
+  }
 }

@@ -16,6 +16,14 @@ export function setShownMap(map: LeafletMap | null): void {
 }
 
 /**
+ * The map on screen, if any.
+ * @returns The Leaflet map, or `null`.
+ */
+export function shownMap(): LeafletMap | null {
+  return shown.map;
+}
+
+/**
  * Switch a map to full screen and back (legacy `setMapFull`); on tablets the
  * browser goes full screen too.
  * @param map - Leaflet map.

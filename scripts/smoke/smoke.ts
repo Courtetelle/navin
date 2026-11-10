@@ -34,16 +34,19 @@ const FAKE_GPS = `
   };
 `;
 
+const PHONE = { width: 390, height: 844 };
+
 async function open(
   browser: Browser,
   theme: string,
+  viewport: { width: number; height: number } = PHONE,
 ): Promise<{
   context: BrowserContext;
   page: Page;
   errors: string[];
 }> {
   const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
+    viewport,
     locale: 'fr-CH',
     serviceWorkers: 'block',
   });
@@ -561,6 +564,63 @@ async function swipeToDelete(page: Page, theme: string): Promise<void> {
   );
 }
 
+// Where the side buttons of the tablet stand, to the pixel.
+const TABLET_BUTTONS = [
+  '#clock',
+  '.top-tab[data-view="tracker"]',
+  '.top-tab.tab-data',
+  '.top-tab.tab-sos',
+  '#gearBtn',
+  '#searchBtn',
+  '.rail-comm',
+  '.side-rail-left .rail-btn',
+];
+
+async function tabletPlaces(page: Page): Promise<string> {
+  const places: string[] = [];
+  for (const selector of TABLET_BUTTONS) {
+    // eslint-disable-next-line no-await-in-loop -- one button after the other
+    const box = await page.locator(selector).first().boundingBox();
+    places.push(
+      box
+        ? `${Math.round(box.x)},${Math.round(box.y)},${Math.round(box.width)}`
+        : 'absent',
+    );
+  }
+  return places.join(' ');
+}
+
+/**
+ * The rule of the landscape tablet: on every screen the clock, NavIn and data
+ * stand on the left, SOS, settings, magnifier and VHF on the right, at the
+ * same places, and the page stays between the two columns.
+ */
+async function tablet(page: Page, theme: string): Promise<void> {
+  const home = await tabletPlaces(page);
+  check(theme, 'tablet: every side button is shown', !home.includes('absent'));
+  const screens: Array<[string, string]> = [
+    ['data', '.top-tab.tab-data'],
+    ['SOS', '.top-tab.tab-sos'],
+    ['settings', '#gearBtn'],
+  ];
+  for (const [name, opener] of screens) {
+    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    await page.locator(opener).click();
+    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    await page.waitForTimeout(700);
+    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    const here = await tabletPlaces(page);
+    check(theme, `tablet: same side buttons on ${name}`, here === home);
+    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    const view = await page.locator('main#view').boundingBox();
+    check(
+      theme,
+      `tablet: the ${name} page stays between the columns`,
+      view !== null && view.x >= 130 && view.x + view.width <= 1150,
+    );
+  }
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
@@ -580,6 +640,23 @@ for (const theme of ['day', 'night']) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }
   check(theme, 'no error in the page', errors.length === 0);
+  await context.close();
+}
+for (const theme of ['day', 'night']) {
+  const { context, page, errors } = await open(browser, theme, {
+    width: 1280,
+    height: 800,
+  });
+  try {
+    await tablet(page, theme);
+  } catch (error) {
+    check(
+      theme,
+      `tablet: no step blocks: ${String(error).slice(0, 700)}`,
+      false,
+    );
+  }
+  check(theme, 'tablet: no error in the page', errors.length === 0);
   await context.close();
 }
 /* eslint-enable no-await-in-loop */

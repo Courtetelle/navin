@@ -1,4 +1,5 @@
 import { LangFab } from './i18n/LangFab.tsx';
+import { SideRails } from './pages/tracker/SideRails.tsx';
 import { PageHost } from './shell/PageHost.tsx';
 import { SlideHandles } from './shell/SlideHandles.tsx';
 import { WakeVideo } from './shell/WakeVideo.tsx';
@@ -30,6 +31,7 @@ export function App() {
       <LangFab />
       <SlideHandles />
       <SearchButton />
+      <SideRails />
       <RemarkPill />
       <UiEditor />
     </>
