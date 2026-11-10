@@ -9667,7 +9667,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body header.topbar #clock {
     top: calc(8px + env(safe-area-inset-top)) !important;
     left: 10px !important;
-    height: 50px;
+    height: 62px;
     padding: 2px 0;
     border-radius: 14px;
     text-align: center;
@@ -9676,12 +9676,12 @@ body.nav-search:not(.trk-mode) #searchBtn {
     backdrop-filter: blur(6px);
   }
   html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
-    top: calc(64px + env(safe-area-inset-top)) !important;
+    top: calc(76px + env(safe-area-inset-top)) !important;
     left: 10px !important;
     height: 62px !important;
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data {
-    top: calc(132px + env(safe-area-inset-top)) !important;
+    top: calc(144px + env(safe-area-inset-top)) !important;
     left: 10px !important;
     height: 56px !important;
   }
@@ -9721,7 +9721,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body .side-rail {
-    top: calc(200px + env(safe-area-inset-top));
+    top: calc(212px + env(safe-area-inset-top));
     width: 96px;
   }
   html body .side-rail-right {
@@ -9729,7 +9729,12 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
   html body .trk-full .trk-dash {
     left: 116px;
-    right: 116px;
+    right: 140px;
+  }
+  /* SOS keeps its size, wider than the column, at the bottom right corner. */
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+    width: 120px !important;
+    right: 6px !important;
   }
   html body .rail-btn {
     width: 96px;
@@ -9919,4 +9924,11 @@ body.nav-search:not(.trk-mode) #searchBtn {
 .rail-bare .rail-svg {
   width: 72px;
   height: 60px;
+}
+
+/* Tablet in landscape: « data » a little larger, same proportions */
+@media (min-width: 1000px) and (orientation: landscape) {
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    font-size: 34px !important;
+  }
 }
