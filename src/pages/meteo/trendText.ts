@@ -1,5 +1,4 @@
 import type { WindPoint, WindTrend } from '../../features/onwater/index.ts';
-import { HISTORY_MS } from '../../features/onwater/index.ts';
 
 const WIDTH = 300;
 const HEIGHT = 80;
@@ -67,7 +66,7 @@ export function chartPaths(points: readonly WindPoint[]): ChartPaths {
   const minutes = Math.round(span / 60_000);
   const since =
     minutes >= 90
-      ? `il y a ${Math.round(Math.min(span, HISTORY_MS) / 3_600_000)} h`
+      ? `il y a ${Math.round(span / 3_600_000)} h`
       : `il y a ${minutes} min`;
   return { width: WIDTH, height: HEIGHT, avg, gust, top, since };
 }

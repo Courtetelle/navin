@@ -122,7 +122,7 @@ export function MeteoPage() {
       >
         {tr(back.label)}
       </PageBack>
-      <h1>{tr('🌬 Live météo')}</h1>
+      <h1 className="live-title">{tr('🌬 Live météo')}</h1>
       {station ? (
         <StationCard
           station={station}
@@ -144,12 +144,6 @@ export function MeteoPage() {
         />
       ) : null}
       <div className={station ? 'live-map-part hidden' : 'live-map-part'}>
-        <p className="keep-help live-status" role="status">
-          {status}
-        </p>
-        {tally ? (
-          <p className="keep-help live-mf">{tr(mfTallyText(tally, radius))}</p>
-        ) : null}
         <div className="live-map-wrap">
           <div id="liveMap" className="map live-map" ref={box}>
             {live.noMap ? (
@@ -160,35 +154,7 @@ export function MeteoPage() {
               </div>
             ) : null}
           </div>
-          <div className="live-tools">
-            <Button
-              className="btn primary"
-              onClick={() => {
-                buzz();
-                const middle = live.center();
-                if (middle) setCenter(middle);
-              }}
-            >
-              {tr('🔍 Chercher ici')}
-            </Button>
-            <Button
-              className="btn"
-              onClick={() => {
-                buzz();
-                setCenter(boatPlace());
-              }}
-            >
-              {tr('📍 Bateau')}
-            </Button>
-          </div>
         </div>
-        {live.twoFingers ? (
-          <p className="keep-help live-hint">
-            {tr(
-              'Carte : deux doigts pour la déplacer ou zoomer · un doigt fait défiler la page',
-            )}
-          </p>
-        ) : null}
         <ButtonRow className="row c3">
           {RADII.map((value) => (
             <Button
@@ -203,6 +169,33 @@ export function MeteoPage() {
             </Button>
           ))}
         </ButtonRow>
+        <ButtonRow className="row c2 live-tools">
+          <Button
+            className="btn primary"
+            onClick={() => {
+              buzz();
+              const middle = live.center();
+              if (middle) setCenter(middle);
+            }}
+          >
+            {tr('🔍 Chercher au centre')}
+          </Button>
+          <Button
+            className="btn"
+            onClick={() => {
+              buzz();
+              setCenter(boatPlace());
+            }}
+          >
+            {tr('📍 Autour du bateau')}
+          </Button>
+        </ButtonRow>
+        <p className="keep-help live-status" role="status">
+          {status}
+        </p>
+        {tally ? (
+          <p className="keep-help live-mf">{tr(mfTallyText(tally, radius))}</p>
+        ) : null}
         {!loading && stations.length === 0 ? (
           <p className="keep-help">
             {tr(

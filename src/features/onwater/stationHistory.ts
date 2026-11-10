@@ -29,16 +29,22 @@ export interface WindTrend {
   minutes: number;
 }
 
-/** Length of the trend shown. */
+/** Length of the trend shown first. */
 export const HISTORY_MS = 3 * 3_600_000;
+/** Lengths of trend offered, in hours. */
+export const HISTORY_SPANS = [3, 12, 24] as const;
+/** Measurements kept on the phone: a day. */
+const KEEP_MS = 24 * 3_600_000;
+/** Two points kept are at least this far apart. */
+const KEEP_STEP_MS = 8 * 60_000;
 /** A change smaller than this is "stable". */
 const FLAT_KN = 3;
 const KMH_TO_KN = 1 / 1.852;
 const MS_TO_KN = 3600 / 1852;
 const OWM_ARCHIVE = 'https://api.pioupiou.fr/v1/archive/';
 const SEEN_KEY = 'ldb.live.seen';
-const SEEN_STATIONS = 80;
-const SEEN_POINTS = 60;
+const SEEN_STATIONS = 50;
+const SEEN_POINTS = Math.ceil(KEEP_MS / KEEP_STEP_MS) + 10;
 
 /** A station whose past is asked. */
 export interface HistoryStation {
@@ -53,29 +59,32 @@ export interface HistoryStation {
  * @param station - The station.
  * @param mfKey - Météo-France key.
  * @param now - Epoch milliseconds.
+ * @param span - Length asked, in milliseconds.
  * @returns The points, empty when nothing is known.
  */
 export async function stationHistory(
   station: HistoryStation,
   mfKey: string,
   now: number,
+  span = HISTORY_MS,
 ): Promise<WindPoint[]> {
   let points: WindPoint[] = [];
   try {
-    points = await networkHistory(station, mfKey, now);
+    points = await networkHistory(station, mfKey, now, span);
   } catch {
     points = [];
   }
-  return mergePoints(points, seenPoints(station), now);
+  return mergePoints(points, seenPoints(station), now, span);
 }
 
 async function networkHistory(
   station: HistoryStation,
   mfKey: string,
   now: number,
+  span: number,
 ): Promise<WindPoint[]> {
   if (station.net === OPEN_WIND_MAP) {
-    const start = new Date(now - HISTORY_MS).toISOString();
+    const start = new Date(now - span).toISOString();
     const response = await fetch(
       `${OWM_ARCHIVE}${encodeURIComponent(station.id)}?start=${start}&stop=now`,
       { signal: AbortSignal.timeout(15_000) },
@@ -164,15 +173,17 @@ export function mfPoints(
  * @param a - Points.
  * @param b - Other points.
  * @param now - Epoch milliseconds.
+ * @param span - Length kept, in milliseconds.
  * @returns The points.
  */
 export function mergePoints(
   a: readonly WindPoint[],
   b: readonly WindPoint[],
   now: number,
+  span = HISTORY_MS,
 ): WindPoint[] {
   const sorted = [...a, ...b]
-    .filter((point) => point.t > now - HISTORY_MS && point.t <= now + 60_000)
+    .filter((point) => point.t > now - span && point.t <= now + 60_000)
     .toSorted((x, y) => x.t - y.t);
   const kept: WindPoint[] = [];
   for (const point of sorted) {
@@ -213,8 +224,8 @@ type Seen = Record<
 >;
 
 /**
- * Keep the measurements read, so that a station whose network gives no past
- * still gets a trend while the screen stays open.
+ * Keep the measurements read for a day, one every 8 minutes at most, so that
+ * the trend is there wherever the boat is, even when the network keeps no past.
  * @param stations - Stations just read.
  * @param now - Epoch milliseconds.
  */
@@ -222,20 +233,30 @@ export function rememberReadings(
   stations: ReadonlyArray<HistoryStation & WindPoint>,
   now: number,
 ): void {
+  if (stations.length === 0) return;
   const seen = store.get<Seen>(SEEN_KEY, {});
   for (const station of stations) {
     const key = `${station.net}:${station.id}`;
-    const list = (seen[key] ?? []).filter(([t]) => t > now - HISTORY_MS);
-    if (!list.some(([t]) => t === station.t)) {
-      list.push([station.t, station.avg, station.gust]);
+    const list = (seen[key] ?? []).filter(([t]) => t > now - KEEP_MS);
+    const last = list.at(-1);
+    if (!last || station.t - last[0] >= KEEP_STEP_MS) {
+      list.push([
+        station.t,
+        round(station.avg),
+        station.gust == null ? null : round(station.gust),
+      ]);
     }
     seen[key] = list.slice(-SEEN_POINTS);
   }
   const fresh = Object.entries(seen)
-    .filter(([, list]) => list.some(([t]) => t > now - HISTORY_MS))
+    .filter(([, list]) => list.some(([t]) => t > now - KEEP_MS))
     .toSorted((x, y) => (y[1].at(-1)?.[0] ?? 0) - (x[1].at(-1)?.[0] ?? 0))
     .slice(0, SEEN_STATIONS);
   store.set(SEEN_KEY, Object.fromEntries(fresh));
+}
+
+function round(knots: number): number {
+  return Math.round(knots * 10) / 10;
 }
 
 function seenPoints(station: HistoryStation): WindPoint[] {

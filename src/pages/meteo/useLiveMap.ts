@@ -7,6 +7,7 @@ import { createMap, leaflet, loadLeaflet } from '../../features/map/leaflet.ts';
 import { disposeMap } from '../../features/map/mapExtras.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
 import { stationKey, windValue } from '../../features/onwater/index.ts';
+import { toast } from '../../state/index.ts';
 
 import { windColors } from './liveText.ts';
 
@@ -26,8 +27,6 @@ export interface LiveMap {
   focus: (key: string) => void;
   /** Leaflet could not load. */
   noMap: boolean;
-  /** Touch screen: the map moves with two fingers, one finger scrolls the page. */
-  twoFingers: boolean;
 }
 
 /** A touch screen, where one finger must scroll the page. */
@@ -36,6 +35,8 @@ function coarsePointer(): boolean {
 }
 
 const KM_TO_M = 1000;
+/** The two-finger hint comes back at most this often. */
+const HINT_EVERY_MS = 20_000;
 
 function escapeHtml(text: string): string {
   return text.replaceAll(/[&<>"']/gu, (char) => `&#${char.codePointAt(0)};`);
@@ -103,6 +104,21 @@ export function useLiveMap(
           attribution: '© OpenSeaMap',
         }).addTo(created);
         layer.current = L.layerGroup().addTo(created);
+        if (coarsePointer()) {
+          // One finger scrolls the page: say once in a while how to move the map.
+          let told = 0;
+          created.getContainer().addEventListener(
+            'touchmove',
+            (event) => {
+              if (event.touches.length !== 1) return;
+              const now = Date.now();
+              if (now - told < HINT_EVERY_MS) return;
+              told = now;
+              toast('Deux doigts pour déplacer ou zoomer la carte');
+            },
+            { passive: true },
+          );
+        }
         map.current = created;
         setReady(true);
       })
@@ -217,6 +233,5 @@ export function useLiveMap(
       };
     },
     noMap,
-    twoFingers: coarsePointer(),
   };
 }

@@ -103,6 +103,11 @@ export function NavTop() {
   useLayoutEffect(() => {
     setBodyClass('has-navtop', shown);
     if (shown) setBodyClass('prep-top', Boolean(prepBar));
+    // The magnifier sits between ◀ and Sortir when nothing else is there.
+    setBodyClass(
+      'nav-search',
+      shown && !nav.hasSteps && !okShown && !nav.nextShown,
+    );
     if (shown && !sameSticky(live, sticky.peek())) sticky.value = live;
   });
   useNavHeight(reference, shown);
@@ -154,6 +159,7 @@ export function NavTop() {
       >
         {navEdit.value ? <PencilIcon /> : '✔'}
       </Button>
+      <div id="navSearchSlot" aria-hidden="true" />
       <Button
         className={exitHold.holding ? 'btn holding' : 'btn'}
         id="navExit"

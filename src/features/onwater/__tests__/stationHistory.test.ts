@@ -74,3 +74,29 @@ describe('stationHistory', () => {
     expect(windTrend(line([10, 11, 12]))).toBeNull();
   });
 });
+
+describe('rememberReadings', () => {
+  it('keeps a day, one point every 8 minutes at most', async () => {
+    const { rememberReadings, stationHistory } =
+      await import('../stationHistory.ts');
+    const { createMemoryStorage } =
+      await import('../../../storage/memoryStorage.ts');
+    const { setStorageBackend } = await import('../../../storage/store.ts');
+    setStorageBackend(createMemoryStorage({}));
+    const station = { id: 'X', net: 'Test' };
+    for (let minutes = 0; minutes <= 30 * 60; minutes += 4) {
+      const t = NOW - 30 * 3_600_000 + minutes * MIN;
+      rememberReadings([{ ...station, t, avg: 10.04, gust: null }], t);
+    }
+    const day = await stationHistory(station, '', NOW, 24 * 3_600_000);
+    expect(day.length).toBeGreaterThan(170);
+    expect(day.length).toBeLessThanOrEqual(181);
+    expect(day[0]?.avg).toBe(10);
+    expect(
+      day.every(
+        (point, index) =>
+          index === 0 || point.t - (day[index - 1]?.t ?? 0) >= 8 * MIN,
+      ),
+    ).toBe(true);
+  });
+});

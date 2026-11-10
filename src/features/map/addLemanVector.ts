@@ -69,9 +69,14 @@ export async function addLemanVector(
     seamarks as unknown as Pick<LemanVector, 'feats'>,
   );
   if (vector?.shore?.length) {
-    const bands = newShoreBands(vector.shore);
-    layersControl.addOverlay(bands, 'Zones 150 m et 300 m des rives');
-    bands.addTo(map);
+    // At start only the 300 m limit, dashed; the bands are offered.
+    const limit = newShoreBands(vector.shore, 'dashed');
+    layersControl.addOverlay(limit, 'Limite des 300 m des rives (tiretés)');
+    limit.addTo(map);
+    layersControl.addOverlay(
+      newShoreBands(vector.shore),
+      'Zones 150 m et 300 m des rives (bandes)',
+    );
   }
   const bath = bathLayer(vector);
   if (bath) {

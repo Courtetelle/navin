@@ -32,6 +32,19 @@ export function startWindWatch(): void {
       windReminderTick(),
     );
   }, 60_000);
+  // The stations around the GPS position are recorded, for the trends of
+  // Live météo wherever the boat is.
+  setTimeout(record, 30_000);
+  setInterval(record, RECORD_EVERY_MS);
+}
+
+/** The stations around the boat are recorded this often. */
+const RECORD_EVERY_MS = 10 * 60_000;
+
+function record(): void {
+  void import('./liveRecorder.ts')
+    .then(({ recordAround }) => recordAround())
+    .catch(() => undefined);
 }
 
 function alertsOn(): boolean {

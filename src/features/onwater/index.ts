@@ -35,6 +35,7 @@
  */
 export {
   HISTORY_MS,
+  HISTORY_SPANS,
   rememberReadings,
   stationHistory,
   windTrend,

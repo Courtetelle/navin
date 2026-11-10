@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'react';
 
+import { Button } from '../../components/shared/Button.tsx';
 import type { LiveStation, WindPoint } from '../../features/onwater/index.ts';
-import { stationHistory, windTrend } from '../../features/onwater/index.ts';
+import {
+  HISTORY_SPANS,
+  stationHistory,
+  windTrend,
+} from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
+import { buzz } from '../../lib/dom.ts';
 
 import { chartPaths, trendText } from './trendText.ts';
 
@@ -20,7 +26,8 @@ export interface WindTrendChartProps {
  */
 export function WindTrendChart({ station, mfKey }: WindTrendChartProps) {
   const tr = useTr();
-  const ask = `${station.net}:${station.id}:${station.t}`;
+  const [hours, setHours] = useState<number>(HISTORY_SPANS[0]);
+  const ask = `${station.net}:${station.id}:${station.t}:${hours}`;
   const [read, setRead] = useState<{ ask: string; points: WindPoint[] }>({
     ask: '',
     points: [],
@@ -28,29 +35,56 @@ export function WindTrendChart({ station, mfKey }: WindTrendChartProps) {
   const { id, net } = station;
   useEffect(() => {
     let closed = false;
-    void stationHistory({ id, net }, mfKey, Date.now()).then((points) => {
-      if (!closed) setRead({ ask, points });
-    });
+    void stationHistory({ id, net }, mfKey, Date.now(), hours * 3_600_000).then(
+      (points) => {
+        if (!closed) setRead({ ask, points });
+      },
+    );
     return () => {
       closed = true;
     };
-  }, [ask, id, net, mfKey]);
+  }, [ask, id, net, mfKey, hours]);
+  const spans = (
+    <div className="live-spans" role="group" aria-label={tr('Durée')}>
+      {HISTORY_SPANS.map((value) => (
+        <Button
+          key={value}
+          className={value === hours ? 'btn on' : 'btn'}
+          onClick={() => {
+            buzz();
+            setHours(value);
+          }}
+        >
+          {tr(`${value} h`)}
+        </Button>
+      ))}
+    </div>
+  );
   if (read.ask !== ask) {
-    return <p className="live-trend-txt">{tr('Lecture de l’historique…')}</p>;
+    return (
+      <>
+        {spans}
+        <p className="live-trend-txt">{tr('Lecture de l’historique…')}</p>
+      </>
+    );
   }
   const { points } = read;
   if (points.length < 3) {
     return (
-      <p className="live-trend-txt">
-        {tr(
-          'Pas encore d’historique pour cette station : la tendance apparaîtra en gardant cet écran ouvert.',
-        )}
-      </p>
+      <>
+        {spans}
+        <p className="live-trend-txt">
+          {tr(
+            'Pas encore d’historique pour cette station : NavIn enregistre toutes les 10 min les stations autour de votre position GPS, la courbe viendra.',
+          )}
+        </p>
+      </>
     );
   }
   const paths = chartPaths(points);
   return (
     <figure className="live-trend">
+      {spans}
       <figcaption className="live-trend-txt">
         {tr(trendText(windTrend(points)))}
       </figcaption>
