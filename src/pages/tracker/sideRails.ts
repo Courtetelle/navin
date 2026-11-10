@@ -12,7 +12,7 @@ export interface Rails {
 
 /** Places in each column. */
 export const RAIL_SLOTS = 6;
-const RAILS_KEY = 'ldb.rails.v4';
+const RAILS_KEY = 'ldb.rails.v5';
 
 /** Actions on the map itself, beside the screens of the app. */
 export const MAP_ACTIONS: readonly FunctionEntry[] = [
@@ -29,7 +29,7 @@ export const MAP_ACTIONS: readonly FunctionEntry[] = [
 
 /** The columns of a first start, to show the idea. */
 export const DEFAULT_RAILS: Rails = {
-  left: ['weather', 'marks', 'vhf', 'mob', '', ''],
+  left: ['weather', '', '', '', '', ''],
   right: ['act:point', 'act:photo', '', '', '', ''],
 };
 

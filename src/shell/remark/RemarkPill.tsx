@@ -21,6 +21,9 @@ interface Opened {
  * `rem-target`), a tap opens the remark window. Position kept in `ldb.remPill`.
  * @returns The pill and its window.
  */
+/** A finger may wander this far on a tap before the pill moves instead. */
+const DRAG_PX = 18;
+
 export function RemarkPill() {
   const [position, setPosition] = useState<PillPosition>(
     () => store.get<PillPosition>('ldb.remPill', {}) ?? {},
@@ -45,16 +48,16 @@ export function RemarkPill() {
   const left = Math.max(
     4,
     Math.min(
-      size.width - 52,
+      size.width - 64,
       // On a landscape tablet, clear of the right column of buttons.
       position.x ??
         size.width -
-          (size.width >= 1000 && size.width > size.height ? 260 : 60),
+          (size.width >= 1000 && size.width > size.height ? 260 : 72),
     ),
   );
   const top = Math.max(
     4,
-    Math.min(size.height - 56, position.y ?? size.height - 164),
+    Math.min(size.height - 68, position.y ?? size.height - 164),
   );
   const open = () => {
     const pill = reference.current;
@@ -103,7 +106,8 @@ export function RemarkPill() {
           const start = drag.current;
           if (!start) return;
           if (
-            Math.hypot(event.clientX - start.x0, event.clientY - start.y0) > 6
+            Math.hypot(event.clientX - start.x0, event.clientY - start.y0) >
+            DRAG_PX
           ) {
             start.moved = true;
           }

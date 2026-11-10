@@ -55,6 +55,12 @@ export interface TopMenuContext {
   tracking: boolean;
   /** Navigation zone. */
   zone: 'lac' | 'mer';
+  /**
+   * Landscape tablet: Météo has its own button in the left column, so the
+   * NavIn menu goes without it.
+   * @default false
+   */
+  wide?: boolean;
 }
 
 /** Actions the menus trigger; domains plug theirs with `setTopMenuActions`. */
@@ -191,7 +197,7 @@ function trackerMenu(
     };
     return [
       base,
-      weatherItem(actions, true),
+      ...(context.wide ? [] : [weatherItem(actions, true)]),
       fin,
       {
         label: 'Point',
@@ -215,7 +221,7 @@ function trackerMenu(
   }
   return [
     base,
-    weatherItem(actions, false),
+    ...(context.wide ? [] : [weatherItem(actions, false)]),
     {
       label: 'PréP',
       html: [FLAG_SVG],

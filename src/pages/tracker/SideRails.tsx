@@ -144,6 +144,9 @@ export function SideRails() {
   );
 }
 
+/** Functions shown with a drawing rather than their emoji. */
+const DRAWN = new Set(['act:point', 'act:photo', 'weather']);
+
 /** The right column gives its first place to the VHF / phone button. */
 function slotsOf(side: RailSide): number {
   return side === 'right' ? RAIL_SLOTS - 1 : RAIL_SLOTS;
@@ -215,7 +218,7 @@ function RailButton({
       ? (functionEntries().find((one) => one.key === 'meteo') ?? entry)
       : entry;
   const { icon, label } = splitTitle(shown.title);
-  const drawn = entry.key === 'act:point' || entry.key === 'act:photo';
+  const drawn = DRAWN.has(shown.key);
   return (
     <Button
       type="button"
@@ -225,7 +228,7 @@ function RailButton({
       {...press.handlers}
     >
       <span className="rail-icon">
-        {drawn ? <RailIcon name={entry.key} /> : icon || '•'}
+        {drawn ? <RailIcon name={shown.key} /> : icon || '•'}
       </span>
       <span className="rail-label">{tr(label)}</span>
     </Button>

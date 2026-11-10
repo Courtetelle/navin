@@ -7979,13 +7979,13 @@ details[data-b]:not([open]) > summary .b-editbtn {
 #remPill {
   position: fixed;
   z-index: 8900;
-  width: 48px;
-  height: 48px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: 2px solid #fff;
   background: #6a1b9a;
   color: #fff;
-  font-size: 24px;
+  font-size: 30px;
   line-height: 1;
   padding: 0;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.35);
@@ -9684,17 +9684,18 @@ body.nav-search:not(.trk-mode) #searchBtn {
     height: 56px !important;
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
-    top: 8px !important;
+    top: auto !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
     right: 10px !important;
     height: 64px !important;
   }
   html body header.topbar #gearBtn {
-    top: 78px !important;
+    top: 8px !important;
     right: 10px !important;
     height: 52px !important;
   }
   html body #searchBtn {
-    top: 136px !important;
+    top: 68px !important;
     right: 10px !important;
     left: auto !important;
     bottom: auto !important;
@@ -9720,6 +9721,13 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body .side-rail {
     top: 200px;
     width: 120px;
+  }
+  html body .side-rail-right {
+    top: 130px;
+  }
+  html body .trk-full .trk-dash {
+    left: 140px;
+    right: 140px;
   }
   html body .rail-btn {
     width: 120px;

@@ -78,3 +78,13 @@ test('the phone pictogram exists in a day and a night version', () => {
     night?.startsWith('<svg class="tb-ico tb-phone tb-still ph-night"'),
   ).toBe(true);
 });
+
+const labelsWide = (wide: boolean) =>
+  topMenu('tracker', { ...idle, wide }, actions).map((item) => item.label);
+
+test('on a landscape tablet, the NavIn menu leaves Météo to its own button', () => {
+  const labels = labelsWide;
+  expect(labels(false)).toContain('Météo');
+  expect(labels(true)).not.toContain('Météo');
+  expect(labels(true)).toContain('PréP');
+});
