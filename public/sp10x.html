@@ -7,7 +7,7 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <meta name="robots" content="noindex" />
-    <title>NavIn · essai SP10X</title>
+    <title>NavIn · essai SP10X et téléphone</title>
     <style>
       /* Development only: NavIn at the size of the Sailproof SP10X screen
          (10 inches, 800 x 1280 pixels), to judge it on an iPad. */
@@ -63,6 +63,25 @@
         inset: 52px 0 0;
         overflow: hidden;
       }
+      /* Phone view: the switch in the left margin, the phone beside it. */
+      body.phone header {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 170px;
+        height: auto;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        padding: 12px;
+      }
+      body.phone header b {
+        margin: 0 0 8px;
+      }
+      body.phone #stage {
+        inset: 0 0 0 170px;
+      }
       #frame {
         position: absolute;
         left: 50%;
@@ -81,18 +100,20 @@
   </head>
   <body>
     <header>
-      <b>Essai SP10X · <span id="size"></span></b>
+      <b><span id="what">Essai SP10X</span> · <span id="size"></span></b>
       <button type="button" data-size="1280x800" aria-pressed="true">
         Paysage 1280 × 800
       </button>
       <button type="button" data-size="800x1280">Portrait</button>
       <button type="button" data-size="960x600">Paysage 960 × 600</button>
+      <button type="button" data-size="390x844">Téléphone</button>
       <button type="button" id="reload">↻</button>
     </header>
     <div id="stage">
       <div id="frame"><iframe id="app" src="./" title="NavIn"></iframe></div>
     </div>
     <script>
+      // Téléphone: the size of an iPhone, to see the phone layout on the iPad.
       // 1280 x 800 if the tablet shows one CSS pixel per screen pixel, as
       // most 10-inch Android tablets of this resolution; 960 x 600 if it
       // enlarges by a third.
@@ -102,6 +123,11 @@
       let size = [1280, 800];
       function fit() {
         const [w, h] = size;
+        const phone = w < 600;
+        document.body.classList.toggle('phone', phone);
+        document.getElementById('what').textContent = phone
+          ? 'Essai téléphone'
+          : 'Essai SP10X';
         app.style.width = `${w}px`;
         app.style.height = `${h}px`;
         const room = stage.getBoundingClientRect();
