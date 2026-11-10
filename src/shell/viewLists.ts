@@ -40,6 +40,7 @@ export const VIEW_NAMES = [
   'traces',
   'tracker',
   'vhf',
+  'weather',
 ] as const;
 
 /** A screen name. */
@@ -88,4 +89,5 @@ export const NO_CRUISE_VIEWS: readonly string[] = [
   'beaufort',
   'douglas',
   'meteo',
+  'weather',
 ];

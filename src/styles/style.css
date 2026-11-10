@@ -9035,9 +9035,35 @@ body:not(.trk-mode) #searchBtn {
 .live-status {
   margin: 4px 0 8px;
 }
+.live-map-wrap {
+  position: relative;
+}
 .map.live-map {
   height: calc(100vh - 430px);
   min-height: 320px;
+  max-height: 70vh;
+}
+.live-tools {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 22px;
+  z-index: 500;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  pointer-events: none;
+}
+.live-tools .btn {
+  pointer-events: auto;
+  min-height: 52px;
+  padding: 6px 16px;
+  font-size: 17px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+}
+.live-hint {
+  margin: 4px 0 0;
+  font-size: 14px;
 }
 .live-mk-wrap {
   background: none;
@@ -9234,4 +9260,95 @@ body:not(.trk-mode) #searchBtn {
 :root[data-theme='night'] .live-badge,
 :root[data-theme='night'] .live-head {
   filter: brightness(0.7);
+}
+
+/* Météo screen of the NavIn menu */
+.wx-live {
+  width: 100%;
+  font-size: 20px;
+}
+.wx-fc h2,
+.wx-checks h2,
+.wx-links h2 {
+  margin: 18px 0 6px;
+  font-size: 20px;
+}
+.wx-peak {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+.wx-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+}
+.wx-hour {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 0 6px;
+  border-radius: 10px;
+  line-height: 1.1;
+}
+.wx-hour .wx-h {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.wx-hour i {
+  font-style: normal;
+  font-weight: 900;
+  font-size: 18px;
+}
+.wx-hour b {
+  font-size: 22px;
+}
+.wx-hour small {
+  font-size: 13px;
+}
+.wx-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.wx-list li {
+  margin: 0 0 6px;
+}
+.wx-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  font-size: 17px;
+  min-height: 64px;
+}
+.wx-box {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border: 2px solid currentColor;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+}
+.wx-check.on .wx-box {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #fff;
+}
+.wx-done {
+  font-weight: 700;
+  color: var(--ok);
+}
+:root[data-theme='night'] .wx-hour {
+  filter: brightness(0.7);
+}
+:root[data-theme='night'] .wx-check.on .wx-box {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: #000;
+}
+:root[data-theme='night'] .wx-done {
+  color: var(--fg);
 }

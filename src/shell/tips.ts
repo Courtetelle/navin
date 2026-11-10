@@ -9,7 +9,7 @@ export const tipFocus = signal<string | null>(null);
 const TIPS: ReadonlyArray<readonly [string | null, string]> = [
   [
     'tracker',
-    'NavIn : touchez plusieurs fois pour faire défiler ses choix (PréP, START, Téléphone ou VHF) · appui long sur un choix : il se lance · appui long sur le logo : change la zone de navigation',
+    'NavIn : touchez plusieurs fois pour faire défiler ses choix (Météo, PréP, START, Téléphone ou VHF) · appui long sur un choix : il se lance · toucher ailleurs : retour à NavIn · appui long sur le logo : change la zone de navigation',
   ],
   [
     'more',

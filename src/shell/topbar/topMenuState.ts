@@ -2,6 +2,7 @@ import { batch } from '@preact/signals-react';
 
 import { buzz } from '../../lib/dom.ts';
 import { navZone, state, toast } from '../../state/index.ts';
+import { clearToast } from '../../state/toast.ts';
 import { hasBodyClass } from '../bodyClass.ts';
 import { go } from '../router.ts';
 
@@ -104,6 +105,28 @@ export function showChoice(key: TopTabKey, index: number): void {
   if (position > 0) {
     stageTimers[key] = setTimeout(() => resetTab(key), 5000);
   }
+}
+
+/**
+ * A tap anywhere outside the top tabs while a menu choice is shown: back to
+ * the tab names, and the tap does nothing else (it only leaves the menu).
+ * @param event - The pointer press.
+ * @returns `true` when a menu was left.
+ */
+export function leaveMenusOnTap(event: Event): boolean {
+  const target = event.target instanceof Element ? event.target : null;
+  if (target?.closest('.top-tab')) return false;
+  const open = (Object.keys(tabDisplays) as TopTabKey[]).filter((key) => {
+    const display = tabDisplays[key].value;
+    return display.index > 0 || display.stopArmed;
+  });
+  if (open.length === 0) return false;
+  for (const key of open) {
+    if (key === 'tracker' && tabDisplays.tracker.value.stopArmed) disarmStop();
+    else resetTab(key);
+  }
+  clearToast();
+  return true;
 }
 
 /** Keep the NavIn name in line with PréP, tracking and VHF (prep.js:273, every second). */

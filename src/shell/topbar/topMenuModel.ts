@@ -12,6 +12,7 @@ import {
   START_SVG,
   STOP_SVG,
   TRACK_SVG,
+  WEATHER_SVG,
 } from './tabIcons.ts';
 
 /** The three top tabs (`data-view` of each). */
@@ -150,6 +151,18 @@ function vhfItem(
     : { label: 'VHF', hint, act };
 }
 
+function weatherItem(actions: TopMenuActions, tracking: boolean): TopMenuItem {
+  return {
+    label: 'Météo',
+    html: [WEATHER_SVG],
+    bare: true,
+    hint: tracking
+      ? 'Toucher encore : menu suivant · appui long : météo et Live météo'
+      : 'Toucher encore : menu suivant · appui long : météo et procédure avant le départ',
+    act: () => actions.go('weather'),
+  };
+}
+
 function trackerMenu(
   context: TopMenuContext,
   actions: TopMenuActions,
@@ -171,6 +184,8 @@ function trackerMenu(
     };
     return [
       base,
+      weatherItem(actions, true),
+      fin,
       {
         label: 'Point',
         html: [PIN_SVG],
@@ -193,6 +208,7 @@ function trackerMenu(
   }
   return [
     base,
+    weatherItem(actions, false),
     {
       label: 'PréP',
       html: [FLAG_SVG],

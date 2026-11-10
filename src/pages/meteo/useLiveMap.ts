@@ -24,6 +24,13 @@ export interface LiveMap {
   invalidate: () => void;
   /** Leaflet could not load. */
   noMap: boolean;
+  /** Touch screen: the map moves with two fingers, one finger scrolls the page. */
+  twoFingers: boolean;
+}
+
+/** A touch screen, where one finger must scroll the page. */
+function coarsePointer(): boolean {
+  return globalThis.matchMedia?.('(pointer: coarse)').matches ?? false;
 }
 
 const KM_TO_M = 1000;
@@ -61,9 +68,12 @@ export function useLiveMap(
     loadLeaflet()
       .then((L) => {
         if (closed || !box.current) return;
+        // On a touch screen one finger scrolls the page: the map moves and
+        // zooms with two fingers (the pinch also pans).
         const created = createMap(box.current, {
           zoomControl: true,
           attributionControl: true,
+          dragging: !coarsePointer(),
         });
         L.tileLayer(OSM_TILES, {
           maxZoom: 19,
@@ -160,5 +170,6 @@ export function useLiveMap(
     },
     invalidate: () => map.current?.invalidateSize(),
     noMap,
+    twoFingers: coarsePointer(),
   };
 }

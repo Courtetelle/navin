@@ -4,24 +4,22 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
-import { defaultMapCenter } from '../../features/map/shownMap.ts';
 import type { LiveStation, MfTally } from '../../features/onwater/index.ts';
 import {
   liveStations,
   newMfTally,
   stationKey,
   windConfig,
-  windWatchPlace,
 } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtTime } from '../../lib/format.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
-import { isLake, lastKnownPos } from '../../state/index.ts';
 
 import { StationCard } from './StationCard.tsx';
 import { StationList } from './StationList.tsx';
+import { boatPlace, liveBack } from './boatPlace.ts';
 import { mfTallyText } from './liveText.ts';
 import type { LivePlace } from './useLiveMap.ts';
 import { useLiveMap } from './useLiveMap.ts';
@@ -30,12 +28,6 @@ import { useLiveMap } from './useLiveMap.ts';
 const RADII = [15, 30, 60] as const;
 /** The stations are read again this often while the screen is open. */
 const REFRESH_MS = 2 * 60_000;
-
-function boatPlace(): LivePlace {
-  const known = lastKnownPos() ?? windWatchPlace.peek();
-  if (known) return { lat: known.lat, lon: known.lon };
-  return defaultMapCenter(isLake());
-}
 
 /**
  * Screen `meteo`: the wind measured now by the stations around the boat
@@ -47,6 +39,7 @@ export function MeteoPage() {
   useSignals();
   const tr = useTr();
   const config = windConfig();
+  const back = liveBack.value;
   const [center, setCenter] = useState<LivePlace>(boatPlace);
   const [radius, setRadius] = useState(config.radius);
   const [stations, setStations] = useState<LiveStation[]>([]);
@@ -99,7 +92,10 @@ export function MeteoPage() {
   }, [load]);
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30_000);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      liveBack.value = { view: 'more', label: '◀ data' };
+    };
   }, []);
   const station = stations.find((item) => stationKey(item) === picked) ?? null;
   const showMap = () => {
@@ -117,14 +113,14 @@ export function MeteoPage() {
   return (
     <>
       <PageBack
-        label="◀ data"
-        data-go="more"
+        label={back.label}
+        data-go={back.view}
         onClick={() => {
           buzz();
-          go('more');
+          go(back.view);
         }}
       >
-        {tr('◀ data')}
+        {tr(back.label)}
       </PageBack>
       <h1>{tr('🌬 Live météo')}</h1>
       {station ? (
@@ -149,15 +145,45 @@ export function MeteoPage() {
         {tally ? (
           <p className="keep-help live-mf">{tr(mfTallyText(tally, radius))}</p>
         ) : null}
-        <div id="liveMap" className="map live-map" ref={box}>
-          {live.noMap ? (
-            <div className="empty-state">
-              {tr(
-                'Carte indisponible sans réseau : la liste reste ci-dessous.',
-              )}
-            </div>
-          ) : null}
+        <div className="live-map-wrap">
+          <div id="liveMap" className="map live-map" ref={box}>
+            {live.noMap ? (
+              <div className="empty-state">
+                {tr(
+                  'Carte indisponible sans réseau : la liste reste ci-dessous.',
+                )}
+              </div>
+            ) : null}
+          </div>
+          <div className="live-tools">
+            <Button
+              className="btn primary"
+              onClick={() => {
+                buzz();
+                const middle = live.center();
+                if (middle) setCenter(middle);
+              }}
+            >
+              {tr('🔍 Chercher ici')}
+            </Button>
+            <Button
+              className="btn"
+              onClick={() => {
+                buzz();
+                setCenter(boatPlace());
+              }}
+            >
+              {tr('📍 Bateau')}
+            </Button>
+          </div>
         </div>
+        {live.twoFingers ? (
+          <p className="keep-help live-hint">
+            {tr(
+              'Carte : deux doigts pour la déplacer ou zoomer · un doigt fait défiler la page',
+            )}
+          </p>
+        ) : null}
         <ButtonRow className="row c3">
           {RADII.map((value) => (
             <Button
@@ -171,27 +197,6 @@ export function MeteoPage() {
               {tr(`${value} km`)}
             </Button>
           ))}
-        </ButtonRow>
-        <ButtonRow className="row c2">
-          <Button
-            className="btn primary"
-            onClick={() => {
-              buzz();
-              const middle = live.center();
-              if (middle) setCenter(middle);
-            }}
-          >
-            {tr('🔍 Chercher au centre de la carte')}
-          </Button>
-          <Button
-            className="btn"
-            onClick={() => {
-              buzz();
-              setCenter(boatPlace());
-            }}
-          >
-            {tr('📍 Autour du bateau')}
-          </Button>
         </ButtonRow>
         {!loading && stations.length === 0 ? (
           <p className="keep-help">

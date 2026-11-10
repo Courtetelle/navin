@@ -14,7 +14,7 @@ import type { TabDisplay } from './tabDisplays.ts';
 import { TAB_ORDER, tabDisplays } from './tabDisplays.ts';
 import { faceIsEdited, tabEdit, tabEditKey } from './tabEdits.ts';
 import type { TopTabKey } from './topMenuModel.ts';
-import { refreshBase } from './topMenuState.ts';
+import { leaveMenusOnTap, refreshBase } from './topMenuState.ts';
 import { sosSimulation } from './topState.ts';
 import {
   cancelTabPress,
@@ -51,8 +51,25 @@ export function TopTabs() {
       passive: true,
     });
     document.addEventListener('keydown', onKey);
+    // A tap outside the tabs while a menu choice shows: back to NavIn, and
+    // the tap is swallowed so it presses nothing under the finger.
+    let swallow = false;
+    const onPress = (event: PointerEvent) => {
+      swallow = leaveMenusOnTap(event);
+      if (swallow) event.preventDefault();
+    };
+    const onClick = (event: MouseEvent) => {
+      if (!swallow) return;
+      swallow = false;
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    document.addEventListener('pointerdown', onPress, { capture: true });
+    document.addEventListener('click', onClick, { capture: true });
     return () => {
       clearInterval(interval);
+      document.removeEventListener('pointerdown', onPress, { capture: true });
+      document.removeEventListener('click', onClick, { capture: true });
       document.removeEventListener('pointerup', cancelTabPress);
       document.removeEventListener('pointercancel', cancelTabPress);
       document.removeEventListener('keydown', onKey);
