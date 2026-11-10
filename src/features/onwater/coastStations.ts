@@ -58,7 +58,7 @@ interface MfRow {
  */
 export function nearCoastStations(
   stations: readonly CoastStation[],
-  position: Position,
+  position: { lat: number; lon: number },
   radius: number,
 ): Array<{ station: CoastStation; km: number }> {
   return stations
@@ -219,32 +219,101 @@ export async function mfReadings(
   key: string,
 ): Promise<WindReading[]> {
   if (!key) return [];
-  const headers = { apikey: key };
   const stations = await listOf(MF_KEY, MF_LIST_MAX_AGE_MS, async () => {
-    const response = await fetch(`${MF_BASE}liste-stations`, { headers });
+    const response = await fetch(`${MF_BASE}liste-stations`, {
+      headers: { apikey: key },
+    });
     return response.ok ? mfStations(await response.text()) : [];
   });
   const near = nearCoastStations(stations, position, radius);
   /* eslint-disable no-await-in-loop -- Météo-France allows 50 requests a minute */
   const readings: WindReading[] = [];
   for (const { station, km } of near) {
-    try {
-      const response = await fetch(
-        `${MF_BASE}station/infrahoraire-6m?id_station=${encodeURIComponent(station[0])}&format=json`,
-        { headers },
-      );
-      if (!response.ok) continue;
-      const rows = (await response.json()) as MfRow[];
-      const reading = Array.isArray(rows)
-        ? mfReading(rows, station[1], km, Date.now())
-        : null;
-      if (reading) readings.push(reading);
-    } catch {
-      // Next station.
-    }
+    const { reading } = await mfStationWind(station, km, key);
+    if (reading) readings.push(reading);
   }
   /* eslint-enable no-await-in-loop */
   return readings;
+}
+
+/** Result of {@link mfCheck}. */
+export type MfCheck =
+  | { kind: 'ok'; stations: number; reading: WindReading }
+  | { kind: 'noWind'; stations: number; near: string; status: string }
+  | { kind: 'refused'; status: number }
+  | { kind: 'empty'; status: number; sample: string }
+  | { kind: 'offline' };
+
+/**
+ * Try a Météo-France key: the list of stations, then the wind of the closest
+ * stations to a place.
+ * @param key - The key.
+ * @param position - Place near which a wind is read.
+ * @returns What Météo-France answered.
+ */
+export async function mfCheck(
+  key: string,
+  position: { lat: number; lon: number },
+): Promise<MfCheck> {
+  let response: Response;
+  try {
+    response = await fetch(`${MF_BASE}liste-stations`, {
+      headers: { apikey: key },
+    });
+  } catch {
+    return { kind: 'offline' };
+  }
+  if (response.status === 401 || response.status === 403) {
+    return { kind: 'refused', status: response.status };
+  }
+  const text = response.ok ? await response.text() : '';
+  const list = mfStations(text);
+  if (list.length === 0) {
+    return {
+      kind: 'empty',
+      status: response.status,
+      sample: text.slice(0, 80),
+    };
+  }
+  store.set(MF_KEY, { at: Date.now(), list });
+  const near = nearCoastStations(list, position, 80).slice(0, 5);
+  const codes: string[] = [];
+  /* eslint-disable no-await-in-loop -- the next station only when the closer one has no wind */
+  for (const { station, km } of near) {
+    const { reading, status } = await mfStationWind(station, km, key);
+    if (reading) return { kind: 'ok', stations: list.length, reading };
+    codes.push(String(status));
+  }
+  /* eslint-enable no-await-in-loop */
+  return {
+    kind: 'noWind',
+    stations: list.length,
+    near: near[0]?.station[1] ?? '',
+    status: codes.join(', '),
+  };
+}
+
+async function mfStationWind(
+  station: CoastStation,
+  km: number,
+  key: string,
+): Promise<{ reading: WindReading | null; status: number }> {
+  try {
+    const response = await fetch(
+      `${MF_BASE}station/infrahoraire-6m?id_station=${encodeURIComponent(station[0])}&format=json`,
+      { headers: { apikey: key } },
+    );
+    if (!response.ok) return { reading: null, status: response.status };
+    const rows = (await response.json()) as MfRow[];
+    return {
+      reading: Array.isArray(rows)
+        ? mfReading(rows, station[1], km, Date.now())
+        : null,
+      status: response.status,
+    };
+  } catch {
+    return { reading: null, status: 0 };
+  }
 }
 
 async function listOf(

@@ -10,6 +10,7 @@ import {
   owmReading,
   owmStations,
 } from '../coastStations.ts';
+import { checkText } from '../mfCheckText.ts';
 import { windAlertNote } from '../windLogic.ts';
 import { otherWind } from '../windWatch.ts';
 
@@ -123,6 +124,25 @@ describe('alert texts', () => {
     expect(otherWind({ ...config, basis: 'avg' }, top)).toBe('rafales 26 nd');
     expect(otherWind({ ...config, basis: 'avg' }, { ...top, gust: null })).toBe(
       '',
+    );
+  });
+});
+
+describe('Météo-France key check', () => {
+  it('names the station and its wind when the key works', () => {
+    const text = checkText({
+      kind: 'ok',
+      stations: 1100,
+      reading: { name: 'Dinard', t: NOW, avg: 14, gust: 19, dir: 250, km: 6 },
+    });
+    expect(text).toContain(
+      '✅ Clé Météo-France valide · 1100 stations · Dinard (6 km)',
+    );
+  });
+
+  it('says a refused key', () => {
+    expect(checkText({ kind: 'refused', status: 401 })).toContain(
+      'Clé refusée',
     );
   });
 });

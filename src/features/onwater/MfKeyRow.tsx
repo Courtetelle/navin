@@ -1,17 +1,20 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { toast, updateSettings } from '../../state/index.ts';
+import { lastKnownPos, toast, updateSettings } from '../../state/index.ts';
 
+import { mfCheck } from './coastStations.ts';
+import { seaPlace } from './externals.ts';
+import { checkText } from './mfCheckText.ts';
 import { windConfig, windWatchStart } from './windWatch.ts';
 
 /**
  * The Météo-France API key of the wind alerts: with it, the official French
- * stations are read besides the OpenWindMap beacons.
+ * stations are read besides the OpenWindMap beacons. Saving tries the key.
  * @returns The row.
  */
 export function MfKeyRow() {
@@ -19,7 +22,9 @@ export function MfKeyRow() {
   const tr = useTr();
   const key = windConfig().mfKey;
   const input = useRef<HTMLInputElement>(null);
-  const save = () => {
+  const [result, setResult] = useState('');
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
     const value = input.current?.value.trim() ?? '';
     buzz();
     input.current?.blur();
@@ -27,18 +32,25 @@ export function MfKeyRow() {
       settings.windAlert = { ...settings.windAlert, mfKey: value };
     });
     windWatchStart();
-    toast(
-      value
-        ? 'Clé Météo-France enregistrée · stations françaises lues'
-        : 'Clé Météo-France retirée',
-    );
+    if (!value) {
+      setResult('');
+      toast('Clé Météo-France retirée');
+      return;
+    }
+    setBusy(true);
+    setResult('Vérification de la clé auprès de Météo-France…');
+    const place = lastKnownPos() ?? seaPlace();
+    const text = checkText(await mfCheck(value, place));
+    setBusy(false);
+    setResult(text);
+    toast(text.split(' · ', 1)[0] ?? text);
   };
   return (
     <form
       className="field sea-center"
       onSubmit={(event) => {
         event.preventDefault();
-        save();
+        void save();
       }}
     >
       <div className="cf">
@@ -56,16 +68,21 @@ export function MfKeyRow() {
             defaultValue={key}
             key={key}
           />
-          <Button className="btn" type="submit">
-            {tr('Enregistrer')}
+          <Button className="btn" type="submit" disabled={busy}>
+            {tr(busy ? 'Vérification…' : 'Enregistrer')}
           </Button>
         </div>
       </div>
+      {result ? (
+        <p className="keep-help mf-check" role="status">
+          {tr(result)}
+        </p>
+      ) : null}
       <HelpText>
         Facultatif. Gratuite sur portail-api.meteofrance.fr : créer un compte,
         s’abonner à l’API « Données Publiques Observation », puis générer une
-        clé de type « API Key » et la coller ici. Sans clé, seules les balises
-        OpenWindMap sont lues hors de Suisse.
+        clé de type « API Key » et la coller ici. Enregistrer vérifie la clé.
+        Sans clé, seules les balises OpenWindMap sont lues hors de Suisse.
       </HelpText>
     </form>
   );

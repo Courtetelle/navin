@@ -70,3 +70,4 @@ export type { TrackerFix, TrackerHandle } from './trackerState.ts';
 export { allLakeTracks, trackStats } from './trackStats.ts';
 export type { LakeTrack, TrackStatsResult } from './trackStats.ts';
 export { vdIsobathLayers } from './vdIsobath.ts';
+export { seaPlace } from './seaCenter.ts';

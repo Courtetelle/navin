@@ -5,6 +5,7 @@ export {
   entryColor,
   inSwissArea,
   mapData,
+  seaPlace,
   segments,
 } from '../map/index.ts';
 export { smnMeasure, smnNow, smnStations, wxNext } from '../tracking/index.ts';
