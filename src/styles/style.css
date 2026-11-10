@@ -9729,12 +9729,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
   html body .trk-full .trk-dash {
     left: 116px;
-    right: 140px;
-  }
-  /* SOS keeps its size, wider than the column, at the bottom right corner. */
-  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
-    width: 120px !important;
-    right: 6px !important;
+    right: 116px;
   }
   html body .rail-btn {
     width: 96px;
