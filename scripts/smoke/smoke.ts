@@ -616,7 +616,7 @@ async function tablet(page: Page, theme: string): Promise<void> {
     check(
       theme,
       `tablet: the ${name} page stays between the columns`,
-      view !== null && view.x >= 130 && view.x + view.width <= 1150,
+      view !== null && view.x >= 106 && view.x + view.width <= 1174,
     );
   }
 }

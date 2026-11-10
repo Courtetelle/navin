@@ -9657,7 +9657,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body header.topbar #gearBtn,
   html body #searchBtn {
     position: fixed !important;
-    width: 120px !important;
+    width: 96px !important;
     min-width: 0 !important;
     max-width: none !important;
     flex: none !important;
@@ -9722,17 +9722,22 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
   html body .side-rail {
     top: calc(200px + env(safe-area-inset-top));
-    width: 120px;
+    width: 96px;
   }
   html body .side-rail-right {
     top: calc(130px + env(safe-area-inset-top));
   }
   html body .trk-full .trk-dash {
-    left: 140px;
+    left: 116px;
     right: 140px;
   }
+  /* SOS keeps its size, wider than the column, at the bottom right corner. */
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+    width: 120px !important;
+    right: 6px !important;
+  }
   html body .rail-btn {
-    width: 120px;
+    width: 96px;
   }
   html body header.topbar.topbar {
     -webkit-backdrop-filter: none !important;
@@ -9742,7 +9747,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body .trk-full .leaflet-top.ctl-col {
     top: calc(8px + env(safe-area-inset-top)) !important;
     left: auto !important;
-    right: 138px !important;
+    right: 114px !important;
     padding-top: 0 !important;
     margin-top: 0 !important;
   }
@@ -9758,8 +9763,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body .trk-full .trk-over {
-    left: 140px;
-    right: 140px;
+    left: 116px;
+    right: 116px;
   }
 }
 .rail-svg {
@@ -9790,13 +9795,13 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
   html body:not(.trk-mode) main#view {
     max-width: none !important;
-    margin: 0 140px !important;
+    margin: 0 116px !important;
     padding-top: 12px;
   }
   html body #navtop {
     top: 0 !important;
     padding-top: calc(8px + env(safe-area-inset-top)) !important;
-    max-width: min(760px, calc(100vw - 280px)) !important;
+    max-width: min(760px, calc(100vw - 232px)) !important;
   }
   html body #navSearchSlot,
   html body #navSearch {
@@ -9806,7 +9811,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: flex !important;
   }
   html body .lang-fab {
-    right: 150px !important;
+    right: 126px !important;
   }
 }
 
