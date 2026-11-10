@@ -87,3 +87,84 @@ export function inInland(
   }
   return false;
 }
+
+/** A French sea rescue centre and the coast it watches. */
+export interface SeaRescue {
+  name: string;
+  coast: string;
+  /** Its own number, when the official sources agree on it. */
+  phone?: string;
+}
+
+/**
+ * The French rescue centre (CROSS) of a place at sea, by its coast; the 196
+ * reaches the nearest one anyway.
+ * @param position - The place.
+ * @returns The centre, or `null` off the French coasts.
+ */
+export function seaRescueAt(
+  position: { lat: number; lon: number } | null | undefined,
+): SeaRescue | null {
+  if (!position) return null;
+  const { lat, lon } = position;
+  if (lon >= 8.3 && lon <= 9.8 && lat >= 41.2 && lat <= 43.2) {
+    return {
+      name: 'CROSS Corse (Aspretto)',
+      coast: 'Corse',
+      phone: '+33 4 95 20 13 63',
+    };
+  }
+  if (lat >= 41.8 && lat <= 43.9 && lon >= 2.9 && lon <= 7.8) {
+    return {
+      name: 'CROSS Méditerranée (La Garde)',
+      coast: 'Méditerranée',
+      phone: '+33 4 94 61 16 16',
+    };
+  }
+  if (lat >= 43.2 && lat < 47.8 && lon >= -6 && lon <= -0.9) {
+    return {
+      name: 'CROSS Étel',
+      coast: 'Atlantique',
+      phone: '+33 2 97 55 35 35',
+    };
+  }
+  // Brittany, up to the bay of Mont-Saint-Michel; the Cotentin goes to Jobourg.
+  if (
+    lat >= 47.8 &&
+    lat <= 49.2 &&
+    lon >= -6.5 &&
+    lon < -1.4 &&
+    (lat < 48.75 || lon < -2.5)
+  ) {
+    return {
+      name: 'CROSS Corsen',
+      coast: 'Manche ouest et Bretagne',
+      phone: '+33 2 98 89 31 31',
+    };
+  }
+  if (lat >= 48.5 && lat <= 50.2 && lon >= -2.5 && lon < 0.2) {
+    return { name: 'CROSS Jobourg', coast: 'Manche centrale' };
+  }
+  if (lat >= 49.5 && lat <= 51.3 && lon >= 0.2 && lon <= 2.6) {
+    return {
+      name: 'CROSS Gris-Nez',
+      coast: 'Manche est et mer du Nord',
+      phone: '+33 3 21 87 21 87',
+    };
+  }
+  return null;
+}
+
+/**
+ * The numbers to call for help at sea near a French coast.
+ * @param rescue - The rescue centre of the place.
+ * @returns One number per line.
+ */
+export function seaRescueContacts(rescue: SeaRescue): string {
+  return [
+    'Secours en mer (France, téléphone) : 196',
+    ...(rescue.phone ? [`${rescue.name} : ${rescue.phone}`] : []),
+    'Appel de détresse : VHF 16, ASN canal 70',
+    'Urgence (Europe) : 112',
+  ].join('\n');
+}

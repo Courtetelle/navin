@@ -3,16 +3,24 @@ import { untracked } from '@preact/signals-react';
 import { Button } from '../../components/shared/Button.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { contextPlace } from '../../features/map/index.ts';
+import { ContactButtons } from '../../features/safety/Contacts.tsx';
 import { EmergencyCalls } from '../../features/safety/EmergencyCalls.tsx';
 import { GpsButton } from '../../features/safety/GpsButton.tsx';
+import { contactItems } from '../../features/safety/contacts.ts';
 import { openView } from '../../features/safety/openView.ts';
 import { useLocalTimes } from '../../features/safety/useLocalTimes.ts';
 import { lakeMessage } from '../../features/safety/vhfContext.ts';
 import { radioDesc } from '../../lib/boatDescription.ts';
-import { inFrenchLeman } from '../../model/contacts.ts';
+import {
+  inFrenchLeman,
+  seaRescueAt,
+  seaRescueContacts,
+} from '../../model/contacts.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import {
   lastKnownPos,
+  navZone,
   sosLogActive,
   sosLogAdd,
   state,
@@ -33,7 +41,7 @@ export interface VhfLakeProps {
  */
 export function VhfLake({ onRedraw }: VhfLakeProps) {
   useLocalTimes(true);
-  const { position, french, message } = untracked(readScreen);
+  const { position, french, message, rescue } = untracked(readScreen);
   return (
     <>
       <PageBack
@@ -41,23 +49,38 @@ export function VhfLake({ onRedraw }: VhfLakeProps) {
         data-go="sos"
         onClick={() => openView('sos')}
       />
-      <h1>VHF · navigation intérieure</h1>
-      <FoldSection title="Appeler les secours">
-        <EmergencyCalls
-          french={french}
-          dataKey="data-vcall"
-          onCall={(label, number) => {
-            if (sosLogActive()) {
-              sosLogAdd(`VHF lac › Appel ${label} (${number})`);
-            }
-          }}
-        />
-        <HelpText>
-          Sur le lac, les secours se joignent par téléphone. Si le premier appel
-          n’aboutit pas, essayer le suivant. Les numéros courts suisses ne
-          passent que sur un réseau suisse ; le 112 passe partout.
-        </HelpText>
-      </FoldSection>
+      <h1>
+        {rescue ? 'Téléphone · secours en mer' : 'VHF · navigation intérieure'}
+      </h1>
+      {rescue ? (
+        <FoldSection title={`${rescue.name} (${rescue.coast})`}>
+          <div className="contacts">
+            <ContactButtons items={contactItems(seaRescueContacts(rescue))} />
+          </div>
+          <HelpText>
+            Le 196 joint le CROSS le plus proche depuis un téléphone ; en mer,
+            la VHF canal 16 reste le premier moyen.
+          </HelpText>
+        </FoldSection>
+      ) : null}
+      {rescue ? null : (
+        <FoldSection title="Appeler les secours">
+          <EmergencyCalls
+            french={french}
+            dataKey="data-vcall"
+            onCall={(label, number) => {
+              if (sosLogActive()) {
+                sosLogAdd(`VHF lac › Appel ${label} (${number})`);
+              }
+            }}
+          />
+          <HelpText>
+            Sur le lac, les secours se joignent par téléphone. Si le premier
+            appel n’aboutit pas, essayer le suivant. Les numéros courts suisses
+            ne passent que sur un réseau suisse ; le 112 passe partout.
+          </HelpText>
+        </FoldSection>
+      )}
       <FoldSection title="Position à donner">
         <div className="value" style={{ fontSize: 26 }}>
           <PositionLines position={position} />
@@ -111,10 +134,13 @@ function readScreen() {
   const cruise = state.data.cruise.value;
   const info = cruise?.info ?? {};
   const position = lastKnownPos();
-  const french = inFrenchLeman(position);
+  // The services follow the place of the menus (the zone chosen with NavIn).
+  const place = contextPlace();
+  const french = inFrenchLeman(place);
   return {
     position,
     french,
+    rescue: navZone() === 'mer' ? seaRescueAt(place) : null,
     message: lakeMessage({
       boat: info.boat,
       registration: info.reg,

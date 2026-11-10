@@ -1,9 +1,5 @@
-import {
-  defaultMapCenter,
-  shownMapCenter,
-} from '../../features/map/shownMap.ts';
-import { windWatchPlace } from '../../features/onwater/index.ts';
-import { isLake, lastKnownPos } from '../../state/index.ts';
+import { contextPlace } from '../../features/map/contextPlace.ts';
+import { shownMapCenter } from '../../features/map/shownMap.ts';
 
 /** A place searched around. */
 export interface BoatPlace {
@@ -12,13 +8,13 @@ export interface BoatPlace {
 }
 
 /**
- * Where the boat is, or was last seen, else the default place of the zone.
+ * The place of the menus: the zone chosen with NavIn (La Rochelle when the
+ * sea is forced there), else the boat, else the map last shown.
  * @returns The place.
  */
 export function boatPlace(): BoatPlace {
-  const known = lastKnownPos() ?? windWatchPlace.peek();
-  if (known) return { lat: known.lat, lon: known.lon };
-  return defaultMapCenter(isLake());
+  const { lat, lon } = contextPlace();
+  return { lat, lon };
 }
 
 /**
@@ -27,6 +23,7 @@ export function boatPlace(): BoatPlace {
  * @returns The place.
  */
 export function mapPlace(): BoatPlace {
+  if (contextPlace().forced) return boatPlace();
   const shown = shownMapCenter();
   return shown ? { lat: shown.lat, lon: shown.lon } : boatPlace();
 }
