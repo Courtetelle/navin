@@ -48,7 +48,7 @@ export function RemarkPill() {
   );
   const top = Math.max(
     4,
-    Math.min(size.height - 56, position.y ?? size.height - 140),
+    Math.min(size.height - 56, position.y ?? size.height - 164),
   );
   const open = () => {
     const pill = reference.current;

@@ -9506,3 +9506,25 @@ body.nav-search:not(.trk-mode) #searchBtn {
     margin-top: 0;
   }
 }
+
+/* Tablet in landscape: the tracker figures read from the helm */
+@media (min-width: 1000px) and (orientation: landscape) {
+  .trk-dash {
+    gap: 10px;
+  }
+  .trk-dash div {
+    padding: 8px 6px 10px;
+    border-radius: 16px;
+  }
+  .trk-dash b,
+  .trk-dash div:nth-child(4) b {
+    font-size: 44px;
+    line-height: 1.05;
+  }
+  .trk-dash small {
+    font-size: 15px;
+  }
+  .trk-full .trk-over {
+    bottom: calc(132px + env(safe-area-inset-bottom));
+  }
+}
