@@ -7,14 +7,32 @@ import { addWindFlash } from './windOverlayState.ts';
 const SIGNAL_MS = 1200;
 const PAUSE_MS = 400;
 
+/** Beeps refused by the phone still sound at a touch within this time. */
+const PENDING_MS = 15 * 60_000;
+
+interface AudioSessionNavigator {
+  audioSession?: { type: string };
+}
+
 let audioContext: AudioContext | null = null;
 let keepAlive: HTMLAudioElement | null = null;
+/** Beeps the phone refused to play, sounded at the next touch. */
+let pending: { level: number; at: number } | null = null;
 
 /** Sound can only be unlocked by a touch: run it on each touch while the alerts are on. */
 export function unlockAudio(): void {
   try {
+    // On an iPhone in silent mode, only the `playback` session sounds.
+    const session = (navigator as unknown as AudioSessionNavigator)
+      .audioSession;
+    if (session && session.type !== 'playback') session.type = 'playback';
+  } catch {
+    // Not supported.
+  }
+  try {
     audioContext ??= new AudioContext();
-    if (audioContext.state !== 'running') void audioContext.resume();
+    if (audioContext.state === 'running') playPending();
+    else audioContext.resume().then(playPending, () => undefined);
   } catch {
     audioContext = null;
   }
@@ -33,8 +51,9 @@ export function unlockAudio(): void {
 /** Wake the audio output when the app comes back to the foreground. */
 export function resumeAudio(): void {
   if (audioContext && audioContext.state !== 'running') {
-    audioContext.resume().catch(() => undefined);
+    audioContext.resume().then(playPending, () => undefined);
   }
+  if (keepAlive?.paused) keepAlive.play().catch(() => undefined);
 }
 
 /**
@@ -43,16 +62,23 @@ export function resumeAudio(): void {
  * @param knots - Wind shown; the level's threshold by default.
  */
 export function playAlarm(level: number, knots?: number): void {
-  if (audioContext && audioContext.state !== 'running') {
-    audioContext
-      .resume()
-      .then(() => playTones(level))
-      .catch(() => undefined);
-    showFlash(level, knots);
+  showFlash(level, knots);
+  const context = audioContext;
+  if (context?.state === 'running') {
+    playTones(level);
     return;
   }
-  playTones(level);
-  showFlash(level, knots);
+  // The phone keeps the sound locked (not touched since the app opened, or
+  // back from the lock screen): try to wake it, else beep at the next touch.
+  pending = { level, at: Date.now() };
+  context?.resume().then(playPending, () => undefined);
+}
+
+function playPending(): void {
+  if (!pending || audioContext?.state !== 'running') return;
+  const { level, at } = pending;
+  pending = null;
+  if (Date.now() - at < PENDING_MS) playTones(level);
 }
 
 function showFlash(level: number, knots: number | undefined): void {

@@ -9,13 +9,16 @@ import { windAlertConfig } from './windLogic.ts';
  * loads apart so a failure in the weather code never reaches the boot.
  */
 export function startWindWatch(): void {
-  document.addEventListener(
-    'pointerdown',
-    () => {
-      if (alertsOn()) unlockAudio();
-    },
-    { passive: true },
-  );
+  // Safari counts the end of a touch as the gesture that unlocks the sound.
+  for (const type of ['pointerdown', 'pointerup', 'touchend'] as const) {
+    document.addEventListener(
+      type,
+      () => {
+        if (alertsOn()) unlockAudio();
+      },
+      { passive: true, capture: true },
+    );
+  }
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && alertsOn()) resumeAudio();
   });
