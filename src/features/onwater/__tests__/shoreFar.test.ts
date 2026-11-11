@@ -1,6 +1,18 @@
-import { expect, test } from 'vitest';
+import { gzipSync } from 'node:zlib';
 
-import { farFromShore, parseShoreGrid } from '../shoreFar.ts';
+import { afterEach, expect, test, vi } from 'vitest';
+
+import {
+  farFromShore,
+  forgetShoreGrid,
+  nearWater,
+  parseShoreGrid,
+} from '../shoreFar.ts';
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  forgetShoreGrid();
+});
 
 const PER = 10;
 
@@ -67,4 +79,29 @@ test('outside the grid nothing is left out', () => {
 test('a file that is not a grid is refused', () => {
   expect(parseShoreGrid(new Uint8Array([1, 2, 3]))).toBeNull();
   expect(parseShoreGrid(new TextEncoder().encode('NOPE0000000000'))).toBeNull();
+});
+
+test('the alerts keep the stations near the water and those without a place', async () => {
+  vi.stubGlobal('fetch', () =>
+    Promise.resolve(new Response(gzipSync(sample()))),
+  );
+  const kept = await nearWater([
+    { name: 'far', lat: 46.5, lon: 6.5 },
+    { name: 'shore', lat: 46.2, lon: 7.5 },
+    { name: 'outside', lat: 40, lon: 6.5 },
+    { name: 'no place' },
+  ]);
+  expect(kept.map(({ name }) => name)).toStrictEqual([
+    'shore',
+    'outside',
+    'no place',
+  ]);
+});
+
+test('without the grid every station stays', async () => {
+  vi.stubGlobal('fetch', () =>
+    Promise.resolve(new Response('', { status: 404 })),
+  );
+  const kept = await nearWater([{ lat: 46.5, lon: 6.5 }]);
+  expect(kept).toHaveLength(1);
 });

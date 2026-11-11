@@ -4,6 +4,7 @@ import { isLake } from '../../state/index.ts';
 
 import { mfReadings, owmReadings } from './coastStations.ts';
 import { smnNow, smnStations } from './externals.ts';
+import { farFromShore, nearWater, shoreGrid } from './shoreFar.ts';
 import type { WindConfig } from './windLogic.ts';
 import { windLevel, windValue } from './windLogic.ts';
 import type { MarineReply, ModelReply, StationRow } from './windModels.ts';
@@ -26,7 +27,8 @@ export interface WindCheck {
 }
 
 /**
- * Strongest wind of the MeteoSwiss stations around the boat.
+ * Strongest wind of the MeteoSwiss stations around the boat, on the water or
+ * within 1 km of the shore.
  * @param config - Alert configuration.
  * @param position - Boat position.
  * @returns The wind, null when no station answers.
@@ -35,12 +37,13 @@ export async function stationWind(
   config: WindConfig,
   position: Position,
 ): Promise<WindCheck | null> {
-  const stations = await smnStations();
+  const [stations, grid] = await Promise.all([smnStations(), shoreGrid()]);
   const readings: WindReading[] = [];
   /* eslint-disable no-await-in-loop -- stations are read one at a time, like the rest of the rate-limited open data */
   for (const [abbreviation, name, lat, lon, altitude] of stations) {
     const km = distKm(position.lat, position.lon, lat, lon);
     if ((altitude || 0) >= 800 || km >= config.radius) continue;
+    if (grid && farFromShore(grid, lat, lon)) continue;
     try {
       const rows = (await smnNow(abbreviation)) as unknown as StationRow[];
       const reading = stationReading(rows, name, km, Date.now());
@@ -61,7 +64,8 @@ export async function stationWind(
 
 /**
  * Strongest measured wind of the OpenWindMap beacons and the Météo-France
- * stations (with a key) around the boat, outside Switzerland.
+ * stations (with a key) around the boat, outside Switzerland, on the water or
+ * within 1 km of the shore.
  * @param config - Alert configuration.
  * @param position - Boat position.
  * @returns The wind, null when no station answers.
@@ -74,7 +78,7 @@ export async function coastWind(
     owmReadings(position, config.radius).catch(() => []),
     mfReadings(position, config.radius, config.mfKey).catch(() => []),
   ]);
-  const readings = [...official, ...beacons];
+  const readings = await nearWater([...official, ...beacons]);
   if (readings.length === 0) return null;
   const top = strongest(readings, config.basis);
   const sea = isLake() ? null : await seaStateAt(position);

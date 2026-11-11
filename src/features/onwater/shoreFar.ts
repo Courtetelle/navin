@@ -135,3 +135,21 @@ export function shoreGrid(): Promise<ShoreGrid | null> {
   });
   return reading;
 }
+
+/**
+ * The places that are not on land far from the water: those at sea, on a
+ * lake or within 1 km of the shore. Everything is kept without the grid, and
+ * a place without a position is kept.
+ * @param places - Stations or readings.
+ * @returns Those kept, in the same order.
+ */
+export async function nearWater<T extends { lat?: number; lon?: number }>(
+  places: readonly T[],
+): Promise<T[]> {
+  const grid = await shoreGrid();
+  if (!grid) return [...places];
+  return places.filter(
+    ({ lat, lon }) =>
+      lat == null || lon == null || !farFromShore(grid, lat, lon),
+  );
+}
