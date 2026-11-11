@@ -10365,6 +10365,16 @@ body.nav-search:not(.trk-mode) #searchBtn {
   font-size: 26px;
   font-weight: 800;
 }
+/* Fields and buttons inside the box, whatever the width the app gives them */
+.ruler-edit-box > *,
+.ruler-edit-box label > input,
+.ruler-edit-box .row > .btn {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+}
 .ruler-edit-note {
   margin: 0;
   color: var(--muted);

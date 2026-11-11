@@ -123,7 +123,8 @@ export function trkFix(fix: TrackerFix): void {
   }
   const target = L.latLng(position);
   const tooFar = handle.follow && !map.getBounds().contains(target);
-  if (known && map.getZoom() >= 13 && !tooFar) {
+  // At every scale: the map keeps the zoom chosen, and still turns smoothly.
+  if (known && !tooFar) {
     glideBoat(
       {
         map,
