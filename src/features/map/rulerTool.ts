@@ -163,28 +163,45 @@ export function addRulerControl(map: LeafletMap): void {
   };
 
   /** A touch on the label: type the course and the distance of the arrow. */
+  /** The two points as the course reads: from the other point to the arrow. */
+  const course = () => {
+    const from = ends?.[1 - target]?.marker.getLatLng();
+    const arrow = ends?.[target];
+    const to = arrow?.marker.getLatLng();
+    if (!from || !to || !arrow) return null;
+    return {
+      from,
+      arrow,
+      start: { lat: from.lat, lon: from.lng },
+      end: { lat: to.lat, lon: to.lng },
+    };
+  };
+
   const editCourse = () => {
-    if (!ends) return;
-    const from = ends[1 - target]?.marker.getLatLng();
-    const to = ends[target]?.marker.getLatLng();
-    const arrow = ends[target];
-    if (!from || !to || !arrow) return;
+    const shown = course();
+    if (!shown) return;
     buzz();
-    const start = { lat: from.lat, lon: from.lng };
-    const end = { lat: to.lat, lon: to.lng };
     openRulerEditor(
-      Math.round(bearing(start, end)) % 360,
-      distNM(start, end),
-      (course, nm) => {
-        const reached = destination(start, course, nm);
-        arrow.marker.setLatLng(L.latLng(reached.lat, reached.lon));
-        arrow.onBoat = false;
+      Math.round(bearing(shown.start, shown.end)) % 360,
+      distNM(shown.start, shown.end),
+      (chosen, nm) => {
+        const now = course();
+        if (!now) return;
+        const reached = destination(now.start, chosen, nm);
+        now.arrow.marker.setLatLng(L.latLng(reached.lat, reached.lon));
+        now.arrow.onBoat = false;
         redraw();
         if (!map.getBounds().contains([reached.lat, reached.lon])) {
-          map.fitBounds(L.latLngBounds([from, [reached.lat, reached.lon]]), {
-            padding: [60, 60],
-          });
+          map.fitBounds(
+            L.latLngBounds([now.from, [reached.lat, reached.lon]]),
+            { padding: [60, 60] },
+          );
         }
+      },
+      () => {
+        // The arrow on the other point: the course turns about.
+        target = 1 - target;
+        redraw();
       },
     );
   };

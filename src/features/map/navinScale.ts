@@ -13,9 +13,9 @@ type Centre = 'view' | 'boat';
  * The scales NavIn and the boat button go through on the tablet: the
  * distance shown across the short side of the map, in nautical miles.
  */
-export const SCALES_NM = [2, 30, 58] as const;
-/** Coming from another screen, the map opens at 2 NM. */
-export const FIRST_SCALE = 0;
+export const SCALES_NM = [0.3, 3, 33, 99] as const;
+/** Coming from another screen, the map opens at 3 NM. */
+export const FIRST_SCALE = 1;
 
 const METRES_PER_NM = 1852;
 const WAIT_STEP_MS = 100;
@@ -28,7 +28,7 @@ let boatScale: number = FIRST_SCALE;
  * The scale after a touch on NavIn.
  * @param current - Rank of the scale shown.
  * @param onMap - The map was already on screen.
- * @returns Rank of the next scale: 2 NM when coming from elsewhere.
+ * @returns Rank of the next scale: 3 NM when coming from elsewhere.
  */
 export function nextScale(current: number, onMap: boolean): number {
   return onMap ? (current + 1) % SCALES_NM.length : FIRST_SCALE;
@@ -37,10 +37,10 @@ export function nextScale(current: number, onMap: boolean): number {
 /**
  * Text of a scale.
  * @param rank - Rank in {@link SCALES_NM}.
- * @returns For example « 30 NM ».
+ * @returns For example « 33 NM ».
  */
 export function scaleText(rank: number): string {
-  const nm = SCALES_NM[rank] ?? 2;
+  const nm = SCALES_NM[rank] ?? 3;
   return `${String(nm).replace('.', ',')} NM`;
 }
 
@@ -60,7 +60,7 @@ function apply(rank: number, centre: Centre, tries = WAIT_TRIES): void {
   const middle = centre === 'boat' && boat ? boat : map.getCenter();
   // NavIn looks where the map is: it must not be pulled back to the boat.
   setFollow(centre === 'boat');
-  const span = (SCALES_NM[rank] ?? 2) * METRES_PER_NM;
+  const span = (SCALES_NM[rank] ?? 3) * METRES_PER_NM;
   map.fitBounds(leaflet().latLng(middle).toBounds(span), { padding: [0, 0] });
 }
 
@@ -69,8 +69,8 @@ function onMap(): boolean {
 }
 
 /**
- * NavIn on the tablet: back to the map at 2 NM, or on the map the next
- * scale (2 NM, 30 NM, 58 NM, then 2 NM again), always where
+ * NavIn on the tablet: back to the map at 3 NM, or on the map the next
+ * scale (0,3 NM, 3 NM, 33 NM, 99 NM, then 0,3 NM again), always where
  * the map is looking, never back on the boat.
  * @param shown - The map was already on screen.
  */
@@ -83,7 +83,7 @@ export function navinScaleTap(shown: boolean): void {
 }
 
 /**
- * The boat button of the tablet: the map on the boat, followed, at 2 NM;
+ * The boat button of the tablet: the map on the boat, followed, at 3 NM;
  * touched again, the next scale on the boat.
  */
 export function boatScaleTap(): void {

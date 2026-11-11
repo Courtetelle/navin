@@ -47,7 +47,7 @@ export interface TopMenuDomainActions {
   sosTap: () => void;
   /**
    * NavIn when it only brings back the map (landscape tablet): the map at
-   * 2 NM, or on the map the next scale.
+   * 3 NM, or on the map the next scale.
    */
   scaleTap: (onMap: boolean) => void;
 }
