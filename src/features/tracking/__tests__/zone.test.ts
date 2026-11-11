@@ -8,3 +8,8 @@ test('NavIn goes between lake and sea; the GPS is left for the lake', () => {
   expect(nextZone('mer')).toBe('lac');
   expect(nextZone('auto')).toBe('lac');
 });
+
+test('on the GPS, a long press goes to the other zone than the boat', () => {
+  expect(nextZone('auto', 'lac')).toBe('mer');
+  expect(nextZone('auto', 'mer')).toBe('lac');
+});

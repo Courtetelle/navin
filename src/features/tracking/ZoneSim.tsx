@@ -6,7 +6,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { state } from '../../state/index.ts';
+import { navZone, state } from '../../state/index.ts';
 
 import { cycleZone, nextZone } from './zone.ts';
 
@@ -63,7 +63,7 @@ export function ZoneSim() {
             cycleZone();
           }}
         >
-          {text('Passer à : ', nextZone(zone))}
+          {text('Passer à : ', nextZone(zone, navZone()))}
           <small>{text('zone de navigation actuelle : ', zone)}</small>
         </Button>
       </ButtonRow>

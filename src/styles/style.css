@@ -10551,3 +10551,108 @@ html:root[data-theme='night']
     opacity: 0.8;
   }
 }
+
+/* The layer menu of the maps, in the spirit of the app: big rows that read
+   as buttons, a title per group, the choice lit. */
+html body .leaflet-control-layers.leaflet-control-layers-expanded {
+  min-width: 300px;
+  max-width: min(420px, 80vw);
+  padding: 12px !important;
+  border-radius: 18px !important;
+  font-size: 18px;
+  line-height: 1.25;
+}
+html body .leaflet-control-layers-expanded .leaflet-control-layers-base::before,
+html
+  body
+  .leaflet-control-layers-expanded
+  .leaflet-control-layers-overlays::before {
+  display: block;
+  margin: 2px 6px 6px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+html
+  body
+  .leaflet-control-layers-expanded
+  .leaflet-control-layers-base::before {
+  content: 'Fond de carte';
+}
+html
+  body
+  .leaflet-control-layers-expanded
+  .leaflet-control-layers-overlays::before {
+  content: 'Couches';
+}
+html body .leaflet-control-layers-expanded .leaflet-control-layers-separator {
+  margin: 10px 2px !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.15) !important;
+}
+html body .leaflet-control-layers-expanded label {
+  display: block;
+  margin: 6px 0;
+}
+html body .leaflet-control-layers-expanded label > span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    inset 0 0 0 1px rgba(15, 23, 42, 0.14),
+    0 1px 3px rgba(15, 23, 42, 0.12);
+  color: #0a2a5c;
+  font-weight: 700;
+  cursor: pointer;
+}
+html body .leaflet-control-layers-expanded label:has(input:checked) > span {
+  background: #e3eeff;
+  box-shadow:
+    inset 0 0 0 2px #0b3d91,
+    0 1px 3px rgba(15, 23, 42, 0.12);
+}
+html body .leaflet-control-layers-expanded label input {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  accent-color: #0b3d91;
+}
+html body .leaflet-control-layers-expanded label input + span {
+  flex: 1;
+}
+html[data-theme='night'] body .leaflet-control-layers-expanded label > span {
+  background: rgba(40, 0, 0, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(255, 64, 64, 0.35);
+  color: #ff4040;
+}
+html[data-theme='night']
+  body
+  .leaflet-control-layers-expanded
+  label:has(input:checked)
+  > span {
+  background: rgba(90, 10, 10, 0.9);
+  box-shadow: inset 0 0 0 2px #ff4040;
+}
+html[data-theme='night'] body .leaflet-control-layers-expanded label input {
+  accent-color: #ff4040;
+}
+html[data-theme='night']
+  body
+  .leaflet-control-layers-expanded
+  .leaflet-control-layers-separator {
+  border-top-color: rgba(255, 64, 64, 0.3) !important;
+}
+/* Night: dark boxes, nothing white to dazzle. */
+html[data-theme='night'] body .leaflet-control-layers-expanded {
+  color-scheme: dark;
+}
+/* Open, the menu shows its rows only: a touch on the map closes it. */
+html body .leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+  display: none !important;
+}
