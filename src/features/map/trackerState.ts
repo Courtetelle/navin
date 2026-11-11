@@ -42,6 +42,12 @@ export interface TrackerHandle {
   others: Polyline | null;
   lastSog: number | null;
   lastCog: number | null;
+  /**
+   * Adds the Swiss layers (bathymetry, Lake Geneva depth lines, buoyage) once,
+   * when the lake comes with NavIn after the map opened at sea.
+   * @default undefined
+   */
+  addSwiss?: () => void;
 }
 
 /** A position given to the tracker. */

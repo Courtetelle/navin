@@ -85,7 +85,10 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   // The lake chosen with NavIn opens on its place, not on the boat.
   if (simulatedLake) here = null;
   const inSwissWaters = here ? inSwissArea(fix) : !cruise;
-  const useSwiss = !simulatedSea && ((cruise && isLake()) || inSwissWaters);
+  // The lake chosen with NavIn always has its Swiss layers, whatever the
+  // cruise open.
+  const useSwiss =
+    !simulatedSea && (simulatedLake || (cruise && isLake()) || inSwissWaters);
   osm.addTo(map);
   seamark.addTo(map);
   const layers = L.control
@@ -98,7 +101,13 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
       { position: 'topright' },
     )
     .addTo(map);
-  if (useSwiss) void addLemanVector(map, layers, osm);
+  let swissAdded = false;
+  handle.addSwiss = () => {
+    if (swissAdded) return;
+    swissAdded = true;
+    void addLemanVector(map, layers, osm);
+  };
+  if (useSwiss) handle.addSwiss();
   keepTilesFilled(map, [osm, swiss]);
   void addOfflineMaps(map, layers, osm);
   addFullscreenControl(map);

@@ -41,6 +41,7 @@ export function trkZoneRecenter(zone: string): void {
     // The lake chosen with NavIn, even with a GPS position in Switzerland:
     // only the boat button brings the map back on the boat.
     setFollow(false);
+    tracker.current?.addSwiss?.();
     map.setView(lakeCenter(), lakeZoom());
   } else if (fix) {
     setFollow(true);
