@@ -11,7 +11,7 @@ import type { BoxTr } from './useBoxTr.ts';
 import { useBoxTr } from './useBoxTr.ts';
 
 /** Props of {@link NavigationButtons}. */
-export interface NavigationButtonsProps {
+interface NavigationButtonsProps {
   /** Today's key. */
   today: string;
   /** The open outing is on the lake. */

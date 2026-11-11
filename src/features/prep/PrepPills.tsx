@@ -7,7 +7,7 @@ import { prepLineJump } from './prepFlow.ts';
 import type { PrepLineItem, PrepPill } from './prepLine.ts';
 
 /** Props of {@link PrepPills}. */
-export interface PrepPillsProps {
+interface PrepPillsProps {
   /** Pills to show. */
   pills: readonly PrepPill[];
 }
@@ -31,7 +31,7 @@ export function PrepPills({ pills }: PrepPillsProps) {
 }
 
 /** Props of {@link PrepLineTitles}. */
-export interface PrepLineTitlesProps {
+interface PrepLineTitlesProps {
   /** Items of the line. */
   items: readonly PrepLineItem[];
 }

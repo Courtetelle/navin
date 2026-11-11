@@ -2,7 +2,7 @@
 const ASC_LEVELS = [1, 2, 3, 4, 5];
 
 /** A contour being assembled, in grid coordinates. */
-export interface ContourLine {
+interface ContourLine {
   d: number;
   pts: Array<[number, number]>;
   head: number;

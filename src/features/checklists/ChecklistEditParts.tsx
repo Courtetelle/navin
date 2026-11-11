@@ -10,7 +10,7 @@ import { ckIcon } from './checklistEditing.ts';
 import { useScreenLead } from './useScreenLead.ts';
 
 /** Props of {@link EditTitle}. */
-export interface EditTitleProps {
+interface EditTitleProps {
   /** Mode and boat, under the title. */
   subtitle: string;
 }
@@ -43,7 +43,7 @@ export function EditTitle({ subtitle }: EditTitleProps) {
 }
 
 /** Props of {@link EditTabs}. */
-export interface EditTabsProps {
+interface EditTabsProps {
   /** Lists of the owner. */
   definitions: readonly ChecklistSlot[];
   /** List edited. */

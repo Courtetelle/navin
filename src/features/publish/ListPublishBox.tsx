@@ -25,7 +25,7 @@ import { LX_THEMES } from './themes.ts';
 import type { ListKind } from './types.ts';
 
 /** Props of {@link ListPublishBox}. */
-export interface ListPublishBoxProps {
+interface ListPublishBoxProps {
   /** The list. */
   kind: ListKind;
 }

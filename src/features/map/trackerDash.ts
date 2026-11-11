@@ -7,7 +7,7 @@ import { currentTrack, trackStats } from './trackStats.ts';
 import { tracker } from './trackerState.ts';
 
 /** The five cells of the tracker dashboard, as shown. */
-export interface TrackerDashTexts {
+interface TrackerDashTexts {
   speed: string;
   speedUnit: string;
   course: string;
@@ -18,7 +18,7 @@ export interface TrackerDashTexts {
 }
 
 /** What the dashboard shows. */
-export interface TrackerDashValues {
+interface TrackerDashValues {
   sog: number | null | undefined;
   cog: number | null | undefined;
   distance: number;

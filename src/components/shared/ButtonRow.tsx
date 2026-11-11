@@ -9,7 +9,7 @@ import type { RowChild } from './buttonTypology.ts';
 import { rowTypology } from './buttonTypology.ts';
 
 /** Props of {@link ButtonRow}. */
-export interface ButtonRowProps extends HTMLAttributes<HTMLDivElement> {
+interface ButtonRowProps extends HTMLAttributes<HTMLDivElement> {
   /** The row children: `Button`, `HoldDeleteButton`, `ArmedButton`, `<a className="btn">`… */
   children: ReactNode;
   /**

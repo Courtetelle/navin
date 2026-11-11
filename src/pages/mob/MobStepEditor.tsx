@@ -6,7 +6,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 
 /** Props of {@link MobStepEditor}. */
-export interface MobStepEditorProps {
+interface MobStepEditorProps {
   /** Index of the step. */
   step: number;
   title: string;

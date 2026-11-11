@@ -4,7 +4,7 @@ const WIDTH = 300;
 const HEIGHT = 80;
 
 /** Paths of the trend chart. */
-export interface ChartPaths {
+interface ChartPaths {
   width: number;
   height: number;
   /** Mean wind, a line. */

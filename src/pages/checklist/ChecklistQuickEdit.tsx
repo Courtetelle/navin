@@ -22,7 +22,7 @@ import { toast } from '../../state/index.ts';
 import type { ChecklistModel } from './checklistModel.ts';
 
 /** Props of {@link ChecklistQuickEdit}. */
-export interface ChecklistQuickEditProps {
+interface ChecklistQuickEditProps {
   model: ChecklistModel;
   /** Draws the screen again. */
   onRedraw: () => void;

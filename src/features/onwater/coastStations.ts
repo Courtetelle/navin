@@ -4,7 +4,7 @@ import { store } from '../../storage/store.ts';
 import type { WindReading } from './windTypes.ts';
 
 /** A wind station: network id, name, latitude, longitude. */
-export type CoastStation = [id: string, name: string, lat: number, lon: number];
+type CoastStation = [id: string, name: string, lat: number, lon: number];
 
 /** Networks of measured wind outside Switzerland. */
 export const OPEN_WIND_MAP = 'OpenWindMap';

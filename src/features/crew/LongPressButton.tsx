@@ -3,7 +3,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
 
 /** Props of {@link LongPressButton}. */
-export interface LongPressButtonProps extends ButtonProps {
+interface LongPressButtonProps extends ButtonProps {
   /** A press of 550 ms opens the card of the person. */
   onLongPress: () => void;
 }

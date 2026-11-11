@@ -19,7 +19,7 @@ const BASES_HELP =
   'Listes modèles gardées dans le téléphone. On les reprend pour créer ou compléter la check-list d’un bateau ou d’une croisière.';
 
 /** Props of {@link CkbasesHome}. */
-export interface CkbasesHomeProps {
+interface CkbasesHomeProps {
   /** Opens a base. */
   onBase: (id: string) => void;
   /** Opens the editor of a list of a boat. */

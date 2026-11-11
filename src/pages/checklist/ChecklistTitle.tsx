@@ -13,7 +13,7 @@ const PRESS_HELP =
   'Appui simple : orange, pas fait (valeur, photo). Appui long : vert, fait. Appui long sur un vert : remis à blanc.';
 
 /** Props of {@link ChecklistTitle}. */
-export interface ChecklistTitleProps {
+interface ChecklistTitleProps {
   model: ChecklistModel;
   /** Draws the screen again. */
   onRedraw: () => void;
@@ -76,7 +76,7 @@ function countText({ doneCount, items }: ChecklistModel): string {
 }
 
 /** Props of {@link PressHelp}. */
-export interface PressHelpProps {
+interface PressHelpProps {
   /**
    * Its ⓘ is already in the title.
    * @default false

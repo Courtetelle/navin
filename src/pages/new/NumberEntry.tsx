@@ -15,7 +15,7 @@ import { state, toast } from '../../state/index.ts';
 import { stepValue } from './stepValue.ts';
 
 /** Props of {@link NumberEntry}. */
-export interface NumberEntryProps {
+interface NumberEntryProps {
   field: FieldDefinition;
   /** The keyboard input is shown: the other buttons of the card do nothing. */
   typing: boolean;

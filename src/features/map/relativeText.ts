@@ -4,7 +4,7 @@ import { bearing, distNM } from '../../lib/geo.ts';
 import { herePos } from '../../state/index.ts';
 
 /** Distance and course from my position, as shown (legacy `relTxt`). */
-export interface RelativeParts {
+interface RelativeParts {
   distance: string;
   bearing: string;
   /** ` · 1 h 05 à 4,5 nd` when under way. */

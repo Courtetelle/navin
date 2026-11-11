@@ -15,7 +15,7 @@ import { MapSvg } from './MapSvg.tsx';
 import { useJournalMap } from './useJournalMap.ts';
 
 /** Props of {@link MapContent}. */
-export interface MapContentProps {
+interface MapContentProps {
   /** Day shown, `null` for the whole cruise. */
   day: string | null;
   /** Show another day, or `'all'`. */

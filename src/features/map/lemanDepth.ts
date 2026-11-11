@@ -10,7 +10,7 @@ import tiles from './lemanDepthTiles.json' with { type: 'json' };
 import { inLemanPort } from './lemanPorts.ts';
 
 /** Reads the cells of a tile, row 0 to the north. */
-export type DepthTileLoader = (key: string) => Promise<Uint8Array>;
+type DepthTileLoader = (key: string) => Promise<Uint8Array>;
 
 const SHALLOW_TILES: ReadonlySet<string> = new Set(tiles);
 /** A boat stays in few tiles: enough to read them only once in a while. */

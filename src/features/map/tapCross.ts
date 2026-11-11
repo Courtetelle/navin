@@ -31,7 +31,7 @@ interface Spot {
 /** The four branches of the cross, clockwise from the top. */
 const CROSS_BRANCHES = ['mark', 'weather', 'goto', 'info'] as const;
 /** A branch of the cross. */
-export type CrossBranch = (typeof CROSS_BRANCHES)[number];
+type CrossBranch = (typeof CROSS_BRANCHES)[number];
 
 const PIN_SVG = pinSvg('');
 const WEATHER_SVG =

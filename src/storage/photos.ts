@@ -11,7 +11,7 @@ export const PHOTO_CTX: Readonly<Record<string, string>> = {
 };
 
 /** A stored photo or document: a data URL (legacy) or a Blob. */
-export type PhotoData = string | Blob;
+type PhotoData = string | Blob;
 
 let photoDb: Promise<IDBDatabase> | null = null;
 

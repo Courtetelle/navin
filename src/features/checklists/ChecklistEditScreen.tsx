@@ -34,7 +34,7 @@ import { updateOwner } from './ownerUpdates.ts';
 import type { EditScreenState } from './useChecklistScreens.ts';
 
 /** Props of {@link ChecklistEditScreen}. */
-export interface ChecklistEditScreenProps {
+interface ChecklistEditScreenProps {
   /** Boat, list and mode edited. */
   screen: EditScreenState;
   /** Draws another list of the editor. */

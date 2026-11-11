@@ -88,7 +88,7 @@ export function inInland(
 }
 
 /** A French sea rescue centre and the coast it watches. */
-export interface SeaRescue {
+interface SeaRescue {
   name: string;
   coast: string;
   /** Its own number, when the official sources agree on it. */

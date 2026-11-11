@@ -11,7 +11,7 @@ let holdFired = false;
 let heldAt = 0;
 
 /** What {@link useItemHold} returns. */
-export interface ItemHold {
+interface ItemHold {
   /** Key of the item being pressed. */
   holdingId: string | null;
   /** To call on the `pointerdown` of an item. */

@@ -8,7 +8,7 @@ import type { LakeState } from './lakeState.ts';
 import { useBoxTr } from './useBoxTr.ts';
 
 /** Props of {@link SailChips}. */
-export interface SailChipsProps {
+interface SailChipsProps {
   field: 'allure' | 'gv' | 'avant';
   options: readonly string[];
   /** Columns of the row. */

@@ -3,7 +3,7 @@ import type { FieldData } from '../../../model/field.ts';
 import type { Cruise, Day, Entry } from '../../../model/types.ts';
 
 /** Figures of the engine block of the day sheet. */
-export interface EngineFigures {
+interface EngineFigures {
   /** Hours read tonight. */
   evening: number | null;
   /** Hours at the start of the cruise. */
@@ -87,7 +87,7 @@ export function lochSuggestion(cruise: Cruise, key: string): number | null {
 }
 
 /** Figures of the miles block of the day sheet. */
-export interface MilesFigures {
+interface MilesFigures {
   /** Total of the previous days. */
   previous: number;
   /** Miles of this day. */

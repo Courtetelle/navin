@@ -105,7 +105,7 @@ export function setZoneSim(value: string): void {
 const NAVIN_SPOT_KEY = 'ldb.navinSpot';
 
 /** A place on a map. */
-export interface NavinSpot {
+interface NavinSpot {
   lat: number;
   lon: number;
 }

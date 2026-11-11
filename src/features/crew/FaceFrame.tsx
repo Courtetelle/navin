@@ -12,7 +12,7 @@ import { photosOf } from './ficheRecord.ts';
 import type { FicheRecord } from './useFicheRecord.ts';
 
 /** Props of {@link FaceFrame}. */
-export interface FaceFrameProps {
+interface FaceFrameProps {
   /** The card. */
   record: FicheRecord;
   /** The window closes. */

@@ -12,7 +12,7 @@ import { pad } from '../../lib/format.ts';
 import { MobPosBox } from './MobPosBox.tsx';
 
 /** Props of {@link MobLive}. */
-export interface MobLiveProps {
+interface MobLiveProps {
   /** Open log. */
   log: MobLogRecord;
   training: boolean;

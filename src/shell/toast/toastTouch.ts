@@ -1,7 +1,7 @@
 import { hideToast } from '../toastControl.ts';
 
 /** The last touch on the page, used to keep the bubble off the button just touched. */
-export interface LastTouch {
+interface LastTouch {
   /** The button-like element touched, if any. */
   element: Element | null;
   /** Vertical position of the touch. */

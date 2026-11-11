@@ -6,7 +6,7 @@ import { fmtDate, fr, keyToDate } from '../../lib/format.ts';
 import { daysWithData, navLabel } from '../../state/index.ts';
 
 /** Props of {@link DayNav}. */
-export interface DayNavProps {
+interface DayNavProps {
   /** Day shown, `null` for the whole cruise. */
   day: string | null;
   /** Distance sailed in NM. */

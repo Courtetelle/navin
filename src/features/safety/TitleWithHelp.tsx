@@ -7,7 +7,7 @@ import { useIntroLead } from '../../components/shared/introLead.ts';
 import { state } from '../../state/index.ts';
 
 /** Props of {@link TitleWithHelp}. */
-export interface TitleWithHelpProps {
+interface TitleWithHelpProps {
   /** Classes of the `h1`. */
   className: string;
   /** Title. */

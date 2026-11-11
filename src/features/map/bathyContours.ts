@@ -14,10 +14,10 @@ export interface AscSource {
 }
 
 /** Progress of a reading: ratio read, row reached, rows in all. */
-export type AscProgress = (ratio: number, row: number, rows: number) => void;
+type AscProgress = (ratio: number, row: number, rows: number) => void;
 
 /** Description of an ESRI ASCII grid. */
-export interface GridHeader {
+interface GridHeader {
   columns: number;
   rows: number;
   xCorner: number;

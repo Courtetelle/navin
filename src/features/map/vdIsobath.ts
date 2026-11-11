@@ -7,7 +7,7 @@ import { isMapLive } from './mapExtras.ts';
 import { LEMAN_BOX, addRegional } from './regionalLayers.ts';
 
 /** A layer of the Vaud WMS. */
-export interface VdLayer {
+interface VdLayer {
   name: string;
   title: string;
 }

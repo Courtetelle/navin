@@ -13,7 +13,7 @@ import { buzz } from '../../lib/dom.ts';
 import { chartPaths, trendText } from './trendText.ts';
 
 /** Props of {@link WindTrendChart}. */
-export interface WindTrendChartProps {
+interface WindTrendChartProps {
   station: LiveStation;
   mfKey: string;
 }

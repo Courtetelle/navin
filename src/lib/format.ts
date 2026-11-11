@@ -1,6 +1,3 @@
-/** A value that legacy code parses as a number (numbers, `'1,5'`, `'2.3'`…). */
-export type NumberLike = number | string | null | undefined;
-
 /**
  * Left-pad with zeros (legacy `pad`).
  * @param value - Value to pad.

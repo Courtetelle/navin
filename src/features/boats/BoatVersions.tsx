@@ -22,7 +22,7 @@ import { versionValueText } from './versionText.ts';
 import { withKeys } from './withKeys.ts';
 
 /** Props of {@link BoatVersionsButton}. */
-export interface BoatVersionsButtonProps {
+interface BoatVersionsButtonProps {
   /** Boat. */
   boat: Boat;
   /** Opens the versions. */
@@ -58,7 +58,7 @@ export function BoatVersionsButton({ boat, onOpen }: BoatVersionsButtonProps) {
 }
 
 /** Props of {@link BoatVersions}. */
-export interface BoatVersionsProps {
+interface BoatVersionsProps {
   /** Boat id. */
   boatId: string;
   /** Leaves the screen. */

@@ -24,7 +24,7 @@ import { TaskLine } from './TaskLine.tsx';
 import { useKeepScroll } from './useKeepScroll.ts';
 
 /** Props of {@link TaskTplEdit}. */
-export interface TaskTplEditProps {
+interface TaskTplEditProps {
   /** Leaves the screen. */
   onDone: () => void;
 }

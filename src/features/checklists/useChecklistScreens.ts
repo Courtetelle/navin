@@ -20,7 +20,7 @@ export type ChecklistScreenState =
   | { kind: 'base'; id: string };
 
 /** What {@link useChecklistScreens} returns. */
-export interface ChecklistScreens {
+interface ChecklistScreens {
   screen: ChecklistScreenState;
   /** Key of the screen: it changes at every {@link ChecklistScreens.show}. */
   revision: number;

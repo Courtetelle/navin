@@ -1,7 +1,7 @@
 import { signal } from '@preact/signals-react';
 
 /** What the `#toast` element shows: legacy keeps the last text even once hidden. */
-export interface ToastDisplay {
+interface ToastDisplay {
   /** Text with one idea per line. */
   text: string;
   /** The bubble is visible (legacy class `show`). */

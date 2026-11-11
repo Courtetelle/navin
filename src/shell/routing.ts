@@ -4,7 +4,7 @@ export { NO_CRUISE_VIEWS, ROOTS, VIEW_NAMES } from './viewLists.ts';
 export type { ViewName } from './viewLists.ts';
 
 /** Context of the tab rules. */
-export interface TabContext {
+interface TabContext {
   /** A cruise is open. */
   cruiseOpen: boolean;
   /** Where the alphabet goes back to (legacy `alphaBack`). */
@@ -79,7 +79,7 @@ export function tabOf(view: unknown, context: TabContext): string | null {
 }
 
 /** Screen state read by {@link activeTab}. */
-export interface ActiveTabContext extends TabContext {
+interface ActiveTabContext extends TabContext {
   /** Tab the settings were opened from with the gear (null = from data). */
   settingsFrom: string | null;
 }

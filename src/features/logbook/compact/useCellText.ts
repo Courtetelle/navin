@@ -8,7 +8,7 @@ import { useCompactForm } from './compactContext.ts';
 import { isFilled } from './fieldChange.ts';
 
 /** Text of an input of a compact form. */
-export interface CellText {
+interface CellText {
   text: string;
   setText: (text: string) => void;
   /** The input has the focus. */

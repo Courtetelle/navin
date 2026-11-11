@@ -2,7 +2,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { buzz, openLink } from '../../lib/dom.ts';
 
 /** Number of an emergency service. */
-export type EmergencyKey = 'ch' | 'fr' | 'eu';
+type EmergencyKey = 'ch' | 'fr' | 'eu';
 
 /** Rescue services of the lake: label, number, details (legacy `MOB_CALLS`). */
 const MOB_CALLS: Readonly<
@@ -14,7 +14,7 @@ const MOB_CALLS: Readonly<
 };
 
 /** Props of {@link EmergencyCalls}. */
-export interface EmergencyCallsProps {
+interface EmergencyCallsProps {
   /** Position on the French side: French services first. */
   french: boolean;
   /** Attribute naming the button (`data-mcall`, `data-vcall`). */

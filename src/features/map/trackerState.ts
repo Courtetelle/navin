@@ -63,7 +63,7 @@ export interface TrackerFix {
 }
 
 /** A simulated point: pinned on the track, never written in the logbook. */
-export interface SimulatedPin {
+interface SimulatedPin {
   ll: LatLngPair;
   t: number;
 }

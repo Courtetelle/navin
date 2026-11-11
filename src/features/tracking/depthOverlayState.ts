@@ -1,7 +1,7 @@
 import { signal } from '@preact/signals-react';
 
 /** What the depth alarm overlay shows. */
-export interface DepthOverlayState {
+interface DepthOverlayState {
   /** The overlay exists in the page (it is created once, at the first use). */
   mounted: boolean;
   on: boolean;

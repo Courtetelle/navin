@@ -9,7 +9,7 @@ import type { LemanVector } from './lemanVector.ts';
 import type { OsmFeature } from './osmFeatures.ts';
 
 /** A place where swimming is forbidden. */
-export interface BathPoint {
+interface BathPoint {
   ll: LatLngPair;
   what: string;
   name: string;

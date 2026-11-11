@@ -12,7 +12,7 @@ import { lastKnownPos, navZone, state, toast } from '../../state/index.ts';
 import { setBodyClass } from '../bodyClass.ts';
 
 /** What the top bar clock shows since the last tick. */
-export interface ClockFace {
+interface ClockFace {
   /** Shows the zone (local) time, else UTC. */
   local: boolean;
   /** `HH:MM`. */

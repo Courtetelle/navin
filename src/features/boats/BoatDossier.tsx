@@ -26,7 +26,7 @@ import { saveBoatInfo } from './boatActions.ts';
 import { BOAT_DOC_KINDS, boatDocs } from './boatDocs.ts';
 
 /** Props of {@link BoatDossier}. */
-export interface BoatDossierProps {
+interface BoatDossierProps {
   /** Boat id. */
   boatId: string;
 }

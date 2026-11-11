@@ -64,7 +64,7 @@ export function windConv(knots: unknown): string {
 }
 
 /** Parts of the wind display (data of legacy `windHtml`). */
-export interface WindParts {
+interface WindParts {
   knots: number;
   beaufort: number;
   kmh: number;

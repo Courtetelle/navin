@@ -13,7 +13,7 @@ import { fetchTiles } from './zoneDownload.ts';
 import { zoneTileXY, zoneUrl } from './zoneStore.ts';
 
 /** A lake whose maps are always kept in the app. */
-export interface BaseLake {
+interface BaseLake {
   id: string;
   name: string;
   b: GeoBox;

@@ -6,7 +6,7 @@ import type { UiEdit } from '../../model/logTypes.ts';
 import { normalizeLabel } from './uiEditKey.ts';
 
 /** Main text and small text of a button's children (ui-edit.js:17-23). */
-export interface ButtonTexts {
+interface ButtonTexts {
   /** Direct text, whitespace collapsed. */
   text: string;
   /** Text of the direct `<small>`, `undefined` without one. */

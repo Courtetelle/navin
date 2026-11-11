@@ -1,7 +1,7 @@
 import { useTr } from '../../i18n/useTr.ts';
 
 /** Props of the installation steps. */
-export interface InstallStepsProps {
+interface InstallStepsProps {
   /** Address of the site. */
   host: string;
 }

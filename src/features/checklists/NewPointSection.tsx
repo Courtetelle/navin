@@ -14,7 +14,7 @@ import type { ItemsEditorProps } from './ItemsEditor.tsx';
 import { addPoint } from './checklistBases.ts';
 
 /** Props of {@link NewPointSection}. */
-export interface NewPointSectionProps {
+interface NewPointSectionProps {
   /** Name of the list. */
   name: string;
   /** List id. */

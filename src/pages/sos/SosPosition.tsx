@@ -7,7 +7,7 @@ import type { TimedPosition } from '../../state/index.ts';
 import { state } from '../../state/index.ts';
 
 /** Props of {@link PositionSection}. */
-export interface PositionSectionProps {
+interface PositionSectionProps {
   position: TimedPosition | null;
   /** Redraws the screen after a new position. */
   onRedraw: () => void;

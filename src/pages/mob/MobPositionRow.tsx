@@ -13,7 +13,7 @@ import { addEntry, state } from '../../state/index.ts';
 import type { MobNote } from './MobMain.tsx';
 
 /** Props of {@link MobPositionRow}. */
-export interface MobPositionRowProps {
+interface MobPositionRowProps {
   lake: boolean;
   training: boolean;
   /** Redraws the screen with a confirmation. */

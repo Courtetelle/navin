@@ -13,7 +13,7 @@ import type { PlanDay, PlanRow } from './aboardPlan.ts';
 import { slotIndex } from './aboardPlan.ts';
 
 /** Props of {@link DayCard}. */
-export interface DayCardProps {
+interface DayCardProps {
   day: PlanDay;
   /** Crew names. */
   crew: readonly string[];

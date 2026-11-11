@@ -6,7 +6,7 @@ import { state } from '../../state/index.ts';
 import { localText, utcText } from './timeText.ts';
 
 /** Props of {@link TzTime}. */
-export interface TzTimeProps {
+interface TzTimeProps {
   /** Moment shown (Date, ISO string or epoch ms). */
   date: Date | string | number;
   /**

@@ -2,7 +2,7 @@
 export type UiEditScope = 'view' | 'onglets' | 'haut';
 
 /** What identifies a button for the label edit mode. */
-export interface UiEditIdentity {
+interface UiEditIdentity {
   /**
    * Button id.
    * @default undefined

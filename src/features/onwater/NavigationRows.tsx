@@ -16,7 +16,7 @@ import { photosFor, takePhoto } from './photos.ts';
 import type { BoxTr } from './useBoxTr.ts';
 
 /** Props of the rows of the « En navigation » section. */
-export interface NavigationRowProps {
+interface NavigationRowProps {
   /** State of the day. */
   current: LakeState;
   /** Button already touched, disabled until the redraw. */

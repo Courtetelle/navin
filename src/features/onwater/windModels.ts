@@ -4,10 +4,10 @@ import { douglasOfH } from './windLogic.ts';
 import type { SeaState, WindReading } from './windTypes.ts';
 
 /** A forecast model: Open-Meteo id, label. */
-export type WindModel = readonly [string, string];
+type WindModel = readonly [string, string];
 
 /** A region with its finest forecast models (legacy `WIND_REGIONS`). */
-export interface WindRegion {
+interface WindRegion {
   name: string;
   /** `[south, north, west, east]`. */
   box: readonly [number, number, number, number];

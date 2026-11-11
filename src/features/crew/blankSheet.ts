@@ -10,7 +10,7 @@ import { BLANK_FIELDS, BLANK_HEAD, BLANK_I18N } from './blankTexts.ts';
 import { showArbitration, showFicheList } from './screen.ts';
 
 /** Language of a blank sheet. */
-export type BlankLanguage = 'fr' | BlankForeignLanguage;
+type BlankLanguage = 'fr' | BlankForeignLanguage;
 
 let queue: ParsedSheet[] = [];
 

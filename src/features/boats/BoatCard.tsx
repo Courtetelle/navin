@@ -21,7 +21,7 @@ import { saveBoatInfo } from './boatActions.ts';
 import { boatThumbId } from './boatDocs.ts';
 
 /** Props of {@link BoatCard}. */
-export interface BoatCardProps {
+interface BoatCardProps {
   /** Boat. */
   boat: Boat;
   /** The card starts open. */

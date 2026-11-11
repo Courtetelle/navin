@@ -10,7 +10,7 @@ import type { GridItem } from './fieldChange.ts';
 import { fieldHasValue, gridItems } from './fieldChange.ts';
 
 /** Props of {@link Grid}. */
-export interface GridProps {
+interface GridProps {
   fields: readonly FieldDefinition[];
   afterCell: CompactFormProps['afterCell'];
 }

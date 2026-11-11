@@ -14,7 +14,7 @@ import { saveSosLogs, state } from '../../state/index.ts';
 import { SosEvents } from './SosEvents.tsx';
 
 /** Props of {@link EndedLog}. */
-export interface EndedLogProps {
+interface EndedLogProps {
   log: SosLog;
   /** The details are open. */
   open: boolean;

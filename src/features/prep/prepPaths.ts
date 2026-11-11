@@ -25,7 +25,7 @@ export const PREP_PATH_KEYS = [
 ] as const;
 
 /** One saved lake path (`ldb.prepPaths`). */
-export interface PrepPath {
+interface PrepPath {
   /** Lake path. @default undefined */
   purpose?: string;
   /** Duration. @default undefined */

@@ -10,7 +10,7 @@ import { updateSettings } from '../../state/index.ts';
 import type { ChecklistModel } from './checklistModel.ts';
 
 /** Props of {@link ChecklistFilters}. */
-export interface ChecklistFiltersProps {
+interface ChecklistFiltersProps {
   model: ChecklistModel;
   /** Shows a list. */
   onList: (list: string) => void;

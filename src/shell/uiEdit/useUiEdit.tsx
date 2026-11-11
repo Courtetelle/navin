@@ -9,7 +9,7 @@ import { UiEditScopeContext } from './scope.ts';
 import { uiEditKey } from './uiEditKey.ts';
 
 /** What a button renders once its label edit is applied. */
-export interface UiEditResult {
+interface UiEditResult {
   /** Classes to add (`ue-*`). */
   classes: string[];
   /** Children to render. */

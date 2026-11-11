@@ -13,7 +13,7 @@ import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { lastKnownPos, state } from '../../state/index.ts';
 
 /** Props of {@link SosScript}. */
-export interface SosScriptProps {
+interface SosScriptProps {
   kind: SosKind;
   /** Index of the nature chosen, or `null`. */
   nature: number | null;

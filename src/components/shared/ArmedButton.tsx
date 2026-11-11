@@ -5,7 +5,7 @@ import type { ButtonProps } from './Button.tsx';
 import { Button } from './Button.tsx';
 
 /** Props of {@link ArmedButton}. */
-export interface ArmedButtonProps extends Omit<ButtonProps, 'onClick'> {
+interface ArmedButtonProps extends Omit<ButtonProps, 'onClick'> {
   /** Content shown after the first tap (legacy `label`, e.g. « Toucher encore : amarré »). */
   armedLabel: ReactNode;
   /** Runs on the second tap within 3 s. */

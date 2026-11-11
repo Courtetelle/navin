@@ -13,7 +13,7 @@ import {
 import { PubModal } from '../publish/index.ts';
 
 /** Props of {@link CrewPublish}. */
-export interface CrewPublishProps {
+interface CrewPublishProps {
   /** The window closes. */
   onClose: () => void;
 }

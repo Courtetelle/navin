@@ -24,7 +24,7 @@ import type { LemanDocument } from './lemanDocs.ts';
 const noDirectFetch = new Set<string>();
 
 /** Props of {@link DocumentCard}. */
-export interface DocumentCardProps {
+interface DocumentCardProps {
   /** The document. */
   document: LemanDocument;
   /** Kept document; null when absent, undefined while reading. */

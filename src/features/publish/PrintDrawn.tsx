@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useLayoutEffect } from 'react';
 
 /** Props of {@link PrintDrawn}. */
-export interface PrintDrawnProps {
+interface PrintDrawnProps {
   /** Called once the content is in the page. */
   onDrawn: () => void;
   /** The document. */

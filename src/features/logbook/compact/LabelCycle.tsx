@@ -11,7 +11,7 @@ import { useCompactForm } from './compactContext.ts';
 import { useCycleAsk } from './useCycleAsk.ts';
 
 /** Props of {@link LabelCycle}. */
-export interface LabelCycleProps {
+interface LabelCycleProps {
   field: FieldDefinition;
   cycle: NonNullable<FieldDefinition['labelCycle']>;
 }

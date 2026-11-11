@@ -4,7 +4,7 @@ import { state, updateSettings } from '../../state/index.ts';
 import type { LatLngPair } from './constants.ts';
 
 /** A place the lake map opens on (`settings.lakePlace`). */
-export interface LakePlace {
+interface LakePlace {
   name: string;
   lat: number;
   lon: number;

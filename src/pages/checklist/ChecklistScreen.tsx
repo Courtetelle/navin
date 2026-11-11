@@ -27,7 +27,7 @@ import {
 } from './screenActions.ts';
 
 /** Props of {@link ChecklistScreen}. */
-export interface ChecklistScreenProps {
+interface ChecklistScreenProps {
   /** Draws this or another screen of the page. */
   navigation: ChecklistNavigation;
   /** Selector of a field to centre once drawn. */

@@ -26,7 +26,7 @@ import { closeListPublish } from './publishWindowState.ts';
 import type { ListKind } from './types.ts';
 
 /** Props of {@link ExtraSends}. */
-export interface ExtraSendsProps {
+interface ExtraSendsProps {
   /** The list. */
   kind: ListKind;
 }

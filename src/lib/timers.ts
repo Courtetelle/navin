@@ -1,5 +1,5 @@
 /** Timers started by one effect, stopped together by its cleanup. */
-export interface TimerGroup {
+interface TimerGroup {
   /** Run an action after a delay in milliseconds. */
   after: (delay: number, action: () => void) => void;
   /** Stop every timer still pending. */

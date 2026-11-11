@@ -5,7 +5,7 @@ import { screenLanguage, sheetOwners } from './langState.ts';
 import { translateOrKeep, translatePlaceholder } from './translate.ts';
 
 /** Translation function a component calls on its French texts. */
-export interface Tr {
+interface Tr {
   /**
    * Translate one text node of `#view` or `#navtop`.
    * @param text - French text, exactly as legacy rendered it (whitespace kept).

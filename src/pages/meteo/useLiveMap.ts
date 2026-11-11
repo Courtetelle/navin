@@ -19,7 +19,7 @@ export interface LivePlace {
 }
 
 /** The map of the live screen, as the page sees it. */
-export interface LiveMap {
+interface LiveMap {
   /** Centre of the map now, to search there. */
   center: () => LivePlace | null;
   /**

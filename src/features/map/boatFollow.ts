@@ -5,7 +5,7 @@ import { isMapLive } from './mapExtras.ts';
 import { bearingFor, mapBearing, mapOrientation } from './mapOrientation.ts';
 
 /** What a glide moves. */
-export interface Glider {
+interface Glider {
   map: LeafletMap;
   /** Moves the boat and what goes with it. */
   place: (position: LatLng) => void;
@@ -16,7 +16,7 @@ export interface Glider {
 }
 
 /** One step from the boat as it is to the last GPS point. */
-export interface GlideTarget {
+interface GlideTarget {
   from: LatLng;
   to: LatLng;
   course: number | null | undefined;

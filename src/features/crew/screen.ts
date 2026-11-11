@@ -9,7 +9,7 @@ import { addPendingMembers } from './crewsEdit.ts';
 import { ensureCustomLabels } from './memberLabels.ts';
 
 /** Sub-screens legacy swapped inside `#view` without `go`. */
-export type CrewScreen =
+type CrewScreen =
   | { kind: 'pick' }
   | { kind: 'list' }
   | { kind: 'crews' }
@@ -18,7 +18,7 @@ export type CrewScreen =
   | { kind: 'arbitration'; received: ParsedSheet; clones: readonly Member[] };
 
 /** The sub-screen shown and how it was drawn. */
-export interface ShownCrewScreen {
+interface ShownCrewScreen {
   screen: CrewScreen;
   /** Increases at every draw: a new one starts from scratch, like legacy `innerHTML`. */
   serial: number;

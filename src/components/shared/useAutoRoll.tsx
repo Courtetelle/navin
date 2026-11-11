@@ -8,7 +8,7 @@ import { rollText } from '../../shell/uiEdit/roll.ts';
 import { uiEditMode } from '../../shell/uiEdit/uiEditState.ts';
 
 /** What an element cut by the stylesheet renders. */
-export interface AutoRoll {
+interface AutoRoll {
   /** Class to add once the text overflowed (`ue-roll-auto`), kept afterwards. */
   className: string;
   /** Content, inside a `span.ue-track` while it overflows. */

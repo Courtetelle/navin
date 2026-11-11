@@ -47,7 +47,7 @@ const SEEN_STATIONS = 50;
 const SEEN_POINTS = Math.ceil(KEEP_MS / KEEP_STEP_MS) + 10;
 
 /** A station whose past is asked. */
-export interface HistoryStation {
+interface HistoryStation {
   id: string;
   net: string;
 }

@@ -6,7 +6,7 @@ import { readRecord, writeRecord } from './idbRecord.ts';
 import { resetIsobaths } from './isobath.ts';
 
 /** Shallow lines kept on the device (`ldb-docs`, key `bathy-asc`). */
-export interface BathyRecord {
+interface BathyRecord {
   at: string;
   files: string[];
   /** `[depth, lat, lon, lat, lon, …]`. */

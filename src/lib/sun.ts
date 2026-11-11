@@ -9,7 +9,7 @@ const rad = (degrees: number) => (degrees * Math.PI) / 180;
 const deg = (radians: number) => (radians * 180) / Math.PI;
 
 /** Sunrise and sunset, epoch ms. */
-export interface SunTimes {
+interface SunTimes {
   rise: number;
   set: number;
 }

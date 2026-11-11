@@ -19,7 +19,7 @@ import {
 import type { SeaState, WindMeta, WindReading } from './windTypes.ts';
 
 /** Result of a wind reading around the boat. */
-export interface WindCheck {
+interface WindCheck {
   /** Strongest reading. */
   top: WindReading;
   /** Alert level, thresholds lowered when the region asks for it. */

@@ -1,5 +1,5 @@
 /** A list item with a React key. */
-export interface KeyedItem<T> {
+interface KeyedItem<T> {
   key: string;
   item: T;
   /** Position in the list. */

@@ -14,7 +14,7 @@ import type { BoatDocument } from './boatDocs.ts';
 import { boatDocs, docKindLabel, docKindName } from './boatDocs.ts';
 
 /** Props of {@link DocumentKind}. */
-export interface DocumentKindProps {
+interface DocumentKindProps {
   /** Boat. */
   boat: Boat;
   /** Kind of document. */

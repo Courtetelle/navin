@@ -10,7 +10,7 @@ import { onlinePlaces } from '../../shell/search/searchIndex.ts';
 import { plain, zoomOf } from './placeCenter.ts';
 
 /** A place a map can open on. */
-export interface CenterPlace {
+interface CenterPlace {
   name: string;
   lat: number;
   lon: number;

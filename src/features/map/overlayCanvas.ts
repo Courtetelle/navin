@@ -8,7 +8,7 @@ import type {
 import { leaflet } from './leaflet.ts';
 
 /** A canvas placed over a map, ready for drawing. */
-export interface CanvasFrame {
+interface CanvasFrame {
   context: CanvasRenderingContext2D;
   /** Side of the square drawn, in pixels. */
   side: number;

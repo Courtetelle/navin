@@ -2,7 +2,7 @@ import { contextPlace } from '../../features/map/contextPlace.ts';
 import { shownMapCenter } from '../../features/map/shownMap.ts';
 
 /** A place searched around. */
-export interface BoatPlace {
+interface BoatPlace {
   lat: number;
   lon: number;
 }

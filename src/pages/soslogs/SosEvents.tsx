@@ -7,7 +7,7 @@ import { keyedItems } from '../../lib/keyedItems.ts';
 import type { LogEvent, SosLog } from '../../model/types.ts';
 
 /** Props of the components of a log. */
-export interface SosLogProps {
+interface SosLogProps {
   log: SosLog;
 }
 

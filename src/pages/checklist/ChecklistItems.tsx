@@ -18,7 +18,7 @@ import type { ChecklistNavigation } from './screenActions.ts';
 import { isHoldClick, useItemHold } from './useItemHold.ts';
 
 /** Props of {@link ChecklistItems}. */
-export interface ChecklistItemsProps {
+interface ChecklistItemsProps {
   model: ChecklistModel;
   /** Draws this or another screen of the page. */
   navigation: ChecklistNavigation;

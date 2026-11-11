@@ -8,10 +8,7 @@ import { state } from '../../state/index.ts';
 import { FOLD_SKIP, isFolded, setFolded } from './folds.ts';
 
 /** Props of {@link FoldSection}. */
-export interface FoldSectionProps extends Omit<
-  HTMLAttributes<HTMLElement>,
-  'title'
-> {
+interface FoldSectionProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
   /** Title of the `h2` (a French string is translated). */
   title: ReactNode;
   /**

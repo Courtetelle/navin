@@ -2,7 +2,7 @@
 export type BlankForeignLanguage = 'en' | 'it' | 'es';
 
 /** Texts of a blank sheet in one foreign language. */
-export interface BlankTexts {
+interface BlankTexts {
   /** First line, recognised when the sheet comes back. */
   head: string;
   /** How to fill in the message. */

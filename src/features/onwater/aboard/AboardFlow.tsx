@@ -11,7 +11,7 @@ import { aboardCrew } from './aboardPlan.ts';
 import { useKeepScroll } from './useKeepScroll.ts';
 
 /** Props of {@link AboardFlow}. */
-export interface AboardFlowProps {
+interface AboardFlowProps {
   /** First screen: the plan, or the template (legacy `renderTaskTplEdit`). */
   initial: 'plan' | 'edit';
 }

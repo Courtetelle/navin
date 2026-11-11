@@ -98,7 +98,7 @@ export function HelpText({
 }
 
 /** Props of {@link HelpPill}. */
-export interface HelpPillProps {
+interface HelpPillProps {
   /** Text shown in the bubble. */
   text: string;
   /**

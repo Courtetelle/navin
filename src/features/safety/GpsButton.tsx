@@ -6,7 +6,7 @@ import { buzz } from '../../lib/dom.ts';
 import { toast } from '../../state/index.ts';
 
 /** Props of {@link GpsButton}. */
-export interface GpsButtonProps extends Omit<ButtonProps, 'onClick'> {
+interface GpsButtonProps extends Omit<ButtonProps, 'onClick'> {
   /** Receives the position read. */
   onPosition: (position: GeolocationPosition) => void;
 }

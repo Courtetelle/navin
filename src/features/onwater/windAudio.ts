@@ -87,7 +87,7 @@ function playPending(): void {
 }
 
 /** What the flash adds under the wind. */
-export interface FlashExtra {
+interface FlashExtra {
   /**
    * The wind is forecast, not measured.
    * @default false

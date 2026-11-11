@@ -6,20 +6,20 @@ import { getPhoto } from '../../storage/photos.ts';
 import { store } from '../../storage/store.ts';
 
 /** One photo carried by a sync file. */
-export interface BackupPhoto {
+interface BackupPhoto {
   id: string;
   /** Photo as stored: a data URL, or a blob for old photos. */
   url: unknown;
 }
 
 /** One cruise of a full backup. */
-export interface BackupCruise {
+interface BackupCruise {
   cruise: Cruise;
   track: TrackPoint[];
 }
 
 /** Content of a full backup file (`version: 4`), keys in the legacy file order. */
-export interface FullBackup {
+interface FullBackup {
   app: 'livre-de-bord';
   version: 4;
   all: true;
@@ -32,7 +32,7 @@ export interface FullBackup {
 }
 
 /** A backup ready to deliver. */
-export interface BackupPack {
+interface BackupPack {
   /** File name. */
   name: string;
   /** Content, before serialization. */

@@ -28,7 +28,7 @@ import {
 import { PositionLines, PositionTime } from '../sos/SosPosition.tsx';
 
 /** Props of {@link VhfLake}. */
-export interface VhfLakeProps {
+interface VhfLakeProps {
   /** Redraws the screen. */
   onRedraw: () => void;
 }

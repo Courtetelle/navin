@@ -15,7 +15,7 @@ import { mobAllure, mobKind, mobSections, mobZone } from './mobProcedures.ts';
 import { sosLogStart } from './sosLogStart.ts';
 
 /** What the page shows, read when it is drawn: a GPS answer waits for the next redraw. */
-export interface MobScreen {
+interface MobScreen {
   log: MobLogRecord | null;
   kind: MobKind;
   lake: boolean;

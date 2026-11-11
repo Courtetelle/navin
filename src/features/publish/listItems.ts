@@ -90,7 +90,7 @@ export function peopleItems(
 }
 
 /** Crew-set helpers of the state layer. */
-export interface CrewSetHelpers {
+interface CrewSetHelpers {
   /** Name of a composition. */
   nameOf: (set: CrewSet) => string;
   /** Date line of a composition. */

@@ -2,7 +2,7 @@ import type { MouseEvent, PointerEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 /** Long press handling of the nav bar ✖ in PréP. */
-export interface ExitHold {
+interface ExitHold {
   /** The button is being held (class `holding`). */
   holding: boolean;
   /** Pointer handlers to spread on the button. */

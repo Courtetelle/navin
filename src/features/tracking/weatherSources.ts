@@ -9,13 +9,13 @@ const WEATHER_SOURCES = {
 type WeatherModel = keyof typeof WEATHER_SOURCES;
 
 /** Hourly values of one variable; `null` where the model has none. */
-export type HourlySeries = ReadonlyArray<number | null>;
+type HourlySeries = ReadonlyArray<number | null>;
 
 /** Hourly series of Open-Meteo, as received: variable name → series, and `time`. */
 export type HourlyWeather = Record<string, unknown>;
 
 /** The hourly weather of one day at one place. */
-export interface DayWeather {
+interface DayWeather {
   /** Atmosphere. */
   a: HourlyWeather;
   /** Sea, null on a lake or when unavailable. */

@@ -4,7 +4,7 @@ import { state, updateSettings } from '../../state/index.ts';
 import type { LatLngPair } from './constants.ts';
 
 /** A place the sea map opens on (`settings.seaPlace`). */
-export interface SeaPlace {
+interface SeaPlace {
   name: string;
   lat: number;
   lon: number;

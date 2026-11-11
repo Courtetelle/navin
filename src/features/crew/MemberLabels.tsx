@@ -23,7 +23,7 @@ import {
 } from './memberLabels.ts';
 
 /** Props of {@link MemberLabels}. */
-export interface MemberLabelsProps {
+interface MemberLabelsProps {
   /** Leaves the mode. */
   back: () => void;
   /** The title differs from the screen drawn before. */

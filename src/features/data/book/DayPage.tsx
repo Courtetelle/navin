@@ -22,7 +22,7 @@ import { printedCalcs } from './printedCalcs.ts';
 const NOT_PRINTED: ReadonlySet<string> = new Set(['Étape', 'Signatures']);
 
 /** Props of {@link DayPage}. */
-export interface DayPageProps {
+interface DayPageProps {
   /** Cruise printed. */
   cruise: Cruise;
   /** Day key. */

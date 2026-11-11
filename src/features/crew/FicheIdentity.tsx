@@ -9,7 +9,7 @@ import { CompactForm } from '../logbook/index.ts';
 import type { FicheRecord } from './useFicheRecord.ts';
 
 /** Props of {@link FicheIdentity}. */
-export interface FicheIdentityProps {
+interface FicheIdentityProps {
   /** The card. */
   record: FicheRecord;
   /** The card is open for reading. */

@@ -12,7 +12,7 @@ import { toast } from '../../state/index.ts';
 import type { ChecklistRow } from './checklistModel.ts';
 
 /** Callbacks of a checklist item. */
-export interface ChecklistItemActions {
+interface ChecklistItemActions {
   /** Short tap on the item. */
   onTap: (row: ChecklistRow) => void;
   /** The finger is down on the item. */
@@ -30,7 +30,7 @@ export interface ChecklistItemActions {
 }
 
 /** Props of {@link ChecklistItemRow}. */
-export interface ChecklistItemRowProps extends ChecklistItemActions {
+interface ChecklistItemRowProps extends ChecklistItemActions {
   row: ChecklistRow;
   /** The finger is down on this item. */
   holding: boolean;

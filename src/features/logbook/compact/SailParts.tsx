@@ -7,7 +7,7 @@ import { buzz } from '../../../lib/dom.ts';
 import { SAIL_COLORS } from '../../../lib/translateDictionary.ts';
 
 /** Props of {@link ColorButton}. */
-export interface ColorButtonProps {
+interface ColorButtonProps {
   color: string;
   /**
    * Colour of the mainsail.
@@ -52,7 +52,7 @@ export function ColorButton({
 }
 
 /** Props of {@link SailLine}. */
-export interface SailLineProps {
+interface SailLineProps {
   name: string;
   color: string;
   text: string;

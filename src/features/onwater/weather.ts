@@ -7,7 +7,7 @@ import type { WeatherNow } from './weatherLogic.ts';
 import { applyWeather } from './weatherLogic.ts';
 
 /** How an update reports to the screen. */
-export interface LakeWeatherOptions {
+interface LakeWeatherOptions {
   /**
    * No bubble: the automatic update of the screen.
    * @default false

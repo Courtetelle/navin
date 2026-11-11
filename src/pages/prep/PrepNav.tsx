@@ -3,7 +3,7 @@ import { prepBack, prepNext } from '../../features/prep/prepBack.ts';
 import { PageBack, PageValidate } from '../../shell/navbar/PageBack.tsx';
 
 /** Props of {@link PrepNav}. */
-export interface PrepNavProps {
+interface PrepNavProps {
   /**
    * Label of the button that goes on, none by default.
    * @default ''

@@ -17,7 +17,7 @@ import { state } from '../../state/index.ts';
 const OTHER_BOAT = 'ALBATROS';
 
 /** Props of {@link VhfSea}. */
-export interface VhfSeaProps {
+interface VhfSeaProps {
   onCall: (call: VhfCallKey) => void;
 }
 

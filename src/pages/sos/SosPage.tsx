@@ -11,7 +11,7 @@ import { SosMain } from './SosMain.tsx';
 import { SosScript } from './SosScript.tsx';
 
 /** Argument of `go('sos')` that opens a message directly. */
-export interface SosScriptTarget {
+interface SosScriptTarget {
   script: SosKind;
   nature: number | null;
 }

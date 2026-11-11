@@ -11,7 +11,7 @@ interface FiguresProps {
 }
 
 /** Props of {@link CalcTable}. */
-export interface CalcTableProps extends FiguresProps {
+interface CalcTableProps extends FiguresProps {
   /** Block printed. */
   kind: FieldDefinition['calc'];
 }

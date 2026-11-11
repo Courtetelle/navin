@@ -22,7 +22,7 @@ import { toast } from '../../state/index.ts';
 import { MobStepEditor } from './MobStepEditor.tsx';
 
 /** Props of {@link MobEditSection}. */
-export interface MobEditSectionProps {
+interface MobEditSectionProps {
   /** Index of the section. */
   index: number;
   onBack: () => void;

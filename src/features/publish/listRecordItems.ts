@@ -5,7 +5,7 @@ import type { ChecklistBase, Mark, SosLog } from '../../model/types.ts';
 import type { PublishItem, PublishRowData } from './types.ts';
 
 /** A track with its statistics. */
-export interface PublishableTrack {
+interface PublishableTrack {
   /** Id. */
   id: string;
   /** Name. */

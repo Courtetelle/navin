@@ -18,7 +18,7 @@ import { deleteMemberCard, openFiche } from './ficheNavigation.ts';
 import { showCrewPick, showFiche } from './screen.ts';
 
 /** Props of {@link FicheListScreen}. */
-export interface FicheListScreenProps {
+interface FicheListScreenProps {
   /** The title differs from the screen drawn before. */
   lead: boolean;
 }

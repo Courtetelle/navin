@@ -31,7 +31,7 @@ interface ChoiceProps {
 }
 
 /** Props of {@link BoatChoice}. */
-export interface BoatChoiceProps extends ChoiceProps {
+interface BoatChoiceProps extends ChoiceProps {
   /** Boat chosen. */
   boatId: string | null;
 }
@@ -118,7 +118,7 @@ export function PurposeChoice({ onRedraw }: ChoiceProps) {
 }
 
 /** Props of {@link ZoneChoice}. */
-export interface ZoneChoiceProps extends ChoiceProps {
+interface ZoneChoiceProps extends ChoiceProps {
   /** Sea area chosen. */
   zone: string;
 }

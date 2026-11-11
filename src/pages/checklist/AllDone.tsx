@@ -6,7 +6,7 @@ import { dayKey } from '../../lib/format.ts';
 import { go } from '../../shell/router.ts';
 
 /** Props of {@link AllDone}. */
-export interface AllDoneProps {
+interface AllDoneProps {
   /** Name of the list. */
   name: string;
   /** `dep` or `quit`; `null` for a free list. */

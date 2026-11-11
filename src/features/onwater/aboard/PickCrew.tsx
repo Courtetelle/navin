@@ -7,7 +7,7 @@ import { keyedItems } from '../../../lib/keyedItems.ts';
 import { PageBack } from '../../../shell/navbar/PageBack.tsx';
 
 /** Props of {@link PickCrew}. */
-export interface PickCrewProps {
+interface PickCrewProps {
   /** Crew names. */
   crew: readonly string[];
   /** Receives the index of the person chosen. */

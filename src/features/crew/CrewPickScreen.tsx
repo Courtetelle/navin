@@ -22,7 +22,7 @@ import { openFiche } from './ficheNavigation.ts';
 import { crewPickTitle, showCrewPick } from './screen.ts';
 
 /** Props of {@link CrewPickScreen}. */
-export interface CrewPickScreenProps {
+interface CrewPickScreenProps {
   /** The title differs from the screen drawn before. */
   lead: boolean;
 }

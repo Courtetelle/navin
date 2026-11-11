@@ -23,7 +23,7 @@ import { go } from '../../shell/router.ts';
 import { state, toast, updateCkLib } from '../../state/index.ts';
 
 /** Props of {@link BaseEditScreen}. */
-export interface BaseEditScreenProps {
+interface BaseEditScreenProps {
   /** The base edited. */
   base: ChecklistBase;
   /** Draws the screen again. */

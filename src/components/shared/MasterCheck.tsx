@@ -6,7 +6,7 @@ import { Button } from './Button.tsx';
 import { masterState } from './masterState.ts';
 
 /** Props of {@link MasterCheck}. */
-export interface MasterCheckProps {
+interface MasterCheckProps {
   /** Number of items checked. */
   checked: number;
   /** Number of items. */

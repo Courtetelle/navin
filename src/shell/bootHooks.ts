@@ -3,7 +3,7 @@ import { noteError } from '../storage/errLog.ts';
 import { errorContext } from './errorContext.ts';
 
 /** Start-up functions other domains provide (legacy `boot`, app.js:3301-3307). */
-export interface BootHooks {
+interface BootHooks {
   /** Apply the chosen app icon (legacy `applyIcon`, data domain). */
   applyIcon: () => void;
   /** Resume a track that was recording when the app closed (legacy `autoResumeTrip`, tracking domain). */

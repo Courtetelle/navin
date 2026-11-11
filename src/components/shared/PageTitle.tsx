@@ -11,13 +11,13 @@ import { helpBubbleText, keepHelp, splitEmptyHelp } from './helpRules.ts';
 import { useIntroLead } from './introLead.ts';
 
 /** One help paragraph right under the title. */
-export interface LeadHelp extends HelpContext {
+interface LeadHelp extends HelpContext {
   /** French text of the paragraph. */
   text: string;
 }
 
 /** Props of {@link PageTitle}. */
-export interface PageTitleProps {
+interface PageTitleProps {
   /** Title content (a French string is translated). */
   children: ReactNode;
   /**

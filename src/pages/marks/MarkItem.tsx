@@ -21,7 +21,7 @@ import { go } from '../../shell/router.ts';
 import { updateMarks } from '../../state/index.ts';
 
 /** Props of {@link MarkItem}. */
-export interface MarkItemProps {
+interface MarkItemProps {
   /** The mark. */
   mark: Mark;
 }

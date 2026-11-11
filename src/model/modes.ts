@@ -4,7 +4,7 @@ import type { Cruise } from './types.ts';
 export type ModeKey = 'mer' | 'lacj' | 'lacc';
 
 /** Display of a mode. */
-export interface ModeDefinition {
+interface ModeDefinition {
   icon: string;
   name: string;
   sub: string;

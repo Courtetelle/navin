@@ -17,7 +17,7 @@ import {
 import { fieldHasValue } from './fieldChange.ts';
 
 /** Props of {@link Cell}. */
-export interface CellProps extends HTMLAttributes<HTMLDivElement> {
+interface CellProps extends HTMLAttributes<HTMLDivElement> {
   field: FieldDefinition;
   /**
    * Full row width.

@@ -18,7 +18,7 @@ import { go } from '../../shell/router.ts';
 import { state, updateSettings } from '../../state/index.ts';
 
 /** Props of {@link VhfCallScreen}. */
-export interface VhfCallScreenProps {
+interface VhfCallScreenProps {
   call: VhfCallKey;
   onBack: () => void;
 }

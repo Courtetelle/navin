@@ -42,14 +42,7 @@ export const DOUGLAS_EN: readonly string[] = [
 ];
 
 /** One Beaufort row: force, knots, French name, English name, French sea, English sea. */
-export type BeaufortRow = readonly [
-  number,
-  string,
-  string,
-  string,
-  string,
-  string,
-];
+type BeaufortRow = readonly [number, string, string, string, string, string];
 
 /** Beaufort scale. */
 export const BEAUFORT_TBL: readonly BeaufortRow[] = [

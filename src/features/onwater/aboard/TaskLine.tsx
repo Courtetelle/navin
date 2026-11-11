@@ -7,7 +7,7 @@ import { updateTaskTpl } from '../../../state/index.ts';
 import { MarqueeInput } from '../../logbook/index.ts';
 
 /** Props of {@link TaskLine}. */
-export interface TaskLineProps {
+interface TaskLineProps {
   task: Task;
   /** Position in the template. */
   index: number;

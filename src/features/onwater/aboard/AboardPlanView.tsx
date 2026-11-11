@@ -22,7 +22,7 @@ import { aboardCrew, aboardPlan } from './aboardPlan.ts';
 import { useKeepScroll } from './useKeepScroll.ts';
 
 /** Props of {@link AboardPlanView}. */
-export interface AboardPlanViewProps {
+interface AboardPlanViewProps {
   /** Opens the template. */
   onEdit: () => void;
   /** Replace the person of a slot on a day. */

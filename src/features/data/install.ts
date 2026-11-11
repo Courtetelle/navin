@@ -1,7 +1,7 @@
 import { signal } from '@preact/signals-react';
 
 /** The browser's install prompt (Android / Chrome), not in the DOM typings. */
-export interface InstallPromptEvent extends Event {
+interface InstallPromptEvent extends Event {
   /** Shows the installation dialog. */
   prompt: () => Promise<unknown>;
   /** Settles when the user answered. */

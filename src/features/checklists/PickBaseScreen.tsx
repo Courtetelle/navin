@@ -8,7 +8,7 @@ import { state } from '../../state/index.ts';
 import { useScreenLead } from './useScreenLead.ts';
 
 /** Props of {@link PickBaseScreen}. */
-export interface PickBaseScreenProps {
+interface PickBaseScreenProps {
   /** Receives the base chosen. */
   onPick: (base: ChecklistBase) => void;
   /** Back to the previous screen. */
@@ -54,7 +54,7 @@ export function PickBaseScreen({ onPick, onBack }: PickBaseScreenProps) {
 }
 
 /** Props of {@link BaseButton}. */
-export interface BaseButtonProps {
+interface BaseButtonProps {
   /** Base shown. */
   base: ChecklistBase;
   /** Opens or picks the base. */

@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useMarquee } from '../../components/shared/useMarquee.ts';
 
 /** Props of {@link CommitInput}. */
-export interface CommitInputProps extends ComponentPropsWithRef<'input'> {
+interface CommitInputProps extends ComponentPropsWithRef<'input'> {
   /** Native `change` event: the value was validated or the field left. */
   onCommit: (value: string) => void;
 }

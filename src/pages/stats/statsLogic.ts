@@ -20,7 +20,7 @@ const MONTHS = [
 ];
 
 /** One day of outing. */
-export interface LakeDay {
+interface LakeDay {
   /** Day key. */
   k: string;
   boatId: string | undefined;
@@ -31,7 +31,7 @@ export interface LakeDay {
 }
 
 /** Totals of a period. */
-export interface PeriodTotal {
+interface PeriodTotal {
   label: string;
   /** Outings. */
   n: number;
@@ -101,7 +101,7 @@ export function periodOf(key: string, period: string): [string, string] {
 }
 
 /** What the screen shows for a choice of boats and period. */
-export interface StatsSummary {
+interface StatsSummary {
   /** Grand total. */
   total: Omit<PeriodTotal, 'label'>;
   /** Periods, newest first. */

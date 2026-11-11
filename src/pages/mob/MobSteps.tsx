@@ -16,7 +16,7 @@ import { buzz } from '../../lib/dom.ts';
 import { keyedItems } from '../../lib/keyedItems.ts';
 
 /** Props of {@link MobSteps}. */
-export interface MobStepsProps {
+interface MobStepsProps {
   log: MobLogRecord | null;
   onRedraw: () => void;
 }

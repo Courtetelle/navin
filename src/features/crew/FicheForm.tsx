@@ -13,7 +13,7 @@ import { packRelatives, shownRelatives } from './ficheRecord.ts';
 import type { FicheRecord } from './useFicheRecord.ts';
 
 /** Props of {@link FicheForm}. */
-export interface FicheFormProps {
+interface FicheFormProps {
   /** The card. */
   record: FicheRecord;
   /** The card is open for reading: only what is filled shows. */

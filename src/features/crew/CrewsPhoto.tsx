@@ -14,7 +14,7 @@ import { setCrewPhotoCaption } from './crewsEdit.ts';
 import { pickCrewPhoto, removeCrewPhoto } from './crewsPhotoActions.ts';
 
 /** Props of {@link CrewsPhoto}. */
-export interface CrewsPhotoProps {
+interface CrewsPhotoProps {
   /** Saved composition, when there is one. */
   base: CrewSet | undefined;
 }

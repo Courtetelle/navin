@@ -21,7 +21,7 @@ import { updateOwner } from './ownerUpdates.ts';
 import { useScreenLead } from './useScreenLead.ts';
 
 /** Props of {@link ChecklistNewScreen}. */
-export interface ChecklistNewScreenProps {
+interface ChecklistNewScreenProps {
   /** Boat asked for, `null` for the owner of the open cruise. */
   boatId: string | null;
   /** Mode of the list. */

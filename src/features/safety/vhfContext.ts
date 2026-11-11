@@ -11,7 +11,7 @@ import type { VhfAskKey, VhfCallKey, VhfContext } from './vhfTypes.ts';
 const PER_CALL: ReadonlySet<VhfAskKey> = new Set(['station', 'chan']);
 
 /** What a routine call is built from, besides the radio message source. */
-export interface VhfSource extends ScriptSource {
+interface VhfSource extends ScriptSource {
   /** Day sheet of today. */
   day: Readonly<Day>;
   /** Values typed earlier (`settings.vhf`). */
@@ -88,7 +88,7 @@ export function vhfContext(call: VhfCallKey, source: VhfSource): VhfContext {
 }
 
 /** What the lake message is built from. */
-export interface LakeMessageSource {
+interface LakeMessageSource {
   /** Boat name. */
   boat: unknown;
   /** Registration. */

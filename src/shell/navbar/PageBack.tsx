@@ -16,7 +16,7 @@ import {
 } from './navBarState.ts';
 
 /** Props of the page buttons relayed by the nav bar. */
-export interface PageNavButtonProps extends Omit<
+interface PageNavButtonProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   'onClick' | 'children'
 > {

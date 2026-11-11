@@ -8,7 +8,7 @@ export const ZONE_BASE =
 /** Tiles per layer and per zone, to stay reasonable. */
 const ZONE_MAX = 8000;
 /** A tile: zoom, column, row. */
-export type TileXY = [number, number, number];
+type TileXY = [number, number, number];
 
 /** A zone kept offline (`ldb.zones`). */
 export interface Zone {

@@ -22,7 +22,7 @@ import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { toast } from '../../state/index.ts';
 
 /** Props of {@link MobEditList}. */
-export interface MobEditListProps {
+interface MobEditListProps {
   /** The screen shown before had another title (its help is then a lead). */
   freshTitle: boolean;
   onBack: () => void;

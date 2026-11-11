@@ -32,7 +32,7 @@ interface DepthScenario {
 }
 
 /** Key of a test scenario. */
-export type DepthScenarioKey = 'lent' | 'vite';
+type DepthScenarioKey = 'lent' | 'vite';
 
 /** The test scenarios of the settings. */
 export const DEPTH_SCENARIOS: Record<DepthScenarioKey, DepthScenario> = {

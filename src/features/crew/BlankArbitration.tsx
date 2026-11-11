@@ -22,7 +22,7 @@ import type { ParsedSheet } from './blankParse.ts';
 import { createFromSheet, sheetDone } from './blankSheet.ts';
 
 /** Props of {@link BlankArbitration}. */
-export interface BlankArbitrationProps {
+interface BlankArbitrationProps {
   /** Received sheet. */
   received: ParsedSheet;
   /** Similar existing cards. */

@@ -30,7 +30,7 @@ export interface MobNote {
 }
 
 /** Props of {@link MobMain}. */
-export interface MobMainProps {
+interface MobMainProps {
   note: MobNote | null;
   /** Redraws the screen, keeping a confirmation. */
   onRedraw: (note?: MobNote | null) => void;

@@ -1,7 +1,7 @@
 import { textOf } from '../../../lib/format.ts';
 
 /** State of an expiry date: `bad` expired, `warn` within 3 months, `ok`, `''` not a date. */
-export type ExpiryState = 'bad' | 'warn' | 'ok' | '';
+type ExpiryState = 'bad' | 'warn' | 'ok' | '';
 
 /**
  * Parse a date typed in any usual form: `2027-03-31`, `31.03.2027`, `31/3/27`,

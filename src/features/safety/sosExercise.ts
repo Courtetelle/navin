@@ -16,7 +16,7 @@ import { refreshSosPage } from './safetyState.ts';
 import { sosLogStart } from './sosLogStart.ts';
 
 /** A simulated SOS position (legacy `sosSim`). */
-export interface SosSimulation {
+interface SosSimulation {
   lat: number;
   lon: number;
   /** Start, epoch milliseconds. */

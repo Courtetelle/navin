@@ -140,7 +140,7 @@ export function updateSeaTpl(recipe: (draft: SeaTemplate) => void): boolean {
 }
 
 /** A checklist owner (boat or cruise) as seen by {@link seedBrief}. */
-export interface ChecklistOwner {
+interface ChecklistOwner {
   /** @default undefined */
   briefSeeded?: boolean;
   /** @default undefined */

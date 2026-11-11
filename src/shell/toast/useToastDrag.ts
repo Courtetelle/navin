@@ -10,7 +10,7 @@ import {
 } from '../toastControl.ts';
 
 /** Offset of the bubble from its place (`ldb.toastPos`). */
-export interface ToastPosition {
+interface ToastPosition {
   x: number;
   y: number;
 }

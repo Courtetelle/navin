@@ -8,7 +8,7 @@ import {
 } from './remarkContext.ts';
 
 /** Outcome of sending a remark. */
-export interface SendOutcome {
+interface SendOutcome {
   /** Delivered (directly or as a preview comment). */
   sent: boolean;
   /** Message to show: a bubble when `toast`, else under the form. */

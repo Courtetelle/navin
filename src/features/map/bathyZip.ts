@@ -1,5 +1,5 @@
 /** A `.asc` file inside a zip: read as a stream. */
-export interface ZipAscEntry {
+interface ZipAscEntry {
   name: string;
   size: number;
   stream: () => ReadableStream<Uint8Array>;

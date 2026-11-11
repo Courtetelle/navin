@@ -14,7 +14,7 @@ import type {
 } from './useChecklistScreens.ts';
 
 /** Props of {@link ChecklistSubScreen}. */
-export interface ChecklistSubScreenProps {
+interface ChecklistSubScreenProps {
   /** Editor, new list or choice of a base. */
   screen: Exclude<ChecklistScreenState, { kind: 'home' } | { kind: 'base' }>;
   /** Draws another sub-screen. */

@@ -10,7 +10,7 @@ import { drawGotoLines, marksRedraw } from './marksDraw.ts';
 import { bearingText, distanceText } from './relativeText.ts';
 
 /** A Go to target (`ldb.goto`). */
-export interface GotoTarget {
+interface GotoTarget {
   lat: number;
   lon: number;
   name: string;
@@ -19,7 +19,7 @@ export interface GotoTarget {
 }
 
 /** Texts of the Go to bar; without position, only `waiting`. */
-export interface GotoBarTexts {
+interface GotoBarTexts {
   name: string;
   /** Waiting for the GPS. */
   waiting: boolean;

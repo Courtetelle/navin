@@ -10,7 +10,7 @@ import { isFilled } from './fieldChange.ts';
 const SUBSCRIPTS = /(?<sub>ₘₐₓ|ₘᵢₙ)/;
 
 /** Props of {@link FieldLabel}. */
-export interface FieldLabelProps {
+interface FieldLabelProps {
   field: FieldDefinition;
   /**
    * Target of the label.

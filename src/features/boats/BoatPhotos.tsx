@@ -23,7 +23,7 @@ import type { BoatDocument } from './boatDocs.ts';
 import { boatDocs } from './boatDocs.ts';
 
 /** Props of {@link BoatPhotos}. */
-export interface BoatPhotosProps {
+interface BoatPhotosProps {
   /** Boat. */
   boat: Boat;
   /** The list must be drawn again with this boat open. */

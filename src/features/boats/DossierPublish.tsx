@@ -7,7 +7,7 @@ import { PubModal } from '../publish/index.ts';
 import { printBoatDossier, shareBoatDossier } from './dossierOutput.tsx';
 
 /** Props of {@link DossierPublish}. */
-export interface DossierPublishProps {
+interface DossierPublishProps {
   /** Boat. */
   boat: Boat;
   /** Closes the window. */

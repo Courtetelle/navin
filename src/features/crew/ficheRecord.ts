@@ -58,7 +58,7 @@ export function shownRelatives(data: FieldData): number {
 }
 
 /** Result of {@link packRelatives}. */
-export interface PackedRelatives {
+interface PackedRelatives {
   /** Values, the second and third relatives packed upwards. */
   data: FieldData;
   /** Relatives to show. */

@@ -16,7 +16,7 @@ export interface IsobathLine {
 }
 
 /** Distance to a line in metres, and the depth of that line. */
-export type NearDepth = [number, number];
+type NearDepth = [number, number];
 
 /** Beyond this distance in metres, a line says nothing about a point. */
 const FAR_METRES = 400;
@@ -123,7 +123,7 @@ export function nearDepths(
 }
 
 /** Estimate from the two nearest lines of different depths. */
-export interface DepthEstimate {
+interface DepthEstimate {
   /** Nearest line. */
   first: NearDepth;
   /** Next line of another depth, when in reach. */

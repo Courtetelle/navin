@@ -2,7 +2,7 @@ import { dayKey, keyToDate } from '../../../lib/format.ts';
 import type { Cruise, Task, TaskTemplate } from '../../../model/types.ts';
 
 /** One place of the day: one person for one task. */
-export interface TaskSlot {
+interface TaskSlot {
   task: Task;
   /** Rank of the person within the task. */
   rank: number;

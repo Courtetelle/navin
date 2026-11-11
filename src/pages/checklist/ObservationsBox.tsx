@@ -6,7 +6,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import type { ChecklistModel } from './checklistModel.ts';
 
 /** Props of {@link ObservationsBox}. */
-export interface ObservationsBoxProps {
+interface ObservationsBoxProps {
   model: ChecklistModel;
   /** The Observations button. */
   onToggle: () => void;

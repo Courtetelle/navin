@@ -9,7 +9,7 @@ import type { ButtonProps } from './Button.tsx';
 import { Button } from './Button.tsx';
 
 /** Props of {@link HoldDeleteButton}. */
-export interface HoldDeleteButtonProps extends Omit<ButtonProps, 'onClick'> {
+interface HoldDeleteButtonProps extends Omit<ButtonProps, 'onClick'> {
   /** Runs 300 ms after a confirmed long press. */
   onDelete: () => void;
   /**

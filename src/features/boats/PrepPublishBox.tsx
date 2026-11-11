@@ -14,7 +14,7 @@ import {
 import { prepReportPrint } from './prepReportPrint.tsx';
 
 /** Props of {@link PrepPublishBox}. */
-export interface PrepPublishBoxProps {
+interface PrepPublishBoxProps {
   /** Closes the window. */
   onClose: () => void;
 }

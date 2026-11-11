@@ -5,7 +5,7 @@ import type { TrackPoint } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 /** One point of the line of a day. */
-export interface DayPoint {
+interface DayPoint {
   /** Epoch milliseconds. */
   t: number;
   lat: number;
@@ -13,7 +13,7 @@ export interface DayPoint {
 }
 
 /** Line sailed on a day. */
-export interface DayLine {
+interface DayLine {
   /** Recorded track, or the entries joined when there is no track. */
   line: DayPoint[];
   /** Miles sailed, stopovers excluded. */

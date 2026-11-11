@@ -138,7 +138,7 @@ export function remarkContext(element: Element | null): string {
 }
 
 /** The comments capability of the claude.ai preview (`window.claude.use('comments')`). */
-export interface CommentsApi {
+interface CommentsApi {
   anchorFor: (element: Element) => Promise<unknown>;
   sendToClaude: (input: { anchor: unknown; text: string }) => Promise<unknown>;
   canSendToClaude: () => Promise<string>;

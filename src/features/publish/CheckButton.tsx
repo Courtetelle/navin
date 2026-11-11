@@ -3,7 +3,7 @@ import type { ComponentPropsWithoutRef, ReactElement, ReactNode } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 
 /** Props of {@link CheckButton}. */
-export interface CheckButtonProps extends ComponentPropsWithoutRef<'button'> {
+interface CheckButtonProps extends ComponentPropsWithoutRef<'button'> {
   /** Checked. */
   on: boolean;
   /**

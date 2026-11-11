@@ -3,7 +3,7 @@ import { keyedItems } from '../../lib/keyedItems.ts';
 import type { ScriptLine } from './sosScripts.ts';
 
 /** Props of {@link ScriptLines}. */
-export interface ScriptLinesProps {
+interface ScriptLinesProps {
   /** Lines of a message; `null` lines are skipped. */
   lines: readonly ScriptLine[];
 }

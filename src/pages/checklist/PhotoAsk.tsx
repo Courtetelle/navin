@@ -7,7 +7,7 @@ import { UiEditScopeContext } from '../../shell/uiEdit/scope.ts';
 import { toast } from '../../state/index.ts';
 
 /** Props of {@link PhotoAsk}. */
-export interface PhotoAskProps {
+interface PhotoAskProps {
   /** Number of photos of the item. */
   count: number;
   /** Deletes the photos of the item. */

@@ -14,7 +14,7 @@ const NO_LEAFLET_NOTE =
   'Carte de fond indisponible sans réseau : la trace est affichée seule.';
 
 /** The map of the logbook, as its page sees it. */
-export interface JournalMapState {
+interface JournalMapState {
   /** The map, once created. */
   journal: RefObject<JournalMap | null>;
   /** Text of `#mapNote`. */

@@ -18,7 +18,7 @@ export const SHEET_PARTS: ReadonlyArray<readonly [SheetPart, string]> = [
 ];
 
 /** A part of the sheet. */
-export type SheetPart =
+type SheetPart =
   | 'info'
   | 'trace'
   | 'journal'

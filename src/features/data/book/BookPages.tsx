@@ -27,7 +27,7 @@ const TECH_SECTIONS: ReadonlySet<string> = new Set([
 ]);
 
 /** Props of a printed page about a cruise. */
-export interface BookPageProps {
+interface BookPageProps {
   /** Cruise printed. */
   cruise: Cruise;
 }
@@ -158,7 +158,7 @@ export function SafetyPage({ cruise }: BookPageProps) {
 const BLANK_ROWS = Array.from({ length: 16 }, (_, row) => row);
 
 /** Props of {@link BlankPage}. */
-export interface BlankPageProps {
+interface BlankPageProps {
   /** Logbook columns (labels, without the time). */
   columns: readonly FieldDefinition[];
 }

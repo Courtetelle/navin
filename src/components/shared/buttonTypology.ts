@@ -63,7 +63,7 @@ export interface RowChild {
 }
 
 /** Classes computed for a row and its children. */
-export interface RowTypology {
+interface RowTypology {
   /** The row gets `row-stack`. */
   stacked: boolean;
   /** Final class attribute of each child, same order. */

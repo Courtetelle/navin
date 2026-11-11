@@ -78,7 +78,7 @@ export function estimateDepth(
 }
 
 /** A depth and where it comes from. */
-export interface DepthReading {
+interface DepthReading {
   /** Water under the boat (m). */
   depth: number;
   source: 'chart' | 'sounder';

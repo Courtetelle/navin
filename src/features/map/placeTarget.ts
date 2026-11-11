@@ -7,7 +7,7 @@ import { leaflet } from './leaflet.ts';
 import { setFollow, tracker } from './trackerState.ts';
 
 /** A place to show on the map. */
-export interface PlaceTarget {
+interface PlaceTarget {
   name: string;
   lat: number;
   lon: number;

@@ -12,7 +12,7 @@ import type {
 } from './types.ts';
 
 /** Props of {@link ListPrintDocument}. */
-export interface ListPrintDocumentProps {
+interface ListPrintDocumentProps {
   /** Title, kicker and subtitle. */
   sheet: Pick<CardsDocument, 'title' | 'kicker' | 'sub'>;
   /** Elements to print. */

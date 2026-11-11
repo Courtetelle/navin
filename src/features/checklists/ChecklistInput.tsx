@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useMarquee } from '../../components/shared/useMarquee.ts';
 
 /** Props of {@link ChecklistInput}. */
-export interface ChecklistInputProps extends ComponentPropsWithoutRef<'input'> {
+interface ChecklistInputProps extends ComponentPropsWithoutRef<'input'> {
   /**
    * Native `change` of the field, fired when it loses the focus (the React
    * `onChange` prop follows every keystroke).

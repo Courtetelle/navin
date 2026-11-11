@@ -2,7 +2,7 @@ import type { CardsPen } from './cardsPen.ts';
 import { CARD_WIDTH, SERIF, font } from './cardsStyle.ts';
 
 /** Texts of the card header. */
-export interface HeaderTexts {
+interface HeaderTexts {
   /** Main title. */
   title: string;
   /** Line under the title. */

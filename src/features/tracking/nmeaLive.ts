@@ -4,7 +4,7 @@ import type { TrueWind } from './nmeaParser.ts';
 import { nmeaTrueWind } from './nmeaParser.ts';
 
 /** Latest instrument values. */
-export interface NmeaReadings {
+interface NmeaReadings {
   /** @default undefined */
   lat?: number;
   /** @default undefined */
@@ -38,10 +38,10 @@ export interface NmeaReadings {
 }
 
 /** A value kept in {@link NmeaReadings}. */
-export type NmeaKey = keyof NmeaReadings;
+type NmeaKey = keyof NmeaReadings;
 
 /** Connection state of the instruments. */
-export type NmeaStatus = 'off' | 'wait' | 'ok' | 'err';
+type NmeaStatus = 'off' | 'wait' | 'ok' | 'err';
 
 /** The instruments link: mutable, redrawn through {@link nmeaRevision}. */
 export const nmeaLink = {
@@ -57,7 +57,7 @@ export const nmeaLink = {
 };
 
 /** What the instruments screen shows of the link. */
-export interface NmeaLinkView {
+interface NmeaLinkView {
   on: boolean;
   status: NmeaStatus;
   error: string;

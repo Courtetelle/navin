@@ -14,7 +14,7 @@ import type { Boat } from '../../model/types.ts';
 import { toast, updateBoat } from '../../state/index.ts';
 
 /** Props of {@link BoatLists}. */
-export interface BoatListsProps {
+interface BoatListsProps {
   boat: Boat;
   /** Opens the editor of a list of the boat. */
   onBoatList: (boatId: string, list: string) => void;

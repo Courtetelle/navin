@@ -26,7 +26,7 @@ export function drawFieldIds(fields: readonly FieldDefinition[]): FieldIds {
 }
 
 /** The ids of a form, kept while the form is on screen. */
-export interface DrawnForm {
+interface DrawnForm {
   ids: FieldIds;
   /** The form left the screen: it draws again if it comes back. */
   released: boolean;

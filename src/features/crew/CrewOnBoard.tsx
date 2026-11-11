@@ -14,7 +14,7 @@ import { deleteMemberCard, openFiche } from './ficheNavigation.ts';
 import { showCrewPick } from './screen.ts';
 
 /** Props of {@link CrewOnBoard}. */
-export interface CrewOnBoardProps {
+interface CrewOnBoardProps {
   /** Crew line. */
   line: CrewMember;
   /** Its position. */

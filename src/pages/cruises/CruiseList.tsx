@@ -45,7 +45,7 @@ function summary({ meta, cruise }: CruiseLine): string {
 }
 
 /** Props of {@link CruiseList}. */
-export interface CruiseListProps {
+interface CruiseListProps {
   /** Mode shown. */
   mode: ModeKey;
   /** Navigations of that mode, newest first. */

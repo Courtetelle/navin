@@ -118,7 +118,7 @@ export function traceTitle(
 }
 
 /** What a sheet of a track shows. */
-export interface TraceSheet {
+interface TraceSheet {
   /** Duration in ms. */
   duration: number;
   nm: number;

@@ -1,8 +1,8 @@
 /** A plain JSON object read from storage. */
-export type StoredObject = Record<string, unknown>;
+type StoredObject = Record<string, unknown>;
 
 /** Called when a write fails (quota exceeded, storage blocked). */
-export type StoreFullHandler = (message: string) => void;
+type StoreFullHandler = (message: string) => void;
 
 /** Message shown when localStorage refuses a write. */
 export const STORE_FULL_MESSAGE =

@@ -6,7 +6,7 @@ import { stopGlide } from './boatFollow.ts';
 import { tracker, trkShowCourse } from './trackerState.ts';
 
 /** North up, or the course of the boat up. */
-export type MapOrientation = 'north' | 'course';
+type MapOrientation = 'north' | 'course';
 
 /** A map that can turn (leaflet-rotate). */
 type TurningMap = LeafletMap & {

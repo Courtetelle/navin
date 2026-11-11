@@ -18,7 +18,7 @@ import { prepDepart } from './prepPicks.ts';
 import type { PrepFlow } from './prepTypes.ts';
 
 /** What the page adds to the steps of the nav bar. */
-export interface PrepStepsOptions {
+interface PrepStepsOptions {
   /**
    * The page holds the « Départ » button: ✔ of the nav bar triggers it.
    * @default false

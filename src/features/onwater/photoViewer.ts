@@ -15,7 +15,7 @@ export interface PhotoViewItem {
 }
 
 /** The series shown full screen. */
-export interface PhotoViewState {
+interface PhotoViewState {
   items: PhotoViewItem[];
   index: number;
 }

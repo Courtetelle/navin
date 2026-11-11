@@ -129,7 +129,7 @@ export function daysWithData(
 }
 
 /** A navigation leg from a "Départ" entry to the next "Arrivée". */
-export interface NavLeg {
+interface NavLeg {
   dep: Entry;
   arr: Entry;
 }
@@ -155,7 +155,7 @@ function navLegs(cruise: Cruise | null = data.cruise.value): NavLeg[] {
 }
 
 /** Navigation of one day: duration, miles and the legs overlapping it. */
-export interface DayNavigation {
+interface DayNavigation {
   ms: number;
   nm: number;
   legs: Array<NavLeg & { ms: number; dist: number }>;

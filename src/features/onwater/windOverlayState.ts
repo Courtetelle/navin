@@ -37,7 +37,7 @@ export interface WindFlash {
 }
 
 /** Content of the wind bubble (legacy `windPopShow`). */
-export interface WindPopupContent {
+interface WindPopupContent {
   /** Beaufort force. */
   bf: number;
   /** Wind text, e.g. `18 nd en rafales`. */

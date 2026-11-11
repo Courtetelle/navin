@@ -5,7 +5,7 @@ import { telOf } from '../../lib/phone.ts';
 import type { CallItem, ContactItem } from './contacts.ts';
 
 /** Props of {@link ContactButtons}. */
-export interface ContactButtonsProps {
+interface ContactButtonsProps {
   /** Items of {@link contactItems}. */
   items: readonly ContactItem[];
 }

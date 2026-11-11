@@ -28,7 +28,7 @@ import { store } from '../../storage/store.ts';
 const BUILT_IN = '🗺 Cartes intégrées (sans réseau) : ';
 
 /** Props of {@link MapExtras}. */
-export interface MapExtrasProps {
+interface MapExtrasProps {
   /** Day shown, `null` for the whole cruise. */
   day: string | null;
   /** Draw the screen again. */

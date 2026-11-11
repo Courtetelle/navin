@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
 /** Phases of a protected choice. */
-export type CyclePhase = 'idle' | 'asking' | 'done';
+type CyclePhase = 'idle' | 'asking' | 'done';
 
 /** What the long press action can do with the display. */
-export interface CycleDisplay {
+interface CycleDisplay {
   /** Back to the normal display. */
   restore: () => void;
   /** Keep the confirmation for `ms`, then restore. */
@@ -12,7 +12,7 @@ export interface CycleDisplay {
 }
 
 /** Handlers and phase returned by {@link useCycleAsk}. */
-export interface CycleAsk extends CycleDisplay {
+interface CycleAsk extends CycleDisplay {
   phase: CyclePhase;
   /** Show the question for 4 s. */
   ask: () => void;

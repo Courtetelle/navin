@@ -30,7 +30,7 @@ export interface NavigationEvent {
 }
 
 /** Called around every `go`. */
-export type NavigationListener = (event: NavigationEvent) => void;
+type NavigationListener = (event: NavigationEvent) => void;
 
 /** The page shown and its argument; every `go` creates a new one (new id). */
 export const navigation = signal<Navigation>({

@@ -6,7 +6,7 @@ import type { FieldDefinition } from '../../../model/field.ts';
 import { toast } from '../../../state/index.ts';
 
 /** State and handlers of a protected input. */
-export interface FieldLock {
+interface FieldLock {
   readOnly: boolean;
   /** Classes of the input. */
   classes: string[];

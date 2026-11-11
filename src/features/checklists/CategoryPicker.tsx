@@ -8,7 +8,7 @@ import { allCkCats, toast } from '../../state/index.ts';
 import { ChecklistInput } from './ChecklistInput.tsx';
 
 /** Props of {@link CategoryPicker}. */
-export interface CategoryPickerProps {
+interface CategoryPickerProps {
   /** Categories chosen. */
   selected: readonly string[];
   /** Receives the new selection. */

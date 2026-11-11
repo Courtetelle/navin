@@ -14,7 +14,7 @@ import { PositionEntry } from './PositionEntry.tsx';
 import { TextEntry } from './TextEntry.tsx';
 
 /** Props of {@link EntryField}. */
-export interface EntryFieldProps {
+interface EntryFieldProps {
   field: FieldDefinition;
   /** Hidden by the propulsion state (no sails under engine). */
   hidden: boolean;

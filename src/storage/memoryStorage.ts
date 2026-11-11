@@ -1,5 +1,5 @@
 /** Options of {@link createMemoryStorage}. */
-export interface MemoryStorageOptions {
+interface MemoryStorageOptions {
   /**
    * Maximum total size (sum of key and value lengths); a write beyond it throws like a full localStorage.
    * @default Infinity

@@ -10,7 +10,7 @@ import { ensureMobLogs } from './mobLog.ts';
 import { sosExEnd, sosExOn } from './sosExercise.ts';
 
 /** Props of {@link SosEndButton}. */
-export interface SosEndButtonProps {
+interface SosEndButtonProps {
   /** Redraws the page a few seconds after the end (legacy `VIEWS[view]()`). */
   onEnded: () => void;
 }

@@ -8,7 +8,7 @@ import { currentTrack } from './trackStats.ts';
 import { simulatedPins, tracker, trkPin } from './trackerState.ts';
 
 /** A logbook point at the last GPS point of the recording. */
-export interface LastPoint {
+interface LastPoint {
   point: { lat: number; lon: number };
   lochBase: number;
   event: TrackEvent;

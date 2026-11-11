@@ -7,7 +7,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { compassPoint } from './liveText.ts';
 
 /** Props of {@link SeaBlock}. */
-export interface SeaBlockProps {
+interface SeaBlockProps {
   lat: number;
   lon: number;
 }

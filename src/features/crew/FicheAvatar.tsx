@@ -9,7 +9,7 @@ import { photosOf } from './ficheRecord.ts';
 import type { FicheRecord } from './useFicheRecord.ts';
 
 /** Props of {@link FicheAvatar}. */
-export interface FicheAvatarProps {
+interface FicheAvatarProps {
   /** The card. */
   record: FicheRecord;
 }

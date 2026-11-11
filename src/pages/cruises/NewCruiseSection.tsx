@@ -45,7 +45,7 @@ const WORDS: Readonly<Record<ModeKey, string>> = {
   lacc: 'croisière sur le lac',
 };
 /** Props of {@link NewCruiseSection}. */
-export interface NewCruiseSectionProps {
+interface NewCruiseSectionProps {
   /** Mode of the new navigation. */
   mode: ModeKey;
   /** Run a choice that redraws the screen. */

@@ -6,7 +6,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { ageText, compassPoint, windColors } from './liveText.ts';
 
 /** Props of {@link StationList}. */
-export interface StationListProps {
+interface StationListProps {
   stations: readonly LiveStation[];
   /** Wind the colours follow, `'gust'` or `'avg'`. */
   basis: string;

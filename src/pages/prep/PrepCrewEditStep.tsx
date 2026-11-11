@@ -20,7 +20,7 @@ import type { PrepStepProps } from './PrepFirstSteps.tsx';
 import { PrepNav } from './PrepNav.tsx';
 
 /** Props of {@link PrepCrewEditStep}. */
-export interface PrepCrewEditStepProps extends PrepStepProps {
+interface PrepCrewEditStepProps extends PrepStepProps {
   /** Crew being composed. */
   draft: CrewDraft;
 }

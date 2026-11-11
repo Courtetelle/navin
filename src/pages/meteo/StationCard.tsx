@@ -12,7 +12,7 @@ import { WindTrendChart } from './WindTrendChart.tsx';
 import { ageText, compassPoint, forceText, windColors } from './liveText.ts';
 
 /** Props of {@link StationCard}. */
-export interface StationCardProps {
+interface StationCardProps {
   station: LiveStation;
   /** Wind the colour follows, `'gust'` or `'avg'`. */
   basis: string;

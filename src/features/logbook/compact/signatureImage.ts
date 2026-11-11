@@ -41,7 +41,7 @@ export function drawStrokes(
 }
 
 /** Box around a signature, in pixels of the full image. */
-export interface SignatureCrop {
+interface SignatureCrop {
   x0: number;
   y0: number;
   x1: number;

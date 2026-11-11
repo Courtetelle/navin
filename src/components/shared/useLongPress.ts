@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { buzz } from '../../lib/dom.ts';
 
 /** Handlers and state returned by {@link useLongPress}. */
-export interface LongPress {
+interface LongPress {
   /** The element was just long-pressed (class `lp-hit` for 300 ms). */
   hit: boolean;
   /** Spread on the element. */

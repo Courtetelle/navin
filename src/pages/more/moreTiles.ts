@@ -2,7 +2,7 @@ import { checklistSub } from '../../features/checklists/index.ts';
 import { hasAboard, isLake, sosLogsCount, state } from '../../state/index.ts';
 
 /** One tile of the data menu. */
-export interface MoreTile {
+interface MoreTile {
   /** View opened, and key of the tile in the learnt order. */
   key: string;
   /** Main text. */

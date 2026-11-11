@@ -16,7 +16,7 @@ import {
 import { keepCrew, newPlace, placeText } from './newCruiseForm.ts';
 
 /** What the form of a new navigation decided. */
-export interface NewCruiseChoices {
+interface NewCruiseChoices {
   /** Mode of the navigation. */
   mode: ModeKey;
   /** Boat of a lake outing. */

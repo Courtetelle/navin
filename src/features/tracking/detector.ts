@@ -37,7 +37,7 @@ export interface TrackEvent {
 }
 
 /** Detector options (legacy `newDetector` argument). */
-export interface DetectorOptions {
+interface DetectorOptions {
   /** Lasting course change (°) that makes a key point. */
   turn: number;
   /** Minutes between two periodic points. */

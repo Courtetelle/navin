@@ -31,7 +31,7 @@ import {
 } from './SosSections.tsx';
 
 /** Props of {@link SosAll}. */
-export interface SosAllProps {
+interface SosAllProps {
   onScript: (kind: SosKind) => void;
   /** Redraws this screen. */
   onRedraw: () => void;

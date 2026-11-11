@@ -19,7 +19,7 @@ import {
 } from './weatherLogic.ts';
 
 /** Props of {@link WeatherNowBlock}. */
-export interface WeatherNowBlockProps {
+interface WeatherNowBlockProps {
   /** Weather stored in today's sheet, if any. */
   weather: WeatherNow | null | undefined;
   /**

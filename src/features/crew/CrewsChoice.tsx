@@ -14,7 +14,7 @@ import {
 import { showCrewsEdit } from './screen.ts';
 
 /** Props of {@link CrewsChoice}. */
-export interface CrewsChoiceProps {
+interface CrewsChoiceProps {
   /** Saved composition that was changed. */
   base: CrewSet;
   /** The user tried to leave without choosing. */

@@ -17,7 +17,7 @@ import type { LogEvent } from '../../model/types.ts';
 import { deliver, mobLogs, state } from '../../state/index.ts';
 
 /** Props of {@link MobHistory}. */
-export interface MobHistoryProps {
+interface MobHistoryProps {
   /** Open log, or `null`. */
   log: MobLogRecord | null;
 }

@@ -16,7 +16,7 @@ export interface DocumentPicture {
 }
 
 /** Props of {@link DossierPrint}. */
-export interface DossierPrintProps {
+interface DossierPrintProps {
   /** Boat. */
   boat: Boat;
   /** Photos of its documents. */

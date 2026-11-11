@@ -5,7 +5,7 @@ import { BOAT_SECTIONS, boatSections } from '../../model/boatSheet.ts';
 import type { Boat } from '../../model/types.ts';
 
 /** One line of the flat list of a boat sheet: a section title or a label. */
-export interface LabelLine {
+interface LabelLine {
   /**
    * Section title.
    * @default undefined

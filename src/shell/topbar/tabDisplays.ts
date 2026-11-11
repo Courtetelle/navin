@@ -28,7 +28,7 @@ export interface TabDisplay {
 }
 
 /** Actions of other domains the top menus trigger. */
-export interface TopMenuDomainActions {
+interface TopMenuDomainActions {
   /** Start the step by step PréP (prep.js:385). */
   prepStart: () => void;
   /** Start a track at once (prep.js:109). */

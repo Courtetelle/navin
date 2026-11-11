@@ -4,7 +4,7 @@
  * `scripts/shore/build_shore.py`). A wind station there says little of the
  * wind on the water.
  */
-export interface ShoreGrid {
+interface ShoreGrid {
   perDeg: number;
   lon0: number;
   lat0: number;
