@@ -18,6 +18,7 @@ import { marksRedraw } from './marksDraw.ts';
 import { bearingText, relativeHtml } from './relativeText.ts';
 import { rulerToPoint } from './rulerTool.ts';
 import { shoreNoteAt } from './shoreBands.ts';
+import { setFollow, tracker } from './trackerState.ts';
 import { areaNotesAt } from './vectorLayers.ts';
 
 /** A point of the map, as the menus speak of it. */
@@ -61,8 +62,8 @@ export function longPressDone(): void {
  * A short tap on the map lays a cross on the point: four lines of 2 cm, not
  * meeting in the middle, a logo at the end of each (mark, weather, Go To,
  * information). A logo opens its menu; a tap beside takes the cross away.
- * A finger sliding the map moves the map under the cross, which stays in its
- * place on the screen, to aim more precisely.
+ * The cross always stands in the middle of the map: the point touched comes
+ * under it, and a finger sliding the map moves the map behind it, to aim.
  * @param map - Leaflet map.
  */
 export function crossAttach(map: LeafletMap): void {
@@ -82,22 +83,20 @@ export function crossAttach(map: LeafletMap): void {
       map.closePopup();
       return;
     }
-    cross = layCross(map, event.latlng, (branch, at) => {
+    // The cross stands in the middle of the map: the point touched slides
+    // under it, and the map stops following the boat.
+    if (tracker.current?.map === map) setFollow(false);
+    cross = layCross(map, map.getCenter(), (branch, at) => {
       remove();
       openBranch(map, branch, at);
     });
+    map.panTo(event.latlng);
   });
   // The map slides under the cross: the cross keeps its place on screen.
-  let held: ReturnType<LeafletMap['latLngToContainerPoint']> | null = null;
-  map.on('dragstart', () => {
-    held = cross ? map.latLngToContainerPoint(cross.getLatLng()) : null;
-  });
-  // Also while the map glides on after the finger left it.
-  map.on('move', () => {
-    if (cross && held) cross.setLatLng(map.containerPointToLatLng(held));
-  });
-  map.on('moveend', () => {
-    held = null;
+  // Whatever moves the map (finger, zoom, glide), the cross stays in its
+  // middle: the map slides behind it.
+  map.on('move zoom', () => {
+    cross?.setLatLng(map.getCenter());
   });
   map.on('unload', remove);
 }
