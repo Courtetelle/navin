@@ -24,6 +24,11 @@ import { setMapWatch } from '../../features/map/mapWatch.ts';
 import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
 import { showPendingPlace } from '../../features/map/placeTarget.ts';
 import { recenterAfterDrag } from '../../features/map/recenterAfterDrag.ts';
+import {
+  SWISS_BOX,
+  addRegional,
+  boxesMeet,
+} from '../../features/map/regionalLayers.ts';
 import { addRulerControl } from '../../features/map/rulerTool.ts';
 import { SEA_ZOOM, seaCenter } from '../../features/map/seaCenter.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
@@ -93,14 +98,13 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   seamark.addTo(map);
   const layers = L.control
     .layers(
-      {
-        'Plan OpenStreetMap': osm,
-        'Carte nationale suisse': swiss,
-      },
+      { 'Plan OpenStreetMap': osm },
       { 'Balisage OpenSeaMap': seamark },
       { position: 'topright' },
     )
     .addTo(map);
+  // The Swiss map only in the menu over Switzerland.
+  addRegional(map, layers, swiss, 'Carte nationale suisse', SWISS_BOX, true);
   let swissAdded = false;
   handle.addSwiss = () => {
     if (swissAdded) return;
@@ -108,6 +112,17 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     void addLemanVector(map, layers, osm);
   };
   if (useSwiss) handle.addSwiss();
+  // The map brought over Switzerland by the fingers gets its Swiss layers.
+  map.on('moveend', () => {
+    const bounds = map.getBounds();
+    const view = {
+      s: bounds.getSouth(),
+      n: bounds.getNorth(),
+      w: bounds.getWest(),
+      e: bounds.getEast(),
+    };
+    if (boxesMeet(view, SWISS_BOX)) handle.addSwiss?.();
+  });
   keepTilesFilled(map, [osm, swiss]);
   void addOfflineMaps(map, layers, osm);
   addFullscreenControl(map);

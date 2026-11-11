@@ -21,6 +21,7 @@ import {
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
 import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
+import { SWISS_BOX, addRegional } from '../../features/map/regionalLayers.ts';
 import { addRulerControl } from '../../features/map/rulerTool.ts';
 import { SEA_ZOOM, seaCenter } from '../../features/map/seaCenter.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
@@ -96,14 +97,13 @@ export function buildJournalMap(
   seamark.addTo(map);
   const layers = L.control
     .layers(
-      {
-        'Plan OpenStreetMap': osm,
-        'Carte nationale suisse': swiss,
-      },
+      { 'Plan OpenStreetMap': osm },
       { 'Balisage OpenSeaMap': seamark },
       { position: 'topright' },
     )
     .addTo(map);
+  // The Swiss map only in the menu over Switzerland.
+  addRegional(map, layers, swiss, 'Carte nationale suisse', SWISS_BOX, true);
   if (useSwiss) void addLemanVector(map, layers, osm);
   keepTilesFilled(map, [osm, swiss]);
   void addOfflineMaps(map, layers, osm);

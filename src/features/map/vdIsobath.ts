@@ -4,6 +4,7 @@ import { store } from '../../storage/store.ts';
 
 import { leaflet } from './leaflet.ts';
 import { isMapLive } from './mapExtras.ts';
+import { LEMAN_BOX, addRegional } from './regionalLayers.ts';
 
 /** A layer of the Vaud WMS. */
 export interface VdLayer {
@@ -71,7 +72,7 @@ export async function addVdIsobath(
     opacity: 0.85,
     attribution: '© État de Vaud',
   });
-  layersControl.addOverlay(wms, 'Isobathes (canton de Vaud)');
+  addRegional(map, layersControl, wms, 'Isobathes (canton de Vaud)', LEMAN_BOX);
 }
 
 function depthLayers(xml: string): VdLayer[] {

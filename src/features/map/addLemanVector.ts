@@ -1,4 +1,4 @@
-import type { Control, GridLayer, Map as LeafletMap } from 'leaflet';
+import type { Control, GridLayer, Layer, Map as LeafletMap } from 'leaflet';
 
 import { bathLayer } from './bathLayer.ts';
 import { BATHY_TILES, SWISS_BOUNDS } from './constants.ts';
@@ -10,6 +10,7 @@ import { lemanFullIsobaths, lemanIsobaths } from './lemanIsobaths.ts';
 import type { LemanVector } from './lemanVector.ts';
 import { lemanVecLoad } from './lemanVector.ts';
 import { isMapLive } from './mapExtras.ts';
+import { LEMAN_BOX, SWISS_BOX, addRegional } from './regionalLayers.ts';
 import { newShoreBands } from './shoreBands.ts';
 import { addVdIsobath } from './vdIsobath.ts';
 import { lemanVecLayer } from './vectorLayers.ts';
@@ -41,24 +42,26 @@ export async function addLemanVector(
     opacity: 0.6,
     attribution: '© swisstopo swissBATHY3D',
   });
-  layersControl.addOverlay(bathy, 'Relief du fond (swissBATHY3D)');
-  layersControl.addOverlay(newLemanAxesLayer(), 'Axes de position du Léman');
+  // Each entry only in the menu while its area is on screen.
+  const swissOverlay = (layer: Layer, name: string) =>
+    addRegional(map, layersControl, layer, name, SWISS_BOX);
+  const lemanOverlay = (layer: Layer, name: string) =>
+    addRegional(map, layersControl, layer, name, LEMAN_BOX);
+  swissOverlay(bathy, 'Relief du fond (swissBATHY3D)');
+  lemanOverlay(newLemanAxesLayer(), 'Axes de position du Léman');
   const vector = await lemanVecLoad();
   if (!isMapLive(map)) return;
   const device = await isobathLoad();
   const lines = await lemanIsobaths(device);
   if (lines.length > 0 && isMapLive(map)) {
     const layer = newIsobathLayer(lines);
-    layersControl.addOverlay(
-      layer,
-      'Isobathes du Léman, jusqu’à 20 m (swissBATHY3D)',
-    );
+    lemanOverlay(layer, 'Isobathes du Léman, jusqu’à 20 m (swissBATHY3D)');
     layer.addTo(map);
     const full = await lemanFullIsobaths(device);
     if (isMapLive(map)) {
-      layersControl.addOverlay(
+      lemanOverlay(
         newIsobathLayer(full),
-        'Isobathes complètes, 1 à 300 m (swissBATHY3D)',
+        'Isobathes complètes du Léman, 1 à 300 m (swissBATHY3D)',
       );
     }
   }
@@ -70,21 +73,18 @@ export async function addLemanVector(
   );
   if (vector?.shore?.length) {
     // Off at start: the 300 m limit is already on the map; the bands are offered.
-    layersControl.addOverlay(
+    lemanOverlay(
       newShoreBands(vector.shore),
       'Zones 150 m et 300 m des rives (bandes)',
     );
   }
   const bath = bathLayer(vector);
   if (bath) {
-    layersControl.addOverlay(
-      bath,
-      'Baignade interdite (100 m des ports et débarcadères)',
-    );
+    lemanOverlay(bath, 'Baignade interdite (100 m des ports et débarcadères)');
     bath.addTo(map);
   }
   if (!buoyage) return;
-  layersControl.addOverlay(buoyage, 'Balises et ports (hors ligne)');
+  lemanOverlay(buoyage, 'Balises et ports du Léman (hors ligne)');
   showBuoyage = () => {
     if (isMapLive(map)) buoyage.addTo(map);
   };
