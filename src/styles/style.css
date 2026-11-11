@@ -10038,6 +10038,11 @@ body.nav-search:not(.trk-mode) #searchBtn {
     width: 40px;
     height: 40px;
   }
+  /* The weather: a little bigger, its cloud fills the button */
+  html body .rail-btn.rail-btn .rail-svg.rail-wx {
+    width: 50px;
+    height: 46px;
+  }
   html body .rail-btn.rail-btn .tb-ico {
     height: 44px;
   }
