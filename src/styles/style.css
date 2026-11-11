@@ -9762,9 +9762,9 @@ body.nav-search:not(.trk-mode) #searchBtn {
     right: 10px !important;
     height: 52px !important;
   }
-  /* data, short like the magnifier, under VHF / phone in the right column */
+  /* data, short like the magnifier, right under NavIn */
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data {
-    top: calc(256px + env(safe-area-inset-top)) !important;
+    top: calc(132px + env(safe-area-inset-top)) !important;
     left: auto !important;
     right: 10px !important;
     height: 52px !important;
@@ -9781,7 +9781,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     height: 52px !important;
   }
   html body #searchBtn {
-    top: calc(132px + env(safe-area-inset-top)) !important;
+    top: calc(194px + env(safe-area-inset-top)) !important;
     right: 10px !important;
     left: auto !important;
     bottom: auto !important;
@@ -9809,7 +9809,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     width: 96px;
   }
   html body .side-rail-right {
-    top: calc(194px + env(safe-area-inset-top));
+    top: calc(256px + env(safe-area-inset-top));
   }
   /* The boat button of the left column replaces the arrow of the map */
   html body .trk-full .map-locate-btn {
@@ -9819,10 +9819,20 @@ body.nav-search:not(.trk-mode) #searchBtn {
     left: 116px;
     right: 140px;
   }
-  /* SOS keeps its size, wider than the column, at the bottom right corner. */
+  /* SOS the size of the other buttons, at the bottom right corner, its
+     letters tall and narrow almost to the edges. */
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
-    width: 120px !important;
-    right: 6px !important;
+    width: 96px !important;
+    right: 10px !important;
+    overflow: hidden;
+  }
+  html body header.topbar nav.topnav .top-tab.tab-sos .tb-sos {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  html body header.topbar nav.topnav .top-tab.tab-sos .tb-sos text {
+    font-size: 70px;
+    transform: translateY(3px);
   }
   html body .rail-btn {
     width: 96px;
@@ -10058,10 +10068,6 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 .rail-depart .rail-hidden {
   visibility: hidden;
-}
-.rail-data-place {
-  height: 52px;
-  flex: none;
 }
 
 /* Tablet columns: every button 52 px high, as the magnifier */

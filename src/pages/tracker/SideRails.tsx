@@ -138,12 +138,7 @@ export function SideRails() {
               <PinButton />
             </>
           ) : null}
-          {side === 'right' ? (
-            <>
-              <CommButton />
-              <div className="rail-data-place" aria-hidden="true" />
-            </>
-          ) : null}
+          {side === 'right' ? <CommButton /> : null}
           {rails[side].slice(0, slotsOf(side)).map((key, index) => {
             const entry = key ? known.get(key) : undefined;
             return entry ? (
