@@ -33,6 +33,6 @@ export function mobLogText(
  * @param end - ISO end.
  * @returns Rounded minutes.
  */
-export function minutesBetween(start: string, end: string): number {
+function minutesBetween(start: string, end: string): number {
   return Math.round((Date.parse(end) - Date.parse(start)) / 60_000);
 }

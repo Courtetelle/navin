@@ -25,7 +25,7 @@ export const LEMAN_FR_CONTACTS = [
 ].join('\n');
 
 /** Approximate border in the middle of Lake Geneva, Hermance to St-Gingolph: `[lon, lat]`. */
-export const LEMAN_BORDER: ReadonlyArray<readonly [number, number]> = [
+const LEMAN_BORDER: ReadonlyArray<readonly [number, number]> = [
   [6.24, 46.302],
   [6.3, 46.372],
   [6.42, 46.42],
@@ -57,14 +57,13 @@ export function inFrenchLeman(
 }
 
 /** Inland lake boxes `[latMin, latMax, lonMin, lonMax]`; elsewhere is the sea. */
-export const INLAND: ReadonlyArray<readonly [number, number, number, number]> =
-  [
-    [45.75, 47.9, 5.85, 10.6],
-    [45.4, 46.05, 5.6, 6.5],
-    [45.4, 46.25, 8.4, 9.4],
-    [45.5, 45.95, 10.45, 10.95],
-    [47.4, 47.9, 8.9, 9.85],
-  ];
+const INLAND: ReadonlyArray<readonly [number, number, number, number]> = [
+  [45.75, 47.9, 5.85, 10.6],
+  [45.4, 46.05, 5.6, 6.5],
+  [45.4, 46.25, 8.4, 9.4],
+  [45.5, 45.95, 10.45, 10.95],
+  [47.4, 47.9, 8.9, 9.85],
+];
 
 /**
  * The position is on an inland lake (legacy `inInland`).

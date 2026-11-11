@@ -22,25 +22,6 @@ import { prepTarifApply, prepTarifs } from './prepTarif.ts';
 import { prepFlow, updatePrepFlow } from './prepTypes.ts';
 
 /**
- * Lake or sea chosen (quick navigation being completed).
- * @param type - `lac` or `mer`.
- */
-export function pickType(type: string): void {
-  buzz();
-  updatePrepFlow((prep) => {
-    prep.type = type;
-    if (type === 'mer') {
-      prep.boatId = null;
-      prep.purpose = null;
-      prep.sub = null;
-    } else {
-      prep.sub = 'purpose';
-    }
-  });
-  if (type === 'mer') prepGo(1);
-}
-
-/**
  * A lake path chosen: resumed as it was left, or started from scratch.
  * @param purpose - `Entraînement`, `Location` or `Invitation`.
  */

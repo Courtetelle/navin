@@ -23,7 +23,7 @@ export function sailColCss(color: unknown): string {
  * @param description - Description.
  * @returns The joined text.
  */
-export function sailJoin(color: unknown, description: unknown): string {
+function sailJoin(color: unknown, description: unknown): string {
   return [color, description]
     .map((part) => text(part))
     .filter(Boolean)
@@ -59,7 +59,7 @@ export function sailLineTexts(
  * @param values - Boat sheet values.
  * @returns `[name, description]` pairs.
  */
-export function sailDescs(values: Values): Array<[string, string]> {
+function sailDescs(values: Values): Array<[string, string]> {
   const out: Array<[string, string]> = [];
   const main = sailJoin(values.gvColor, values.gvDesc);
   if (main) out.push(['Grand-voile', main]);
@@ -84,7 +84,7 @@ export function sailDescs(values: Values): Array<[string, string]> {
  * @param lang - `'fr'` or `'en'`.
  * @returns e.g. `mainsail (white), genoa (blue)`.
  */
-export function sailsTxt(values: Values, lang: string): string {
+function sailsTxt(values: Values, lang: string): string {
   return sailDescs(values)
     .map(([name, description]) =>
       lang === 'fr'

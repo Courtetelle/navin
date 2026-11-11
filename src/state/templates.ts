@@ -68,7 +68,7 @@ export function loadUiEdits(): void {
 /**
  * Persist the button customizations with their stamp (legacy `saveUiEdits`).
  */
-export function saveUiEdits(): void {
+function saveUiEdits(): void {
   store.set('ldb.uiEdits', data.uiEdits.value);
   store.set('ldb.uiEdits.at', new Date().toISOString());
 }

@@ -4,7 +4,7 @@ import type { LxTheme } from './types.ts';
 export const CARD_WIDTH = 1080;
 
 /** Sans-serif stack of the cards. */
-export const SANS =
+const SANS =
   '-apple-system, "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif';
 /** Serif stack of the cards. */
 export const SERIF = 'Georgia, "Times New Roman", serif';

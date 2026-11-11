@@ -44,7 +44,7 @@ let positionWatch: number | null = null;
  * Follow my position while a Go to or a menu needs it (legacy `wantPos`).
  * @param on - Follow it.
  */
-export function wantPos(on: boolean): void {
+function wantPos(on: boolean): void {
   if (on && positionWatch === null && navigator.geolocation) {
     positionWatch = navigator.geolocation.watchPosition(
       (position) => {

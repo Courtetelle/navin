@@ -6,15 +6,7 @@ import type { GeoBox, LatLngPair } from './constants.ts';
 export const ZONE_BASE =
   'https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png';
 /** Tiles per layer and per zone, to stay reasonable. */
-export const ZONE_MAX = 8000;
-/** Levels of detail offered: zoom and label. */
-export const ZONE_ZOOMS: ReadonlyArray<readonly [number, string]> = [
-  [12, 'Large'],
-  [13, 'Côtier'],
-  [14, 'Détaillé'],
-  [15, 'Très détaillé'],
-];
-
+const ZONE_MAX = 8000;
 /** A tile: zoom, column, row. */
 export type TileXY = [number, number, number];
 
@@ -82,20 +74,6 @@ export function zoneUrl(template: string, [z, x, y]: TileXY): string {
     .replace('{z}', String(z))
     .replace('{x}', String(x))
     .replace('{y}', String(y));
-}
-
-/**
- * The offline zone holding a position (legacy `zoneAt`).
- * @param position - `[lat, lon]`, or nothing.
- * @returns The zone, if any.
- */
-export function zoneAt(position: LatLngPair | null): Zone | undefined {
-  if (!position) return undefined;
-  const [lat, lon] = position;
-  return zoneList().find(
-    (zone) =>
-      lat >= zone.b.s && lat <= zone.b.n && lon >= zone.b.w && lon <= zone.b.e,
-  );
 }
 
 /**

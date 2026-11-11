@@ -75,7 +75,7 @@ export interface Detector {
 }
 
 /** Span of the sliding window of positions the course is read over. */
-export const WINDOW_MS = 90_000;
+const WINDOW_MS = 90_000;
 
 /**
  * A fresh detector (legacy `newDetector`).

@@ -37,7 +37,7 @@ export function knOk(knots: unknown): boolean {
  * @param knots - Speed.
  * @returns The number.
  */
-export function knNum(knots: unknown): number {
+function knNum(knots: unknown): number {
   return Number(stringOf(knots).replace(',', '.'));
 }
 

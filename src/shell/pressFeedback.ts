@@ -5,7 +5,7 @@
  */
 
 /** The buttons that show their press. */
-export const PRESS_TARGETS = [
+const PRESS_TARGETS = [
   '.rail-btn',
   '#gearBtn',
   '#searchBtn',

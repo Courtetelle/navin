@@ -52,7 +52,7 @@ export function updateOwner(
  * Copy the lists of the open cruise to the sea template (legacy `syncSeaTpl`).
  * @param mode - Mode of the lists: nothing happens outside `mer`.
  */
-export function syncSeaTpl(mode: ModeKey): void {
+function syncSeaTpl(mode: ModeKey): void {
   const cruise = state.data.cruise.value as ChecklistOwnerRecord | null;
   if (!cruise || mode !== 'mer') return;
   updateSeaTpl((template) => {

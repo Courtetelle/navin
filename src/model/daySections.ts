@@ -10,7 +10,7 @@ export const DAY_INFO_KEYS: readonly string[] = [
 ];
 
 /** Daily controls of the sea day sheet. */
-export const DAY_CONTROLS: readonly string[] = [
+const DAY_CONTROLS: readonly string[] = [
   'Eau douce relevée',
   'Batteries, frigo off',
   'VHF ON, squelch',

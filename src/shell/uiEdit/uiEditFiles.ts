@@ -8,7 +8,7 @@ import { go } from '../router.ts';
  * The export file of the edits (legacy `uiEditExportData`).
  * @returns The JSON object.
  */
-export function uiEditExportData(): Record<string, unknown> {
+function uiEditExportData(): Record<string, unknown> {
   return {
     app: 'livre-de-bord',
     kind: 'ui-edits',

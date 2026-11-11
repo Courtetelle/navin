@@ -25,7 +25,7 @@ export function useCaptionLight(className: string): {
  * @param image - Loaded image.
  * @returns `true` for a light bottom (false when unreadable).
  */
-export function isBottomLight(image: HTMLImageElement): boolean {
+function isBottomLight(image: HTMLImageElement): boolean {
   try {
     const canvas = document.createElement('canvas');
     const width = 40;

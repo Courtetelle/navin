@@ -5,7 +5,7 @@ import { store } from '../../storage/store.ts';
 /** Screens whose sections never fold (input forms, SOS), nav.js:382. */
 export const FOLD_SKIP: readonly string[] = ['new', 'day', 'sheet', 'sos'];
 /** Screens whose sections start open (rescue pages), nav.js:383. */
-export const FOLD_OPEN_VIEWS: readonly string[] = ['sos', 'mob', 'soslogs'];
+const FOLD_OPEN_VIEWS: ReadonlySet<string> = new Set(['sos', 'mob', 'soslogs']);
 
 /** Folded state per `view|title` (`ldb.folds2`): 1 closed, 0 open. */
 export const folds = signal<Readonly<Record<string, number>>>(
@@ -31,7 +31,7 @@ export function foldKey(view: string, title: string): string {
  */
 export function isFolded(view: string, title: string): boolean {
   const stored = folds.value[foldKey(view, title)];
-  return stored === 1 || (stored == null && !FOLD_OPEN_VIEWS.includes(view));
+  return stored === 1 || (stored == null && !FOLD_OPEN_VIEWS.has(view));
 }
 
 /**

@@ -196,31 +196,3 @@ export function stringOf(value: unknown): string {
   if (typeof value === 'function') return '[function]';
   return String(value);
 }
-
-/** Local and UTC clock texts of a time (data of legacy `tzHtml`). */
-export interface TimeParts {
-  /** ISO time (`data-t`). */
-  iso: string;
-  /** Local `HH:MM` or `HH:MM:SS`. */
-  local: string;
-  /** UTC `HH:MM` or `HH:MM:SS`. */
-  utc: string;
-}
-
-/**
- * Texts of a time shown as UTC with a touch for the local time (legacy `tzHtml`):
- * `<time class="tz" data-t="{iso}" [data-s="1"]>{utc}<small>UTC</small></time>`, or with
- * `tzLocalOnly` `<time class="tz-loc">{local}</time>`.
- * @param value - Date or ISO time.
- * @param seconds - Include the seconds.
- * @returns The texts.
- */
-export function timeParts(
-  value: Date | string | number,
-  seconds = false,
-): TimeParts {
-  const date = value instanceof Date ? value : new Date(value);
-  const local = `${pad(date.getHours())}:${pad(date.getMinutes())}${seconds ? `:${pad(date.getSeconds())}` : ''}`;
-  const utc = `${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}${seconds ? `:${pad(date.getUTCSeconds())}` : ''}`;
-  return { iso: date.toISOString(), local, utc };
-}

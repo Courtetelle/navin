@@ -19,9 +19,6 @@ export const uiEditMode = signal(false);
 export const uiEditPick = signal(true);
 /** Button open in the editor, or null. */
 export const editorTarget = signal<EditorTarget | null>(null);
-/** Increases when edits change, to re-render the screen (legacy `uiRefresh`). */
-export const uiEditRevision = signal(0);
-
 /** Turn the label edit mode on (settings › ✎ Activer le mode édition). */
 export function startUiEditing(): void {
   uiEditPick.value = true;
@@ -77,7 +74,7 @@ function catchButton(event: Event): void {
  * @param button - The button element.
  * @returns The editor target.
  */
-export function targetOf(button: HTMLElement): EditorTarget {
+function targetOf(button: HTMLElement): EditorTarget {
   const declared = button.dataset.ueKey;
   if (declared) {
     return {

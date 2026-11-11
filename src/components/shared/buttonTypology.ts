@@ -1,5 +1,5 @@
 /** Screens of the data tab whose button rows are stacked (nav.js:1179). */
-export const DATA_VIEWS: readonly string[] = [
+const DATA_VIEWS: ReadonlySet<string> = new Set([
   'people',
   'crew',
   'crews',
@@ -23,7 +23,7 @@ export const DATA_VIEWS: readonly string[] = [
   'log',
   'day',
   'nmea',
-];
+]);
 
 const CHOICE_DATA = new Set([
   'data-sel',
@@ -88,7 +88,7 @@ export function rowTypology(
     (child) => new Set(child.className.split(/\s+/).filter(Boolean)),
   );
   let stacked = false;
-  if (DATA_VIEWS.includes(view) && dataRowApplies(children, classes)) {
+  if (DATA_VIEWS.has(view) && dataRowApplies(children, classes)) {
     stacked = true;
     for (const [index, child] of children.entries()) {
       const set = classes[index];

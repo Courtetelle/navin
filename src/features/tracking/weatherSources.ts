@@ -54,7 +54,7 @@ const dayCache = new Map<string, DayWeather>();
  * @param lon - Longitude.
  * @returns `true` inside the model area.
  */
-export function inSwissModel(lat: number, lon: number): boolean {
+function inSwissModel(lat: number, lon: number): boolean {
   return lat > 45.6 && lat < 48 && lon > 5.8 && lon < 10.7;
 }
 

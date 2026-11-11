@@ -91,7 +91,7 @@ export function identityOf(button: Element): {
  * @param button - The button element.
  * @returns The text.
  */
-export function directText(button: Element): string {
+function directText(button: Element): string {
   const parts: string[] = [];
   for (const node of button.childNodes) {
     if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {

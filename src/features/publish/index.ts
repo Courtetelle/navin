@@ -74,7 +74,7 @@
 export { cardsPng } from './cardsPng.ts';
 export { ListPublishRow } from './ListPublishRow.tsx';
 export type { ListPublishRowProps } from './ListPublishRow.tsx';
-export { PRINT_CSS_A4_PORTRAIT, printInHolder } from './printHolder.tsx';
+export { printInHolder } from './printHolder.tsx';
 export type { PrintInHolderOptions } from './printHolder.tsx';
 export { PubModal } from './PubModal.tsx';
 export type { PubModalProps } from './PubModal.tsx';

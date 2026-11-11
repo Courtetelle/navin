@@ -21,7 +21,7 @@ interface LatLon {
  * @param name - Place name.
  * @returns e.g. `du Bouveret`, `d’Évian`, `de Lausanne`.
  */
-export function ofPlace(name: string): string {
+function ofPlace(name: string): string {
   if (name.startsWith('Le ')) return `du ${name.slice(3)}`;
   if (name.startsWith('Les ')) return `des ${name.slice(4)}`;
   if (name.startsWith('La ')) return `de la ${name.slice(3)}`;

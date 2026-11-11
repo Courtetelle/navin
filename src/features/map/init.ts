@@ -1,4 +1,3 @@
-import { hasBodyClass } from '../../shell/bodyClass.ts';
 import { addNavigationListener } from '../../shell/router.ts';
 import { setTopMenuActions } from '../../shell/topbar/topMenuState.ts';
 import { addEscapeListener } from '../../shell/topbar/topTabGestures.ts';
@@ -6,7 +5,6 @@ import { addEscapeListener } from '../../shell/topbar/topTabGestures.ts';
 import { gotoTarget, resumeGoto } from './goto.ts';
 import { followGotoBar } from './gotoBarRoot.ts';
 import { autoLakes } from './lakes.ts';
-import { exitMapFull, onFullscreenChange } from './mapFull.ts';
 import { stopMapWatch } from './mapWatch.ts';
 import { closeNavPop } from './navPop.ts';
 import { navinScaleTap } from './navinScale.ts';
@@ -25,11 +23,9 @@ addNavigationListener(({ phase, to }) => {
   if (phase !== 'before') return;
   closeNavPop();
   drawTrkButtons();
-  if (hasBodyClass('map-full')) exitMapFull();
   if (to !== 'map' && to !== 'tracker') stopMapWatch();
 });
 addEscapeListener(closeNavPop);
-document.addEventListener('fullscreenchange', onFullscreenChange);
 followGotoBar();
 setTimeout(() => void autoLakes(), AUTO_LAKES_DELAY_MS);
 globalThis.addEventListener('online', () => {

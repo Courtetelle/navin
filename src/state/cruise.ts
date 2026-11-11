@@ -55,7 +55,7 @@ export function blankCruise(name: string, from?: Cruise | null): Cruise {
  * @param cruise - Cruise.
  * @returns `{ id, name, created, type, duree }`.
  */
-export function cruiseMeta(cruise: Cruise): CruiseMeta {
+function cruiseMeta(cruise: Cruise): CruiseMeta {
   return {
     id: cruise.id,
     name: cruise.info.name || 'Sans nom',
@@ -158,7 +158,7 @@ export function openCruise(id: string): boolean {
  * Delete the stored data of a cruise: photos, cruise, draft, track and trip keys.
  * @param id - Cruise id.
  */
-export function deleteCruiseData(id: string): void {
+function deleteCruiseData(id: string): void {
   const cruise = store.get<Cruise | null>(`ldb.cruise.${id}`, null);
   if (cruise?.photos) {
     for (const photo of cruise.photos) void delPhoto(photo.id);

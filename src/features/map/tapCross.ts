@@ -8,7 +8,7 @@ import type {
 import { buzz } from '../../lib/dom.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import { pinSvg } from '../../shell/topbar/tabIcons.ts';
-import { addMark, toast } from '../../state/index.ts';
+import { addMark, herePos, state, toast } from '../../state/index.ts';
 
 import { escapeHtml } from './escapeHtml.ts';
 import { wxNext } from './external.ts';
@@ -29,7 +29,7 @@ interface Spot {
 }
 
 /** The four branches of the cross, clockwise from the top. */
-export const CROSS_BRANCHES = ['mark', 'weather', 'goto', 'info'] as const;
+const CROSS_BRANCHES = ['mark', 'weather', 'goto', 'info'] as const;
 /** A branch of the cross. */
 export type CrossBranch = (typeof CROSS_BRANCHES)[number];
 
@@ -143,7 +143,7 @@ function layCross(
  * @param point - The point.
  * @returns The text of the message.
  */
-export function positionMessage(point: Spot): string {
+function positionMessage(point: Spot): string {
   const lat = point.lat.toFixed(5);
   const lon = point.lon.toFixed(5);
   return `Position : ${fmtPos(point)}\nhttps://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=15/${lat}/${lon}`;
@@ -174,7 +174,7 @@ function openBranch(map: LeafletMap, branch: CrossBranch, at: LatLng): void {
   } else if (branch === 'weather') {
     body = `<div class="lp-wx" id="lpWx">${navigator.onLine ? 'Prévision : recherche…' : 'Prévision : hors réseau'}</div><div class="lp-btns">${send}</div>`;
   } else if (branch === 'goto') {
-    body = `<div>🧭 Depuis le bateau : <span>${relativeHtml(point)}</span></div><div class="lp-btns"><button class="btn primary" data-lp="goto">🎯 Go to ce point</button>${send}</div>`;
+    body = `<div>🧭 Depuis le bateau : <span class="lp-rel">${relativeHtml(point)}</span></div><div class="lp-btns"><button class="btn primary" data-lp="goto">🎯 Go to ce point</button>${send}</div>`;
     rulerToPoint(map, at);
   } else {
     const depthText = depth
@@ -185,7 +185,7 @@ function openBranch(map: LeafletMap, branch: CrossBranch, at: LatLng): void {
       ...(shore ? [shore] : []),
       ...areaNotesAt(at.lat, at.lng),
     ].map((note) => `<div class="lp-shore">${note}</div>`);
-    body = `<div>🌊 Profondeur : ${depthText}</div><div>🧭 Depuis le bateau : <span>${relativeHtml(point)}</span></div>${notes.join('')}<div class="lp-btns">${send}</div>`;
+    body = `<div>🌊 Profondeur : ${depthText}</div><div>🧭 Depuis le bateau : <span class="lp-rel">${relativeHtml(point)}</span></div>${notes.join('')}<div class="lp-btns">${send}</div>`;
   }
   const popup = leaflet()
     .popup({
@@ -215,6 +215,32 @@ function openBranch(map: LeafletMap, branch: CrossBranch, at: LatLng): void {
     }
   });
   if (branch === 'weather' && navigator.onLine) showForecast(point);
+  if (branch === 'goto' || branch === 'info') askPosition(point);
+}
+
+/**
+ * Without a position of the boat, ask the GPS once, so the course and the
+ * distance from the boat replace « en attente du GPS ».
+ * @param point - The point of the menu.
+ */
+function askPosition(point: Spot): void {
+  if (herePos() || !('geolocation' in navigator)) return;
+  navigator.geolocation.getCurrentPosition(
+    ({ coords }) => {
+      state.view.myPos.value = {
+        lat: coords.latitude,
+        lon: coords.longitude,
+        sog: null,
+        cog: null,
+        t: Date.now(),
+      };
+      for (const shown of document.querySelectorAll('.lp-pop .lp-rel')) {
+        shown.innerHTML = relativeHtml(point);
+      }
+    },
+    () => undefined,
+    { maximumAge: 60_000, timeout: 15_000 },
+  );
 }
 
 const box = () => document.querySelector('#lpWx');

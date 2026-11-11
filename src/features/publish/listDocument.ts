@@ -8,7 +8,7 @@ import type {
 } from './types.ts';
 
 /** Subtitle of each list: what one element is. */
-export const KIND_SUBTITLES: Readonly<Record<ListKind, string>> = {
+const KIND_SUBTITLES: Readonly<Record<ListKind, string>> = {
   people: 'Fiche coéquipier·ère',
   crews: 'Équipage',
   boats: 'Fiche bateau',

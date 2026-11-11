@@ -7,7 +7,7 @@ import type { ViewName } from './routing.ts';
 type PageModule = Promise<{ default: PageComponent }>;
 
 /** Module loader of every screen (one folder per screen in `src/pages`). */
-export const pageLoaders: Record<ViewName, () => PageModule> = {
+const pageLoaders: Record<ViewName, () => PageModule> = {
   aboard: () =>
     import('../pages/aboard/AboardPage.tsx').then((module) => ({
       default: module.AboardPage,

@@ -21,7 +21,7 @@ const MF_NO_WIND_MS = 7 * 86_400_000;
 const OWM_LIST_MAX_AGE_MS = 86_400_000;
 const MF_LIST_MAX_AGE_MS = 30 * 86_400_000;
 /** A measurement older than this is not the wind of now. */
-export const STATION_MAX_AGE_MS = 40 * 60_000;
+const STATION_MAX_AGE_MS = 40 * 60_000;
 const KMH_TO_KN = 1 / 1.852;
 const MS_TO_KN = 3600 / 1852;
 /** Stations read at each check, the closest first. */

@@ -81,7 +81,7 @@ export function loadChecklistLibrary(): void {
  * Persist the checklist bases with their stamp (legacy `saveLib`).
  * @returns `true` when written.
  */
-export function saveLib(): boolean {
+function saveLib(): boolean {
   const written = store.set('ldb.ckLib', data.ckLib.value);
   store.set('ldb.ckLib.at', new Date().toISOString());
   return written;

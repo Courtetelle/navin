@@ -88,6 +88,7 @@ export function backupAll(): BackupPack {
     mob: store.get('ldb.mob2', null),
     mobMer: store.get('ldb.mob2mer', null),
     sosLogs: data.sosLogs.value,
+    // Kept for the format shared with the first app; no longer used.
     sosPwd: store.get('ldb.sosPwd', ''),
     errLog: store.get('ldb.errLog', []),
     mobAt: store.get('ldb.mob.at', ''),

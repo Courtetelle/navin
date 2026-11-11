@@ -28,7 +28,7 @@ let doneUntil = 0;
  * Context of the menus, read from the state.
  * @returns Screen, PréP, tracking and zone.
  */
-export function menuContext(): TopMenuContext {
+function menuContext(): TopMenuContext {
   const currentView = state.view.currentView.value;
   const prepActive = state.data.prep.value !== null;
   return {
@@ -170,7 +170,7 @@ export function armStop(): void {
 }
 
 /** Cancel an armed stop. */
-export function disarmStop(): void {
+function disarmStop(): void {
   clearTimeout(armTimer);
   tabDisplays.tracker.value = {
     ...tabDisplays.tracker.value,

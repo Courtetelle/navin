@@ -13,7 +13,7 @@ export const bodyClasses = signal<ReadonlySet<string>>(new Set());
  * @param className - Class name.
  * @param on - Hold it (`true`) or release it (`false`).
  */
-export function holdBodyClass(className: string, on: boolean): void {
+function holdBodyClass(className: string, on: boolean): void {
   const count = (counts.get(className) ?? 0) + (on ? 1 : -1);
   if (count > 0) counts.set(className, count);
   else counts.delete(className);

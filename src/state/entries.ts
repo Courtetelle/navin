@@ -139,7 +139,7 @@ export interface NavLeg {
  * @param cruise - Cruise (the open one by default).
  * @returns The legs.
  */
-export function navLegs(cruise: Cruise | null = data.cruise.value): NavLeg[] {
+function navLegs(cruise: Cruise | null = data.cruise.value): NavLeg[] {
   const legs: NavLeg[] = [];
   let departure: Entry | null = null;
   for (const entry of cruise?.entries ?? []) {

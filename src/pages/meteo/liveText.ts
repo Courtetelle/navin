@@ -1,4 +1,4 @@
-import type { LiveStation, MfTally } from '../../features/onwater/index.ts';
+import type { MfTally } from '../../features/onwater/index.ts';
 import {
   flashColor,
   flashInk,
@@ -67,15 +67,6 @@ export function windColors(knots: number): { color: string; ink: string } {
  */
 export function forceText(knots: number): string {
   return `${bft(knots)} Bf`;
-}
-
-/**
- * The stations sorted for the list: the closest first.
- * @param stations - Stations.
- * @returns A new array.
- */
-export function byDistance(stations: readonly LiveStation[]): LiveStation[] {
-  return stations.toSorted((a, b) => (a.km ?? 0) - (b.km ?? 0));
 }
 
 /**

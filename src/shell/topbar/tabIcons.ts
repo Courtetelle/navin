@@ -24,9 +24,6 @@ export const STOP_SVG =
 /** Legacy `SOS_SVG`. */
 export const SOS_SVG =
   '<svg class="tb-ico tb-sos" viewBox="0 0 100 52" aria-hidden="true"><text x="50" y="47.5" text-anchor="middle" font-size="60" font-weight="900" fill="#d0021b" stroke="#fff" stroke-width="3" paint-order="stroke" stroke-linejoin="round" font-family="Arial Black, Arial, Helvetica, sans-serif" textLength="96" lengthAdjust="spacingAndGlyphs">SOS</text></svg>';
-/** Legacy `DATA_SVG`. */
-export const DATA_SVG =
-  '<svg class="tb-ico tb-data" viewBox="0 0 60 40" aria-hidden="true"><path d="M30 8c-6-4-16-5-25-3v29c9-2 19-1 25 3z" fill="#fff" stroke="#0b3d91" stroke-width="2.2" stroke-linejoin="round"/><path d="M30 8c6-4 16-5 25-3v29c-9-2-19-1-25 3z" fill="#fff" stroke="#0b3d91" stroke-width="2.2" stroke-linejoin="round"/><path d="M30 8v29" stroke="#0b3d91" stroke-width="2"/><g stroke="#8aa3c7" stroke-width="1.4"><path d="M9 12h16M9 17h16M9 22h16M9 27h12"/></g><g stroke="#0b3d91" stroke-width="1.8" fill="none" stroke-linecap="round"><circle cx="43" cy="13" r="2"/><path d="M43 15v12M38.5 19h9M37 23c1 4 4 5 6 5s5-1 6-5"/></g></svg>';
 /** Legacy `TRACK_SVG`. */
 export const TRACK_SVG =
   '<svg class="tb-ico tb-track" viewBox="0 0 60 40" aria-hidden="true"><path class="tb-dash" d="M3 34c10 0 12-10 22-10s14-8 22-10" stroke="#0b3d91" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="1 5"/><g transform="translate(46 15) scale(1.6)"><g class="tb-boat"><path d="M0 0l7 0-1.5 2.5h-4z" fill="#0b3d91"/><path d="M3.6 -9v8.6h3.6z" fill="#f39c12"/><path d="M3 -9.5v9" stroke="#111" stroke-width=".8"/></g></g></svg>';
@@ -55,9 +52,6 @@ export const MOOR_SVG =
 /** Legacy `DONE_SVG`. */
 export const DONE_SVG =
   '<svg class="tb-ico tb-done" viewBox="0 0 60 40" aria-hidden="true"><path d="M3 34c10 0 12-10 22-10s14-8 22-10" stroke="#0b3d91" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="1 5"/><path class="tb-v" d="M17 19l9.5 10L46 6" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/><path class="tb-v" d="M17 19l9.5 10L46 6" stroke="#12a150" stroke-width="6.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-/** Legacy `NAVIN_SVG`. */
-export const NAVIN_SVG =
-  '<svg class="tb-ico tb-navin" viewBox="0 0 92 40" aria-hidden="true"><text x="1" y="28" font-size="27" font-weight="900" fill="currentColor" font-family="Arial, Helvetica, sans-serif" textLength="47" lengthAdjust="spacingAndGlyphs">Nav</text><rect x="52" y="5" width="3.6" height="23" rx="1" fill="currentColor"/><path d="M57.5 7l12 20h-12z" fill="#f39c12"/><text x="71" y="28" font-size="27" font-weight="900" fill="currentColor" font-family="Arial, Helvetica, sans-serif" textLength="19" lengthAdjust="spacingAndGlyphs">n</text><path d="M2 35q5.5-4 11 0t11 0 11 0 11 0 11 0 11 0 11 0 11 0" stroke="#f39c12" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
 /** Legacy `NAVIN_LAC_SVG`. */
 export const NAVIN_LAC_SVG =
   '<svg class="tb-ico tb-navin" viewBox="0 0 92 40" aria-hidden="true"><path d="M71.8 9.3 75.3 11.2 76.7 13.3 75.0 15.4 71.4 15.6 58.1 13.3 42.8 14.8 41.6 16.8 40.0 17.6 37.6 19.1 36.4 19.5 34.6 21.3 33.2 21.5 31.6 19.1 26.9 18.9 22.4 25.8 18.2 34.1 14.3 38.0 14.6 36.9 15.3 35.5 16.4 30.7 17.7 27.2 28.7 10.2 29.9 9.0 31.3 8.3 36.5 7.7 37.8 6.9 42.4 3.1 43.7 2.6 50.4 2.1 52.1 2.5 65.0 7.0 71.8 9.3Z" fill="#8fd0ff" fill-opacity="1" stroke="#f39c12" stroke-width="1.4" stroke-linejoin="round"/><text x="1" y="28" font-size="27" font-weight="900" fill="currentColor" font-family="Arial, Helvetica, sans-serif" textLength="47" lengthAdjust="spacingAndGlyphs">Nav</text><rect x="52" y="5" width="3.6" height="23" rx="1" fill="currentColor"/><path d="M57.5 7l12 20h-12z" fill="#f39c12"/><text x="71" y="28" font-size="27" font-weight="900" fill="currentColor" font-family="Arial, Helvetica, sans-serif" textLength="19" lengthAdjust="spacingAndGlyphs">n</text></svg>';

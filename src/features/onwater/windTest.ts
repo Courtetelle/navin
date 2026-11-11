@@ -15,7 +15,7 @@ const LAST_LEVEL = 8;
 let timer: ReturnType<typeof setTimeout> | undefined;
 
 /** Stop the alert test and clear the screen (legacy `windTestStop`). */
-export function windTestStop(): void {
+function windTestStop(): void {
   clearTimeout(timer);
   windTestRunning.value = false;
   clearWindOverlays();

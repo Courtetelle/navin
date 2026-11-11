@@ -6,10 +6,9 @@ import { INFO_SECTIONS } from './infoSections.ts';
 import type { Boat, BoatVersion, CruiseInfo } from './types.ts';
 
 /** "Bateau et croisière" sections that belong to the boat (taken over on each outing). */
-export const BOAT_SECTIONS_ALL: readonly SectionDefinition[] =
-  INFO_SECTIONS.filter(
-    (section) => !['Croisière', 'Météo'].includes(section.title),
-  );
+const BOAT_SECTIONS_ALL: readonly SectionDefinition[] = INFO_SECTIONS.filter(
+  (section) => !['Croisière', 'Météo'].includes(section.title),
+);
 
 /** Sections shown on the boat sheet (rental, base and radio values are kept but not shown). */
 export const BOAT_SECTIONS: readonly SectionDefinition[] =
@@ -196,7 +195,7 @@ export function boatSnap(
  * @param info - Sheet values.
  * @returns The 4-digit year found, or the text as typed.
  */
-export function boatYear(info: CruiseInfo | null | undefined): string {
+function boatYear(info: CruiseInfo | null | undefined): string {
   const text = textOf(info?.year);
   const match = text.match(/\b(?:19|20)\d{2}\b/);
   return match ? match[0] : text.trim();

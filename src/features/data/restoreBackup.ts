@@ -65,6 +65,7 @@ export interface BackupFile {
   /** @default undefined */
   sosLogs?: unknown;
   /** @default undefined */
+  /** The old password of the SOS logs: no longer used, ignored. */
   sosPwd?: string;
   /** @default undefined */
   crewSets?: unknown;
@@ -184,9 +185,6 @@ function restoreSosLogs(file: BackupFile): void {
       if (log?.id && !logs.some((known) => known.id === log.id)) logs.push(log);
     }
   });
-  if (file.sosPwd && !store.get('ldb.sosPwd', '')) {
-    store.set('ldb.sosPwd', file.sosPwd);
-  }
 }
 
 function restoreCrewSets(received: ReadonlyArray<CrewSet | null>): void {

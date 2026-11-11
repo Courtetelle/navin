@@ -37,7 +37,7 @@ export function curMode(): ModeKey {
  * @param lake - Lake outing.
  * @returns `true` when shown.
  */
-export function forType(
+function forType(
   item: { sea?: boolean; lake?: boolean },
   lake: boolean = isLake(),
 ): boolean {
@@ -87,15 +87,6 @@ export function daySections(
   lake: boolean = isLake(),
 ): readonly SectionDefinition[] {
   return lake ? LAKE_DAY_SECTIONS : activeSections(DAY_SECTIONS, lake);
-}
-
-/**
- * Field of the logbook by key (legacy `fieldByKey`).
- * @param key - Field key.
- * @returns The active field, if any.
- */
-export function fieldByKey(key: string): FieldDefinition | undefined {
-  return activeFields().find((field) => field.key === key);
 }
 
 /**

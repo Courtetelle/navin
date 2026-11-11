@@ -86,7 +86,7 @@ export function intlPhoneIn(text: unknown): string {
  * @param member - Member card, changed in place.
  * @returns `true` when split.
  */
-export function splitProche(member: Record<string, unknown>): boolean {
+function splitProche(member: Record<string, unknown>): boolean {
   if (!member.proche || member.procheNom || member.procheTel) return false;
   const text = textOf(member.proche);
   const phone = text.match(new RegExp(PHONE_RE.source));

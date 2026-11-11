@@ -16,7 +16,7 @@ const CHEVRON_REACH = 70;
  * (legacy `ctlArrange`).
  * @param map - Leaflet map.
  */
-export function ctlArrange(map: LeafletMap): void {
+function ctlArrange(map: LeafletMap): void {
   const container = map.getContainer();
   const left = container.querySelector('.leaflet-top.leaflet-left');
   if (!left) return;

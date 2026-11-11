@@ -20,7 +20,7 @@ import { tracker } from './trackerState.ts';
 const FOLLOW_MS = 1000;
 
 /** A point dropped this close to the boat (screen pixels) sticks to it. */
-export const SNAP_PX = 40;
+const SNAP_PX = 40;
 
 /** The dividers are laid on a map, for the button of the tablet column. */
 export const rulerOn = signal(false);

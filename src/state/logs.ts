@@ -58,7 +58,7 @@ export function sosLogsCount(): string {
  * Position noted in an SOS log event: the last known one when under 2 minutes old (legacy `sosLogPos`).
  * @returns `{ lat, lon }`, or `null`.
  */
-export function sosLogPos(): { lat: number; lon: number } | null {
+function sosLogPos(): { lat: number; lon: number } | null {
   const position = lastKnownPos();
   if (position?.lat == null) return null;
   if (position.at && Date.now() - new Date(position.at).getTime() >= 120_000) {

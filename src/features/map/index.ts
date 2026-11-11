@@ -22,7 +22,6 @@
  * | `trkChooseStart()`                | {@link trkChooseStart}                                     |
  * | `drawTrkButtons()`                | {@link drawTrkButtons}                                     |
  * | `drawTrkList()`                   | {@link drawTrkList}                                        |
- * | `exitMapFull()`                   | {@link exitMapFull} (runs on every `go`, see `init.ts`)    |
  * | `ctlAutoAttach(map)`              | {@link ctlAutoAttach}                                      |
  * | `trkZoneRecenter(zone)`           | {@link trkZoneRecenter}                                    |
  * | `lemanVecNote()`                  | {@link lemanVecNote}                                       |
@@ -44,12 +43,11 @@ export type { GeoBox, LatLngPair } from './constants.ts';
 export {
   LEMAN_ARCGIS,
   LEMAN_BBOX,
-  LEMAN_CENTER,
   SWISS_BOUNDS,
   inSwissArea,
 } from './constants.ts';
 export { ctlAutoAttach } from './ctlAuto.ts';
-export { depthAt, isobathData, isobathLoad } from './isobath.ts';
+export { depthAt, isobathLoad } from './isobath.ts';
 export type { IsobathLine } from './isobath.ts';
 export { lakesNote } from './lakes.ts';
 export { leaflet, loadLeaflet } from './leaflet.ts';
@@ -57,9 +55,8 @@ export type { LeafletLibrary } from './leaflet.ts';
 export { fetchLemanVec, lemanVecNote } from './lemanVector.ts';
 export { entryColor, mapData, segments } from './mapData.ts';
 export type { MapDataResult, MapPoint, PositionedEntry } from './mapData.ts';
-export { exitMapFull } from './mapFull.ts';
 export { stopMapWatch } from './mapWatch.ts';
-export { closeNavPop, openNavPop } from './navPop.ts';
+export { closeNavPop } from './navPop.ts';
 export { drawTrkList } from './traceList.ts';
 export { drawTrkButtons, trkChooseStart } from './trackerButtons.ts';
 export { updateTrkDash } from './trackerDash.ts';

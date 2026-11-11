@@ -160,7 +160,8 @@ test('crew sets and SOS logs already here are not replaced', async () => {
   });
 
   expect(state.data.sosLogs.value).toHaveLength(logs + 1);
-  expect(store.get('ldb.sosPwd', '')).toBe('abc');
+  // The SOS logs no longer have a password: an old one is ignored.
+  expect(store.get('ldb.sosPwd', '')).toBe('');
   expect(state.data.crewSets.value).toHaveLength(sets + 1);
   expect(state.data.crewSets.value.at(-1)?._sig).toBe('["Neuf",[]]');
 });

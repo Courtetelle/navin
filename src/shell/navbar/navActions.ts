@@ -57,7 +57,7 @@ function inPrep(): boolean {
  * Where the exit button leads: NavIn from PréP, else the root of the lit tab.
  * @returns The root view.
  */
-export function navExitView(): string {
+function navExitView(): string {
   if (inPrep()) return 'tracker';
   const tab = litTab();
   return tab && tab in ROOT_NAMES ? tab : 'more';
