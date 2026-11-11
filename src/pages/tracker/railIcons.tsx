@@ -48,40 +48,49 @@ function Camera() {
 }
 
 /**
- * A hand VHF, its green screen written VHF.
+ * A hand VHF leaning to the left, its green screen written VHF.
  * @returns The drawing.
  */
 function Vhf() {
   return (
     <svg className="rail-svg rail-vhf" viewBox="0 0 40 40" aria-hidden="true">
-      <rect
-        x="15"
-        y="1.5"
-        width="3.4"
-        height="12"
-        rx="1.7"
-        fill="currentColor"
-      />
-      <rect x="12" y="11" width="17" height="27" rx="3.5" fill="currentColor" />
-      <rect x="14" y="14" width="13" height="8" rx="1.2" fill="#22a447" />
-      <text
-        x="20.5"
-        y="20.3"
-        textAnchor="middle"
-        fontSize="5.6"
-        fontWeight="900"
-        fontFamily="Arial, Helvetica, sans-serif"
-        fill="#fff"
-      >
-        VHF
-      </text>
-      <path
-        d="M15.5 26h10M15.5 29.2h10M15.5 32.4h10"
-        stroke="#fff"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.6"
-      />
+      <g transform="rotate(-45 20.5 20)">
+        <rect
+          x="15"
+          y="1.5"
+          width="3.4"
+          height="12"
+          rx="1.7"
+          fill="currentColor"
+        />
+        <rect
+          x="12"
+          y="11"
+          width="17"
+          height="27"
+          rx="3.5"
+          fill="currentColor"
+        />
+        <rect x="14" y="14" width="13" height="8" rx="1.2" fill="#22a447" />
+        <text
+          x="20.5"
+          y="20.3"
+          textAnchor="middle"
+          fontSize="5.6"
+          fontWeight="900"
+          fontFamily="Arial, Helvetica, sans-serif"
+          fill="#fff"
+        >
+          VHF
+        </text>
+        <path
+          d="M15.5 26h10M15.5 29.2h10M15.5 32.4h10"
+          stroke="#fff"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity="0.6"
+        />
+      </g>
     </svg>
   );
 }
