@@ -10435,3 +10435,49 @@ body.nav-search:not(.trk-mode) #searchBtn {
   display: block;
   margin-top: 4px;
 }
+
+/* The button of the menu open (marks, data, settings, VHF, a button of the
+   columns) blinks yellow, as PréP; SOS and NavIn do not. The yellow is a
+   layer between the face of the button and its drawing, as its own
+   background is fixed by many rules. */
+html body .menu-here.menu-here {
+  position: relative;
+  isolation: isolate;
+  color: #1a1400 !important;
+  background: color-mix(
+    in srgb,
+    var(--surface, #fff) 88%,
+    transparent
+  ) !important;
+}
+html body .menu-here::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: #ffd400;
+  pointer-events: none;
+  animation: menuHere 1.4s ease-in-out infinite;
+}
+html[data-theme='night'] body .menu-here.menu-here {
+  color: #1a0000 !important;
+}
+html[data-theme='night'] body .menu-here::before {
+  background: #d89a00;
+}
+@keyframes menuHere {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .menu-here::before {
+    animation: none;
+    opacity: 0.8;
+  }
+}

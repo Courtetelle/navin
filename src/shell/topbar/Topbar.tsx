@@ -85,10 +85,15 @@ function cancelGear(): void {
 }
 
 function GearButton({ focused }: { focused: boolean }) {
+  useSignals();
   useEffect(() => () => clearTimeout(gearTimer), []);
+  // The settings open: the gear blinks yellow, as PréP.
+  const here = state.view.currentView.value === 'settings';
   return (
     <Button
-      className={focused ? 'theme-btn tip-focus' : 'theme-btn'}
+      className={['theme-btn', focused && 'tip-focus', here && 'menu-here']
+        .filter(Boolean)
+        .join(' ')}
       id="gearBtn"
       aria-label="Réglages"
       onPointerDown={() => {

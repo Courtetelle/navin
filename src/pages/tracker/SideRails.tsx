@@ -239,8 +239,15 @@ function BoatButton() {
  * @returns The button.
  */
 function PinButton() {
+  useSignals();
   const tr = useTr();
   const [pressed, setPressed] = useState(0);
+  // A long press opens « Mes marques ».
+  const press = useLongPress(() => {
+    buzz();
+    go('marks');
+  });
+  const here = state.view.currentView.value === 'marks';
   useEffect(() => {
     if (!pressed) return undefined;
     const timer = setTimeout(() => setPressed(0), PRESSED_MS);
@@ -252,17 +259,21 @@ function PinButton() {
     <Button
       type="button"
       noUiEdit
-      className={
-        pressed
-          ? 'rail-btn rail-bare rail-pin rail-pressed'
-          : 'rail-btn rail-bare rail-pin'
-      }
-      aria-label={tr('Point ici')}
+      className={[
+        'rail-btn rail-bare rail-pin',
+        pressed ? 'rail-pressed' : '',
+        here ? 'menu-here' : '',
+        press.hit ? 'lp-hit' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      aria-label={tr('Point ici · appui long : mes marques')}
       aria-pressed={pressed > 0}
       onClick={() => {
         setPressed(Date.now());
         run(PIN_KEY);
       }}
+      {...press.handlers}
     >
       <span className="rail-icon">
         <RailIcon name={PIN_KEY} />
@@ -401,12 +412,13 @@ function CommButton() {
   const tr = useTr();
   const lake = navZone() === 'lac';
   const press = useLongPress(() => openCalls('int'));
+  const here = state.view.currentView.value === 'vhf' ? ' menu-here' : '';
   if (lake) {
     return (
       <Button
         type="button"
         noUiEdit
-        className="rail-btn rail-comm"
+        className={`rail-btn rail-comm${here}`}
         aria-label={tr('Téléphone')}
         onClick={() => openCalls('int')}
       >
@@ -420,7 +432,7 @@ function CommButton() {
     <Button
       type="button"
       noUiEdit
-      className={press.hit ? 'rail-btn rail-comm lp-hit' : 'rail-btn rail-comm'}
+      className={`rail-btn rail-comm${here}${press.hit ? ' lp-hit' : ''}`}
       aria-label={tr('VHF · appui long : téléphone')}
       onClick={() => openCalls('ext')}
       {...press.handlers}
@@ -456,6 +468,8 @@ function RailButton({
   const bare = drawn;
   const classes = ['rail-btn'];
   if (bare) classes.push('rail-bare');
+  // Its menu is open: the button blinks yellow, as PréP.
+  if (state.view.currentView.value === shown.key) classes.push('menu-here');
   if (press.hit) classes.push('lp-hit');
   return (
     <Button

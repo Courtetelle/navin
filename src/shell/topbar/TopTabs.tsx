@@ -5,6 +5,7 @@ import { Fragment, useEffect, useLayoutEffect, useRef } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { markupToReact } from '../../components/shared/markupToReact.ts';
 import type { UiEdit } from '../../model/logTypes.ts';
+import { state } from '../../state/index.ts';
 import { litTab } from '../litTab.ts';
 import { tipFocus } from '../tips.ts';
 import { RollTrack } from '../uiEdit/RollTrack.tsx';
@@ -28,6 +29,9 @@ const TAB_ORIGINALS: Record<TopTabKey, string> = {
   more: 'data',
   sos: '',
 };
+
+/** Menus that blink on their own button (pin, gear, VHF), not on data. */
+const OWN_BUTTON = new Set(['marks', 'settings', 'vhf']);
 
 const TAB_CLASS: Record<TopTabKey, string> = {
   tracker: 'tab top-tab',
@@ -91,6 +95,7 @@ interface TopTabProps {
 
 function TopTab({ tab, active }: TopTabProps) {
   useSignals();
+  const view = state.view.currentView.value;
   const display = tabDisplays[tab].value;
   const focused = tipFocus.value === tab;
   const reference = useRef<HTMLButtonElement>(null);
@@ -103,6 +108,8 @@ function TopTab({ tab, active }: TopTabProps) {
   const classes = [
     TAB_CLASS[tab],
     active && 'active',
+    // The data menu open: its button blinks yellow, as PréP (not SOS, not NavIn).
+    active && tab === 'more' && !OWN_BUTTON.has(view) && 'menu-here',
     ...displayClasses(display),
     focused && 'tip-focus',
     ...editClasses(edit),
