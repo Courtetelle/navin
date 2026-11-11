@@ -129,6 +129,8 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
     updateSettings((settings) => {
       Object.assign(settings, received);
     });
+  } else {
+    restoreMfKey(file.settings);
   }
   saveSettings();
   const pick = pickCruise(currentId, file.current, last);
@@ -233,4 +235,18 @@ function pickCruise(
 
 function isListed(id: string | undefined): boolean {
   return Boolean(id) && state.data.index.value.some((meta) => meta.id === id);
+}
+
+/**
+ * The Météo-France key of a backup comes back on a device that has none,
+ * whatever else the device keeps of its own settings.
+ * @param received - Settings of the backup.
+ */
+export function restoreMfKey(received: Partial<Settings> | undefined): void {
+  const key = received?.windAlert?.mfKey;
+  if (!key) return;
+  updateSettings((settings) => {
+    if (settings.windAlert?.mfKey) return;
+    settings.windAlert = { ...settings.windAlert, mfKey: key };
+  });
 }

@@ -48,48 +48,40 @@ function Camera() {
 }
 
 /**
- * A hand VHF leaning at 45°, drawn in outline: antenna, a green screen
- * written VHF, the knob and two keys.
+ * A hand VHF, its green screen written VHF.
  * @returns The drawing.
  */
 function Vhf() {
   return (
     <svg className="rail-svg rail-vhf" viewBox="0 0 40 40" aria-hidden="true">
-      <g
-        transform="rotate(45 20 20) translate(20 20) scale(0.92) translate(-20.5 -20)"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      >
-        <rect x="14.2" y="1.6" width="3.6" height="11.6" rx="1.8" />
-        <rect x="11.8" y="13.2" width="17.4" height="25" rx="4" />
-        <path d="M10.6 18.5v5" />
-        <rect
-          x="14.6"
-          y="16.4"
-          width="11.8"
-          height="7.4"
-          rx="1.4"
-          fill="#22a447"
-          strokeWidth="1.6"
-        />
-        <circle cx="20.5" cy="29" r="2.7" />
-        <path d="M15.6 34.6h2.6M22.8 34.6h2.6" />
-      </g>
+      <rect
+        x="15"
+        y="1.5"
+        width="3.4"
+        height="12"
+        rx="1.7"
+        fill="currentColor"
+      />
+      <rect x="12" y="11" width="17" height="27" rx="3.5" fill="currentColor" />
+      <rect x="14" y="14" width="13" height="8" rx="1.2" fill="#22a447" />
       <text
         x="20.5"
-        y="22"
-        transform="rotate(45 20 20) translate(20 20) scale(0.92) translate(-20.5 -20)"
+        y="20.3"
         textAnchor="middle"
-        fontSize="4.7"
+        fontSize="5.6"
         fontWeight="900"
         fontFamily="Arial, Helvetica, sans-serif"
         fill="#fff"
       >
         VHF
       </text>
+      <path
+        d="M15.5 26h10M15.5 29.2h10M15.5 32.4h10"
+        stroke="#fff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
     </svg>
   );
 }

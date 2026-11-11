@@ -10039,6 +10039,11 @@ body.nav-search:not(.trk-mode) #searchBtn {
     width: 40px;
     height: 40px;
   }
+  /* The VHF, leaning: a little bigger */
+  html body .rail-btn.rail-btn .rail-svg.rail-vhf {
+    width: 48px;
+    height: 48px;
+  }
   /* The weather: a little bigger, its cloud fills the button */
   html body .rail-btn.rail-btn .rail-svg.rail-wx {
     width: 50px;

@@ -181,3 +181,12 @@ test('the message tells what was restored', () => {
     '2 croisières récupérées',
   );
 });
+
+test('the Météo-France key of a backup comes back on a device without one', async () => {
+  const { restoreMfKey } = await import('../restoreBackup.ts');
+  load('empty');
+  restoreMfKey({ windAlert: { mfKey: 'abc' } });
+  expect(state.preferences.settings.value.windAlert?.mfKey).toBe('abc');
+  restoreMfKey({ windAlert: { mfKey: 'other' } });
+  expect(state.preferences.settings.value.windAlert?.mfKey).toBe('abc');
+});
