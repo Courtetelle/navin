@@ -124,7 +124,6 @@ export function SideRails() {
   const [picking, setPicking] = useState<Picking | null>(null);
   if (!wide) return null;
   const known = new Map(choices().map((entry) => [entry.key, entry]));
-  const weather = known.get('weather');
   const pick = (key: string) => {
     if (!picking) return;
     buzz();
@@ -138,7 +137,6 @@ export function SideRails() {
           {side === 'left' ? (
             <>
               <BoatButton />
-              {weather ? <RailButton entry={weather} onPick={noPick} /> : null}
               <DepartButtons />
               <PinButton />
             </>
@@ -176,10 +174,6 @@ export function SideRails() {
       ) : null}
     </>
   );
-}
-
-function noPick(): void {
-  // The fixed places of the left column are not chosen.
 }
 
 /** Functions shown with a drawing rather than their emoji. */

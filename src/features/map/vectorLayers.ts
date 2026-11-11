@@ -6,6 +6,24 @@ import { leaflet } from './leaflet.ts';
 import type { LemanVector } from './lemanVector.ts';
 import type { OsmFeature } from './osmFeatures.ts';
 import { seamarkColour, seamarkPopup } from './osmFeatures.ts';
+import { inShore } from './shore.ts';
+
+/** The areas of the buoyage, for the information of a point. */
+let areas: Array<{ ring: LatLngPair[]; html: string }> = [];
+
+/**
+ * The areas of the buoyage a point is in (restricted zones, fairways,
+ * harbours), for the information of the point: their surface leaves the taps
+ * to the map.
+ * @param lat - Latitude of the point.
+ * @param lon - Its longitude.
+ * @returns Their descriptions, in HTML.
+ */
+export function areaNotesAt(lat: number, lon: number): string[] {
+  return areas
+    .filter((area) => inShore([area.ring], lat, lon))
+    .map((area) => area.html);
+}
 
 interface PointFeature {
   feature: OsmFeature;
@@ -27,6 +45,7 @@ export function lemanVecLayer(
   const renderer = L.svg({ padding: 0.3 });
   const group = L.layerGroup();
   const points: PointFeature[] = [];
+  const found: typeof areas = [];
   for (const feature of vector.feats) {
     const type = feature.t['seamark:type'] ?? '';
     if (feature.k === 'pier' && feature.g !== 'p') {
@@ -43,16 +62,20 @@ export function lemanVecLayer(
     }
     if (feature.g === 'a' || feature.g === 'm') {
       const zone = /restricted|fairway|anchorage/.test(type);
+      // Drawn only: a tap inside is a tap on the map (the cross), which
+      // tells the area in the information of the point.
       L.polygon(feature.c as LatLngPair[], {
         renderer,
-        bubblingMouseEvents: false,
+        interactive: false,
         color: zone ? '#c0006a' : '#0050d0',
         weight: 2,
         dashArray: zone ? '6 6' : undefined,
         fillOpacity: zone ? 0.06 : 0.1,
-      })
-        .bindPopup(seamarkPopup(feature))
-        .addTo(group);
+      }).addTo(group);
+      found.push({
+        ring: feature.c as LatLngPair[],
+        html: seamarkPopup(feature),
+      });
       if (feature.k === 'harbour') {
         const center = L.polygon(feature.c as LatLngPair[])
           .getBounds()
@@ -80,6 +103,7 @@ export function lemanVecLayer(
     });
   }
   for (const point of points) addPoint(group, renderer, point);
+  areas = found;
   return group;
 }
 

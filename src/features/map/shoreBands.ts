@@ -1,4 +1,4 @@
-import type { Layer, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
+import type { Layer, Map as LeafletMap } from 'leaflet';
 
 import { rad } from '../../lib/geo.ts';
 
@@ -7,9 +7,31 @@ import { leaflet } from './leaflet.ts';
 import { canvasOutdated, frameCanvas } from './overlayCanvas.ts';
 import { inShore, shoreDist, zonePopupHtml } from './shore.ts';
 
+/** The shore of the lake shown on each map, for the information of a point. */
+const shoreOf = new WeakMap<LeafletMap, readonly LatLngPair[][]>();
+
 /**
- * Canvas layer of the 150 m and 300 m bands along the shore; a tap in a band
- * gives its rules (legacy `newShoreBands`).
+ * The rules of the shore band a point is in, for the information of the
+ * point (the cross of a tap).
+ * @param map - The map.
+ * @param lat - Latitude of the point.
+ * @param lon - Its longitude.
+ * @returns The rules, in HTML, or `null` outside the bands.
+ */
+export function shoreNoteAt(
+  map: LeafletMap,
+  lat: number,
+  lon: number,
+): string | null {
+  const rings = shoreOf.get(map);
+  if (!rings || !inShore(rings, lat, lon)) return null;
+  const distance = shoreDist(rings, lat, lon);
+  return distance < 300 ? zonePopupHtml(distance) : null;
+}
+
+/**
+ * Canvas layer of the 150 m and 300 m bands along the shore; the information
+ * of a point gives the rules of its band (legacy `newShoreBands`).
  * @param rings - Lake rings.
  * @returns The layer.
  */
@@ -23,7 +45,7 @@ export function newShoreBands(rings: readonly LatLngPair[][]): Layer {
       this.canvas.style.pointerEvents = 'none';
       map.getPanes().overlayPane.append(this.canvas);
       map.on('moveend zoomend resize viewreset', this.redraw);
-      map.on('click', this.onTap);
+      shoreOf.set(map, rings);
       this.redraw();
       return this;
     }
@@ -31,7 +53,7 @@ export function newShoreBands(rings: readonly LatLngPair[][]): Layer {
     override onRemove(map: LeafletMap): this {
       if (this.canvas) L.DomUtil.remove(this.canvas);
       map.off('moveend zoomend resize viewreset', this.redraw);
-      map.off('click', this.onTap);
+      shoreOf.delete(map);
       return this;
     }
 
@@ -39,17 +61,6 @@ export function newShoreBands(rings: readonly LatLngPair[][]): Layer {
       if (this.canvas && canvasOutdated(this._map, this.canvas)) {
         drawBands(this._map, this.canvas, rings);
       }
-    };
-
-    private readonly onTap = (event: LeafletMouseEvent): void => {
-      const { lat, lng } = event.latlng;
-      if (!inShore(rings, lat, lng)) return;
-      const distance = shoreDist(rings, lat, lng);
-      if (distance >= 300) return;
-      L.popup({ maxWidth: 300 })
-        .setLatLng(event.latlng)
-        .setContent(zonePopupHtml(distance))
-        .openOn(this._map);
     };
   }
   return new ShoreBands();

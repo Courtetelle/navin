@@ -20,10 +20,16 @@ const LOCATE_ICON =
  * @param map - Leaflet map.
  */
 export function addFullscreenControl(map: LeafletMap): void {
-  addButton(map, 'leaflet-bar map-full-btn', 'Plein écran', FULL_ICON, () => {
-    buzz();
-    setMapFull(map, !hasBodyClass('map-full'));
-  });
+  addButton(
+    map,
+    'leaflet-bar map-full-btn map-full-toggle',
+    'Plein écran',
+    FULL_ICON,
+    () => {
+      buzz();
+      setMapFull(map, !hasBodyClass('map-full'));
+    },
+  );
   addButton(
     map,
     'leaflet-bar map-full-btn map-locate-btn',

@@ -1,14 +1,6 @@
-import type {
-  Layer,
-  LeafletMouseEvent,
-  Map as LeafletMap,
-  Point,
-  Popup,
-} from 'leaflet';
+import type { Layer, Map as LeafletMap, Point } from 'leaflet';
 
-import { escapeHtml } from './escapeHtml.ts';
 import type { IsobathLine } from './isobath.ts';
-import { estimateDepth, nearDepths } from './isobath.ts';
 import { leaflet } from './leaflet.ts';
 import { mapBearing } from './mapOrientation.ts';
 import { canvasOutdated, frameCanvas } from './overlayCanvas.ts';
@@ -43,7 +35,6 @@ export function newIsobathLayer(lines: readonly IsobathLine[]): Layer {
       this.canvas.style.pointerEvents = 'none';
       map.getPanes().overlayPane.append(this.canvas);
       map.on('moveend zoomend resize viewreset', this.redraw);
-      map.on('click', this.onTap);
       this.redraw();
       return this;
     }
@@ -51,7 +42,6 @@ export function newIsobathLayer(lines: readonly IsobathLine[]): Layer {
     override onRemove(map: LeafletMap): this {
       if (this.canvas) L.DomUtil.remove(this.canvas);
       map.off('moveend zoomend resize viewreset', this.redraw);
-      map.off('click', this.onTap);
       return this;
     }
 
@@ -59,10 +49,6 @@ export function newIsobathLayer(lines: readonly IsobathLine[]): Layer {
       if (this.canvas && canvasOutdated(this._map, this.canvas)) {
         drawLines(this._map, this.canvas, lines);
       }
-    };
-
-    private readonly onTap = (event: LeafletMouseEvent): void => {
-      showDepth(this._map, lines, event);
     };
   }
   return new IsobathLayer();
@@ -148,39 +134,4 @@ function drawLabels(
     context.fillText(`${depth} m`, 0, 0);
     context.restore();
   }
-}
-
-function showDepth(
-  map: LeafletMap,
-  lines: readonly IsobathLine[],
-  event: LeafletMouseEvent,
-): void {
-  if (map.getZoom() < 13) return;
-  const { lat, lng } = event.latlng;
-  const estimate = estimateDepth(nearDepths(lines, lat, lng));
-  if (!estimate) return;
-  const { first, second, depth } = estimate;
-  const text =
-    second && depth !== null
-      ? `≈ ${depth.toFixed(1)} m (entre les courbes ${Math.min(first[1], second[1])} m et ${Math.max(first[1], second[1])} m)`
-      : `≈ ${first[1]} m (courbe à ${Math.round(first[0])} m)`;
-  const line = `<div class="zone-pop isob-pop"><b>Profondeur ${escapeHtml(text)}</b><br><small>Courbes swissBATHY3D calculées sur l’appareil, indicatif, niveau moyen du lac (372 m)</small></div>`;
-  // The popup of the shore zones stays: the depth goes under it.
-  setTimeout(() => {
-    const open = openPopup(map);
-    if (open && map.hasLayer(open) && open.getLatLng()?.equals(event.latlng)) {
-      const content = open.getContent();
-      open.setContent(`${typeof content === 'string' ? content : ''}${line}`);
-    } else {
-      leaflet()
-        .popup({ maxWidth: 300 })
-        .setLatLng(event.latlng)
-        .setContent(line)
-        .openOn(map);
-    }
-  }, 0);
-}
-
-function openPopup(map: LeafletMap): Popup | undefined {
-  return (map as unknown as { _popup?: Popup })._popup;
 }

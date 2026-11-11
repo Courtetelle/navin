@@ -659,6 +659,80 @@ async function remarkPill(
   );
 }
 
+/**
+ * A short tap on the map lays the cross of four logos; the map slid under it
+ * leaves it in its place; a logo opens its menu; a tap beside closes it.
+ * @param page - A page with a touch screen.
+ * @param theme - Theme checked.
+ * @param where - Phone or tablet.
+ */
+async function tapCross(
+  page: Page,
+  theme: string,
+  where: string,
+): Promise<void> {
+  const map = await page.locator('.trk-map').boundingBox();
+  if (!map) {
+    check(theme, `${where}: the map is shown for the cross`, false);
+    return;
+  }
+  // A finger is drawn to the nearest port or mark: those are set aside here.
+  await page.addStyleTag({
+    content:
+      '.leaflet-marker-icon:not(.tap-cross) { visibility: hidden !important; pointer-events: none !important; }',
+  });
+  // A bare place of the map: not the boat, a port or a mark.
+  const spot = await page.evaluate(
+    (box) => {
+      // Near the middle: the logos stand 13 cm around the point.
+      for (const fy of [0.5, 0.55, 0.45, 0.6, 0.4]) {
+        for (const fx of [0.5, 0.45, 0.55, 0.4, 0.6]) {
+          const px = Math.round(box.x + box.width * fx);
+          const py = Math.round(box.y + box.height * fy);
+          const element = document.elementFromPoint(px, py);
+          if (element?.closest('.leaflet-marker-icon, .leaflet-control')) {
+            continue;
+          }
+          if (element?.closest('.trk-map')) return { x: px, y: py };
+        }
+      }
+      return null;
+    },
+    { x: map.x, y: map.y, width: map.width, height: map.height },
+  );
+  if (!spot) {
+    check(theme, `${where}: a bare place on the map for the cross`, false);
+    return;
+  }
+  const { x, y } = spot;
+  await page.touchscreen.tap(x, y);
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    `${where}: a tap on the map lays the cross of four logos`,
+    (await page.locator('.tap-cross .tap-logo').count()) === 4,
+  );
+  check(
+    theme,
+    `${where}: the logos of the cross are on screen`,
+    await page.locator('.tap-logo-info').isVisible(),
+  );
+  await page.locator('.tap-logo-info').tap();
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    `${where}: a logo of the cross opens its menu with the position`,
+    (await page.locator('.lp-pop [data-lp="send"]').count()) === 1,
+  );
+  await page.touchscreen.tap(x, Math.round(map.y + map.height - 60));
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    `${where}: a tap beside closes the menu`,
+    (await page.locator('.lp-pop, .tap-cross').count()) === 0,
+  );
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
@@ -709,6 +783,7 @@ for (const theme of ['day', 'night']) {
       true,
     );
     try {
+      await tapCross(page, theme, where);
       await remarkPill(page, theme, where);
     } catch (error) {
       check(

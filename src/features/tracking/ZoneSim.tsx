@@ -47,7 +47,9 @@ export function ZoneSim() {
       );
     }
     const zoneName =
-      choice === 'mer' ? '🌊 Maritime' : '🛰️ Automatique par GPS';
+      choice === 'mer'
+        ? '🌊 Maritime'
+        : '📍 Sur la position GPS (flèche du bateau)';
     return tr(`${prefix}${zoneName}`);
   };
   return (

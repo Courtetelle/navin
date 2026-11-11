@@ -113,12 +113,16 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     color: '#d00000',
     weight: 5,
     opacity: 0.9,
+    // A tap on the track is a tap on the map: it lays the cross.
+    interactive: false,
   }).addTo(map);
   handle.live = live;
   handle.tail = L.polyline([], {
     color: '#d00000',
     weight: 5,
     opacity: 0.9,
+    // A tap on the track is a tap on the map: it lays the cross.
+    interactive: false,
   }).addTo(map);
   const track = currentTrackLine();
   trkDrawPins();

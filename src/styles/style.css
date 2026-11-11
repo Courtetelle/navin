@@ -9766,7 +9766,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
   /* The boat button of the left column replaces the arrow of the map, the
      dividers of the right column its own */
   html body .trk-full .map-locate-btn,
-  html body .leaflet-control-container .ruler-btn {
+  html body .leaflet-control-container .ruler-btn,
+  html body .leaflet-control-container .map-full-toggle {
     display: none !important;
   }
   html body .rail-ruler .rail-icon svg {
@@ -10334,4 +10335,103 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 .ruler-edit-bad input {
   border-color: #d00000;
+}
+
+/* The cross of a short tap on a map: four lines of 2 cm that do not meet in
+   the middle, a logo at the end of each. */
+.tap-cross {
+  overflow: visible;
+}
+.tap-cross-box {
+  --tap-gap: 10px;
+  --tap-arm: 2cm;
+  --tap-logo: 46px;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.tap-arm {
+  position: absolute;
+  background: #0b3d91;
+  box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.95);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.tap-arm-mark,
+.tap-arm-goto {
+  left: -1.5px;
+  width: 3px;
+  height: var(--tap-arm);
+}
+.tap-arm-mark {
+  top: calc(-1 * (var(--tap-gap) + var(--tap-arm)));
+}
+.tap-arm-goto {
+  top: var(--tap-gap);
+}
+.tap-arm-weather,
+.tap-arm-info {
+  top: -1.5px;
+  height: 3px;
+  width: var(--tap-arm);
+}
+.tap-arm-weather {
+  left: var(--tap-gap);
+}
+.tap-arm-info {
+  left: calc(-1 * (var(--tap-gap) + var(--tap-arm)));
+}
+.tap-logo {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap-logo);
+  height: var(--tap-logo);
+  margin: 0;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ffffff 0%, #e6edf5 100%);
+  box-shadow:
+    0 3px 10px rgba(15, 23, 42, 0.35),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.tap-logo svg {
+  width: 30px;
+  height: 30px;
+}
+.tap-logo:active {
+  transform: scale(0.92);
+}
+.tap-logo-mark {
+  left: calc(var(--tap-logo) / -2);
+  top: calc(-1 * (var(--tap-gap) + var(--tap-arm) + var(--tap-logo)));
+}
+.tap-logo-goto {
+  left: calc(var(--tap-logo) / -2);
+  top: calc(var(--tap-gap) + var(--tap-arm));
+}
+.tap-logo-weather {
+  left: calc(var(--tap-gap) + var(--tap-arm));
+  top: calc(var(--tap-logo) / -2);
+}
+.tap-logo-info {
+  left: calc(-1 * (var(--tap-gap) + var(--tap-arm) + var(--tap-logo)));
+  top: calc(var(--tap-logo) / -2);
+}
+:root[data-theme='night'] .tap-arm {
+  background: #ff4040;
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.9);
+}
+:root[data-theme='night'] .tap-logo {
+  border-color: rgba(255, 80, 80, 0.7);
+  background: linear-gradient(180deg, #3a0606 0%, #1e0000 100%);
+}
+.lp-wx small,
+.lp-shore {
+  display: block;
+  margin-top: 4px;
 }

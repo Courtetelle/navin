@@ -39,6 +39,19 @@ export function flipRuler(): boolean {
   return true;
 }
 
+/** The dividers of each map, laid from the boat to a point. */
+const toPoint = new WeakMap<LeafletMap, (to: LatLng) => void>();
+
+/**
+ * The dividers laid from the boat (stuck to it) to a point, the arrow on the
+ * point: the course and the distance to go there.
+ * @param map - The map.
+ * @param to - The point.
+ */
+export function rulerToPoint(map: LeafletMap, to: LatLng): void {
+  toPoint.get(map)?.(to);
+}
+
 /** The drawing of the dividers. */
 export const DIVIDERS_ICON =
   '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="4" r="2.2" fill="currentColor"/><path d="M12 5.5 6 21M12 5.5 18 21" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M8.2 14.5h7.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -216,19 +229,26 @@ export function addRulerControl(map: LeafletMap): void {
     );
   };
 
-  const show = () => {
+  let button: HTMLElement | null = null;
+  const show = (to?: LatLng) => {
     rulerOn.value = true;
+    button?.classList.add('on');
     flipLaid = () => {
       target = 1 - target;
       redraw();
     };
     const boat = boatLatLng();
-    const boatSeen = boat !== null && map.getBounds().contains(boat);
+    // Towards a point: from the boat wherever it is; otherwise from the boat
+    // when it is on screen.
+    const boatSeen =
+      boat !== null && (to !== undefined || map.getBounds().contains(boat));
     const first = boatSeen ? boat : map.getCenter();
     const size = map.getSize();
-    const second = map.containerPointToLatLng(
-      map.latLngToContainerPoint(first).add([size.x * 0.22, -size.y * 0.18]),
-    );
+    const second =
+      to ??
+      map.containerPointToLatLng(
+        map.latLngToContainerPoint(first).add([size.x * 0.22, -size.y * 0.18]),
+      );
     line = L.polyline([first, second], {
       color: '#e6007e',
       weight: 3,
@@ -262,6 +282,7 @@ export function addRulerControl(map: LeafletMap): void {
   };
 
   const hide = () => {
+    button?.classList.remove('on');
     if (ends) {
       rulerOn.value = false;
       flipLaid = null;
@@ -279,21 +300,29 @@ export function addRulerControl(map: LeafletMap): void {
 
   const control = new L.Control({ position: 'topleft' }) as Control;
   control.onAdd = () => {
-    const button = L.DomUtil.create('a', 'leaflet-bar map-full-btn ruler-btn');
-    button.href = '#';
-    button.setAttribute('role', 'button');
-    button.title = 'Compas : distance et cap';
-    button.innerHTML = DIVIDERS_ICON;
-    L.DomEvent.on(button, 'click', (event) => {
+    const created = L.DomUtil.create('a', 'leaflet-bar map-full-btn ruler-btn');
+    button = created;
+    created.href = '#';
+    created.setAttribute('role', 'button');
+    created.title = 'Compas : distance et cap';
+    created.innerHTML = DIVIDERS_ICON;
+    L.DomEvent.on(created, 'click', (event) => {
       L.DomEvent.stop(event);
       buzz();
       if (ends) hide();
       else show();
-      button.classList.toggle('on', ends !== null);
     });
-    L.DomEvent.disableClickPropagation(button);
-    return button;
+    L.DomEvent.disableClickPropagation(created);
+    return created;
   };
   map.addControl(control);
+  toPoint.set(map, (to) => {
+    hide();
+    show(to);
+    const shown = ends?.map((end) => end.marker.getLatLng()) ?? [];
+    if (!shown.every((at) => map.getBounds().contains(at))) {
+      map.fitBounds(L.latLngBounds(shown), { padding: [60, 60] });
+    }
+  });
   map.on('unload', hide);
 }
