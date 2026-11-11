@@ -10443,7 +10443,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 html body .menu-here.menu-here {
   position: relative;
   isolation: isolate;
-  color: #1a1400 !important;
+  color: #000 !important;
   background: color-mix(
     in srgb,
     var(--surface, #fff) 88%,
@@ -10456,15 +10456,27 @@ html body .menu-here::before {
   inset: 0;
   z-index: -1;
   border-radius: inherit;
-  background: #ffd400;
+  /* Exactly the colour of PréP lit, day and night; the writing stays black. */
+  background: linear-gradient(180deg, #ffe2b8 0%, #f8bb6a 55%, #ee9a3a 100%);
   pointer-events: none;
   animation: menuHere 1.4s ease-in-out infinite;
 }
 html[data-theme='night'] body .menu-here.menu-here {
-  color: #1a0000 !important;
+  color: #000 !important;
 }
-html[data-theme='night'] body .menu-here::before {
-  background: #d89a00;
+/* data open: always written in black on the colour of PréP. */
+html:root
+  body
+  header.topbar
+  nav.topnav
+  .top-tab.top-tab.tab-data.menu-here.menu-here,
+html:root[data-theme='night']
+  body
+  header.topbar
+  nav.topnav
+  .top-tab.top-tab.tab-data.menu-here.menu-here {
+  color: #000 !important;
+  -webkit-text-stroke-color: #000 !important;
 }
 @keyframes menuHere {
   0%,
