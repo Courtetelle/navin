@@ -10115,8 +10115,10 @@ body.nav-search:not(.trk-mode) #searchBtn {
     border-color: #d40000;
     background: #e10600 !important;
   }
+  /* Course up: the white arrow points straight up, as the boat goes */
   html body .rail-boat.course-up .rail-svg {
     color: #fff;
+    transform: rotate(-45deg);
   }
 }
 

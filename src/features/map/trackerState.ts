@@ -138,9 +138,9 @@ export function trkFix(fix: TrackerFix): void {
     placeBoat(handle, target);
     orientMap(map, fix.cog, fix.sog);
     trkShowCourse(fix.cog);
+    // The scale chosen stays: the map follows the boat at its own zoom.
     if (handle.follow) {
-      const zoom = map.getZoom() < 13 ? 15 : map.getZoom();
-      map.setView(position, zoom, { animate: false });
+      map.setView(position, map.getZoom(), { animate: false });
     }
   }
   handle.lastSog = fix.sog ?? null;
