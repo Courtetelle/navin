@@ -59,20 +59,35 @@ export function MagnifierButton({ id }: { id: string }) {
         searchOpen.value = true;
       }}
     >
-      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+      <svg
+        className="magnifier"
+        viewBox="0 0 24 24"
+        width="28"
+        height="28"
+        aria-hidden="true"
+      >
+        <circle cx="10.2" cy="10.2" r="5.6" fill="currentColor" opacity="0.1" />
         <circle
-          cx="10.5"
-          cy="10.5"
-          r="6.5"
+          cx="10.2"
+          cy="10.2"
+          r="6.6"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.6"
+          strokeWidth="3"
         />
         <path
-          d="m15.5 15.5 5.5 5.5"
+          d="M7.2 8.6a3.4 3.4 0 0 1 2.6-2.3"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.8"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          opacity="0.5"
+        />
+        <path
+          d="m15.3 15.3 5.4 5.4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4.2"
           strokeLinecap="round"
         />
       </svg>

@@ -7,6 +7,7 @@ import type {
 
 import { buzz } from '../../lib/dom.ts';
 import { fmtPos } from '../../lib/geo.ts';
+import { pinSvg } from '../../shell/topbar/tabIcons.ts';
 import { addMark, toast } from '../../state/index.ts';
 
 import { escapeHtml } from './escapeHtml.ts';
@@ -32,8 +33,7 @@ export const CROSS_BRANCHES = ['mark', 'weather', 'goto', 'info'] as const;
 /** A branch of the cross. */
 export type CrossBranch = (typeof CROSS_BRANCHES)[number];
 
-const PIN_SVG =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 2.5 21.5 9.5 19.6 10.6 16.4 13.8 16.8 18.2 15.2 19.8 11 15.6 4.8 21.8 2.2 21.8 2.2 19.2 8.4 13 4.2 8.8 5.8 7.2 10.2 7.6 13.4 4.4z" fill="#e10600" stroke="#7a0000" stroke-width="1.1" stroke-linejoin="round"/></svg>';
+const PIN_SVG = pinSvg('');
 const WEATHER_SVG =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="4.2" fill="#f5a623"/><g stroke="#f5a623" stroke-width="1.6" stroke-linecap="round"><path d="M9 1.5v2M3.7 3.7l1.4 1.4M1.5 9h2M14.3 3.7l-1.4 1.4"/></g><path d="M7.5 19.5a4 4 0 0 1 1.2-7.8 5.2 5.2 0 0 1 9.8 1.6 3.2 3.2 0 0 1 .3 6.2z" fill="#fff" stroke="#5f6f86" stroke-width="1.4" stroke-linejoin="round"/></svg>';
 /** Go To: a target, and the arrow of the dividers going into it. */

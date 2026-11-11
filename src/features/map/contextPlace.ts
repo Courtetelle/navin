@@ -1,4 +1,4 @@
-import { lastKnownPos, state } from '../../state/index.ts';
+import { lastKnownPos, navinSpot, state } from '../../state/index.ts';
 
 import { lakePlace } from './lakeCenter.ts';
 import { seaPlace } from './seaCenter.ts';
@@ -16,13 +16,19 @@ export interface ContextPlace {
 const FRESH_MS = 12 * 3600e3;
 
 /**
- * The place every menu speaks of (weather, Live météo, rescue, VHF or phone):
- * the zone chosen with NavIn first (at sea the sea place of the settings, on
- * a lake the lake place of the settings), else a recent GPS position, else the map last shown.
+ * The place every menu speaks of (weather, Live météo, wind alerts, rescue,
+ * VHF or phone): with a zone chosen with NavIn, the place NavIn looks at (where
+ * the map was left with the fingers, else the place of the settings for the
+ * sea or the lake); on the GPS (the boat arrow), a recent GPS position, else
+ * the map last shown.
  * @returns The place.
  */
 export function contextPlace(): ContextPlace {
   const forced = state.view.zoneSimV.value;
+  // NavIn is the master: where the fingers last left its map, in the zone
+  // chosen with it.
+  const spot = forced ? navinSpot() : null;
+  if (spot) return { lat: spot.lat, lon: spot.lon, forced: true };
   if (forced === 'mer') {
     const { lat, lon } = seaPlace();
     return { lat, lon, forced: true };

@@ -3388,6 +3388,18 @@ time.tz.tz-local,
 .mark-ic span {
   font-size: 16px;
 }
+.mark-ic .mark-pin {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex: none;
+}
+.mark-ic .mark-pin svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  filter: drop-shadow(0 0 1px #fff);
+}
 .mark-ic b {
   font-size: 12px;
   color: #000;
@@ -9771,8 +9783,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body .rail-ruler .rail-icon svg {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
   }
   html body .trk-full .trk-dash {
     left: 116px;

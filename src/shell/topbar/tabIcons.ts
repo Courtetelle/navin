@@ -30,9 +30,25 @@ export const DATA_SVG =
 /** Legacy `TRACK_SVG`. */
 export const TRACK_SVG =
   '<svg class="tb-ico tb-track" viewBox="0 0 60 40" aria-hidden="true"><path class="tb-dash" d="M3 34c10 0 12-10 22-10s14-8 22-10" stroke="#0b3d91" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="1 5"/><g transform="translate(46 15) scale(1.6)"><g class="tb-boat"><path d="M0 0l7 0-1.5 2.5h-4z" fill="#0b3d91"/><path d="M3.6 -9v8.6h3.6z" fill="#f39c12"/><path d="M3 -9.5v9" stroke="#111" stroke-width=".8"/></g></g></svg>';
-/** Legacy `PIN_SVG`. */
-export const PIN_SVG =
-  '<svg class="tb-ico tb-pin" viewBox="0 0 48 40" aria-hidden="true"><path d="M24 3c-7 0-12 5-12 11.5C12 23 24 36 24 36s12-13 12-21.5C36 8 31 3 24 3z" fill="#d0021b"/><circle cx="24" cy="14.5" r="4.6" fill="#fff"/><ellipse cx="24" cy="37" rx="7" ry="1.6" fill="#000" opacity=".2"/></svg>';
+/**
+ * The drawing pin of the app, slightly tilted as on a notice board: one
+ * drawing everywhere (column button, top menu, cross of a tap, marks on the
+ * maps).
+ */
+export const PIN_DRAWING =
+  '<g transform="rotate(35 20 20)"><path d="M20 23v14" stroke="#8a9099" stroke-width="2.4" stroke-linecap="round"/><path d="M13 3h14v3.5l-2.6 1.4v8.4l5.6 5v2.7H10v-2.7l5.6-5V7.9L13 6.5z" fill="#d0021b"/><path d="M17.6 8.5v8" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity="0.55"/></g>';
+
+/**
+ * The drawing pin in an SVG.
+ * @param className - Class of the SVG.
+ * @returns The markup.
+ */
+export function pinSvg(className: string): string {
+  return `<svg class="${className}" viewBox="0 0 40 40" aria-hidden="true">${PIN_DRAWING}</svg>`;
+}
+
+/** The pin of the top menu. */
+export const PIN_SVG = pinSvg('tb-ico tb-pin');
 /** Legacy `MOOR_SVG`. */
 export const MOOR_SVG =
   '<svg class="tb-ico tb-moor" viewBox="0 0 60 40" aria-hidden="true"><path d="M18 36h24" stroke="#5f6368" stroke-width="3" stroke-linecap="round"/><path d="M23 36V20h14v16" fill="#3a4458"/><rect x="19" y="14" width="22" height="7" rx="3.5" fill="#1d2433"/><path d="M4 26c6 0 10-4 16-6 5-1.5 10-1 14 1s6 6 2 7-10-2-14-3" stroke="#c8a165" stroke-width="3" fill="none" stroke-linecap="round"/></svg>';

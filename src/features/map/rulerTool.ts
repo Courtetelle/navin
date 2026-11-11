@@ -54,7 +54,7 @@ export function rulerToPoint(map: LeafletMap, to: LatLng): void {
 
 /** The drawing of the dividers. */
 export const DIVIDERS_ICON =
-  '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="4" r="2.2" fill="currentColor"/><path d="M12 5.5 6 21M12 5.5 18 21" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M8.2 14.5h7.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 .9v1.2" stroke-width="1.6"/><circle cx="12" cy="4.4" r="2.2" stroke-width="1.6"/><path d="M10.9 6.4 5.9 19.8M13.1 6.4l5 13.4" stroke-width="2"/><path d="M5.9 19.8 5.3 22.8" stroke-width="1.1"/><path d="m18.1 19.8.7 2.6" stroke="#e6007e" stroke-width="1.8"/><path d="M7.9 14.6q4.1 1.9 8.2 0" stroke-width="1.3"/></svg>';
 
 interface End {
   marker: Marker;

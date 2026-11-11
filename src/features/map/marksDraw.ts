@@ -4,6 +4,7 @@ import { fmtShortDate, fmtUtc } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import type { Mark } from '../../model/types.ts';
 import { go } from '../../shell/router.ts';
+import { pinSvg } from '../../shell/topbar/tabIcons.ts';
 import { herePos, state } from '../../state/index.ts';
 
 import { escapeHtml } from './escapeHtml.ts';
@@ -58,9 +59,10 @@ export function drawMarks(map: LeafletMap): void {
     L.marker([mark.lat, mark.lon], {
       icon: L.divIcon({
         className: 'mark-ic',
-        html: `<span>◆</span><b>${escapeHtml(mark.name)}</b>`,
-        iconSize: [60, 22],
-        iconAnchor: [8, 11],
+        // The pin of the app, its point on the mark.
+        html: `<span class="mark-pin">${pinSvg('')}</span><b>${escapeHtml(mark.name)}</b>`,
+        iconSize: [80, 24],
+        iconAnchor: [7, 20],
       }),
     }).bindPopup(() => markPopup(mark)),
   );

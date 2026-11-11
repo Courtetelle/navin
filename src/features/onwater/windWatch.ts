@@ -2,6 +2,7 @@ import { signal } from '@preact/signals-react';
 
 import { dayKey, uid } from '../../lib/format.ts';
 import { bft } from '../../lib/wind.ts';
+import type { Position } from '../../model/types.ts';
 import { go } from '../../shell/router.ts';
 import {
   addEntry,
@@ -12,7 +13,7 @@ import {
   updateSettings,
 } from '../../state/index.ts';
 
-import { inSwissArea } from './externals.ts';
+import { contextPlace, inSwissArea } from './externals.ts';
 import { lakeFix } from './lakeFix.ts';
 import { refreshLakeButtons } from './lakeRefresh.ts';
 import { playAlarm } from './windAudio.ts';
@@ -99,7 +100,15 @@ export function windReminderTick(): void {
 export function windCheck(): void {
   const config = windConfig();
   if (!config.on || !navigator.onLine) return;
-  lakeFix((position) => {
+  // A place chosen with NavIn rules over the GPS: the alerts are those of
+  // where NavIn looks, the GPS only after the boat arrow.
+  const where = state.view.zoneSimV.peek()
+    ? (done: (position: Position | null) => void) => {
+        const { lat, lon } = contextPlace();
+        done({ lat, lon });
+      }
+    : lakeFix;
+  where((position) => {
     if (!position) return;
     windWatchPlace.value = { lat: position.lat, lon: position.lon };
     // Measured wind first; the forecast only where no station answers.

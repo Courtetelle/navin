@@ -1,28 +1,9 @@
-/** A drawing pin, slightly tilted, as on a notice board. */
+import { markupToReact } from '../../components/shared/markupToReact.ts';
+import { pinSvg } from '../../shell/topbar/tabIcons.ts';
+
+/** The drawing pin of the app, the same everywhere. */
 function PushPin() {
-  return (
-    <svg className="rail-svg" viewBox="0 0 40 40" aria-hidden="true">
-      <g transform="rotate(35 20 20)">
-        <path
-          d="M20 23v14"
-          stroke="#8a9099"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-        />
-        <path
-          d="M13 3h14v3.5l-2.6 1.4v8.4l5.6 5v2.7H10v-2.7l5.6-5V7.9L13 6.5z"
-          fill="#d0021b"
-        />
-        <path
-          d="M17.6 8.5v8"
-          stroke="#fff"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          opacity="0.55"
-        />
-      </g>
-    </svg>
-  );
+  return markupToReact(pinSvg('rail-svg'));
 }
 
 /** A camera: body in the text colour (red by night), blue lens. */
@@ -54,7 +35,7 @@ function Camera() {
 function Vhf() {
   return (
     <svg className="rail-svg rail-vhf" viewBox="0 0 40 40" aria-hidden="true">
-      <g transform="rotate(-45 20.5 20)">
+      <g transform="translate(20 20) scale(1.12) translate(-21 -23.2) rotate(-45 20.5 20)">
         <rect
           x="15"
           y="1.5"

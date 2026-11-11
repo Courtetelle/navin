@@ -2,6 +2,7 @@
 export { outingTimes, sheetPng } from '../boats/index.ts';
 export {
   LEMAN_ARCGIS,
+  contextPlace,
   entryColor,
   inSwissArea,
   mapData,
