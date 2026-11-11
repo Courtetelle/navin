@@ -2,7 +2,7 @@ import type { Map as LeafletMap } from 'leaflet';
 
 import { store } from '../../storage/store.ts';
 
-import { LEMAN_CENTER } from './constants.ts';
+import { lakeCenter } from './lakeCenter.ts';
 import { seaCenter } from './seaCenter.ts';
 
 /** Centre of the map last shown, kept from one start to the next. */
@@ -44,11 +44,12 @@ export function shownMapCenter(): Place | null {
 }
 
 /**
- * Where the map opens when nothing is known: Lake Geneva or the sea.
+ * Where the map opens when nothing is known: the lake or the sea place chosen
+ * in the settings.
  * @param lake - Inland waters.
  * @returns The place.
  */
 export function defaultMapCenter(lake: boolean): Place {
-  const [lat, lon] = lake ? LEMAN_CENTER : seaCenter();
+  const [lat, lon] = lake ? lakeCenter() : seaCenter();
   return { lat, lon };
 }

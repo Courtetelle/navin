@@ -3,13 +3,13 @@ import type { LatLngExpression, MapOptions } from 'leaflet';
 import { addLemanVector } from '../../features/map/addLemanVector.ts';
 import type { LatLngPair } from '../../features/map/constants.ts';
 import {
-  LEMAN_CENTER,
   OSM_TILES,
   SEAMARK_TILES,
   SWISS_BOUNDS,
   SWISS_TILES,
   inSwissArea,
 } from '../../features/map/constants.ts';
+import { lakeCenter, lakeZoom } from '../../features/map/lakeCenter.ts';
 import { createMap, leaflet } from '../../features/map/leaflet.ts';
 import { addFullscreenControl } from '../../features/map/mapControls.ts';
 import type { MapDataResult } from '../../features/map/mapData.ts';
@@ -138,7 +138,7 @@ export function buildJournalMap(
         maxZoom: 15,
       });
     } else if (useSwiss) {
-      map.setView(LEMAN_CENTER, 10);
+      map.setView(lakeCenter(), lakeZoom());
     } else {
       map.setView(seaCenter(), SEA_ZOOM);
     }

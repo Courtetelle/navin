@@ -4,7 +4,6 @@ import { addLemanVector } from '../../features/map/addLemanVector.ts';
 import { keepBoatCentred } from '../../features/map/boatFollow.ts';
 import type { LatLngPair } from '../../features/map/constants.ts';
 import {
-  LEMAN_CENTER,
   OSM_TILES,
   SEAMARK_TILES,
   SWISS_BOUNDS,
@@ -12,6 +11,7 @@ import {
   inSwissArea,
 } from '../../features/map/constants.ts';
 import { nmeaPosFresh } from '../../features/map/external.ts';
+import { lakeCenter, lakeZoom } from '../../features/map/lakeCenter.ts';
 import { createMap, leaflet } from '../../features/map/leaflet.ts';
 import { addFullscreenControl } from '../../features/map/mapControls.ts';
 import { whileMapLive } from '../../features/map/mapExtras.ts';
@@ -125,7 +125,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   } else if (here) {
     map.setView(here, 14);
   } else if (useSwiss) {
-    map.setView(LEMAN_CENTER, 10);
+    map.setView(lakeCenter(), lakeZoom());
   } else {
     map.setView(seaCenter(), SEA_ZOOM);
   }

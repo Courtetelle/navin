@@ -1,6 +1,6 @@
 import { lastKnownPos, state } from '../../state/index.ts';
 
-import { LEMAN_CENTER } from './constants.ts';
+import { lakePlace } from './lakeCenter.ts';
 import { seaPlace } from './seaCenter.ts';
 import { defaultMapCenter, shownMapCenter } from './shownMap.ts';
 
@@ -18,7 +18,7 @@ const FRESH_MS = 12 * 3600e3;
 /**
  * The place every menu speaks of (weather, Live météo, rescue, VHF or phone):
  * the zone chosen with NavIn first (at sea the sea place of the settings, on
- * the lake Lake Geneva), else a recent GPS position, else the map last shown.
+ * a lake the lake place of the settings), else a recent GPS position, else the map last shown.
  * @returns The place.
  */
 export function contextPlace(): ContextPlace {
@@ -28,7 +28,7 @@ export function contextPlace(): ContextPlace {
     return { lat, lon, forced: true };
   }
   if (forced === 'lac') {
-    const [lat, lon] = LEMAN_CENTER;
+    const { lat, lon } = lakePlace();
     return { lat, lon, forced: true };
   }
   const known = lastKnownPos();
