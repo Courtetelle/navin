@@ -1,4 +1,4 @@
-"""Grid of the land farther than 5 km from the sea or a lake, for Live météo.
+"""Grid of the land farther than 1 km from the sea or a lake, for Live météo.
 
 Run in a folder holding water-polygons-split-3857/ (osmdata.openstreetmap.de)
 and water-eu.geojsonseq / water-ex.geojsonseq (osmium tags-filter
@@ -8,10 +8,10 @@ shore-far.bin into public/shore-far.bin.
 
 Phase `sea`: OSM ocean polygons (3857) over Europe -> sea.wkb (EPSG:3035).
 Phase `lakes`: OSM natural=water polygons >= 2 km2 -> lakes.wkb (EPSG:3035).
-Phase `grid`: 0.01 deg cells, bit 1 = land farther than 5 km -> shore-far.bin.
+Phase `grid`: 0.005 deg cells, bit 1 = land farther than 1 km -> shore-far.bin.
 
 File format (little endian):
-  'NVSH', u8 version=1, u8 cells per degree (100), i16 lon0, i16 lat0,
+  'NVSH', u8 version=1, u8 cells per degree (200), i16 lon0, i16 lat0,
   u16 tiles in lon, u16 tiles in lat,
   then one u8 per tile (lat rows from south, lon from west):
     0 = every cell kept (water or near), 1 = every cell far land, 2 = mixed,
@@ -33,8 +33,10 @@ from pyproj import Transformer
 from shapely.geometry import box, shape
 
 LON0, LON1, LAT0, LAT1 = -25, 46, 27, 82
-PER_DEG = 100
-NEAR_M = 5000
+PER_DEG = 200
+NEAR_M = 1000
+# Outlines simplified this much before widening: far below a cell.
+SIMPLIFY_M = 50
 LAKE_MIN_M2 = 2_000_000
 NOT_LAKES = {
     'river', 'canal', 'stream', 'ditch', 'drain', 'wastewater', 'moat',
@@ -112,8 +114,7 @@ def varint(value, out):
 
 
 def grid():
-    waters = load('sea.wkb') + load('lakes.wkb')
-    shapely.prepare(waters)
+    waters = np.array(load('sea.wkb') + load('lakes.wkb'), dtype=object)
     tree = shapely.STRtree(waters)
     n_lon, n_lat = LON1 - LON0, LAT1 - LAT0
     kinds = bytearray()
@@ -122,20 +123,26 @@ def grid():
     offs = (np.arange(PER_DEG) + 0.5) * step
     started = time.time()
     counts = [0, 0, 0]
+    margin = NEAR_M + 2 * SIMPLIFY_M
     for tlat in range(n_lat):
         for tlon in range(n_lon):
             lon_w, lat_s = LON0 + tlon, LAT0 + tlat
             lons, lats = np.meshgrid(lon_w + offs, lat_s + offs)
             xs, ys = to3035.transform(lons.ravel(), lats.ravel())
-            pts = shapely.points(xs, ys)
-            env = box(xs.min(), ys.min(), xs.max(), ys.max())
-            cand = tree.query(env.buffer(NEAR_M + 100))
-            near = np.zeros(len(pts), dtype=bool)
-            for gi in cand:
+            env = box(xs.min() - margin, ys.min() - margin,
+                      xs.max() + margin, ys.max() + margin)
+            pieces = shapely.intersection(waters[tree.query(env)], env)
+            near = np.zeros(len(xs), dtype=bool)
+            widened = shapely.buffer(
+                shapely.simplify(pieces, SIMPLIFY_M), NEAR_M, quad_segs=4)
+            for piece in widened:
                 todo = ~near
                 if not todo.any():
                     break
-                near[todo] = shapely.dwithin(waters[gi], pts[todo], NEAR_M)
+                if piece.is_empty:
+                    continue
+                shapely.prepare(piece)
+                near[todo] = shapely.contains_xy(piece, xs[todo], ys[todo])
             far = ~near
             if not far.any():
                 kinds.append(0)
@@ -144,14 +151,14 @@ def grid():
             else:
                 kinds.append(2)
                 runs = bytearray()
-                cur, length = False, 0
-                for value in far:
-                    if value == cur:
-                        length += 1
-                    else:
-                        varint(length, runs)
-                        cur, length = value, 1
-                varint(length, runs)
+                changes = np.flatnonzero(np.diff(far.astype(np.int8))) + 1
+                edges = np.concatenate(([0], changes, [len(far)]))
+                lengths = np.diff(edges).tolist()
+                if far[0]:
+                    lengths.insert(0, 0)
+                for length in lengths:
+                    varint(length, runs)
+                assert len(runs) < 65536, 'runs of a tile too long'
                 blobs += struct.pack('<H', len(runs)) + runs
             counts[kinds[-1]] += 1
         print(f'lat {LAT0 + tlat} done, {time.time() - started:.0f}s, kinds {counts}', flush=True)

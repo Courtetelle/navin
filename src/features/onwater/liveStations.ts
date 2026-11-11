@@ -26,7 +26,7 @@ export type LiveStation = WindReading & {
 /**
  * Every wind station measuring now around a place: MeteoSwiss, OpenWindMap,
  * Météo-France (with a key), the closest first. A station on land farther
- * than 5 km from the sea or a lake is left out: its wind is not the wind on
+ * than 1 km from the sea or a lake is left out: its wind is not the wind on
  * the water.
  * @param center - Place searched around.
  * @param radius - Radius in km.

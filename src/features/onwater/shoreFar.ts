@@ -1,6 +1,6 @@
 /**
- * The land farther than 5 km from the sea or a lake of 2 km² or more, on a
- * grid of 0.01° over Europe (built from OpenStreetMap, see
+ * The land farther than 1 km from the sea or a lake of 2 km² or more, on a
+ * grid of 0.005° over Europe (built from OpenStreetMap, see
  * `scripts/shore/build_shore.py`). A wind station there says little of the
  * wind on the water.
  */
@@ -51,7 +51,7 @@ export function parseShoreGrid(bytes: Uint8Array): ShoreGrid | null {
 }
 
 /**
- * Whether a place is on land, farther than 5 km from the sea or a lake.
+ * Whether a place is on land, farther than 1 km from the sea or a lake.
  * @param grid - The grid.
  * @param lat - Latitude.
  * @param lon - Longitude.
