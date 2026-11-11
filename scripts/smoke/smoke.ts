@@ -640,6 +640,27 @@ async function menuBlink(page: Page, theme: string, name: string) {
   );
 }
 
+/**
+ * By day the data button is never grey: black writing on white.
+ * @param page - The page.
+ * @param theme - Theme checked.
+ * @param name - The screen shown.
+ */
+async function dataFace(page: Page, theme: string, name: string) {
+  if (theme === 'night') return;
+  const face = await page.evaluate(() => {
+    const tab = document.querySelector('.top-tab.tab-data');
+    if (!tab) return 'absent';
+    const style = globalThis.getComputedStyle(tab);
+    return `${style.backgroundColor} ${style.color}`;
+  });
+  check(
+    theme,
+    `data is black on white on ${name}`,
+    face === 'rgb(255, 255, 255) rgb(0, 0, 0)',
+  );
+}
+
 async function tablet(page: Page, theme: string): Promise<void> {
   const home = await tabletPlaces(page);
   check(theme, 'tablet: every side button is shown', !home.includes('absent'));
@@ -659,6 +680,8 @@ async function tablet(page: Page, theme: string): Promise<void> {
     check(theme, `tablet: same side buttons on ${name}`, here === home);
     // eslint-disable-next-line no-await-in-loop -- one screen after the other
     if (name !== 'SOS') await menuBlink(page, theme, name);
+    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    await dataFace(page, theme, name);
     // eslint-disable-next-line no-await-in-loop -- one screen after the other
     const view = await page.locator('main#view').boundingBox();
     check(

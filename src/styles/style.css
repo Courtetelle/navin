@@ -10503,6 +10503,22 @@ html:root:not([data-theme='night'])
   .top-tab.top-tab.tab-data.bare.active.menu-here {
   background: #fff !important;
 }
+/* By day the data button is never grey: always black writing on white, in
+   every state (open, staged, menu of another button). */
+html:root:not([data-theme='night'])
+  body
+  header.topbar
+  nav.topnav
+  .top-tab.top-tab.tab-data.tab-data,
+html:root:not([data-theme='night'])
+  body
+  header.topbar
+  nav.topnav
+  .top-tab.top-tab.tab-data.tab-data.bare.active {
+  background: #fff !important;
+  color: #000 !important;
+  -webkit-text-stroke-color: #000 !important;
+}
 /* data open: written in black on the colour of PréP by day, red at night. */
 html:root:not([data-theme='night'])
   body
