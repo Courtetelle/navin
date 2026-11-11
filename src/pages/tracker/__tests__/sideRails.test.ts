@@ -29,6 +29,15 @@ describe('side rails', () => {
     expect(loadRails().right[4]).toBe('');
   });
 
+  it('frees the place of the pin kept from before: it is fixed on the left', () => {
+    setStorageBackend(
+      createMemoryStorage({
+        'ldb.rails.v6': { left: [], right: ['act:point', 'act:photo'] },
+      }),
+    );
+    expect(loadRails().right.slice(0, 2)).toEqual(['', 'act:photo']);
+  });
+
   it('splits the icon from the words', () => {
     expect(splitTitle('🌤 Météo')).toEqual({ icon: '🌤', label: 'Météo' });
     expect(splitTitle('Mes cartes')).toEqual({

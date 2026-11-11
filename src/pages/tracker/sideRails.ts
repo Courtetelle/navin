@@ -30,12 +30,15 @@ export const MAP_ACTIONS: readonly FunctionEntry[] = [
 /** The columns of a first start, to show the idea. */
 export const DEFAULT_RAILS: Rails = {
   left: ['', '', '', '', '', ''],
-  right: ['act:point', 'act:photo', '', '', '', ''],
+  right: ['act:photo', '', '', '', '', ''],
 };
+
+/** Functions with a fixed place, never chosen for a free one. */
+const FIXED: ReadonlySet<string> = new Set(['act:point']);
 
 function fit(keys: unknown): string[] {
   const list = Array.isArray(keys)
-    ? keys.map((key) => (typeof key === 'string' ? key : ''))
+    ? keys.map((key) => (typeof key === 'string' && !FIXED.has(key) ? key : ''))
     : [];
   return Array.from({ length: RAIL_SLOTS }, (_, index) => list[index] ?? '');
 }

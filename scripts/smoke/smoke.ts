@@ -574,6 +574,7 @@ const TABLET_BUTTONS = [
   '#searchBtn',
   '.rail-comm',
   '.side-rail-left .rail-btn',
+  '.rail-pin',
 ];
 
 async function tabletPlaces(page: Page): Promise<string> {
@@ -591,8 +592,8 @@ async function tabletPlaces(page: Page): Promise<string> {
 }
 
 /**
- * The rule of the landscape tablet: on every screen the clock, NavIn and data
- * stand on the left, SOS, settings, magnifier and VHF on the right, at the
+ * The rule of the landscape tablet: on every screen the clock, NavIn and the
+ * pin stand on the left, SOS, settings, magnifier, VHF and data on the right, at the
  * same places, and the page stays between the two columns.
  */
 async function tablet(page: Page, theme: string): Promise<void> {

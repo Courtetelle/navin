@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { markupToReact } from '../../components/shared/markupToReact.ts';
@@ -38,8 +38,15 @@ interface Picking {
   index: number;
 }
 
+/** The pin has its fixed place in the left column. */
+const PIN_KEY = 'act:point';
+/** How long the pin stays pressed in after a touch. */
+const PRESSED_MS = 1500;
+
 function choices(): FunctionEntry[] {
-  return [...MAP_ACTIONS, ...functionEntries()];
+  return [...MAP_ACTIONS, ...functionEntries()].filter(
+    (entry) => entry.key !== PIN_KEY,
+  );
 }
 
 /**
@@ -123,10 +130,15 @@ export function SideRails() {
             <>
               {weather ? <RailButton entry={weather} onPick={noPick} /> : null}
               <DepartButtons />
+              <PinButton />
+            </>
+          ) : null}
+          {side === 'right' ? (
+            <>
+              <CommButton />
               <div className="rail-data-place" aria-hidden="true" />
             </>
           ) : null}
-          {side === 'right' ? <CommButton /> : null}
           {rails[side].slice(0, slotsOf(side)).map((key, index) => {
             const entry = key ? known.get(key) : undefined;
             return entry ? (
@@ -165,13 +177,52 @@ const DRAWN = new Set(['act:point', 'act:photo', 'weather']);
 
 /**
  * Places left for the sailor's buttons: the right column gives its first to
- * the VHF / phone button, the left one has Météo, PréP, START and data first.
+ * the VHF / phone button and data, the left one has Météo, PréP, START and
+ * the pin first.
  */
 function slotsOf(side: RailSide): number {
   return side === 'right' ? RAIL_SLOTS - 1 : LEFT_SLOTS;
 }
 
 const LEFT_SLOTS = 3;
+
+/**
+ * Last fixed button of the left column, as low as the magnifier: a pin where
+ * the boat is. Touched, it stays pressed in a moment, as a real button.
+ * @returns The button.
+ */
+function PinButton() {
+  const tr = useTr();
+  const [pressed, setPressed] = useState(0);
+  useEffect(() => {
+    if (!pressed) return undefined;
+    const timer = setTimeout(() => setPressed(0), PRESSED_MS);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [pressed]);
+  return (
+    <Button
+      type="button"
+      noUiEdit
+      className={
+        pressed
+          ? 'rail-btn rail-bare rail-short rail-pin rail-pressed'
+          : 'rail-btn rail-bare rail-short rail-pin'
+      }
+      aria-label={tr('Point ici')}
+      aria-pressed={pressed > 0}
+      onClick={() => {
+        setPressed(Date.now());
+        run(PIN_KEY);
+      }}
+    >
+      <span className="rail-icon">
+        <RailIcon name={PIN_KEY} />
+      </span>
+    </Button>
+  );
+}
 
 function openCalls(zone: 'ext' | 'int'): void {
   buzz();
