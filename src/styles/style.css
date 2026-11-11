@@ -9811,9 +9811,15 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body .side-rail-right {
     top: calc(256px + env(safe-area-inset-top));
   }
-  /* The boat button of the left column replaces the arrow of the map */
-  html body .trk-full .map-locate-btn {
+  /* The boat button of the left column replaces the arrow of the map, the
+     dividers of the right column its own */
+  html body .trk-full .map-locate-btn,
+  html body .leaflet-control-container .ruler-btn {
     display: none !important;
+  }
+  html body .rail-ruler .rail-icon svg {
+    width: 34px;
+    height: 34px;
   }
   html body .trk-full .trk-dash {
     left: 116px;
@@ -10216,6 +10222,27 @@ body.nav-search:not(.trk-mode) #searchBtn {
       0 0 0 1px rgba(0, 0, 0, 0.7),
       0 0 12px 2px rgba(255, 110, 30, 0.55),
       inset 0 1px 0 rgba(255, 170, 110, 0.35) !important;
+  }
+  /* The dividers laid on the map: their button lit in their pink */
+  html:root body .rail-btn.rail-ruler.rail-on {
+    color: #fff !important;
+    border-color: rgba(255, 190, 225, 0.95) !important;
+    background: linear-gradient(
+      180deg,
+      #ff5fb4 0%,
+      #e6007e 55%,
+      #b00062 100%
+    ) !important;
+  }
+  :root[data-theme='night'] body .rail-btn.rail-ruler.rail-on {
+    color: #ffd0e6 !important;
+    border-color: rgba(255, 90, 170, 0.8) !important;
+    background: linear-gradient(
+      180deg,
+      #7a1048 0%,
+      #560030 60%,
+      #3a0020 100%
+    ) !important;
   }
   /* The boat button red while the course is up */
   html:root body .rail-btn.rail-boat.course-up,

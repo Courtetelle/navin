@@ -10,6 +10,7 @@ import {
   boatOrientPress,
   boatScaleTap,
 } from '../../features/map/navinScale.ts';
+import { DIVIDERS_ICON, rulerOn } from '../../features/map/rulerTool.ts';
 import { trkPointNow } from '../../features/map/trackerPoint.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { takePhoto } from '../../features/onwater/index.ts';
@@ -138,7 +139,12 @@ export function SideRails() {
               <PinButton />
             </>
           ) : null}
-          {side === 'right' ? <CommButton /> : null}
+          {side === 'right' ? (
+            <>
+              <CommButton />
+              <RulerButton />
+            </>
+          ) : null}
           {rails[side].slice(0, slotsOf(side)).map((key, index) => {
             const entry = key ? known.get(key) : undefined;
             return entry ? (
@@ -258,6 +264,56 @@ function PinButton() {
       <span className="rail-icon">
         <RailIcon name={PIN_KEY} />
       </span>
+    </Button>
+  );
+}
+
+/** Time for the map to open before the dividers are laid on it. */
+const MAP_OPEN_MS = 600;
+
+function rulerButton(): HTMLElement | null {
+  const map = shownMap() ?? tracker.current?.map;
+  const box = map?.getContainer();
+  return box?.isConnected && box.offsetParent !== null
+    ? box.querySelector<HTMLElement>('.ruler-btn')
+    : null;
+}
+
+/** The dividers on the map shown, or on the map of the boat. */
+function toggleRuler(): void {
+  const button = rulerButton();
+  if (button) {
+    button.click();
+    return;
+  }
+  buzz();
+  go('tracker');
+  setTimeout(() => rulerButton()?.click(), MAP_OPEN_MS);
+}
+
+/**
+ * The dividers, distance and course, at their fixed place in the right
+ * column: lit while laid on the map.
+ * @returns The button.
+ */
+function RulerButton() {
+  useSignals();
+  const tr = useTr();
+  const on = rulerOn.value;
+  return (
+    <Button
+      type="button"
+      noUiEdit
+      className={
+        on
+          ? 'rail-btn rail-bare rail-ruler rail-on'
+          : 'rail-btn rail-bare rail-ruler'
+      }
+      aria-label={tr('Compas : distance et cap')}
+      aria-pressed={on}
+      onClick={toggleRuler}
+    >
+      <span className="rail-icon">{markupToReact(DIVIDERS_ICON)}</span>
     </Button>
   );
 }

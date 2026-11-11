@@ -576,6 +576,7 @@ const TABLET_BUTTONS = [
   '.side-rail-left .rail-btn',
   '.rail-pin',
   '.rail-boat',
+  '.rail-ruler',
 ];
 
 async function tabletPlaces(page: Page): Promise<string> {

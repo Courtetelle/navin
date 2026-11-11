@@ -1,3 +1,4 @@
+import { signal } from '@preact/signals-react';
 import type {
   Control,
   LatLng,
@@ -21,7 +22,11 @@ const FOLLOW_MS = 1000;
 /** A point dropped this close to the boat (screen pixels) sticks to it. */
 export const SNAP_PX = 40;
 
-const DIVIDERS_ICON =
+/** The dividers are laid on a map, for the button of the tablet column. */
+export const rulerOn = signal(false);
+
+/** The drawing of the dividers. */
+export const DIVIDERS_ICON =
   '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="4" r="2.2" fill="currentColor"/><path d="M12 5.5 6 21M12 5.5 18 21" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M8.2 14.5h7.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 
 interface End {
@@ -185,6 +190,7 @@ export function addRulerControl(map: LeafletMap): void {
   };
 
   const show = () => {
+    rulerOn.value = true;
     const boat = boatLatLng();
     const boatSeen = boat !== null && map.getBounds().contains(boat);
     const first = boatSeen ? boat : map.getCenter();
@@ -225,6 +231,7 @@ export function addRulerControl(map: LeafletMap): void {
   };
 
   const hide = () => {
+    if (ends) rulerOn.value = false;
     stopFollow?.();
     stopFollow = null;
     map.off('rotate zoomend', redraw);
