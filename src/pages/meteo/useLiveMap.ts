@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from 'react';
 import { OSM_TILES, SEAMARK_TILES } from '../../features/map/constants.ts';
 import { createMap, leaflet, loadLeaflet } from '../../features/map/leaflet.ts';
 import { disposeMap } from '../../features/map/mapExtras.ts';
-import type { LiveStation } from '../../features/onwater/index.ts';
+import type { AlertSpot, LiveStation } from '../../features/onwater/index.ts';
 import { stationKey, windValue } from '../../features/onwater/index.ts';
+import { distKm } from '../../lib/geo.ts';
 import { toast } from '../../state/index.ts';
 
 import { windColors } from './liveText.ts';
@@ -49,6 +50,33 @@ const FOCUS_MS = 4000;
 /** Closest zoom kept when a station is centred. */
 const FOCUS_ZOOM = 12;
 
+/** A station this close to the place of an alert is the one that gave it. */
+const SAME_STATION_KM = 0.3;
+
+/**
+ * The station that gave a wind alert, among those shown.
+ * @param stations - Stations shown.
+ * @param lat - Latitude of the station of the alert.
+ * @param lon - Its longitude.
+ * @returns The closest one within 300 m, or `undefined`.
+ */
+export function alertStation(
+  stations: readonly LiveStation[],
+  lat: number,
+  lon: number,
+): LiveStation | undefined {
+  let best: LiveStation | undefined;
+  let bestKm = SAME_STATION_KM;
+  for (const station of stations) {
+    const km = distKm(lat, lon, station.lat, station.lon);
+    if (km <= bestKm) {
+      best = station;
+      bestKm = km;
+    }
+  }
+  return best;
+}
+
 /**
  * The map of the stations: one coloured badge per station (mean wind, gusts
  * in small), the circle searched and its centre.
@@ -58,6 +86,7 @@ const FOCUS_ZOOM = 12;
  * @param search.center - Centre searched.
  * @param search.radius - Radius in km.
  * @param basis - Wind the colours follow, `'gust'` or `'avg'`.
+ * @param alert - The station of a wind alert, blinking in a red band.
  * @param onPick - A station is touched.
  * @returns The map handle.
  */
@@ -66,6 +95,7 @@ export function useLiveMap(
   stations: readonly LiveStation[],
   search: { center: LivePlace; radius: number },
   basis: string,
+  alert: AlertSpot | null,
   onPick: (key: string) => void,
 ): LiveMap {
   const map = useRef<LeafletMap | null>(null);
@@ -158,6 +188,8 @@ export function useLiveMap(
       padding: [10, 10],
     });
   }, [ready, lat, lon, radius]);
+  const alertLat = alert?.lat;
+  const alertLon = alert?.lon;
   useEffect(() => {
     const group = layer.current;
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- keeps Leaflet, outside React, in step with the props
@@ -200,7 +232,28 @@ export function useLiveMap(
         marker.getElement()?.classList.add('live-focused');
       }
     }
-  }, [ready, stations, basis, lat, lon]);
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- keeps Leaflet, outside React, in step with the props
+    if (alertLat == null || alertLon == null) return;
+    // The station of the wind alert: its badge in a red band that blinks,
+    // the other stations still shown around it.
+    const alerted = alertStation(stations, alertLat, alertLon);
+    if (alerted) {
+      const marker = markers.current.get(stationKey(alerted));
+      marker?.setZIndexOffset(1000);
+      marker?.getElement()?.classList.add('live-alerted');
+      return;
+    }
+    // Its station no longer answers: a red band on its place.
+    L.marker([alertLat, alertLon], {
+      icon: L.divIcon({
+        className: 'live-alert-wrap',
+        html: '<div class="live-alert-ring"></div>',
+        iconSize: [0, 0],
+      }),
+      interactive: false,
+      keyboard: false,
+    }).addTo(group);
+  }, [ready, stations, basis, lat, lon, alertLat, alertLon]);
   return {
     center: () => {
       const shown = map.current;

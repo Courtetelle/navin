@@ -106,6 +106,11 @@ export function topMenu(
  */
 export function baseNav(context: TopMenuContext): TabFace {
   const inland = context.zone === 'lac';
+  // Landscape tablet: VHF, PréP and the track have their own buttons in the
+  // columns, which show their state; NavIn stays NavIn.
+  if (context.wide) {
+    return { label: 'NavIn', html: [inland ? NAVIN_LAC_SVG : NAVIN_MER_SVG] };
+  }
   if (context.currentView === 'vhf') {
     return inland
       ? { label: 'Téléphone', html: phoneHtml(true), box: true, vhfOn: true }

@@ -16,11 +16,16 @@ import { takePhoto } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { useWide } from '../../lib/useWide.ts';
+import { hasBodyClass } from '../../shell/bodyClass.ts';
 import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
 import { domainActions } from '../../shell/topbar/tabDisplays.ts';
-import { FLAG_SVG, START_SVG } from '../../shell/topbar/tabIcons.ts';
+import {
+  FLAG_SVG,
+  FLAG_WAVE_SVG,
+  START_SVG,
+} from '../../shell/topbar/tabIcons.ts';
 import { addMark, navZone, state, toast } from '../../state/index.ts';
 
 import { TrackRailButton } from './TrackRailButton.tsx';
@@ -281,21 +286,30 @@ function DepartButtons() {
     domainActions.quickStart();
   });
   const tracking = state.view.tracking.value;
+  // A PréP under way shows on its own button, no longer on NavIn.
+  const prepOn = state.data.prep.value !== null;
+  const inPrep =
+    prepOn &&
+    (state.view.currentView.value === 'prep' || hasBodyClass('prep-on'));
+  const prepClasses = ['rail-btn', 'rail-prep'];
+  if (tracking) prepClasses.push('rail-hidden');
+  if (prepOn) prepClasses.push('rail-on');
   return (
     <div className="rail-depart">
       <Button
         type="button"
         noUiEdit
-        className={
-          tracking ? 'rail-btn rail-prep rail-hidden' : 'rail-btn rail-prep'
-        }
-        aria-label={tr('PréP')}
+        className={prepClasses.join(' ')}
+        aria-label={tr(prepOn ? 'PréP en cours' : 'PréP')}
+        aria-pressed={prepOn}
         onClick={() => {
           buzz();
           domainActions.prepStart();
         }}
       >
-        <span className="rail-icon">{markupToReact(FLAG_SVG)}</span>
+        <span className="rail-icon">
+          {markupToReact(inPrep ? FLAG_WAVE_SVG : FLAG_SVG)}
+        </span>
       </Button>
       {tracking ? (
         <TrackRailButton />

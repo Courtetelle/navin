@@ -27,7 +27,7 @@ import {
   windMutedNote,
   windValue,
 } from './windLogic.ts';
-import { showWindPopup } from './windOverlayState.ts';
+import { liveAlertSpot, showWindPopup } from './windOverlayState.ts';
 import { coastWind, modelWind, stationWind } from './windReadings.ts';
 import type {
   WindMeta,
@@ -189,7 +189,19 @@ function showAlertPopup(
       : `mesuré à ${top.name} (${network})`,
     sea: meta.waveH == null ? '' : `modèle ici : ${seaTxt(meta)}`,
     omm: isLake() ? '' : waveOmmTxt(force),
-    onLive: () => go('meteo'),
+    onLive: () => {
+      // A measured alert: Live météo shows where it came from.
+      liveAlertSpot.value =
+        forecast || top.lat == null || top.lon == null
+          ? null
+          : {
+              lat: top.lat,
+              lon: top.lon,
+              name: top.name,
+              boat: windWatchPlace.peek(),
+            };
+      go('meteo');
+    },
     ...(forecast
       ? {
           note: `⚠️ Aucune station de mesure à moins de ${meta.radius ?? config.radius} km : vent calculé par un modèle de prévision. Le vent réel peut être plus fort ou plus faible.`,

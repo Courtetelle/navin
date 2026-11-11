@@ -6,6 +6,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import type { LiveStation, MfTally } from '../../features/onwater/index.ts';
 import {
+  liveAlertSpot,
   liveStations,
   newMfTally,
   stationKey,
@@ -42,7 +43,14 @@ export function MeteoPage() {
   const config = windConfig();
   const [back] = useState(() => liveBackFrom(navigation.peek().from));
   const wide = useWide();
-  const [center, setCenter] = useState<LivePlace>(mapPlace);
+  // Opened from a wind alert: around the boat, the station of the alert lit.
+  const [alert] = useState(() => liveAlertSpot.peek());
+  useEffect(() => {
+    liveAlertSpot.value = null;
+  }, []);
+  const [center, setCenter] = useState<LivePlace>(
+    () => alert?.boat ?? mapPlace(),
+  );
   const [radius, setRadius] = useState(config.radius);
   const [stations, setStations] = useState<LiveStation[]>([]);
   const [readFor, setReadFor] = useState<string | null>(null);
@@ -57,6 +65,7 @@ export function MeteoPage() {
     stations,
     { center, radius },
     config.basis,
+    alert,
     (key) => {
       buzz();
       setPicked(key);

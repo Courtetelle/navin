@@ -2282,7 +2282,8 @@ dl.vocab dd {
 .wind-flash {
   position: fixed;
   inset: 0;
-  z-index: 2000;
+  /* Above every button, the magnifier (2300) included */
+  z-index: 2350;
   pointer-events: none;
   background: transparent;
 }
@@ -9071,17 +9072,20 @@ body.has-navtop #view > h1.live-title,
 .live-focus .live-mk-wrap:not(.live-focused) {
   visibility: hidden;
 }
-.live-focused {
+.live-focused,
+.live-alerted {
   z-index: 1000 !important;
 }
-.live-focused .live-mk {
+.live-focused .live-mk,
+.live-alerted .live-mk {
   transform: translate(-50%, -50%) scale(1.6);
   box-shadow:
     0 0 0 4px #fff,
     0 0 0 8px #d0021b;
   animation: live-pulse 0.8s ease-in-out infinite alternate;
 }
-.live-focused .live-mk::after {
+.live-focused .live-mk::after,
+.live-alerted .live-mk::after {
   content: attr(data-name);
   position: absolute;
   top: calc(100% + 14px);
@@ -9127,6 +9131,41 @@ body.has-navtop #view > h1.live-title,
   white-space: nowrap;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   cursor: pointer;
+}
+/* Live météo opened from a wind alert: the station of the alert in a red
+   band that blinks */
+.live-alert-ring {
+  position: absolute;
+  width: 74px;
+  height: 74px;
+  transform: translate(-50%, -50%);
+  border: 8px solid #e10600;
+  border-radius: 50%;
+  background: rgba(225, 6, 0, 0.18);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 18px 6px rgba(225, 6, 0, 0.7);
+  pointer-events: none;
+  animation: live-alert-blink 0.9s steps(2, jump-none) infinite;
+}
+@keyframes live-alert-blink {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.12;
+  }
+}
+:root[data-theme='night'] .live-alert-ring {
+  border-color: #ff2a1a;
+  box-shadow:
+    0 0 0 3px #300,
+    0 0 18px 6px rgba(255, 42, 26, 0.75);
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-alert-ring {
+    animation-duration: 1.6s;
+  }
 }
 .live-mk i {
   display: inline-block;
@@ -10106,6 +10145,34 @@ body.nav-search:not(.trk-mode) #searchBtn {
     transition:
       transform 0.12s ease-out,
       box-shadow 0.12s ease-out;
+  }
+  /* PréP under way: its button lit orange, as NavIn was on the phone */
+  html:root body .rail-btn.rail-prep.rail-on {
+    border-color: rgba(255, 214, 160, 0.95) !important;
+    background: linear-gradient(
+      180deg,
+      #ffe2b8 0%,
+      #f8bb6a 55%,
+      #ee9a3a 100%
+    ) !important;
+    box-shadow:
+      0 0 0 1px rgba(160, 80, 0, 0.45),
+      0 0 14px 2px rgba(245, 150, 40, 0.75),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -3px 6px rgba(140, 60, 0, 0.25) !important;
+  }
+  :root[data-theme='night'] body .rail-btn.rail-prep.rail-on {
+    border-color: rgba(255, 140, 60, 0.85) !important;
+    background: linear-gradient(
+      180deg,
+      #8a3a08 0%,
+      #5e2400 60%,
+      #3e1600 100%
+    ) !important;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.7),
+      0 0 12px 2px rgba(255, 110, 30, 0.55),
+      inset 0 1px 0 rgba(255, 170, 110, 0.35) !important;
   }
   /* The boat button red while the course is up */
   html:root body .rail-btn.rail-boat.course-up,

@@ -4,6 +4,7 @@ import { isLake } from '../../state/index.ts';
 
 import { mfReadings, owmReadings } from './coastStations.ts';
 import { smnNow, smnStations } from './externals.ts';
+import { METEO_SWISS } from './liveStations.ts';
 import { farFromShore, nearWater, shoreGrid } from './shoreFar.ts';
 import type { WindConfig } from './windLogic.ts';
 import { windLevel, windValue } from './windLogic.ts';
@@ -47,7 +48,15 @@ export async function stationWind(
     try {
       const rows = (await smnNow(abbreviation)) as unknown as StationRow[];
       const reading = stationReading(rows, name, km, Date.now());
-      if (reading) readings.push(reading);
+      if (reading) {
+        readings.push({
+          ...reading,
+          id: abbreviation,
+          lat,
+          lon,
+          net: METEO_SWISS,
+        });
+      }
     } catch {
       // Next station.
     }
