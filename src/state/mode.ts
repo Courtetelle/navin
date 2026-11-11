@@ -104,9 +104,39 @@ export function fieldByKey(key: string): FieldDefinition | undefined {
  * @param value - `'auto'` for GPS, `'lac'` or `'mer'`.
  */
 export function setZoneSim(value: string): void {
+  // A zone chosen with NavIn starts again on the place of the settings.
+  if (value !== 'auto') store.del(NAVIN_SPOT_KEY);
   view.zoneSimV.value = value === 'auto' ? '' : value;
   if (value === 'auto') store.del('ldb.zoneSim');
   else store.setRaw('ldb.zoneSim', value);
+}
+
+const NAVIN_SPOT_KEY = 'ldb.navinSpot';
+
+/** A place on a map. */
+export interface NavinSpot {
+  lat: number;
+  lon: number;
+}
+
+/**
+ * Where NavIn looks: the place the map was last moved to with the fingers,
+ * kept until another zone is chosen with NavIn.
+ * @returns The place, or `null` for the place of the settings.
+ */
+export function navinSpot(): NavinSpot | null {
+  const spot = store.get<NavinSpot | null>(NAVIN_SPOT_KEY, null);
+  return spot && Number.isFinite(spot.lat) && Number.isFinite(spot.lon)
+    ? spot
+    : null;
+}
+
+/**
+ * Keep the place the map was moved to with the fingers, for NavIn.
+ * @param spot - Centre of the map.
+ */
+export function setNavinSpot(spot: NavinSpot): void {
+  store.set(NAVIN_SPOT_KEY, { lat: spot.lat, lon: spot.lon });
 }
 
 /**

@@ -19,6 +19,7 @@ function openTracker() {
     },
     getContainer: () => ({ isConnected: true, querySelector: () => null }),
     getZoom: () => 15,
+    getCenter: () => ({ lat: 46.5, lng: 6.6 }),
     setView,
   };
   const handle: TrackerHandle = newTracker();

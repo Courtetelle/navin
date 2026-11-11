@@ -1,6 +1,6 @@
 import type { Map as LeafletMap } from 'leaflet';
 
-import { state } from '../../state/index.ts';
+import { setNavinSpot, state } from '../../state/index.ts';
 
 import { isMapLive } from './mapExtras.ts';
 import type { TrackerHandle } from './trackerState.ts';
@@ -44,6 +44,11 @@ export function recenterAfterDrag(
     handle.drifted = drifted;
   });
   map.on('dragend zoomend', wait);
+  // Moved with the fingers: NavIn will come back exactly here.
+  map.on('dragend', () => {
+    const { lat, lng } = map.getCenter();
+    setNavinSpot({ lat, lon: lng });
+  });
   map.on('zoomstart', () => clearTimeout(timer));
   map.on('popupopen', () => {
     popupOpen = true;

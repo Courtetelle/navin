@@ -1,14 +1,18 @@
+import type { LatLng } from 'leaflet';
+
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
-import { herePos, state, toast } from '../../state/index.ts';
+import { herePos, navinSpot, state, toast } from '../../state/index.ts';
 
 import { backToGps } from './gpsZone.ts';
+import { lakeCenter } from './lakeCenter.ts';
 import { leaflet } from './leaflet.ts';
 import { mapOrientation, toggleOrientation } from './mapOrientation.ts';
+import { seaCenter } from './seaCenter.ts';
 import { setFollow, tracker } from './trackerState.ts';
 
-/** Where a scale is centred: the map as shown, or the boat. */
-type Centre = 'view' | 'boat';
+/** Where a scale is centred: the place of NavIn, or the boat. */
+type Centre = 'navin' | 'boat';
 
 /**
  * The scales NavIn and the boat button go through on the tablet: the
@@ -58,11 +62,27 @@ function apply(rank: number, centre: Centre, tries = WAIT_TRIES): void {
   const boat =
     handle.me?.getLatLng() ??
     (here ? leaflet().latLng(here.lat, here.lon) : null);
-  const middle = centre === 'boat' && boat ? boat : map.getCenter();
+  const middle =
+    centre === 'boat' && boat ? boat : (navinPlace() ?? map.getCenter());
   // NavIn looks where the map is: it must not be pulled back to the boat.
   setFollow(centre === 'boat');
   const span = (SCALES_NM[rank] ?? 3) * METRES_PER_NM;
   map.fitBounds(leaflet().latLng(middle).toBounds(span), { padding: [0, 0] });
+}
+
+/**
+ * Where NavIn looks: the place the map was last moved to with the fingers,
+ * else the place of the zone chosen in the settings.
+ * @returns The place, or `null` to stay where the map is.
+ */
+function navinPlace(): LatLng | null {
+  const L = leaflet();
+  const spot = navinSpot();
+  if (spot) return L.latLng(spot.lat, spot.lon);
+  const zone = state.view.zoneSimV.peek();
+  if (zone === 'lac') return L.latLng(...lakeCenter());
+  if (zone === 'mer') return L.latLng(...seaCenter());
+  return null;
 }
 
 function onMap(): boolean {
@@ -71,15 +91,16 @@ function onMap(): boolean {
 
 /**
  * NavIn on the tablet: back to the map at 3 NM, or on the map the next
- * scale (0,3 NM, 3 NM, 33 NM, 99 NM, then 0,3 NM again), always where
- * the map is looking, never back on the boat.
+ * scale (0,3 NM, 3 NM, 33 NM, 99 NM, then 0,3 NM again), always on the
+ * place of NavIn (where the fingers last left the map, else the place of the
+ * settings), never back on the boat.
  * @param shown - The map was already on screen.
  */
 export function navinScaleTap(shown: boolean): void {
   buzz();
   scale = nextScale(scale, shown);
   if (!shown) go('tracker');
-  apply(scale, 'view');
+  apply(scale, 'navin');
   toast(scaleText(scale));
 }
 
