@@ -9678,14 +9678,17 @@ body.nav-search:not(.trk-mode) #searchBtn {
     -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
   }
+  /* NavIn under the settings, in the right column; the boat takes its place
+     on the left */
   html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
-    top: calc(68px + env(safe-area-inset-top)) !important;
-    left: 10px !important;
-    height: 70px !important;
+    top: calc(70px + env(safe-area-inset-top)) !important;
+    left: auto !important;
+    right: 10px !important;
+    height: 52px !important;
   }
   /* data, short like the magnifier, under VHF / phone in the right column */
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data {
-    top: calc(210px + env(safe-area-inset-top)) !important;
+    top: calc(256px + env(safe-area-inset-top)) !important;
     left: auto !important;
     right: 10px !important;
     height: 52px !important;
@@ -9694,7 +9697,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     top: auto !important;
     bottom: calc(10px + env(safe-area-inset-bottom)) !important;
     right: 10px !important;
-    height: 70px !important;
+    height: 52px !important;
   }
   html body header.topbar #gearBtn {
     top: calc(8px + env(safe-area-inset-top)) !important;
@@ -9702,7 +9705,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     height: 52px !important;
   }
   html body #searchBtn {
-    top: calc(68px + env(safe-area-inset-top)) !important;
+    top: calc(132px + env(safe-area-inset-top)) !important;
     right: 10px !important;
     left: auto !important;
     bottom: auto !important;
@@ -9726,11 +9729,15 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body .side-rail {
-    top: calc(148px + env(safe-area-inset-top));
+    top: calc(70px + env(safe-area-inset-top));
     width: 96px;
   }
   html body .side-rail-right {
-    top: calc(130px + env(safe-area-inset-top));
+    top: calc(194px + env(safe-area-inset-top));
+  }
+  /* The boat button of the left column replaces the arrow of the map */
+  html body .trk-full .map-locate-btn {
+    display: none !important;
   }
   html body .trk-full .trk-dash {
     left: 116px;
@@ -9981,15 +9988,47 @@ body.nav-search:not(.trk-mode) #searchBtn {
   flex: none;
 }
 
-/* Tablet columns: two heights only, 70 px, and 52 px as the magnifier (clock,
-   settings, magnifier, data, pin) */
+/* Tablet columns: every button 52 px high, as the magnifier */
 @media (min-width: 1000px) and (orientation: landscape) {
-  html body .rail-btn.rail-short {
+  html body .rail-btn.rail-btn {
     height: 52px;
+    padding: 2px;
   }
-  html body .rail-btn.rail-short .rail-svg {
-    width: 42px;
-    height: 42px;
+  html body .rail-btn.rail-btn .rail-svg {
+    width: 40px;
+    height: 40px;
+  }
+  html body .rail-btn.rail-btn .tb-ico {
+    height: 44px;
+  }
+  html body .rail-btn.rail-comm .rail-badge .rail-svg {
+    width: 18px;
+    height: 18px;
+  }
+  html body .rail-btn.rail-btn .rail-icon {
+    font-size: 30px;
+  }
+  /* NavIn at the screen edge: its satellite at its inner corner */
+  html
+    body.zone-auto
+    header.topbar
+    nav.topnav
+    .top-tab[data-view='tracker']::after {
+    right: auto !important;
+    left: -7px !important;
+  }
+  /* The boat button: the arrow of the map, red while the course is up */
+  html body .rail-boat .rail-svg {
+    width: 40px;
+    height: 40px;
+    color: #1677ff;
+  }
+  html body .rail-btn.rail-boat.course-up {
+    border-color: #d40000;
+    background: #e10600 !important;
+  }
+  html body .rail-boat.course-up .rail-svg {
+    color: #fff;
   }
   /* The pin touched stays pressed in a moment, as a real button */
   html body .rail-btn.rail-btn.rail-pressed {

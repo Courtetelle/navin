@@ -5,6 +5,11 @@ import { Button } from '../../components/shared/Button.tsx';
 import { markupToReact } from '../../components/shared/markupToReact.ts';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { shownMap } from '../../features/map/mapFull.ts';
+import { mapOrientation } from '../../features/map/mapOrientation.ts';
+import {
+  boatOrientPress,
+  boatScaleTap,
+} from '../../features/map/navinScale.ts';
 import { trkPointNow } from '../../features/map/trackerPoint.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { takePhoto } from '../../features/onwater/index.ts';
@@ -21,13 +26,7 @@ import { addMark, navZone, state, toast } from '../../state/index.ts';
 import { TrackRailButton } from './TrackRailButton.tsx';
 import { RailIcon } from './railIcons.tsx';
 import type { RailSide, Rails } from './sideRails.ts';
-import {
-  MAP_ACTIONS,
-  RAIL_SLOTS,
-  loadRails,
-  setRail,
-  splitTitle,
-} from './sideRails.ts';
+import { MAP_ACTIONS, loadRails, setRail, splitTitle } from './sideRails.ts';
 
 /** A GPS position older than this is read again. */
 const FRESH_FIX_MS = 30_000;
@@ -128,6 +127,7 @@ export function SideRails() {
         <div key={side} className={`side-rail side-rail-${side}`}>
           {side === 'left' ? (
             <>
+              <BoatButton />
               {weather ? <RailButton entry={weather} onPick={noPick} /> : null}
               <DepartButtons />
               <PinButton />
@@ -176,15 +176,53 @@ function noPick(): void {
 const DRAWN = new Set(['act:point', 'act:photo', 'weather']);
 
 /**
- * Places left for the sailor's buttons: the right column gives its first to
- * the VHF / phone button and data, the left one has Météo, PréP, START and
- * the pin first.
+ * Places left for the sailor's buttons: the right column has NavIn, the
+ * magnifier, VHF / phone and data first, the left one the boat, Météo, PréP,
+ * START and the pin.
  */
 function slotsOf(side: RailSide): number {
-  return side === 'right' ? RAIL_SLOTS - 1 : LEFT_SLOTS;
+  return side === 'right' ? RIGHT_SLOTS : LEFT_SLOTS;
 }
 
+const RIGHT_SLOTS = 3;
+
 const LEFT_SLOTS = 3;
+
+/** The arrow of the boat button. */
+const BOAT_SVG =
+  '<svg class="rail-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3 3 7.5z" fill="currentColor"/></svg>';
+
+/**
+ * First of the left column, in the place NavIn had: the boat. Each touch
+ * shows the boat at the next scale and follows it; a long press turns the
+ * map to the course of the boat, the button red, and back to north up.
+ * @returns The button.
+ */
+function BoatButton() {
+  const tr = useTr();
+  const [courseUp, setCourseUp] = useState(() => mapOrientation() === 'course');
+  const press = useLongPress(() => setCourseUp(boatOrientPress()));
+  const classes = ['rail-btn', 'rail-bare', 'rail-boat'];
+  if (courseUp) classes.push('course-up');
+  if (press.hit) classes.push('lp-hit');
+  return (
+    <Button
+      type="button"
+      noUiEdit
+      className={classes.join(' ')}
+      aria-label={tr(
+        courseUp
+          ? 'Bateau · cap en haut · appui long : nord en haut'
+          : 'Bateau · appui long : cap en haut',
+      )}
+      aria-pressed={courseUp}
+      onClick={boatScaleTap}
+      {...press.handlers}
+    >
+      <span className="rail-icon">{markupToReact(BOAT_SVG)}</span>
+    </Button>
+  );
+}
 
 /**
  * Last fixed button of the left column, as low as the magnifier: a pin where
@@ -207,8 +245,8 @@ function PinButton() {
       noUiEdit
       className={
         pressed
-          ? 'rail-btn rail-bare rail-short rail-pin rail-pressed'
-          : 'rail-btn rail-bare rail-short rail-pin'
+          ? 'rail-btn rail-bare rail-pin rail-pressed'
+          : 'rail-btn rail-bare rail-pin'
       }
       aria-label={tr('Point ici')}
       aria-pressed={pressed > 0}
