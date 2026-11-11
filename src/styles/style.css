@@ -10461,22 +10461,29 @@ html body .menu-here::before {
   pointer-events: none;
   animation: menuHere 1.4s ease-in-out infinite;
 }
+/* At night: the writing stays red, on the colour of PréP lit at night. */
 html[data-theme='night'] body .menu-here.menu-here {
-  color: #000 !important;
+  color: var(--fg) !important;
 }
-/* data open: always written in black on the colour of PréP. */
-html:root
-  body
-  header.topbar
-  nav.topnav
-  .top-tab.top-tab.tab-data.menu-here.menu-here,
-html:root[data-theme='night']
+html[data-theme='night'] body .menu-here::before {
+  background: linear-gradient(180deg, #8a3a08 0%, #5e2400 60%, #3e1600 100%);
+}
+/* data open: written in black on the colour of PréP by day, red at night. */
+html:root:not([data-theme='night'])
   body
   header.topbar
   nav.topnav
   .top-tab.top-tab.tab-data.menu-here.menu-here {
   color: #000 !important;
   -webkit-text-stroke-color: #000 !important;
+}
+html:root[data-theme='night']
+  body
+  header.topbar
+  nav.topnav
+  .top-tab.top-tab.tab-data.menu-here.menu-here {
+  color: #ff4040 !important;
+  -webkit-text-stroke-color: #ff4040 !important;
 }
 @keyframes menuHere {
   0%,
