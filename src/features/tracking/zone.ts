@@ -4,16 +4,19 @@ import { setZoneSim, state, toast, zoneSimGet } from '../../state/index.ts';
 
 import { trkZoneRecenter } from './trackerLink.ts';
 
-/** The cycle of the zone button. */
-export const ZONE_CYC = ['lac', 'mer', 'auto'] as const;
+/**
+ * The cycle of NavIn and of the zone button: a place chosen, lake or sea.
+ * The GPS comes back with the boat arrow only.
+ */
+export const ZONE_CYC = ['lac', 'mer'] as const;
 
 /** A choice of the zone button. */
 export type ZoneChoice = (typeof ZONE_CYC)[number];
 
 /**
  * Choice after a zone in the cycle.
- * @param zone - Current choice.
- * @returns The next one.
+ * @param zone - Current choice (`'auto'` on the GPS).
+ * @returns The next one: the lake first when on the GPS.
  */
 export function nextZone(zone: string): ZoneChoice {
   const position = ZONE_CYC.indexOf(zone as ZoneChoice);
@@ -33,7 +36,7 @@ export function zoneSet(zone: string): void {
   toast(
     zone === 'auto'
       ? 'Zone : automatique par GPS'
-      : `Zone : ${zone === 'lac' ? 'en eaux intérieures' : 'maritime'} · reste active jusqu’au retour sur GPS`,
+      : `Zone : ${zone === 'lac' ? 'en eaux intérieures' : 'maritime'} · la flèche du bateau ramène au GPS`,
   );
 }
 

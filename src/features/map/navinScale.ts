@@ -2,6 +2,7 @@ import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
 import { herePos, state, toast } from '../../state/index.ts';
 
+import { backToGps } from './gpsZone.ts';
 import { leaflet } from './leaflet.ts';
 import { mapOrientation, toggleOrientation } from './mapOrientation.ts';
 import { setFollow, tracker } from './trackerState.ts';
@@ -83,11 +84,12 @@ export function navinScaleTap(shown: boolean): void {
 }
 
 /**
- * The boat button of the tablet: the map on the boat, followed, at 3 NM;
- * touched again, the next scale on the boat.
+ * The boat button of the tablet: back on the GPS, the map on the boat,
+ * followed, at 3 NM; touched again, the next scale on the boat.
  */
 export function boatScaleTap(): void {
   buzz();
+  backToGps();
   const shown = onMap();
   const following = Boolean(tracker.current?.follow);
   boatScale = nextScale(boatScale, shown && following);

@@ -6288,23 +6288,10 @@ body.is-tracking .top-tab.bare.stop-armed {
 :root[data-theme='night'] .top-tab.ph-box {
   background: transparent !important;
 }
-/* v317 (Corban) : tout petit satellite en haut à droite du logo NavIn quand la zone est « Automatique par GPS » ; il déborde un peu du cadre. */
+/* NavIn: no satellite any more, the boat arrow brings the GPS back */
 .top-tab[data-view='tracker'] {
   position: relative;
   overflow: visible;
-}
-body.zone-auto
-  .top-tab[data-view='tracker'][data-base='NavIn']:not(.staged):not(
-    .ph-box
-  ):not(.vhf-on)::after {
-  content: '🛰️';
-  position: absolute;
-  top: -7px;
-  right: -7px;
-  font-size: 15px;
-  line-height: 1;
-  pointer-events: none;
-  filter: drop-shadow(0 0 1px #fff);
 }
 /* v321 (Corban) : en mode nuit, fond de carte sombre et atténué, façon traceur de nuit (eau bleu nuit, terre sombre, peu d’éblouissement). */
 :root[data-theme='night'] .leaflet-container {
@@ -10095,15 +10082,6 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
   html body .rail-btn.rail-btn .rail-icon {
     font-size: 30px;
-  }
-  /* NavIn at the screen edge: its satellite at its inner corner */
-  html
-    body.zone-auto
-    header.topbar
-    nav.topnav
-    .top-tab[data-view='tracker']::after {
-    right: auto !important;
-    left: -7px !important;
   }
   /* The boat button: the arrow of the map, red while the course is up */
   html body .rail-boat .rail-svg {

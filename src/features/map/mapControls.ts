@@ -4,6 +4,7 @@ import { buzz } from '../../lib/dom.ts';
 import { hasBodyClass } from '../../shell/bodyClass.ts';
 import { herePos, toast } from '../../state/index.ts';
 
+import { backToGps } from './gpsZone.ts';
 import { leaflet } from './leaflet.ts';
 import { setMapFull } from './mapFull.ts';
 import { locateAction, toggleOrientation } from './mapOrientation.ts';
@@ -66,6 +67,8 @@ function locate(map: LeafletMap, button: HTMLAnchorElement): void {
     toggleOrientation(map);
     return;
   }
+  // The arrow leaves the place chosen with NavIn: back on the GPS.
+  backToGps();
   const center = (lat: number, lon: number) => {
     map.setView([lat, lon], Math.max(map.getZoom(), 14));
   };

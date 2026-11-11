@@ -66,9 +66,10 @@ export function ZoneSim() {
         </Button>
       </ButtonRow>
       <HelpText>
-        Le choix reste actif jusqu’au retour sur « Automatique par GPS ». Tout
-        suit la zone choisie : heure (UTC d’abord en mer, Zone Time sur le lac),
-        touche VHF / Téléphone, SOS, VHF, rubriques et cartes.
+        Comme l’appui long sur NavIn : lac ou mer, sur le lieu choisi plus bas.
+        Tout suit la zone choisie : heure (UTC d’abord en mer, Zone Time sur le
+        lac), touche VHF / Téléphone, SOS, VHF, météo, rubriques et cartes. La
+        flèche du bateau ramène tout sur la position GPS.
       </HelpText>
     </section>
   );
