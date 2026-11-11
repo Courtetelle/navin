@@ -10484,6 +10484,25 @@ html[data-theme='night'] body .menu-here.menu-here {
 html[data-theme='night'] body .menu-here::before {
   background: linear-gradient(180deg, #8a3a08 0%, #5e2400 60%, #3e1600 100%);
 }
+/* By day every menu button blinks between the yellow of PréP and white,
+   never on a dark face (data open had its grey). */
+html:root:not([data-theme='night']) body .menu-here.menu-here,
+html:root:not([data-theme='night'])
+  body
+  header.topbar.topbar
+  #gearBtn.theme-btn.menu-here.menu-here,
+html:root:not([data-theme='night'])
+  body
+  header.topbar
+  nav.topnav
+  .top-tab.top-tab.tab-data.menu-here.menu-here,
+html:root:not([data-theme='night'])
+  body
+  header.topbar
+  nav.topnav
+  .top-tab.top-tab.tab-data.bare.active.menu-here {
+  background: #fff !important;
+}
 /* data open: written in black on the colour of PréP by day, red at night. */
 html:root:not([data-theme='night'])
   body
@@ -10504,7 +10523,7 @@ html:root[data-theme='night']
 @keyframes menuHere {
   0%,
   100% {
-    opacity: 0.2;
+    opacity: 0;
   }
   50% {
     opacity: 1;

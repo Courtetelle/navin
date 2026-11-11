@@ -17,10 +17,8 @@ import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { go } from '../../shell/router.ts';
 import { sosLogActive, state } from '../../state/index.ts';
-import { store } from '../../storage/store.ts';
 
 import { EndedLog } from './EndedLog.tsx';
-import { PasswordSection } from './PasswordSection.tsx';
 import { ActiveHeading, SosEvents } from './SosEvents.tsx';
 
 /**
@@ -48,7 +46,7 @@ interface SosLogsContentProps {
 
 function SosLogsContent({ openLog, onRedraw }: SosLogsContentProps) {
   const tr = useTr();
-  const { active, ended, hasPassword } = untracked(readScreen);
+  const { active, ended } = untracked(readScreen);
   return (
     <>
       <PageBack
@@ -96,11 +94,9 @@ function SosLogsContent({ openLog, onRedraw }: SosLogsContentProps) {
           key={log.id}
           log={log}
           open={openLog === log.id}
-          hasPassword={hasPassword}
           onRedraw={onRedraw}
         />
       ))}
-      <PasswordSection hasPassword={hasPassword} onRedraw={onRedraw} />
       <ListPublishRow kind="soslogs" />
     </>
   );
@@ -114,6 +110,5 @@ function readScreen() {
   return {
     active: sosLogActive(),
     ended,
-    hasPassword: Boolean(store.get('ldb.sosPwd', '')),
   };
 }

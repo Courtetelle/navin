@@ -65,11 +65,14 @@ async function open(
   await page.addStyleTag({
     content: '#toast { pointer-events: none !important; }',
   });
-  if (theme === 'night') {
-    await page.evaluate(() => {
-      document.documentElement.dataset.theme = 'night';
-    });
-  }
+  // Each pass shows its theme whatever the hour (night mode comes on its own
+  // after dusk).
+  await page.evaluate(
+    (shown) => {
+      document.documentElement.dataset.theme = shown;
+    },
+    theme === 'night' ? 'night' : 'day',
+  );
   return { context, page, errors };
 }
 
@@ -346,11 +349,14 @@ async function follow(page: Page, theme: string): Promise<void> {
   await page.addStyleTag({
     content: '#toast { pointer-events: none !important; }',
   });
-  if (theme === 'night') {
-    await page.evaluate(() => {
-      document.documentElement.dataset.theme = 'night';
-    });
-  }
+  // Each pass shows its theme whatever the hour (night mode comes on its own
+  // after dusk).
+  await page.evaluate(
+    (shown) => {
+      document.documentElement.dataset.theme = shown;
+    },
+    theme === 'night' ? 'night' : 'day',
+  );
 }
 
 async function recenter(page: Page, theme: string): Promise<void> {
@@ -608,6 +614,32 @@ async function tabletPlaces(page: Page): Promise<string> {
  * the right, at the
  * same places, and the page stays between the two columns.
  */
+/**
+ * The rule of the menu buttons: the one of the open menu blinks between the
+ * yellow of PréP and white by day (never on a dark face), on PréP's night
+ * colour at night.
+ * @param page - The page, a menu just opened.
+ * @param theme - Theme checked.
+ * @param name - The menu.
+ */
+async function menuBlink(page: Page, theme: string, name: string) {
+  // The theme shown: after dusk the day pass is in night mode on its own.
+  const { face, night } = await page.evaluate(() => {
+    const button = document.querySelector('.menu-here');
+    return {
+      face: button
+        ? globalThis.getComputedStyle(button).backgroundColor
+        : 'absent',
+      night: document.documentElement.dataset.theme === 'night',
+    };
+  });
+  check(
+    theme,
+    `the ${name} button blinks on ${night ? 'its night face' : 'white'}`,
+    night ? face !== 'absent' : face === 'rgb(255, 255, 255)',
+  );
+}
+
 async function tablet(page: Page, theme: string): Promise<void> {
   const home = await tabletPlaces(page);
   check(theme, 'tablet: every side button is shown', !home.includes('absent'));
@@ -625,6 +657,8 @@ async function tablet(page: Page, theme: string): Promise<void> {
     // eslint-disable-next-line no-await-in-loop -- one screen after the other
     const here = await tabletPlaces(page);
     check(theme, `tablet: same side buttons on ${name}`, here === home);
+    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    if (name !== 'SOS') await menuBlink(page, theme, name);
     // eslint-disable-next-line no-await-in-loop -- one screen after the other
     const view = await page.locator('main#view').boundingBox();
     check(
