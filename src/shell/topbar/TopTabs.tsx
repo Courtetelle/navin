@@ -107,7 +107,8 @@ function TopTab({ tab, active }: TopTabProps) {
   }, [fits, measuredStaged]);
   const classes = [
     TAB_CLASS[tab],
-    active && 'active',
+    // A menu with its own button (settings, marks, VHF) does not light data.
+    active && !(tab === 'more' && OWN_BUTTON.has(view)) && 'active',
     // The data menu open: its button blinks yellow, as PréP (not SOS, not NavIn).
     active && tab === 'more' && !OWN_BUTTON.has(view) && 'menu-here',
     ...displayClasses(display),

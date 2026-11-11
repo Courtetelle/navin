@@ -641,12 +641,21 @@ async function menuBlink(page: Page, theme: string, name: string) {
 }
 
 /**
- * By day the data button is never grey: black writing on white.
+ * By day the data button is never grey: black writing on white; it is not
+ * lit on a menu of another button.
  * @param page - The page.
  * @param theme - Theme checked.
  * @param name - The screen shown.
  */
 async function dataFace(page: Page, theme: string, name: string) {
+  if (name === 'settings') {
+    // The settings have their own button: data does not stay lit.
+    check(
+      theme,
+      'data is not lit on the settings',
+      !(await page.locator('.top-tab.tab-data.active').count()),
+    );
+  }
   if (theme === 'night') return;
   const face = await page.evaluate(() => {
     const tab = document.querySelector('.top-tab.tab-data');
