@@ -216,5 +216,8 @@ describe('Météo-France gusts', () => {
     expect(mfGust({ ff: 3, fxi: 6 })).toBe(6);
     expect(mfGust({ ff: 3, fx3s: 7 })).toBe(7);
     expect(mfGust({ ff: 3, fxi10: null })).toBeNull();
+    // The six-minute package sends raf10, its direction in ddraf10.
+    expect(mfGust({ ff: 3, dd: 200, ddraf10: 210, raf10: 6.5 })).toBe(6.5);
+    expect(mfGust({ ff: 3, ddraf10: 210, raf10: null })).toBeNull();
   });
 });

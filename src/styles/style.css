@@ -9778,8 +9778,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   /* The boat button of the left column replaces the arrow of the map, the
      dividers of the right column its own */
   html body .trk-full .map-locate-btn,
-  html body .leaflet-control-container .ruler-btn,
-  html body .leaflet-control-container .map-full-toggle {
+  html body .leaflet-control-container .ruler-btn {
     display: none !important;
   }
   html body .rail-ruler .rail-icon svg {

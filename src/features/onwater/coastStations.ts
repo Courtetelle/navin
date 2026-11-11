@@ -54,11 +54,16 @@ interface MfRow {
   [field: string]: unknown;
 }
 
-/** Names of the gusts in the Météo-France replies, the 10-minute one first. */
-const GUST_FIELDS = ['fxi10', 'fxi', 'fxi3s', 'fxy', 'fx'];
+/**
+ * Names of the gusts in the Météo-France replies: `raf10`, the strongest
+ * gust of the last 10 minutes, as the six-minute packages send it; then the
+ * names of the other packages.
+ */
+const GUST_FIELDS = ['raf10', 'fxi10', 'fxi', 'fxi3s', 'fxy', 'fx'];
 
 /**
- * The gusts of a Météo-France row, whatever their name (`fx…`).
+ * The gusts of a Météo-France row, whatever their name (`raf…`, `fx…`; not
+ * `ddraf10`, their direction).
  * @param row - The row.
  * @returns Gusts in m/s, null when the station gives none.
  */
@@ -69,7 +74,7 @@ export function mfGust(row: Readonly<Record<string, unknown>>): number | null {
   if (typeof known === 'number') return known;
   for (const [name, value] of Object.entries(row)) {
     if (
-      name.startsWith('fx') &&
+      (name.startsWith('fx') || name.startsWith('raf')) &&
       typeof value === 'number' &&
       Number.isFinite(value)
     ) {

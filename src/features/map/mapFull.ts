@@ -33,7 +33,7 @@ export function setMapFull(map: LeafletMap, on: boolean): void {
   const container = map.getContainer();
   setBodyClass('map-full', on);
   container.classList.toggle('map-full-box', on);
-  const button = container.querySelector<HTMLElement>('.map-full-btn');
+  const button = container.querySelector<HTMLElement>('.map-full-toggle');
   if (button) {
     button.textContent = on ? '✕' : '⛶';
     button.title = on ? 'Revenir au mode normal' : 'Plein écran';

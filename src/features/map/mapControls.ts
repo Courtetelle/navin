@@ -1,35 +1,22 @@
 import type { Control, Map as LeafletMap } from 'leaflet';
 
 import { buzz } from '../../lib/dom.ts';
-import { hasBodyClass } from '../../shell/bodyClass.ts';
 import { herePos, toast } from '../../state/index.ts';
 
 import { backToGps } from './gpsZone.ts';
 import { leaflet } from './leaflet.ts';
-import { setMapFull } from './mapFull.ts';
 import { locateAction, toggleOrientation } from './mapOrientation.ts';
 import { setFollow, tracker } from './trackerState.ts';
 
-const FULL_ICON =
-  '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const LOCATE_ICON =
   '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3 3 7.5z" fill="currentColor"/></svg>';
 
 /**
- * Full-screen button of a map, then the « my position » arrow (legacy `addFullscreenControl`).
+ * The « my position » arrow of a map (legacy `addFullscreenControl`, whose
+ * full-screen button is gone: the map already fills the screen).
  * @param map - Leaflet map.
  */
 export function addFullscreenControl(map: LeafletMap): void {
-  addButton(
-    map,
-    'leaflet-bar map-full-btn map-full-toggle',
-    'Plein écran',
-    FULL_ICON,
-    () => {
-      buzz();
-      setMapFull(map, !hasBodyClass('map-full'));
-    },
-  );
   addButton(
     map,
     'leaflet-bar map-full-btn map-locate-btn',
