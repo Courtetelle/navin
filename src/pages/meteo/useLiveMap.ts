@@ -243,6 +243,9 @@ export function useLiveMap(
       marker?.getElement()?.classList.add('live-alerted');
       return;
     }
+    // Stations not read yet: nothing, the badge gets its band once shown.
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- keeps Leaflet, outside React, in step with the props
+    if (stations.length === 0) return;
     // Its station no longer answers: a red band on its place.
     L.marker([alertLat, alertLon], {
       icon: L.divIcon({
