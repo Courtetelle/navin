@@ -10030,24 +10030,135 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body .rail-boat.course-up .rail-svg {
     color: #fff;
   }
-  /* The pin touched stays pressed in a moment, as a real button */
-  html body .rail-btn.rail-btn.rail-pressed {
-    transform: translateY(3px) scale(0.95);
-    border-color: var(--fg, #111);
-    background: color-mix(
-      in srgb,
-      var(--fg, #111) 26%,
-      var(--surface, #fff)
+}
+
+/* Tablet: every side and map button in glass, with a little relief. Pressed,
+   it sinks in: a short press briefly, a long one deeper with a lit ring. */
+@media (min-width: 1000px) and (orientation: landscape) {
+  html:root body .rail-btn.rail-btn,
+  html:root body header.topbar.topbar #gearBtn.theme-btn,
+  html:root body #searchBtn.no-print,
+  html:root
+    body
+    header.topbar
+    nav.topnav
+    .top-tab.top-tab:not([data-view='tracker']),
+  html:root body header.topbar.topbar #clock,
+  html:root body .trk-full .ctl-col .leaflet-bar,
+  html:root body .trk-full .ctl-col > a.map-full-btn,
+  html:root body .trk-full .ctl-col > .leaflet-control-layers {
+    border: 1px solid rgba(255, 255, 255, 0.92) !important;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.86) 0%,
+      rgba(255, 255, 255, 0.52) 50%,
+      rgba(226, 233, 242, 0.66) 100%
     ) !important;
     box-shadow:
-      inset 0 6px 12px rgba(0, 0, 0, 0.55),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.25);
+      0 0 0 1px rgba(15, 23, 42, 0.2),
+      0 6px 14px rgba(15, 23, 42, 0.22),
+      0 1px 2px rgba(15, 23, 42, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -3px 6px rgba(15, 23, 42, 0.1) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(1.3) !important;
+    backdrop-filter: blur(10px) saturate(1.3) !important;
     transition:
-      transform 0.08s,
-      box-shadow 0.08s;
+      transform 0.12s ease-out,
+      box-shadow 0.12s ease-out;
   }
-  html body .rail-btn.rail-pressed .rail-svg {
-    transform: translateY(1px) scale(0.92);
+  :root[data-theme='night'] body .rail-btn.rail-btn,
+  :root[data-theme='night'] body header.topbar.topbar #gearBtn.theme-btn,
+  :root[data-theme='night'] body #searchBtn.no-print,
+  :root[data-theme='night']
+    body
+    header.topbar
+    nav.topnav
+    .top-tab.top-tab:not([data-view='tracker']),
+  :root[data-theme='night'] body header.topbar.topbar #clock,
+  :root[data-theme='night'] body .trk-full .ctl-col .leaflet-bar,
+  :root[data-theme='night'] body .trk-full .ctl-col > a.map-full-btn,
+  :root[data-theme='night'] body .trk-full .ctl-col > .leaflet-control-layers {
+    border: 1px solid rgba(255, 80, 80, 0.6) !important;
+    background: linear-gradient(
+      180deg,
+      rgba(80, 10, 10, 0.78) 0%,
+      rgba(30, 2, 2, 0.72) 55%,
+      rgba(12, 0, 0, 0.78) 100%
+    ) !important;
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.7),
+      0 6px 14px rgba(0, 0, 0, 0.65),
+      inset 0 1px 0 rgba(255, 130, 130, 0.35),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.5) !important;
+  }
+  /* NavIn keeps its own colour, with the same glass edge and relief */
+  html:root
+    body
+    header.topbar
+    nav.topnav
+    .top-tab.top-tab[data-view='tracker'] {
+    border: 1px solid rgba(255, 255, 255, 0.85) !important;
+    box-shadow:
+      0 0 0 1px rgba(15, 23, 42, 0.25),
+      0 6px 14px rgba(15, 23, 42, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6),
+      inset 0 -3px 6px rgba(0, 0, 0, 0.18) !important;
+    transition:
+      transform 0.12s ease-out,
+      box-shadow 0.12s ease-out;
+  }
+  /* The boat button red while the course is up */
+  html:root body .rail-btn.rail-boat.course-up,
+  :root[data-theme='night'] body .rail-btn.rail-boat.course-up {
+    border-color: rgba(255, 190, 190, 0.9) !important;
+    background: linear-gradient(
+      180deg,
+      #ff4b3e 0%,
+      #e10600 55%,
+      #b30000 100%
+    ) !important;
+  }
+
+  /* Finger on it, or a short press just made: sunk in. (#press-outranks names
+     nothing: it only lets these rules win over the glass ones.) */
+  html:root body :is([data-press='down'], #press-outranks),
+  html:root body :is([data-press='short'], #press-outranks),
+  html:root body :is(.rail-btn.rail-pressed, #press-outranks) {
+    transform: translateY(2px) scale(0.95);
+    box-shadow:
+      0 0 0 1px rgba(15, 23, 42, 0.3),
+      0 1px 1px rgba(15, 23, 42, 0.2),
+      inset 0 5px 12px rgba(15, 23, 42, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    filter: brightness(0.93);
+    transition:
+      transform 0.05s,
+      box-shadow 0.05s;
+  }
+  /* Held long enough, or a long press just made: deeper, with a lit ring */
+  html:root body :is([data-press='held'], #press-outranks),
+  html:root body :is([data-press='long'], #press-outranks) {
+    transform: translateY(3px) scale(0.9);
+    box-shadow:
+      0 0 0 3px #1677ff,
+      0 0 18px 2px rgba(22, 119, 255, 0.7),
+      inset 0 7px 16px rgba(15, 23, 42, 0.55) !important;
+    filter: brightness(0.9);
+  }
+  :root[data-theme='night'] body :is([data-press='down'], #press-outranks),
+  :root[data-theme='night'] body :is([data-press='short'], #press-outranks),
+  :root[data-theme='night'] body :is(.rail-btn.rail-pressed, #press-outranks) {
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, 0.8),
+      inset 0 5px 12px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 120, 120, 0.2) !important;
+  }
+  :root[data-theme='night'] body :is([data-press='held'], #press-outranks),
+  :root[data-theme='night'] body :is([data-press='long'], #press-outranks) {
+    box-shadow:
+      0 0 0 3px #ff3b30,
+      0 0 18px 2px rgba(255, 59, 48, 0.75),
+      inset 0 7px 16px rgba(0, 0, 0, 0.85) !important;
   }
 }
 

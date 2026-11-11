@@ -12,6 +12,7 @@ import { errorContext } from './errorContext.ts';
 import { installFrameLinks } from './frameLinks.ts';
 import { preloadPages } from './pageRegistry.ts';
 import { installParityHook, parityStarted } from './parityHook.ts';
+import { installPressFeedback } from './pressFeedback.ts';
 import { addNavigationListener, go } from './router.ts';
 import { installTapScrollHold } from './scrollAnchor.ts';
 import { followTheme } from './theme.ts';
@@ -45,6 +46,7 @@ function boot(): void {
   installRollListeners();
   installFrameLinks();
   installTapScrollHold();
+  installPressFeedback();
   effect(() => {
     document.documentElement.classList.toggle(
       'no-help-i',

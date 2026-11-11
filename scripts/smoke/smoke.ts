@@ -609,8 +609,9 @@ async function tablet(page: Page, theme: string): Promise<void> {
   for (const [name, opener] of screens) {
     // eslint-disable-next-line no-await-in-loop -- one screen after the other
     await page.locator(opener).click();
+    // The button touched sinks in a moment (pressFeedback): wait it is back.
     // eslint-disable-next-line no-await-in-loop -- one screen after the other
-    await page.waitForTimeout(700);
+    await page.waitForTimeout(1100);
     // eslint-disable-next-line no-await-in-loop -- one screen after the other
     const here = await tabletPlaces(page);
     check(theme, `tablet: same side buttons on ${name}`, here === home);
