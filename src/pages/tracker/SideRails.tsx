@@ -404,15 +404,20 @@ function DepartButtons() {
 
 /**
  * Always shown, first of the right column: at sea the VHF, a long press opens
- * the phone numbers; on a lake the phone.
+ * the phone numbers (the handset then takes the button, the VHF goes small,
+ * and a long press goes back); on a lake the phone.
  * @returns The button.
  */
 function CommButton() {
   useSignals();
   const tr = useTr();
   const lake = navZone() === 'lac';
-  const press = useLongPress(() => openCalls('int'));
-  const here = state.view.currentView.value === 'vhf' ? ' menu-here' : '';
+  const inCalls = state.view.currentView.value === 'vhf';
+  // At sea, the phone numbers opened by a long press: the handset takes the
+  // button, the VHF goes small; leaving the menu brings the VHF back.
+  const phones = inCalls && state.view.viewArg.value === 'int';
+  const press = useLongPress(() => openCalls(phones ? 'ext' : 'int'));
+  const here = inCalls ? ' menu-here' : '';
   if (lake) {
     return (
       <Button
@@ -428,20 +433,25 @@ function CommButton() {
       </Button>
     );
   }
+  const [big, small] = phones ? ['phone', 'vhf'] : ['vhf', 'phone'];
   return (
     <Button
       type="button"
       noUiEdit
       className={`rail-btn rail-comm${here}${press.hit ? ' lp-hit' : ''}`}
-      aria-label={tr('VHF · appui long : téléphone')}
-      onClick={() => openCalls('ext')}
+      aria-label={tr(
+        phones
+          ? 'Téléphone · appui long : VHF'
+          : 'VHF · appui long : téléphone',
+      )}
+      onClick={() => openCalls(phones ? 'int' : 'ext')}
       {...press.handlers}
     >
       <span className="rail-icon">
-        <RailIcon name="vhf" />
+        <RailIcon name={big} />
       </span>
       <span className="rail-badge" aria-hidden="true">
-        <RailIcon name="phone" />
+        <RailIcon name={small} />
       </span>
     </Button>
   );
