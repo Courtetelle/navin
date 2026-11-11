@@ -84,6 +84,19 @@ export function showFiche(id: string): void {
 }
 
 /** Leave a card towards the screen it was opened from (legacy `back`, lake.js:2187). */
+/**
+ * Where leaving a card goes, as its back button says it.
+ * @returns The label of the screen.
+ */
+export function ficheBackLabel(): string {
+  const backTo = state.view.crewFicheBack.value;
+  if (backTo === 'crews') return '◀ Équipages';
+  if (backTo === 'list' || !state.data.cruise.value) {
+    return '◀ Les coéquipiers·ères';
+  }
+  return '◀ Équipage';
+}
+
 export function leaveFiche(): void {
   const backTo = state.view.crewFicheBack.value;
   batch(() => {

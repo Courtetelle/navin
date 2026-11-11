@@ -86,14 +86,14 @@ export function BoatVersions({ boatId, onBack }: BoatVersionsProps) {
   return (
     <>
       <PageBack
-        label="◀ Retour"
+        label="◀ Le bateau"
         id="verBack"
         onClick={() => {
           buzz();
           onBack();
         }}
       >
-        {tr('◀ Retour')}
+        {tr('◀ Le bateau')}
       </PageBack>
       <PageTitle>{`↺ ${boat.info.boat || 'Bateau'} : versions`}</PageTitle>
       {withKeys(versions, versionKey).map(({ key, item }, position) => (

@@ -30,6 +30,11 @@ export interface TabFace {
   box?: boolean;
   /** Yellow VHF state (class `vhf-on`). */
   vhfOn?: boolean;
+  /**
+   * Blinks in the colour of PréP (class `menu-here`): a track recorded.
+   * @default undefined
+   */
+  blink?: boolean;
 }
 
 /** One choice of a tab menu (prep.js:200-231). */
@@ -126,7 +131,12 @@ export function baseNav(context: TopMenuContext): TabFace {
         };
   }
   if (context.tracking) {
-    return { label: 'TRACK en cours', html: [TRACK_SVG], bare: true };
+    return {
+      label: 'TRACK en cours',
+      html: [TRACK_SVG],
+      bare: true,
+      blink: true,
+    };
   }
   return { label: 'NavIn', html: [inland ? NAVIN_LAC_SVG : NAVIN_MER_SVG] };
 }

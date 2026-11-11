@@ -67,14 +67,14 @@ export function ChecklistNewScreen({
   return (
     <>
       <PageBack
-        label="◀ Retour"
+        label="◀ Check-lists"
         id="nlBack"
         onClick={() => {
           buzz();
           onBack();
         }}
       >
-        {tr('◀ Retour')}
+        {tr('◀ Check-lists')}
       </PageBack>
       <h1>{tr('Nouvelle check-list')}</h1>
       {library.length > 0 ? (

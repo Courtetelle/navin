@@ -31,7 +31,7 @@ import { FicheForm } from './FicheForm.tsx';
 import { FicheIdentity } from './FicheIdentity.tsx';
 import { FichePhotos } from './FichePhotos.tsx';
 import { deleteFiche } from './ficheActions.ts';
-import { leaveFiche, showFiche, showLabels } from './screen.ts';
+import { ficheBackLabel, leaveFiche, showFiche, showLabels } from './screen.ts';
 import { useFicheRecord } from './useFicheRecord.ts';
 
 /** Props of {@link Fiche}. */
@@ -121,8 +121,8 @@ export function Fiche({ id }: FicheProps) {
   };
   return (
     <>
-      <PageBack id="fBack" label="◀ Retour" onClick={leave}>
-        {tr('◀ Retour')}
+      <PageBack id="fBack" label={ficheBackLabel()} onClick={leave}>
+        {tr(ficheBackLabel())}
       </PageBack>
       {reading ? null : (
         <PageValidate label="Valider" onClick={validate} hidden>

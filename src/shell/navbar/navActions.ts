@@ -42,17 +42,42 @@ export function navNext(): void {
   else navSteps.value?.onBrowseNext();
 }
 
+/** Names of the roots the exit button leads to. */
+const ROOT_NAMES: Readonly<Record<string, string>> = {
+  tracker: 'NavIn',
+  more: 'data',
+  sos: 'SOS',
+};
+
+function inPrep(): boolean {
+  return state.view.currentView.value === 'prep' || hasBodyClass('prep-on');
+}
+
+/**
+ * Where the exit button leads: NavIn from PréP, else the root of the lit tab.
+ * @returns The root view.
+ */
+export function navExitView(): string {
+  if (inPrep()) return 'tracker';
+  const tab = litTab();
+  return tab && tab in ROOT_NAMES ? tab : 'more';
+}
+
+/**
+ * The exit button says where it leads (« NavIn », « data », « SOS »).
+ * @returns Its label.
+ */
+export function navExitLabel(): string {
+  return ROOT_NAMES[navExitView()] ?? 'data';
+}
+
 /** `#navExit` (nav.js:81-86): quit PréP, or go to the root of the lit tab. */
 export function navExit(): void {
   buzz();
   clearHistory();
-  if (state.view.currentView.value === 'prep' || hasBodyClass('prep-on')) {
-    setPrep(null);
-    go('tracker');
-    return;
-  }
-  const tab = litTab();
-  go(tab && ['tracker', 'more', 'sos'].includes(tab) ? tab : 'more');
+  const target = navExitView();
+  if (inPrep()) setPrep(null);
+  go(target);
 }
 
 /**

@@ -38,36 +38,58 @@ function Camera() {
         rx="5"
         fill="currentColor"
       />
-      <circle cx="20" cy="22.3" r="8.4" fill="#fff" />
-      <circle cx="20" cy="22.3" r="6.6" fill="#1e5aa8" />
-      <circle cx="20" cy="22.3" r="3.2" fill="#0b2545" />
+      <circle cx="20" cy="22" r="8.4" fill="#fff" />
+      <circle cx="20" cy="22" r="6.6" fill="#1e5aa8" />
+      <circle cx="20" cy="22" r="3.2" fill="#0b2545" />
       <circle cx="17.7" cy="20" r="1.5" fill="#fff" opacity="0.85" />
       <rect x="29" y="13.5" width="5" height="3" rx="1" fill="#f39c12" />
     </svg>
   );
 }
 
-/** A handheld VHF: body in the text colour, green screen. */
+/**
+ * A hand VHF leaning at 45°, drawn in outline: antenna, a green screen
+ * written VHF, the knob and two keys.
+ * @returns The drawing.
+ */
 function Vhf() {
   return (
-    <svg className="rail-svg" viewBox="0 0 40 40" aria-hidden="true">
-      <rect
-        x="15"
-        y="1.5"
-        width="3.4"
-        height="12"
-        rx="1.7"
-        fill="currentColor"
-      />
-      <rect x="12" y="11" width="17" height="27" rx="3.5" fill="currentColor" />
-      <rect x="15" y="14.5" width="11" height="7" rx="1.2" fill="#8fd19e" />
-      <path
-        d="M15.5 26h10M15.5 29.2h10M15.5 32.4h10"
-        stroke="#fff"
-        strokeWidth="1.5"
+    <svg className="rail-svg rail-vhf" viewBox="0 0 40 40" aria-hidden="true">
+      <g
+        transform="rotate(45 20 20) translate(20 20) scale(0.92) translate(-20.5 -20)"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinejoin="round"
         strokeLinecap="round"
-        opacity="0.6"
-      />
+      >
+        <rect x="14.2" y="1.6" width="3.6" height="11.6" rx="1.8" />
+        <rect x="11.8" y="13.2" width="17.4" height="25" rx="4" />
+        <path d="M10.6 18.5v5" />
+        <rect
+          x="14.6"
+          y="16.4"
+          width="11.8"
+          height="7.4"
+          rx="1.4"
+          fill="#22a447"
+          strokeWidth="1.6"
+        />
+        <circle cx="20.5" cy="29" r="2.7" />
+        <path d="M15.6 34.6h2.6M22.8 34.6h2.6" />
+      </g>
+      <text
+        x="20.5"
+        y="22"
+        transform="rotate(45 20 20) translate(20 20) scale(0.92) translate(-20.5 -20)"
+        textAnchor="middle"
+        fontSize="4.7"
+        fontWeight="900"
+        fontFamily="Arial, Helvetica, sans-serif"
+        fill="#fff"
+      >
+        VHF
+      </text>
     </svg>
   );
 }

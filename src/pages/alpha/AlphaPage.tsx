@@ -8,6 +8,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { textOf } from '../../lib/format.ts';
 import { keyedItems } from '../../lib/keyedItems.ts';
+import { VIEW_LABELS } from '../../model/views.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { go } from '../../shell/router.ts';
@@ -31,14 +32,14 @@ export function AlphaPage() {
   return (
     <>
       <PageBack
-        label="◀ Retour"
+        label={`◀ ${VIEW_LABELS[back] ?? 'Retour'}`}
         data-go={back}
         onClick={() => {
           buzz();
           go(back);
         }}
       >
-        {tr('◀ Retour')}
+        {tr(`◀ ${VIEW_LABELS[back] ?? 'Retour'}`)}
       </PageBack>
       <h1>{tr('Alphabet phonétique')}</h1>
       <label className="field alpha-spell">

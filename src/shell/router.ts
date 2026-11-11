@@ -98,6 +98,17 @@ export function goBackInHistory(): void {
   go(known ? previous : backFallback(state.view.currentView.value));
 }
 
+/**
+ * The screen the nav bar back button goes to without a page back button.
+ * @returns Its view name.
+ */
+export function backDestination(): string {
+  const previous = history.at(-1);
+  return previous !== undefined && isView(previous)
+    ? previous
+    : backFallback(state.view.currentView.value);
+}
+
 /** Forget the history (nav bar exit button, nav.js:82). */
 export function clearHistory(): void {
   history.length = 0;

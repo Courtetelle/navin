@@ -26,14 +26,14 @@ export function PickBaseScreen({ onPick, onBack }: PickBaseScreenProps) {
   return (
     <>
       <PageBack
-        label="◀ Retour"
+        label="◀ La check-list"
         id="pbBack"
         onClick={() => {
           buzz();
           onBack();
         }}
       >
-        {tr('◀ Retour')}
+        {tr('◀ La check-list')}
       </PageBack>
       <h1>{tr('Choisir une base')}</h1>
       <div className="checks">

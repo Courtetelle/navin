@@ -90,6 +90,8 @@ export function TrackRailButton() {
   };
   const face = faces[step];
   const classes = ['rail-btn', 'rail-track', `rail-${step}`];
+  // Recording: the button blinks in the colour of PréP.
+  if (step === 'run') classes.push('menu-here');
   if (resume.hit) classes.push('lp-hit');
   return (
     <Button

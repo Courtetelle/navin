@@ -6,14 +6,17 @@ import { useLayoutEffect, useRef } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { useAutoRoll } from '../../components/shared/useAutoRoll.tsx';
 import { useTr } from '../../i18n/useTr.ts';
+import { VIEW_LABELS } from '../../model/views.ts';
 import { state } from '../../state/index.ts';
 import { hasBodyClass, setBodyClass } from '../bodyClass.ts';
+import { backDestination } from '../router.ts';
 import { MagnifierButton } from '../search/SearchButton.tsx';
 
 import { PrepLine } from './PrepLine.tsx';
 import {
   navBack,
   navExit,
+  navExitLabel,
   navNext,
   navOk,
   navPillClick,
@@ -84,7 +87,11 @@ export function NavTop() {
   const exitHold = useExitHold(Boolean(steps), () => steps?.onReset());
   const previous = sticky.value;
   const live: StickyNav = {
-    backLabel: navBackLabel(pageBackTarget(), prepOn),
+    backLabel: navBackLabel(
+      pageBackTarget(),
+      prepOn,
+      VIEW_LABELS[backDestination()],
+    ),
     hasSteps: Boolean(steps),
     pills: steps ? steps.pills : previous.pills,
     nextShown: Boolean(prepBar?.onNext),
@@ -171,7 +178,7 @@ export function NavTop() {
         }}
         {...exitHold.handlers}
       >
-        {tr('Sortir')}
+        {navExitLabel()}
       </Button>
       <Button className="btn primary" id="navAct" hidden />
       {lineContent === null ? null : (

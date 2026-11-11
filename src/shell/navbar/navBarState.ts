@@ -122,13 +122,15 @@ export function pageBackTarget():
 export function navBackLabel(
   target: { label: string } | null,
   prepOn: boolean,
+  destination?: string,
 ): string {
-  let label = '◀ Retour';
+  // Without a back button of its own, the name of the screen it goes back to.
+  let label = destination ? `◀ ${destination}` : '◀ Retour';
   if (!prepOn && target) {
     const text = target.label.trim();
     label = text.startsWith('✔')
       ? '✔ Terminé'
-      : text.replace(/^◀ Plus$/, '◀ data');
+      : text.replace(/^◀ Plus$/, '◀ data').replace(/^◀ Traceur$/, '◀ NavIn');
   }
   return label.replace(/^◀\s*/, '');
 }

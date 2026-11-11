@@ -42,14 +42,14 @@ export function PickCrew({ crew, onPick, onBack }: PickCrewProps) {
   return (
     <>
       <PageBack
-        label="◀ Retour"
+        label="◀ À bord"
         id="pcBack"
         onClick={() => {
           buzz();
           onBack();
         }}
       >
-        {tr('◀ Retour')}
+        {tr('◀ À bord')}
       </PageBack>
       <h1>{tr('Qui fait cette tâche ?')}</h1>
       <div className="checks">{buttons}</div>

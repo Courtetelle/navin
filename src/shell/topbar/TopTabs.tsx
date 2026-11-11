@@ -160,6 +160,7 @@ function displayClasses({
     face.bare && 'bare',
     face.box && 'ph-box',
     face.vhfOn && 'vhf-on',
+    face.blink && 'menu-here',
     keyboardFocus && 'kbd-focus',
   ];
 }
