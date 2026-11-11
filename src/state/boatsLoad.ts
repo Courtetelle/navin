@@ -49,13 +49,18 @@ const randomId = (prefix: string) =>
 export function readBoats(): Boat[] {
   let boats: Boat[];
   if (store.get<unknown>('ldb.boats', null) == null) {
-    boats = [
-      {
-        id: 'savannah',
-        info: { contacts: LAKE_CONTACTS },
-        checklist: seedList(SAVANNAH_CHECK, 'c'),
-      },
-    ];
+    // A new install starts without boats: Savannah and Inspiration are data,
+    // brought by loading a backup (the tests keep them as examples).
+    boats = examplesWanted()
+      ? [
+          {
+            id: 'savannah',
+            info: { contacts: LAKE_CONTACTS },
+            checklist: seedList(SAVANNAH_CHECK, 'c'),
+          },
+        ]
+      : [];
+    if (!examplesWanted()) store.set('ldb.inspiration', true);
   } else {
     boats = store.arr<Boat>('ldb.boats', (boat) => {
       if (!boat.info || typeof boat.info !== 'object') boat.info = {};
