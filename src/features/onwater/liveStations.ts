@@ -3,6 +3,7 @@ import { distKm } from '../../lib/geo.ts';
 import type { MfTally } from './coastStations.ts';
 import { mfReadings, owmReadings } from './coastStations.ts';
 import { smnNow, smnStations } from './externals.ts';
+import { farFromShore, shoreGrid } from './shoreFar.ts';
 import { rememberReadings } from './stationHistory.ts';
 import type { StationRow } from './windModels.ts';
 import { stationReading } from './windModels.ts';
@@ -24,7 +25,9 @@ export type LiveStation = WindReading & {
 
 /**
  * Every wind station measuring now around a place: MeteoSwiss, OpenWindMap,
- * Météo-France (with a key), the closest first.
+ * Météo-France (with a key), the closest first. A station on land farther
+ * than 5 km from the sea or a lake is left out: its wind is not the wind on
+ * the water.
  * @param center - Place searched around.
  * @param radius - Radius in km.
  * @param mfKey - Météo-France key, empty without one.
@@ -37,13 +40,15 @@ export async function liveStations(
   mfKey: string,
   tally: MfTally | null = null,
 ): Promise<LiveStation[]> {
-  const [swiss, beacons, french] = await Promise.all([
+  const [swiss, beacons, french, grid] = await Promise.all([
     smnLive(center, radius).catch(() => []),
     owmReadings(center, radius, LIVE_MOST).catch(() => []),
     mfReadings(center, radius, mfKey, LIVE_MOST, tally).catch(() => []),
+    shoreGrid(),
   ]);
   const live = [...swiss, ...beacons, ...french]
     .filter(isLive)
+    .filter((station) => !grid || !farFromShore(grid, station.lat, station.lon))
     .toSorted((a, b) => (a.km ?? 0) - (b.km ?? 0));
   rememberReadings(live, Date.now());
   return live;
