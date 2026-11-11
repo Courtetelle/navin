@@ -23,6 +23,9 @@ interface RemarkWindowProps {
   onClose: () => void;
 }
 
+/** A click on the backdrop this soon after opening is the opening tap. */
+const OPENING_CLICK_MS = 500;
+
 /**
  * The remark window (`div.ck-ask.rem-modal`, nav.js:1404-1475): the element
  * aimed at, a text area, « 📨 Envoyer à Claude », the list of my remarks; it
@@ -65,6 +68,7 @@ export function RemarkWindow({ target, anchor, onClose }: RemarkWindowProps) {
       drag.current = null;
     },
   };
+  const [openedAt] = useState(() => performance.now());
   return createPortal(
     <div
       className={
@@ -73,6 +77,9 @@ export function RemarkWindow({ target, anchor, onClose }: RemarkWindowProps) {
           : 'ck-ask rem-modal no-print'
       }
       onClick={(event) => {
+        // The click a finger makes as it lifts from the 💬 pill comes after
+        // the window opened: it must not close it at once.
+        if (event.timeStamp - openedAt < OPENING_CLICK_MS) return;
         if (event.target === event.currentTarget) onClose();
       }}
     >

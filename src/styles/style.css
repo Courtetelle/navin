@@ -9156,41 +9156,6 @@ body.has-navtop #view > h1.live-title,
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
-/* Live météo opened from a wind alert: the station of the alert in a red
-   band that blinks */
-.live-alert-ring {
-  position: absolute;
-  width: 74px;
-  height: 74px;
-  transform: translate(-50%, -50%);
-  border: 8px solid #e10600;
-  border-radius: 50%;
-  background: rgba(225, 6, 0, 0.18);
-  box-shadow:
-    0 0 0 3px #fff,
-    0 0 18px 6px rgba(225, 6, 0, 0.7);
-  pointer-events: none;
-  animation: live-alert-blink 0.9s steps(2, jump-none) infinite;
-}
-@keyframes live-alert-blink {
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.12;
-  }
-}
-:root[data-theme='night'] .live-alert-ring {
-  border-color: #ff2a1a;
-  box-shadow:
-    0 0 0 3px #300,
-    0 0 18px 6px rgba(255, 42, 26, 0.75);
-}
-@media (prefers-reduced-motion: reduce) {
-  .live-alert-ring {
-    animation-duration: 1.6s;
-  }
-}
 .live-mk i {
   display: inline-block;
   font-style: normal;
@@ -10093,10 +10058,9 @@ body.nav-search:not(.trk-mode) #searchBtn {
     border-color: #d40000;
     background: #e10600 !important;
   }
-  /* Course up: the white arrow points straight up, as the boat goes */
+  /* Course up: the white arrow, straight up and in the middle */
   html body .rail-boat.course-up .rail-svg {
     color: #fff;
-    transform: rotate(-45deg);
   }
 }
 

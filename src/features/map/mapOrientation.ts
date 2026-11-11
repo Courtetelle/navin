@@ -1,7 +1,6 @@
 import type { Map as LeafletMap, MapOptions } from 'leaflet';
 
 import { toast } from '../../state/index.ts';
-import { store } from '../../storage/store.ts';
 
 import { stopGlide } from './boatFollow.ts';
 import { tracker, trkShowCourse } from './trackerState.ts';
@@ -15,7 +14,11 @@ type TurningMap = LeafletMap & {
   setBearing: (bearing: number) => void;
 };
 
-const KEY = 'ldb.mapOrientation';
+/**
+ * The orientation chosen in this run of the app: every launch starts north
+ * up (the blue arrow), then the last choice stays.
+ */
+let chosen: MapOrientation = 'north';
 /** Below this speed in knots the course of a GPS means nothing. */
 const MIN_SPEED_KN = 1;
 /** A smaller change of course does not turn the map. */
@@ -31,10 +34,10 @@ export const TURNING_MAP_OPTIONS = {
 
 /**
  * The orientation chosen.
- * @returns North up unless the course was chosen.
+ * @returns North up unless the course was chosen since the launch.
  */
 export function mapOrientation(): MapOrientation {
-  return store.raw(KEY) === 'course' ? 'course' : 'north';
+  return chosen;
 }
 
 /**
@@ -115,7 +118,7 @@ export function locateAction(
 export function toggleOrientation(map: LeafletMap): void {
   stopGlide();
   const next = mapOrientation() === 'course' ? 'north' : 'course';
-  store.setRaw(KEY, next);
+  chosen = next;
   toast(next === 'course' ? 'Cap en haut' : 'Nord en haut');
   showOrientation(map);
   const handle = tracker.current;

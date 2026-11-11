@@ -25,6 +25,20 @@ export const SNAP_PX = 40;
 /** The dividers are laid on a map, for the button of the tablet column. */
 export const rulerOn = signal(false);
 
+/** Turns about the arrow of the dividers laid, if any. */
+let flipLaid: (() => void) | null = null;
+
+/**
+ * The arrow of the dividers laid goes to the other point.
+ * @returns Whether dividers were laid to turn.
+ */
+export function flipRuler(): boolean {
+  if (!flipLaid) return false;
+  buzz();
+  flipLaid();
+  return true;
+}
+
 /** The drawing of the dividers. */
 export const DIVIDERS_ICON =
   '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="4" r="2.2" fill="currentColor"/><path d="M12 5.5 6 21M12 5.5 18 21" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M8.2 14.5h7.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
@@ -198,16 +212,16 @@ export function addRulerControl(map: LeafletMap): void {
           );
         }
       },
-      () => {
-        // The arrow on the other point: the course turns about.
-        target = 1 - target;
-        redraw();
-      },
+      () => flipLaid?.(),
     );
   };
 
   const show = () => {
     rulerOn.value = true;
+    flipLaid = () => {
+      target = 1 - target;
+      redraw();
+    };
     const boat = boatLatLng();
     const boatSeen = boat !== null && map.getBounds().contains(boat);
     const first = boatSeen ? boat : map.getCenter();
@@ -248,7 +262,10 @@ export function addRulerControl(map: LeafletMap): void {
   };
 
   const hide = () => {
-    if (ends) rulerOn.value = false;
+    if (ends) {
+      rulerOn.value = false;
+      flipLaid = null;
+    }
     stopFollow?.();
     stopFollow = null;
     map.off('rotate zoomend', redraw);

@@ -40,6 +40,7 @@ async function open(
   browser: Browser,
   theme: string,
   viewport: { width: number; height: number } = PHONE,
+  touch = false,
 ): Promise<{
   context: BrowserContext;
   page: Page;
@@ -47,6 +48,7 @@ async function open(
 }> {
   const context = await browser.newContext({
     viewport,
+    hasTouch: touch,
     locale: 'fr-CH',
     serviceWorkers: 'block',
   });
@@ -259,12 +261,6 @@ const mapTurn = (page: Page) =>
   });
 
 async function follow(page: Page, theme: string): Promise<void> {
-  await page.evaluate(() => {
-    localStorage.setItem('ldb.mapOrientation', 'course');
-  });
-  await page.reload({ waitUntil: 'load' });
-  await page.locator('.map-locate-btn').waitFor({ state: 'attached' });
-  await page.waitForTimeout(1000);
   const sail = (lat: number, lon: number, heading: number) =>
     page.evaluate(
       (point) => {
@@ -289,6 +285,19 @@ async function follow(page: Page, theme: string): Promise<void> {
     theme,
     'the boat stays in the middle of the map',
     (await boatOffCentre(page)) < 3,
+  );
+  check(
+    theme,
+    'the map opens north up',
+    (await page.locator('.leaflet-container.course-up').count()) === 0,
+  );
+  // The boat in the middle: the arrow turns the map to the course.
+  await page.locator('.map-locate-btn').first().click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'the arrow puts the course up',
+    (await page.locator('.leaflet-container.course-up').count()) > 0,
   );
   const turns: number[] = [];
   await sail(46.4504, 6.6, 90);
@@ -626,6 +635,30 @@ async function tablet(page: Page, theme: string): Promise<void> {
   }
 }
 
+/**
+ * The 💬 pill touched with a finger opens its window, which stays open: the
+ * click a finger makes as it lifts once closed it at once.
+ * @param page - A page with a touch screen.
+ * @param theme - Theme checked.
+ * @param where - Phone or tablet.
+ */
+async function remarkPill(
+  page: Page,
+  theme: string,
+  where: string,
+): Promise<void> {
+  const pill = await page.locator('#remPill').boundingBox();
+  check(theme, `${where}: the 💬 pill is shown`, pill !== null);
+  if (!pill) return;
+  await page.touchscreen.tap(pill.x + pill.width / 2, pill.y + pill.height / 2);
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    `${where}: a finger on the 💬 pill opens its window`,
+    await page.locator('.rem-modal textarea').isVisible(),
+  );
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
@@ -663,6 +696,30 @@ for (const theme of ['day', 'night']) {
   }
   check(theme, 'tablet: no error in the page', errors.length === 0);
   await context.close();
+}
+for (const theme of ['day', 'night']) {
+  for (const [where, viewport] of [
+    ['phone', PHONE],
+    ['tablet', { width: 1280, height: 800 }],
+  ] as const) {
+    const { context, page, errors } = await open(
+      browser,
+      theme,
+      viewport,
+      true,
+    );
+    try {
+      await remarkPill(page, theme, where);
+    } catch (error) {
+      check(
+        theme,
+        `${where} 💬: no step blocks: ${String(error).slice(0, 700)}`,
+        false,
+      );
+    }
+    check(theme, `${where} 💬: no error in the page`, errors.length === 0);
+    await context.close();
+  }
 }
 /* eslint-enable no-await-in-loop */
 await browser.close();

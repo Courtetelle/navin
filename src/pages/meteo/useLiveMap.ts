@@ -236,26 +236,12 @@ export function useLiveMap(
     if (alertLat == null || alertLon == null) return;
     // The station of the wind alert: its badge in a red band that blinks,
     // the other stations still shown around it.
+    // Only on its badge: a station not shown gets no circle of its own.
     const alerted = alertStation(stations, alertLat, alertLon);
-    if (alerted) {
-      const marker = markers.current.get(stationKey(alerted));
-      marker?.setZIndexOffset(1000);
-      marker?.getElement()?.classList.add('live-alerted');
-      return;
-    }
-    // Stations not read yet: nothing, the badge gets its band once shown.
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- keeps Leaflet, outside React, in step with the props
-    if (stations.length === 0) return;
-    // Its station no longer answers: a red band on its place.
-    L.marker([alertLat, alertLon], {
-      icon: L.divIcon({
-        className: 'live-alert-wrap',
-        html: '<div class="live-alert-ring"></div>',
-        iconSize: [0, 0],
-      }),
-      interactive: false,
-      keyboard: false,
-    }).addTo(group);
+    if (!alerted) return;
+    const marker = markers.current.get(stationKey(alerted));
+    marker?.setZIndexOffset(1000);
+    marker?.getElement()?.classList.add('live-alerted');
   }, [ready, stations, basis, lat, lon, alertLat, alertLon]);
   return {
     center: () => {

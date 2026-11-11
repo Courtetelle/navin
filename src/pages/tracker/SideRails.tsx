@@ -10,7 +10,11 @@ import {
   boatOrientPress,
   boatScaleTap,
 } from '../../features/map/navinScale.ts';
-import { DIVIDERS_ICON, rulerOn } from '../../features/map/rulerTool.ts';
+import {
+  DIVIDERS_ICON,
+  flipRuler,
+  rulerOn,
+} from '../../features/map/rulerTool.ts';
 import { trkPointNow } from '../../features/map/trackerPoint.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { takePhoto } from '../../features/onwater/index.ts';
@@ -195,6 +199,9 @@ const RIGHT_SLOTS = 3;
 const LEFT_SLOTS = 3;
 
 /** The arrow of the boat button. */
+/** Course up: the arrow straight up, in the middle of the button. */
+const BOAT_UP_SVG =
+  '<svg class="rail-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 19.5 21 12 17 4.5 21z" fill="currentColor"/></svg>';
 const BOAT_SVG =
   '<svg class="rail-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3 3 7.5z" fill="currentColor"/></svg>';
 
@@ -225,7 +232,9 @@ function BoatButton() {
       onClick={boatScaleTap}
       {...press.handlers}
     >
-      <span className="rail-icon">{markupToReact(BOAT_SVG)}</span>
+      <span className="rail-icon">
+        {markupToReact(courseUp ? BOAT_UP_SVG : BOAT_SVG)}
+      </span>
     </Button>
   );
 }
@@ -300,18 +309,24 @@ function RulerButton() {
   useSignals();
   const tr = useTr();
   const on = rulerOn.value;
+  // A long press turns the arrow about.
+  const press = useLongPress(() => {
+    if (!flipRuler()) toast('Touchez le compas pour le poser sur la carte.');
+  });
+  const classes = ['rail-btn', 'rail-bare', 'rail-ruler'];
+  if (on) classes.push('rail-on');
+  if (press.hit) classes.push('lp-hit');
   return (
     <Button
       type="button"
       noUiEdit
-      className={
-        on
-          ? 'rail-btn rail-bare rail-ruler rail-on'
-          : 'rail-btn rail-bare rail-ruler'
-      }
-      aria-label={tr('Compas : distance et cap')}
+      className={classes.join(' ')}
+      aria-label={tr(
+        'Compas : distance et cap · appui long : inverser la flèche',
+      )}
       aria-pressed={on}
       onClick={toggleRuler}
+      {...press.handlers}
     >
       <span className="rail-icon">{markupToReact(DIVIDERS_ICON)}</span>
     </Button>
