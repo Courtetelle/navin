@@ -103,7 +103,7 @@ export function buildJournalMap(
     )
     .addTo(map);
   // The Swiss map only in the menu over Switzerland.
-  addRegional(map, layers, swiss, 'Carte nationale suisse', SWISS_BOX, true);
+  addRegional(map, layers, swiss, 'Carte nationale suisse', SWISS_BOX, osm);
   if (useSwiss) void addLemanVector(map, layers, osm);
   keepTilesFilled(map, [osm, swiss]);
   void addOfflineMaps(map, layers, osm);

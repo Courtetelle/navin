@@ -92,7 +92,6 @@ export function crossAttach(map: LeafletMap): void {
     });
     map.panTo(event.latlng);
   });
-  // The map slides under the cross: the cross keeps its place on screen.
   // Whatever moves the map (finger, zoom, glide), the cross stays in its
   // middle: the map slides behind it.
   map.on('move zoom', () => {

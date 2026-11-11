@@ -104,7 +104,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     )
     .addTo(map);
   // The Swiss map only in the menu over Switzerland.
-  addRegional(map, layers, swiss, 'Carte nationale suisse', SWISS_BOX, true);
+  addRegional(map, layers, swiss, 'Carte nationale suisse', SWISS_BOX, osm);
   let swissAdded = false;
   handle.addSwiss = () => {
     if (swissAdded) return;

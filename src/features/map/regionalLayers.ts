@@ -9,7 +9,8 @@ interface Entry {
   layer: Layer;
   name: string;
   box: GeoBox;
-  base: boolean;
+  /** For a background map: the background that takes over out of its area. */
+  fallback: Layer | null;
   shown: boolean;
 }
 
@@ -51,22 +52,32 @@ function update(map: LeafletMap, control: Control.Layers): void {
     const inView = boxesMeet(view, entry.box);
     if (inView === entry.shown) continue;
     entry.shown = inView;
-    if (!inView) control.removeLayer(entry.layer);
-    else if (entry.base) control.addBaseLayer(entry.layer, entry.name);
-    else control.addOverlay(entry.layer, entry.name);
+    if (inView) {
+      if (entry.fallback) control.addBaseLayer(entry.layer, entry.name);
+      else control.addOverlay(entry.layer, entry.name);
+      continue;
+    }
+    control.removeLayer(entry.layer);
+    // A background left behind would show nothing out of its area.
+    if (entry.fallback && map.hasLayer(entry.layer)) {
+      map.removeLayer(entry.layer);
+      map.addLayer(entry.fallback);
+    }
   }
 }
 
 /**
  * Put a layer in the layer menu only while its area is on screen: the Lake
  * Geneva layers when a part of the lake shows, the Swiss ones over
- * Switzerland. A layer turned on stays on; it only leaves the menu.
+ * Switzerland. An overlay turned on stays on; it only leaves the menu. A
+ * background map gives way to its fallback when its area leaves the screen.
  * @param map - The map.
  * @param control - Its layer menu.
  * @param layer - The layer.
  * @param name - Its name in the menu.
  * @param box - Its area.
- * @param base - A background map rather than an overlay.
+ * @param fallback - For a background map: the one that takes over out of
+ *   its area; without it, the layer is an overlay.
  */
 export function addRegional(
   map: LeafletMap,
@@ -74,7 +85,7 @@ export function addRegional(
   layer: Layer,
   name: string,
   box: GeoBox,
-  base = false,
+  fallback: Layer | null = null,
 ): void {
   let entries = entriesOf.get(control);
   if (!entries) {
@@ -82,7 +93,7 @@ export function addRegional(
     entriesOf.set(control, entries);
     map.on('moveend zoomend', () => update(map, control));
   }
-  entries.push({ layer, name, box, base, shown: false });
+  entries.push({ layer, name, box, fallback, shown: false });
   try {
     update(map, control);
   } catch {
