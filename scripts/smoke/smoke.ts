@@ -670,6 +670,83 @@ async function dataFace(page: Page, theme: string, name: string) {
   );
 }
 
+const longPress = async (page: Page, selector: string) => {
+  const box = await page.locator(selector).boundingBox();
+  if (!box) return;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(900);
+  await page.mouse.up();
+  await page.waitForTimeout(1500);
+};
+
+const zoneChosen = (page: Page) =>
+  page.evaluate(() => localStorage.getItem('ldb.zoneSim'));
+
+const NAVIN = 'header.topbar nav.topnav .top-tab[data-view="tracker"]';
+
+/**
+ * The zones of NavIn on the tablet: the Swiss map gives way to OpenStreetMap
+ * out of Switzerland; after the boat arrow (GPS on Lake Geneva) a long press
+ * on NavIn goes to sea.
+ * @param page - The tablet page, on the map.
+ * @param theme - Theme checked.
+ */
+async function zones(page: Page, theme: string): Promise<void> {
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(1200);
+  if ((await zoneChosen(page)) !== 'lac') await longPress(page, NAVIN);
+  if ((await zoneChosen(page)) !== 'lac') await longPress(page, NAVIN);
+  await page.evaluate(() => {
+    const label = [
+      ...document.querySelectorAll('.leaflet-control-layers label'),
+    ].find((one) => one.textContent?.includes('nationale suisse'));
+    label?.querySelector('input')?.click();
+  });
+  const checked = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.leaflet-control-layers label')]
+        .filter((one) => one.querySelector('input')?.checked)
+        .map((one) => one.textContent?.trim())
+        .join('|'),
+    );
+  const onLake = await checked();
+  check(
+    theme,
+    'tablet: on the lake the Swiss map can be chosen',
+    onLake.includes('nationale suisse'),
+  );
+  await longPress(page, NAVIN);
+  const background = await checked();
+  check(
+    theme,
+    'tablet: at sea the Swiss map gives way to OpenStreetMap',
+    background.includes('Plan OpenStreetMap') &&
+      !background.includes('nationale'),
+  );
+  await page.evaluate(() => {
+    (
+      globalThis as unknown as {
+        fakeGps: (lat: number, lon: number, heading: number) => void;
+      }
+    ).fakeGps(46.45, 6.6, 0);
+  });
+  await page.waitForTimeout(500);
+  await page.locator('.rail-boat').click();
+  await page.waitForTimeout(1200);
+  check(
+    theme,
+    'tablet: the boat arrow goes back to the GPS',
+    !(await zoneChosen(page)),
+  );
+  await longPress(page, NAVIN);
+  check(
+    theme,
+    'tablet: on the GPS of Lake Geneva a long press on NavIn goes to sea',
+    (await zoneChosen(page)) === 'mer',
+  );
+}
+
 async function tablet(page: Page, theme: string): Promise<void> {
   const home = await tabletPlaces(page);
   check(theme, 'tablet: every side button is shown', !home.includes('absent'));
@@ -827,6 +904,7 @@ for (const theme of ['day', 'night']) {
   });
   try {
     await tablet(page, theme);
+    await zones(page, theme);
   } catch (error) {
     check(
       theme,
