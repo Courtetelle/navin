@@ -10,12 +10,12 @@ import { setFollow, tracker } from './trackerState.ts';
 type Centre = 'view' | 'boat';
 
 /**
- * The scales NavIn goes through on the tablet: the distance shown across the
- * short side of the map, in nautical miles. The first is the detailed map.
+ * The scales NavIn and the boat button go through on the tablet: the
+ * distance shown across the short side of the map, in nautical miles.
  */
-export const SCALES_NM = [0.5, 2, 30, 58] as const;
+export const SCALES_NM = [2, 30, 58] as const;
 /** Coming from another screen, the map opens at 2 NM. */
-export const FIRST_SCALE = 1;
+export const FIRST_SCALE = 0;
 
 const METRES_PER_NM = 1852;
 const WAIT_STEP_MS = 100;
@@ -37,12 +37,11 @@ export function nextScale(current: number, onMap: boolean): number {
 /**
  * Text of a scale.
  * @param rank - Rank in {@link SCALES_NM}.
- * @returns For example « Carte détaillée · 0,5 NM » or « 30 NM ».
+ * @returns For example « 30 NM ».
  */
 export function scaleText(rank: number): string {
   const nm = SCALES_NM[rank] ?? 2;
-  const shown = `${String(nm).replace('.', ',')} NM`;
-  return rank === 0 ? `Carte détaillée · ${shown}` : shown;
+  return `${String(nm).replace('.', ',')} NM`;
 }
 
 function apply(rank: number, centre: Centre, tries = WAIT_TRIES): void {
@@ -71,7 +70,7 @@ function onMap(): boolean {
 
 /**
  * NavIn on the tablet: back to the map at 2 NM, or on the map the next
- * scale (detailed, 2 NM, 30 NM, 58 NM, then detailed again), always where
+ * scale (2 NM, 30 NM, 58 NM, then 2 NM again), always where
  * the map is looking, never back on the boat.
  * @param shown - The map was already on screen.
  */

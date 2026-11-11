@@ -32,7 +32,7 @@ import {
   drawTrace,
   takePendingTrace,
 } from '../../features/map/traceActions.ts';
-import { simSeaMode } from '../../features/map/trackerRecenter.ts';
+import { simLakeMode, simSeaMode } from '../../features/map/trackerRecenter.ts';
 import type { TrackerHandle } from '../../features/map/trackerState.ts';
 import {
   currentTrackLine,
@@ -76,11 +76,14 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     attribution: '© swisstopo',
   });
   const simulatedSea = simSeaMode();
+  const simulatedLake = simLakeMode();
   const fix = state.view.lastFix.value;
   const cruise = state.data.cruise.value;
   let here: LatLngPair | null = fix ? [fix.lat, fix.lon] : null;
   // On a simulated sea, the real position in Switzerland no longer imposes the lake.
   if (simulatedSea && inSwissArea(fix)) here = null;
+  // The lake chosen with NavIn opens on its place, not on the boat.
+  if (simulatedLake) here = null;
   const inSwissWaters = here ? inSwissArea(fix) : !cruise;
   const useSwiss = !simulatedSea && ((cruise && isLake()) || inSwissWaters);
   osm.addTo(map);
@@ -104,7 +107,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   keepBoatCentred(map, () =>
     handle.follow && handle.me ? handle.me.getLatLng() : null,
   );
-  setFollow(!(simulatedSea && !here));
+  setFollow(!((simulatedSea || simulatedLake) && !here));
   recenterAfterDrag(map, handle);
   const live = L.polyline([], {
     color: '#d00000',
