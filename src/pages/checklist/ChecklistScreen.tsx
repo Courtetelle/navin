@@ -14,6 +14,7 @@ import { ChecklistFilters } from './ChecklistFilters.tsx';
 import { ChecklistItems } from './ChecklistItems.tsx';
 import { ChecklistQuickEdit } from './ChecklistQuickEdit.tsx';
 import { ChecklistTitle, PressHelp } from './ChecklistTitle.tsx';
+import { CopyCheckIn } from './CopyCheckIn.tsx';
 import { ObservationsBox } from './ObservationsBox.tsx';
 import { PrepCloseButton } from './PrepCloseButton.tsx';
 import { checklistModel } from './checklistModel.ts';
@@ -114,6 +115,9 @@ export function ChecklistScreen({
         />
       ) : null}
       {inPrep && list === 'dep' ? <PrepCloseButton /> : null}
+      {builtin && list === 'dep' ? (
+        <CopyCheckIn onCopied={() => redraw()} />
+      ) : null}
       {list === 'dep' ? (
         <ButtonRow className="row ck-pub-row">
           <Button

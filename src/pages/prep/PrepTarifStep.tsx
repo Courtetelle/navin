@@ -42,7 +42,8 @@ export function PrepTarifStep({ prep }: PrepStepProps) {
           {rental}
         </HelpText>
       )}
-      <PrepNav next="Suivant ▶" />
+      {/* A fare touched goes on by itself: « Suivant » only without fares. */}
+      <PrepNav next={list.length > 0 ? '' : 'Suivant ▶'} />
     </>
   );
 }
@@ -55,7 +56,6 @@ interface TarifListProps {
 
 function TarifList({ boat, list, chosen }: TarifListProps) {
   const { tarif, why } = prepTarifSuggest(boat);
-  const current = chosen || tarif?.label;
   const text = `Proposé pour aujourd’hui (${why}) : ${tarif ? tarif.label : 'aucun tarif ne correspond'}. Touchez le bon tarif.`;
   return (
     <>
@@ -70,7 +70,8 @@ function TarifList({ boat, list, chosen }: TarifListProps) {
         {list.map((item) => (
           <Button
             key={item.index}
-            className={`btn big ${current === item.label ? 'on' : ''}`}
+            // Only a fare chosen is lit; the proposed one just says so.
+            className={`btn big ${chosen === item.label ? 'on' : ''}`}
             data-tarif={item.index}
             onClick={() => pickTarif(item.index)}
           >

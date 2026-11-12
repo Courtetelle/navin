@@ -372,7 +372,9 @@ function DepartButtons() {
     (state.view.currentView.value === 'prep' || hasBodyClass('prep-on'));
   const prepClasses = ['rail-btn', 'rail-prep'];
   // Always shown, even during a track.
-  if (prepOn) prepClasses.push('rail-on');
+  // Shown: lit orange. Kept while elsewhere: it blinks orange until resumed.
+  if (inPrep) prepClasses.push('rail-on');
+  else if (prepOn) prepClasses.push('prep-held', 'menu-here');
   const ready = state.data.prep.value === null ? prepReady.value : null;
   if (ready) prepClasses.push('prep-ready', `prep-ready-${ready}`);
   return (

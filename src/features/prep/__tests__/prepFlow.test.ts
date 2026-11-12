@@ -1,6 +1,6 @@
 import { beforeEach, expect, test } from 'vitest';
 
-import { navigation } from '../../../shell/router.ts';
+import { go, navigation } from '../../../shell/router.ts';
 import {
   blankCruise,
   initState,
@@ -14,12 +14,13 @@ import { prepBack } from '../prepBack.ts';
 import {
   prepBrowseNext,
   prepGo,
+  prepHasPicks,
   prepJump,
   prepLineJump,
   prepReset,
   prepStart,
 } from '../prepFlow.ts';
-import { prepFlow } from '../prepTypes.ts';
+import { prepFlow, updatePrepFlow } from '../prepTypes.ts';
 
 beforeEach(() => {
   initState(createMemoryStorage({}));
@@ -37,6 +38,7 @@ test('on a lake the PréP opens on the three paths', () => {
     boatName: '',
     purpose: null,
     sub: 'purpose',
+    fresh: true,
   });
   expect(navigation.value.view).toBe('prep');
 });
@@ -49,25 +51,38 @@ test('at sea the PréP opens on the duration', () => {
   expect(prepFlow()?.reach).toBe(1);
 });
 
-test('a quick navigation is completed instead of a new one', () => {
+test('a new PréP starts from nothing, even with a quick navigation open', () => {
+  setZoneSim('lac');
   const cruise = blankCruise('Rapide', null);
   cruise.quick = true;
   cruise.type = 'lac';
   cruise.boatId = 'savannah';
-  cruise.info.boat = 'Savannah';
   cruise.purpose = 'Location';
   setCruise(cruise);
   prepStart();
-  expect(state.data.prep.value).toStrictEqual({
-    step: 0,
-    reach: 0,
-    fill: true,
-    type: 'lac',
-    duree: 'jour',
-    boatId: 'savannah',
-    boatName: 'Savannah',
-    purpose: 'Location',
+  expect(prepFlow()?.boatId).toBe(null);
+  expect(prepFlow()?.purpose).toBe(null);
+  expect(prepHasPicks(prepFlow())).toBe(false);
+});
+
+test('a second touch on PréP leaves it: dropped when empty, kept with a choice', () => {
+  setZoneSim('lac');
+  go('marks');
+  prepStart();
+  expect(navigation.value.view).toBe('prep');
+  prepStart();
+  expect(navigation.value.view).toBe('marks');
+  expect(prepFlow()).toBe(null);
+  prepStart();
+  updatePrepFlow((prep) => {
+    prep.purpose = 'Entraînement';
   });
+  prepStart();
+  expect(navigation.value.view).toBe('marks');
+  expect(prepFlow()?.purpose).toBe('Entraînement');
+  prepStart();
+  expect(navigation.value.view).toBe('prep');
+  expect(prepFlow()?.purpose).toBe('Entraînement');
 });
 
 test('browsing does not move the step being filled', () => {
