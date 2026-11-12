@@ -955,6 +955,16 @@ async function offlineFiles(page: Page, theme: string): Promise<void> {
     ).fakeGps(43, 6.2, 90);
   });
   await page.waitForTimeout(3000);
+  const ticked = await page.evaluate(() =>
+    [...document.querySelectorAll('.leaflet-control-layers-overlays label')]
+      .filter((label) => label.textContent?.includes('Hors ligne'))
+      .map((label) => label.querySelector('input')?.checked),
+  );
+  check(
+    theme,
+    'every map file is ticked in the layer menu by default',
+    ticked.length === 2 && ticked.every(Boolean),
+  );
   check(
     theme,
     'without network the map file shows under the boat',

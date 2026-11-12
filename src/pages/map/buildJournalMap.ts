@@ -20,7 +20,10 @@ import {
 } from '../../features/map/mapData.ts';
 import { disposeMap, whileMapLive } from '../../features/map/mapExtras.ts';
 import { setShownMap } from '../../features/map/mapFull.ts';
-import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
+import {
+  BACKGROUND_Z,
+  addOfflineMaps,
+} from '../../features/map/offlineMapLayer.ts';
 import { SWISS_BOX, addRegional } from '../../features/map/regionalLayers.ts';
 import { addRulerControl } from '../../features/map/rulerTool.ts';
 import { SEA_ZOOM, seaCenter } from '../../features/map/seaCenter.ts';
@@ -78,6 +81,7 @@ export function buildJournalMap(
   const tiles = { maxZoom: 19, maxNativeZoom: 18 };
   const osm = L.tileLayer(OSM_TILES, {
     ...tiles,
+    zIndex: BACKGROUND_Z,
     subdomains: 'abc',
     crossOrigin: true,
     attribution: '© OpenStreetMap France',
@@ -89,6 +93,7 @@ export function buildJournalMap(
   const useSwiss = chooseSwiss(data);
   const swiss = L.tileLayer(SWISS_TILES, {
     ...tiles,
+    zIndex: BACKGROUND_Z,
     crossOrigin: true,
     bounds: SWISS_BOUNDS,
     attribution: '© swisstopo',
@@ -99,14 +104,15 @@ export function buildJournalMap(
     .layers(
       { 'Plan OpenStreetMap': osm },
       { 'Balisage OpenSeaMap': seamark },
-      { position: 'topright' },
+      // Fixed order, not the menu's: background, map files, overlays.
+      { position: 'topright', autoZIndex: false },
     )
     .addTo(map);
   // The Swiss map only in the menu over Switzerland.
   addRegional(map, layers, swiss, 'Carte nationale suisse', SWISS_BOX, osm);
   if (useSwiss) void addLemanVector(map, layers, osm);
   keepTilesFilled(map, [osm, swiss]);
-  void addOfflineMaps(map, layers, osm);
+  void addOfflineMaps(map, layers);
   addFullscreenControl(map);
   addRulerControl(map);
   const points: LatLngExpression[] = [];

@@ -2,6 +2,7 @@ import type { Control, GridLayer, Map as LeafletMap } from 'leaflet';
 import { PMTiles } from 'pmtiles';
 
 import { state, toast } from '../../state/index.ts';
+import { store } from '../../storage/store.ts';
 
 import { isMapLive } from './mapExtras.ts';
 import type { OfflineMap } from './offlineMapStore.ts';
@@ -54,62 +55,58 @@ async function newLayer(
   >[0]) as unknown as GridLayer;
 }
 
+const entryName = (item: OfflineMap) => `Hors ligne · ${item.name}`;
+
+/** The backgrounds (OpenStreetMap, Swiss map) lie under the map files. */
+export const BACKGROUND_Z = -1;
+/** The map files lie on the background, under the overlays (OpenSeaMap). */
+const OFFLINE_Z = 0;
+/** The map files the sailor unticked in the layer menu. */
+const HIDDEN_KEY = 'ldb.offlineHidden';
+
 /**
- * Offer the map files of this device as backgrounds, and draw them all at once
- * under whatever background shows: its tiles cover them as they arrive, and
- * where they cannot load (no network) the map files show through. When the
- * online map cannot load, the map file that covers the place takes over in the
- * menu; the other map files keep drawing beside it.
+ * Show every map file of this device at once, each over its own area, on top
+ * of the background and under the overlays: with or without network, what
+ * was loaded is what is seen. Each one has its tick in the layer menu; one
+ * unticked stays hidden the next times.
  * @param map - Leaflet map.
  * @param control - Layer chooser.
- * @param online - The online background that shows by default.
  */
 export async function addOfflineMaps(
   map: LeafletMap,
   control: Control.Layers,
-  online: GridLayer,
 ): Promise<void> {
   const stored = await offlineMaps().catch(() => []);
   if (stored.length === 0 || !isMapLive(map)) return;
   const layers = await Promise.all(
-    stored.map(async (item) => {
-      const reader = new PMTiles(offlineMapSource(item));
-      return {
+    stored.map(async (item) => ({
+      item,
+      layer: await newLayer(
         item,
-        layer: await newLayer(item, reader, 1),
-        under: await newLayer(item, reader, 0),
-      };
-    }),
+        new PMTiles(offlineMapSource(item)),
+        OFFLINE_Z,
+      ),
+    })),
   );
   if (!isMapLive(map)) return;
+  const hidden = new Set(store.get<string[]>(HIDDEN_KEY, []));
   for (const { item, layer } of layers) {
-    control.addBaseLayer(layer, `Hors ligne · ${item.name}`);
+    control.addOverlay(layer, entryName(item));
+    if (!hidden.has(item.id)) layer.addTo(map);
   }
-  // Each map file is drawn once: as the chosen background, or underneath.
-  const syncUnder = () => {
-    if (!isMapLive(map)) return;
-    for (const { layer, under } of layers) {
-      const wanted = !map.hasLayer(layer);
-      if (wanted && !map.hasLayer(under)) under.addTo(map);
-      if (!wanted && map.hasLayer(under)) map.removeLayer(under);
-    }
-  };
-  map.on('baselayerchange', syncUnder);
-  syncUnder();
-  const takeOver = () => {
-    if (!isMapLive(map) || !map.hasLayer(online)) return;
-    const { lat, lng } = map.getCenter();
-    const found = layers.find(({ item }) => offlineMapCovers(item, lat, lng));
+  const remember = (name: string, shown: boolean) => {
+    const found = layers.find(({ item }) => entryName(item) === name);
     if (!found) return;
-    online.off('tileerror', takeOver);
-    map.removeLayer(online);
-    found.layer.addTo(map);
-    map.fire('baselayerchange', { layer: found.layer, name: found.item.name });
-    if (state.view.currentView.peek() === 'tracker') {
-      toast(`Pas de réseau : carte hors ligne ${found.item.name}`);
-    }
+    if (shown) hidden.delete(found.item.id);
+    else hidden.add(found.item.id);
+    store.set(HIDDEN_KEY, [...hidden]);
   };
-  online.on('tileerror', takeOver);
-  map.on('unload', () => online.off('tileerror', takeOver));
-  if (!navigator.onLine) takeOver();
+  map.on('overlayadd', (event) => remember(event.name, true));
+  map.on('overlayremove', (event) => remember(event.name, false));
+  if (navigator.onLine || state.view.currentView.peek() !== 'tracker') return;
+  const { lat, lng } = map.getCenter();
+  const shown = layers.find(
+    ({ item }) => !hidden.has(item.id) && offlineMapCovers(item, lat, lng),
+  );
+  if (shown) toast(`Pas de réseau : carte hors ligne ${shown.item.name}`);
 }

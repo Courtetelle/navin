@@ -21,7 +21,10 @@ import {
   startOrientation,
 } from '../../features/map/mapOrientation.ts';
 import { setMapWatch } from '../../features/map/mapWatch.ts';
-import { addOfflineMaps } from '../../features/map/offlineMapLayer.ts';
+import {
+  BACKGROUND_Z,
+  addOfflineMaps,
+} from '../../features/map/offlineMapLayer.ts';
 import { showPendingPlace } from '../../features/map/placeTarget.ts';
 import { recenterAfterDrag } from '../../features/map/recenterAfterDrag.ts';
 import {
@@ -66,6 +69,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   const tiles = { maxZoom: 19, maxNativeZoom: 18 };
   const osm = L.tileLayer(OSM_TILES, {
     ...tiles,
+    zIndex: BACKGROUND_Z,
     subdomains: 'abc',
     crossOrigin: true,
     attribution: '© OpenStreetMap France',
@@ -76,6 +80,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   });
   const swiss = L.tileLayer(SWISS_TILES, {
     ...tiles,
+    zIndex: BACKGROUND_Z,
     crossOrigin: true,
     bounds: SWISS_BOUNDS,
     attribution: '© swisstopo',
@@ -100,7 +105,8 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     .layers(
       { 'Plan OpenStreetMap': osm },
       { 'Balisage OpenSeaMap': seamark },
-      { position: 'topright' },
+      // Fixed order, not the menu's: background, map files, overlays.
+      { position: 'topright', autoZIndex: false },
     )
     .addTo(map);
   // The Swiss map only in the menu over Switzerland.
@@ -124,7 +130,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     if (boxesMeet(view, SWISS_BOX)) handle.addSwiss?.();
   });
   keepTilesFilled(map, [osm, swiss]);
-  void addOfflineMaps(map, layers, osm);
+  void addOfflineMaps(map, layers);
   addFullscreenControl(map);
   addRulerControl(map);
   startOrientation(map);
