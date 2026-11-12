@@ -6439,19 +6439,9 @@ body.prep-top.prep-on #view {
   align-self: center;
   padding: 0 1px;
 }
-/* v338 (Corban) : en mode nuit, « PréP » ressort en blanc (clignote blanc / orange) */
-
+/* At night « PréP » blinks between the night red and orange (v338, v340) */
 :root[data-theme='night'] .tb-flag text.tb-blink {
   animation-name: tbBlinkNight;
-}
-@keyframes tbBlinkNight {
-  0%,
-  100% {
-    fill: #fff;
-  }
-  50% {
-    fill: #ff8a00;
-  }
 }
 /* v340 — PréP logo en mode nuit : toutes les parties blanches passent au rouge nuit */
 :root[data-theme='night'] .tb-flag pattern rect:first-child {
