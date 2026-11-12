@@ -1,5 +1,7 @@
 import { buzz } from '../../lib/dom.ts';
 import { state, toast } from '../../state/index.ts';
+import { menuButtonPress } from '../menuOwner.ts';
+import { navBack } from '../navbar/navActions.ts';
 import { go } from '../router.ts';
 
 import { TAB_ORDER, tabDisplays, topMenuDomainActions } from './tabDisplays.ts';
@@ -77,6 +79,13 @@ export function tabClick(key: TopTabKey, active: boolean): void {
     topMenuDomainActions().sosTap();
     go('sos');
     showBaseHint('sos');
+    return;
+  }
+  // data: one step back at each touch inside its menu, the same rule as the
+  // other menu buttons.
+  if (key === 'more') {
+    for (const other of TAB_ORDER) resetTab(other);
+    menuButtonPress('more', navBack);
     return;
   }
   const onItsPage = active && state.view.currentView.value !== 'settings';

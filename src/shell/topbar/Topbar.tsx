@@ -6,6 +6,8 @@ import { buzz } from '../../lib/dom.ts';
 import { state } from '../../state/index.ts';
 import { BarChevron } from '../BarChevron.tsx';
 import { hasBodyClass } from '../bodyClass.ts';
+import { inMenu, menuButtonPress } from '../menuOwner.ts';
+import { navBack } from '../navbar/navActions.ts';
 import { goFromGear, navigation, voyageName } from '../router.ts';
 import { toggleTheme, toggleThemeFromGear } from '../theme.ts';
 import { tipFocus } from '../tips.ts';
@@ -88,7 +90,8 @@ function GearButton({ focused }: { focused: boolean }) {
   useSignals();
   useEffect(() => () => clearTimeout(gearTimer), []);
   // The settings open: the gear blinks yellow, as PréP.
-  const here = state.view.currentView.value === 'settings';
+  const here =
+    state.view.currentView.value === 'settings' || inMenu('settings');
   return (
     <Button
       className={['theme-btn', focused && 'tip-focus', here && 'menu-here']
@@ -114,7 +117,8 @@ function GearButton({ focused }: { focused: boolean }) {
           return;
         }
         buzz();
-        goFromGear();
+        // One step back in a page of the settings, as data.
+        menuButtonPress('settings', navBack, goFromGear);
       }}
     >
       <svg

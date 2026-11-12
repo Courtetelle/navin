@@ -79,6 +79,18 @@ async function open(
   return { context, page, errors };
 }
 
+// data goes back one step at each touch inside its menu: touch it until its
+// home (the tiles) shows.
+async function openData(page: Page): Promise<void> {
+  /* eslint-disable no-await-in-loop -- one touch after the other */
+  for (let touch = 0; touch < 5; touch++) {
+    if ((await page.locator('[data-tile]').count()) > 0) return;
+    await page.getByText('data', { exact: true }).first().click();
+    await page.waitForTimeout(300);
+  }
+  /* eslint-enable no-await-in-loop */
+}
+
 const bodyHas = (page: Page, name: string) =>
   page.evaluate(
     (className) => document.body.classList.contains(className),
@@ -220,7 +232,7 @@ async function myMaps(page: Page, theme: string): Promise<void> {
     'my maps and my marks are not in the settings',
     (await page.locator('[data-go="cartes"], [data-go="marks"]').count()) === 0,
   );
-  await page.getByText('data', { exact: true }).first().click();
+  await openData(page);
   await page.waitForTimeout(300);
   check(
     theme,
@@ -420,7 +432,7 @@ async function crewCard(page: Page, theme: string): Promise<void> {
     (await button.getAttribute('aria-label')) === 'Modifier' &&
     (await button.locator('svg').count()) === 1 &&
     (await shown()) === '';
-  await page.getByText('data', { exact: true }).first().click();
+  await openData(page);
   await page.locator('[data-tile="people"]').click();
   await page.locator('#mNew').click();
   check(theme, 'a new crew card has the green tick', (await shown()) === '✔');
@@ -499,7 +511,7 @@ async function crewAndBoat(page: Page, theme: string): Promise<void> {
   const isPencil = async () =>
     (await button.getAttribute('aria-label')) === 'Modifier';
   // A crew: built, then read-only.
-  await page.getByText('data', { exact: true }).first().click();
+  await openData(page);
   await page.locator('[data-tile="crews"]').click();
   await page.locator('#csNew').click();
   await page.locator('[data-cem]').first().click();
@@ -528,7 +540,7 @@ async function crewAndBoat(page: Page, theme: string): Promise<void> {
     (await page.locator('#ceRead').count()) === 1 && (await isPencil()),
   );
   // A boat: filled, then only what is filled.
-  await page.getByText('data', { exact: true }).first().click();
+  await openData(page);
   await page.locator('[data-tile="boats"]').click();
   await page.locator('#addBoat').click();
   await page.waitForTimeout(300);
@@ -559,7 +571,7 @@ async function crewAndBoat(page: Page, theme: string): Promise<void> {
 }
 
 async function swipeToDelete(page: Page, theme: string): Promise<void> {
-  await page.getByText('data', { exact: true }).first().click();
+  await openData(page);
   await page.locator('[data-tile="people"]').click();
   await page.waitForTimeout(300);
   const row = page.locator('[data-fiche]').first();
@@ -921,7 +933,7 @@ const offlineDrawn = (page: Page) =>
 async function offlineFiles(page: Page, theme: string): Promise<void> {
   await page.locator('#gearBtn').click();
   await page.waitForTimeout(300);
-  await page.getByText('data', { exact: true }).first().click();
+  await openData(page);
   await page.waitForTimeout(300);
   await page.locator('[data-tile="cartes"]').click();
   await page.waitForTimeout(500);

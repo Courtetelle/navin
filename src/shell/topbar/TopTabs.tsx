@@ -7,6 +7,7 @@ import { markupToReact } from '../../components/shared/markupToReact.ts';
 import type { UiEdit } from '../../model/logTypes.ts';
 import { state } from '../../state/index.ts';
 import { litTab } from '../litTab.ts';
+import { inMenu } from '../menuOwner.ts';
 import { tipFocus } from '../tips.ts';
 import { RollTrack } from '../uiEdit/RollTrack.tsx';
 import { editClasses, editedChildren } from '../uiEdit/applyUiEdit.tsx';
@@ -110,7 +111,11 @@ function TopTab({ tab, active }: TopTabProps) {
     // A menu with its own button (settings, marks, VHF) does not light data.
     active && !(tab === 'more' && OWN_BUTTON.has(view)) && 'active',
     // The data menu open: its button blinks yellow, as PréP (not SOS, not NavIn).
-    active && tab === 'more' && !OWN_BUTTON.has(view) && 'menu-here',
+    // In every page of its menu, until another main screen opens.
+    (active || inMenu('more')) &&
+      tab === 'more' &&
+      !OWN_BUTTON.has(view) &&
+      'menu-here',
     ...displayClasses(display),
     focused && 'tip-focus',
     ...editClasses(edit),
