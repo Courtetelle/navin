@@ -228,6 +228,18 @@ async function myMaps(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(500);
   const title = (await page.locator('main h1').first().textContent()) ?? '';
   check(theme, 'data leads to my maps', title.includes('Mes cartes'));
+  await page.setInputFiles('#offlineFile', {
+    name: 'notes.pmtiles',
+    mimeType: 'application/octet-stream',
+    buffer: Buffer.from('pas une carte'),
+  });
+  await page.waitForTimeout(500);
+  const failure = (await page.locator('#offlineFailure').textContent()) ?? '';
+  check(
+    theme,
+    'a refused map import says why, under the button',
+    failure.includes('notes.pmtiles') && failure.includes('pas une carte'),
+  );
   const box = await page.locator('#navSearch').boundingBox();
   const back = await page.locator('#navBack').boundingBox();
   const exit = await page.locator('#navExit').boundingBox();

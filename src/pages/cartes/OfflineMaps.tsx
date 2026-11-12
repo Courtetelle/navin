@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { failureText } from '../../features/map/offlineMapFailure.ts';
 import type { OfflineMap } from '../../features/map/offlineMapStore.ts';
 import {
   deleteOfflineMap,
@@ -25,6 +26,7 @@ export function OfflineMaps() {
   const tr = useTr();
   const [maps, setMaps] = useState<OfflineMap[] | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
+  const [failure, setFailure] = useState<string | null>(null);
   const file = useRef<HTMLInputElement>(null);
   const refresh = () => {
     void offlineMaps()
@@ -38,12 +40,11 @@ export function OfflineMaps() {
       const map = await importOfflineMap(chosen, setProgress);
       toast(`Carte ${map.name} gardée sur cet appareil`);
       refresh();
+      setFailure(null);
     } catch (error) {
-      toast(
-        error instanceof Error && error.name === 'QuotaExceededError'
-          ? 'Pas assez de place sur cet appareil'
-          : 'Ce fichier n’est pas une carte .pmtiles',
-      );
+      const text = failureText(error);
+      setFailure(`${chosen.name} : ${text}`);
+      toast(text);
     } finally {
       setProgress(null);
     }
@@ -87,6 +88,11 @@ export function OfflineMaps() {
       {maps?.length === 0 ? (
         <p className="help">
           {tr('Aucune carte sur cet appareil pour l’instant.', { help: true })}
+        </p>
+      ) : null}
+      {failure ? (
+        <p className="help" id="offlineFailure" role="alert">
+          ⚠️ {failure}
         </p>
       ) : null}
       <ButtonRow>
