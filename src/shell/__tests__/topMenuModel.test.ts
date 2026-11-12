@@ -16,6 +16,7 @@ const idle: TopMenuContext = {
   currentView: 'tracker',
   prepActive: false,
   inPrep: false,
+  prepReady: null,
   tracking: false,
   zone: 'lac',
 };
@@ -88,4 +89,13 @@ test('on a landscape tablet, NavIn only brings back the map', () => {
   expect(labels(true)).not.toContain('Météo');
   // PréP and START have their own buttons: NavIn only brings back the map.
   expect(labels(true)).toHaveLength(1);
+});
+
+test('a PréP closed shows on NavIn, green when complete, orange when not', () => {
+  expect(baseNav({ ...idle, prepReady: 'ok' }).ready).toBe('ok');
+  expect(baseNav({ ...idle, prepReady: 'part' }).ready).toBe('part');
+  expect(baseNav({ ...idle, prepReady: 'ok', tracking: true }).ready).toBe(
+    undefined,
+  );
+  expect(baseNav(idle).ready).toBe(undefined);
 });

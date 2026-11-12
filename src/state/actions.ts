@@ -15,6 +15,7 @@ export * from './mode.ts';
 export * from './position.ts';
 export * from './preferences.ts';
 export * from './prep.ts';
+export * from './prepReady.ts';
 export * from './templates.ts';
 export * from './toast.ts';
 export * from './tracking.ts';

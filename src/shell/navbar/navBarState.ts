@@ -23,8 +23,6 @@ export interface NavStepsConfig {
   pills: ReactNode;
   /** Content of `#prepLine` (legacy `window.prepLine()`). */
   line: ReactNode;
-  /** The current step page holds the « Départ » button (`[data-p="depart"]`): ✔ triggers it. */
-  onDepart?: () => void;
   /** Browse to the next step without validating (legacy `prepBrowseNext`). */
   onBrowseNext: () => void;
   /** Long press on ✖: reset the PréP path (legacy `prepReset`). */

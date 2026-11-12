@@ -162,6 +162,7 @@ function displayClasses({
     face.box && 'ph-box',
     face.vhfOn && 'vhf-on',
     face.blink && 'menu-here',
+    face.ready && `prep-ready prep-ready-${face.ready}`,
     keyboardFocus && 'kbd-focus',
   ];
 }

@@ -35,6 +35,8 @@ export interface TabFace {
    * @default undefined
    */
   blink?: boolean;
+  /** A PréP closed, waiting for START: green when complete, orange when not. */
+  ready?: 'ok' | 'part';
 }
 
 /** One choice of a tab menu (prep.js:200-231). */
@@ -54,6 +56,8 @@ export interface TopMenuContext {
   currentView: string;
   /** A PréP flow exists (legacy `prep` not null). */
   prepActive: boolean;
+  /** A PréP closed and waiting for START: `ok` complete, `part` not. */
+  prepReady: 'ok' | 'part' | null;
   /** The PréP page or the PréP bar is shown (legacy `inPrep`). */
   inPrep: boolean;
   /** A track is being recorded. */
@@ -129,6 +133,17 @@ export function baseNav(context: TopMenuContext): TabFace {
           html: [FLAG_PREP_SVG],
           bare: true,
         };
+  }
+  if (context.prepReady && !context.tracking) {
+    return {
+      label:
+        context.prepReady === 'ok'
+          ? 'PréP terminée, prêt au départ'
+          : 'PréP close, check-in incomplète',
+      html: [FLAG_SVG],
+      bare: true,
+      ready: context.prepReady,
+    };
   }
   if (context.tracking) {
     return {

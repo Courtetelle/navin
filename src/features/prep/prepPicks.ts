@@ -1,22 +1,17 @@
 import { buzz } from '../../lib/dom.ts';
-import { go } from '../../shell/router.ts';
 import {
   boatById,
-  lastTripKey,
   noteUse,
   openCruise,
-  setPrep,
   state,
   toast,
 } from '../../state/index.ts';
-import { store } from '../../storage/store.ts';
-import { startTracking } from '../tracking/index.ts';
 
 import { navPageRefresh } from './navPage.ts';
 import { applyCrewSet } from './prepCrew.ts';
 import { prepCreateOrFill } from './prepCruise.ts';
 import { prepGo } from './prepFlow.ts';
-import { PREP_PATH_KEYS, prepPathDrop, prepPathGet } from './prepPaths.ts';
+import { PREP_PATH_KEYS, prepPathGet } from './prepPaths.ts';
 import type { PrepTarif } from './prepTarif.ts';
 import { prepTarifApply, prepTarifs } from './prepTarif.ts';
 import { prepFlow, updatePrepFlow } from './prepTypes.ts';
@@ -133,15 +128,4 @@ export function pickTarif(position: number | null): void {
     prep.sub = null;
   });
   prepGo(3);
-}
-
-/** « Départ »: the path sails off, the track and the automatic logbook start. */
-export function prepDepart(): void {
-  buzz();
-  prepPathDrop(prepFlow()?.purpose);
-  setPrep(null);
-  store.del(lastTripKey());
-  go('tracker');
-  startTracking(false);
-  navPageRefresh();
 }

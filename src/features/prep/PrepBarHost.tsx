@@ -8,6 +8,7 @@ import { state } from '../../state/index.ts';
 import { PrepPills } from './PrepPills.tsx';
 import { prepBarApplies } from './prepBarSync.ts';
 import { prepBarBack, prepBarNext } from './prepFlow.ts';
+import { LAST_PREP_STEP } from './prepLine.ts';
 import type { PrepFlow } from './prepTypes.ts';
 import { prepFlow } from './prepTypes.ts';
 import { usePrepSteps } from './usePrepSteps.ts';
@@ -42,9 +43,15 @@ function PrepBar({ prep }: { prep: PrepFlow }) {
           ◀
         </Button>
         <b>{PREP_STEPS[prep.step]}</b>
-        <Button className="btn primary" data-prep="next" onClick={prepBarNext}>
-          Suivant ▶
-        </Button>
+        {prep.step < LAST_PREP_STEP ? (
+          <Button
+            className="btn primary"
+            data-prep="next"
+            onClick={prepBarNext}
+          >
+            Suivant ▶
+          </Button>
+        ) : null}
       </div>
     </div>
   );

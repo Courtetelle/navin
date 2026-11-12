@@ -82,7 +82,7 @@ test('browsing does not move the step being filled', () => {
 test('prepGo stays inside the steps', () => {
   setPrep({ step: 2, reach: 2 });
   prepGo(9);
-  expect(prepFlow()?.step).toBe(5);
+  expect(prepFlow()?.step).toBe(4);
   prepGo(-1, true);
   expect(prepFlow()?.step).toBe(0);
 });

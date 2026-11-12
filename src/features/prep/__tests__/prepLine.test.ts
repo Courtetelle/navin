@@ -16,7 +16,6 @@ test('pills of a lake PréP skip the duration', () => {
     { step: 2, label: 2, className: 'on' },
     { step: 3, label: 3, className: '' },
     { step: 4, label: 4, className: '' },
-    { step: 5, label: 5, className: '' },
   ]);
 });
 
@@ -26,7 +25,6 @@ test('pills of a sea PréP skip the type', () => {
     { step: 2, label: 2, className: '' },
     { step: 3, label: 3, className: '' },
     { step: 4, label: 4, className: '' },
-    { step: 5, label: 5, className: '' },
   ]);
 });
 
@@ -49,7 +47,6 @@ test('line of a fresh lake PréP', () => {
     { text: 'Bateau', target: 2, status: '', current: false },
     { text: 'Équipage', target: 3, status: '', current: false },
     { text: 'Check-in', target: 4, status: '', current: false },
-    { text: 'Départ', target: 5, status: '', current: false },
   ]);
 });
 

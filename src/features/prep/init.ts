@@ -1,6 +1,8 @@
+import { effect } from '@preact/signals-react';
+
 import { addNavigationListener } from '../../shell/router.ts';
 import { setTopMenuActions } from '../../shell/topbar/topMenuState.ts';
-import { setPrep, state } from '../../state/index.ts';
+import { prepReady, setPrep, setPrepReady, state } from '../../state/index.ts';
 
 import { prepBarSync } from './prepBarSync.ts';
 
@@ -22,4 +24,12 @@ addNavigationListener(({ phase, to }) => {
     setPrep({ step: 0 });
   }
   if (phase === 'after') prepBarSync(to);
+});
+
+// START after a closed PréP: the PréP button turns white again, and the
+// check-in is kept for the logbook then emptied for the next outing.
+effect(() => {
+  if (!state.view.tracking.value || prepReady.peek() === null) return;
+  setPrepReady(null);
+  void import('./prepClose.ts').then(({ archiveCheckIn }) => archiveCheckIn());
 });

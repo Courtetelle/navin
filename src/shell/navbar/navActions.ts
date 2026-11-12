@@ -101,8 +101,7 @@ export function navOk(): void {
   const steps = navSteps.value;
   if (steps) {
     const next = prepBar()?.onNext;
-    if (steps.onDepart) steps.onDepart();
-    else if (next) next();
+    if (next) next();
     else steps.onBrowseNext();
     return;
   }

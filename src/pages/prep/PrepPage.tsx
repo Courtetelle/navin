@@ -12,9 +12,9 @@ import { state } from '../../state/index.ts';
 import { PrepBoatStep } from './PrepBoatStep.tsx';
 import { PrepCrewEditStep } from './PrepCrewEditStep.tsx';
 import { PrepCrewStep } from './PrepCrewStep.tsx';
-import { PrepDepartStep } from './PrepDepartStep.tsx';
 import { PrepDureeStep, PrepPurposeStep } from './PrepFirstSteps.tsx';
 import { PrepNav } from './PrepNav.tsx';
+import { PrepNoBoatStep } from './PrepNoBoatStep.tsx';
 import { PrepTarifStep } from './PrepTarifStep.tsx';
 
 const NO_FLOW: PrepFlow = { step: 0 };
@@ -27,8 +27,7 @@ const NO_FLOW: PrepFlow = { step: 0 };
 export function PrepPage() {
   useSignals();
   const prep = prepFlow() ?? NO_FLOW;
-  const departure = prep.step === 5 && state.data.cruise.value !== null;
-  const pills = usePrepSteps(prep, { depart: departure });
+  const pills = usePrepSteps(prep, {});
   useEffect(mountPrepBar, []);
   return (
     <>
@@ -70,8 +69,6 @@ function PrepStep({ prep }: { prep: PrepFlow }) {
       <PrepCrewStep prep={prep} />
     );
   }
-  if (step === 5 || (step === 4 && !state.data.cruise.value)) {
-    return <PrepDepartStep />;
-  }
+  if (step >= 4 && !state.data.cruise.value) return <PrepNoBoatStep />;
   return step === 4 ? null : <PrepNav />;
 }

@@ -31,7 +31,13 @@ import {
   FLAG_WAVE_SVG,
   START_SVG,
 } from '../../shell/topbar/tabIcons.ts';
-import { addMark, navZone, state, toast } from '../../state/index.ts';
+import {
+  addMark,
+  navZone,
+  prepReady,
+  state,
+  toast,
+} from '../../state/index.ts';
 
 import { TrackRailButton } from './TrackRailButton.tsx';
 import { RailIcon } from './railIcons.tsx';
@@ -369,8 +375,10 @@ function DepartButtons() {
     prepOn &&
     (state.view.currentView.value === 'prep' || hasBodyClass('prep-on'));
   const prepClasses = ['rail-btn', 'rail-prep'];
-  if (tracking) prepClasses.push('rail-hidden');
+  // Always shown, even during a track.
   if (prepOn) prepClasses.push('rail-on');
+  const ready = state.data.prep.value === null ? prepReady.value : null;
+  if (ready) prepClasses.push('prep-ready', `prep-ready-${ready}`);
   return (
     <div className="rail-depart">
       <Button

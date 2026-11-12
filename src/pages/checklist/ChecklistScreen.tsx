@@ -15,6 +15,7 @@ import { ChecklistItems } from './ChecklistItems.tsx';
 import { ChecklistQuickEdit } from './ChecklistQuickEdit.tsx';
 import { ChecklistTitle, PressHelp } from './ChecklistTitle.tsx';
 import { ObservationsBox } from './ObservationsBox.tsx';
+import { PrepCloseButton } from './PrepCloseButton.tsx';
 import { checklistModel } from './checklistModel.ts';
 import type { ChecklistNavigation } from './screenActions.ts';
 import {
@@ -85,7 +86,7 @@ export function ChecklistScreen({
         />
       ) : null}
       <ChecklistItems model={model} navigation={navigation} />
-      {allDone ? (
+      {allDone && !(inPrep && list === 'dep') ? (
         <AllDone
           name={listName}
           list={builtin ? list : null}
@@ -112,6 +113,7 @@ export function ChecklistScreen({
           onRemovePhoto={removePhoto}
         />
       ) : null}
+      {inPrep && list === 'dep' ? <PrepCloseButton /> : null}
       {list === 'dep' ? (
         <ButtonRow className="row ck-pub-row">
           <Button

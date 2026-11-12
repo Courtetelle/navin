@@ -1,5 +1,4 @@
 import { buzz } from '../../lib/dom.ts';
-import { PREP_STEPS } from '../../model/modes.ts';
 import { go } from '../../shell/router.ts';
 import {
   crewSetName,
@@ -12,7 +11,9 @@ import {
   toast,
 } from '../../state/index.ts';
 
+import { prepClose } from './prepClose.ts';
 import { crewSetFromCruise } from './prepCrew.ts';
+import { LAST_PREP_STEP } from './prepLine.ts';
 import { prepPathDrop, prepPathSave } from './prepPaths.ts';
 import type { PrepFlow } from './prepTypes.ts';
 import { prepFlow, updatePrepFlow } from './prepTypes.ts';
@@ -64,7 +65,7 @@ export function prepStart(): void {
  */
 export function prepGo(step: number, browse = false): void {
   updatePrepFlow((prep) => {
-    prep.step = Math.max(0, Math.min(PREP_STEPS.length - 1, step));
+    prep.step = Math.max(0, Math.min(LAST_PREP_STEP, step));
     if (!browse) {
       prep.reach = Math.max(prep.reach ?? 0, prep.step);
     }
@@ -124,7 +125,7 @@ export function prepBrowseNext(): void {
   if (!prep) return;
   let next = (prep.step || 0) + 1;
   if (prep.type !== 'mer' && next === 1) next = 2;
-  if (next > 5) return;
+  if (next > LAST_PREP_STEP) return;
   prepJump(next);
 }
 
@@ -162,6 +163,10 @@ export function prepReset(): void {
 export function prepBarNext(): void {
   const prep = prepFlow();
   if (!prep) return;
+  if (prep.step >= LAST_PREP_STEP) {
+    prepClose();
+    return;
+  }
   buzz();
   if (prep.step === 3) {
     const set = crewSetFromCruise();

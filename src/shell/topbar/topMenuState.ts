@@ -2,7 +2,7 @@ import { batch } from '@preact/signals-react';
 
 import { buzz } from '../../lib/dom.ts';
 import { WIDE_QUERY } from '../../lib/useWide.ts';
-import { navZone, state, toast } from '../../state/index.ts';
+import { navZone, prepReady, state, toast } from '../../state/index.ts';
 import { clearToast } from '../../state/toast.ts';
 import { hasBodyClass } from '../bodyClass.ts';
 import { go } from '../router.ts';
@@ -36,6 +36,7 @@ function menuContext(): TopMenuContext {
     prepActive,
     inPrep: prepActive && (currentView === 'prep' || hasBodyClass('prep-on')),
     tracking: state.view.tracking.value,
+    prepReady: prepReady.value,
     zone: navZone(),
     wide:
       typeof globalThis.matchMedia === 'function' &&

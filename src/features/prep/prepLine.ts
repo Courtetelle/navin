@@ -1,10 +1,13 @@
-import { PREP_PURPOSES, PREP_STEPS } from '../../model/modes.ts';
+import { PREP_PURPOSES } from '../../model/modes.ts';
 import type { Cruise } from '../../model/types.ts';
 import { boatById, crewSetName, state } from '../../state/index.ts';
 import { checkItems, checkLeft } from '../checklists/index.ts';
 
 import { prepPathValid } from './prepPaths.ts';
 import type { PrepFlow } from './prepTypes.ts';
+
+/** The check-in, last step of the PréP. */
+export const LAST_PREP_STEP = 4;
 
 /** Where an item of the step line leads. */
 export type PrepLineTarget = number | 'paths' | '2t';
@@ -41,7 +44,8 @@ export function prepPills(prep: PrepFlow): PrepPill[] {
   const shown = prep.step;
   const reached = prep.reach == null ? shown : Math.max(prep.reach, 0);
   const pills: PrepPill[] = [];
-  for (let step = 0; step < PREP_STEPS.length; step++) {
+  // The check-in is the last step: its button closes the PréP, START departs.
+  for (let step = 0; step <= LAST_PREP_STEP; step++) {
     if (step === (prep.type === 'lac' ? 1 : 0)) continue;
     let className = '';
     if (step === reached) className = 'on';
@@ -88,11 +92,11 @@ export function prepLineItems(
     status: boatName ? 'ok' : '',
   });
   if (lake && prep.purpose === 'Location') items.push(tarifItem(prep, cruise));
-  items.push(
-    crewItem(prep, cruise),
-    { text: 'Check-in', target: 4, status: checkInStatus(prep, cruise) },
-    { text: 'Départ', target: 5, status: '' },
-  );
+  items.push(crewItem(prep, cruise), {
+    text: 'Check-in',
+    target: 4,
+    status: checkInStatus(prep, cruise),
+  });
   const shown = prep.step === 2 && prep.sub === 'tarif' ? '2t' : prep.step;
   return items.map((item) => ({ ...item, current: item.target === shown }));
 }
