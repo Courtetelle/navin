@@ -5,6 +5,9 @@
  *
  *   npm run build && npm run smoke
  */
+
+import path from 'node:path';
+
 import type { Browser, BrowserContext, Page } from 'playwright-core';
 import { chromium } from 'playwright-core';
 
@@ -888,6 +891,90 @@ async function tapCross(
   );
 }
 
+// Whether a map file draws at the middle of the map (its tiles are canvases).
+const offlineDrawn = (page: Page) =>
+  page.evaluate(() => {
+    const box = document.querySelector('#trkMap')?.getBoundingClientRect();
+    if (!box) return false;
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2 + 40;
+    return [...document.querySelectorAll('.leaflet-layer canvas')].some(
+      (tile) => {
+        const canvas = tile as HTMLCanvasElement;
+        const rect = canvas.getBoundingClientRect();
+        if (x < rect.left || x >= rect.right) return false;
+        if (y < rect.top || y >= rect.bottom) return false;
+        const pixel = canvas
+          .getContext('2d')
+          ?.getImageData(
+            Math.floor(((x - rect.left) * canvas.width) / rect.width),
+            Math.floor(((y - rect.top) * canvas.height) / rect.height),
+            1,
+            1,
+          ).data;
+        return (pixel?.[3] ?? 0) > 0;
+      },
+    );
+  });
+
+// Two map files side by side, network gone: both show where the boat sails.
+async function offlineFiles(page: Page, theme: string): Promise<void> {
+  await page.locator('#gearBtn').click();
+  await page.waitForTimeout(300);
+  await page.getByText('data', { exact: true }).first().click();
+  await page.waitForTimeout(300);
+  await page.locator('[data-tile="cartes"]').click();
+  await page.waitForTimeout(500);
+  /* eslint-disable no-await-in-loop -- one file after the other */
+  for (const name of ['porquerolles', 'port-cros']) {
+    await page.setInputFiles(
+      '#offlineFile',
+      path.join(import.meta.dirname, 'fixtures', `${name}.pmtiles`),
+    );
+    await page.waitForTimeout(1500);
+  }
+  /* eslint-enable no-await-in-loop */
+  check(
+    theme,
+    'two map files are imported',
+    (await page.locator('[data-offline-map]').count()) === 2,
+  );
+  await page.reload({ waitUntil: 'load' });
+  await page.locator('.map-locate-btn').waitFor({ state: 'attached' });
+  await page.evaluate(
+    (shown) => {
+      document.documentElement.dataset.theme = shown;
+    },
+    theme === 'night' ? 'night' : 'day',
+  );
+  await page.evaluate(() => {
+    (
+      window as unknown as {
+        fakeGps: (lat: number, lon: number, heading: number) => void;
+      }
+    ).fakeGps(43, 6.2, 90);
+  });
+  await page.waitForTimeout(3000);
+  check(
+    theme,
+    'without network the map file shows under the boat',
+    await offlineDrawn(page),
+  );
+  await page.evaluate(() => {
+    (
+      window as unknown as {
+        fakeGps: (lat: number, lon: number, heading: number) => void;
+      }
+    ).fakeGps(43, 6.42, 90);
+  });
+  await page.waitForTimeout(3000);
+  check(
+    theme,
+    'sailing on, the next map file shows too',
+    await offlineDrawn(page),
+  );
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
@@ -907,6 +994,20 @@ for (const theme of ['day', 'night']) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }
   check(theme, 'no error in the page', errors.length === 0);
+  await context.close();
+}
+for (const theme of ['day', 'night']) {
+  const { context, page, errors } = await open(browser, theme);
+  try {
+    await offlineFiles(page, theme);
+  } catch (error) {
+    check(
+      theme,
+      `map files: no step blocks: ${String(error).slice(0, 700)}`,
+      false,
+    );
+  }
+  check(theme, 'map files: no error in the page', errors.length === 0);
   await context.close();
 }
 for (const theme of ['day', 'night']) {

@@ -117,9 +117,15 @@ async function appFileResponse(request: Request): Promise<Response> {
     }
     return response;
   } catch {
-    const cached = await self.caches.match(request, { ignoreSearch: true });
+    // ignoreVary: a server answering « Vary: Origin » would otherwise hide
+    // every kept script from the page that asks for it, and the app would not
+    // start offline.
+    const kept = { ignoreSearch: true, ignoreVary: true };
+    const cached = await self.caches.match(request, kept);
     return (
-      cached ?? (await self.caches.match('index.html')) ?? Response.error()
+      cached ??
+      (await self.caches.match('index.html', kept)) ??
+      Response.error()
     );
   }
 }

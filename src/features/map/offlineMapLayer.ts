@@ -55,9 +55,11 @@ async function newLayer(
 }
 
 /**
- * Offer the map files of this device as backgrounds, and draw them at once under
- * the online map, which is slower: its tiles cover them as they arrive. When the
- * online map cannot load, the map file that covers the place takes over.
+ * Offer the map files of this device as backgrounds, and draw them all at once
+ * under whatever background shows: its tiles cover them as they arrive, and
+ * where they cannot load (no network) the map files show through. When the
+ * online map cannot load, the map file that covers the place takes over in the
+ * menu; the other map files keep drawing beside it.
  * @param map - Leaflet map.
  * @param control - Layer chooser.
  * @param online - The online background that shows by default.
@@ -83,15 +85,17 @@ export async function addOfflineMaps(
   for (const { item, layer } of layers) {
     control.addBaseLayer(layer, `Hors ligne · ${item.name}`);
   }
-  const showUnder = () => {
-    for (const { under } of layers) under.addTo(map);
+  // Each map file is drawn once: as the chosen background, or underneath.
+  const syncUnder = () => {
+    if (!isMapLive(map)) return;
+    for (const { layer, under } of layers) {
+      const wanted = !map.hasLayer(layer);
+      if (wanted && !map.hasLayer(under)) under.addTo(map);
+      if (!wanted && map.hasLayer(under)) map.removeLayer(under);
+    }
   };
-  const hideUnder = () => {
-    for (const { under } of layers) map.removeLayer(under);
-  };
-  online.on('add', showUnder);
-  online.on('remove', hideUnder);
-  if (map.hasLayer(online)) showUnder();
+  map.on('baselayerchange', syncUnder);
+  syncUnder();
   const takeOver = () => {
     if (!isMapLive(map) || !map.hasLayer(online)) return;
     const { lat, lng } = map.getCenter();
