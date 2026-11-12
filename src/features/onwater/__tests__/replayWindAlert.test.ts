@@ -19,6 +19,7 @@ test('the last automatic alert can be shown again, with its time', () => {
   expect(lastWindAlertAt()).not.toBe(null);
   windPopup.value = null;
   expect(replayWindAlert()).toBe(true);
-  expect(windPopup.value?.kn).toBe('24 nd en rafales');
-  expect(windPopup.value?.note).toMatch(/^🔁 Alerte de \d\d:\d\d$/u);
+  const shown = windPopup.peek();
+  expect(shown?.kn).toBe('24 nd en rafales');
+  expect(shown?.note).toMatch(/^🔁 Alerte de \d\d:\d\d$/u);
 });
