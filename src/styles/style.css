@@ -10678,3 +10678,29 @@ html body .btn.ck-close.ck-close-ok {
   background: linear-gradient(180deg, #145a22 0%, #0b3d16 60%, #06260d 100%);
   color: #ff5a5a;
 }
+
+/* Tablet track button: paused, black II blinking orange until the next touch;
+   FIN stands beside it, over the map. */
+.rail-track-wrap {
+  position: relative;
+}
+/* The blink of menu-here, in a deeper orange than PréP. */
+html:root:not([data-theme='night'])
+  body
+  .rail-btn.rail-paused.menu-here::before {
+  background: linear-gradient(180deg, #ffc56b 0%, #f39c12 55%, #e07b00 100%);
+}
+:root[data-theme='night'] body .rail-btn.rail-paused .rail-pause rect {
+  fill: #ff4d4d;
+}
+html body .rail-track-wrap .rail-btn.rail-fin {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 10px);
+}
+html:root body .rail-btn.rail-fin.rail-fin-armed {
+  background: #ffd6d6 !important;
+}
+:root[data-theme='night'] body .rail-btn.rail-fin.rail-fin-armed {
+  background: #4a0000 !important;
+}

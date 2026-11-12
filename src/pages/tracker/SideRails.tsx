@@ -39,10 +39,11 @@ import {
   toast,
 } from '../../state/index.ts';
 
-import { TrackRailButton } from './TrackRailButton.tsx';
+import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
 import { RailIcon } from './railIcons.tsx';
 import type { RailSide, Rails } from './sideRails.ts';
 import { MAP_ACTIONS, loadRails, setRail, splitTitle } from './sideRails.ts';
+import { trackDone } from './trackDone.ts';
 
 /** A GPS position older than this is read again. */
 const FRESH_FIX_MS = 30_000;
@@ -356,18 +357,13 @@ function openCalls(zone: 'ext' | 'int'): void {
 }
 
 /**
- * First of the left column while no track is recorded: PréP opens the
- * preparation, a long press on START starts the track at once (a short touch
- * only says so, against a start by mistake).
+ * Left column: PréP opens the preparation; START starts the track at a short
+ * touch, then holds every step of the track itself.
  * @returns The two buttons, or nothing during a track.
  */
 function DepartButtons() {
   useSignals();
   const tr = useTr();
-  const start = useLongPress(() => {
-    buzz();
-    domainActions.quickStart();
-  });
   const tracking = state.view.tracking.value;
   // A PréP under way shows on its own button, no longer on NavIn.
   const prepOn = state.data.prep.value !== null;
@@ -398,16 +394,18 @@ function DepartButtons() {
       </Button>
       {tracking ? (
         <TrackRailButton />
+      ) : trackDone.value ? (
+        <TrackDoneButton />
       ) : (
         <Button
           type="button"
           noUiEdit
-          className={
-            start.hit ? 'rail-btn rail-start lp-hit' : 'rail-btn rail-start'
-          }
-          aria-label={tr('START : appui long pour démarrer la trace')}
-          onClick={() => toast(tr('START : appui long pour démarrer la trace'))}
-          {...start.handlers}
+          className="rail-btn rail-start"
+          aria-label={tr('START : démarrer la trace')}
+          onClick={() => {
+            buzz();
+            domainActions.quickStart();
+          }}
         >
           <span className="rail-icon">{markupToReact(START_SVG)}</span>
         </Button>
@@ -481,11 +479,8 @@ function RailButton({
   useSignals();
   const tr = useTr();
   const press = useLongPress(onPick);
-  // During a track, the Météo menu gives way to Live météo.
-  const shown =
-    entry.key === 'weather' && state.view.tracking.value
-      ? (functionEntries().find((one) => one.key === 'meteo') ?? entry)
-      : entry;
+  // Météo stays Météo during a track: Live météo is inside its menu.
+  const shown = entry;
   const { icon, label } = splitTitle(shown.title);
   const drawn = DRAWN.has(shown.key);
   // A clear drawing speaks for itself: no word under it.

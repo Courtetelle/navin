@@ -187,23 +187,15 @@ function vhfItem(
     : { label: 'VHF', hint, act };
 }
 
-function weatherItem(actions: TopMenuActions, tracking: boolean): TopMenuItem {
-  // During a track, Live météo straight away, in place of the Météo menu.
-  return tracking
-    ? {
-        label: 'Live météo',
-        html: [WEATHER_SVG],
-        bare: true,
-        hint: 'Toucher encore : menu suivant · appui long : Live météo, le vent mesuré maintenant',
-        act: () => actions.go('meteo'),
-      }
-    : {
-        label: 'Météo',
-        html: [WEATHER_SVG],
-        bare: true,
-        hint: 'Toucher encore : menu suivant · appui long : prévisions et Live météo',
-        act: () => actions.go('weather'),
-      };
+function weatherItem(actions: TopMenuActions): TopMenuItem {
+  // The same during a track: Live météo is inside the Météo menu.
+  return {
+    label: 'Météo',
+    html: [WEATHER_SVG],
+    bare: true,
+    hint: 'Toucher encore : menu suivant · appui long : prévisions et Live météo',
+    act: () => actions.go('weather'),
+  };
 }
 
 function trackerMenu(
@@ -227,7 +219,7 @@ function trackerMenu(
     };
     return [
       base,
-      ...(context.wide ? [] : [weatherItem(actions, true)]),
+      ...(context.wide ? [] : [weatherItem(actions)]),
       fin,
       {
         label: 'Point',
@@ -254,7 +246,7 @@ function trackerMenu(
   if (context.wide) return [base];
   return [
     base,
-    weatherItem(actions, false),
+    weatherItem(actions),
     {
       label: 'PréP',
       html: [FLAG_SVG],

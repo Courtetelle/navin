@@ -985,6 +985,53 @@ async function offlineFiles(page: Page, theme: string): Promise<void> {
   );
 }
 
+// Tablet track button: short touches only; the pause holds until its button
+// is touched again (a tap on the map does nothing); FIN beside it, in two
+// touches; the tick shows on the button, not on NavIn.
+async function trackButton(page: Page, theme: string): Promise<void> {
+  const has = (selector: string) =>
+    page.evaluate((query) => document.querySelector(query) !== null, selector);
+  await page.locator('.rail-start').click();
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    'tablet: a short touch on START records',
+    await has('.rail-run'),
+  );
+  check(
+    theme,
+    'tablet: Météo stays Météo during a track',
+    (await page.locator('.rail-btn[aria-label*="Live"]').count()) === 0,
+  );
+  await page.locator('.rail-track').click();
+  await page.waitForTimeout(300);
+  const box = await page.locator('#trkMap').boundingBox();
+  if (box) await page.mouse.click(box.x + box.width / 2, box.y + 200);
+  await page.waitForTimeout(1500);
+  check(
+    theme,
+    'tablet: the pause holds, whatever is touched beside',
+    (await has('.rail-paused')) && (await has('.rail-fin')),
+  );
+  await page.locator('.rail-track').click();
+  await page.waitForTimeout(300);
+  check(theme, 'tablet: a touch on II resumes', await has('.rail-run'));
+  await page.locator('.rail-track').click();
+  await page.waitForTimeout(300);
+  await page.locator('.rail-fin').click();
+  await page.waitForTimeout(300);
+  await page.locator('.rail-fin').click();
+  await page.waitForTimeout(800);
+  const navinFace = await page.locator('.top-tab').first().innerHTML();
+  check(
+    theme,
+    'tablet: FIN in two touches ends the track, the tick on its button',
+    (await has('.rail-done')) && !navinFace.includes('tb-done'),
+  );
+  await page.waitForTimeout(3500);
+  check(theme, 'tablet: START comes back', await has('.rail-start'));
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
@@ -1028,6 +1075,7 @@ for (const theme of ['day', 'night']) {
   try {
     await tablet(page, theme);
     await zones(page, theme);
+    await trackButton(page, theme);
   } catch (error) {
     check(
       theme,

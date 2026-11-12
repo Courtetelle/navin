@@ -184,17 +184,20 @@ function disarmStop(): void {
 export async function stopNow(): Promise<void> {
   disarmStop();
   buzz();
-  doneUntil = Date.now() + 3000;
-  const display = tabDisplays.tracker;
-  display.value = {
-    ...display.value,
-    face: { ...display.value.face, html: [DONE_SVG], bare: true },
-    base: '',
-  };
-  setTimeout(() => {
-    doneUntil = 0;
-    resetTab('tracker');
-  }, 3000);
+  // The landscape tablet shows the tick on its track button, not on NavIn.
+  if (!menuContext().wide) {
+    doneUntil = Date.now() + 3000;
+    const display = tabDisplays.tracker;
+    display.value = {
+      ...display.value,
+      face: { ...display.value.face, html: [DONE_SVG], bare: true },
+      base: '',
+    };
+    setTimeout(() => {
+      doneUntil = 0;
+      resetTab('tracker');
+    }, 3000);
+  }
   if (state.view.tracking.value) await domainActions.stopTracking();
   if (state.view.currentView.value !== 'tracker') go('tracker');
   domainActions.afterStop();

@@ -38,7 +38,7 @@ test('during a track, FIN comes back after every choice', () => {
   );
   expect(labels).toStrictEqual([
     'TRACK en cours',
-    'Live météo',
+    'Météo',
     'FIN',
     'Point',
     'FIN',
