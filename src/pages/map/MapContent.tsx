@@ -10,7 +10,6 @@ import { buzz } from '../../lib/dom.ts';
 import { isLake } from '../../state/index.ts';
 
 import { DayNav } from './DayNav.tsx';
-import { MapExtras } from './MapExtras.tsx';
 import { MapSvg } from './MapSvg.tsx';
 import { useJournalMap } from './useJournalMap.ts';
 
@@ -79,7 +78,6 @@ export function MapContent({ day, onShowDay }: MapContentProps) {
           {tr(following ? '⏹ Arrêter le suivi' : '📍 Suivre ma position')}
         </Button>
       </ButtonRow>
-      <MapExtras day={day} onShowDay={onShowDay} />
     </>
   );
 }

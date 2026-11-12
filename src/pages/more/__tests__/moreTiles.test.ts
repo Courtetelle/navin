@@ -64,7 +64,6 @@ test('a lake outing shows its sheet, its rules and the lake totals', () => {
     'lists',
     'marks',
     'cartes',
-    'map',
     'nmea',
     'print',
     'export',

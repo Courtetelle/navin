@@ -19,6 +19,7 @@ import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
 import { state } from '../../state/index.ts';
 
+import { LemanTools } from './LemanTools.tsx';
 import { OfflineMaps } from './OfflineMaps.tsx';
 
 const HELP =
@@ -54,6 +55,9 @@ function CartesContent({ onChange }: { onChange: () => void }) {
         {help}
       </p>
       <OfflineMaps />
+      <FoldSection title="🏔 Léman : données hors ligne">
+        <LemanTools />
+      </FoldSection>
       {zones.length > 0 ? (
         <section className="field">
           <h2>{tr('Anciennes zones')}</h2>

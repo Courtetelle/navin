@@ -163,13 +163,6 @@ export function tilesWithCruise(): MoreTile[] {
     LISTS,
     marksTile(marks.value.length),
     chartsTile(),
-    {
-      key: 'map',
-      title: `🗺 ${lake ? 'Carte du Léman' : 'Carte'}`,
-      sub: lake
-        ? 'OpenStreetMap, profondeurs, position GPS'
-        : 'trace et entrées sur la carte',
-    },
     NMEA,
     {
       key: 'print',
