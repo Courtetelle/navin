@@ -9694,12 +9694,29 @@ body.nav-search:not(.trk-mode) #searchBtn {
     right: 10px !important;
     height: 52px !important;
   }
+  /* The magnifier at the bottom left, facing SOS; zoom + and − above it */
   html body #searchBtn {
-    top: calc(194px + env(safe-area-inset-top)) !important;
-    right: 10px !important;
-    left: auto !important;
-    bottom: auto !important;
+    top: auto !important;
+    right: auto !important;
+    left: 10px !important;
+    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
     height: 52px !important;
+  }
+  html body .rail-zoom {
+    position: fixed;
+    left: 10px;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  html body .rail-zoom-sign {
+    width: 34px;
+    height: 34px;
+  }
+  html body .leaflet-control-zoom {
+    display: none !important;
   }
   html body header.topbar.topbar #gearBtn.theme-btn,
   html body #searchBtn.no-print {
@@ -9723,7 +9740,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     width: 96px;
   }
   html body .side-rail-right {
-    top: calc(256px + env(safe-area-inset-top));
+    top: calc(194px + env(safe-area-inset-top));
   }
   /* The boat button of the left column replaces the arrow of the map, the
      dividers of the right column its own */
@@ -10688,6 +10705,9 @@ html body .btn.ck-close.ck-close-ok {
 html:root:not([data-theme='night'])
   body
   .rail-btn.rail-paused.menu-here::before,
+html:root:not([data-theme='night'])
+  body
+  #searchBtn.search-open.menu-here::before,
 html:root:not([data-theme='night']) body .rail-btn.prep-held.menu-here::before {
   background: linear-gradient(180deg, #ffc56b 0%, #f39c12 55%, #e07b00 100%);
 }

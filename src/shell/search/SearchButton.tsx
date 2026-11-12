@@ -3,16 +3,16 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { beginCrewSetEdit } from '../../features/crew/crewsEdit.ts';
+import { openFiche } from '../../features/crew/ficheNavigation.ts';
 import { showPlace } from '../../features/map/placeTarget.ts';
+import { state } from '../../state/index.ts';
 import { go } from '../router.ts';
 
-import type { FunctionEntry, PlaceEntry } from './searchIndex.ts';
-import {
-  functionEntries,
-  matches,
-  onlinePlaces,
-  placeEntries,
-} from './searchIndex.ts';
+import type { SearchHit } from './searchHits.ts';
+import { searchContext, searchHits } from './searchHits.ts';
+import type { PlaceEntry } from './searchIndex.ts';
+import { onlinePlaces } from './searchIndex.ts';
 
 /** Time without typing before the network is asked, in ms. */
 const TYPING_PAUSE_MS = 600;
@@ -49,11 +49,16 @@ const searchOpen = signal(false);
  * @returns The button.
  */
 export function MagnifierButton({ id }: { id: string }) {
+  useSignals();
   return (
     <button
       type="button"
       id={id}
-      className="no-print no-navact"
+      className={
+        searchOpen.value
+          ? 'no-print no-navact menu-here search-open'
+          : 'no-print no-navact'
+      }
       aria-label="Rechercher une fonction ou un lieu"
       onClick={() => {
         searchOpen.value = true;
@@ -101,73 +106,47 @@ interface OnlineAnswer {
   places: PlaceEntry[];
 }
 
-type SearchMode = 'place' | 'function';
-
-function SearchWindow({ onClose }: { onClose: () => void }) {
-  const [mode, setMode] = useState<SearchMode | null>(null);
-  return createPortal(
-    <div
-      className="ck-ask search-modal no-print"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <div className="ck-ask-box">
-        {mode ? (
-          <SearchField
-            key={mode}
-            mode={mode}
-            onClose={onClose}
-            onBack={() => setMode(null)}
-          />
-        ) : (
-          <>
-            <button
-              type="button"
-              className="btn big primary"
-              data-search="place"
-              onClick={() => setMode('place')}
-            >
-              📍 Un lieu, un pays, une région
-            </button>
-            <button
-              type="button"
-              className="btn big primary"
-              data-search="function"
-              onClick={() => setMode('function')}
-            >
-              ⚙️ Une fonction de l’application
-            </button>
-          </>
-        )}
-        <button type="button" className="btn" onClick={onClose}>
-          Fermer
-        </button>
-      </div>
-    </div>,
-    document.body,
-  );
+/**
+ * Open what a suggestion names.
+ * @param hit - The suggestion.
+ */
+function openHit(hit: SearchHit): void {
+  if (hit.place) {
+    showPlace(hit.place);
+    return;
+  }
+  if (hit.kind === 'boat') {
+    go('boats', hit.id);
+  } else if (hit.kind === 'member') {
+    go('people');
+    openFiche(hit.id, 'list');
+  } else if (hit.kind === 'crew') {
+    beginCrewSetEdit(hit.id);
+    go('crews');
+  } else {
+    go(hit.id);
+  }
 }
 
-function SearchField({
-  mode,
-  onClose,
-  onBack,
-}: {
-  mode: SearchMode;
-  onClose: () => void;
-  onBack: () => void;
-}) {
+/**
+ * The search, over the screen: one field; first what the screen looks for
+ * (a place on the map, a name in the boats, the cards, the crews), then
+ * everything of the app, suggested from the first letters typed.
+ * @param props - Closes the window.
+ * @returns The window.
+ */
+function SearchWindow({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('');
   const [answer, setAnswer] = useState<OnlineAnswer | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const [context] = useState(() =>
+    searchContext(state.view.currentView.peek()),
+  );
   useEffect(() => {
     input.current?.focus();
   }, []);
   const asksOnline =
-    mode === 'place' &&
-    query.trim().length >= MIN_ONLINE_LETTERS &&
-    navigator.onLine;
+    query.trim().length >= MIN_ONLINE_LETTERS && navigator.onLine;
   useEffect(() => {
     if (!asksOnline) return undefined;
     const controller = new AbortController();
@@ -183,88 +162,103 @@ function SearchField({
   }, [query, asksOnline]);
   const online = answer?.query === query ? answer.places : [];
   const waiting = asksOnline && answer?.query !== query;
-  const functions =
-    mode === 'function'
-      ? matches(
-          query,
-          functionEntries(),
-          (entry) => `${entry.title} ${entry.sub}`,
-        )
-      : [];
-  const places =
-    mode === 'place'
-      ? matches(query, placeEntries(), (entry) => entry.name)
-      : [];
-  const openFunction = (entry: FunctionEntry) => {
+  const { here, everywhere } = searchHits(query, context);
+  const pick = (hit: SearchHit) => {
     onClose();
-    go(entry.key);
+    openHit(hit);
   };
-  const openPlace = (place: PlaceEntry) => {
-    onClose();
-    showPlace(place);
-  };
+  const onlineHits = online.map((place): SearchHit => ({
+    kind: 'place',
+    key: `o-${place.name}${place.lat}`,
+    label: `🌐 ${place.name}`,
+    id: place.name,
+    place,
+  }));
+  const typed = query.trim().length > 0;
   const empty =
-    query.trim() &&
+    typed &&
     !waiting &&
-    functions.length + places.length + online.length === 0;
+    here.length + everywhere.length + onlineHits.length === 0;
+  return createPortal(
+    <div
+      className="ck-ask search-modal no-print"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="ck-ask-box search-box">
+        <input
+          className="text"
+          id="searchInput"
+          type="search"
+          enterKeyHint="search"
+          placeholder={context.placeholder}
+          autoComplete="off"
+          ref={input}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== 'Enter') return;
+            const first = here[0] ?? everywhere[0] ?? onlineHits[0];
+            if (first) pick(first);
+          }}
+        />
+        {typed ? null : (
+          <p className="help">
+            {`Ici : ${context.title.toLowerCase()}. Puis partout dans l’application : fonctions, bateaux, co-équipiers, équipages, marques et lieux.`}
+          </p>
+        )}
+        <HitGroup
+          title={`Ici · ${context.title}`}
+          hits={context.online ? [...here, ...onlineHits] : here}
+          onPick={pick}
+        />
+        <HitGroup
+          title="Partout"
+          hits={context.online ? everywhere : [...everywhere, ...onlineHits]}
+          onPick={pick}
+        />
+        {waiting ? <p className="help">Recherche en ligne…</p> : null}
+        {empty ? (
+          <p className="help">
+            {navigator.onLine
+              ? 'Rien trouvé.'
+              : 'Rien trouvé sur l’appareil. Les pays et régions demandent du réseau.'}
+          </p>
+        ) : null}
+        <button type="button" className="btn" onClick={onClose}>
+          Fermer
+        </button>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+function HitGroup({
+  title,
+  hits,
+  onPick,
+}: {
+  title: string;
+  hits: readonly SearchHit[];
+  onPick: (hit: SearchHit) => void;
+}) {
+  if (hits.length === 0) return null;
   return (
     <>
-      <button type="button" className="search-back" onClick={onBack}>
-        ◀ Changer de recherche
-      </button>
-      <input
-        className="text"
-        id="searchInput"
-        type="search"
-        placeholder={
-          mode === 'place'
-            ? 'Lieu, pays, région…'
-            : 'Fonction de l’application…'
-        }
-        autoComplete="off"
-        ref={input}
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-      />
-      {functions.map((entry) => (
+      <h3 className="search-group">{title}</h3>
+      {hits.map((hit) => (
         <button
           type="button"
           className="search-hit"
-          key={entry.key}
-          onClick={() => openFunction(entry)}
+          key={hit.key}
+          data-hit={hit.kind}
+          onClick={() => onPick(hit)}
         >
-          {entry.title}
+          {hit.label}
         </button>
       ))}
-      {places.map((place) => (
-        <button
-          type="button"
-          className="search-hit"
-          key={place.name}
-          onClick={() => openPlace(place)}
-        >
-          📍 {place.name}
-        </button>
-      ))}
-      {online.length > 0 ? <h3>En ligne</h3> : null}
-      {online.map((place) => (
-        <button
-          type="button"
-          className="search-hit"
-          key={`${place.name}${place.lat}`}
-          onClick={() => openPlace(place)}
-        >
-          🌐 {place.name}
-        </button>
-      ))}
-      {waiting ? <p className="help">Recherche en ligne…</p> : null}
-      {empty ? (
-        <p className="help">
-          {mode === 'place' && !navigator.onLine
-            ? 'Rien trouvé sur l’appareil. Les pays et régions demandent du réseau.'
-            : 'Rien trouvé.'}
-        </p>
-      ) : null}
     </>
   );
 }

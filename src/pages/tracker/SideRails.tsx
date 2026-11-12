@@ -172,6 +172,7 @@ export function SideRails() {
           })}
         </div>
       ))}
+      <ZoomButtons />
       {picking ? (
         <RailPicker
           current={rails[picking.side][picking.index] ?? ''}
@@ -182,6 +183,65 @@ export function SideRails() {
         />
       ) : null}
     </>
+  );
+}
+
+/**
+ * Bottom of the left column, above the magnifier: zoom in and out of the map
+ * shown, the size of the other buttons. Away from a map, the map opens.
+ * @returns The two buttons.
+ */
+function zoom(step: 1 | -1): void {
+  buzz();
+  const map = tracker.current?.map ?? shownMap();
+  if (!map || !document.contains(map.getContainer())) {
+    go('tracker');
+    return;
+  }
+  if (step > 0) map.zoomIn();
+  else map.zoomOut();
+}
+
+function ZoomSign({ plus }: { plus: boolean }) {
+  return (
+    <svg className="rail-zoom-sign" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d={plus ? 'M12 4v16M4 12h16' : 'M4 12h16'}
+        stroke="currentColor"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function ZoomButtons() {
+  const tr = useTr();
+  return (
+    <div className="rail-zoom">
+      <Button
+        type="button"
+        noUiEdit
+        className="rail-btn rail-zoom-in"
+        aria-label={tr('Zoomer')}
+        onClick={() => zoom(1)}
+      >
+        <span className="rail-icon">
+          <ZoomSign plus />
+        </span>
+      </Button>
+      <Button
+        type="button"
+        noUiEdit
+        className="rail-btn rail-zoom-out"
+        aria-label={tr('Dézoomer')}
+        onClick={() => zoom(-1)}
+      >
+        <span className="rail-icon">
+          <ZoomSign plus={false} />
+        </span>
+      </Button>
+    </div>
   );
 }
 

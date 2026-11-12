@@ -171,19 +171,25 @@ async function search(page: Page, theme: string): Promise<void> {
   await page.locator('#searchBtn').click();
   check(
     theme,
-    'search asks what to look for first',
-    (await page.locator('#searchInput').count()) === 0,
+    'the magnifier opens one field at once, and blinks while open',
+    (await page.locator('#searchInput').count()) === 1 &&
+      ((await page.locator('#searchBtn').getAttribute('class')) ?? '').includes(
+        'search-open',
+      ),
   );
-  await page.locator('[data-search=function]').click();
   await page.locator('#searchInput').fill('alarme');
   check(
     theme,
-    'it finds a function',
-    (await page.locator('.search-hit').count()) > 0,
+    'everywhere, it finds a function',
+    (await page.locator('.search-hit[data-hit=function]').count()) > 0,
   );
-  await page.locator('.search-back').click();
-  await page.locator('[data-search=place]').click();
   await page.locator('#searchInput').fill('chillon');
+  const firstGroup = await page.locator('.search-group').first().textContent();
+  check(
+    theme,
+    'on the map, places come first (here)',
+    firstGroup?.includes('Lieux') === true,
+  );
   await page.locator('.search-hit', { hasText: 'Chillon' }).first().click();
   await page.waitForTimeout(800);
   check(
@@ -619,6 +625,8 @@ const TABLET_BUTTONS = [
   '.rail-pin',
   '.rail-boat',
   '.rail-ruler',
+  '.rail-zoom-in',
+  '.rail-zoom-out',
 ];
 
 async function tabletPlaces(page: Page): Promise<string> {
