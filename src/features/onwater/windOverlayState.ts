@@ -1,5 +1,8 @@
 import { signal } from '@preact/signals-react';
 
+import { store } from '../../storage/store.ts';
+
+import { LAST_ALERT_KEY } from './lastWindAlert.ts';
 import { showOverlays } from './overlayRoot.ts';
 
 /** Where a wind alert came from, for Live météo opened from its bubble. */
@@ -118,6 +121,46 @@ export function removeWindFlash(id: number): void {
 export function showWindPopup(content: WindPopupContent): void {
   showOverlays();
   windPopup.value = content;
+}
+
+/** The last automatic alert: its bubble, and when it was given. */
+interface LastAlert {
+  content: WindPopupContent;
+  at: number;
+}
+
+let lastAlert: LastAlert | null = null;
+
+/**
+ * Show the bubble of an automatic alert, and keep it to show it again.
+ * @param content - Bubble content.
+ */
+export function showWindAlert(content: WindPopupContent): void {
+  lastAlert = { content, at: Date.now() };
+  // Kept on the device without its actions: the text comes back after a restart.
+  const { onLive, onStop, onClose, ...text } = content;
+  store.set(LAST_ALERT_KEY, { content: text, at: lastAlert.at });
+  showWindPopup(content);
+}
+
+/**
+ * Show again the text of the last automatic alert.
+ * @returns Whether there was one.
+ */
+export function replayWindAlert(): boolean {
+  const last = lastAlert ?? store.get<LastAlert | null>(LAST_ALERT_KEY, null);
+  if (!last) return false;
+  const time = new Date(last.at).toLocaleTimeString('fr-CH', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  showWindPopup({
+    ...last.content,
+    note: [`🔁 Alerte de ${time}`, last.content.note]
+      .filter(Boolean)
+      .join(' · '),
+  });
+  return true;
 }
 
 /** Remove the bubble and the flashes from the screen. */

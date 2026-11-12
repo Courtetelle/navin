@@ -28,7 +28,7 @@ import {
   windMutedNote,
   windValue,
 } from './windLogic.ts';
-import { liveAlertSpot, showWindPopup } from './windOverlayState.ts';
+import { liveAlertSpot, showWindAlert } from './windOverlayState.ts';
 import { coastWind, modelWind, stationWind } from './windReadings.ts';
 import type {
   WindMeta,
@@ -189,7 +189,7 @@ function showAlertPopup(
   const basis = config.basis === 'gust' ? 'en rafales' : 'de vent moyen';
   const forecast = meta.src === 'model';
   const network = top.net ?? 'MeteoSwiss';
-  showWindPopup({
+  showWindAlert({
     bf: force,
     kn: `${Math.round(knots)} nd ${basis}${forecast ? ' PRÉVUS' : ''}`,
     other: otherWind(config, top),

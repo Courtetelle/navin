@@ -31,6 +31,14 @@ export async function playAlarm(level: number): Promise<void> {
   domain.playAlarm(level);
 }
 
+export { lastWindAlertAt } from '../onwater/lastWindAlert.ts';
+
+/** Show again the text of the last automatic wind alert (onwater domain). */
+export async function replayWindAlert(): Promise<void> {
+  const domain = await onwater();
+  domain.replayWindAlert();
+}
+
 /** Start a track at once (prep domain). */
 export async function quickStart(): Promise<void> {
   const domain = await prep();

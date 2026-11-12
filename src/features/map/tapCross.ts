@@ -11,7 +11,7 @@ import { pinSvg } from '../../shell/topbar/tabIcons.ts';
 import { addMark, herePos, state, toast } from '../../state/index.ts';
 
 import { escapeHtml } from './escapeHtml.ts';
-import { wxNext } from './external.ts';
+import { lastWindAlertAt, replayWindAlert, wxNext } from './external.ts';
 import { setGoto } from './goto.ts';
 import { depthAt } from './isobath.ts';
 import { leaflet } from './leaflet.ts';
@@ -171,7 +171,11 @@ function openBranch(map: LeafletMap, branch: CrossBranch, at: LatLng): void {
   if (branch === 'mark') {
     body = `<div class="lp-btns"><button class="btn primary" data-lp="mark">📌 Enregistrer une marque</button>${send}</div>`;
   } else if (branch === 'weather') {
-    body = `<div class="lp-wx" id="lpWx">${navigator.onLine ? 'Prévision : recherche…' : 'Prévision : hors réseau'}</div><div class="lp-btns">${send}</div>`;
+    const alertAt = lastWindAlertAt();
+    const replay = alertAt
+      ? `<button class="btn" data-lp="alert">🔔 Revoir la dernière alerte (${new Date(alertAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })})</button>`
+      : '';
+    body = `<div class="lp-wx" id="lpWx">${navigator.onLine ? 'Prévision : recherche…' : 'Prévision : hors réseau'}</div><div class="lp-btns">${replay}${send}</div>`;
   } else if (branch === 'goto') {
     body = `<div>🧭 Depuis le bateau : <span class="lp-rel">${relativeHtml(point)}</span></div><div class="lp-btns"><button class="btn primary" data-lp="goto">🎯 Go to ce point</button>${send}</div>`;
     rulerToPoint(map, at);
@@ -202,6 +206,10 @@ function openBranch(map: LeafletMap, branch: CrossBranch, at: LatLng): void {
     buzz();
     const action = button.dataset.lp;
     if (action === 'send') void sendPosition(point);
+    if (action === 'alert') {
+      map.closePopup(popup);
+      void replayWindAlert();
+    }
     if (action === 'goto') {
       setGoto({ lat: point.lat, lon: point.lon, name: fmtPos(point) });
       map.closePopup(popup);
