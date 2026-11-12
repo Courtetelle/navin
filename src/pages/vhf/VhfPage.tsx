@@ -11,8 +11,8 @@ import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
 import { navZone, state } from '../../state/index.ts';
 
+import { PhoneBook } from './PhoneBook.tsx';
 import { VhfCallScreen } from './VhfCallScreen.tsx';
-import { VhfLake } from './VhfLake.tsx';
 import { VhfSea } from './VhfSea.tsx';
 
 /**
@@ -23,7 +23,7 @@ import { VhfSea } from './VhfSea.tsx';
  */
 export function VhfPage({ arg }: PageProps) {
   const [call, setCall] = useState<VhfCallKey | null>(null);
-  const { version, redraw } = useRedraw();
+  const { version } = useRedraw();
   const hasCruise = untracked(() => state.data.cruise.value !== null);
   const zone =
     arg === 'int' || arg === 'ext'
@@ -31,9 +31,8 @@ export function VhfPage({ arg }: PageProps) {
       : untracked(navZone) === 'lac'
         ? 'int'
         : 'ext';
-  if (zone === 'int') {
-    return <VhfLake key={version} onRedraw={() => redraw()} />;
-  }
+  // The phone: the useful numbers (rescue, position and message are in SOS).
+  if (zone === 'int') return <PhoneBook key={version} />;
   if (!hasCruise) return <VhfWithoutCruise />;
   if (call) return <VhfCallScreen call={call} onBack={() => setCall(null)} />;
   return <VhfSea onCall={setCall} />;

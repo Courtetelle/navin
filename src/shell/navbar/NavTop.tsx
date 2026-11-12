@@ -17,6 +17,7 @@ import {
   navBack,
   navExit,
   navExitLabel,
+  navExitView,
   navNext,
   navOk,
   navPillClick,
@@ -83,6 +84,10 @@ export function NavTop() {
     (Boolean(steps) ||
       Boolean(validate) ||
       (!prepOn && view !== 'prep' && fieldOwners.value > 0));
+  // ◀ already goes back to the map: one button, not two to the same place.
+  const backGo = pageBackTarget()?.element()?.dataset.go;
+  const exitTwice =
+    !steps && backGo === 'tracker' && navExitView() === 'tracker';
   const reference = useRef<HTMLDivElement>(null);
   const exitHold = useExitHold(Boolean(steps), () => steps?.onReset());
   const previous = sticky.value;
@@ -173,6 +178,7 @@ export function NavTop() {
       <Button
         className={exitHold.holding ? 'btn holding' : 'btn'}
         id="navExit"
+        hidden={exitTwice}
         onClick={(event) => {
           if (!exitHold.consumeClick(event)) navExit();
         }}

@@ -28,6 +28,7 @@ import {
   state,
 } from '../../state/index.ts';
 
+import { SosLake } from './SosLake.tsx';
 import { PositionSection } from './SosPosition.tsx';
 import {
   AlphaButton,
@@ -68,6 +69,7 @@ export function SosMain({ onScript, onRedraw }: SosMainProps) {
       <SosPosBlock />
       {lake ? null : <SosGrid onScript={onScript} />}
       <MobButton zone={lake ? 'lac' : 'mer'} />
+      {lake ? <SosLake french={french} /> : null}
       {positionShown ? (
         <PositionSection position={position} onRedraw={onRedraw} />
       ) : null}
