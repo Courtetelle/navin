@@ -32,11 +32,28 @@ export function startWindWatch(): void {
       windReminderTick(),
     );
   }, 60_000);
+  // Another zone of navigation (NavIn, the boat arrow): the alerts start
+  // again for the place the map now shows.
+  let known = state.view.zoneSimV.peek();
+  let settle: ReturnType<typeof setTimeout> | undefined;
+  state.view.zoneSimV.subscribe((zone) => {
+    if (zone === known) return;
+    known = zone;
+    clearTimeout(settle);
+    settle = setTimeout(() => {
+      void import('./windWatch.ts').then(({ windWatchRestart }) =>
+        windWatchRestart(),
+      );
+    }, ZONE_SETTLE_MS);
+  });
   // The stations around the GPS position are recorded, for the trends of
   // Live météo wherever the boat is.
   setTimeout(record, 30_000);
   setInterval(record, RECORD_EVERY_MS);
 }
+
+/** Time for the map to reach the new zone before the wind is read there. */
+const ZONE_SETTLE_MS = 1500;
 
 /** The stations around the boat are recorded this often. */
 const RECORD_EVERY_MS = 10 * 60_000;

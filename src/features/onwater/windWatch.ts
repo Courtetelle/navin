@@ -29,7 +29,11 @@ import {
   windMutedNote,
   windValue,
 } from './windLogic.ts';
-import { liveAlertSpot, showWindAlert } from './windOverlayState.ts';
+import {
+  clearWindOverlays,
+  liveAlertSpot,
+  showWindAlert,
+} from './windOverlayState.ts';
 import { coastWind, modelWind, stationWind } from './windReadings.ts';
 import type {
   WindMeta,
@@ -84,6 +88,17 @@ export function windWatchStart(): void {
   if (!windConfig().on) return;
   windCheck();
   windTimer = setInterval(windCheck, 5 * 60_000);
+}
+
+/**
+ * The zone of navigation changed (NavIn, or the boat arrow back to the GPS):
+ * the alert of the old place goes, and the watch starts again at once, where
+ * the map now shows.
+ */
+export function windWatchRestart(): void {
+  clearWindOverlays();
+  resetWindSignal();
+  windWatchStart();
 }
 
 /** A light check every minute keeps the 15-minute reminder between two readings. */
