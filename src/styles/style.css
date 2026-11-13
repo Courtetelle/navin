@@ -11110,3 +11110,12 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
 .sw-menu > .btn.share-btn {
   font-size: 17px;
 }
+
+/* A mark is a band, as a boat: its name, its date and time; touched, its
+   position, Go to and Nom. */
+.mark-item > .mk-body {
+  padding: 0 14px 12px;
+}
+.mark-item > summary .mk-pin {
+  margin-right: 6px;
+}

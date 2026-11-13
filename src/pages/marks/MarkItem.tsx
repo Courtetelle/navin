@@ -3,7 +3,6 @@ import { useSignals } from '@preact/signals-react/runtime';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { TzTime } from '../../components/shared/TzTime.tsx';
 import { utcText } from '../../components/shared/timeText.ts';
@@ -35,7 +34,6 @@ interface MarkItemProps {
 export function MarkItem({ mark }: MarkItemProps) {
   useSignals();
   const tr = useTr();
-  const title = `📌 ${mark.name}${mark.note ? ` · ${mark.note}` : ''}`;
   const date = fmtShortDate(new Date(mark.at));
   const position = fmtPos(mark);
   const depth = mark.depth ? ` · 🌊 ${mark.depth}` : '';
@@ -71,50 +69,55 @@ export function MarkItem({ mark }: MarkItemProps) {
         });
       }}
     >
-      <FoldSection
-        className="field mark-item"
-        data-id={mark.id}
-        title={title}
-        titleText={title}
-      >
-        <HelpText text={plain} nextIsRow>
-          <>
+      <details className="section mark-item" data-id={mark.id}>
+        <summary>
+          <span className="mk-pin">📌</span>
+          <span className="b-nm">
+            {`${mark.name}${mark.note ? ` · ${mark.note}` : ''}`}
+          </span>{' '}
+          <small>
             {`${date} · `}
             <TzTime date={mark.at} />
-            {` · ${position}${depth}`}
-            <br />
-            🧭{' '}
-            {relative ? (
-              <>
-                <b>{relative.distance}</b> · cap à suivre{' '}
-                <b>{relative.bearing}</b> (vrai){relative.eta}
-              </>
-            ) : (
-              relativeText
-            )}
-          </>
-        </HelpText>
-        <ButtonRow className="row c2">
-          <Button
-            className="btn primary"
-            data-mk="goto"
-            onClick={() => {
-              buzz();
-              const note = mark.note ? ` · ${mark.note}` : '';
-              setGoto({
-                lat: mark.lat,
-                lon: mark.lon,
-                name: `${mark.name}${note}`,
-              });
-            }}
-          >
-            {tr('🎯 Go to')}
-          </Button>
-          <Button className="btn" data-mk="note" onClick={rename}>
-            {tr('✏️ Nom')}
-          </Button>
-        </ButtonRow>
-      </FoldSection>
+          </small>
+        </summary>
+        <div className="mk-body">
+          <HelpText text={plain} nextIsRow>
+            <>
+              {`${position}${depth}`}
+              <br />
+              🧭{' '}
+              {relative ? (
+                <>
+                  <b>{relative.distance}</b> · cap à suivre{' '}
+                  <b>{relative.bearing}</b> (vrai){relative.eta}
+                </>
+              ) : (
+                relativeText
+              )}
+            </>
+          </HelpText>
+          <ButtonRow className="row c2">
+            <Button
+              className="btn primary"
+              data-mk="goto"
+              onClick={() => {
+                buzz();
+                const note = mark.note ? ` · ${mark.note}` : '';
+                setGoto({
+                  lat: mark.lat,
+                  lon: mark.lon,
+                  name: `${mark.name}${note}`,
+                });
+              }}
+            >
+              {tr('🎯 Go to')}
+            </Button>
+            <Button className="btn" data-mk="note" onClick={rename}>
+              {tr('✏️ Nom')}
+            </Button>
+          </ButtonRow>
+        </div>
+      </details>
     </SwipeRow>
   );
 }
