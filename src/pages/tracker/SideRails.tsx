@@ -563,7 +563,9 @@ function RailButton({
   }
   // The weather check, as PréP: orange blinking while started, green once
   // every point is ticked (for the day).
-  const check = weather ? wxCheckState(isLake()) : 'none';
+  const check = weather
+    ? wxCheckState(isLake() || navZone() === 'lac')
+    : 'none';
   if (check === 'ok') classes.push('prep-ready', 'prep-ready-ok');
   if (check === 'part') classes.push('prep-held', 'menu-here');
   if (press.hit) classes.push('lp-hit');

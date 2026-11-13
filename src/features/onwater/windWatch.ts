@@ -7,6 +7,7 @@ import { go } from '../../shell/router.ts';
 import {
   addEntry,
   isLake,
+  navZone,
   state,
   toast,
   updateDay,
@@ -164,7 +165,9 @@ function fireWind(
     if (open) {
       noteAlert({
         note: windAlertNote(top, meta),
-        ...(meta.waveH == null ? {} : { mer: String(meta.douglas) }),
+        ...(meta.waveH == null || onLake()
+          ? {}
+          : { mer: String(meta.douglas) }),
       });
     }
   }
@@ -178,6 +181,9 @@ function noteAlert(values: { note: string; mer?: string }): void {
     v: { evt: ['Alerte vent'], ...values },
   });
 }
+
+/** On a lake: the place of NavIn, or a lake outing. */
+const onLake = () => isLake() || navZone() === 'lac';
 
 function showAlertPopup(
   config: WindConfig,
@@ -196,8 +202,9 @@ function showAlertPopup(
     where: forecast
       ? `PRÉVISION ${top.name}, pas une mesure`
       : `mesuré à ${top.name} (${network})`,
-    sea: meta.waveH == null ? '' : `modèle ici : ${seaTxt(meta)}`,
-    omm: isLake() ? '' : waveOmmTxt(force),
+    // On a lake no sea state: the marine model and the WMO table are for the sea.
+    sea: meta.waveH == null || onLake() ? '' : `modèle ici : ${seaTxt(meta)}`,
+    omm: onLake() ? '' : waveOmmTxt(force),
     onLive: () => {
       // A measured alert: Live météo shows where it came from.
       liveAlertSpot.value =

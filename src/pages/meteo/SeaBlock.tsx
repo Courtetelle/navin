@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import type { SeaNow, WaveTrain } from '../../features/onwater/index.ts';
 import { seaNow, seaSentence } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
+import { inInland } from '../../model/contacts.ts';
+import { navZone } from '../../state/index.ts';
 
 import { compassPoint } from './liveText.ts';
 
@@ -38,7 +40,8 @@ export function SeaBlock({ lat, lon }: SeaBlockProps) {
     };
   }, [ask, lat, lon]);
   const sea = read.ask === ask ? read.sea : null;
-  if (!sea) return null;
+  // Lakes have no sea state: waves, swell and currents are for the sea.
+  if (!sea || inInland({ lat, lon }) || navZone() === 'lac') return null;
   const rows: Array<[string, string]> = [['Mer totale', trainText(sea.total)]];
   if (sea.windSea) rows.push(['Mer du vent', trainText(sea.windSea)]);
   if (sea.swell) rows.push(['Houle', trainText(sea.swell)]);

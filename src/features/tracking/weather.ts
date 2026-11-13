@@ -2,6 +2,7 @@ import { angDiff } from '../../lib/geo.ts';
 import type { EntryValues } from '../../model/types.ts';
 import {
   isLake,
+  navZone,
   saveCruise,
   state,
   toast,
@@ -81,7 +82,7 @@ export async function fetchWeather(
  * @param weather - Weather received.
  */
 export function applyWeather(values: EntryValues, weather: Weather): void {
-  const lake = isLake();
+  const lake = isLake() || navZone() === 'lac';
   const waveDirection = lake ? null : weather.waveDir;
   const waveHeight = lake ? null : weather.waveH;
   if (weather.twd != null && values.twd == null) {

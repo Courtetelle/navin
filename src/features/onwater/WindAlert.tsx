@@ -7,7 +7,13 @@ import { buzz } from '../../lib/dom.ts';
 import { dayKey, fmtTime } from '../../lib/format.ts';
 import { windTxt } from '../../lib/wind.ts';
 import { BFT_KN } from '../../model/lists.ts';
-import { ensureDay, getDay, state } from '../../state/index.ts';
+import {
+  ensureDay,
+  getDay,
+  isLake,
+  navZone,
+  state,
+} from '../../state/index.ts';
 
 import { BoxHelp } from './BoxHelp.tsx';
 import { MfKeyRow } from './MfKeyRow.tsx';
@@ -52,6 +58,8 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
     ? (getDay(today).windWatch as WindWatch | undefined)
     : null;
   const watch = stored || windWatchLast.value;
+  // On a lake no sea state: the marine model is for the sea.
+  const lake = isLake() || navZone() === 'lac';
   return (
     <div className="wind-alert">
       <p className="keep-help nav-hint">
@@ -77,7 +85,7 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
       {config.on && watch ? (
         <WatchLine watch={watch} config={config} keep={keep} />
       ) : null}
-      {watch?.waveH == null ? null : (
+      {watch?.waveH == null || lake ? null : (
         <p className="keep-help">
           {tr('🌊 État de la mer prévu ici : ')}
           <b>{tr(seaTxt(watch))}</b>

@@ -1,6 +1,6 @@
 import { distKm } from '../../lib/geo.ts';
 import type { Position } from '../../model/types.ts';
-import { isLake } from '../../state/index.ts';
+import { isLake, navZone } from '../../state/index.ts';
 
 import { mfReadings, owmReadings } from './coastStations.ts';
 import { smnNow, smnStations } from './externals.ts';
@@ -17,6 +17,9 @@ import {
   windRegion,
 } from './windModels.ts';
 import type { SeaState, WindMeta, WindReading } from './windTypes.ts';
+
+/** On a lake: no sea, no waves nor swell (the marine model is for the sea). */
+const onLake = () => isLake() || navZone() === 'lac';
 
 /** Result of a wind reading around the boat. */
 interface WindCheck {
@@ -90,7 +93,7 @@ export async function coastWind(
   const readings = await nearWater([...official, ...beacons]);
   if (readings.length === 0) return null;
   const top = strongest(readings, config.basis);
-  const sea = isLake() ? null : await seaStateAt(position);
+  const sea = onLake() ? null : await seaStateAt(position);
   return {
     top,
     level: windLevel(windValue(top, config.basis)),
@@ -119,7 +122,7 @@ export async function modelWind(
   if (readings.length === 0) return null;
   const top = strongest(readings, config.basis);
   const bias = region?.bias ?? 0;
-  const sea = isLake() ? null : await seaStateAt(position);
+  const sea = onLake() ? null : await seaStateAt(position);
   return {
     top,
     level: windLevel(windValue(top, config.basis) + bias),

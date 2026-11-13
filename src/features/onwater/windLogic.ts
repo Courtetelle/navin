@@ -196,7 +196,7 @@ export function windAlertNote(top: WindReading, meta: WindMeta): string {
     meta.src === 'model'
       ? `PRÉVISION ${top.name} à la position du bateau, pas une mesure (aucune station à moins de ${meta.radius ?? 30} km${lowered})`
       : `mesuré à ${top.name} (station ${top.net ?? 'MeteoSwiss'}${top.km == null ? '' : `, ${Math.round(top.km)} km`})`;
-  const sea = meta.waveH == null ? '' : ` ; ${seaTxt(meta)}`;
+  const sea = meta.waveH == null ? '' : ` ; ${seaTxt(meta)}`; // never set on a lake
   return `${windTxt(top.avg)}, rafales ${gust}${direction} ${where}${sea}`;
 }
 

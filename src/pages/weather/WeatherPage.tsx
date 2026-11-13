@@ -15,6 +15,7 @@ import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
 import {
   isLake,
+  navZone,
   newWxCheck,
   setWxChecks,
   state,
@@ -105,7 +106,7 @@ function WeatherMenu() {
 function ForecastPage() {
   useSignals();
   const tr = useTr();
-  const lake = isLake();
+  const lake = isLake() || navZone() === 'lac';
   const tracking = state.view.tracking.value;
   const [forecast, setForecast] = useState<Forecast | null | 'loading'>(
     'loading',
