@@ -13,15 +13,14 @@ import {
   PhotoOptions,
 } from './ListPublishOptions.tsx';
 import { SectionChecks } from './SectionChecks.tsx';
+import { ShareThemeNote } from './ShareTheme.tsx';
 import { TemplateChoice } from './TemplateChoice.tsx';
 import { imageList } from './imageList.ts';
 import { hasExtraSends, listItems } from './listKinds.ts';
-import { activeTemplate, listChoice } from './listPublishState.ts';
+import { listChoice } from './listPublishState.ts';
 import { chosenItems, sectionKeys } from './listSelection.ts';
-import { setListTheme } from './listTemplateActions.ts';
 import { printList } from './printList.tsx';
 import { closeListPublish } from './publishWindowState.ts';
-import { LX_THEMES } from './themes.ts';
 import type { ListKind } from './types.ts';
 
 /** Props of {@link ListPublishBox}. */
@@ -41,7 +40,6 @@ export function ListPublishBox({ kind }: ListPublishBoxProps): ReactElement {
   useSignals();
   const [imageBusy, setImageBusy] = useState(false);
   const items = listItems(kind);
-  const theme = activeTemplate(kind).theme ?? 'cards';
   const choice = listChoice(kind);
   const severalSections = sectionKeys(items).length > 1;
 
@@ -60,22 +58,7 @@ export function ListPublishBox({ kind }: ListPublishBoxProps): ReactElement {
     >
       <summary>🖨 Imprimer ou envoyer la liste</summary>
       <div className="lx-in">
-        <p className="help lx-sec-h">Mise en page</p>
-        <div className="lx-tpl lx-themes">
-          {LX_THEMES.map(([id, label]) => (
-            <Button
-              key={id}
-              type="button"
-              className={`btn no-navact ${theme === id ? 'on' : ''}`}
-              data-lxth={id}
-              onClick={() => {
-                setListTheme(kind, id);
-              }}
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
+        <ShareThemeNote />
         <PhotoOptions kind={kind} items={items} choice={choice} />
         <div className="row c2">
           <Button

@@ -23,8 +23,8 @@ import {
   addTemplate,
   renameTemplate,
   selectTemplate,
-  setListTheme,
 } from '../listTemplateActions.ts';
+import { setShareTheme } from '../shareTheme.ts';
 
 const stored = () => store.raw('ldb.lxTpl');
 
@@ -95,13 +95,13 @@ test('keepOnly unchecks all the others, whatever the session did', () => {
   expect(listChoice('people').off).toStrictEqual(['a', 'b']);
 });
 
-test('setListTheme is saved and read back', () => {
+test('every list takes the layout chosen in Réglages', () => {
   prepareList('crews');
-  setListTheme('crews', 'carnet');
+  expect(listTheme('crews')).toBe('cards');
+  setShareTheme('carnet');
   expect(listTheme('crews')).toBe('carnet');
-  expect(stored()).toBe(
-    '{"crews":{"act":"t1","list":[{"id":"t1","name":"Modèle 1","offSec":[],"offRow":[],"theme":"carnet"}]}}',
-  );
+  expect(listTheme('boats')).toBe('carnet');
+  setShareTheme('cards');
 });
 
 test('addTemplate copies the active one and activates the copy', () => {
@@ -173,7 +173,8 @@ test('a stored template is read at the first opening', () => {
     },
   });
   resetListPublishState();
-  expect(listTheme('boats')).toBe('mini');
+  // The layout of a stored template gives way to the one of Réglages.
+  expect(listTheme('boats')).toBe('cards');
   expect(listChoice('boats')).toStrictEqual({
     off: [],
     offSec: ['Moteur'],

@@ -23,9 +23,8 @@ import type {
   CardsSection,
   LxTheme,
 } from '../publish/index.ts';
-import { cardsPng } from '../publish/index.ts';
+import { cardsPng, shareTheme } from '../publish/index.ts';
 
-const THEMES: ReadonlySet<string> = new Set(['cards', 'carnet', 'mini']);
 const OBSERVATIONS = '§obs';
 
 /** The PréP + check-in report (legacy `prepReportDoc`). */
@@ -48,14 +47,11 @@ export interface CachedPrepReport {
 let cached: CachedPrepReport | null = null;
 
 /**
- * Layout chosen for the report (legacy `repTheme`).
+ * Layout of the report: the one of every share, chosen in Réglages.
  * @returns The layout.
  */
 export function reportTheme(): LxTheme {
-  const theme = state.preferences.settings.value.repTheme;
-  return typeof theme === 'string' && THEMES.has(theme)
-    ? (theme as LxTheme)
-    : 'cards';
+  return shareTheme();
 }
 
 /**

@@ -3,13 +3,12 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { Button } from '../../components/shared/Button.tsx';
 import { buzz } from '../../lib/dom.ts';
 import { updateSettings } from '../../state/index.ts';
-import { LX_THEMES } from '../publish/index.ts';
+import { ShareThemeNote } from '../publish/index.ts';
 
 import {
   prepReportCache,
   prepReportShare,
   reportPhotos,
-  reportTheme,
 } from './prepReportData.ts';
 import { prepReportPrint } from './prepReportPrint.tsx';
 
@@ -26,31 +25,11 @@ interface PrepPublishBoxProps {
  */
 export function PrepPublishBox({ onClose }: PrepPublishBoxProps) {
   useSignals();
-  const theme = reportTheme();
   const photos = reportPhotos();
   return (
     <div className="ck-ask-box pub-box">
       <p>Partager le rapport PréP + check-in</p>
-      <p className="help pub-h">Mise en page</p>
-      <div className="pub-themes">
-        {LX_THEMES.map(([id, label]) => (
-          <Button
-            key={id}
-            type="button"
-            className={theme === id ? 'btn on' : 'btn'}
-            data-pubth={id}
-            onClick={() => {
-              buzz();
-              updateSettings((settings) => {
-                settings.repTheme = id;
-              });
-              prepReportCache();
-            }}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
+      <ShareThemeNote />
       <Button
         type="button"
         className={photos ? 'btn check on' : 'btn check'}

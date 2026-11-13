@@ -6,6 +6,7 @@ import { layOutPhotos } from './cardsPhotos.ts';
 import { layOutFooter, layOutSection } from './cardsSections.ts';
 import { CARDS_STYLES, CARD_WIDTH } from './cardsStyle.ts';
 import type { LoadedPhoto, LoadedSection } from './cardsTypes.ts';
+import { shareTheme } from './shareTheme.ts';
 import type { CardsDocument, CardsPhoto, LxTheme } from './types.ts';
 
 /**
@@ -15,7 +16,7 @@ import type { CardsDocument, CardsPhoto, LxTheme } from './types.ts';
  * @returns The PNG file.
  */
 export async function cardsPng(sheet: CardsDocument): Promise<Blob> {
-  const theme: LxTheme = sheet.theme ?? 'cards';
+  const theme: LxTheme = sheet.theme ?? shareTheme();
   const canvas = document.createElement('canvas');
   const context = canvas.getContext('2d') as CanvasRenderingContext2D;
   const photos = await loadPhotos(sheet.photos ?? []);

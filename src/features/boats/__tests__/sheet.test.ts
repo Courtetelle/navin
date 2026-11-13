@@ -169,4 +169,10 @@ test('report choices: known layout, photos unless switched off', () => {
     settings.repTheme = 'other';
   });
   expect(reportTheme()).toBe('cards');
+  // The layout chosen in Réglages wins, for the report as for every share.
+  updateSettings((settings) => {
+    settings.shareTheme = 'carnet';
+    settings.repTheme = 'mini';
+  });
+  expect(reportTheme()).toBe('carnet');
 });

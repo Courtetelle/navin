@@ -7,6 +7,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { installPrompt } from '../../features/data/install.ts';
 import { WindAlert, windAlertClick } from '../../features/onwater/index.ts';
+import { ShareThemePicker } from '../../features/publish/index.ts';
 import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -182,6 +183,10 @@ export function SettingsPage({ from }: PageProps) {
           <h3>{tr('Alertes de vent')}</h3>
           <WindAlert noTest />
           <DepthSet />
+        </SettingsSection>
+        <SettingsSection section="share" title="📤 Partages">
+          <h3>{tr('Mise en page')}</h3>
+          <ShareThemePicker />
         </SettingsSection>
         <SettingsSection section="simu" title="🆘 Simulation SOS">
           <SimulationSection />

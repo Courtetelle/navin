@@ -5,19 +5,7 @@ import {
   templatesIn,
   update,
 } from './listPublishState.ts';
-import type { ListKind, LxTheme } from './types.ts';
-
-/**
- * Choose the layout of the active template.
- * @param kind - List kind.
- * @param theme - Layout.
- */
-export function setListTheme(kind: ListKind, theme: LxTheme): void {
-  update((draft) => {
-    currentIn(draft, kind).theme = theme;
-  });
-  persist();
-}
+import type { ListKind } from './types.ts';
 
 /**
  * Activate a template.
