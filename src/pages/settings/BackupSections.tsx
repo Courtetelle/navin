@@ -7,6 +7,7 @@ import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { boatDocPhotos } from '../../features/boats/index.ts';
 import { syncPack } from '../../features/data/backup.ts';
+import { sendMenus } from '../../features/data/menusExport.ts';
 import { restoreFile } from '../../features/data/restoreFile.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -99,6 +100,23 @@ export function BackupSections() {
             }}
           >
             {tr('⬇ Exporter toutes les données')}
+          </Button>
+        </ButtonRow>
+        <ButtonRow>
+          <Button
+            className="btn big"
+            id="menusOut"
+            onClick={() => {
+              buzz();
+              void sendMenus();
+            }}
+          >
+            {tr('📋 Envoyer mes menus')}
+            <small>
+              {tr(
+                'check-in, listes, bases, boutons et météo modifiés · sans données personnelles · AirDrop vers le Mac',
+              )}
+            </small>
           </Button>
         </ButtonRow>
         <HelpText>
