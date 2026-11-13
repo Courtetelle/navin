@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
 /** A tablet in landscape (iPad, Sailproof SP10X): two panes side by side. */
-export const WIDE_QUERY = '(min-width: 1000px) and (orientation: landscape)';
+export const WIDE_QUERY = '(orientation: landscape) and (min-width: 560px)';
 
 function wideList(): MediaQueryList | null {
   return globalThis.matchMedia?.(WIDE_QUERY) ?? null;

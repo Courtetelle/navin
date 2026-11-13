@@ -9445,7 +9445,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 
 /* Tablet in landscape (iPad, Sailproof SP10X): the live map on the left,
    the controls, the list or the station card on the right */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   .live-page {
     display: grid;
     grid-template-columns: minmax(0, 3fr) minmax(360px, 2fr);
@@ -9482,7 +9482,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 
 /* Tablet in landscape: the forecast on the left, the checks on the right */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   .wx-page {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -9502,7 +9502,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 
 /* Tablet in landscape: the tracker figures read from the helm */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   .trk-dash {
     gap: 10px;
   }
@@ -9531,14 +9531,14 @@ body.nav-search:not(.trk-mode) #searchBtn {
   z-index: 1500;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--rb-gap, 10px);
   width: 84px;
 }
 .side-rail-left {
-  left: 10px;
+  left: var(--rb-side);
 }
 .side-rail-right {
-  right: 10px;
+  right: var(--rb-side);
 }
 .rail-btn {
   display: flex;
@@ -9611,10 +9611,10 @@ body.nav-search:not(.trk-mode) #searchBtn {
   margin-bottom: 12px;
 }
 .rail-pick-list .btn {
-  min-height: 52px;
+  min-height: var(--rb-h);
   text-align: left;
 }
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   .trk-full .trk-over {
     left: 104px;
     right: 104px;
@@ -9625,7 +9625,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
    left column, the settings, the magnifier, VHF / phone and data the right
    one, SOS at its foot;
    the map takes the whole height. */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   html body header.topbar.topbar {
     position: fixed !important;
     inset: 0 auto auto 0 !important;
@@ -9650,7 +9650,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body header.topbar #gearBtn,
   html body #searchBtn {
     position: fixed !important;
-    width: 96px !important;
+    width: var(--rb-w) !important;
     min-width: 0 !important;
     max-width: none !important;
     flex: none !important;
@@ -9658,9 +9658,9 @@ body.nav-search:not(.trk-mode) #searchBtn {
     box-sizing: border-box;
   }
   html body header.topbar #clock {
-    top: calc(8px + env(safe-area-inset-top)) !important;
-    left: 10px !important;
-    height: 52px;
+    top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
+    left: var(--rb-side) !important;
+    height: var(--rb-h);
     padding: 2px 0;
     border-radius: 14px;
     text-align: center;
@@ -9671,45 +9671,49 @@ body.nav-search:not(.trk-mode) #searchBtn {
   /* NavIn under the settings, in the right column; the boat takes its place
      on the left */
   html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
-    top: calc(70px + env(safe-area-inset-top)) !important;
+    top: calc(
+      var(--rb-top) + var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
     left: auto !important;
-    right: 10px !important;
-    height: 52px !important;
+    right: var(--rb-side) !important;
+    height: var(--rb-h) !important;
   }
   /* data, short like the magnifier, right under NavIn */
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data {
-    top: calc(132px + env(safe-area-inset-top)) !important;
+    top: calc(
+      var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
     left: auto !important;
-    right: 10px !important;
-    height: 52px !important;
+    right: var(--rb-side) !important;
+    height: var(--rb-h) !important;
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
     top: auto !important;
-    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    right: 10px !important;
-    height: 52px !important;
+    bottom: calc(var(--rb-top) + env(safe-area-inset-bottom)) !important;
+    right: var(--rb-side) !important;
+    height: var(--rb-h) !important;
   }
   html body header.topbar #gearBtn {
-    top: calc(8px + env(safe-area-inset-top)) !important;
-    right: 10px !important;
-    height: 52px !important;
+    top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
+    right: var(--rb-side) !important;
+    height: var(--rb-h) !important;
   }
   /* The magnifier at the bottom left, facing SOS; zoom + and − above it */
   html body #searchBtn {
     top: auto !important;
     right: auto !important;
-    left: 10px !important;
-    bottom: calc(10px + env(safe-area-inset-bottom)) !important;
-    height: 52px !important;
+    left: var(--rb-side) !important;
+    bottom: calc(var(--rb-top) + env(safe-area-inset-bottom)) !important;
+    height: var(--rb-h) !important;
   }
   html body .rail-zoom {
     position: fixed;
-    left: 10px;
-    bottom: calc(72px + env(safe-area-inset-bottom));
+    left: var(--rb-side);
+    bottom: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-bottom));
     z-index: 1500;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--rb-gap);
   }
   html body .rail-zoom-sign {
     width: 34px;
@@ -9736,11 +9740,11 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body .side-rail {
-    top: calc(70px + env(safe-area-inset-top));
-    width: 96px;
+    top: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-top));
+    width: var(--rb-w);
   }
   html body .side-rail-right {
-    top: calc(194px + env(safe-area-inset-top));
+    top: calc(var(--rb-top) + 3 * var(--rb-step) + env(safe-area-inset-top));
   }
   /* The boat button of the left column replaces the arrow of the map, the
      dividers of the right column its own */
@@ -9753,14 +9757,14 @@ body.nav-search:not(.trk-mode) #searchBtn {
     height: 38px;
   }
   html body .trk-full .trk-dash {
-    left: 116px;
-    right: 140px;
+    left: var(--rb-col);
+    right: calc(var(--rb-col) + 24px);
   }
   /* SOS the size of the other buttons, at the bottom right corner, its
      letters tall and narrow almost to the edges. */
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
-    width: 96px !important;
-    right: 10px !important;
+    width: var(--rb-w) !important;
+    right: var(--rb-side) !important;
     overflow: hidden;
   }
   html body header.topbar nav.topnav .top-tab.tab-sos .tb-sos {
@@ -9772,7 +9776,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     transform: translateY(3px);
   }
   html body .rail-btn {
-    width: 96px;
+    width: var(--rb-w);
   }
   html body header.topbar.topbar {
     -webkit-backdrop-filter: none !important;
@@ -9780,9 +9784,9 @@ body.nav-search:not(.trk-mode) #searchBtn {
     filter: none !important;
   }
   html body .trk-full .leaflet-top.ctl-col {
-    top: calc(8px + env(safe-area-inset-top)) !important;
+    top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
     left: auto !important;
-    right: 114px !important;
+    right: calc(var(--rb-col) - 2px) !important;
     padding-top: 0 !important;
     margin-top: 0 !important;
   }
@@ -9798,8 +9802,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body .trk-full .trk-over {
-    left: 116px;
-    right: 116px;
+    left: var(--rb-col);
+    right: var(--rb-col);
   }
 }
 .rail-svg {
@@ -9822,7 +9826,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 
 /* Tablet in landscape, every screen: the page between the two columns; the
    magnifier stays in the right column, not in the nav bar. */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   html body.trk-mode main#view {
     max-width: none !important;
     margin: 0 !important;
@@ -9830,13 +9834,13 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
   html body:not(.trk-mode) main#view {
     max-width: none !important;
-    margin: 0 116px !important;
+    margin: 0 var(--rb-col) !important;
     padding-top: 12px;
   }
   html body #navtop {
     top: 0 !important;
-    padding-top: calc(8px + env(safe-area-inset-top)) !important;
-    max-width: min(760px, calc(100vw - 232px)) !important;
+    padding-top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
+    max-width: min(760px, calc(100vw - 2 * var(--rb-col))) !important;
   }
   html body #navSearchSlot,
   html body #navSearch {
@@ -9846,7 +9850,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: flex !important;
   }
   html body .lang-fab {
-    right: 126px !important;
+    right: calc(var(--rb-col) + 10px) !important;
   }
 }
 
@@ -9942,7 +9946,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 
 /* Tablet in landscape: the time in the middle of its pill */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   html body header.topbar.topbar #clock {
     display: flex !important;
     flex-direction: column;
@@ -9958,7 +9962,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 
 /* Tablet in landscape: « data » a little larger, same proportions */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
     font-size: 34px !important;
   }
@@ -9970,7 +9974,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 
 /* Tablet columns: every drawing the same size; the map shows through each
    pill, blurred, only inside its frame (NavIn keeps its own colour). */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   html body .rail-btn .rail-svg {
     width: 50px;
     height: 50px;
@@ -10001,16 +10005,16 @@ body.nav-search:not(.trk-mode) #searchBtn {
 .rail-depart {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--rb-gap, 10px);
 }
 .rail-depart .rail-hidden {
   visibility: hidden;
 }
 
 /* Tablet columns: every button 52 px high, as the magnifier */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   html body .rail-btn.rail-btn {
-    height: 52px;
+    height: var(--rb-h);
     padding: 2px;
   }
   html body .rail-btn.rail-btn .rail-svg {
@@ -10055,7 +10059,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 
 /* Tablet: every side and map button in glass, with a little relief. Pressed,
    it sinks in: a short press briefly, a long one deeper with a lit ring. */
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   html:root body .rail-btn.rail-btn,
   html:root body header.topbar.topbar #gearBtn.theme-btn,
   html:root body #searchBtn.no-print,
@@ -10242,7 +10246,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
 .side-rail .rail-btn.rail-hidden {
   pointer-events: none;
 }
-@media (min-width: 1000px) and (orientation: landscape) {
+@media (orientation: landscape) and (min-width: 560px) {
   /* PréP, START and the track keep the drawings and proportions of the
      phone's NavIn button, scaled to the pill */
   html body .rail-btn .tb-ico {
@@ -10286,7 +10290,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   font-weight: 700;
 }
 .ruler-edit-box input {
-  min-height: 52px;
+  min-height: var(--rb-h);
   padding: 0 12px;
   border: 2px solid var(--line);
   border-radius: 12px;
@@ -10812,4 +10816,104 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
 :root[data-theme='night'] .phone-track .rail-btn {
   background: #1a0000;
   border-color: #5a0000;
+}
+
+/* « Vue X » on every screen in landscape: the tablet, and the phone turned
+   sideways, the same buttons at the same places, sized to the screen. */
+@media (orientation: landscape) and (min-width: 560px) {
+  :root {
+    --rb-h: 52px;
+    --rb-w: 96px;
+    --rb-gap: 10px;
+    --rb-top: 8px;
+    --rb-side: 10px;
+    --rb-step: calc(var(--rb-h) + var(--rb-gap));
+    --rb-col: calc(var(--rb-side) + var(--rb-w) + 10px);
+  }
+}
+/* A phone sideways: the same columns, smaller to fit its height */
+@media (orientation: landscape) and (min-width: 560px) and (max-height: 520px) {
+  :root {
+    --rb-h: 36px;
+    --rb-w: 70px;
+    --rb-gap: 4px;
+    --rb-top: 4px;
+    /* The rounded corners and the camera: the same margin on both sides */
+    --rb-edge-x: max(
+      6px,
+      env(safe-area-inset-left),
+      env(safe-area-inset-right)
+    );
+    --rb-side: var(--rb-edge-x);
+  }
+  html body .trk-full .trk-map {
+    left: var(--rb-edge-x) !important;
+    right: var(--rb-edge-x) !important;
+  }
+  html body .rail-btn .rail-svg,
+  html body .rail-btn .rail-icon svg,
+  html body .rail-btn .tb-ico {
+    width: 30px !important;
+    height: 30px !important;
+  }
+  html body .rail-btn .rail-icon {
+    font-size: 24px !important;
+  }
+  html body header.topbar #clock {
+    font-size: 11px;
+  }
+  html body header.topbar.topbar #gearBtn.theme-btn,
+  html body #searchBtn.no-print,
+  html body .rail-btn.rail-btn {
+    min-height: 0 !important;
+    height: var(--rb-h) !important;
+  }
+  html body header.topbar #gearBtn svg,
+  html body #searchBtn svg {
+    width: 26px;
+    height: 26px;
+  }
+  html body .trk-dash b,
+  html body .trk-dash div:nth-child(4) b {
+    font-size: 24px;
+  }
+  html body .trk-dash small {
+    font-size: 11px;
+  }
+}
+/* The phone upright is set aside for now: it asks to be turned. */
+.turn-phone {
+  display: none;
+}
+@media (orientation: portrait) and (max-width: 559px) {
+  html:not(.portrait-ok) .turn-phone {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    padding: 32px;
+    background: var(--bg, #f3f5f9);
+    color: var(--fg, #0b1220);
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  html:not(.portrait-ok) .turn-phone .turn-ico {
+    font-size: 72px;
+    animation: turnPhone 2s ease-in-out infinite;
+  }
+}
+@keyframes turnPhone {
+  0%,
+  30% {
+    transform: rotate(0deg);
+  }
+  60%,
+  100% {
+    transform: rotate(-90deg);
+  }
 }

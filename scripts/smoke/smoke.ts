@@ -61,6 +61,15 @@ async function open(
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(FAKE_GPS);
+  // The upright phone is set aside for now (it asks to be turned); its
+  // layout stays tested underneath the notice.
+  await page.addInitScript(() => {
+    const mark = () => {
+      document.documentElement.classList.add('portrait-ok');
+    };
+    if (document.documentElement) mark();
+    else document.addEventListener('DOMContentLoaded', mark, { once: true });
+  });
   await page.goto(URL, { waitUntil: 'load' });
   await page.locator('.map-locate-btn').waitFor({ state: 'attached' });
   await page.waitForTimeout(1500);
@@ -818,10 +827,18 @@ async function tablet(page: Page, theme: string): Promise<void> {
     await dataFace(page, theme, name);
     // eslint-disable-next-line no-await-in-loop -- one screen after the other
     const view = await page.locator('main#view').boundingBox();
+    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    const left = await page.locator('#clock').boundingBox();
+    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    const right = await page.locator('#gearBtn').boundingBox();
     check(
       theme,
       `tablet: the ${name} page stays between the columns`,
-      view !== null && view.x >= 106 && view.x + view.width <= 1174,
+      view !== null &&
+        left !== null &&
+        right !== null &&
+        view.x >= left.x + left.width &&
+        view.x + view.width <= right.x,
     );
   }
 }
@@ -1106,6 +1123,29 @@ async function phoneTrack(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(3500);
 }
 
+// The phone held upright asks to be turned; sideways it has the columns of X.
+async function turnPhone(browser: Browser): Promise<void> {
+  const context = await browser.newContext({ viewport: PHONE });
+  await context.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
+  const page = await context.newPage();
+  await page.goto(URL, { waitUntil: 'load' });
+  await page.waitForTimeout(1200);
+  check(
+    'day',
+    'an upright phone asks to be turned',
+    await page.locator('.turn-phone').isVisible(),
+  );
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.waitForTimeout(800);
+  check(
+    'day',
+    'a phone sideways has the columns of X, the notice gone',
+    !(await page.locator('.turn-phone').isVisible()) &&
+      (await page.locator('.side-rail-left').count()) === 1,
+  );
+  await context.close();
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
@@ -1142,11 +1182,14 @@ for (const theme of ['day', 'night']) {
   check(theme, 'map files: no error in the page', errors.length === 0);
   await context.close();
 }
-for (const theme of ['day', 'night']) {
-  const { context, page, errors } = await open(browser, theme, {
-    width: 1280,
-    height: 800,
-  });
+await turnPhone(browser);
+for (const [theme, viewport] of [
+  ['day', { width: 1280, height: 800 }],
+  ['night', { width: 1280, height: 800 }],
+  ['day', { width: 844, height: 390 }],
+  ['night', { width: 844, height: 390 }],
+] as const) {
+  const { context, page, errors } = await open(browser, theme, viewport);
   try {
     await tablet(page, theme);
     await zones(page, theme);

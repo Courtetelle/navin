@@ -2,6 +2,7 @@ import { LangFab } from './i18n/LangFab.tsx';
 import { SideRails } from './pages/tracker/SideRails.tsx';
 import { PageHost } from './shell/PageHost.tsx';
 import { SlideHandles } from './shell/SlideHandles.tsx';
+import { TurnPhone } from './shell/TurnPhone.tsx';
 import { WakeVideo } from './shell/WakeVideo.tsx';
 import { NavTop } from './shell/navbar/NavTop.tsx';
 import { RemarkPill } from './shell/remark/RemarkPill.tsx';
@@ -34,6 +35,7 @@ export function App() {
       <SideRails />
       <RemarkPill />
       <UiEditor />
+      <TurnPhone />
     </>
   );
 }
