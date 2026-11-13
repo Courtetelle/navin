@@ -11056,3 +11056,19 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
 :root[data-theme='night'] .share-fmt-pdf .share-ic-dot {
   fill: #200000;
 }
+
+/* SOS open: red, white letters, above the glass look of the buttons (which
+   used to hide it: white letters on white glass). */
+html:root body header.topbar nav.topnav .top-tab.top-tab.tab-sos.active.active,
+html:root[data-theme='night']
+  body
+  header.topbar
+  nav.topnav
+  .top-tab.top-tab.tab-sos.active.active {
+  background: var(--danger, #d0021b) !important;
+  color: #fff !important;
+}
+html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
+  fill: #fff !important;
+  stroke: none !important;
+}
