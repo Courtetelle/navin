@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 
 import { reportRows, snippetZoom, worldPixel } from '../alertPublish.ts';
 import { seaRows } from '../seaNow.ts';
+import { beaufortOfWaves, seaMarks } from '../windLogic.ts';
 
 const reading = {
   name: 'St-Prex',
@@ -73,4 +74,18 @@ test('the five lines of the sea read as in Live météo', () => {
     ['Courant', '0,4 nd · porte vers E'],
     ['Eau', '15,3 °C'],
   ]);
+});
+
+test('the marks give the Douglas degree, the Beaufort force of the waves and the WMO reference', () => {
+  expect(beaufortOfWaves(0)).toBe(0);
+  expect(beaufortOfWaves(1.2)).toBe(5);
+  expect(beaufortOfWaves(0.6)).toBe(3);
+  expect(beaufortOfWaves(20)).toBe(12);
+  const marks = Object.fromEntries(seaMarks(1.2, 5));
+  expect(marks.Provenance).toContain('Open-Meteo Marine');
+  expect(marks['Échelle de Douglas']).toBe(
+    'vagues de 1,2 m = degré 3, mer peu agitée',
+  );
+  expect(marks['En Beaufort']).toContain('force 5 Bf');
+  expect(marks['OMM pour 5 Bf']).toMatch(/^mer 4 agitée, vagues ≈ 2,0 m/u);
 });

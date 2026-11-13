@@ -7,7 +7,7 @@ import { deliver } from '../../state/index.ts';
 import { onLake } from './onLake.ts';
 import type { SeaNow } from './seaNow.ts';
 import { seaNow, seaRows } from './seaNow.ts';
-import { flashColor, flashInk, seaTxt } from './windLogic.ts';
+import { flashColor, flashInk, seaMarks, seaTxt } from './windLogic.ts';
 import type { WindReading } from './windTypes.ts';
 
 /** What an alert publishes: the reading, as Live météo shows it, and where. */
@@ -76,6 +76,35 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
 }
 
 const TILE = 256;
+
+/**
+ * Cut a text into lines that fit a width.
+ * @param context - Canvas, with its font set.
+ * @param text - The text.
+ * @param width - Width in pixels.
+ * @returns The lines.
+ */
+function wrap(
+  context: CanvasRenderingContext2D,
+  text: string,
+  width: number,
+): string[] {
+  const lines: string[] = [];
+  let line = '';
+  for (const word of text.split(' ')) {
+    const next = line ? `${line} ${word}` : word;
+    if (line && context.measureText(next).width > width) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+
+const SEA_MODEL = 'Open-Meteo Marine, Best Match';
 
 /**
  * Pixel of a place on the world at a zoom (Web Mercator).
@@ -238,7 +267,20 @@ export async function alertImage(
   const head = 260;
   const rowHeight = 64;
   const mapHeight = 620;
-  const seaHeight = sea ? 150 + seaLines.length * rowHeight : 0;
+  const force = bft(report.reading.gust ?? report.reading.avg);
+  const marks = sea ? seaMarks(sea.total.height, force) : [];
+  const measure = document.createElement('canvas').getContext('2d');
+  if (measure) {
+    measure.font = '28px -apple-system, Helvetica, Arial, sans-serif';
+  }
+  const markLines = marks.map(([title, text]): [string, string[]] => [
+    title,
+    measure ? wrap(measure, text, width - 80) : [text],
+  ]);
+  const marksHeight = sea
+    ? 70 + markLines.reduce((sum, [, lines]) => sum + 44 + lines.length * 38, 0)
+    : 0;
+  const seaHeight = sea ? 150 + seaLines.length * rowHeight + marksHeight : 0;
   const height =
     head + rows.length * rowHeight + seaHeight + 40 + mapHeight + 90;
   const canvas = document.createElement('canvas');
@@ -279,6 +321,9 @@ export async function alertImage(
     context.fillStyle = '#0b3d91';
     context.font = 'bold 36px -apple-system, Helvetica, Arial, sans-serif';
     context.fillText('🌊 État de la mer', 40, y);
+    const titleWidth = context.measureText('🌊 État de la mer ').width;
+    context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
+    context.fillText(`(${SEA_MODEL})`, 40 + titleWidth, y);
     y += 46;
     context.fillStyle = '#0b1220';
     context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
@@ -296,6 +341,24 @@ export async function alertImage(
       context.font = 'bold 34px -apple-system, Helvetica, Arial, sans-serif';
       context.fillText(value, 440, y);
       y += rowHeight;
+    }
+    y += 20;
+    context.fillStyle = '#0b3d91';
+    context.font = 'bold 36px -apple-system, Helvetica, Arial, sans-serif';
+    context.fillText('📘 Repères', 40, y);
+    y += 50;
+    for (const [title, lines] of markLines) {
+      context.fillStyle = '#0b1220';
+      context.font = 'bold 30px -apple-system, Helvetica, Arial, sans-serif';
+      context.fillText(title, 40, y);
+      y += 40;
+      context.fillStyle = '#333c4a';
+      context.font = '28px -apple-system, Helvetica, Arial, sans-serif';
+      for (const line of lines) {
+        context.fillText(line, 40, y);
+        y += 38;
+      }
+      y += 4;
     }
   }
   await drawSnippet(context, report, {
@@ -348,7 +411,16 @@ export async function publishAlert(report: AlertReport): Promise<void> {
     await deliver(image, `alerte-vent-${stamp}.png`, 'image/png');
     return;
   }
-  const text = [...reportRows(report), ...(sea ? seaRows(sea) : [])]
+  const text = [
+    ...reportRows(report),
+    ...(sea ? seaRows(sea) : []),
+    ...(sea
+      ? seaMarks(
+          sea.total.height,
+          bft(report.reading.gust ?? report.reading.avg),
+        )
+      : []),
+  ]
     .map(([label, value]) => `${label} : ${value}`)
     .join('\n');
   await deliver(

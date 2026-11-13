@@ -153,6 +153,54 @@ export function waveOmmTxt(force: number): string {
 }
 
 /**
+ * The Beaufort force whose wind raises such waves in open sea, from the WMO
+ * table (the smallest force whose probable height reaches it).
+ * @param height - Wave height in metres.
+ * @returns The force, 0 for a calm sea.
+ */
+export function beaufortOfWaves(height: number): number {
+  if (height <= 0) return 0;
+  for (let force = 1; force <= 12; force++) {
+    if ((WAVE_OMM[force] ?? 0) >= height) return force;
+  }
+  return 12;
+}
+
+/**
+ * The marks under the sea state of a published alert: where the figures come
+ * from, the Douglas degree of the waves, the Beaufort force that raises them,
+ * and the WMO reference for the force measured.
+ * @param height - Significant wave height of the model, in metres.
+ * @param force - Beaufort force of the alert.
+ * @returns `[title, text]` pairs.
+ */
+export function seaMarks(
+  height: number,
+  force: number,
+): Array<[string, string]> {
+  const degree = douglasOfH(height);
+  const waveForce = beaufortOfWaves(height);
+  return [
+    [
+      'Provenance',
+      'Vagues et houle : Open-Meteo Marine, « Best Match » (le meilleur modèle pour le lieu : Météo-France MFWAM, ECMWF WAM, DWD ou NOAA GFS Wave). Courant : Météo-France SMOC. Eau : Météo-France, température de surface.',
+    ],
+    [
+      'Échelle de Douglas',
+      `vagues de ${fr(height)} m = degré ${degree}, mer ${DOUGLAS[degree]?.[1] ?? ''}`,
+    ],
+    [
+      'En Beaufort',
+      `ces vagues sont celles d’un vent de force ${waveForce} Bf établi en pleine mer (table OMM)`,
+    ],
+    [
+      `OMM pour ${force} Bf`,
+      `${waveOmmTxt(force).replace('théorique OMM : ', '')}. Organisation météorologique mondiale : hauteur probable des vagues au large, pour un vent établi depuis longtemps sur une grande distance ; près des côtes la mer est souvent plus petite, et la houle venue d’ailleurs peut la grossir.`,
+    ],
+  ];
+}
+
+/**
  * Sample sea state of the test mode: 70 % of the WMO wave height.
  * @param force - Beaufort force.
  * @returns The sentence shown in the test bubble.
