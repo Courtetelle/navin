@@ -5,6 +5,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { boatSections, boatSub } from '../../model/boatSheet.ts';
@@ -132,18 +133,10 @@ export function BoatCard({
         </div>
         <BoatPhotos boat={boat} reading={reading} onRefresh={onRefresh} />
         <ButtonRow className="row ck-pub-row" style={{ padding: '0 14px' }}>
-          <Button
-            className="btn big ck-pub"
+          <ShareButton
             data-bpub={boat.id}
-            onClick={(event) => {
-              event.preventDefault();
-              buzz();
-              openListPublish('boats', boat.id);
-            }}
-          >
-            {tr('📤 Partager')}
-            <small>{tr('cette fiche en image ou PDF, avec les photos')}</small>
-          </Button>
+            onShare={(format) => openListPublish('boats', boat.id, format)}
+          />
         </ButtonRow>
         <BoatVersionsButton boat={drawn.versions} onOpen={onVersions} />
         <ButtonRow className="row b-delrow" style={{ padding: '0 14px 14px' }}>

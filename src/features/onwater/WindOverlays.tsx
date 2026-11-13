@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
@@ -100,9 +101,7 @@ export function WindPopup() {
         event.stopPropagation();
         windPopup.value = null;
         const target = event.target instanceof Element ? event.target : null;
-        if (target?.closest('.wp-publish')) {
-          if (content.report) void publishAlert(content.report);
-        } else if (target?.closest('.wp-stop')) {
+        if (target?.closest('.wp-stop')) {
           content.onStop?.();
         } else if (target?.closest('.wp-live')) {
           content.onLive?.();
@@ -138,9 +137,14 @@ export function WindPopup() {
           </Button>
         ) : null}
         {content.report ? (
-          <Button className="btn wp-publish" noUiEdit>
-            {translate('📤 Partager')}
-          </Button>
+          <div className="wp-publish">
+            <ShareButton
+              onShare={(format) => {
+                windPopup.value = null;
+                if (content.report) void publishAlert(content.report, format);
+              }}
+            />
+          </div>
         ) : null}
         {content.closeTxt ? (
           <div className="wp-close">{translate(content.closeTxt)}</div>

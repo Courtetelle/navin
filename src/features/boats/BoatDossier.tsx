@@ -6,6 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { useReadingMarquee } from '../../components/shared/useReadingMarquee.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -21,9 +22,9 @@ import { BoatFieldsEditor } from '../onwater/index.ts';
 
 import { BoatVersions, BoatVersionsButton } from './BoatVersions.tsx';
 import { DocumentKind } from './DocumentKind.tsx';
-import { DossierPublish } from './DossierPublish.tsx';
 import { saveBoatInfo } from './boatActions.ts';
 import { BOAT_DOC_KINDS, boatDocs } from './boatDocs.ts';
+import { printBoatDossier, shareBoatDossier } from './dossierOutput.tsx';
 
 /** Props of {@link BoatDossier}. */
 interface BoatDossierProps {
@@ -107,7 +108,6 @@ function DossierSheet({
   useNavEdit(reading, () => setReading(false));
   const sheet = useRef<HTMLDivElement>(null);
   useReadingMarquee(reading, sheet);
-  const [publishing, setPublishing] = useState(false);
   const [versioned] = useState(() => boat);
   const name = boat.info.boat || 'Bateau sans nom';
   const hasDocs = boatDocs(boat).length > 0;
@@ -189,21 +189,14 @@ function DossierSheet({
       )}
       <h2 className="sub-h">{tr('Envoyer la fiche')}</h2>
       <ButtonRow className="row ck-pub-row">
-        <Button
-          className="btn big ck-pub"
+        <ShareButton
           id="dosPub"
-          onClick={() => {
-            buzz();
-            setPublishing(true);
+          onShare={(format) => {
+            if (format === 'pdf') void printBoatDossier(boat);
+            else void shareBoatDossier(boat);
           }}
-        >
-          {tr('📤 Partager')}
-          <small>{tr('fiche et documents, image ou PDF')}</small>
-        </Button>
+        />
       </ButtonRow>
-      {publishing ? (
-        <DossierPublish boat={boat} onClose={() => setPublishing(false)} />
-      ) : null}
     </>
   );
 }

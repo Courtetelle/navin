@@ -5,6 +5,8 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { textOf } from '../../lib/format.ts';
@@ -36,7 +38,7 @@ interface CrewPickScreenProps {
 export function CrewPickScreen({ lead }: CrewPickScreenProps) {
   useSignals();
   const tr = useTr();
-  const [publishing, setPublishing] = useState(false);
+  const [publishing, setPublishing] = useState<ShareFormat | null>(null);
   const cruise = state.data.cruise.value;
   if (!cruise) return null;
   const sorted = membersByNav();
@@ -94,20 +96,12 @@ export function CrewPickScreen({ lead }: CrewPickScreenProps) {
       </ButtonRow>
       {cruise.crew.length > 0 ? (
         <ButtonRow className="row ck-pub-row">
-          <Button
-            className="btn big ck-pub"
-            id="crewPub"
-            onClick={() => {
-              buzz();
-              setPublishing(true);
-            }}
-          >
-            {tr('📤 Partager')}
-            <small>{tr('liste d’équipage, image ou PDF')}</small>
-          </Button>
+          <ShareButton id="crewPub" onShare={setPublishing} />
         </ButtonRow>
       ) : null}
-      {publishing ? <CrewPublish onClose={() => setPublishing(false)} /> : null}
+      {publishing ? (
+        <CrewPublish format={publishing} onClose={() => setPublishing(null)} />
+      ) : null}
     </>
   );
 }

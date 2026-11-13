@@ -2,6 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { openListPublish } from '../../features/publish/index.ts';
 import { sosDeleteId } from '../../features/safety/safetyState.ts';
 import { toastThenRedraw } from '../../features/safety/toastThenRedraw.ts';
@@ -36,16 +37,11 @@ export function EndedLog({ log, open, onRedraw }: EndedLogProps) {
       <div style={{ padding: '0 14px 12px' }}>
         <SosEvents log={log} />
         <ButtonRow className="row c2">
-          <Button
-            className="btn ck-pub"
+          <ShareButton
+            small
             data-share={log.id}
-            onClick={() => {
-              buzz();
-              openListPublish('soslogs', log.id);
-            }}
-          >
-            {tr('📤 Partager')}
-          </Button>
+            onShare={(format) => openListPublish('soslogs', log.id, format)}
+          />
           <Button
             className="btn danger"
             data-del={log.id}

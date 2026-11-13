@@ -1,3 +1,4 @@
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import {
   clearItem,
   saveObservation,
@@ -60,9 +61,12 @@ export function addPhotoAndRedraw(list: string, redraw: () => void): void {
   takePhoto(list, () => redraw());
 }
 
-/** Open the window publishing the PréP + check-in report. */
-export function publishChecklist(): void {
-  prepPublishDialog();
+/**
+ * Open the window sharing the PréP + check-in report.
+ * @param format - The format chosen with « Partager ».
+ */
+export function publishChecklist(format: ShareFormat): void {
+  prepPublishDialog(format);
 }
 
 /**

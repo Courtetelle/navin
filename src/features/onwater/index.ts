@@ -55,6 +55,7 @@ export {
   CREW_LIST_COLS,
   crewListCols,
   crewListHead,
+  crewListPng,
   crewRole,
   printCrewList,
   shareCrewList,

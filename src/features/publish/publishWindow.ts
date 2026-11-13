@@ -2,11 +2,13 @@ import { createElement } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
+
 import { PublishHost } from './PublishHost.tsx';
 import { keepOnly } from './listChoiceActions.ts';
 import { listItems } from './listKinds.ts';
 import { prepareList } from './listPublishState.ts';
-import { openKind } from './publishWindowState.ts';
+import { openFormat, openKind } from './publishWindowState.ts';
 import type { ListKind } from './types.ts';
 
 let host: Root | null = null;
@@ -16,8 +18,13 @@ let host: Root | null = null;
  * page: the window is a portal on `<body>`.
  * @param kind - List kind.
  * @param only - Id of the only element to keep checked (Partager from a sheet).
+ * @param format - The format chosen with « Partager ».
  */
-export function openListPublish(kind: ListKind, only?: string): void {
+export function openListPublish(
+  kind: ListKind,
+  only?: string,
+  format: ShareFormat = 'image',
+): void {
   if (only) {
     const ids = listItems(kind).map((item) => item.id);
     if (ids.includes(only)) {
@@ -32,5 +39,6 @@ export function openListPublish(kind: ListKind, only?: string): void {
   // its state whatever happens to the screen below it.
   host ??= createRoot(document.createElement('div'));
   host.render(createElement(PublishHost));
+  openFormat.value = format;
   openKind.value = kind;
 }

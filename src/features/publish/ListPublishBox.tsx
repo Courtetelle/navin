@@ -3,6 +3,7 @@ import type { MouseEvent, ReactElement } from 'react';
 import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { SendButton } from '../../components/shared/ShareButton.tsx';
 import { buzz } from '../../lib/dom.ts';
 import { toast } from '../../state/index.ts';
 
@@ -20,7 +21,7 @@ import { hasExtraSends, listItems } from './listKinds.ts';
 import { listChoice } from './listPublishState.ts';
 import { chosenItems, sectionKeys } from './listSelection.ts';
 import { printList } from './printList.tsx';
-import { closeListPublish } from './publishWindowState.ts';
+import { closeListPublish, openFormat } from './publishWindowState.ts';
 import type { ListKind } from './types.ts';
 
 /** Props of {@link ListPublishBox}. */
@@ -41,6 +42,7 @@ export function ListPublishBox({ kind }: ListPublishBoxProps): ReactElement {
   const [imageBusy, setImageBusy] = useState(false);
   const items = listItems(kind);
   const choice = listChoice(kind);
+  const format = openFormat.value;
   const severalSections = sectionKeys(items).length > 1;
 
   const publish = (send: (list: ReturnType<typeof chosenItems>) => void) => {
@@ -56,40 +58,31 @@ export function ListPublishBox({ kind }: ListPublishBoxProps): ReactElement {
       open
       onClick={buzzOnButton}
     >
-      <summary>🖨 Imprimer ou envoyer la liste</summary>
+      <summary>
+        {format === 'pdf' ? '🖨 PDF de la liste' : '💬 Image de la liste'}
+      </summary>
       <div className="lx-in">
         <ShareThemeNote />
         <PhotoOptions kind={kind} items={items} choice={choice} />
-        <div className="row c2">
-          <Button
-            type="button"
-            className="btn big"
-            data-lximg="1"
+        <div className="row">
+          <SendButton
+            format={format}
+            data-lxsend={format}
             disabled={imageBusy}
             onClick={() => {
               publish((list) => {
+                if (format === 'pdf') {
+                  closeListPublish();
+                  void printList(kind, list);
+                  return;
+                }
                 setImageBusy(true);
                 void imageList(kind, list).finally(() => {
                   setImageBusy(false);
                 });
               });
             }}
-          >
-            📸 Image<small>écran, WhatsApp…</small>
-          </Button>
-          <Button
-            type="button"
-            className="btn big"
-            data-lxpdf="1"
-            onClick={() => {
-              publish((list) => {
-                closeListPublish();
-                void printList(kind, list);
-              });
-            }}
-          >
-            🖨 PDF<small>A4, imprimante</small>
-          </Button>
+          />
         </div>
         <p className="help lx-sec-h lx-opt-h">Réglages de l’envoi</p>
         {severalSections ? <TemplateChoice kind={kind} /> : null}

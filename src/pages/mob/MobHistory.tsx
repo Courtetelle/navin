@@ -1,20 +1,20 @@
 import { untracked } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 
-import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { TzTime } from '../../components/shared/TzTime.tsx';
 import type { MobLogRecord } from '../../features/safety/mobLog.ts';
 import { mobEventPositions } from '../../features/safety/mobLog.ts';
-import { mobLogText } from '../../features/safety/mobLogText.ts';
 import { mobKind } from '../../features/safety/mobProcedures.ts';
 import { useTr } from '../../i18n/useTr.ts';
-import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import { keyedItems } from '../../lib/keyedItems.ts';
 import type { LogEvent } from '../../model/types.ts';
-import { deliver, mobLogs, state } from '../../state/index.ts';
+import { mobLogs } from '../../state/index.ts';
+
+import { shareMobLog } from './mobShare.ts';
 
 /** Props of {@link MobHistory}. */
 interface MobHistoryProps {
@@ -37,14 +37,10 @@ export function MobHistory({ log }: MobHistoryProps) {
           <h2 className="sub-h">{tr('Log de l’incident')}</h2>
           <EventList log={log} />
           <ButtonRow className="row ck-pub-row">
-            <Button
-              className="btn big ck-pub"
+            <ShareButton
               data-mshare={log.id}
-              onClick={() => share(log)}
-            >
-              {tr('📤 Partager')}
-              <small>{tr('texte du log')}</small>
-            </Button>
+              onShare={(format) => shareMobLog(log, format)}
+            />
           </ButtonRow>
         </>
       ) : null}
@@ -61,13 +57,11 @@ export function MobHistory({ log }: MobHistoryProps) {
               </h3>
               <EventList log={item} />
               <ButtonRow>
-                <Button
-                  className="btn ck-pub"
+                <ShareButton
+                  small
                   data-mshare={item.id}
-                  onClick={() => share(item)}
-                >
-                  {tr('📤 Partager ce log')}
-                </Button>
+                  onShare={(format) => shareMobLog(item, format)}
+                />
               </ButtonRow>
             </div>
           ))}
@@ -84,16 +78,6 @@ function pastLogs(): MobLogRecord[] {
     if (log.kind === kind && log.end) past.unshift(log);
   }
   return past;
-}
-
-function share(log: MobLogRecord): void {
-  buzz();
-  const start = log.start.slice(0, 16).replaceAll(/[:T]/g, '-');
-  void deliver(
-    mobLogText(log, state.data.cruise.value?.info.name),
-    `log-homme-a-la-mer-${start}.txt`,
-    'text/plain',
-  );
 }
 
 function EventList({ log }: { log: MobLogRecord }) {

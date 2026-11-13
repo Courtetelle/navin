@@ -6,6 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { useIntroLead } from '../../components/shared/introLead.ts';
 import { useReadingMarquee } from '../../components/shared/useReadingMarquee.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -182,23 +183,15 @@ export function Fiche({ id }: FicheProps) {
           id="fImgRow"
           hidden={!record.recordId}
         >
-          <Button
-            className="btn big ck-pub no-navact"
+          <ShareButton
+            className="no-navact"
             id="fImg"
-            onClick={() => {
-              buzz();
+            onShare={(format) => {
               record.persist();
               const savedId = record.latestId();
-              if (savedId) openListPublish('people', savedId);
+              if (savedId) openListPublish('people', savedId, format);
             }}
-          >
-            {tr('📤 Partager')}
-            <small>
-              {tr(
-                'la fiche en image ou PDF, pour un dernier contrôle par la personne',
-              )}
-            </small>
-          </Button>
+          />
         </ButtonRow>
         {locked ? (
           <HelpText className="fiche-lock">{`🔒 ${memberLockMsg(id)}`}</HelpText>

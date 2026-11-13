@@ -1,9 +1,7 @@
 import type { ReactElement } from 'react';
 
-import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { useTr } from '../../i18n/useTr.ts';
-import { buzz } from '../../lib/dom.ts';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 
 import { listHasContent } from './listKinds.ts';
 import { openListPublish } from './publishWindow.ts';
@@ -24,21 +22,13 @@ export interface ListPublishRowProps {
 export function ListPublishRow({
   kind,
 }: ListPublishRowProps): ReactElement | null {
-  const tr = useTr();
   if (!listHasContent(kind)) return null;
   return (
     <ButtonRow className="row ck-pub-row lx-pub no-print">
-      <Button
-        type="button"
-        className="btn big ck-pub"
-        onClick={() => {
-          buzz();
-          openListPublish(kind);
-        }}
-      >
-        {tr('📤 Partager')}
-        <small>{tr('image ou PDF')}</small>
-      </Button>
+      <ShareButton
+        data-lxpub={kind}
+        onShare={(format) => openListPublish(kind, undefined, format)}
+      />
     </ButtonRow>
   );
 }

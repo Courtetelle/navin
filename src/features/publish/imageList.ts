@@ -120,7 +120,12 @@ async function listPhotos(list: readonly PublishItem[]): Promise<CardsPhoto[]> {
   return photos;
 }
 
-async function sendFiles(files: File[], title: string): Promise<void> {
+/**
+ * Hand several pictures over at once (one share sheet when the device can).
+ * @param files - The pictures.
+ * @param title - Title of the share.
+ */
+export async function sendFiles(files: File[], title: string): Promise<void> {
   const downloads = await claudeDownloads();
   if (!downloads && files.length > 1 && navigator.canShare?.({ files })) {
     try {

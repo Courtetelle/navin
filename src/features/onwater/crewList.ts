@@ -120,7 +120,11 @@ export async function shareCrewList(
   setBusy?.(false);
 }
 
-async function crewListPng(): Promise<Blob> {
+/**
+ * The crew list of the outing as a PNG.
+ * @returns The image.
+ */
+export async function crewListPng(): Promise<Blob> {
   const head = crewListHead();
   const columns = crewListCols();
   const withRole = columns.some(([key]) => key === 'fonction');

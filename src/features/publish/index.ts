@@ -81,6 +81,8 @@ export type { PubModalProps } from './PubModal.tsx';
 export { listTheme } from './listPublishState.ts';
 export { openListPublish } from './publishWindow.ts';
 export { LX_THEMES } from './themes.ts';
+export { printImage, shareCards } from './cardsShare.tsx';
+export { sendFiles } from './imageList.ts';
 export { setShareTheme, shareTheme } from './shareTheme.ts';
 export { ShareThemeNote, ShareThemePicker } from './ShareTheme.tsx';
 export type {

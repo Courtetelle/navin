@@ -2,9 +2,9 @@ import { untracked } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
-import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import {
   ListPublishRow,
   openListPublish,
@@ -74,17 +74,12 @@ function SosLogsContent({ openLog, onRedraw }: SosLogsContentProps) {
           <ActiveHeading log={active} />
           <SosEvents log={active} />
           <ButtonRow className="row ck-pub-row">
-            <Button
-              className="btn big ck-pub"
+            <ShareButton
               data-share={active.id}
-              onClick={() => {
-                buzz();
-                openListPublish('soslogs', active.id);
-              }}
-            >
-              {tr('📤 Partager')}
-              <small>{tr('image, PDF ou texte')}</small>
-            </Button>
+              onShare={(format) =>
+                openListPublish('soslogs', active.id, format)
+              }
+            />
           </ButtonRow>
           <SosEndButton onEnded={() => onRedraw()} />
         </div>

@@ -162,6 +162,15 @@ export function reportKey(): string {
 }
 
 /**
+ * The PréP + check-in report as a PNG, in the layout of Réglages.
+ * @returns The image, null without an open outing.
+ */
+export async function prepReportPng(): Promise<Blob | null> {
+  const document = await prepReportDocument(reportPhotos());
+  return document ? cardsPng({ ...document, theme: reportTheme() }) : null;
+}
+
+/**
  * Send the report as an image (legacy `prepReportShare`).
  * @returns Resolves when delivered.
  */

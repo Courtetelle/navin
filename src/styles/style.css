@@ -9222,15 +9222,10 @@ body.has-navtop #view > h1.live-title,
   width: 100%;
   margin-top: 12px;
 }
-/* « Partager » under Live météo: white, so the two do not look alike */
-.wind-pop .wp-publish {
-  background: #fff;
-  color: #0b1220;
-  font-weight: 800;
-}
-:root[data-theme='night'] .wind-pop .wp-publish {
-  background: #1a0000;
-  color: #ff5a5a;
+/* « Partager » under Live météo: the one share button of the app. */
+.wind-pop .wp-publish .btn {
+  width: 100%;
+  margin: 0;
 }
 .live-sea h2 {
   margin: 16px 0 4px;
@@ -10957,6 +10952,14 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
     min-height: 40px;
     font-size: 16px;
   }
+  .wind-pop .wp-publish .btn {
+    min-height: 40px;
+    font-size: 16px;
+  }
+  .wind-pop .wp-publish .share-ic {
+    width: 28px;
+    height: 28px;
+  }
   .wind-pop .wp-big {
     font-size: 24px;
   }
@@ -10973,4 +10976,83 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
     font-size: 12px;
     margin-top: 4px;
   }
+}
+
+/* The one « 📤 Partager » button: a touch splits it into 💬 image and 🖨 PDF,
+   icons only. */
+.share-pick {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.share-pick-small {
+  display: inline-flex;
+  width: auto;
+}
+.share-pick .share-fmt {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+.share-pick-small .share-fmt {
+  min-width: 64px;
+}
+.share-ic {
+  width: 38px;
+  height: 38px;
+  display: block;
+}
+.share-pick-small .share-ic {
+  width: 28px;
+  height: 28px;
+}
+.share-fmt-image .share-ic-fill {
+  fill: #25d366;
+}
+.share-fmt-image .share-ic-dot {
+  fill: #fff;
+}
+.share-fmt-pdf .share-ic-fill {
+  fill: #e8edf3;
+}
+.share-fmt-pdf .share-ic-paper {
+  fill: #fff;
+  stroke: #e8edf3;
+  stroke-width: 2;
+}
+.share-fmt-pdf .share-ic-line {
+  stroke: #2f3337;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.share-fmt-pdf .share-ic-dot {
+  fill: #25d366;
+}
+.btn.share-send {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.btn.share-send .share-ic {
+  width: 32px;
+  height: 32px;
+}
+/* At night everything stays red, the bubble too. */
+:root[data-theme='night'] .share-fmt-image .share-ic-fill,
+:root[data-theme='night'] .share-fmt-pdf .share-ic-fill {
+  fill: #ff4040;
+}
+:root[data-theme='night'] .share-fmt-image .share-ic-dot,
+:root[data-theme='night'] .share-fmt-pdf .share-ic-paper {
+  fill: #200000;
+  stroke: #ff4040;
+}
+:root[data-theme='night'] .share-fmt-pdf .share-ic-line {
+  stroke: #ff4040;
+}
+:root[data-theme='night'] .share-fmt-pdf .share-ic-dot {
+  fill: #200000;
 }

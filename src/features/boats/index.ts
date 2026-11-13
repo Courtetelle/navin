@@ -65,6 +65,7 @@ export {
   cachedPrepReport,
   prepReportCache,
   prepReportDocument,
+  prepReportPng,
   prepReportShare,
 } from './prepReportData.ts';
 export type { CachedPrepReport, PrepReportDocument } from './prepReportData.ts';

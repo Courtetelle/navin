@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { ArmedButton } from '../../components/shared/ArmedButton.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { checklistUi } from '../../features/checklists/checklistUi.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -120,17 +121,7 @@ export function ChecklistScreen({
       ) : null}
       {list === 'dep' ? (
         <ButtonRow className="row ck-pub-row">
-          <Button
-            className="btn big ck-pub"
-            id="prepPub"
-            onClick={() => {
-              buzz();
-              publishChecklist();
-            }}
-          >
-            {tr('📤 Partager')}
-            <small>{tr('rapport PréP + check-in, image ou PDF')}</small>
-          </Button>
+          <ShareButton id="prepPub" onShare={publishChecklist} />
         </ButtonRow>
       ) : null}
       {inPrep ? null : (

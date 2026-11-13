@@ -3,6 +3,8 @@ import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { MasterCheck } from '../../components/shared/MasterCheck.tsx';
+import { SendButton } from '../../components/shared/ShareButton.tsx';
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { updateSettings } from '../../state/index.ts';
 import {
   CREW_LIST_COLS,
@@ -14,6 +16,8 @@ import { PubModal } from '../publish/index.ts';
 
 /** Props of {@link CrewPublish}. */
 interface CrewPublishProps {
+  /** The format chosen with « Partager ». */
+  format: ShareFormat;
   /** The window closes. */
   onClose: () => void;
 }
@@ -21,10 +25,10 @@ interface CrewPublishProps {
 /**
  * The window that publishes the crew list of the outing as an image or a PDF,
  * with the information to include (legacy `crewPubOpen`, lake.js:1990).
- * @param props - Close action.
+ * @param props - Format and close action.
  * @returns The window.
  */
-export function CrewPublish({ onClose }: CrewPublishProps) {
+export function CrewPublish({ format, onClose }: CrewPublishProps) {
   useSignals();
   const [busy, setBusy] = useState(false);
   const selected: string[] = [];
@@ -41,27 +45,20 @@ export function CrewPublish({ onClose }: CrewPublishProps) {
   return (
     <PubModal sub="Liste d’équipage" onClose={onClose}>
       <div className="cp-in">
-        <div className="row c2">
-          <Button
-            type="button"
-            className="btn big"
-            data-cp="img"
+        <div className="row">
+          <SendButton
+            format={format}
+            data-cp={format === 'pdf' ? 'pdf' : 'img'}
             disabled={busy}
-            onClick={() => void shareCrewList(setBusy)}
-          >
-            📸 Image<small>écran, WhatsApp…</small>
-          </Button>
-          <Button
-            type="button"
-            className="btn big"
-            data-cp="pdf"
             onClick={() => {
-              onClose();
-              printCrewList();
+              if (format === 'pdf') {
+                onClose();
+                printCrewList();
+              } else {
+                void shareCrewList(setBusy);
+              }
             }}
-          >
-            🖨 PDF<small>A4, imprimante</small>
-          </Button>
+          />
         </div>
         <p className="help lx-sec-h lx-opt-h">Réglages de l’envoi</p>
         <p className="help lx-sec-h">

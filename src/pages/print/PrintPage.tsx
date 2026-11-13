@@ -5,13 +5,16 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { MasterCheck } from '../../components/shared/MasterCheck.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { useIntroLead } from '../../components/shared/introLead.ts';
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { prepReportCache } from '../../features/boats/index.ts';
 import { printBook } from '../../features/data/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { isLake, state, toast } from '../../state/index.ts';
 
+import { shareLogbookImages } from './logbookImages.ts';
 import type { PrintPageChoice } from './printPages.ts';
 import {
   defaultSelection,
@@ -23,7 +26,7 @@ import {
 
 const TITLE = 'Partager le livre de bord';
 const HELP =
-  'Cochez les pages, puis « 📤 Partager ». Dans la fenêtre qui s’ouvre, choisissez « Enregistrer en PDF » (ou une imprimante).';
+  'Cochez les pages, puis « 📤 Partager » : 💬 en images (journées, équipage, PréP) ou 🖨 en PDF A4 (toutes les pages). Pour le PDF, choisissez « Enregistrer en PDF » (ou une imprimante) dans la fenêtre qui s’ouvre.';
 
 /**
  * Screen `print` (legacy `VIEWS.print`): choose the pages of the log book, then
@@ -52,15 +55,16 @@ export function PrintPage() {
     setPrintSelection(next);
   };
   const checked = pages.filter((page) => selected.has(page.id)).length;
-  const publish = () => {
-    buzz();
+  const publish = (format: ShareFormat) => {
     if (selected.size === 0) {
       toast('Choisissez au moins une page');
       return;
     }
-    printBook(
-      pages.filter((page) => selected.has(page.id)).map((page) => page.id),
-    );
+    const ids = pages
+      .filter((page) => selected.has(page.id))
+      .map((page) => page.id);
+    if (format === 'pdf') printBook(ids);
+    else void shareLogbookImages(ids);
   };
   return (
     <>
@@ -118,14 +122,7 @@ export function PrintPage() {
         ))}
       </div>
       <ButtonRow className="save-bar row ck-pub-row">
-        <Button className="btn big ck-pub" id="doPrint" onClick={publish}>
-          {tr('📤 Partager')}
-          <small>
-            {tr(
-              `PDF A4 · ${selected.size} page${selected.size > 1 ? 's' : ''}`,
-            )}
-          </small>
-        </Button>
+        <ShareButton id="doPrint" onShare={publish} />
       </ButtonRow>
     </>
   );

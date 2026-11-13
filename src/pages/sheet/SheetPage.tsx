@@ -4,7 +4,9 @@ import { useLayoutEffect, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { useIntroLead } from '../../components/shared/introLead.ts';
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { LakeSheet } from '../../features/boats/LakeSheet.tsx';
 import { hasTrace } from '../../features/boats/outing.ts';
 import {
@@ -21,16 +23,10 @@ import { sheetPng } from '../../features/boats/sheetPng.ts';
 import { printBook } from '../../features/data/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { dayKey, textOf } from '../../lib/format.ts';
+import { dayKey } from '../../lib/format.ts';
 import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
-import { deliver, state, toast, updateSettings } from '../../state/index.ts';
-
-const FORMATS: ReadonlyArray<readonly [string, string]> = [
-  ['img', '📸 Image'],
-  ['pdf', '🖨 PDF'],
-  ['both', '📸 + 🖨 Les deux'],
-];
+import { deliver, state, toast } from '../../state/index.ts';
 
 /**
  * Screen `sheet` (legacy `VIEWS.sheet`): the lake day sheet, the parts to send
@@ -57,12 +53,9 @@ export function SheetPage({ arg }: PageProps) {
   const sheet = pickSheet(buildSheetData(key), key);
   const parts = sheetParts();
   const trace = hasTrace(key);
-  const format = textOf(state.preferences.settings.value.sheetFmt) || 'img';
-  const print = () => printBook([`day:${key}`]);
-  const send = async () => {
-    buzz();
+  const send = async (format: ShareFormat) => {
     if (format === 'pdf') {
-      print();
+      printBook([`day:${key}`]);
       return;
     }
     setSending(true);
@@ -75,11 +68,7 @@ export function SheetPage({ arg }: PageProps) {
       toast('Image impossible : faites une capture d’écran');
     }
     setSending(false);
-    if (format === 'both') print();
   };
-  let sendLabel = '📤 Envoyer l’image (WhatsApp…)';
-  if (format === 'pdf') sendLabel = '🖨 Imprimer ou enregistrer en PDF';
-  if (format === 'both') sendLabel = '📤 Envoyer l’image, puis le PDF';
   return (
     <>
       <HelpText introLead={lead} style={{ marginTop: 0 }}>
@@ -131,39 +120,17 @@ export function SheetPage({ arg }: PageProps) {
           {tr('✎ Compléter la fiche')}
         </Button>
       </ButtonRow>
-      <h3 className="sub-h">{tr('Format')}</h3>
-      <ButtonRow className="row c3">
-        {FORMATS.map(([id, label]) => (
-          <Button
-            key={id}
-            className={format === id ? 'btn on' : 'btn'}
-            data-fmt={id}
-            onClick={() => {
-              buzz();
-              setFresh(false);
-              updateSettings((settings) => {
-                settings.sheetFmt = id;
-              });
-            }}
-          >
-            {tr(label)}
-          </Button>
-        ))}
-      </ButtonRow>
-      <ButtonRow>
-        <Button
-          className="btn big primary"
+      <ButtonRow className="row ck-pub-row">
+        <ShareButton
           id="shareImg"
           disabled={sending}
-          onClick={() => void send()}
-        >
-          {tr(sendLabel)}
-        </Button>
+          onShare={(format) => void send(format)}
+        />
       </ButtonRow>
       <HelpText>
-        Image : elle s’ouvre dans le menu de partage, choisissez WhatsApp puis
-        le groupe. PDF : dans la fenêtre d’impression, « Enregistrer en PDF » ou
-        partager. Une simple capture d’écran de la fiche marche aussi.
+        💬 Image : elle s’ouvre dans le menu de partage, choisissez WhatsApp
+        puis le groupe. 🖨 PDF : dans la fenêtre d’impression, « Enregistrer en
+        PDF » ou partager. Une simple capture d’écran de la fiche marche aussi.
       </HelpText>
     </>
   );

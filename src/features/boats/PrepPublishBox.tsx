@@ -1,6 +1,8 @@
 import { useSignals } from '@preact/signals-react/runtime';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { SendButton } from '../../components/shared/ShareButton.tsx';
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { buzz } from '../../lib/dom.ts';
 import { updateSettings } from '../../state/index.ts';
 import { ShareThemeNote } from '../publish/index.ts';
@@ -14,6 +16,8 @@ import { prepReportPrint } from './prepReportPrint.tsx';
 
 /** Props of {@link PrepPublishBox}. */
 interface PrepPublishBoxProps {
+  /** The format chosen with « Partager ». */
+  format: ShareFormat;
   /** Closes the window. */
   onClose: () => void;
 }
@@ -23,7 +27,7 @@ interface PrepPublishBoxProps {
  * @param props - Way out.
  * @returns The box.
  */
-export function PrepPublishBox({ onClose }: PrepPublishBoxProps) {
+export function PrepPublishBox({ format, onClose }: PrepPublishBoxProps) {
   useSignals();
   const photos = reportPhotos();
   return (
@@ -44,31 +48,17 @@ export function PrepPublishBox({ onClose }: PrepPublishBoxProps) {
       >
         <span className="box">{photos ? '✔' : ''}</span>Inclure les photos
       </Button>
-      <div className="row c2">
-        <Button
-          type="button"
-          className="btn big"
-          data-pubimg="1"
+      <div className="row">
+        <SendButton
+          format={format}
+          data-pubsend={format}
           onClick={() => {
             buzz();
             onClose();
-            void prepReportShare();
+            if (format === 'pdf') void prepReportPrint();
+            else void prepReportShare();
           }}
-        >
-          📸 Image<small>écran, WhatsApp…</small>
-        </Button>
-        <Button
-          type="button"
-          className="btn big"
-          data-pubpdf="1"
-          onClick={() => {
-            buzz();
-            onClose();
-            void prepReportPrint();
-          }}
-        >
-          🖨 PDF<small>A4, imprimante</small>
-        </Button>
+        />
       </div>
       <Button
         type="button"

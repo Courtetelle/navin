@@ -1,8 +1,11 @@
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import { bft, compassPoint, windTxt } from '../../lib/wind.ts';
 import { inInland } from '../../model/contacts.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 import { deliver, state } from '../../state/index.ts';
+import type { CardsDocument, CardsSection } from '../publish/index.ts';
+import { cardsPng, printImage } from '../publish/index.ts';
 
 import { onLake } from './onLake.ts';
 import type { SeaNow } from './seaNow.ts';
@@ -10,14 +13,7 @@ import { seaNow, seaRows } from './seaNow.ts';
 import type { WindPoint } from './stationHistory.ts';
 import { HISTORY_MS, stationHistory, windTrend } from './stationHistory.ts';
 import { chartPaths, trendText } from './trendText.ts';
-import {
-  SEA_MODEL,
-  flashColor,
-  flashInk,
-  seaMarks,
-  seaTxt,
-  windAlertConfig,
-} from './windLogic.ts';
+import { SEA_MODEL, seaMarks, seaTxt, windAlertConfig } from './windLogic.ts';
 import type { WindReading } from './windTypes.ts';
 
 /** What an alert publishes: the reading, as Live météo shows it, and where. */
@@ -86,33 +82,6 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
 }
 
 const TILE = 256;
-
-/**
- * Cut a text into lines that fit a width.
- * @param context - Canvas, with its font set.
- * @param text - The text.
- * @param width - Width in pixels.
- * @returns The lines.
- */
-function wrap(
-  context: CanvasRenderingContext2D,
-  text: string,
-  width: number,
-): string[] {
-  const lines: string[] = [];
-  let line = '';
-  for (const word of text.split(' ')) {
-    const next = line ? `${line} ${word}` : word;
-    if (line && context.measureText(next).width > width) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = next;
-    }
-  }
-  if (line) lines.push(line);
-  return lines;
-}
 
 /**
  * Pixel of a place on the world at a zoom (Web Mercator).
@@ -249,47 +218,49 @@ async function drawSnippet(
     dot(box.x + at.x - left, box.y + at.y - top, '#1677ff', 'Bateau');
   }
   dot(box.x + box.width / 2, box.y + box.height / 2, '#d0021b', reading.name);
+  // The credit is the caption of the picture.
   context.restore();
-  context.font = '22px -apple-system, Helvetica, Arial, sans-serif';
-  context.fillStyle = '#333';
-  context.fillText(
-    '© OpenStreetMap France',
-    box.x + 12,
-    box.y + box.height - 12,
-  );
 }
 
 const font = (size: number, bold = false) =>
   `${bold ? 'bold ' : ''}${size}px -apple-system, Helvetica, Arial, sans-serif`;
 
-/** Height of the trend section of the image. */
-const TREND_HEIGHT = 420;
+/** Size of the trend chart picture. */
+const CHART = { width: 1000, height: 330 };
+/** Size of the map picture. */
+const MAP = { width: 1000, height: 620 };
 
 /**
- * Draw the wind of the last hours, as Live météo shows it: one sentence,
- * the mean wind as a line, the gusts as a light band above it.
- * @param context - Canvas of the image.
- * @param points - Points, oldest first.
- * @param top - Top of the section.
+ * A canvas of a size, white.
+ * @param size - Width and height.
+ * @returns The canvas and its context, null when the device has none.
  */
-function drawTrend(
-  context: CanvasRenderingContext2D,
-  points: readonly WindPoint[],
-  top: number,
-): void {
+function blankCanvas(size: { width: number; height: number }): {
+  canvas: HTMLCanvasElement;
+  context: CanvasRenderingContext2D;
+} | null {
+  const canvas = document.createElement('canvas');
+  canvas.width = size.width;
+  canvas.height = size.height;
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+  context.fillStyle = '#fff';
+  context.fillRect(0, 0, size.width, size.height);
+  return { canvas, context };
+}
+
+/**
+ * The wind of the last hours as a picture, as Live météo draws it: the mean
+ * wind as a line, the gusts as a light band above it, a scale and a key.
+ * @param points - Points, oldest first.
+ * @returns A data URL, null without a canvas.
+ */
+export function trendPicture(points: readonly WindPoint[]): string | null {
+  const blank = blankCanvas(CHART);
+  if (!blank) return null;
+  const { canvas, context } = blank;
   const paths = chartPaths(points);
-  let y = top + 20;
-  context.fillStyle = '#0b3d91';
-  context.font = font(36, true);
-  context.fillText('📈 Tendance du vent', 40, y);
-  const titleWidth = context.measureText('📈 Tendance du vent ').width;
-  context.font = font(30);
-  context.fillText(`(${HISTORY_MS / 3_600_000} h)`, 40 + titleWidth, y);
-  y += 46;
-  context.fillStyle = '#0b1220';
-  context.font = font(30);
-  context.fillText(trendText(windTrend(points)), 40, y);
-  const box = { x: 120, y: y + 24, width: 920, height: 220 };
+  const box = { x: 90, y: 16, width: CHART.width - 110, height: 220 };
   context.fillStyle = '#f2f5f9';
   context.fillRect(box.x, box.y, box.width, box.height);
   const first = points[0]?.t ?? 0;
@@ -302,9 +273,9 @@ function drawTrend(
     context.beginPath();
     for (const [index, point] of withGust.entries()) {
       const x = px(point.t);
-      const yy = py(point.gust ?? point.avg);
-      if (index) context.lineTo(x, yy);
-      else context.moveTo(x, yy);
+      const y = py(point.gust ?? point.avg);
+      if (index) context.lineTo(x, y);
+      else context.moveTo(x, y);
     }
     for (const point of withGust.toReversed()) {
       context.lineTo(px(point.t), py(point.avg));
@@ -324,8 +295,8 @@ function drawTrend(
   context.stroke();
   context.fillStyle = '#5b6575';
   context.font = font(24);
-  context.fillText(`${Math.round(paths.top)} nd`, 40, box.y + 22);
-  context.fillText('0 nd', 40, box.y + box.height);
+  context.fillText(`${Math.round(paths.top)} nd`, 10, box.y + 22);
+  context.fillText('0 nd', 10, box.y + box.height);
   const axis = box.y + box.height + 34;
   context.fillText(paths.since, box.x, axis);
   const now = 'maintenant';
@@ -346,11 +317,87 @@ function drawTrend(
     context.fillStyle = '#333c4a';
     context.fillText('rafales', at + 52, key);
   }
+  return canvas.toDataURL('image/png');
 }
 
 /**
- * The image of an alert: the card of the station, as in Live météo, and a
- * map that places the measurement.
+ * The map around the station as a picture: the station in red, the boat in
+ * blue, on OpenStreetMap.
+ * @param report - The alert.
+ * @returns A data URL, null without a place or a canvas.
+ */
+async function mapPicture(report: AlertReport): Promise<string | null> {
+  if (report.reading.lat == null || report.reading.lon == null) return null;
+  const blank = blankCanvas(MAP);
+  if (!blank) return null;
+  await drawSnippet(blank.context, report, { x: 0, y: 0, ...MAP });
+  try {
+    return blank.canvas.toDataURL('image/png');
+  } catch {
+    // A tile without its permission spoils the canvas: no map then.
+    return null;
+  }
+}
+
+/**
+ * The alert as a document of the layout chosen in Réglages: the card of the
+ * station, the trend, the sea and its marks, then the map.
+ * @param report - The alert.
+ * @param sea - The sea of the model, at sea only.
+ * @param trend - The wind of the last hours, when the station has enough past.
+ * @returns The document.
+ */
+export async function alertDocument(
+  report: AlertReport,
+  sea: SeaNow | null = null,
+  trend: readonly WindPoint[] | null = null,
+): Promise<CardsDocument> {
+  const { reading, wind, forecast } = report;
+  const sections: CardsSection[] = [
+    { title: forecast ? 'Prévision' : 'Station', rows: reportRows(report) },
+  ];
+  if (trend) {
+    const chart = trendPicture(trend);
+    sections.push({
+      title: `Tendance du vent (${HISTORY_MS / 3_600_000} h)`,
+      rows: [
+        [
+          'Tendance',
+          trendText(windTrend(trend)),
+          chart ? [{ url: chart }] : [],
+        ],
+      ],
+    });
+  }
+  if (sea) {
+    const force = bft(reading.gust ?? reading.avg);
+    sections.push(
+      {
+        title: `État de la mer (modèle ${SEA_MODEL})`,
+        rows: [
+          [
+            'Mer',
+            `${seaTxt({ waveH: sea.total.height })} · prévision du modèle, pas une mesure`,
+          ],
+          ...seaRows(sea),
+        ],
+      },
+      { title: 'Repères', rows: seaMarks(sea.total.height, force) },
+    );
+  }
+  const map = await mapPicture(report);
+  return {
+    title: `Alerte vent · ${reading.name}`,
+    kicker: 'Live météo',
+    sub: `${wind} · ${forecast ? 'PRÉVISION, pas une mesure' : 'mesure'}`,
+    sections,
+    photos: map ? [{ url: map, cap: '© OpenStreetMap France' }] : [],
+    photosTitle: 'Carte',
+  };
+}
+
+/**
+ * The image of an alert, in the layout chosen in Réglages.
  * @param report - The alert.
  * @param sea - The sea of the model, at sea only.
  * @param trend - The wind of the last hours, when the station has enough past.
@@ -360,134 +407,8 @@ export async function alertImage(
   report: AlertReport,
   sea: SeaNow | null = null,
   trend: readonly WindPoint[] | null = null,
-): Promise<Blob | null> {
-  const width = 1080;
-  const rows = reportRows(report);
-  const seaLines = sea ? seaRows(sea) : [];
-  const head = 260;
-  const rowHeight = 64;
-  const mapHeight = 620;
-  const force = bft(report.reading.gust ?? report.reading.avg);
-  const marks = sea ? seaMarks(sea.total.height, force) : [];
-  const measure = document.createElement('canvas').getContext('2d');
-  if (measure) {
-    measure.font = '28px -apple-system, Helvetica, Arial, sans-serif';
-  }
-  const markLines = marks.map(([title, text]): [string, string[]] => [
-    title,
-    measure ? wrap(measure, text, width - 80) : [text],
-  ]);
-  const marksHeight = sea
-    ? 70 + markLines.reduce((sum, [, lines]) => sum + 44 + lines.length * 38, 0)
-    : 0;
-  const seaHeight = sea ? 150 + seaLines.length * rowHeight + marksHeight : 0;
-  const trendHeight = trend ? TREND_HEIGHT : 0;
-  const height =
-    head +
-    rows.length * rowHeight +
-    trendHeight +
-    seaHeight +
-    40 +
-    mapHeight +
-    90;
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext('2d');
-  if (!context) return null;
-  const { reading, wind, forecast } = report;
-  const level = Math.max(0, bft(reading.gust ?? reading.avg) - 4);
-  const color = flashColor(level);
-  context.fillStyle = '#fff';
-  context.fillRect(0, 0, width, height);
-  context.fillStyle = color;
-  context.fillRect(0, 0, width, head);
-  context.fillStyle = flashInk(color);
-  context.font = 'bold 44px -apple-system, Helvetica, Arial, sans-serif';
-  context.fillText(`💨 Alerte vent · ${reading.name}`, 40, 76);
-  context.font = 'bold 72px -apple-system, Helvetica, Arial, sans-serif';
-  context.fillText(wind, 40, 170);
-  context.font = '32px -apple-system, Helvetica, Arial, sans-serif';
-  context.fillText(
-    forecast ? 'PRÉVISION, pas une mesure' : 'Mesure Live météo',
-    40,
-    225,
-  );
-  let y = head + 52;
-  for (const [label, value] of rows) {
-    context.fillStyle = '#5b6575';
-    context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
-    context.fillText(label, 40, y);
-    context.fillStyle = '#0b1220';
-    context.font = 'bold 34px -apple-system, Helvetica, Arial, sans-serif';
-    context.fillText(value, 440, y);
-    y += rowHeight;
-  }
-  if (trend) {
-    drawTrend(context, trend, y);
-    y += TREND_HEIGHT;
-  }
-  if (sea) {
-    y += 20;
-    context.fillStyle = '#0b3d91';
-    context.font = 'bold 36px -apple-system, Helvetica, Arial, sans-serif';
-    context.fillText('🌊 État de la mer', 40, y);
-    const titleWidth = context.measureText('🌊 État de la mer ').width;
-    context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
-    context.fillText(`(modèle ${SEA_MODEL})`, 40 + titleWidth, y);
-    y += 46;
-    context.fillStyle = '#0b1220';
-    context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
-    context.fillText(
-      `${seaTxt({ waveH: sea.total.height })} · prévision du modèle, pas une mesure`,
-      40,
-      y,
-    );
-    y += 64;
-    for (const [label, value] of seaLines) {
-      context.fillStyle = '#5b6575';
-      context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
-      context.fillText(label, 40, y);
-      context.fillStyle = '#0b1220';
-      context.font = 'bold 34px -apple-system, Helvetica, Arial, sans-serif';
-      context.fillText(value, 440, y);
-      y += rowHeight;
-    }
-    y += 20;
-    context.fillStyle = '#0b3d91';
-    context.font = 'bold 36px -apple-system, Helvetica, Arial, sans-serif';
-    context.fillText('📘 Repères', 40, y);
-    y += 50;
-    for (const [title, lines] of markLines) {
-      context.fillStyle = '#0b1220';
-      context.font = 'bold 30px -apple-system, Helvetica, Arial, sans-serif';
-      context.fillText(title, 40, y);
-      y += 40;
-      context.fillStyle = '#333c4a';
-      context.font = '28px -apple-system, Helvetica, Arial, sans-serif';
-      for (const line of lines) {
-        context.fillText(line, 40, y);
-        y += 38;
-      }
-      y += 4;
-    }
-  }
-  await drawSnippet(context, report, {
-    x: 40,
-    y,
-    width: width - 80,
-    height: mapHeight,
-  });
-  context.fillStyle = '#5b6575';
-  context.font = '26px -apple-system, Helvetica, Arial, sans-serif';
-  context.fillText(
-    `NavIn · ${new Date().toLocaleString('fr-CH')}`,
-    40,
-    y + mapHeight + 56,
-  );
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob), 'image/png');
-  });
+): Promise<Blob> {
+  return cardsPng(await alertDocument(report, sea, trend));
 }
 
 /**
@@ -530,10 +451,15 @@ async function trendAround(report: AlertReport): Promise<WindPoint[] | null> {
 }
 
 /**
- * Publish an alert: its image goes to the share sheet (messages, mail, AirDrop).
+ * Share an alert: its image goes to the share sheet (WhatsApp, Messages…),
+ * or the same image as a PDF (mail, print).
  * @param report - The alert.
+ * @param format - Image or PDF.
  */
-export async function publishAlert(report: AlertReport): Promise<void> {
+export async function publishAlert(
+  report: AlertReport,
+  format: ShareFormat = 'image',
+): Promise<void> {
   const [sea, trend] = await Promise.all([
     seaAround(report),
     trendAround(report),
@@ -544,7 +470,8 @@ export async function publishAlert(report: AlertReport): Promise<void> {
     .slice(0, 16)
     .replace(':', 'h');
   if (image) {
-    await deliver(image, `alerte-vent-${stamp}.png`, 'image/png');
+    if (format === 'pdf') await printImage(image, `alerte-vent-${stamp}`);
+    else await deliver(image, `alerte-vent-${stamp}.png`, 'image/png');
     return;
   }
   const text = [
