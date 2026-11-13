@@ -327,11 +327,7 @@ export async function alertImage(
     context.fillText('🌊 État de la mer', 40, y);
     const titleWidth = context.measureText('🌊 État de la mer ').width;
     context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
-    context.fillText(
-      `(Open-Meteo Marine, modèle ${SEA_MODEL})`,
-      40 + titleWidth,
-      y,
-    );
+    context.fillText(`(modèle ${SEA_MODEL})`, 40 + titleWidth, y);
     y += 46;
     context.fillStyle = '#0b1220';
     context.font = '30px -apple-system, Helvetica, Arial, sans-serif';

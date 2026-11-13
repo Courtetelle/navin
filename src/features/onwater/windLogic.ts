@@ -200,8 +200,12 @@ export function seaMarks(
   ];
 }
 
-/** The marine model the app reads (Open-Meteo picks the best for the place). */
-export const SEA_MODEL = 'Best Match';
+/**
+ * The marine model the app reads. Open-Meteo Marine picks, for the place,
+ * the best of its wave models (« Best Match »): that choice is no model of
+ * its own, so the source is named.
+ */
+export const SEA_MODEL = 'Open-Meteo Marine';
 
 /**
  * Sample sea state of the test mode: 70 % of the WMO wave height.

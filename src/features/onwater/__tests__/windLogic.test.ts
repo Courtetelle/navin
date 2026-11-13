@@ -76,7 +76,7 @@ test('douglasOfH and the sea sentences', () => {
     'théorique OMM : mer 8 très grosse, vagues ≈ 14,0 m et plus (pleine mer, vent établi)',
   );
   expect(testSeaTxt(5)).toBe(
-    'modèle Best Match (exemple fictif) : mer 4 agitée, vagues 1,4 m',
+    'modèle Open-Meteo Marine (exemple fictif) : mer 4 agitée, vagues 1,4 m',
   );
 });
 
