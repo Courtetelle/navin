@@ -1,5 +1,3 @@
-import { store } from '../../storage/store.ts';
-
 import {
   METEO_FRANCE,
   OPEN_WIND_MAP,
@@ -7,6 +5,8 @@ import {
   mfRows,
 } from './coastStations.ts';
 import { smnNow } from './externals.ts';
+import type { KeptReading, KeptStations } from './liveStore.ts';
+import { readKept, readStation, writeKept } from './liveStore.ts';
 import type { StationRow } from './windModels.ts';
 
 /** One measurement of the trend. */
@@ -17,6 +17,21 @@ export interface WindPoint {
   avg: number;
   /** Gusts in knots, null when the station gives none. */
   gust: number | null;
+  /**
+   * Direction in degrees.
+   * @default undefined
+   */
+  dir?: number | null;
+  /**
+   * Air temperature in °C.
+   * @default undefined
+   */
+  air?: number | null;
+  /**
+   * Sea-level pressure in hPa.
+   * @default undefined
+   */
+  baro?: number | null;
 }
 
 /** Where the wind goes. */
@@ -42,8 +57,8 @@ const FLAT_KN = 3;
 const KMH_TO_KN = 1 / 1.852;
 const MS_TO_KN = 3600 / 1852;
 const OWM_ARCHIVE = 'https://api.pioupiou.fr/v1/archive/';
-const SEEN_KEY = 'ldb.live.seen';
-const SEEN_STATIONS = 50;
+/** Stations kept at most: every station within 60 km, with room to move. */
+const SEEN_STATIONS = 400;
 const SEEN_POINTS = Math.ceil(KEEP_MS / KEEP_STEP_MS) + 10;
 
 /** A station whose past is asked. */
@@ -74,7 +89,7 @@ export async function stationHistory(
   } catch {
     points = [];
   }
-  return mergePoints(points, seenPoints(station), now, span);
+  return mergePoints(points, await seenPoints(station), now, span);
 }
 
 async function networkHistory(
@@ -218,23 +233,21 @@ function mean(points: readonly WindPoint[]): number {
   return points.reduce((sum, point) => sum + point.avg, 0) / points.length;
 }
 
-type Seen = Record<
-  string,
-  Array<[t: number, avg: number, gust: number | null]>
->;
-
 /**
- * Keep the measurements read for a day, one every 8 minutes at most, so that
- * the trend is there wherever the boat is, even when the network keeps no past.
+ * Keep the measurements read for a day, one every 8 minutes at most, with
+ * all a station gives (wind, gusts, direction, air, pressure), so that the
+ * trend is there wherever the boat is, even when the network keeps no past.
  * @param stations - Stations just read.
  * @param now - Epoch milliseconds.
+ * @returns Resolves when written.
  */
-export function rememberReadings(
+export async function rememberReadings(
   stations: ReadonlyArray<HistoryStation & WindPoint>,
   now: number,
-): void {
+): Promise<void> {
   if (stations.length === 0) return;
-  const seen = store.get<Seen>(SEEN_KEY, {});
+  const seen = await readKept().catch((): KeptStations => ({}));
+  const changed: KeptStations = {};
   for (const station of stations) {
     const key = `${station.net}:${station.id}`;
     const list = (seen[key] ?? []).filter(([t]) => t > now - KEEP_MS);
@@ -244,25 +257,34 @@ export function rememberReadings(
         station.t,
         round(station.avg),
         station.gust == null ? null : round(station.gust),
+        station.dir == null ? null : Math.round(station.dir),
+        station.air == null ? null : round(station.air),
+        station.baro == null ? null : round(station.baro),
       ]);
     }
     seen[key] = list.slice(-SEEN_POINTS);
+    changed[key] = seen[key];
   }
-  const fresh = Object.entries(seen)
+  const ranked = Object.entries(seen)
     .filter(([, list]) => list.some(([t]) => t > now - KEEP_MS))
-    .toSorted((x, y) => (y[1].at(-1)?.[0] ?? 0) - (x[1].at(-1)?.[0] ?? 0))
-    .slice(0, SEEN_STATIONS);
-  store.set(SEEN_KEY, Object.fromEntries(fresh));
+    .toSorted((x, y) => (y[1].at(-1)?.[0] ?? 0) - (x[1].at(-1)?.[0] ?? 0));
+  const keep = new Set(ranked.slice(0, SEEN_STATIONS).map(([key]) => key));
+  const gone = Object.keys(seen).filter((key) => !keep.has(key));
+  await writeKept(changed, gone).catch(() => undefined);
 }
 
-function round(knots: number): number {
-  return Math.round(knots * 10) / 10;
+function round(value: number): number {
+  return Math.round(value * 10) / 10;
 }
 
-function seenPoints(station: HistoryStation): WindPoint[] {
-  const seen = store.get<Seen>(SEEN_KEY, {});
-  const list = seen[`${station.net}:${station.id}`];
-  return Array.isArray(list)
-    ? list.map(([t, avg, gust]) => ({ t, avg, gust }))
-    : [];
+async function seenPoints(station: HistoryStation): Promise<WindPoint[]> {
+  const list = await readStation(`${station.net}:${station.id}`);
+  return list.map(([t, avg, gust, dir, air, baro]: KeptReading): WindPoint => ({
+    t,
+    avg,
+    gust,
+    dir,
+    air,
+    baro,
+  }));
 }

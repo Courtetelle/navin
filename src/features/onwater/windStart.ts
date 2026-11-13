@@ -46,8 +46,9 @@ export function startWindWatch(): void {
       );
     }, ZONE_SETTLE_MS);
   });
-  // The stations around the GPS position are recorded, for the trends of
-  // Live météo wherever the boat is.
+  // Every station within 60 km of the GPS position is recorded, all its
+  // data, for the trends of Live météo and the alerts wherever the boat is,
+  // in the background too while the device lets NavIn run.
   setTimeout(record, 30_000);
   setInterval(record, RECORD_EVERY_MS);
 }

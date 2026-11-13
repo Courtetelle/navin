@@ -84,14 +84,22 @@ describe('rememberReadings', () => {
     const { setStorageBackend } = await import('../../../storage/store.ts');
     setStorageBackend(createMemoryStorage({}));
     const station = { id: 'X', net: 'Test' };
+    /* eslint-disable no-await-in-loop -- each reading is written before the next, as the recorder does */
     for (let minutes = 0; minutes <= 30 * 60; minutes += 4) {
       const t = NOW - 30 * 3_600_000 + minutes * MIN;
-      rememberReadings([{ ...station, t, avg: 10.04, gust: null }], t);
+      await rememberReadings(
+        [{ ...station, t, avg: 10.04, gust: null, dir: 225, air: 9.44 }],
+        t,
+      );
     }
+    /* eslint-enable no-await-in-loop */
     const day = await stationHistory(station, '', NOW, 24 * 3_600_000);
     expect(day.length).toBeGreaterThan(170);
     expect(day.length).toBeLessThanOrEqual(181);
     expect(day[0]?.avg).toBe(10);
+    // Everything a station gives is kept, not only the wind.
+    expect(day[0]?.dir).toBe(225);
+    expect(day[0]?.air).toBe(9.4);
     expect(
       day.every(
         (point, index) =>

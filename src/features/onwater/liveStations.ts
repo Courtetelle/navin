@@ -29,6 +29,7 @@ export type LiveStation = WindReading & {
  * @param radius - Radius in km.
  * @param mfKey - Météo-France key, empty without one.
  * @param tally - Filled with what the Météo-France stations answered.
+ * @param most - Stations read per network at most (25 without it).
  * @returns The stations with a recent measurement.
  */
 export async function liveStations(
@@ -36,16 +37,19 @@ export async function liveStations(
   radius: number,
   mfKey: string,
   tally: MfTally | null = null,
+  most: { open: number; mf: number } | null = null,
 ): Promise<LiveStation[]> {
   const [swiss, beacons, french] = await Promise.all([
-    smnLive(center, radius).catch(() => []),
-    owmReadings(center, radius, LIVE_MOST).catch(() => []),
-    mfReadings(center, radius, mfKey, LIVE_MOST, tally).catch(() => []),
+    smnLive(center, radius, most?.open ?? LIVE_MOST).catch(() => []),
+    owmReadings(center, radius, most?.open ?? LIVE_MOST).catch(() => []),
+    mfReadings(center, radius, mfKey, most?.mf ?? LIVE_MOST, tally).catch(
+      () => [],
+    ),
   ]);
   const live = [...swiss, ...beacons, ...french]
     .filter(isLive)
     .toSorted((a, b) => (a.km ?? 0) - (b.km ?? 0));
-  rememberReadings(live, Date.now());
+  void rememberReadings(live, Date.now());
   return live;
 }
 
@@ -70,6 +74,7 @@ function isLive(reading: WindReading): reading is LiveStation {
 async function smnLive(
   center: { lat: number; lon: number },
   radius: number,
+  most: number,
 ): Promise<WindReading[]> {
   const stations = await smnStations();
   const near = stations
@@ -79,7 +84,7 @@ async function smnLive(
     }))
     .filter(({ station, km }) => km < radius && (station[4] || 0) < 800)
     .toSorted((a, b) => a.km - b.km)
-    .slice(0, LIVE_MOST);
+    .slice(0, most);
   const readings = await Promise.all(
     near.map(async ({ station: [id, name, lat, lon], km }) => {
       try {
