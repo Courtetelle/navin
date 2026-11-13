@@ -7,7 +7,6 @@ import { go } from '../../shell/router.ts';
 import {
   addEntry,
   isLake,
-  navZone,
   state,
   toast,
   updateDay,
@@ -17,6 +16,7 @@ import {
 import { contextPlace, inSwissArea } from './externals.ts';
 import { lakeFix } from './lakeFix.ts';
 import { refreshLakeButtons } from './lakeRefresh.ts';
+import { onLake } from './onLake.ts';
 import { playAlarm } from './windAudio.ts';
 import type { WindConfig } from './windLogic.ts';
 import {
@@ -181,9 +181,6 @@ function noteAlert(values: { note: string; mer?: string }): void {
     v: { evt: ['Alerte vent'], ...values },
   });
 }
-
-/** On a lake: the place of NavIn, or a lake outing. */
-const onLake = () => isLake() || navZone() === 'lac';
 
 function showAlertPopup(
   config: WindConfig,

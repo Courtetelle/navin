@@ -3,6 +3,7 @@ import { signal } from '@preact/signals-react';
 import { store } from '../../storage/store.ts';
 
 import { LAST_ALERT_KEY } from './lastWindAlert.ts';
+import { onLake } from './onLake.ts';
 import { showOverlays } from './overlayRoot.ts';
 
 /** Where a wind alert came from, for Live météo opened from its bubble. */
@@ -154,8 +155,11 @@ export function replayWindAlert(): boolean {
     hour: '2-digit',
     minute: '2-digit',
   });
+  // An alert kept before the lake lost its sea state: shown without it.
+  const sea = onLake() ? { sea: '', omm: '' } : {};
   showWindPopup({
     ...last.content,
+    ...sea,
     note: [`🔁 Alerte de ${time}`, last.content.note]
       .filter(Boolean)
       .join(' · '),

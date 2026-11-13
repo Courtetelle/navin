@@ -1,10 +1,10 @@
 import { distKm } from '../../lib/geo.ts';
 import type { Position } from '../../model/types.ts';
-import { isLake, navZone } from '../../state/index.ts';
 
 import { mfReadings, owmReadings } from './coastStations.ts';
 import { smnNow, smnStations } from './externals.ts';
 import { METEO_SWISS } from './liveStations.ts';
+import { onLake } from './onLake.ts';
 import { farFromShore, nearWater, shoreGrid } from './shoreFar.ts';
 import type { WindConfig } from './windLogic.ts';
 import { windLevel, windValue } from './windLogic.ts';
@@ -17,9 +17,6 @@ import {
   windRegion,
 } from './windModels.ts';
 import type { SeaState, WindMeta, WindReading } from './windTypes.ts';
-
-/** On a lake: no sea, no waves nor swell (the marine model is for the sea). */
-const onLake = () => isLake() || navZone() === 'lac';
 
 /** Result of a wind reading around the boat. */
 interface WindCheck {

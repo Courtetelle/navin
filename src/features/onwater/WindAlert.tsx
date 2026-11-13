@@ -7,16 +7,11 @@ import { buzz } from '../../lib/dom.ts';
 import { dayKey, fmtTime } from '../../lib/format.ts';
 import { windTxt } from '../../lib/wind.ts';
 import { BFT_KN } from '../../model/lists.ts';
-import {
-  ensureDay,
-  getDay,
-  isLake,
-  navZone,
-  state,
-} from '../../state/index.ts';
+import { ensureDay, getDay, state } from '../../state/index.ts';
 
 import { BoxHelp } from './BoxHelp.tsx';
 import { MfKeyRow } from './MfKeyRow.tsx';
+import { onLake } from './onLake.ts';
 import { useBoxTr } from './useBoxTr.ts';
 import type { WindAlertAction } from './windAlertClick.ts';
 import { windAlertClick } from './windAlertClick.ts';
@@ -59,7 +54,7 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
     : null;
   const watch = stored || windWatchLast.value;
   // On a lake no sea state: the marine model is for the sea.
-  const lake = isLake() || navZone() === 'lac';
+  const lake = onLake();
   return (
     <div className="wind-alert">
       <p className="keep-help nav-hint">

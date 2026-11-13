@@ -3,6 +3,7 @@ import { signal } from '@preact/signals-react';
 import { BEAUFORT_TBL, BFT_KN } from '../../model/lists.ts';
 import { go } from '../../shell/router.ts';
 
+import { onLake } from './onLake.ts';
 import { playAlarm } from './windAudio.ts';
 import { WIND_POP_DELAY, testSeaTxt, waveOmmTxt } from './windLogic.ts';
 import { clearWindOverlays, showWindPopup } from './windOverlayState.ts';
@@ -51,8 +52,9 @@ function playLevel(level: number): void {
       kn: `${BEAUFORT_TBL[force]?.[1]} nd`,
       other,
       where: 'essai',
-      sea: testSeaTxt(force),
-      omm: waveOmmTxt(force),
+      // On a lake no sea state, not even an invented one.
+      sea: onLake() ? '' : testSeaTxt(force),
+      omm: onLake() ? '' : waveOmmTxt(force),
       note: 'Essai : la valeur du modèle est inventée pour l’exemple. En navigation, elle vient des stations de mesure autour du bateau, ou à défaut d’un modèle de prévision, signalé « PRÉVISION ».',
       closeTxt:
         level + 1 > LAST_LEVEL
