@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { weatherChecks } from '../weatherChecks.ts';
+import { weatherChecks } from '../../../model/weatherChecks.ts';
 
 describe('weatherChecks', () => {
   it('asks for the sea state at sea, the storms on a lake', () => {

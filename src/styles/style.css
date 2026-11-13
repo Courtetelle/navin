@@ -10749,3 +10749,32 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
 :root[data-theme='night'] .map-layers .map-layer input {
   accent-color: #b00000;
 }
+
+/* Météo: the pencil of the weather checks, beside their title */
+.wx-checks-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wx-checks-head h2 {
+  flex: 1;
+}
+.wx-checks-head .wx-edit {
+  min-width: 52px;
+  min-height: 44px;
+  font-size: 22px;
+}
+.wx-editor .wx-edit-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.wx-editor .wx-edit-row .text {
+  flex: 1;
+  min-width: 0;
+}
+.wx-editor .wx-edit-row .btn {
+  min-width: 52px;
+  min-height: 48px;
+}

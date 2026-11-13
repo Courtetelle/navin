@@ -22,6 +22,8 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { useWide } from '../../lib/useWide.ts';
 import { hasBodyClass } from '../../shell/bodyClass.ts';
+import { inMenu, menuButtonPress } from '../../shell/menuOwner.ts';
+import { navBack } from '../../shell/navbar/navActions.ts';
 import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
@@ -33,10 +35,12 @@ import {
 } from '../../shell/topbar/tabIcons.ts';
 import {
   addMark,
+  isLake,
   navZone,
   prepReady,
   state,
   toast,
+  wxCheckState,
 } from '../../state/index.ts';
 
 import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
@@ -550,7 +554,18 @@ function RailButton({
   const classes = ['rail-btn'];
   if (bare) classes.push('rail-bare');
   // Its menu is open: the button blinks yellow, as PréP.
-  if (state.view.currentView.value === shown.key) classes.push('menu-here');
+  const weather = shown.key === 'weather';
+  if (
+    state.view.currentView.value === shown.key ||
+    (weather && inMenu('weather'))
+  ) {
+    classes.push('menu-here');
+  }
+  // The weather check, as PréP: orange blinking while started, green once
+  // every point is ticked (for the day).
+  const check = weather ? wxCheckState(isLake()) : 'none';
+  if (check === 'ok') classes.push('prep-ready', 'prep-ready-ok');
+  if (check === 'part') classes.push('prep-held', 'menu-here');
   if (press.hit) classes.push('lp-hit');
   return (
     <Button
@@ -558,7 +573,21 @@ function RailButton({
       noUiEdit
       className={classes.join(' ')}
       aria-label={bare ? tr(label) : undefined}
-      onClick={() => run(shown.key)}
+      onClick={() => {
+        if (!weather) {
+          run(shown.key);
+          return;
+        }
+        // Météo is a menu button: one step back inside, then out.
+        menuButtonPress(
+          'weather',
+          navBack,
+          () => run('weather'),
+          () =>
+            state.view.currentView.value === 'weather' &&
+            state.view.viewArg.value !== 'forecast',
+        );
+      }}
       {...press.handlers}
     >
       <span className="rail-icon">

@@ -21,15 +21,17 @@ export const openMenu = signal<OpenMenu | null>(null);
  * @param root - The view of the menu.
  * @param back - Goes one step back (the nav bar ◀).
  * @param open - Opens the menu (by default, `go(root)`).
+ * @param atHome - The menu home is shown (by default, its view).
  */
 export function menuButtonPress(
   root: string,
   back: () => void,
   open: () => void = () => go(root),
+  atHome: () => boolean = () => state.view.currentView.value === root,
 ): void {
   const view = state.view.currentView.value;
   const current = openMenu.peek();
-  if (current?.root === root && view === root) {
+  if (current?.root === root && atHome()) {
     openMenu.value = null;
     go(current.from.view, current.from.arg);
     return;

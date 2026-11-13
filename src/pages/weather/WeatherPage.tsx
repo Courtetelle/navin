@@ -8,12 +8,20 @@ import type { Forecast } from '../../features/tracking/index.ts';
 import { wxNext } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { dayKey, fmtTime } from '../../lib/format.ts';
+import { fmtTime } from '../../lib/format.ts';
+import type { WeatherCheck } from '../../model/weatherChecks.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
-import { isLake, state } from '../../state/index.ts';
-import { store } from '../../storage/store.ts';
+import {
+  isLake,
+  newWxCheck,
+  setWxChecks,
+  state,
+  toggleWxCheck,
+  wxChecks,
+  wxTicked,
+} from '../../state/index.ts';
 import { boatPlace } from '../meteo/boatPlace.ts';
 import {
   BEAUFORT_COLORS,
@@ -21,11 +29,14 @@ import {
   scaleColors,
 } from '../meteo/liveText.ts';
 
-import { weatherChecks } from './weatherChecks.ts';
-
 function openLive() {
   buzz();
   go('meteo');
+}
+
+function toggle(id: string): void {
+  buzz();
+  toggleWxCheck(id);
 }
 
 function openForecast() {
@@ -38,7 +49,6 @@ const FORECAST = 'forecast';
 
 /** Hours of forecast shown. */
 const HOURS = 12;
-const CHECKS_KEY = 'ldb.wx.checks';
 
 /**
  * The Météo screen of the NavIn menu: an entry to its two menus, the
@@ -112,23 +122,9 @@ function ForecastPage() {
       closed = true;
     };
   }, []);
-  const today = dayKey(new Date());
-  const [ticked, setTicked] = useState<string[]>(() => {
-    const kept = store.get<{ day: string; ids: string[] } | null>(
-      CHECKS_KEY,
-      null,
-    );
-    return kept?.day === today ? kept.ids : [];
-  });
-  const toggle = (id: string) => {
-    buzz();
-    const next = ticked.includes(id)
-      ? ticked.filter((one) => one !== id)
-      : [...ticked, id];
-    setTicked(next);
-    store.set(CHECKS_KEY, { day: today, ids: next });
-  };
-  const checks = weatherChecks(lake);
+  const [editing, setEditing] = useState(false);
+  const ticked = wxTicked();
+  const checks = wxChecks(lake);
   const done = checks.filter((check) => ticked.includes(check.id)).length;
   return (
     <>
@@ -149,14 +145,28 @@ function ForecastPage() {
           <ForecastStrip forecast={forecast} />
         </section>
         <section className="wx-checks">
-          <h2>
-            {tr(
-              tracking
-                ? `Procédure météo · ${done}/${checks.length}`
-                : `Avant le départ · ${done}/${checks.length}`,
-            )}
-          </h2>
-          <ul className="wx-list">
+          <div className="wx-checks-head">
+            <h2>
+              {tr(
+                tracking
+                  ? `Procédure météo · ${done}/${checks.length}`
+                  : `Avant le départ · ${done}/${checks.length}`,
+              )}
+            </h2>
+            <Button
+              className={editing ? 'btn wx-edit on' : 'btn wx-edit'}
+              id="wxEdit"
+              aria-label={tr(editing ? 'Terminer' : 'Modifier la liste')}
+              onClick={() => {
+                buzz();
+                setEditing(!editing);
+              }}
+            >
+              {editing ? '✔' : '✎'}
+            </Button>
+          </div>
+          {editing ? <WxChecksEditor lake={lake} /> : null}
+          <ul className="wx-list" hidden={editing}>
             {checks.map((check) => {
               const on = ticked.includes(check.id);
               return (
@@ -173,7 +183,7 @@ function ForecastPage() {
               );
             })}
           </ul>
-          {done === checks.length ? (
+          {done === checks.length && checks.length > 0 ? (
             <p className="wx-done">
               {tr('✅ Météo vérifiée pour aujourd’hui')}
             </p>
@@ -282,5 +292,100 @@ function ForecastStrip({
         )}
       </p>
     </>
+  );
+}
+
+/**
+ * The pencil of the weather checks: each check can be reworded or deleted,
+ * new ones added, and the list put back as it came.
+ * @param props - Lake or sea list.
+ * @returns The editor.
+ */
+function WxChecksEditor({ lake }: { lake: boolean }) {
+  useSignals();
+  const tr = useTr();
+  const checks = wxChecks(lake);
+  const [text, setText] = useState('');
+  const save = (next: WeatherCheck[]) => setWxChecks(lake, next);
+  return (
+    <div className="wx-editor">
+      {checks.map((check, index) => (
+        <div className="wx-edit-row" key={check.id}>
+          <textarea
+            className="text"
+            rows={2}
+            data-wxedit={check.id}
+            defaultValue={check.text}
+            onBlur={(event) => {
+              const value = event.target.value.trim();
+              if (value && value !== check.text) {
+                save(
+                  checks.map((one) =>
+                    one.id === check.id ? { ...one, text: value } : one,
+                  ),
+                );
+              }
+            }}
+          />
+          <Button
+            className="btn"
+            aria-label={tr('Monter')}
+            disabled={index === 0}
+            onClick={() => {
+              buzz();
+              const next = [...checks];
+              const [moved] = next.splice(index, 1);
+              if (moved) next.splice(index - 1, 0, moved);
+              save(next);
+            }}
+          >
+            ▲
+          </Button>
+          <Button
+            className="btn danger"
+            aria-label={tr('Supprimer')}
+            onClick={() => {
+              buzz();
+              save(checks.filter((one) => one.id !== check.id));
+            }}
+          >
+            ✕
+          </Button>
+        </div>
+      ))}
+      <div className="wx-edit-row">
+        <input
+          className="text"
+          id="wxNew"
+          placeholder={tr.placeholder('Nouveau point à vérifier…')}
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+        />
+        <Button
+          className="btn primary"
+          id="wxAdd"
+          disabled={!text.trim()}
+          onClick={() => {
+            buzz();
+            save([...checks, newWxCheck(text.trim())]);
+            setText('');
+          }}
+        >
+          {tr('Ajouter')}
+        </Button>
+      </div>
+      <ButtonRow>
+        <Button
+          className="btn"
+          id="wxReset"
+          onClick={() => {
+            buzz();
+            setWxChecks(lake, null);
+          }}
+        >
+          {tr('↺ Revenir à la liste d’origine')}
+        </Button>
+      </ButtonRow>
+    </div>
   );
 }

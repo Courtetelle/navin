@@ -1,5 +1,5 @@
 /** One step of the weather check before leaving. */
-interface WeatherCheck {
+export interface WeatherCheck {
   id: string;
   text: string;
 }
