@@ -10,6 +10,7 @@ const { replayWindAlert, showWindAlert, windPopup } =
   await import('../windOverlayState.ts');
 const { windTestToggle, windTestRunning } = await import('../windTest.ts');
 const { WIND_POP_DELAY } = await import('../windLogic.ts');
+const { beaufortSea } = await import('../onLake.ts');
 
 beforeEach(() => {
   initState(createMemoryStorage({}));
@@ -53,4 +54,11 @@ test('an alert kept with waves comes back without them on a lake', () => {
   expect(shown?.kn).toBe('24 nd');
   expect(shown?.sea).toBe('');
   expect(shown?.omm).toBe('');
+});
+
+test('the bubble describes the sea of the force at sea only, never on a lake', () => {
+  setZoneSim('mer');
+  expect(beaufortSea(5)).toMatch(/[Vv]agues/u);
+  setZoneSim('lac');
+  expect(beaufortSea(5)).toBe('');
 });

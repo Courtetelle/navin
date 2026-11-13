@@ -8,6 +8,7 @@ import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 
+import { beaufortSea } from './onLake.ts';
 import { flashColor } from './windLogic.ts';
 import type { WindFlash } from './windOverlayState.ts';
 import { removeWindFlash, windFlashes, windPopup } from './windOverlayState.ts';
@@ -83,6 +84,8 @@ export function WindPopup() {
   const content = windPopup.value;
   if (!content) return null;
   const row = BEAUFORT_TBL[Math.max(0, Math.min(12, content.bf))];
+  // The sea the scale describes: none on a lake.
+  const sea = beaufortSea(content.bf);
   const style = {
     '--lvl': flashColor(Math.max(0, content.bf - 4)),
   } as CSSProperties;
@@ -121,7 +124,7 @@ export function WindPopup() {
         {content.note ? (
           <div className="wp-note">{translate(content.note)}</div>
         ) : null}
-        <div className="wp-desc">{translate(row?.[4] ?? '')}</div>
+        {sea ? <div className="wp-desc">{translate(sea)}</div> : null}
         {content.onLive ? (
           <Button className="btn primary wp-live" noUiEdit>
             {translate('🌬 Live météo')}
