@@ -1,9 +1,13 @@
 import { fmtPos } from '../../lib/geo.ts';
 import { bft, compassPoint, windTxt } from '../../lib/wind.ts';
+import { inInland } from '../../model/contacts.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 import { deliver } from '../../state/index.ts';
 
-import { flashColor, flashInk } from './windLogic.ts';
+import { onLake } from './onLake.ts';
+import type { SeaNow } from './seaNow.ts';
+import { seaNow, seaRows } from './seaNow.ts';
+import { flashColor, flashInk, seaTxt } from './windLogic.ts';
 import type { WindReading } from './windTypes.ts';
 
 /** What an alert publishes: the reading, as Live météo shows it, and where. */
@@ -224,13 +228,19 @@ async function drawSnippet(
  * @param report - The alert.
  * @returns The PNG.
  */
-export async function alertImage(report: AlertReport): Promise<Blob | null> {
+export async function alertImage(
+  report: AlertReport,
+  sea: SeaNow | null = null,
+): Promise<Blob | null> {
   const width = 1080;
   const rows = reportRows(report);
+  const seaLines = sea ? seaRows(sea) : [];
   const head = 260;
   const rowHeight = 64;
   const mapHeight = 620;
-  const height = head + rows.length * rowHeight + 40 + mapHeight + 90;
+  const seaHeight = sea ? 150 + seaLines.length * rowHeight : 0;
+  const height =
+    head + rows.length * rowHeight + seaHeight + 40 + mapHeight + 90;
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -264,6 +274,30 @@ export async function alertImage(report: AlertReport): Promise<Blob | null> {
     context.fillText(value, 440, y);
     y += rowHeight;
   }
+  if (sea) {
+    y += 20;
+    context.fillStyle = '#0b3d91';
+    context.font = 'bold 36px -apple-system, Helvetica, Arial, sans-serif';
+    context.fillText('🌊 État de la mer', 40, y);
+    y += 46;
+    context.fillStyle = '#0b1220';
+    context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
+    context.fillText(
+      `${seaTxt({ waveH: sea.total.height })} · prévision du modèle, pas une mesure`,
+      40,
+      y,
+    );
+    y += 64;
+    for (const [label, value] of seaLines) {
+      context.fillStyle = '#5b6575';
+      context.font = '30px -apple-system, Helvetica, Arial, sans-serif';
+      context.fillText(label, 40, y);
+      context.fillStyle = '#0b1220';
+      context.font = 'bold 34px -apple-system, Helvetica, Arial, sans-serif';
+      context.fillText(value, 440, y);
+      y += rowHeight;
+    }
+  }
   await drawSnippet(context, report, {
     x: 40,
     y,
@@ -283,11 +317,29 @@ export async function alertImage(report: AlertReport): Promise<Blob | null> {
 }
 
 /**
+ * The sea near the station, from the model: at sea only, never on a lake,
+ * and not waited for more than a few seconds.
+ * @param report - The alert.
+ * @returns The sea, or null.
+ */
+async function seaAround(report: AlertReport): Promise<SeaNow | null> {
+  const { lat, lon } = report.reading;
+  if (onLake() || lat == null || lon == null || inInland({ lat, lon })) {
+    return null;
+  }
+  const late = new Promise<null>((resolve) => {
+    setTimeout(() => resolve(null), 8000);
+  });
+  return Promise.race([seaNow({ lat, lon }).catch(() => null), late]);
+}
+
+/**
  * Publish an alert: its image goes to the share sheet (messages, mail, AirDrop).
  * @param report - The alert.
  */
 export async function publishAlert(report: AlertReport): Promise<void> {
-  const image = await alertImage(report).catch(() => null);
+  const sea = await seaAround(report);
+  const image = await alertImage(report, sea).catch(() => null);
   const stamp = new Date(report.reading.t)
     .toISOString()
     .slice(0, 16)
@@ -296,7 +348,7 @@ export async function publishAlert(report: AlertReport): Promise<void> {
     await deliver(image, `alerte-vent-${stamp}.png`, 'image/png');
     return;
   }
-  const text = reportRows(report)
+  const text = [...reportRows(report), ...(sea ? seaRows(sea) : [])]
     .map(([label, value]) => `${label} : ${value}`)
     .join('\n');
   await deliver(

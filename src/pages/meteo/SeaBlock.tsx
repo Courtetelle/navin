@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import type { SeaNow, WaveTrain } from '../../features/onwater/index.ts';
-import { seaNow, seaSentence } from '../../features/onwater/index.ts';
+import type { SeaNow } from '../../features/onwater/index.ts';
+import { seaNow, seaRows, seaSentence } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { inInland } from '../../model/contacts.ts';
 import { navZone } from '../../state/index.ts';
-
-import { compassPoint } from './liveText.ts';
 
 /** Props of {@link SeaBlock}. */
 interface SeaBlockProps {
@@ -42,19 +40,7 @@ export function SeaBlock({ lat, lon }: SeaBlockProps) {
   const sea = read.ask === ask ? read.sea : null;
   // Lakes have no sea state: waves, swell and currents are for the sea.
   if (!sea || inInland({ lat, lon }) || navZone() === 'lac') return null;
-  const rows: Array<[string, string]> = [['Mer totale', trainText(sea.total)]];
-  if (sea.windSea) rows.push(['Mer du vent', trainText(sea.windSea)]);
-  if (sea.swell) rows.push(['Houle', trainText(sea.swell)]);
-  if (sea.current) {
-    const { knots, toward } = sea.current;
-    rows.push([
-      'Courant',
-      `${knots.toFixed(1).replace('.', ',')} nd${toward == null ? '' : ` · porte vers ${compassPoint(toward)}`}`,
-    ]);
-  }
-  if (sea.water != null) {
-    rows.push(['Eau', `${sea.water.toFixed(1).replace('.', ',')} °C`]);
-  }
+  const rows = seaRows(sea);
   return (
     <section className="live-sea">
       <h2>{tr('🌊 État de la mer')}</h2>
@@ -78,11 +64,4 @@ export function SeaBlock({ lat, lon }: SeaBlockProps) {
       </p>
     </section>
   );
-}
-
-function trainText(wave: WaveTrain): string {
-  const parts = [`${wave.height.toFixed(1).replace('.', ',')} m`];
-  if (wave.period != null) parts.push(`${Math.round(wave.period)} s`);
-  if (wave.dir != null) parts.push(`du ${compassPoint(wave.dir)}`);
-  return parts.join(' · ');
 }

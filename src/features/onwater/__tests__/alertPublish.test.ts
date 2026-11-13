@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 
 import { reportRows, snippetZoom, worldPixel } from '../alertPublish.ts';
+import { seaRows } from '../seaNow.ts';
 
 const reading = {
   name: 'St-Prex',
@@ -53,4 +54,23 @@ test('the map snippet zooms out until it shows the station and the boat', () => 
   const a = worldPixel(station.lat, station.lon, far);
   const b = worldPixel(46.3, 6.9, far);
   expect(Math.abs(a.x - b.x)).toBeLessThan(500);
+});
+
+test('the five lines of the sea read as in Live météo', () => {
+  expect(
+    seaRows({
+      total: { height: 1.2, dir: 250, period: 6.4 },
+      windSea: { height: 0.9, dir: 225, period: 4.2 },
+      swell: { height: 0.7, dir: 270, period: 9.6 },
+      current: { knots: 0.4, toward: 90 },
+      water: 15.3,
+      t: 0,
+    }),
+  ).toStrictEqual([
+    ['Mer totale', '1,2 m · 6 s · du OSO'],
+    ['Mer du vent', '0,9 m · 4 s · du SO'],
+    ['Houle', '0,7 m · 10 s · du O'],
+    ['Courant', '0,4 nd · porte vers E'],
+    ['Eau', '15,3 °C'],
+  ]);
 });

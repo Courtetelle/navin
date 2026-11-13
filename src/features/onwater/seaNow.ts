@@ -1,3 +1,5 @@
+import { compassPoint } from '../../lib/wind.ts';
+
 /** One train of waves. */
 export interface WaveTrain {
   /** Height in metres. */
@@ -105,4 +107,34 @@ function currentOf(
     knots: kmh / 1.852,
     toward: numberOr(current.ocean_current_direction),
   };
+}
+
+const fr = (value: number) => value.toFixed(1).replace('.', ',');
+
+function trainText(wave: WaveTrain): string {
+  const parts = [`${fr(wave.height)} m`];
+  if (wave.period != null) parts.push(`${Math.round(wave.period)} s`);
+  if (wave.dir != null) parts.push(`du ${compassPoint(wave.dir)}`);
+  return parts.join(' · ');
+}
+
+/**
+ * The lines of the sea, as Live météo shows them: the whole sea, the wind
+ * sea, the swell, the current and the water.
+ * @param sea - The sea from the model.
+ * @returns `[label, value]` pairs.
+ */
+export function seaRows(sea: SeaNow): Array<[string, string]> {
+  const rows: Array<[string, string]> = [['Mer totale', trainText(sea.total)]];
+  if (sea.windSea) rows.push(['Mer du vent', trainText(sea.windSea)]);
+  if (sea.swell) rows.push(['Houle', trainText(sea.swell)]);
+  if (sea.current) {
+    const { knots, toward } = sea.current;
+    rows.push([
+      'Courant',
+      `${fr(knots)} nd${toward == null ? '' : ` · porte vers ${compassPoint(toward)}`}`,
+    ]);
+  }
+  if (sea.water != null) rows.push(['Eau', `${fr(sea.water)} °C`]);
+  return rows;
 }
