@@ -45,7 +45,7 @@ test('an alert kept with waves comes back without them on a lake', () => {
     bf: 6,
     kn: '24 nd',
     where: 'mesuré à Pully',
-    sea: 'modèle ici : mer 3 peu agitée, vagues 0,8 m',
+    sea: 'modèle Best Match : mer 3 peu agitée, vagues 0,8 m',
     omm: 'théorique OMM : mer 4',
   });
   setZoneSim('lac');

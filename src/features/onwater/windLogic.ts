@@ -200,6 +200,9 @@ export function seaMarks(
   ];
 }
 
+/** The marine model the app reads (Open-Meteo picks the best for the place). */
+export const SEA_MODEL = 'Best Match';
+
 /**
  * Sample sea state of the test mode: 70 % of the WMO wave height.
  * @param force - Beaufort force.
@@ -208,7 +211,7 @@ export function seaMarks(
 export function testSeaTxt(force: number): string {
   const height = Math.round((WAVE_OMM[force] ?? 0) * 0.7 * 10) / 10;
   const degree = douglasOfH(height);
-  return `modèle ici (exemple fictif) : mer ${degree} ${DOUGLAS[degree]?.[1]}, vagues ${fr(height)} m`;
+  return `modèle ${SEA_MODEL} (exemple fictif) : mer ${degree} ${DOUGLAS[degree]?.[1]}, vagues ${fr(height)} m`;
 }
 
 /**

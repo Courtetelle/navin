@@ -20,6 +20,7 @@ import { onLake } from './onLake.ts';
 import { playAlarm } from './windAudio.ts';
 import type { WindConfig } from './windLogic.ts';
 import {
+  SEA_MODEL,
   WIND_POP_DELAY,
   seaTxt,
   signalDue,
@@ -215,7 +216,10 @@ function showAlertPopup(
       ? `PRÉVISION ${top.name}, pas une mesure`
       : `mesuré à ${top.name} (${network})`,
     // On a lake no sea state: the marine model and the WMO table are for the sea.
-    sea: meta.waveH == null || onLake() ? '' : `modèle ici : ${seaTxt(meta)}`,
+    sea:
+      meta.waveH == null || onLake()
+        ? ''
+        : `modèle ${SEA_MODEL} : ${seaTxt(meta)}`,
     omm: onLake() ? '' : waveOmmTxt(force),
     report: {
       reading: top,
