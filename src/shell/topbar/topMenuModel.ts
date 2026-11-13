@@ -9,9 +9,6 @@ import {
   PHONE_W_SVG,
   PIN_SVG,
   SOS_SVG,
-  START_SVG,
-  STOP_SVG,
-  TRACK_SVG,
   WEATHER_SVG,
 } from './tabIcons.ts';
 
@@ -145,14 +142,6 @@ export function baseNav(context: TopMenuContext): TabFace {
       ready: context.prepReady,
     };
   }
-  if (context.tracking) {
-    return {
-      label: 'TRACK en cours',
-      html: [TRACK_SVG],
-      bare: true,
-      blink: true,
-    };
-  }
   return { label: 'NavIn', html: [inland ? NAVIN_LAC_SVG : NAVIN_MER_SVG] };
 }
 
@@ -208,19 +197,13 @@ function trackerMenu(
     hint: 'Touche « NavIn » plusieurs fois (appuis courts) · pour faire défiler ses menus',
     act: () => actions.go('tracker'),
   };
+  // The track has its own button (START, pause, FIN): NavIn keeps none of
+  // its steps. The landscape tablet has its own buttons for the rest.
+  if (context.wide) return [base];
   if (context.tracking) {
-    const fin: TopMenuItem = {
-      label: 'FIN',
-      html: [STOP_SVG],
-      bare: true,
-      stop: true,
-      hint: 'Toucher encore : menu suivant · appui long : arrêter la trace (confirmation demandée)',
-      act: actions.armStop,
-    };
     return [
       base,
-      ...(context.wide ? [] : [weatherItem(actions)]),
-      fin,
+      weatherItem(actions),
       {
         label: 'Point',
         html: [PIN_SVG],
@@ -228,9 +211,7 @@ function trackerMenu(
         hint: 'Toucher encore : menu suivant · appui long : enregistrer un point dans le journal',
         act: actions.pointNow,
       },
-      fin,
       vhfItem(context, actions, VHF_HINT, true),
-      fin,
       {
         label: 'Amarrage',
         html: [MOOR_SVG],
@@ -238,12 +219,8 @@ function trackerMenu(
         hint: 'Toucher encore : menu suivant · appui long : fin de la trace, puis check-out',
         act: actions.moorNow,
       },
-      fin,
     ];
   }
-  // Landscape tablet: PréP, START, Météo and VHF have their own buttons;
-  // NavIn only brings back the map.
-  if (context.wide) return [base];
   return [
     base,
     weatherItem(actions),
@@ -253,13 +230,6 @@ function trackerMenu(
       bare: true,
       hint: 'Toucher encore : menu suivant · appui long : préparer la sortie pas à pas',
       act: actions.prepStart,
-    },
-    {
-      label: 'START track',
-      html: [START_SVG],
-      bare: true,
-      hint: 'Toucher encore : menu suivant · appui long : démarrer la trace tout de suite',
-      act: actions.quickStart,
     },
     vhfItem(context, actions, VHF_HINT, true),
   ];

@@ -17,6 +17,7 @@ import {
 import { useBodyClass } from '../../shell/bodyClass.ts';
 import { state } from '../../state/index.ts';
 
+import { PhoneTrackButton } from './PhoneTrackButton.tsx';
 import { TrackerDash } from './TrackerDash.tsx';
 import { TrackerOverlay } from './TrackerOverlay.tsx';
 import { buildTrackerMap } from './buildTrackerMap.ts';
@@ -69,6 +70,7 @@ export function TrackerPage() {
         ) : null}
       </div>
       <TrackerDash />
+      <PhoneTrackButton />
       <TrackerOverlay />
     </div>
   );

@@ -13,7 +13,7 @@ import {
   fitted,
   tabDisplays,
 } from './tabDisplays.ts';
-import { DONE_SVG, STOP_SVG } from './tabIcons.ts';
+import { STOP_SVG } from './tabIcons.ts';
 import type { TopMenuContext, TopMenuItem, TopTabKey } from './topMenuModel.ts';
 import { topMenu } from './topMenuModel.ts';
 
@@ -22,7 +22,6 @@ export { setTopMenuActions } from './tabDisplays.ts';
 const stageTimers: Partial<Record<TopTabKey, ReturnType<typeof setTimeout>>> =
   {};
 let armTimer: ReturnType<typeof setTimeout> | undefined;
-let doneUntil = 0;
 
 /**
  * Context of the menus, read from the state.
@@ -138,7 +137,7 @@ export function leaveMenusOnTap(event: Event): boolean {
 export function refreshBase(): void {
   const display = tabDisplays.tracker;
   const current = display.value;
-  if (current.stopArmed || Date.now() < doneUntil || current.index > 0) return;
+  if (current.stopArmed || current.index > 0) return;
   const [first] = menuItems('tracker');
   if (!first || current.base === first.label) return;
   display.value = {
@@ -184,20 +183,7 @@ function disarmStop(): void {
 export async function stopNow(): Promise<void> {
   disarmStop();
   buzz();
-  // The landscape tablet shows the tick on its track button, not on NavIn.
-  if (!menuContext().wide) {
-    doneUntil = Date.now() + 3000;
-    const display = tabDisplays.tracker;
-    display.value = {
-      ...display.value,
-      face: { ...display.value.face, html: [DONE_SVG], bare: true },
-      base: '',
-    };
-    setTimeout(() => {
-      doneUntil = 0;
-      resetTab('tracker');
-    }, 3000);
-  }
+  // The tick shows on the track button itself, never on NavIn.
   if (state.view.tracking.value) await domainActions.stopTracking();
   if (state.view.currentView.value !== 'tracker') go('tracker');
   domainActions.afterStop();

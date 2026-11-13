@@ -1065,12 +1065,54 @@ async function trackButton(page: Page, theme: string): Promise<void> {
   check(theme, 'tablet: START comes back', await has('.rail-start'));
 }
 
+// Phone: the track has its own button on the map, with every step; NavIn
+// keeps none of them.
+async function phoneTrack(page: Page, theme: string): Promise<void> {
+  const has = (selector: string) =>
+    page.evaluate((query) => document.querySelector(query) !== null, selector);
+  await page.locator('.phone-track .rail-start').click();
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    'phone: START records at a short touch',
+    await has('.phone-track .rail-run'),
+  );
+  const navin =
+    (await page
+      .locator('.top-tab[data-view="tracker"]')
+      .getAttribute('aria-label')) ?? '';
+  check(
+    theme,
+    'phone: NavIn does not turn into the track',
+    !navin.includes('TRACK'),
+  );
+  await page.locator('.phone-track .rail-track').click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'phone: the pause holds, FIN beside it',
+    (await has('.phone-track .rail-paused')) &&
+      (await has('.phone-track .rail-fin')),
+  );
+  await page.locator('.phone-track .rail-fin').click();
+  await page.waitForTimeout(300);
+  await page.locator('.phone-track .rail-fin').click();
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    'phone: FIN ends the track, the tick on its button',
+    await has('.phone-track .rail-done'),
+  );
+  await page.waitForTimeout(3500);
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
   const { context, page, errors } = await open(browser, theme);
   try {
     await follow(page, theme);
+    await phoneTrack(page, theme);
     await recenter(page, theme);
     await bars(page, theme);
     await layers(page, theme);

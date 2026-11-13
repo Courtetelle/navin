@@ -10778,3 +10778,38 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
   min-width: 52px;
   min-height: 48px;
 }
+
+/* Phone: the track button of its own on the map, bottom left; FIN beside it
+   while paused. */
+.phone-track {
+  position: absolute;
+  left: 10px;
+  bottom: calc(160px + env(safe-area-inset-bottom));
+  z-index: 1000;
+}
+.phone-track .rail-btn {
+  width: 84px;
+  height: 52px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface, #fff) 92%, transparent);
+  box-shadow: 0 2px 8px rgba(11, 18, 32, 0.28);
+}
+.phone-track .rail-btn .tb-ico,
+.phone-track .rail-btn svg {
+  width: 56px;
+  height: 40px;
+}
+.phone-track .rail-track-wrap .rail-btn.rail-fin {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 10px);
+}
+:root[data-theme='night'] .phone-track .rail-btn {
+  background: #1a0000;
+  border-color: #5a0000;
+}

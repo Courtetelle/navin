@@ -21,31 +21,27 @@ const idle: TopMenuContext = {
   zone: 'lac',
 };
 
-test('NavIn cycles Météo, PréP, START and the phone inland, the VHF at sea', () => {
+test('NavIn cycles Météo, PréP and the phone inland, the VHF at sea (START has its own button)', () => {
   expect(
     topMenu('tracker', idle, actions).map((item) => item.label),
-  ).toStrictEqual(['NavIn', 'Météo', 'PréP', 'START track', 'Téléphone']);
+  ).toStrictEqual(['NavIn', 'Météo', 'PréP', 'Téléphone']);
   expect(
     topMenu('tracker', { ...idle, zone: 'mer' }, actions).map(
       (item) => item.label,
     ),
-  ).toStrictEqual(['NavIn', 'Météo', 'PréP', 'START track', 'VHF']);
+  ).toStrictEqual(['NavIn', 'Météo', 'PréP', 'VHF']);
 });
 
-test('during a track, FIN comes back after every choice', () => {
+test('during a track, NavIn keeps none of its steps: they are on its own button', () => {
   const labels = topMenu('tracker', { ...idle, tracking: true }, actions).map(
     (item) => item.label,
   );
   expect(labels).toStrictEqual([
-    'TRACK en cours',
+    'NavIn',
     'Météo',
-    'FIN',
     'Point',
-    'FIN',
     'Téléphone',
-    'FIN',
     'Amarrage',
-    'FIN',
   ]);
 });
 
