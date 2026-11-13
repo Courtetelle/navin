@@ -8,6 +8,7 @@ import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 
+import { publishAlert } from './alertPublish.ts';
 import { beaufortSea } from './onLake.ts';
 import { flashColor } from './windLogic.ts';
 import type { WindFlash } from './windOverlayState.ts';
@@ -99,9 +100,15 @@ export function WindPopup() {
         event.stopPropagation();
         windPopup.value = null;
         const target = event.target instanceof Element ? event.target : null;
-        if (target?.closest('.wp-stop')) content.onStop?.();
-        else if (target?.closest('.wp-live')) content.onLive?.();
-        else content.onClose?.();
+        if (target?.closest('.wp-publish')) {
+          if (content.report) void publishAlert(content.report);
+        } else if (target?.closest('.wp-stop')) {
+          content.onStop?.();
+        } else if (target?.closest('.wp-live')) {
+          content.onLive?.();
+        } else {
+          content.onClose?.();
+        }
       }}
     >
       <div className="wp-box">
@@ -130,9 +137,14 @@ export function WindPopup() {
             {translate('🌬 Live météo')}
           </Button>
         ) : null}
-        <div className="wp-close">
-          {translate(content.closeTxt ?? 'Toucher pour fermer')}
-        </div>
+        {content.report ? (
+          <Button className="btn wp-publish" noUiEdit>
+            {translate('📤 Publier')}
+          </Button>
+        ) : null}
+        {content.closeTxt ? (
+          <div className="wp-close">{translate(content.closeTxt)}</div>
+        ) : null}
         {content.onStop ? (
           <Button className="btn danger wp-stop" noUiEdit>
             {translate('⏹ Arrêter le test')}

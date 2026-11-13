@@ -6,37 +6,10 @@ import {
 } from '../../features/onwater/index.ts';
 import { bft } from '../../lib/wind.ts';
 
-const POINTS = [
-  'N',
-  'NNE',
-  'NE',
-  'ENE',
-  'E',
-  'ESE',
-  'SE',
-  'SSE',
-  'S',
-  'SSO',
-  'SO',
-  'OSO',
-  'O',
-  'ONO',
-  'NO',
-  'NNO',
-] as const;
+export { compassPoint } from '../../lib/wind.ts';
 
 /** Colour of a calm wind, under 4 Beaufort. */
 const CALM = '#9ec9e8';
-
-/**
- * Compass point a wind comes from.
- * @param degrees - Direction in degrees.
- * @returns `N`, `NNE`… (`O` for west).
- */
-export function compassPoint(degrees: number): string {
-  const index = Math.round((((degrees % 360) + 360) % 360) / 22.5) % 16;
-  return POINTS[index] as string;
-}
 
 /**
  * How old a measurement is, in words.

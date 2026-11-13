@@ -2,6 +2,7 @@ import { signal } from '@preact/signals-react';
 
 import { store } from '../../storage/store.ts';
 
+import type { AlertReport } from './alertPublish.ts';
 import { LAST_ALERT_KEY } from './lastWindAlert.ts';
 import { onLake } from './onLake.ts';
 import { showOverlays } from './overlayRoot.ts';
@@ -68,6 +69,11 @@ interface WindPopupContent {
    * @default 'Toucher pour fermer'
    */
   closeTxt?: string;
+  /**
+   * The alert to publish (its reading and where): a « Publier » button.
+   * @default undefined
+   */
+  report?: AlertReport;
   /**
    * Opens the live weather conditions screen, from its button.
    * @default undefined

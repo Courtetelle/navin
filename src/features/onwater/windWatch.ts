@@ -202,6 +202,12 @@ function showAlertPopup(
     // On a lake no sea state: the marine model and the WMO table are for the sea.
     sea: meta.waveH == null || onLake() ? '' : `modèle ici : ${seaTxt(meta)}`,
     omm: onLake() ? '' : waveOmmTxt(force),
+    report: {
+      reading: top,
+      wind: `${Math.round(knots)} nd ${basis}${forecast ? ' PRÉVUS' : ''}`,
+      forecast,
+      boat: windWatchPlace.peek(),
+    },
     onLive: () => {
       // A measured alert: Live météo shows where it came from.
       liveAlertSpot.value =

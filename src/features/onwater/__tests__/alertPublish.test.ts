@@ -1,0 +1,56 @@
+import { expect, test } from 'vitest';
+
+import { reportRows, snippetZoom, worldPixel } from '../alertPublish.ts';
+
+const reading = {
+  name: 'St-Prex',
+  t: Date.UTC(2026, 10, 13, 17, 55),
+  avg: 12,
+  gust: 20,
+  dir: 225,
+  km: 6.4,
+  net: 'MeteoSwiss',
+  lat: 46.48,
+  lon: 6.45,
+  air: 9.4,
+  baro: 1012.6,
+};
+
+test('the published alert reads like the station card of Live météo', () => {
+  const rows = Object.fromEntries(
+    reportRows({
+      reading,
+      wind: '20 nd en rafales',
+      forecast: false,
+      boat: null,
+    }),
+  );
+  expect(rows['Vent moyen']).toMatch(/^12 nd/u);
+  expect(rows.Rafales).toMatch(/^20 nd/u);
+  expect(rows.Direction).toBe('du SO (225°)');
+  expect(rows.Force).toBe('4 Bf · Jolie brise');
+  expect(rows['Température de l’air']).toBe('9,4 °C');
+  expect(rows['Pression (niveau de la mer)']).toBe('1013 hPa');
+  expect(rows.Source).toBe('MeteoSwiss');
+  expect(rows.Distance).toBe('6 km');
+  expect(rows.Position).toBeTruthy();
+});
+
+test('a forecast says it is no measurement', () => {
+  const rows = Object.fromEntries(
+    reportRows({ reading, wind: '20 nd', forecast: true, boat: null }),
+  );
+  expect(rows['Prévu pour']).toBeTruthy();
+  expect(rows.Source).toBe('prévision d’un modèle, pas une mesure');
+});
+
+test('the map snippet zooms out until it shows the station and the boat', () => {
+  const station = { lat: 46.48, lon: 6.45 };
+  expect(snippetZoom(station, null, 1000, 620)).toBe(12);
+  expect(snippetZoom(station, { lat: 46.49, lon: 6.47 }, 1000, 620)).toBe(12);
+  const far = snippetZoom(station, { lat: 46.3, lon: 6.9 }, 1000, 620);
+  expect(far).toBeLessThan(12);
+  const a = worldPixel(station.lat, station.lon, far);
+  const b = worldPixel(46.3, 6.9, far);
+  expect(Math.abs(a.x - b.x)).toBeLessThan(500);
+});

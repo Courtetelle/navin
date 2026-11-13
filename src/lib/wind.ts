@@ -81,3 +81,32 @@ export function windParts(knots: unknown): WindParts | null {
   const speed = knNum(knots);
   return { knots: Math.round(speed), beaufort: bft(speed), kmh: kmh(speed) };
 }
+
+const POINTS = [
+  'N',
+  'NNE',
+  'NE',
+  'ENE',
+  'E',
+  'ESE',
+  'SE',
+  'SSE',
+  'S',
+  'SSO',
+  'SO',
+  'OSO',
+  'O',
+  'ONO',
+  'NO',
+  'NNO',
+] as const;
+
+/**
+ * Compass point a wind comes from.
+ * @param degrees - Direction in degrees.
+ * @returns `N`, `NNE`… (`O` for west).
+ */
+export function compassPoint(degrees: number): string {
+  const index = Math.round((((degrees % 360) + 360) % 360) / 22.5) % 16;
+  return POINTS[index] as string;
+}

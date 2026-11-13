@@ -9213,10 +9213,21 @@ body.has-navtop #view > h1.live-title,
   font-weight: 600;
   width: 48%;
 }
-.wind-pop .wp-live {
+.wind-pop .wp-live,
+.wind-pop .wp-publish {
   display: block;
   width: 100%;
   margin-top: 12px;
+}
+/* « Publier » under Live météo: white, so the two do not look alike */
+.wind-pop .wp-publish {
+  background: #fff;
+  color: #0b1220;
+  font-weight: 800;
+}
+:root[data-theme='night'] .wind-pop .wp-publish {
+  background: #1a0000;
+  color: #ff5a5a;
 }
 .live-sea h2 {
   margin: 16px 0 4px;
