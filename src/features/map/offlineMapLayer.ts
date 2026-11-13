@@ -2,7 +2,6 @@ import type { Control, GridLayer, Map as LeafletMap } from 'leaflet';
 import { PMTiles } from 'pmtiles';
 
 import { state, toast } from '../../state/index.ts';
-import { store } from '../../storage/store.ts';
 
 import { isMapLive } from './mapExtras.ts';
 import type { OfflineMap } from './offlineMapStore.ts';
@@ -61,8 +60,6 @@ const entryName = (item: OfflineMap) => `Hors ligne · ${item.name}`;
 export const BACKGROUND_Z = -1;
 /** The map files lie on the background, under the overlays (OpenSeaMap). */
 const OFFLINE_Z = 0;
-/** The map files the sailor unticked in the layer menu. */
-const HIDDEN_KEY = 'ldb.offlineHidden';
 
 /**
  * Show every map file of this device at once, each over its own area, on top
@@ -89,24 +86,16 @@ export async function addOfflineMaps(
     })),
   );
   if (!isMapLive(map)) return;
-  const hidden = new Set(store.get<string[]>(HIDDEN_KEY, []));
+  // Shown by default; « Mes cartes » can hide one (the menu applies it).
   for (const { item, layer } of layers) {
+    layer.addTo(map);
     control.addOverlay(layer, entryName(item));
-    if (!hidden.has(item.id)) layer.addTo(map);
   }
-  const remember = (name: string, shown: boolean) => {
-    const found = layers.find(({ item }) => entryName(item) === name);
-    if (!found) return;
-    if (shown) hidden.delete(found.item.id);
-    else hidden.add(found.item.id);
-    store.set(HIDDEN_KEY, [...hidden]);
-  };
-  map.on('overlayadd', (event) => remember(event.name, true));
-  map.on('overlayremove', (event) => remember(event.name, false));
   if (navigator.onLine || state.view.currentView.peek() !== 'tracker') return;
   const { lat, lng } = map.getCenter();
   const shown = layers.find(
-    ({ item }) => !hidden.has(item.id) && offlineMapCovers(item, lat, lng),
+    ({ item, layer }) =>
+      map.hasLayer(layer) && offlineMapCovers(item, lat, lng),
   );
   if (shown) toast(`Pas de réseau : carte hors ligne ${shown.item.name}`);
 }

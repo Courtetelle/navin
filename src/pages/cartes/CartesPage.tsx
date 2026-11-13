@@ -20,10 +20,11 @@ import { fmtShortDate } from '../../lib/format.ts';
 import { state } from '../../state/index.ts';
 
 import { LemanTools } from './LemanTools.tsx';
+import { MapLayersSection } from './MapLayersSection.tsx';
 import { OfflineMaps } from './OfflineMaps.tsx';
 
 const HELP =
-  'Importez un fichier de carte (.pmtiles) depuis Fichiers, kDrive ou Google Drive : il reste sur cet appareil et s’affiche sans réseau. Quand la carte en ligne ne charge plus, elle prend le relais toute seule.';
+  'Importez un fichier de carte (.pmtiles) depuis Fichiers, kDrive ou Google Drive : il reste sur cet appareil et s’affiche sans réseau. Le fond de carte et les couches se choisissent ici.';
 
 /**
  * Screen `cartes`: load the maps around me in one touch (legacy `VIEWS.cartes`).
@@ -54,6 +55,7 @@ function CartesContent({ onChange }: { onChange: () => void }) {
       <p className={fresh ? 'help help-pop help-lead' : 'help help-pop'}>
         {help}
       </p>
+      <MapLayersSection />
       <OfflineMaps />
       <FoldSection title="🏔 Léman : données hors ligne">
         <LemanTools />

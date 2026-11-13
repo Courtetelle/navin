@@ -127,6 +127,11 @@ async function bars(page: Page, theme: string): Promise<void> {
 }
 
 async function layers(page: Page, theme: string): Promise<void> {
+  check(
+    theme,
+    'no layer menu on the map: it is in my maps',
+    !(await page.locator('.leaflet-control-layers').isVisible()),
+  );
   const names = await page.evaluate(() =>
     [...document.querySelectorAll('.leaflet-control-layers-base label')].map(
       (label) => label.textContent?.trim() ?? '',
@@ -249,6 +254,14 @@ async function myMaps(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(500);
   const title = (await page.locator('main h1').first().textContent()) ?? '';
   check(theme, 'data leads to my maps', title.includes('Mes cartes'));
+  check(
+    theme,
+    'my maps list the background and layers of the map',
+    (await page.locator('#mapLayers input[type=radio]').count()) >= 1 &&
+      (await page.locator('#mapLayers input[type=checkbox]').count()) >= 1,
+  );
+  await page.locator('#mapLayers label', { hasText: 'OpenSeaMap' }).click();
+  await page.locator('#mapLayers label', { hasText: 'OpenSeaMap' }).click();
   await page.setInputFiles('#offlineFile', {
     name: 'notes.pmtiles',
     mimeType: 'application/octet-stream',

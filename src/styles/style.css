@@ -10725,3 +10725,27 @@ html:root body .rail-btn.rail-fin.rail-fin-armed {
 :root[data-theme='night'] body .rail-btn.rail-fin.rail-fin-armed {
   background: #4a0000 !important;
 }
+
+/* The layer menu stays on the map out of sight: the layers are chosen in
+   « Mes cartes », which drives it. */
+html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
+  display: none !important;
+}
+/* « Mes cartes »: the background and layers, big rows to touch */
+.map-layers .map-layer {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 52px;
+  padding: 6px 4px;
+  font-size: 19px;
+  border-bottom: 1px solid var(--line);
+}
+.map-layers .map-layer input {
+  width: 26px;
+  height: 26px;
+  accent-color: var(--primary, #0b3d91);
+}
+:root[data-theme='night'] .map-layers .map-layer input {
+  accent-color: #b00000;
+}

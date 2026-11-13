@@ -12,6 +12,7 @@ import {
 } from '../../features/map/constants.ts';
 import { nmeaPosFresh } from '../../features/map/external.ts';
 import { lakeCenter, lakeZoom } from '../../features/map/lakeCenter.ts';
+import { followLayerPrefs } from '../../features/map/layerPrefs.ts';
 import { createMap, leaflet } from '../../features/map/leaflet.ts';
 import { addFullscreenControl } from '../../features/map/mapControls.ts';
 import { whileMapLive } from '../../features/map/mapExtras.ts';
@@ -101,14 +102,14 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     !simulatedSea && (simulatedLake || (cruise && isLake()) || inSwissWaters);
   osm.addTo(map);
   seamark.addTo(map);
+  // Fixed order, not the menu's: background, map files, overlays. The menu
+  // stays out of sight: the layers are chosen in « Mes cartes ».
   const layers = L.control
-    .layers(
-      { 'Plan OpenStreetMap': osm },
-      { 'Balisage OpenSeaMap': seamark },
-      // Fixed order, not the menu's: background, map files, overlays.
-      { position: 'topright', autoZIndex: false },
-    )
+    .layers({}, {}, { position: 'topright', autoZIndex: false })
     .addTo(map);
+  followLayerPrefs(map, layers);
+  layers.addBaseLayer(osm, 'Plan OpenStreetMap');
+  layers.addOverlay(seamark, 'Balisage OpenSeaMap');
   // The Swiss map only in the menu over Switzerland.
   addRegional(map, layers, swiss, 'Carte nationale suisse', SWISS_BOX, osm);
   let swissAdded = false;
