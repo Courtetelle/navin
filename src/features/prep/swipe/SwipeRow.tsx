@@ -1,9 +1,10 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import type { PointerEvent, ReactNode } from 'react';
-import { useEffect, useId, useLayoutEffect, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { Button } from '../../../components/shared/Button.tsx';
-import { HoldDeleteButton } from '../../../components/shared/HoldDeleteButton.tsx';
+import { ShareButton } from '../../../components/shared/ShareButton.tsx';
+import type { ShareFormat } from '../../../components/shared/shareFormat.ts';
 import { buzz } from '../../../lib/dom.ts';
 import { toast } from '../../../state/index.ts';
 
@@ -30,22 +31,33 @@ export interface SwipeRowProps {
    * @default false
    */
   silent?: boolean;
+  /**
+   * 👁 Visualiser: show the item (a mark on the map…). Without it, the same as
+   * a touch on the band; `null` when there is nothing to show (no button).
+   * @default undefined
+   */
+  onView?: (() => void) | null;
+  /**
+   * 📤 Partager, in the format chosen; without it, no share button.
+   * @default undefined
+   */
+  onShare?: (format: ShareFormat) => void;
   /** The row. */
   children: ReactNode;
 }
 
-/** Swiped this far to the left, in pixels, the row asks for its deletion. */
+/** Swiped this far to the left, in pixels, the band opens its menu. */
 const SWIPE_ASK_PX = 70;
 const SWIPE_MAX_PX = 110;
 /** A finger moved this far has chosen a direction. */
 const SWIPE_START_PX = 10;
 
 /**
- * A row deleted by swiping it to the left, with a confirmation every time: the
- * swipe opens « 🗑 Supprimer … ? » right after the row; a long press on it
- * deletes, « Annuler » or 5 s without a touch closes it.
- * @param props - Item, deletion and row.
- * @returns The row and its confirmation.
+ * A band of data: swiped to the left, it opens its menu right under it,
+ * 👁 Visualiser, 📤 Partager (💬 image or 🖨 PDF) and 🗑 Effacer, which deletes
+ * on a long press only. The menu closes after 8 s or at a touch elsewhere.
+ * @param props - Item, its actions and the band.
+ * @returns The band and its menu.
  */
 export function SwipeRow({
   id,
@@ -53,6 +65,8 @@ export function SwipeRow({
   onDelete,
   block,
   silent = false,
+  onView,
+  onShare,
   children,
 }: SwipeRowProps) {
   useSignals();
@@ -63,17 +77,10 @@ export function SwipeRow({
     },
     [token],
   );
-  const askDeletion = () => {
+  const openMenu = () => {
     if (!id) return;
-    const blocked = block?.(id);
-    if (blocked) {
-      buzz();
-      toast(blocked);
-      return;
-    }
     buzz();
     openSwipeRow(token);
-    toast('Appui long sur « Supprimer » pour confirmer · sinon rien dans 5 s');
   };
   const slide = useRef<HTMLDivElement>(null);
   const gesture = useRef<{ x: number; y: number; moving: boolean } | null>(
@@ -95,7 +102,7 @@ export function SwipeRow({
     setTimeout(() => {
       swallowClick.current = false;
     }, 300);
-    if (!cancelled && start.x - event.clientX >= SWIPE_ASK_PX) askDeletion();
+    if (!cancelled && start.x - event.clientX >= SWIPE_ASK_PX) openMenu();
   };
   return (
     <>
@@ -141,9 +148,36 @@ export function SwipeRow({
         </div>
       </div>
       {id && openRowToken.value === token ? (
-        <SwipeConfirm
+        <SwipeMenu
           name={name}
-          onConfirm={() => {
+          onView={
+            onView === null
+              ? undefined
+              : () => {
+                  closeSwipeRow();
+                  if (onView) {
+                    onView();
+                    return;
+                  }
+                  slide.current
+                    ?.querySelector<HTMLElement>('button, summary, a[href]')
+                    ?.click();
+                }
+          }
+          onShare={
+            onShare
+              ? (format) => {
+                  closeSwipeRow();
+                  onShare(format);
+                }
+              : undefined
+          }
+          onDelete={() => {
+            const blocked = block?.(id);
+            if (blocked) {
+              toast(blocked);
+              return;
+            }
             closeSwipeRow();
             if (onDelete(id) !== false && !silent) toast('Supprimé');
           }}
@@ -153,41 +187,84 @@ export function SwipeRow({
   );
 }
 
-interface SwipeConfirmProps {
+interface SwipeMenuProps {
   name: string;
-  onConfirm: () => void;
+  onView: (() => void) | undefined;
+  onShare: ((format: ShareFormat) => void) | undefined;
+  onDelete: () => void;
 }
 
-function SwipeConfirm({ name, onConfirm }: SwipeConfirmProps) {
-  const button = useRef<HTMLButtonElement>(null);
-  // The row opens with its button already waiting for the long press.
-  useLayoutEffect(() => {
-    button.current?.click();
+/** A trash pressed this long deletes. */
+const HOLD_MS = 650;
+
+function SwipeMenu({ name, onView, onShare, onDelete }: SwipeMenuProps) {
+  const box = useRef<HTMLDivElement>(null);
+  const hold = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const [done, setDone] = useState(false);
+  // A touch anywhere else closes the menu.
+  useEffect(() => {
+    const away = (event: Event) => {
+      if (!box.current?.contains(event.target as Node)) closeSwipeRow();
+    };
+    document.addEventListener('pointerdown', away, true);
+    return () => {
+      document.removeEventListener('pointerdown', away, true);
+      clearTimeout(hold.current);
+    };
   }, []);
+  const release = () => clearTimeout(hold.current);
   return (
-    <div className="sw-confirm">
-      <HoldDeleteButton
-        ref={button}
-        className="btn danger"
-        data-swok="1"
-        armedLabel={`🗑 Supprimer « ${name.slice(0, 60)} » ?`}
-        onClick={(event) => {
-          event.stopPropagation();
-          event.preventDefault();
-        }}
-        onDelete={onConfirm}
-      />
+    <div
+      ref={box}
+      className="sw-confirm sw-menu"
+      onClick={(event) => {
+        event.stopPropagation();
+      }}
+    >
+      {onView ? (
+        <Button
+          type="button"
+          noUiEdit
+          className="btn sw-view"
+          data-swview="1"
+          aria-label={`Visualiser « ${name.slice(0, 60)} »`}
+          onClick={(event) => {
+            event.preventDefault();
+            buzz();
+            onView();
+          }}
+        >
+          👁<small>Visualiser</small>
+        </Button>
+      ) : null}
+      {onShare ? (
+        <ShareButton small className="sw-share" onShare={onShare} />
+      ) : null}
       <Button
-        className="btn"
-        data-swno="1"
+        type="button"
+        noUiEdit
+        className={done ? 'btn danger sw-del lp-ok' : 'btn danger sw-del'}
+        data-swdel="1"
+        aria-label={`Effacer « ${name.slice(0, 60)} » : appui long`}
         onClick={(event) => {
-          event.stopPropagation();
           event.preventDefault();
-          buzz();
-          closeSwipeRow();
+          if (!done) toast('Appui long sur 🗑 pour effacer');
         }}
+        onPointerDown={() => {
+          clearTimeout(hold.current);
+          hold.current = setTimeout(() => {
+            buzz();
+            setDone(true);
+            setTimeout(onDelete, 300);
+          }, HOLD_MS);
+        }}
+        onPointerUp={release}
+        onPointerLeave={release}
+        onPointerCancel={release}
+        onContextMenu={(event) => event.preventDefault()}
       >
-        Annuler
+        {done ? '✓' : '🗑'}
+        <small>{done ? 'Effacé' : 'appui long'}</small>
       </Button>
     </div>
   );

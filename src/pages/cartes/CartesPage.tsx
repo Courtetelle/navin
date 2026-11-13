@@ -9,6 +9,7 @@ import { HelpPill, HelpText } from '../../components/shared/HelpText.tsx';
 import { helpBubbleText } from '../../components/shared/helpRules.ts';
 import { useIntroLead } from '../../components/shared/introLead.ts';
 import { LEMAN_ARCGIS } from '../../features/map/constants.ts';
+import { marksFly } from '../../features/map/longPress.ts';
 import { showPlace } from '../../features/map/placeTarget.ts';
 import { zoneDelete } from '../../features/map/zoneDownload.ts';
 import type { Zone } from '../../features/map/zoneStore.ts';
@@ -17,6 +18,7 @@ import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
+import { go } from '../../shell/router.ts';
 import { state } from '../../state/index.ts';
 
 import { LemanTools } from './LemanTools.tsx';
@@ -103,6 +105,13 @@ function ZoneRow({ zone, onChange }: { zone: Zone; onChange: () => void }) {
     <SwipeRow
       id={zone.id}
       name={zone.name}
+      onView={() => {
+        marksFly.position = zone.center ?? [
+          (zone.b.s + zone.b.n) / 2,
+          (zone.b.w + zone.b.e) / 2,
+        ];
+        go('tracker');
+      }}
       onDelete={(id) => {
         void zoneDelete(id).then(onChange);
       }}

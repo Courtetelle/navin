@@ -13,8 +13,10 @@ import {
   crewSetName,
   crewSetPeople,
   state,
+  updateCrewSets,
 } from '../../state/index.ts';
-import { ListPublishRow } from '../publish/index.ts';
+import { SwipeRow } from '../prep/index.ts';
+import { ListPublishRow, openListPublish } from '../publish/index.ts';
 
 import { beginCrewSetEdit } from './crewsEdit.ts';
 import { showCrewsEdit } from './screen.ts';
@@ -63,7 +65,20 @@ export function CrewsList() {
       {sets.length > 0 ? (
         <ButtonRow className="row prep-col">
           {sets.map((set) => (
-            <SetButton key={set.id} className="btn big" set={set} />
+            <SwipeRow
+              key={set.id}
+              id={set.id}
+              name={crewSetName(set)}
+              onShare={(format) => openListPublish('crews', set.id, format)}
+              onDelete={(id) => {
+                updateCrewSets((list) => {
+                  const index = list.findIndex((item) => item.id === id);
+                  if (index !== -1) list.splice(index, 1);
+                });
+              }}
+            >
+              <SetButton className="btn big" set={set} />
+            </SwipeRow>
           ))}
         </ButtonRow>
       ) : (

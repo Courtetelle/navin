@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { marksFly } from '../../features/map/longPress.ts';
 import { failureText } from '../../features/map/offlineMapFailure.ts';
 import type { OfflineMap } from '../../features/map/offlineMapStore.ts';
 import {
@@ -14,6 +15,7 @@ import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
+import { go } from '../../shell/router.ts';
 import { toast } from '../../state/index.ts';
 
 const BYTES_PER_MB = 1_000_000;
@@ -57,6 +59,13 @@ export function OfflineMaps() {
           key={map.id}
           id={map.id}
           name={map.name}
+          onView={() => {
+            marksFly.position = [
+              (map.south + map.north) / 2,
+              (map.west + map.east) / 2,
+            ];
+            go('tracker');
+          }}
           onDelete={(id) => {
             void deleteOfflineMap(id).then(refresh);
           }}

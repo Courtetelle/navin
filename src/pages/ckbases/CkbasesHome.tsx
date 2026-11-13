@@ -5,8 +5,12 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { BaseButton } from '../../features/checklists/PickBaseScreen.tsx';
-import { ListPublishRow } from '../../features/checklists/neighbours.ts';
+import {
+  ListPublishRow,
+  openListPublish,
+} from '../../features/checklists/neighbours.ts';
 import { useScreenLead } from '../../features/checklists/useScreenLead.ts';
+import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { textOf, uid } from '../../lib/format.ts';
@@ -96,16 +100,28 @@ export function CkbasesHome({
       ) : null}
       <div className="checks">
         {shown.map((base) => (
-          <BaseButton
+          <SwipeRow
             key={base.id}
-            base={base}
-            noCategory="sans catégorie"
-            idAttribute="data-base"
-            onClick={() => {
-              buzz();
-              onBase(base.id);
+            id={base.id}
+            name={base.name}
+            onShare={(format) => openListPublish('ckbases', base.id, format)}
+            onDelete={(id) => {
+              updateCkLib((bases) => {
+                const index = bases.findIndex((item) => item.id === id);
+                if (index !== -1) bases.splice(index, 1);
+              });
             }}
-          />
+          >
+            <BaseButton
+              base={base}
+              noCategory="sans catégorie"
+              idAttribute="data-base"
+              onClick={() => {
+                buzz();
+                onBase(base.id);
+              }}
+            />
+          </SwipeRow>
         ))}
         {shown.length === 0 ? (
           <HelpText>

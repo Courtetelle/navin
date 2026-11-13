@@ -598,7 +598,7 @@ async function crewAndBoat(page: Page, theme: string): Promise<void> {
   );
 }
 
-async function swipeToDelete(page: Page, theme: string): Promise<void> {
+async function swipeMenu(page: Page, theme: string): Promise<void> {
   await openData(page);
   await page.locator('[data-tile="people"]').click();
   await page.waitForTimeout(300);
@@ -623,14 +623,26 @@ async function swipeToDelete(page: Page, theme: string): Promise<void> {
   check(theme, 'the row slides back', back?.x === box.x);
   check(
     theme,
-    'swiping left asks to confirm the deletion',
-    await page.locator('.sw-confirm').isVisible(),
+    'swiping left opens the menu: view, share, delete',
+    (await page.locator('.sw-menu').isVisible()) &&
+      (await page.locator('.sw-menu [data-swview]').count()) === 1 &&
+      (await page.locator('.sw-menu .share-btn').count()) === 1 &&
+      (await page.locator('.sw-menu [data-swdel]').count()) === 1,
   );
-  await page.locator('[data-swno]').click();
+  // A tap on the trash deletes nothing: only a long press does.
+  await page.locator('.sw-menu [data-swdel]').click();
   check(
     theme,
-    'and cancelling keeps the row',
+    'a tap on the trash keeps the row',
     (await page.locator('[data-fiche]').count()) > 0,
+  );
+  // A touch elsewhere closes the menu.
+  await page.locator('h1, .page-title').first().click({ force: true });
+  await page.waitForTimeout(200);
+  check(
+    theme,
+    'a touch elsewhere closes the menu',
+    (await page.locator('.sw-menu').count()) === 0,
   );
 }
 
@@ -1160,7 +1172,7 @@ for (const theme of ['day', 'night']) {
     await buoyage(page, theme);
     await myMaps(page, theme);
     await crewCard(page, theme);
-    await swipeToDelete(page, theme);
+    await swipeMenu(page, theme);
     await crewAndBoat(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);

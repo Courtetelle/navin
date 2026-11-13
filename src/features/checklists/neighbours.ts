@@ -7,4 +7,4 @@ export {
   removePhoto,
   takePhoto,
 } from '../onwater/index.ts';
-export { ListPublishRow } from '../publish/index.ts';
+export { ListPublishRow, openListPublish } from '../publish/index.ts';

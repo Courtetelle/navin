@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { exportTrace, showTrace } from '../../features/map/traceActions.ts';
 import { drawTrkList } from '../../features/map/traceList.ts';
 import type { LakeTrack } from '../../features/map/trackStats.ts';
@@ -10,6 +11,7 @@ import {
   trackStats,
 } from '../../features/map/trackStats.ts';
 import { SwipeRow, deleteTrace } from '../../features/prep/index.ts';
+import { shareCards } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
@@ -53,6 +55,8 @@ function TraceItem({ track }: { track: LakeTrack }) {
       name={track.name}
       silent
       onDelete={deleteAndRefresh}
+      onView={() => showTrace(track)}
+      onShare={(format) => shareTrace(track, format)}
     >
       <div className="trk-item">
         <button
@@ -101,10 +105,14 @@ function knots(value: number | null): string {
   return value === null ? 'non enregistré' : `${fr(value)} nd`;
 }
 
-function TraceFiche({ track }: { track: LakeTrack }) {
-  const tr = useTr();
+/**
+ * The figures of a trace, as its sheet shows them.
+ * @param track - The trace.
+ * @returns `[label, value]` pairs.
+ */
+function traceRows(track: LakeTrack): Array<[string, string]> {
   const sheet = traceSheet(track.track);
-  const rows: Array<[string, string]> = [
+  return [
     ['Durée', fmtDur(sheet.duration)],
     ['Longueur', `${fr(sheet.nm)} NM`],
     ['Vitesse max', `${fr(sheet.maxSpeed)} nd`],
@@ -118,6 +126,30 @@ function TraceFiche({ track }: { track: LakeTrack }) {
       fmtTime(new Date(at)),
     ]),
   ];
+}
+
+/**
+ * Share a trace: its sheet as an image or a PDF, in the layout of Réglages.
+ * @param track - The trace.
+ * @param format - Image or PDF.
+ */
+function shareTrace(track: LakeTrack, format: ShareFormat): void {
+  const start = trackStats(track.track).start ?? Date.now();
+  void shareCards(
+    {
+      title: track.name,
+      kicker: 'Trace',
+      sub: fmtShortDate(new Date(start)),
+      sections: [{ title: 'Trace', rows: traceRows(track) }],
+    },
+    `trace-${track.name.replaceAll(/[^\w-]+/g, '-')}`,
+    format,
+  );
+}
+
+function TraceFiche({ track }: { track: LakeTrack }) {
+  const tr = useTr();
+  const rows = traceRows(track);
   return (
     <dl className="trk-sheet">
       {rows.map(([label, value]) => (

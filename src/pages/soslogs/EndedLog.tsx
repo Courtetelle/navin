@@ -3,6 +3,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
+import { SwipeRow } from '../../features/prep/index.ts';
 import { openListPublish } from '../../features/publish/index.ts';
 import { sosDeleteId } from '../../features/safety/safetyState.ts';
 import { toastThenRedraw } from '../../features/safety/toastThenRedraw.ts';
@@ -32,31 +33,47 @@ export function EndedLog({ log, open, onRedraw }: EndedLogProps) {
   const tr = useTr();
   const deleting = sosDeleteId.value === log.id;
   return (
-    <details className="section" open={open}>
-      <summary>{tr(summaryOf(log))}</summary>
-      <div style={{ padding: '0 14px 12px' }}>
-        <SosEvents log={log} />
-        <ButtonRow className="row c2">
-          <ShareButton
-            small
-            data-share={log.id}
-            onShare={(format) => openListPublish('soslogs', log.id, format)}
-          />
-          <Button
-            className="btn danger"
-            data-del={log.id}
-            onClick={() => {
-              buzz();
-              sosDeleteId.value = deleting ? null : log.id;
-              onRedraw(log.id);
-            }}
-          >
-            {tr('🗑 Effacer')}
-          </Button>
-        </ButtonRow>
-        {deleting ? <DeleteForm log={log} onRedraw={onRedraw} /> : null}
-      </div>
-    </details>
+    <SwipeRow
+      id={log.id}
+      name={summaryOf(log)}
+      silent
+      onShare={(format) => openListPublish('soslogs', log.id, format)}
+      onDelete={(id) => {
+        toastThenRedraw('Log SOS effacé', () => {
+          state.data.sosLogs.value = state.data.sosLogs.value.filter(
+            (one) => one.id !== id,
+          );
+          saveSosLogs();
+          onRedraw();
+        });
+      }}
+    >
+      <details className="section" open={open}>
+        <summary>{tr(summaryOf(log))}</summary>
+        <div style={{ padding: '0 14px 12px' }}>
+          <SosEvents log={log} />
+          <ButtonRow className="row c2">
+            <ShareButton
+              small
+              data-share={log.id}
+              onShare={(format) => openListPublish('soslogs', log.id, format)}
+            />
+            <Button
+              className="btn danger"
+              data-del={log.id}
+              onClick={() => {
+                buzz();
+                sosDeleteId.value = deleting ? null : log.id;
+                onRedraw(log.id);
+              }}
+            >
+              {tr('🗑 Effacer')}
+            </Button>
+          </ButtonRow>
+          {deleting ? <DeleteForm log={log} onRedraw={onRedraw} /> : null}
+        </div>
+      </details>
+    </SwipeRow>
   );
 }
 

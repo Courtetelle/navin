@@ -7,6 +7,7 @@ import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { SwipeRow } from '../../features/prep/index.ts';
+import { shareCards } from '../../features/publish/index.ts';
 import { CallButton } from '../../features/safety/Contacts.tsx';
 import type { PhoneEntry } from '../../features/safety/phoneBook.ts';
 import {
@@ -112,6 +113,27 @@ function PhoneRow({
       onDelete={(id) => {
         deletePhone(id);
         onDeleted();
+      }}
+      onView={null}
+      onShare={(format) => {
+        void shareCards(
+          {
+            title: entry.name,
+            kicker: 'Contact',
+            sub: kind,
+            sections: [
+              {
+                rows: [
+                  entry.email
+                    ? ['Courriel', entry.email]
+                    : ['Téléphone', entry.number],
+                ],
+              },
+            ],
+          },
+          `contact-${entry.name.replaceAll(/[^\w-]+/g, '-')}`,
+          format,
+        );
       }}
     >
       {button}

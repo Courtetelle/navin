@@ -8,6 +8,7 @@ import { LAKE_ROLES, SEA_ROLES, roleLabel } from '../../model/crewFields.ts';
 import type { CrewMember } from '../../model/types.ts';
 import { isLake, memberLockMsg } from '../../state/index.ts';
 import { SwipeRow } from '../prep/index.ts';
+import { openListPublish } from '../publish/index.ts';
 
 import { moveCrewLineUp, setCrewRole } from './aboard.ts';
 import { deleteMemberCard, openFiche } from './ficheNavigation.ts';
@@ -68,6 +69,11 @@ export function CrewOnBoard({ line, index }: CrewOnBoardProps) {
             name="✎ Fiche"
             block={memberLockMsg}
             onDelete={deleteMemberCard}
+            onShare={(format) => {
+              if (line.memberId) {
+                openListPublish('people', line.memberId, format);
+              }
+            }}
           >
             <Button
               className="btn act-plain"

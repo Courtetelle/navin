@@ -75,7 +75,16 @@ export function CruiseList({ mode, lines }: CruiseListProps) {
         const { id, name } = line.meta;
         const current = openId === id;
         return (
-          <SwipeRow key={id} id={id} name={name} onDelete={removeCruise}>
+          <SwipeRow
+            key={id}
+            id={id}
+            name={name}
+            onDelete={removeCruise}
+            onView={() => {
+              if (current) go('info');
+              else open(id);
+            }}
+          >
             <article
               className={current ? 'entry current' : 'entry'}
               data-id={id}

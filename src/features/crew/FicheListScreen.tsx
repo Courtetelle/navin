@@ -12,7 +12,7 @@ import { go } from '../../shell/router.ts';
 import { memberLockMsg, memberName, state } from '../../state/index.ts';
 import { membersByNav } from '../boats/index.ts';
 import { SwipeRow } from '../prep/index.ts';
-import { ListPublishRow } from '../publish/index.ts';
+import { ListPublishRow, openListPublish } from '../publish/index.ts';
 
 import { deleteMemberCard, openFiche } from './ficheNavigation.ts';
 import { showCrewPick, showFiche } from './screen.ts';
@@ -93,6 +93,7 @@ function CardButton({ member }: { member: Member }) {
       name={name}
       block={memberLockMsg}
       onDelete={deleteMemberCard}
+      onShare={(format) => openListPublish('people', member.id, format)}
     >
       <Button
         className="btn"

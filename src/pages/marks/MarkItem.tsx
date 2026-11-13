@@ -1,7 +1,6 @@
 import { untracked } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 
-import { ArmedButton } from '../../components/shared/ArmedButton.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
@@ -12,6 +11,8 @@ import { askText } from '../../features/map/dialogs.ts';
 import { setGoto } from '../../features/map/goto.ts';
 import { marksFly } from '../../features/map/longPress.ts';
 import { relativeParts } from '../../features/map/relativeText.ts';
+import { SwipeRow } from '../../features/prep/index.ts';
+import { openListPublish } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
@@ -53,75 +54,67 @@ export function MarkItem({ mark }: MarkItemProps) {
       if (found) found.note = note.trim();
     });
   };
+  const view = () => {
+    marksFly.position = [mark.lat, mark.lon];
+    go('tracker');
+  };
   return (
-    <FoldSection
-      className="field mark-item"
-      data-id={mark.id}
-      title={title}
-      titleText={title}
+    <SwipeRow
+      id={mark.id}
+      name={mark.name}
+      onView={view}
+      onShare={(format) => openListPublish('marks', mark.id, format)}
+      onDelete={(id) => {
+        updateMarks((marks) => {
+          const index = marks.findIndex((item) => item.id === id);
+          if (index !== -1) marks.splice(index, 1);
+        });
+      }}
     >
-      <HelpText text={plain} nextIsRow>
-        <>
-          {`${date} · `}
-          <TzTime date={mark.at} />
-          {` · ${position}${depth}`}
-          <br />
-          🧭{' '}
-          {relative ? (
-            <>
-              <b>{relative.distance}</b> · cap à suivre{' '}
-              <b>{relative.bearing}</b> (vrai){relative.eta}
-            </>
-          ) : (
-            relativeText
-          )}
-        </>
-      </HelpText>
-      <ButtonRow className="row c4">
-        <Button
-          className="btn primary"
-          data-mk="goto"
-          onClick={() => {
-            buzz();
-            const note = mark.note ? ` · ${mark.note}` : '';
-            setGoto({
-              lat: mark.lat,
-              lon: mark.lon,
-              name: `${mark.name}${note}`,
-            });
-          }}
-        >
-          {tr('🎯 Go to')}
-        </Button>
-        <Button
-          className="btn"
-          data-mk="show"
-          onClick={() => {
-            buzz();
-            marksFly.position = [mark.lat, mark.lon];
-            go('tracker');
-          }}
-        >
-          {tr('🗺 Voir')}
-        </Button>
-        <Button className="btn" data-mk="note" onClick={rename}>
-          {tr('✏️ Nom')}
-        </Button>
-        <ArmedButton
-          className="btn danger"
-          data-mk="del"
-          armedLabel="Encore"
-          onClick={buzz}
-          onConfirm={() => {
-            updateMarks((marks) => {
-              const index = marks.findIndex((item) => item.id === mark.id);
-              if (index !== -1) marks.splice(index, 1);
-            });
-          }}
-        >
-          🗑
-        </ArmedButton>
-      </ButtonRow>
-    </FoldSection>
+      <FoldSection
+        className="field mark-item"
+        data-id={mark.id}
+        title={title}
+        titleText={title}
+      >
+        <HelpText text={plain} nextIsRow>
+          <>
+            {`${date} · `}
+            <TzTime date={mark.at} />
+            {` · ${position}${depth}`}
+            <br />
+            🧭{' '}
+            {relative ? (
+              <>
+                <b>{relative.distance}</b> · cap à suivre{' '}
+                <b>{relative.bearing}</b> (vrai){relative.eta}
+              </>
+            ) : (
+              relativeText
+            )}
+          </>
+        </HelpText>
+        <ButtonRow className="row c2">
+          <Button
+            className="btn primary"
+            data-mk="goto"
+            onClick={() => {
+              buzz();
+              const note = mark.note ? ` · ${mark.note}` : '';
+              setGoto({
+                lat: mark.lat,
+                lon: mark.lon,
+                name: `${mark.name}${note}`,
+              });
+            }}
+          >
+            {tr('🎯 Go to')}
+          </Button>
+          <Button className="btn" data-mk="note" onClick={rename}>
+            {tr('✏️ Nom')}
+          </Button>
+        </ButtonRow>
+      </FoldSection>
+    </SwipeRow>
   );
 }

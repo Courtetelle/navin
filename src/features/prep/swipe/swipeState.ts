@@ -1,7 +1,7 @@
 import { signal } from '@preact/signals-react';
 
-/** Delay before an unanswered confirmation row closes (prep.js:1256). */
-const CONFIRM_DELAY_MS = 5000;
+/** Delay before an untouched menu of a band closes. */
+const CONFIRM_DELAY_MS = 8000;
 
 /** Token of the row whose confirmation is open; only one at a time. */
 export const openRowToken = signal<string | null>(null);

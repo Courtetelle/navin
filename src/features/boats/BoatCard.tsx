@@ -80,6 +80,7 @@ export function BoatCard({
         removeBoat(id);
         onRemoved();
       }}
+      onShare={(format) => openListPublish('boats', boat.id, format)}
     >
       <details
         className="section"
