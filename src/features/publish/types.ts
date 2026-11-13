@@ -1,4 +1,4 @@
-/** Data lists that can be published through the « 📤 Publier » window. */
+/** Data lists that can be published through the « 📤 Partager » window. */
 export type ListKind =
   'people' | 'crews' | 'boats' | 'traces' | 'marks' | 'ckbases' | 'soslogs';
 
@@ -29,7 +29,7 @@ export interface PublishPhoto {
   cap: string;
 }
 
-/** One element of a data list, as the Publier window sees it. */
+/** One element of a data list, as the Partager window sees it. */
 export interface PublishItem {
   /** Id. */
   id: string;

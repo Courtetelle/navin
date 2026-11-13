@@ -15,7 +15,7 @@ interface DossierPublishProps {
 }
 
 /**
- * The « Publier » window of a boat sheet: image or PDF.
+ * The « Partager » window of a boat sheet: image or PDF.
  * @param props - Boat and way out.
  * @returns The window.
  */

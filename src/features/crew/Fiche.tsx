@@ -192,7 +192,7 @@ export function Fiche({ id }: FicheProps) {
               if (savedId) openListPublish('people', savedId);
             }}
           >
-            {tr('📤 Publier')}
+            {tr('📤 Partager')}
             <small>
               {tr(
                 'la fiche en image ou PDF, pour un dernier contrôle par la personne',

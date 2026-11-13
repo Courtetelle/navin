@@ -139,7 +139,7 @@ export function WindPopup() {
         ) : null}
         {content.report ? (
           <Button className="btn wp-publish" noUiEdit>
-            {translate('📤 Publier')}
+            {translate('📤 Partager')}
           </Button>
         ) : null}
         {content.closeTxt ? (

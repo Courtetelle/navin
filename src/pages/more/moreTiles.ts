@@ -166,7 +166,7 @@ export function tilesWithCruise(): MoreTile[] {
     NMEA,
     {
       key: 'print',
-      title: '📤 Publier le livre de bord',
+      title: '📤 Partager le livre de bord',
       sub: 'PDF A4, choisir les pages',
     },
     {

@@ -141,7 +141,7 @@ export function BoatCard({
               openListPublish('boats', boat.id);
             }}
           >
-            {tr('📤 Publier')}
+            {tr('📤 Partager')}
             <small>{tr('cette fiche en image ou PDF, avec les photos')}</small>
           </Button>
         </ButtonRow>

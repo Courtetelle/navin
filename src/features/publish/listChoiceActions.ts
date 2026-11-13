@@ -2,7 +2,7 @@ import { choiceIn, currentIn, persist, update } from './listPublishState.ts';
 import type { ListChoice, ListKind } from './types.ts';
 
 /**
- * Keep a single element checked (the Publier button of a sheet).
+ * Keep a single element checked (the Partager button of a sheet).
  * @param kind - List kind.
  * @param others - Ids of all the other elements.
  */

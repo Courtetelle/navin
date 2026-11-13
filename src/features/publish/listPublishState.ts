@@ -16,7 +16,7 @@ const STORAGE_KEY = 'ldb.lxTpl';
 
 type Templates = Partial<Record<ListKind, ListTemplates>>;
 
-/** Everything the Publier windows remember. */
+/** Everything the Partager windows remember. */
 interface PublishState {
   /** Print templates, as stored. */
   templates: Templates;

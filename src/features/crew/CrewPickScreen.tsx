@@ -102,7 +102,7 @@ export function CrewPickScreen({ lead }: CrewPickScreenProps) {
               setPublishing(true);
             }}
           >
-            {tr('📤 Publier')}
+            {tr('📤 Partager')}
             <small>{tr('liste d’équipage, image ou PDF')}</small>
           </Button>
         </ButtonRow>

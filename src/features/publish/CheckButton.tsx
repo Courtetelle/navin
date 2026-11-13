@@ -16,7 +16,7 @@ interface CheckButtonProps extends ComponentPropsWithoutRef<'button'> {
 }
 
 /**
- * A `button.btn.check` of the Publier window: ✔ box, then its label.
+ * A `button.btn.check` of the Partager window: ✔ box, then its label.
  * @param props - State, classes and label.
  * @returns The button.
  */

@@ -70,7 +70,7 @@ const WITH_EXTRA_SENDS: ReadonlySet<ListKind> = new Set([
 ]);
 
 /**
- * Whether a list has sends of its own in the Publier window.
+ * Whether a list has sends of its own in the Partager window.
  * @param kind - List kind.
  * @returns Whether the « Autres envois » part shows.
  */
@@ -79,7 +79,7 @@ export function hasExtraSends(kind: ListKind): boolean {
 }
 
 /**
- * Whether the Publier row of a list is shown.
+ * Whether the Partager row of a list is shown.
  * @param kind - List kind.
  * @returns Whether the list has elements or sends of its own.
  */

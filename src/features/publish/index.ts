@@ -1,5 +1,5 @@
 /**
- * Publish domain: the single « 📤 Publier » window that replaces every print and
+ * Publish domain: the single « 📤 Partager » window that replaces every print and
  * export, the list print block, the image cards and the A4 print holder.
  *
  * | Legacy (nav.js)                          | New export                                                 |
@@ -15,7 +15,7 @@
  * ## `<ListPublishRow kind />`: under a data list
  *
  * Replaces the nav.js:676 observer. Renders `div.row.ck-pub-row.lx-pub.no-print.row-stack >
- * button.btn.big.ck-pub.act-plain` (« 📤 Publier » + `small` « image ou PDF », translated, through
+ * button.btn.big.ck-pub.act-plain` (« 📤 Partager » + `small` « image ou PDF », translated, through
  * `ButtonRow`) and opens the window on tap. It renders
  * nothing when the list has nothing to publish. Place it as the **last child of `#view`, or just
  * before a direct child `.page-end`** (delete zones stay at the very bottom). Render it only in
@@ -51,7 +51,7 @@
  * ```
  *
  * Renders in a portal on `<body>`: `div.ck-ask.lx-modal > div.ck-ask-box.pub-box` with `p` (head,
- * default « 📤 Publier »), `p.help.lx-modal-sub` (when `sub`), your children, then
+ * default « 📤 Partager »), `p.help.lx-modal-sub` (when `sub`), your children, then
  * `div.row > button.btn` « Fermer ». A tap on the overlay closes, every button inside buzzes.
  * `pubBox={false}` is legacy `classList.remove('pub-box')` (face framing, `head="🙂 Vignette du visage"`).
  * The legacy `onClick(button, overlay)` becomes plain `onClick` on your buttons; `overlay.remove()`

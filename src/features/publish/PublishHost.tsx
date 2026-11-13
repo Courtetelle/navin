@@ -7,7 +7,7 @@ import { LIST_TITLES } from './listKinds.ts';
 import { closeListPublish, openKind } from './publishWindowState.ts';
 
 /**
- * The Publier window of the open list, in a portal on `<body>`.
+ * The Partager window of the open list, in a portal on `<body>`.
  * @returns The overlay, or null when no window is open.
  */
 export function PublishHost(): ReactElement | null {
@@ -17,7 +17,7 @@ export function PublishHost(): ReactElement | null {
   return createPortal(
     <div className="ck-ask lx-modal" onClick={closeOnOverlay}>
       <div className="ck-ask-box pub-box">
-        <p>📤 Publier</p>
+        <p>📤 Partager</p>
         <p className="help lx-modal-sub">{LIST_TITLES[kind]}</p>
         <ListPublishBox kind={kind} />
       </div>

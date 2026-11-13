@@ -12,7 +12,7 @@ import {
 import { ITEM_LABELS } from './listKinds.ts';
 import type { ListChoice, ListKind, PublishItem } from './types.ts';
 
-/** Props of the option blocks of the Publier window. */
+/** Props of the option blocks of the Partager window. */
 export interface ListOptionProps {
   /** The list. */
   kind: ListKind;

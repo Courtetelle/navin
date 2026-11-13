@@ -70,7 +70,7 @@ interface WindPopupContent {
    */
   closeTxt?: string;
   /**
-   * The alert to publish (its reading and where): a « Publier » button.
+   * The alert to publish (its reading and where): a « Partager » button.
    * @default undefined
    */
   report?: AlertReport;

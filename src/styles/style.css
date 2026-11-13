@@ -7558,7 +7558,7 @@ html {
   display: none !important;
 }
 /* v387 (Corban) : la liste de check-in dans son cadre ; « Observations » dans son propre cadre, d'une couleur à lui, en fin de liste ;
-   bouton « Publier » gris anthracite, écriture blanche. */
+   bouton « Partager » gris anthracite, écriture blanche. */
 .ck-list:not(:empty) {
   border: 1.5px solid var(--line, #c9ced6);
   border-radius: 18px;
@@ -7610,7 +7610,7 @@ html {
   color: #ff4040;
   border-color: #600000;
 }
-/* v388 (Corban) : fenêtre Publier : 3 mises en page, case photos, image ou PDF. */
+/* v388 (Corban) : fenêtre Partager : 3 mises en page, case photos, image ou PDF. */
 .pub-box .pub-h {
   margin: 4px 0 0;
   font-size: 14px;
@@ -7719,7 +7719,7 @@ figure.photo figcaption {
 figure.photo img {
   display: block;
 }
-/* v393 (Corban) : fenêtre « Publier » des listes data (même disposition que le check-in, puis réglages et envois propres). */
+/* v393 (Corban) : fenêtre « Partager » des listes data (même disposition que le check-in, puis réglages et envois propres). */
 .lx-modal .ck-ask-box {
   max-height: calc(100vh - 32px);
   max-height: calc(100dvh - 32px);
@@ -7774,7 +7774,7 @@ figure.photo img {
   color: #ff4040;
   border-color: #600000;
 }
-/* v394 (Corban) : vignette ronde du visage (fiche coéquipier·ère), à l'écran et dans les fiches publiées. */
+/* v394 (Corban) : vignette ronde du visage (fiche coéquipier·ère), à l'écran et dans les fiches partagées. */
 .lx-hd.lx-hd-av {
   position: relative;
   padding-right: 34mm;
@@ -8295,7 +8295,7 @@ h1 .help-i.help-i-h1 {
   display: none !important;
 }
 
-/* v429 (Corban) : toujours de l'espace entre les pastilles (fiche personne : photos, publier, supprimer) */
+/* v429 (Corban) : toujours de l'espace entre les pastilles (fiche personne : photos, partager, supprimer) */
 #fPhList:not(:empty) {
   margin-bottom: 14px;
 }
@@ -9222,7 +9222,7 @@ body.has-navtop #view > h1.live-title,
   width: 100%;
   margin-top: 12px;
 }
-/* « Publier » under Live météo: white, so the two do not look alike */
+/* « Partager » under Live météo: white, so the two do not look alike */
 .wind-pop .wp-publish {
   background: #fff;
   color: #0b1220;

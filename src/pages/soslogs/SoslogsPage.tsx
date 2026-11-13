@@ -82,7 +82,7 @@ function SosLogsContent({ openLog, onRedraw }: SosLogsContentProps) {
                 openListPublish('soslogs', active.id);
               }}
             >
-              {tr('📤 Publier')}
+              {tr('📤 Partager')}
               <small>{tr('image, PDF ou texte')}</small>
             </Button>
           </ButtonRow>

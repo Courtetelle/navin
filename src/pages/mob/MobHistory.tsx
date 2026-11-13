@@ -42,7 +42,7 @@ export function MobHistory({ log }: MobHistoryProps) {
               data-mshare={log.id}
               onClick={() => share(log)}
             >
-              {tr('📤 Publier')}
+              {tr('📤 Partager')}
               <small>{tr('texte du log')}</small>
             </Button>
           </ButtonRow>
@@ -66,7 +66,7 @@ export function MobHistory({ log }: MobHistoryProps) {
                   data-mshare={item.id}
                   onClick={() => share(item)}
                 >
-                  {tr('📤 Publier ce log')}
+                  {tr('📤 Partager ce log')}
                 </Button>
               </ButtonRow>
             </div>

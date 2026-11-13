@@ -1,4 +1,4 @@
-/* What the Publier window uses from the other domains, in one place. */
+/* What the Partager window uses from the other domains, in one place. */
 export {
   boatDocs,
   boatInfoRows,

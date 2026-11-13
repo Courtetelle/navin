@@ -12,10 +12,10 @@ import type { ListKind } from './types.ts';
 let host: Root | null = null;
 
 /**
- * Open the « 📤 Publier » window of a data list. No component is needed on the
+ * Open the « 📤 Partager » window of a data list. No component is needed on the
  * page: the window is a portal on `<body>`.
  * @param kind - List kind.
- * @param only - Id of the only element to keep checked (Publier from a sheet).
+ * @param only - Id of the only element to keep checked (Partager from a sheet).
  */
 export function openListPublish(kind: ListKind, only?: string): void {
   if (only) {

@@ -128,7 +128,7 @@ export function ChecklistScreen({
               publishChecklist();
             }}
           >
-            {tr('📤 Publier')}
+            {tr('📤 Partager')}
             <small>{tr('rapport PréP + check-in, image ou PDF')}</small>
           </Button>
         </ButtonRow>

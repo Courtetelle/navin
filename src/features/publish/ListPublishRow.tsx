@@ -16,7 +16,7 @@ export interface ListPublishRowProps {
 }
 
 /**
- * The « 📤 Publier » row at the bottom of a data list. Renders nothing when
+ * The « 📤 Partager » row at the bottom of a data list. Renders nothing when
  * the list has nothing to publish.
  * @param props - List kind.
  * @returns The row or null.
@@ -36,7 +36,7 @@ export function ListPublishRow({
           openListPublish(kind);
         }}
       >
-        {tr('📤 Publier')}
+        {tr('📤 Partager')}
         <small>{tr('image ou PDF')}</small>
       </Button>
     </ButtonRow>

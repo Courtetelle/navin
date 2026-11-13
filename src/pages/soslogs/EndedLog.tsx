@@ -44,7 +44,7 @@ export function EndedLog({ log, open, onRedraw }: EndedLogProps) {
               openListPublish('soslogs', log.id);
             }}
           >
-            {tr('📤 Publier')}
+            {tr('📤 Partager')}
           </Button>
           <Button
             className="btn danger"

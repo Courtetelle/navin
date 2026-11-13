@@ -197,7 +197,7 @@ function DossierSheet({
             setPublishing(true);
           }}
         >
-          {tr('📤 Publier')}
+          {tr('📤 Partager')}
           <small>{tr('fiche et documents, image ou PDF')}</small>
         </Button>
       </ButtonRow>

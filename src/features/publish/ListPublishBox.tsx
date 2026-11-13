@@ -31,7 +31,7 @@ interface ListPublishBoxProps {
 }
 
 /**
- * Content of the Publier window of a list: layout, photos, image or PDF, then
+ * Content of the Partager window of a list: layout, photos, image or PDF, then
  * the settings of the list (templates, elements, sections, photos) and its own
  * sends.
  * @param props - List kind.

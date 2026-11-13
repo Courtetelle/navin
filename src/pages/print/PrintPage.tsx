@@ -21,9 +21,9 @@ import {
   setPrintSelection,
 } from './printPages.ts';
 
-const TITLE = 'Publier le livre de bord';
+const TITLE = 'Partager le livre de bord';
 const HELP =
-  'Cochez les pages, puis « 📤 Publier ». Dans la fenêtre qui s’ouvre, choisissez « Enregistrer en PDF » (ou une imprimante).';
+  'Cochez les pages, puis « 📤 Partager ». Dans la fenêtre qui s’ouvre, choisissez « Enregistrer en PDF » (ou une imprimante).';
 
 /**
  * Screen `print` (legacy `VIEWS.print`): choose the pages of the log book, then
@@ -119,7 +119,7 @@ export function PrintPage() {
       </div>
       <ButtonRow className="save-bar row ck-pub-row">
         <Button className="btn big ck-pub" id="doPrint" onClick={publish}>
-          {tr('📤 Publier')}
+          {tr('📤 Partager')}
           <small>
             {tr(
               `PDF A4 · ${selected.size} page${selected.size > 1 ? 's' : ''}`,

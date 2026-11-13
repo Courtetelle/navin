@@ -30,7 +30,7 @@ export function PrepPublishBox({ onClose }: PrepPublishBoxProps) {
   const photos = reportPhotos();
   return (
     <div className="ck-ask-box pub-box">
-      <p>Publier le rapport PréP + check-in</p>
+      <p>Partager le rapport PréP + check-in</p>
       <p className="help pub-h">Mise en page</p>
       <div className="pub-themes">
         {LX_THEMES.map(([id, label]) => (

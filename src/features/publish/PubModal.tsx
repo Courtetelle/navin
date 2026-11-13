@@ -13,7 +13,7 @@ export interface PubModalProps {
   sub?: string;
   /**
    * First line of the window.
-   * @default '📤 Publier'
+   * @default '📤 Partager'
    */
   head?: string;
   /**
@@ -28,14 +28,14 @@ export interface PubModalProps {
 }
 
 /**
- * Small « Publier » window for what is sent outside the data lists (crew list
+ * Small « Partager » window for what is sent outside the data lists (crew list
  * of the outing, boat dossier, face framing). Every button inside buzzes.
  * @param props - Texts, close action and content.
  * @returns The overlay, in a portal on `<body>`.
  */
 export function PubModal({
   sub = '',
-  head = '📤 Publier',
+  head = '📤 Partager',
   pubBox = true,
   onClose,
   children,

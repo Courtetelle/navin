@@ -5,7 +5,7 @@ import { state, toast } from '../../state/index.ts';
 import { PrepPublishBox } from './PrepPublishBox.tsx';
 
 /**
- * The « Publier » window of the report: layout, photos, then image or PDF
+ * The « Partager » window of the report: layout, photos, then image or PDF
  * (legacy `prepPublishDialog`). It is appended to `<body>`, from any screen.
  */
 export function prepPublishDialog(): void {
