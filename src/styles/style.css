@@ -11119,3 +11119,130 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
 .mark-item > summary .mk-pin {
   margin-right: 6px;
 }
+
+/* Landscape tablet (X), one column on the left, top to bottom: the clock,
+   the arrow and ＋, NavIn, START (and Amarrage), the mark, the dividers,
+   the photo, and SOS at the very bottom; the magnifier at the top right. NavIn unrolls at its right PréP (Météo
+   during a track), data, the settings, the phone or VHF. */
+@media (orientation: landscape) and (min-width: 560px) {
+  html body {
+    --rb-x: calc(var(--rb-w) + var(--rb-gap));
+  }
+  html body .side-rail.side-rail-left {
+    top: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-top));
+    left: var(--rb-side);
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--rb-gap);
+  }
+  html body .side-rail-left .rail-line {
+    display: flex;
+    flex-direction: row;
+    gap: var(--rb-gap);
+  }
+  html body .side-rail-left .rail-btn {
+    width: var(--rb-w);
+    height: var(--rb-h);
+    margin: 0;
+  }
+  html body .side-rail-left .rail-navin-place {
+    height: var(--rb-h);
+    width: var(--rb-w);
+    pointer-events: none;
+  }
+  html body .rail-boat {
+    position: relative;
+  }
+  html body .rail-boat .rail-minus {
+    position: absolute;
+    right: 8px;
+    bottom: 2px;
+    font-size: calc(var(--rb-h) * 0.42);
+    font-weight: 900;
+    line-height: 1;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
+    top: calc(
+      var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+    top: auto !important;
+    bottom: calc(var(--rb-top) + env(safe-area-inset-bottom)) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+  }
+  /* The magnifier alone at the top right */
+  html body #searchBtn {
+    top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: var(--rb-side) !important;
+  }
+  /* data and the settings: in the row of NavIn, only while it is unrolled */
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    top: calc(
+      var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
+    left: calc(var(--rb-side) + 2 * var(--rb-x)) !important;
+    right: auto !important;
+  }
+  html body header.topbar #gearBtn {
+    top: calc(
+      var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
+    left: calc(var(--rb-side) + 3 * var(--rb-x)) !important;
+    right: auto !important;
+  }
+  html body:not(.navin-open) header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body:not(.navin-open) header.topbar.topbar #gearBtn.theme-btn {
+    display: none !important;
+  }
+  html body .navin-row {
+    position: fixed;
+    top: calc(var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top));
+    left: calc(var(--rb-side) + var(--rb-x));
+    z-index: 1500;
+    display: flex;
+    gap: var(--rb-gap);
+    pointer-events: none;
+  }
+  html body .navin-row > * {
+    pointer-events: auto;
+  }
+  html body .navin-row .rail-btn {
+    width: var(--rb-w);
+    height: var(--rb-h);
+    margin: 0;
+  }
+  html body .navin-row-comm {
+    margin-left: calc(2 * var(--rb-x));
+  }
+  /* No column on the right any more: the map and its overlays reach the
+     right edge. */
+  html body .trk-full .trk-over {
+    right: var(--rb-side);
+  }
+  html body .trk-full .trk-dash {
+    right: calc(var(--rb-side) + 24px);
+  }
+  html body .trk-full .leaflet-top.ctl-col {
+    right: var(--rb-side) !important;
+  }
+}
+
+/* X: in the line of START, FIN (paused) takes its own place, then Amarrage */
+@media (orientation: landscape) and (min-width: 560px) {
+  html body .side-rail-left .rail-track-wrap {
+    display: flex;
+    gap: var(--rb-gap);
+  }
+  html body .side-rail-left .rail-track-wrap .rail-btn.rail-fin {
+    position: static;
+  }
+}

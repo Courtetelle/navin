@@ -124,6 +124,44 @@ export function boatScaleTap(): void {
 }
 
 /**
+ * The arrow of the landscape tablet: the first touch brings the map back on
+ * the boat and follows it, the zoom unchanged; each further touch, the boat
+ * already followed, zooms out one level, and stays at the widest.
+ */
+export function boatArrowTap(): void {
+  buzz();
+  backToGps();
+  const shown = onMap();
+  const map = tracker.current?.map;
+  const following = Boolean(tracker.current?.follow);
+  if (!shown || !map) {
+    go('tracker');
+    apply(boatScale, 'boat');
+    return;
+  }
+  const here = herePos();
+  const boat =
+    tracker.current?.me?.getLatLng() ??
+    (here ? leaflet().latLng(here.lat, here.lon) : null);
+  if (!boat) {
+    toast('Position du bateau inconnue : attendez le GPS.');
+    return;
+  }
+  if (!following) {
+    setFollow(true);
+    map.setView(boat, map.getZoom());
+    toast('Bateau suivi');
+    return;
+  }
+  if (map.getZoom() <= map.getMinZoom()) {
+    map.setView(boat, map.getZoom());
+    toast('Zoom le plus large');
+    return;
+  }
+  map.setView(boat, map.getZoom() - 1);
+}
+
+/**
  * Long press on the boat button: the map turned to the course of the boat,
  * or north up again.
  * @returns Whether the course is now up.

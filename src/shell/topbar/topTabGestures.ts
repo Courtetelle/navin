@@ -1,8 +1,11 @@
 import { buzz } from '../../lib/dom.ts';
+import { WIDE_QUERY } from '../../lib/useWide.ts';
 import { state, toast } from '../../state/index.ts';
 import { menuButtonPress } from '../menuOwner.ts';
 import { navBack } from '../navbar/navActions.ts';
+import { closeNavinRow, navinRowChosen, toggleNavinRow } from '../navinRow.ts';
 import { go } from '../router.ts';
+import { toggleThemeFromNavin } from '../theme.ts';
 
 import { TAB_ORDER, tabDisplays, topMenuDomainActions } from './tabDisplays.ts';
 import type { TopTabKey } from './topMenuModel.ts';
@@ -15,6 +18,11 @@ import {
 } from './topMenuState.ts';
 
 let pressTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** A tablet in landscape: NavIn holds a row of menus. */
+function wideScreen(): boolean {
+  return globalThis.matchMedia?.(WIDE_QUERY).matches ?? false;
+}
 let fired = false;
 let keyboardTab: TopTabKey | null = null;
 let keyboardTimer: ReturnType<typeof setTimeout> | undefined;
@@ -37,9 +45,15 @@ export function tabPointerDown(key: TopTabKey): void {
       return;
     }
     if (item.base && key === 'tracker' && item.label === 'NavIn') {
+      resetTab(key);
+      // Landscape tablet: the long press on NavIn is night and day; the
+      // zone is chosen in PréP.
+      if (wideScreen()) {
+        toggleThemeFromNavin();
+        return;
+      }
       buzz();
       topMenuDomainActions().cycleZone();
-      resetTab(key);
       return;
     }
     if (item.base) return;
@@ -81,9 +95,23 @@ export function tabClick(key: TopTabKey, active: boolean): void {
     showBaseHint('sos');
     return;
   }
+  // Landscape tablet: NavIn unrolls its row of menus at its right, or rolls
+  // it back.
+  if (key === 'tracker' && wideScreen()) {
+    for (const other of TAB_ORDER) if (other !== key) resetTab(other);
+    // Away from the map, NavIn rolls its row back and brings the map.
+    if (state.view.currentView.value !== 'tracker') {
+      closeNavinRow();
+      go('tracker');
+      return;
+    }
+    toggleNavinRow();
+    return;
+  }
   // data: one step back at each touch inside its menu, the same rule as the
   // other menu buttons.
   if (key === 'more') {
+    navinRowChosen();
     for (const other of TAB_ORDER) resetTab(other);
     menuButtonPress('more', navBack);
     return;

@@ -1,3 +1,4 @@
+import { signal } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 
@@ -7,8 +8,8 @@ import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { shownMap } from '../../features/map/mapFull.ts';
 import { mapOrientation } from '../../features/map/mapOrientation.ts';
 import {
+  boatArrowTap,
   boatOrientPress,
-  boatScaleTap,
 } from '../../features/map/navinScale.ts';
 import {
   DIVIDERS_ICON,
@@ -24,6 +25,7 @@ import { useWide } from '../../lib/useWide.ts';
 import { hasBodyClass } from '../../shell/bodyClass.ts';
 import { inMenu, menuButtonPress } from '../../shell/menuOwner.ts';
 import { navBack } from '../../shell/navbar/navActions.ts';
+import { navinRowChosen, navinRowOpen } from '../../shell/navinRow.ts';
 import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
@@ -31,6 +33,7 @@ import { domainActions } from '../../shell/topbar/tabDisplays.ts';
 import {
   FLAG_SVG,
   FLAG_WAVE_SVG,
+  MOOR_SVG,
   START_SVG,
 } from '../../shell/topbar/tabIcons.ts';
 import {
@@ -45,18 +48,11 @@ import {
 
 import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
 import { RailIcon } from './railIcons.tsx';
-import type { RailSide, Rails } from './sideRails.ts';
-import { MAP_ACTIONS, loadRails, setRail, splitTitle } from './sideRails.ts';
+import { MAP_ACTIONS, splitTitle } from './sideRails.ts';
 import { trackDone } from './trackDone.ts';
 
 /** A GPS position older than this is read again. */
 const FRESH_FIX_MS = 30_000;
-
-/** A place being chosen: its column and its rank. */
-interface Picking {
-  side: RailSide;
-  index: number;
-}
 
 /** The pin has its fixed place in the left column. */
 const PIN_KEY = 'act:point';
@@ -124,76 +120,129 @@ function run(key: string): void {
 }
 
 /**
- * Two columns of buttons beside the map, on a landscape tablet only. A free
- * place (＋) takes any function of the app; a long press on a button changes
- * or removes it. The choice stays on this device.
- * @returns The columns, or nothing on a phone.
+ * The column of the landscape tablet, on the left of the map, top to bottom:
+ * the clock, the arrow of the boat with ＋ at its right (3 s after the
+ * arrow), NavIn, START (and Amarrage at its right during a track), the mark,
+ * the dividers, the photo, and SOS at the very bottom; the magnifier alone
+ * at the top right. NavIn unrolls at its right PréP (Météo during a
+ * track), data, the settings and the phone or the VHF.
+ * @returns The column, or nothing on a phone held upright.
  */
 export function SideRails() {
   const wide = useWide();
-  const [rails, setRails] = useState<Rails>(loadRails);
-  const [picking, setPicking] = useState<Picking | null>(null);
   if (!wide) return null;
-  const known = new Map(choices().map((entry) => [entry.key, entry]));
-  const weather = known.get('weather');
-  const pick = (key: string) => {
-    if (!picking) return;
-    buzz();
-    setRails(setRail(rails, picking.side, picking.index, key));
-    setPicking(null);
-  };
   return (
     <>
-      {(['left', 'right'] as const).map((side) => (
-        <div key={side} className={`side-rail side-rail-${side}`}>
-          {side === 'left' ? (
-            <>
-              <BoatButton />
-              {weather ? <RailButton entry={weather} onPick={noPick} /> : null}
-              <DepartButtons />
-              <PinButton />
-            </>
-          ) : null}
-          {side === 'right' ? (
-            <>
-              <CommButton />
-              <RulerButton />
-            </>
-          ) : null}
-          {rails[side].slice(0, slotsOf(side)).map((key, index) => {
-            const entry = key ? known.get(key) : undefined;
-            return entry ? (
-              <RailButton
-                // eslint-disable-next-line react/no-array-index-key -- the places are fixed
-                key={index}
-                entry={entry}
-                onPick={() => {
-                  buzz();
-                  setPicking({ side, index });
-                }}
-              />
-            ) : null;
-          })}
+      <div className="side-rail side-rail-left">
+        <div className="rail-line">
+          <BoatButton />
+          <PlusButton />
         </div>
-      ))}
-      <ZoomButtons />
-      {picking ? (
-        <RailPicker
-          current={rails[picking.side][picking.index] ?? ''}
-          onPick={pick}
-          onAdd={addPlaceOf(rails, picking.side)}
-          onMove={(index) => setPicking({ side: picking.side, index })}
-          onClose={() => setPicking(null)}
-        />
-      ) : null}
+        <div className="rail-navin-place" aria-hidden="true" />
+        <StartLine />
+        <PinButton />
+        <RulerButton />
+        <PhotoButton />
+      </div>
+      <NavinRow />
     </>
   );
 }
 
 /**
- * Bottom of the left column, above the magnifier: zoom in and out of the map
- * shown, the size of the other buttons. Away from a map, the map opens.
- * @returns The two buttons.
+ * The row NavIn unrolls at its right: PréP (Météo during a track), then data
+ * and the settings (their own buttons, placed there), then the phone or the
+ * VHF. Leaving one of their menus rolls it back.
+ * @returns The row, or nothing while rolled.
+ */
+function NavinRow() {
+  useSignals();
+  if (!navinRowOpen.value) return null;
+  const tracking = state.view.tracking.value;
+  const weather = choices().find((entry) => entry.key === 'weather');
+  return (
+    <div className="navin-row" onClickCapture={navinRowChosen}>
+      <div className="navin-row-first">
+        {tracking && weather ? (
+          <RailButton entry={weather} onPick={noPick} />
+        ) : (
+          <PrepButton />
+        )}
+      </div>
+      <div className="navin-row-comm">
+        <CommButton />
+      </div>
+    </div>
+  );
+}
+
+/** ＋ is shown this long after a touch on the arrow, or on itself. */
+const PLUS_MS = 3000;
+
+/** ＋ is shown (for a moment after the arrow). */
+const plusShown = signal(false);
+let plusTimer: ReturnType<typeof setTimeout> | undefined;
+
+function showPlus(): void {
+  plusShown.value = true;
+  clearTimeout(plusTimer);
+  plusTimer = setTimeout(() => {
+    plusShown.value = false;
+  }, PLUS_MS);
+}
+
+/**
+ * ＋ at the right of the arrow: zooms in the map shown, one level. It shows
+ * for 3 s after a touch on the arrow (each ＋ gives 3 s more), on a map only.
+ * @returns The button, or nothing.
+ */
+function PlusButton() {
+  useSignals();
+  const tr = useTr();
+  const map = state.view.currentView.value === 'tracker' || shownMap();
+  if (!map || !plusShown.value) return null;
+  return (
+    <Button
+      type="button"
+      noUiEdit
+      className="rail-btn rail-zoom-in"
+      aria-label={tr('Zoomer')}
+      onClick={() => {
+        showPlus();
+        zoom(1);
+      }}
+    >
+      <span className="rail-icon">
+        <ZoomSign plus />
+      </span>
+    </Button>
+  );
+}
+
+/**
+ * The photo, at its fixed place under the dividers.
+ * @returns The button.
+ */
+function PhotoButton() {
+  const tr = useTr();
+  return (
+    <Button
+      type="button"
+      noUiEdit
+      className="rail-btn rail-bare rail-photo"
+      aria-label={tr('Photo')}
+      onClick={() => run('act:photo')}
+    >
+      <span className="rail-icon">
+        <RailIcon name="act:photo" />
+      </span>
+    </Button>
+  );
+}
+
+/**
+ * Zoom the map shown one level. Away from a map, the map opens.
+ * @param step - In or out.
  */
 function zoom(step: 1 | -1): void {
   buzz();
@@ -219,55 +268,12 @@ function ZoomSign({ plus }: { plus: boolean }) {
   );
 }
 
-function ZoomButtons() {
-  const tr = useTr();
-  return (
-    <div className="rail-zoom">
-      <Button
-        type="button"
-        noUiEdit
-        className="rail-btn rail-zoom-in"
-        aria-label={tr('Zoomer')}
-        onClick={() => zoom(1)}
-      >
-        <span className="rail-icon">
-          <ZoomSign plus />
-        </span>
-      </Button>
-      <Button
-        type="button"
-        noUiEdit
-        className="rail-btn rail-zoom-out"
-        aria-label={tr('Dézoomer')}
-        onClick={() => zoom(-1)}
-      >
-        <span className="rail-icon">
-          <ZoomSign plus={false} />
-        </span>
-      </Button>
-    </div>
-  );
-}
-
 function noPick(): void {
   // The fixed places of the left column are not chosen.
 }
 
 /** Functions shown with a drawing rather than their emoji. */
 const DRAWN = new Set(['act:point', 'act:photo', 'weather']);
-
-/**
- * Places left for the sailor's buttons: the right column has NavIn, the
- * magnifier, VHF / phone and data first, the left one the boat, Météo, PréP,
- * START and the pin.
- */
-function slotsOf(side: RailSide): number {
-  return side === 'right' ? RIGHT_SLOTS : LEFT_SLOTS;
-}
-
-const RIGHT_SLOTS = 3;
-
-const LEFT_SLOTS = 3;
 
 /** The arrow of the boat button. */
 /** Course up: the arrow straight up, in the middle of the button. */
@@ -277,9 +283,10 @@ const BOAT_SVG =
   '<svg class="rail-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3 3 7.5z" fill="currentColor"/></svg>';
 
 /**
- * First of the left column, in the place NavIn had: the boat. Each touch
- * shows the boat at the next scale and follows it; a long press turns the
- * map to the course of the boat, the button red, and back to north up.
+ * Under the clock: the arrow of the boat, with a small − at its right. The
+ * first touch brings the map back on the boat, each further touch zooms out;
+ * a long press turns the map to the course of the boat, the arrow red, and
+ * back to north up, blue.
  * @returns The button.
  */
 function BoatButton() {
@@ -300,11 +307,17 @@ function BoatButton() {
           : 'Bateau · appui long : cap en haut',
       )}
       aria-pressed={courseUp}
-      onClick={boatScaleTap}
+      onClick={() => {
+        boatArrowTap();
+        showPlus();
+      }}
       {...press.handlers}
     >
       <span className="rail-icon">
         {markupToReact(courseUp ? BOAT_UP_SVG : BOAT_SVG)}
+      </span>
+      <span className="rail-minus" aria-hidden="true">
+        −
       </span>
     </Button>
   );
@@ -421,69 +434,90 @@ function openCalls(zone: 'ext' | 'int'): void {
 }
 
 /**
- * Left column: PréP opens the preparation; START starts the track at a short
- * touch, then holds every step of the track itself.
- * @returns The two buttons, or nothing during a track.
+ * PréP, first of the row of NavIn: it opens the preparation.
+ * @returns The button.
  */
-function DepartButtons() {
+function PrepButton() {
   useSignals();
   const tr = useTr();
-  const tracking = state.view.tracking.value;
-  // A PréP under way shows on its own button, no longer on NavIn.
   const prepOn = state.data.prep.value !== null;
   const inPrep =
     prepOn &&
     (state.view.currentView.value === 'prep' || hasBodyClass('prep-on'));
-  const prepClasses = ['rail-btn', 'rail-prep'];
-  // Always shown, even during a track.
-  // Shown: lit orange. Kept while elsewhere: it blinks orange until resumed.
-  if (inPrep) prepClasses.push('rail-on');
-  else if (prepOn) prepClasses.push('prep-held', 'menu-here');
+  const classes = ['rail-btn', 'rail-prep'];
+  if (inPrep) classes.push('rail-on');
+  else if (prepOn) classes.push('prep-held', 'menu-here');
   const ready = state.data.prep.value === null ? prepReady.value : null;
-  if (ready) prepClasses.push('prep-ready', `prep-ready-${ready}`);
+  if (ready) classes.push('prep-ready', `prep-ready-${ready}`);
   return (
-    <div className="rail-depart">
-      <Button
-        type="button"
-        noUiEdit
-        className={prepClasses.join(' ')}
-        aria-label={tr(prepOn ? 'PréP en cours' : 'PréP')}
-        aria-pressed={prepOn}
-        onClick={() => {
-          buzz();
-          domainActions.prepStart();
-        }}
-      >
-        <span className="rail-icon">
-          {markupToReact(inPrep ? FLAG_WAVE_SVG : FLAG_SVG)}
-        </span>
-      </Button>
+    <Button
+      type="button"
+      noUiEdit
+      className={classes.join(' ')}
+      aria-label={tr(prepOn ? 'PréP en cours' : 'PréP')}
+      aria-pressed={prepOn}
+      onClick={() => {
+        buzz();
+        domainActions.prepStart();
+      }}
+    >
+      <span className="rail-icon">
+        {markupToReact(inPrep ? FLAG_WAVE_SVG : FLAG_SVG)}
+      </span>
+    </Button>
+  );
+}
+
+/**
+ * START under NavIn: a short touch starts the track, then the button holds
+ * every step of it; during a track Amarrage stands at its right.
+ * @returns The line.
+ */
+function StartLine() {
+  useSignals();
+  const tr = useTr();
+  const tracking = state.view.tracking.value;
+  let start = (
+    <Button
+      type="button"
+      noUiEdit
+      className="rail-btn rail-start"
+      aria-label={tr('START : démarrer la trace')}
+      onClick={() => {
+        buzz();
+        domainActions.quickStart();
+      }}
+    >
+      <span className="rail-icon">{markupToReact(START_SVG)}</span>
+    </Button>
+  );
+  if (tracking) start = <TrackRailButton />;
+  else if (trackDone.value) start = <TrackDoneButton />;
+  return (
+    <div className="rail-line rail-depart">
+      {start}
       {tracking ? (
-        <TrackRailButton />
-      ) : trackDone.value ? (
-        <TrackDoneButton />
-      ) : (
         <Button
           type="button"
           noUiEdit
-          className="rail-btn rail-start"
-          aria-label={tr('START : démarrer la trace')}
+          className="rail-btn rail-bare rail-moor"
+          aria-label={tr('Amarrage : fin de la trace, puis check-out')}
           onClick={() => {
             buzz();
-            domainActions.quickStart();
+            domainActions.moorNow();
           }}
         >
-          <span className="rail-icon">{markupToReact(START_SVG)}</span>
+          <span className="rail-icon">{markupToReact(MOOR_SVG)}</span>
         </Button>
-      )}
+      ) : null}
     </div>
   );
 }
 
 /**
- * Always shown, first of the right column: at sea the VHF, a long press opens
- * the phone numbers (the handset then takes the button, the VHF goes small,
- * and a long press goes back); on a lake the phone.
+ * Last of the row of NavIn: at sea the VHF, a long press opens the phone
+ * numbers (the handset then takes the button, the VHF goes small, and a long
+ * press goes back); on a lake the phone.
  * @returns The button.
  */
 function CommButton() {
@@ -597,78 +631,5 @@ function RailButton({
       </span>
       {bare ? null : <span className="rail-label">{tr(label)}</span>}
     </Button>
-  );
-}
-
-function addPlaceOf(rails: Rails, side: RailSide): number {
-  return rails[side].slice(0, slotsOf(side)).findIndex((key) => !key);
-}
-
-function RailPicker({
-  current,
-  onPick,
-  onAdd,
-  onMove,
-  onClose,
-}: {
-  current: string;
-  onPick: (key: string) => void;
-  /** A free place of the column, -1 when it is full. */
-  onAdd: number;
-  /** Choose for another place of the column. */
-  onMove: (index: number) => void;
-  onClose: () => void;
-}) {
-  const tr = useTr();
-  return (
-    <div className="rail-pick" role="dialog" aria-modal="true">
-      <div className="rail-pick-box">
-        <h2>{tr(current ? 'Changer ce bouton' : 'Ajouter un bouton')}</h2>
-        <div className="rail-pick-list">
-          {choices().map((entry) => (
-            <Button
-              type="button"
-              noUiEdit
-              key={entry.key}
-              className={entry.key === current ? 'btn primary' : 'btn'}
-              onClick={() => onPick(entry.key)}
-            >
-              {tr(entry.title)}
-            </Button>
-          ))}
-        </div>
-        <div className="row c2">
-          {current ? (
-            <Button
-              type="button"
-              noUiEdit
-              className="btn danger"
-              onClick={() => {
-                onPick('');
-                toast(tr('Bouton retiré : la place est libre.'));
-              }}
-            >
-              {tr('Retirer ce bouton')}
-            </Button>
-          ) : null}
-          {current && onAdd >= 0 ? (
-            <Button
-              type="button"
-              noUiEdit
-              className="btn"
-              onClick={() => {
-                buzz();
-                onMove(onAdd);
-              }}
-            >
-              {tr('＋ Ajouter un bouton dans cette colonne')}
-            </Button>
-          ) : null}
-          <Button type="button" noUiEdit className="btn" onClick={onClose}>
-            {tr('Fermer')}
-          </Button>
-        </div>
-      </div>
-    </div>
   );
 }

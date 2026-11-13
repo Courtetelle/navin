@@ -3,11 +3,13 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { buzz } from '../../lib/dom.ts';
+import { WIDE_QUERY } from '../../lib/useWide.ts';
 import { state } from '../../state/index.ts';
 import { BarChevron } from '../BarChevron.tsx';
 import { hasBodyClass } from '../bodyClass.ts';
 import { inMenu, menuButtonPress } from '../menuOwner.ts';
 import { navBack } from '../navbar/navActions.ts';
+import { navinRowChosen } from '../navinRow.ts';
 import { goFromGear, navigation, voyageName } from '../router.ts';
 import { toggleTheme, toggleThemeFromGear } from '../theme.ts';
 import { tipFocus } from '../tips.ts';
@@ -102,6 +104,8 @@ function GearButton({ focused }: { focused: boolean }) {
       onPointerDown={() => {
         gearLongPress = false;
         clearTimeout(gearTimer);
+        // Landscape tablet: night and day are on NavIn now.
+        if (globalThis.matchMedia?.(WIDE_QUERY).matches) return;
         gearTimer = setTimeout(() => {
           gearLongPress = true;
           toggleThemeFromGear();
@@ -117,6 +121,7 @@ function GearButton({ focused }: { focused: boolean }) {
           return;
         }
         buzz();
+        navinRowChosen();
         // One step back in a page of the settings, as data.
         menuButtonPress('settings', navBack, goFromGear);
       }}

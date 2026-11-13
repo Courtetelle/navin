@@ -29,6 +29,19 @@ export function toggleTheme(): void {
   });
 }
 
+/** Long press on NavIn (landscape tablet): night mode, and back to day. */
+export function toggleThemeFromNavin(): void {
+  buzz();
+  updateSettings((settings) => {
+    settings.theme = settings.theme === 'night' ? 'day' : 'night';
+  });
+  toast(
+    state.preferences.settings.value.theme === 'night'
+      ? '☾ Mode nuit · appui long sur NavIn pour revenir au jour'
+      : '☀︎ Mode jour',
+  );
+}
+
 /** Long press on the gear: night mode, and back to day (app.js:3294). */
 export function toggleThemeFromGear(): void {
   buzz();

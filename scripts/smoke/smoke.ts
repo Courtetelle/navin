@@ -650,17 +650,13 @@ async function swipeMenu(page: Page, theme: string): Promise<void> {
 const TABLET_BUTTONS = [
   '#clock',
   '.top-tab[data-view="tracker"]',
-  '.top-tab.tab-data',
   '.top-tab.tab-sos',
-  '#gearBtn',
   '#searchBtn',
-  '.rail-comm',
   '.side-rail-left .rail-btn',
   '.rail-pin',
   '.rail-boat',
   '.rail-ruler',
-  '.rail-zoom-in',
-  '.rail-zoom-out',
+  '.rail-photo',
 ];
 
 async function tabletPlaces(page: Page): Promise<string> {
@@ -761,11 +757,51 @@ const NAVIN = 'header.topbar nav.topnav .top-tab[data-view="tracker"]';
  * @param page - The tablet page, on the map.
  * @param theme - Theme checked.
  */
-async function zones(page: Page, theme: string): Promise<void> {
+/**
+ * The next zone of navigation, from the settings (the long press on NavIn is
+ * night and day on the tablet), then back to the map.
+ * @param page - The tablet page.
+ */
+async function nextZoneX(page: Page): Promise<void> {
+  if (!(await page.locator('#gearBtn').isVisible())) {
+    await page.locator(NAVIN).click();
+    await page.waitForTimeout(400);
+  }
+  await page.locator('#gearBtn').click();
+  await page.waitForTimeout(500);
+  const section = page.locator('details[data-sec="zone"]');
+  if (!(await section.evaluate((one) => (one as HTMLDetailsElement).open))) {
+    await section.locator('summary').click();
+    await page.waitForTimeout(300);
+  }
+  await page.locator('[data-zonesim]').click();
+  await page.waitForTimeout(300);
   await page.locator(NAVIN).click();
   await page.waitForTimeout(1200);
-  if ((await zoneChosen(page)) !== 'lac') await longPress(page, NAVIN);
-  if ((await zoneChosen(page)) !== 'lac') await longPress(page, NAVIN);
+}
+
+async function zones(page: Page, theme: string): Promise<void> {
+  // The theme chosen, as kept: the one shown follows dusk on its own.
+  const night = () =>
+    page.evaluate(
+      () =>
+        (
+          JSON.parse(localStorage.getItem('ldb.settings') ?? '{}') as {
+            theme?: string;
+          }
+        ).theme,
+    );
+  const before = await night();
+  await longPress(page, NAVIN);
+  const after = await night();
+  await longPress(page, NAVIN);
+  check(
+    theme,
+    'tablet: a long press on NavIn turns night and day',
+    before !== after && (await night()) === before,
+  );
+  if ((await zoneChosen(page)) !== 'lac') await nextZoneX(page);
+  if ((await zoneChosen(page)) !== 'lac') await nextZoneX(page);
   await page.evaluate(() => {
     const label = [
       ...document.querySelectorAll('.leaflet-control-layers label'),
@@ -785,7 +821,7 @@ async function zones(page: Page, theme: string): Promise<void> {
     'tablet: on the lake the Swiss map can be chosen',
     onLake.includes('nationale suisse'),
   );
-  await longPress(page, NAVIN);
+  await nextZoneX(page);
   const background = await checked();
   check(
     theme,
@@ -808,51 +844,92 @@ async function zones(page: Page, theme: string): Promise<void> {
     'tablet: the boat arrow goes back to the GPS',
     !(await zoneChosen(page)),
   );
-  await longPress(page, NAVIN);
-  check(
-    theme,
-    'tablet: on the GPS of Lake Geneva a long press on NavIn goes to sea',
-    (await zoneChosen(page)) === 'mer',
-  );
 }
 
 async function tablet(page: Page, theme: string): Promise<void> {
   const home = await tabletPlaces(page);
   check(theme, 'tablet: every side button is shown', !home.includes('absent'));
+  check(
+    theme,
+    'tablet: data and the settings wait in the row of NavIn',
+    !(await page.locator('.top-tab.tab-data').isVisible()) &&
+      !(await page.locator('#gearBtn').isVisible()),
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'tablet: a touch on NavIn unrolls PréP, data, settings and phone',
+    (await page.locator('.navin-row .rail-prep').isVisible()) &&
+      (await page.locator('.top-tab.tab-data').isVisible()) &&
+      (await page.locator('#gearBtn').isVisible()) &&
+      (await page.locator('.navin-row .rail-comm').isVisible()),
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'tablet: a second touch rolls it back',
+    (await page.locator('.navin-row').count()) === 0,
+  );
+  check(
+    theme,
+    'tablet: ＋ hides until the arrow is touched',
+    (await page.locator('.rail-zoom-in').count()) === 0,
+  );
+  await page.locator('.rail-boat').click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'tablet: the arrow shows ＋ at its right',
+    await page.locator('.rail-zoom-in').isVisible(),
+  );
+  await page.waitForTimeout(3300);
+  check(
+    theme,
+    'tablet: ＋ goes away after 3 s',
+    (await page.locator('.rail-zoom-in').count()) === 0,
+  );
   const screens: Array<[string, string]> = [
     ['data', '.top-tab.tab-data'],
     ['SOS', '.top-tab.tab-sos'],
     ['settings', '#gearBtn'],
   ];
   for (const [name, opener] of screens) {
-    // eslint-disable-next-line no-await-in-loop -- one screen after the other
+    /* eslint-disable no-await-in-loop -- one screen after the other */
+    if (!(await page.locator(opener).isVisible())) {
+      await page.locator(NAVIN).click();
+      await page.waitForTimeout(400);
+    }
     await page.locator(opener).click();
     // The button touched sinks in a moment (pressFeedback): wait it is back.
-    // eslint-disable-next-line no-await-in-loop -- one screen after the other
     await page.waitForTimeout(1100);
-    // eslint-disable-next-line no-await-in-loop -- one screen after the other
     const here = await tabletPlaces(page);
     check(theme, `tablet: same side buttons on ${name}`, here === home);
-    // eslint-disable-next-line no-await-in-loop -- one screen after the other
     if (name !== 'SOS') await menuBlink(page, theme, name);
-    // eslint-disable-next-line no-await-in-loop -- one screen after the other
     await dataFace(page, theme, name);
-    // eslint-disable-next-line no-await-in-loop -- one screen after the other
     const view = await page.locator('main#view').boundingBox();
-    // eslint-disable-next-line no-await-in-loop -- one screen after the other
     const left = await page.locator('#clock').boundingBox();
-    // eslint-disable-next-line no-await-in-loop -- one screen after the other
-    const right = await page.locator('#gearBtn').boundingBox();
+    const width = page.viewportSize()?.width ?? 0;
+    /* eslint-enable no-await-in-loop */
     check(
       theme,
-      `tablet: the ${name} page stays between the columns`,
+      `tablet: the ${name} page stays beside the column`,
       view !== null &&
         left !== null &&
-        right !== null &&
         view.x >= left.x + left.width &&
-        view.x + view.width <= right.x,
+        view.x + view.width <= width,
     );
   }
+  // NavIn away from the map: back on the map, the row rolled back.
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    'tablet: NavIn brings the map back and rolls its row',
+    (await page.locator('#trkMap').isVisible()) &&
+      (await page.locator('.navin-row').count()) === 0,
+  );
 }
 
 /**
@@ -1062,9 +1139,19 @@ async function trackButton(page: Page, theme: string): Promise<void> {
   );
   check(
     theme,
-    'tablet: Météo stays Météo during a track',
-    (await page.locator('.rail-btn[aria-label*="Live"]').count()) === 0,
+    'tablet: Amarrage stands at the right of START during a track',
+    await has('.rail-depart .rail-moor'),
   );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'tablet: during a track the row of NavIn starts with Météo',
+    (await page.locator('.navin-row .rail-btn[aria-label="Météo"]').count()) ===
+      1 && (await page.locator('.navin-row .rail-prep').count()) === 0,
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(400);
   await page.locator('.rail-track').click();
   await page.waitForTimeout(300);
   const box = await page.locator('#trkMap').boundingBox();

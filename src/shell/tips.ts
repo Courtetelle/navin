@@ -1,5 +1,6 @@
 import { signal } from '@preact/signals-react';
 
+import { WIDE_QUERY } from '../lib/useWide.ts';
 import { state, toast } from '../state/index.ts';
 import { store } from '../storage/store.ts';
 
@@ -30,6 +31,17 @@ const TIPS: ReadonlyArray<readonly [string | null, string]> = [
   ],
 ];
 
+/** The same buttons on the landscape tablet, where they work otherwise. */
+const WIDE_TIPS: Readonly<Record<string, string>> = {
+  tracker:
+    'NavIn : un toucher déroule à sa droite PréP, data, Réglages et Téléphone ou VHF · son logo montre lac ou mer · appui long : mode nuit ou mode jour',
+  gear: 'Curseurs : les réglages (dans la rangée de NavIn)',
+};
+
+function wide(): boolean {
+  return globalThis.matchMedia?.(WIDE_QUERY).matches ?? false;
+}
+
 /**
  * 1.5 s after the start, one tip presents a button of the top bar, the next
  * one at the next start, each once (prep.js:234-251, index in `ldb.tipIdx`).
@@ -48,7 +60,8 @@ function showBootTip(): void {
   const tip = TIPS[index];
   if (!tip) return;
   store.setRaw('ldb.tipIdx', String(index + 1));
-  const [target, message] = tip;
+  const [target, text] = tip;
+  const message = (wide() && WIDE_TIPS[target ?? '']) || text;
   toast(message);
   if (!target) return;
   tipFocus.value = target;
