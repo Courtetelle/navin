@@ -45,3 +45,46 @@ test('the search reads names without accents, kinds and digits', () => {
   expect(names('')).toHaveLength(4);
   expect(names('zzz')).toStrictEqual([]);
 });
+
+test('the crew cards give their emails and their relatives, each number once', () => {
+  const cards = [
+    {
+      id: 'm1',
+      prenom: 'Élise',
+      nom: 'Martin',
+      tel: '+41 79 111 22 33',
+      email: 'elise@exemple.ch',
+      procheNom: 'Paul Martin',
+      procheTel: '+41 79 444 55 66',
+    },
+  ];
+  const outing = [
+    { nom: 'Élise Martin', tel: '+41 79 111 22 33' },
+    {
+      nom: 'Invité',
+      tel: '+33 6 12 34 56 78',
+      proche2Tel: '+33 6 99 88 77 66',
+    },
+  ];
+  const entries = phoneBookEntries([], cards, [], outing);
+  expect(
+    entries.map((entry) => [
+      entry.name,
+      entry.kind,
+      entry.email ?? entry.number,
+      entry.sub ?? '',
+    ]),
+  ).toStrictEqual([
+    ['Élise Martin', 'equipier', '+41 79 111 22 33', ''],
+    ['Élise Martin', 'equipier', 'elise@exemple.ch', ''],
+    ['Invité', 'equipier', '+33 6 12 34 56 78', ''],
+    ['Paul Martin', 'proche', '+41 79 444 55 66', 'Proche de Élise Martin'],
+    ['Proche de Invité', 'proche', '+33 6 99 88 77 66', 'Proche de Invité'],
+  ]);
+  expect(
+    searchPhones(entries, 'proche martin').map((entry) => entry.name),
+  ).toStrictEqual(['Paul Martin']);
+  expect(
+    searchPhones(entries, 'exemple').map((entry) => entry.email),
+  ).toStrictEqual(['elise@exemple.ch']);
+});

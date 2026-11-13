@@ -3,6 +3,7 @@ import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { SwipeRow } from '../../features/prep/index.ts';
@@ -45,7 +46,7 @@ export function PhoneBook() {
           go('tracker');
         }}
       />
-      <h1>{tr('📞 Téléphones utiles')}</h1>
+      <h1>{tr('📞 Téléphones et courriels')}</h1>
       <div className="field">
         <input
           className="text"
@@ -53,7 +54,9 @@ export function PhoneBook() {
           type="search"
           enterKeyHint="search"
           autoComplete="off"
-          placeholder={tr.placeholder('Rechercher un nom, un numéro, un port…')}
+          placeholder={tr.placeholder(
+            'Rechercher un nom, un numéro, un courriel, un port…',
+          )}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
@@ -70,7 +73,7 @@ export function PhoneBook() {
       {shown.length === 0 ? (
         <HelpText>
           {all.length === 0
-            ? 'Aucun numéro pour l’instant : ajoutez les ports et vos contacts ci-dessous ; les téléphones des fiches équipiers viennent d’eux-mêmes.'
+            ? 'Aucun numéro pour l’instant : ajoutez les ports et vos contacts ci-dessous ; les téléphones et courriels des fiches co-équipiers et de leurs proches viennent d’eux-mêmes.'
             : 'Aucun numéro ne correspond à la recherche.'}
         </HelpText>
       ) : null}
@@ -86,12 +89,20 @@ function PhoneRow({
   entry: PhoneEntry;
   onDeleted: () => void;
 }) {
-  const button = (
-    <CallButton
-      label={entry.name}
-      number={entry.number}
-      sub={PHONE_KINDS[entry.kind]}
-    />
+  const kind = entry.sub ?? PHONE_KINDS[entry.kind];
+  const button = entry.email ? (
+    <LinkButton
+      className="btn contact call mail"
+      href={`mailto:${entry.email}`}
+    >
+      <span className="ph">✉️</span>
+      <span>
+        <b>{entry.name}</b>
+        <span>{`${entry.email} · ${kind}`}</span>
+      </span>
+    </LinkButton>
+  ) : (
+    <CallButton label={entry.name} number={entry.number} sub={kind} />
   );
   if (!entry.own) return button;
   return (
