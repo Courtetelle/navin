@@ -2,17 +2,21 @@ import { fmtPos } from '../../lib/geo.ts';
 import { bft, compassPoint, windTxt } from '../../lib/wind.ts';
 import { inInland } from '../../model/contacts.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
-import { deliver } from '../../state/index.ts';
+import { deliver, state } from '../../state/index.ts';
 
 import { onLake } from './onLake.ts';
 import type { SeaNow } from './seaNow.ts';
 import { seaNow, seaRows } from './seaNow.ts';
+import type { WindPoint } from './stationHistory.ts';
+import { HISTORY_MS, stationHistory, windTrend } from './stationHistory.ts';
+import { chartPaths, trendText } from './trendText.ts';
 import {
   SEA_MODEL,
   flashColor,
   flashInk,
   seaMarks,
   seaTxt,
+  windAlertConfig,
 } from './windLogic.ts';
 import type { WindReading } from './windTypes.ts';
 
@@ -255,15 +259,107 @@ async function drawSnippet(
   );
 }
 
+const font = (size: number, bold = false) =>
+  `${bold ? 'bold ' : ''}${size}px -apple-system, Helvetica, Arial, sans-serif`;
+
+/** Height of the trend section of the image. */
+const TREND_HEIGHT = 420;
+
+/**
+ * Draw the wind of the last hours, as Live météo shows it: one sentence,
+ * the mean wind as a line, the gusts as a light band above it.
+ * @param context - Canvas of the image.
+ * @param points - Points, oldest first.
+ * @param top - Top of the section.
+ */
+function drawTrend(
+  context: CanvasRenderingContext2D,
+  points: readonly WindPoint[],
+  top: number,
+): void {
+  const paths = chartPaths(points);
+  let y = top + 20;
+  context.fillStyle = '#0b3d91';
+  context.font = font(36, true);
+  context.fillText('📈 Tendance du vent', 40, y);
+  const titleWidth = context.measureText('📈 Tendance du vent ').width;
+  context.font = font(30);
+  context.fillText(`(${HISTORY_MS / 3_600_000} h)`, 40 + titleWidth, y);
+  y += 46;
+  context.fillStyle = '#0b1220';
+  context.font = font(30);
+  context.fillText(trendText(windTrend(points)), 40, y);
+  const box = { x: 120, y: y + 24, width: 920, height: 220 };
+  context.fillStyle = '#f2f5f9';
+  context.fillRect(box.x, box.y, box.width, box.height);
+  const first = points[0]?.t ?? 0;
+  const span = Math.max((points.at(-1)?.t ?? first) - first, 60_000);
+  const px = (t: number) => box.x + ((t - first) / span) * box.width;
+  const py = (knots: number) =>
+    box.y + box.height - (knots / paths.top) * box.height;
+  const withGust = points.filter((point) => point.gust != null);
+  if (withGust.length >= 2) {
+    context.beginPath();
+    for (const [index, point] of withGust.entries()) {
+      const x = px(point.t);
+      const yy = py(point.gust ?? point.avg);
+      if (index) context.lineTo(x, yy);
+      else context.moveTo(x, yy);
+    }
+    for (const point of withGust.toReversed()) {
+      context.lineTo(px(point.t), py(point.avg));
+    }
+    context.closePath();
+    context.fillStyle = 'rgba(255, 140, 0, 0.3)';
+    context.fill();
+  }
+  context.beginPath();
+  for (const [index, point] of points.entries()) {
+    if (index) context.lineTo(px(point.t), py(point.avg));
+    else context.moveTo(px(point.t), py(point.avg));
+  }
+  context.strokeStyle = '#1677ff';
+  context.lineWidth = 5;
+  context.lineJoin = 'round';
+  context.stroke();
+  context.fillStyle = '#5b6575';
+  context.font = font(24);
+  context.fillText(`${Math.round(paths.top)} nd`, 40, box.y + 22);
+  context.fillText('0 nd', 40, box.y + box.height);
+  const axis = box.y + box.height + 34;
+  context.fillText(paths.since, box.x, axis);
+  const now = 'maintenant';
+  context.fillText(
+    now,
+    box.x + box.width - context.measureText(now).width,
+    axis,
+  );
+  const key = axis + 40;
+  context.fillStyle = '#1677ff';
+  context.fillRect(box.x, key - 12, 40, 6);
+  context.fillStyle = '#333c4a';
+  context.fillText('vent moyen', box.x + 52, key);
+  if (withGust.length >= 2) {
+    const at = box.x + 52 + context.measureText('vent moyen').width + 40;
+    context.fillStyle = 'rgba(255, 140, 0, 0.45)';
+    context.fillRect(at, key - 20, 40, 20);
+    context.fillStyle = '#333c4a';
+    context.fillText('rafales', at + 52, key);
+  }
+}
+
 /**
  * The image of an alert: the card of the station, as in Live météo, and a
  * map that places the measurement.
  * @param report - The alert.
+ * @param sea - The sea of the model, at sea only.
+ * @param trend - The wind of the last hours, when the station has enough past.
  * @returns The PNG.
  */
 export async function alertImage(
   report: AlertReport,
   sea: SeaNow | null = null,
+  trend: readonly WindPoint[] | null = null,
 ): Promise<Blob | null> {
   const width = 1080;
   const rows = reportRows(report);
@@ -285,8 +381,15 @@ export async function alertImage(
     ? 70 + markLines.reduce((sum, [, lines]) => sum + 44 + lines.length * 38, 0)
     : 0;
   const seaHeight = sea ? 150 + seaLines.length * rowHeight + marksHeight : 0;
+  const trendHeight = trend ? TREND_HEIGHT : 0;
   const height =
-    head + rows.length * rowHeight + seaHeight + 40 + mapHeight + 90;
+    head +
+    rows.length * rowHeight +
+    trendHeight +
+    seaHeight +
+    40 +
+    mapHeight +
+    90;
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -319,6 +422,10 @@ export async function alertImage(
     context.font = 'bold 34px -apple-system, Helvetica, Arial, sans-serif';
     context.fillText(value, 440, y);
     y += rowHeight;
+  }
+  if (trend) {
+    drawTrend(context, trend, y);
+    y += TREND_HEIGHT;
   }
   if (sea) {
     y += 20;
@@ -401,12 +508,37 @@ async function seaAround(report: AlertReport): Promise<SeaNow | null> {
 }
 
 /**
+ * The wind of the station over the last hours: only for a measuring
+ * station, only when enough past is known, and not waited for long.
+ * @param report - The alert.
+ * @returns The points, oldest first, or null.
+ */
+async function trendAround(report: AlertReport): Promise<WindPoint[] | null> {
+  const { id, net } = report.reading;
+  if (report.forecast || !id || !net) return null;
+  const { mfKey } = windAlertConfig(state.preferences.settings.value);
+  const late = new Promise<null>((resolve) => {
+    setTimeout(() => resolve(null), 8000);
+  });
+  const points = await Promise.race([
+    stationHistory({ id, net }, mfKey, Date.now(), HISTORY_MS).catch(
+      () => null,
+    ),
+    late,
+  ]);
+  return points && points.length >= 3 ? points : null;
+}
+
+/**
  * Publish an alert: its image goes to the share sheet (messages, mail, AirDrop).
  * @param report - The alert.
  */
 export async function publishAlert(report: AlertReport): Promise<void> {
-  const sea = await seaAround(report);
-  const image = await alertImage(report, sea).catch(() => null);
+  const [sea, trend] = await Promise.all([
+    seaAround(report),
+    trendAround(report),
+  ]);
+  const image = await alertImage(report, sea, trend).catch(() => null);
   const stamp = new Date(report.reading.t)
     .toISOString()
     .slice(0, 16)
@@ -417,6 +549,9 @@ export async function publishAlert(report: AlertReport): Promise<void> {
   }
   const text = [
     ...reportRows(report),
+    ...(trend
+      ? [['Tendance du vent', trendText(windTrend(trend))] as [string, string]]
+      : []),
     ...(sea ? seaRows(sea) : []),
     ...(sea
       ? seaMarks(

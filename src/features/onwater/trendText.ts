@@ -1,4 +1,4 @@
-import type { WindPoint, WindTrend } from '../../features/onwater/index.ts';
+import type { WindPoint, WindTrend } from './stationHistory.ts';
 
 const WIDTH = 300;
 const HEIGHT = 80;

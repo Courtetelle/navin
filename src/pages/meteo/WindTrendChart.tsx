@@ -7,10 +7,9 @@ import {
   stationHistory,
   windTrend,
 } from '../../features/onwater/index.ts';
+import { chartPaths, trendText } from '../../features/onwater/trendText.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-
-import { chartPaths, trendText } from './trendText.ts';
 
 /** Props of {@link WindTrendChart}. */
 interface WindTrendChartProps {
