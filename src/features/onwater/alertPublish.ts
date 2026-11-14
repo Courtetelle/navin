@@ -1,4 +1,5 @@
 import type { ShareFormat } from '../../components/shared/shareFormat.ts';
+import { fmtDotDateTime } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import { bft, compassPoint, windTxt } from '../../lib/wind.ts';
 import { inInland } from '../../model/contacts.ts';
@@ -31,6 +32,10 @@ export interface AlertReport {
 const fr = (value: number, digits = 1) =>
   value.toFixed(digits).replace('.', ',');
 
+function forceText(force: number): string {
+  return `${force} Bf · ${BEAUFORT_TBL[Math.min(12, force)]?.[2] ?? ''}`;
+}
+
 /**
  * The lines of the report, as the station card of LiveMétéo reads them.
  * @param report - The alert.
@@ -48,8 +53,13 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
         ? '—'
         : `du ${compassPoint(reading.dir)} (${Math.round(reading.dir)}°)`,
     ],
-    ['Force', `${force} Bf · ${BEAUFORT_TBL[Math.min(12, force)]?.[2] ?? ''}`],
+    ['Force', forceText(force)],
   ];
+  // The gusts reach another force: it is written out too.
+  const gustForce = reading.gust == null ? force : bft(reading.gust);
+  if (gustForce !== force) {
+    rows.push(['Force des rafales', forceText(gustForce)]);
+  }
   if (reading.air != null) {
     rows.push(['Température de l’air', `${fr(reading.air)} °C`]);
   }
@@ -59,14 +69,9 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
       `${Math.round(reading.baro)} hPa`,
     ]);
   }
-  const time = new Date(reading.t).toLocaleString('fr-CH', {
-    day: '2-digit',
-    month: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const time = fmtDotDateTime(new Date(reading.t));
   rows.push(
-    [forecast ? 'Prévu pour' : 'Mesuré', time],
+    [forecast ? 'Prévu pour le' : 'Mesuré le', time],
     [
       'Source',
       forecast

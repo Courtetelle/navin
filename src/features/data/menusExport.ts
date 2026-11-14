@@ -64,7 +64,7 @@ export async function sendMenus(): Promise<void> {
   const date = new Date().toISOString().slice(0, 10);
   await deliver(
     JSON.stringify(menusFile(), null, 2),
-    `navin-menus-${date}.json`,
+    `NavIn-menus-${date}.json`,
     'application/json',
   );
 }

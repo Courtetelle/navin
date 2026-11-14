@@ -42,7 +42,7 @@ test.each(['data-files-lake', 'data-files-sea'])(
 test('a full backup is named after the day', () => {
   load('data-files-sea');
 
-  expect(backupAll().name).toBe('navin-tout-20260715.json');
+  expect(backupAll().name).toBe('NavIn-tout-20260715.json');
 });
 
 test('dayVal joins lists and adds the prefix to a value only', () => {
@@ -68,7 +68,7 @@ test('a sync file carries the boat photos and its time', async () => {
     Promise.resolve([{ id: 'doc1', url: 'data:image/jpeg;base64,AA' }]),
   );
 
-  expect(pack.name).toBe('navin-synchro-20260715-1030.json');
+  expect(pack.name).toBe('NavIn-synchro-20260715-1030.json');
   expect(pack.data.photos).toStrictEqual([
     { id: 'doc1', url: 'data:image/jpeg;base64,AA' },
   ]);

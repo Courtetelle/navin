@@ -21,7 +21,7 @@ export function blankPdf(): void {
   }
   printInHolder({
     className: 'print-only book lx-print',
-    title: 'navin-fiche-coequipier-vide',
+    title: 'NavIn-fiche-coequipier-vide',
     delay: 150,
     css: PRINT_CSS,
     content: (

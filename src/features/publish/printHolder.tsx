@@ -1,7 +1,27 @@
 import type { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { PdfSheet } from './PdfSheet.tsx';
 import { PrintDrawn } from './PrintDrawn.tsx';
+
+/**
+ * The rules of every PDF: no margin left to the browser (so no web address,
+ * date or page title printed in it), our own margin on every page instead,
+ * and no card, section, table row or picture cut in two: it goes whole to
+ * the next page.
+ */
+export const PDF_RULES = `@media print {
+  @page { margin: 0 !important }
+  body > *:not(.print-only) { display: none !important }
+  table.pdf-sheet { width: 100%; border: 0; border-collapse: collapse }
+  table.pdf-sheet > thead > tr > td, table.pdf-sheet > tfoot > tr > td,
+  table.pdf-sheet > tbody > tr > td { border: 0; padding: 0; background: none }
+  table.pdf-sheet > thead > tr > td, table.pdf-sheet > tfoot > tr > td { height: 10mm }
+  table.pdf-sheet > tbody > tr > td.pdf-body { padding: 0 10mm }
+  section, article, figure, img, svg, canvas, tr, li, details,
+  .lx-card, .card, .section, .pdf-keep { break-inside: avoid; page-break-inside: avoid }
+  h1, h2, h3, h4, summary { break-after: avoid; page-break-after: avoid }
+}`;
 
 /** Print stylesheet of the A4 portrait documents. */
 export const PRINT_CSS_A4_PORTRAIT =
@@ -54,7 +74,7 @@ export function printInHolder({
   const root = createRoot(holder);
   document.body.append(holder);
   const style = document.createElement('style');
-  style.textContent = css;
+  style.textContent = `${css}\n${PDF_RULES}`;
   document.head.append(style);
   const oldTitle = document.title;
   document.title = title;
@@ -74,7 +94,7 @@ export function printInHolder({
         }, delay);
       }}
     >
-      {content}
+      <PdfSheet>{content}</PdfSheet>
     </PrintDrawn>,
   );
 }

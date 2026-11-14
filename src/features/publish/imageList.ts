@@ -71,7 +71,7 @@ export async function imageList(
       });
       const blob = await cardsPng(sheet);
       const suffix = pages.length > 1 ? `-${index + 1}` : '';
-      const name = `navin-${slug(LIST_TITLES[kind])}-${dateStamp()}${suffix}.png`;
+      const name = `NavIn-${slug(LIST_TITLES[kind])}-${dateStamp()}${suffix}.png`;
       files.push(new File([blob], name, { type: 'image/png' }));
     }
     await sendFiles(files, LIST_TITLES[kind]);

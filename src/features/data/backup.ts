@@ -96,7 +96,7 @@ export function backupAll(): BackupPack {
     membersAt: store.get('ldb.members.at', ''),
   };
   return {
-    name: `navin-tout-${dateStamp(date)}.json`,
+    name: `NavIn-tout-${dateStamp(date)}.json`,
     data: content,
     get json() {
       return JSON.stringify(content);
@@ -109,7 +109,7 @@ export function backupAll(): BackupPack {
  * always the photos of the boat documents (legacy `syncPack`).
  * @param withPhotos - Carry the cruise photos.
  * @param boatPhotos - Reads the boat document photos.
- * @returns The pack, named `navin-synchro-<date>-<time>.json`.
+ * @returns The pack, named `NavIn-synchro-<date>-<time>.json`.
  */
 export async function syncPack(
   withPhotos: boolean,
@@ -121,7 +121,7 @@ export async function syncPack(
   }
   pack.data.photos = [...(pack.data.photos ?? []), ...(await boatPhotos())];
   const date = new Date();
-  pack.name = `navin-synchro-${dateStamp(date)}-${pad(date.getHours())}${pad(date.getMinutes())}.json`;
+  pack.name = `NavIn-synchro-${dateStamp(date)}-${pad(date.getHours())}${pad(date.getMinutes())}.json`;
   return pack;
 }
 

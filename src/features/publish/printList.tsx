@@ -37,7 +37,7 @@ export async function printList(
         avatars={avatars}
       />
     ),
-    title: `navin-${slug(title)}-${dateStamp()}`,
+    title: `NavIn-${slug(title)}-${dateStamp()}`,
     delay: 400,
     removeStale: true,
   });

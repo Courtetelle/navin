@@ -25,7 +25,7 @@ export function exportEdits(): void {
   const date = new Date();
   void deliver(
     JSON.stringify(uiEditExportData(), null, 2),
-    `navin-boutons-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}.json`,
+    `NavIn-boutons-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}.json`,
     'application/json',
   );
 }

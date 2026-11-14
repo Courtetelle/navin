@@ -42,7 +42,7 @@ test('a forecast says it is no measurement', () => {
   const rows = Object.fromEntries(
     reportRows({ reading, wind: '20 nd', forecast: true, boat: null }),
   );
-  expect(rows['Prévu pour']).toBeTruthy();
+  expect(rows['Prévu pour le']).toBeTruthy();
   expect(rows.Source).toBe('prévision d’un modèle, pas une mesure');
 });
 
@@ -88,4 +88,35 @@ test('the marks give the Douglas degree, the Beaufort force of the waves and the
   );
   expect(marks['En Beaufort']).toContain('force 5 Bf');
   expect(marks['OMM pour 5 Bf']).toMatch(/^mer 4 agitée, vagues ≈ 2,0 m/u);
+});
+
+test('gusts of another force get their own line', () => {
+  const rows = Object.fromEntries(
+    reportRows({
+      reading: {
+        name: 'St-Prex',
+        t: Date.parse('2026-11-14T11:10:00'),
+        avg: 11,
+        gust: 24,
+      },
+      wind: '11 nd',
+      forecast: false,
+      boat: null,
+    } as never),
+  );
+  expect(rows.Force).toMatch(/^4 Bf · /u);
+  expect(rows['Force des rafales']).toMatch(/^6 Bf · /u);
+  expect(rows['Mesuré le']).toBe('14.11.2026 à 11h10');
+});
+
+test('gusts of the same force add no line', () => {
+  const rows = Object.fromEntries(
+    reportRows({
+      reading: { name: 'St-Prex', t: Date.now(), avg: 11, gust: 13 },
+      wind: '11 nd',
+      forecast: false,
+      boat: null,
+    } as never),
+  );
+  expect(rows['Force des rafales']).toBeUndefined();
 });

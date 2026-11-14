@@ -99,6 +99,24 @@ export function fmtShortDate(date: Date): string {
 }
 
 /**
+ * Date with dots, `14.11.2026`.
+ * @param date - Date.
+ * @returns The date.
+ */
+export function fmtDotDate(date: Date): string {
+  return `${pad(date.getDate())}.${pad(date.getMonth() + 1)}.${date.getFullYear()}`;
+}
+
+/**
+ * Date and hour, `14.11.2026 à 11h30`.
+ * @param date - Date.
+ * @returns The date and hour.
+ */
+export function fmtDotDateTime(date: Date): string {
+  return `${fmtDotDate(date)} à ${pad(date.getHours())}h${pad(date.getMinutes())}`;
+}
+
+/**
  * Local day key `YYYY-MM-DD` (legacy `dayKey`).
  * @param date - Date.
  * @returns The day key.

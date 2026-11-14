@@ -77,7 +77,7 @@ export function MarksPage() {
               buzz();
               void deliver(
                 marksGpx(state.data.marks.value),
-                'navin-marques.gpx',
+                'NavIn-marques.gpx',
                 'application/gpx+xml',
               );
             }}
@@ -89,7 +89,7 @@ export function MarksPage() {
             data-mk="txt"
             onClick={() => {
               buzz();
-              void deliver(marksText(marks), 'navin-marques.txt', 'text/plain');
+              void deliver(marksText(marks), 'NavIn-marques.txt', 'text/plain');
             }}
           >
             {tr('📋 Partager la liste')}

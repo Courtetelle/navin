@@ -126,7 +126,7 @@ function miniHeader(pen: CardsPen, { title, sub, kicker }: HeaderTexts): void {
   const { margin } = style;
   let y = 70;
   if (drawing) {
-    context.font = font(22, 700, 'Arial');
+    context.font = font(22, 700);
     context.fillStyle = '#1c6ef2';
     pen.spaced(upperKeepBrands(`NavIn · ${kicker}`), margin, y + 22, 4);
   }

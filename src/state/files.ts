@@ -23,12 +23,13 @@ export function fileName(
   extension: string,
   cruise: Cruise | null = data.cruise.value,
 ): string {
-  const base = (textOf(cruise?.info.name) || 'navin')
-    .normalize('NFD')
-    .replaceAll(/[̀-ͯ]/g, '')
-    .replaceAll(/[^a-z0-9]+/gi, '-')
-    .replaceAll(/^-|-$/g, '')
-    .toLowerCase();
+  const base =
+    textOf(cruise?.info.name)
+      .normalize('NFD')
+      .replaceAll(/[̀-ͯ]/g, '')
+      .replaceAll(/[^a-z0-9]+/gi, '-')
+      .replaceAll(/^-|-$/g, '')
+      .toLowerCase() || 'NavIn';
   const date = new Date();
   return `${base}${suffix}-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}.${extension}`;
 }

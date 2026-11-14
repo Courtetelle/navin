@@ -110,7 +110,7 @@ test('cards layout: header, one card, footer', () => {
     ['Diesel', 416, 448],
     ['MARQUE', 76, 510],
     ['Volvo', 416, 515],
-    ['NavIn · 15/07/2026', 540, 650],
+    ['NavIn · 15.07.2026', 540, 650],
   ]);
 });
 
