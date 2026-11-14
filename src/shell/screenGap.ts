@@ -99,9 +99,23 @@ function apply(): void {
   style.setProperty('--fixed-gap', `${fixedGap(gap)}px`);
 }
 
+/** The page is measured again this long after opening (ms). */
+const SETTLE_MS = [100, 400, 1000, 2500];
+
 /** Keep `--screen-gap` right as the phone turns. */
 export function followScreenGap(): void {
   apply();
+  // At the opening iOS lays the page out in several steps: measured again
+  // once it has settled, and whenever the app comes back to the screen.
+  for (const delay of SETTLE_MS) setTimeout(apply, delay);
+  globalThis.addEventListener('load', apply);
+  globalThis.addEventListener('pageshow', apply);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      for (const delay of SETTLE_MS) setTimeout(apply, delay);
+    }
+  });
+  globalThis.visualViewport?.addEventListener('resize', apply);
   globalThis.addEventListener('resize', apply);
   globalThis.addEventListener('orientationchange', () => {
     setTimeout(apply, 300);
