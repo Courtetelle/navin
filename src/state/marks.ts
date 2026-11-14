@@ -106,8 +106,8 @@ export function mergeMarks(list: unknown): void {
 export function nextMarkNumber(marks: readonly Mark[]): number {
   let highest = 0;
   for (const mark of marks) {
-    const numbered = /^M(\d+)$/.exec(mark.name.trim());
-    if (numbered) highest = Math.max(highest, Number(numbered[1]));
+    const numbered = /^M(?<number>\d+)$/.exec(mark.name.trim())?.groups;
+    if (numbered) highest = Math.max(highest, Number(numbered.number));
   }
   return highest + 1;
 }

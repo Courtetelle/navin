@@ -2,7 +2,7 @@ import { effect } from '@preact/signals-react';
 import { useLayoutEffect } from 'react';
 
 import { installDecimalComma } from '../components/shared/decimalComma.ts';
-import { state } from '../state/index.ts';
+import { applySkipperMenus, state } from '../state/index.ts';
 import { attachErrorLog } from '../storage/errLog.ts';
 
 import { followAutoNight } from './autoNight.ts';
@@ -55,6 +55,8 @@ function boot(): void {
     );
   });
   followTheme();
+  // The menus the skipper sent, made those of the app (once).
+  applySkipperMenus();
   followScreenGap();
   followAutoNight();
   followTopState();
