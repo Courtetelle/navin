@@ -58,6 +58,25 @@ function screenAngle(): number {
   return globalThis.screen.orientation?.angle ?? 0;
 }
 
+/**
+ * How far above the real bottom of the screen a button held at the bottom
+ * stands: measured, as iOS does not always lay them as it tells.
+ * @param gap - The missing height of the page.
+ * @returns Pixels to move them down.
+ */
+function fixedGap(gap: number): number {
+  if (gap <= 0 || !document.body) return 0;
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:fixed;left:0;bottom:0;width:1px;height:1px;visibility:hidden;pointer-events:none';
+  document.body.append(probe);
+  const bottom = probe.getBoundingClientRect().bottom;
+  probe.remove();
+  const full = globalThis.innerHeight + gap;
+  const missing = Math.round(full - bottom);
+  return missing > 0 && missing <= gap ? missing : 0;
+}
+
 function apply(): void {
   const side = cameraSide(
     screenAngle(),
@@ -74,7 +93,10 @@ function apply(): void {
     width: globalThis.innerWidth,
     height: globalThis.innerHeight,
   });
-  document.documentElement.style.setProperty('--screen-gap', `${gap}px`);
+  const style = document.documentElement.style;
+  style.setProperty('--screen-gap', `${gap}px`);
+  // The buttons held at the bottom: only what their own bottom misses.
+  style.setProperty('--fixed-gap', `${fixedGap(gap)}px`);
 }
 
 /** Keep `--screen-gap` right as the phone turns. */

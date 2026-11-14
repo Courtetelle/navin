@@ -11246,8 +11246,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     --rb-x: calc(var(--rb-w) + var(--rb-gap));
     /* Above the home bar, the same gap again */
     --rb-bottom: calc(
-      max(14px, calc(env(safe-area-inset-bottom) - 6px)) -
-        var(--screen-gap, 0px)
+      max(14px, calc(env(safe-area-inset-bottom) - 6px)) - var(--fixed-gap, 0px)
     );
   }
   html body header.topbar #clock {
@@ -11605,7 +11604,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
 /* A phone sideways: SOS above the home bar with the gap of the top */
 @media (orientation: landscape) and (min-width: 560px) and (max-height: 520px) {
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
-    bottom: max(10px, calc(env(safe-area-inset-bottom) - 11px)) !important;
+    bottom: max(19px, calc(env(safe-area-inset-bottom) - 2px)) !important;
   }
 }
 
@@ -11618,12 +11617,17 @@ body.trk-mode .trk-full {
 /* A phone sideways: the wide margin only on the side of the camera, the
    other column as close to its edge as the top */
 @media (orientation: landscape) and (min-width: 560px) and (max-height: 520px) {
+  /* The rounded corners: 19 px from both edges keeps the gap of the
+     edges (10 px) in the corner too */
+  :root {
+    --rb-top: 19px;
+  }
   :root.cam-right {
-    --rb-side: 10px;
+    --rb-side: 19px;
     --rb-side-r: var(--rb-edge-x);
   }
   :root.cam-left {
-    --rb-side-r: 10px;
+    --rb-side-r: 19px;
   }
 }
 
@@ -11631,11 +11635,11 @@ body.trk-mode .trk-full {
    under the top edge and above the camera */
 @media (orientation: portrait) and (max-width: 559px) {
   :root.cam-bottom {
-    --rb-top: 14px;
+    --rb-top: 19px;
   }
   html:root.cam-bottom body {
     --rb-bottom: calc(
-      max(14px, env(safe-area-inset-bottom)) - var(--screen-gap, 0px)
+      max(14px, env(safe-area-inset-bottom)) - var(--fixed-gap, 0px)
     );
   }
 }
@@ -11649,4 +11653,72 @@ body.trk-mode .trk-full {
 }
 :root[data-theme='night'] .swipe-row.search-found {
   outline-color: #ff4040;
+}
+
+/* T upright: the figures of the track fold to the left edge. One tab, at the
+   top of the column: folded, against the left edge (› opens); open, against
+   the right side of the column (‹ folds). */
+@media (orientation: portrait) and (max-width: 559px) {
+  html body .slide-handle.sh-bot {
+    top: calc(var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top));
+    left: 0;
+    width: 26px;
+    height: 68px !important;
+    margin-left: 0;
+    border-radius: 0 12px 12px 0;
+  }
+  html body .slide-handle.sh-bot::before {
+    left: 5px;
+    top: 50%;
+    bottom: auto;
+    margin-top: -6px;
+    transform: rotate(45deg);
+  }
+  html body .slide-handle.sh-bot::after {
+    inset: 0 -20px 0 0 !important;
+    width: auto;
+    height: auto;
+    background: none;
+    box-shadow: none;
+  }
+  html body .slide-handle.sh-bot,
+  html body .trk-full .trk-dash .bar-chevron-bottom {
+    background: color-mix(in srgb, var(--surface, #fff) 88%, transparent);
+    border: 2px solid rgba(11, 18, 32, 0.8);
+    box-sizing: border-box;
+  }
+  html body .slide-handle.sh-bot {
+    border-left: 0;
+  }
+  :root[data-theme='night'] html body .slide-handle.sh-bot::after,
+  :root[data-theme='night'] body .slide-handle.sh-bot::after {
+    background: none;
+    box-shadow: none;
+  }
+  :root[data-theme='night'] body .slide-handle.sh-bot,
+  :root[data-theme='night'] body .trk-full .trk-dash .bar-chevron-bottom {
+    background: #200000;
+    border-color: #ff4040;
+  }
+  html body .trk-full .trk-dash .bar-chevron-bottom {
+    top: 0;
+    bottom: auto;
+    left: 100%;
+    margin: 0 0 0 4px;
+    width: 26px;
+    height: 68px;
+    border-radius: 12px;
+  }
+  html body .trk-full .trk-dash .bar-chevron-bottom::before {
+    left: 9px;
+    top: 50%;
+    margin-top: -6px;
+    transform: rotate(-135deg);
+  }
+  html body .trk-full .trk-dash .bar-chevron-bottom::after {
+    top: 0;
+    bottom: 0;
+    left: -6px;
+    right: -20px;
+  }
 }
