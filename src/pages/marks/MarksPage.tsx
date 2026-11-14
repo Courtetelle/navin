@@ -4,13 +4,12 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { gotoTarget, setGoto } from '../../features/map/goto.ts';
-import { marksGpx } from '../../features/map/marksText.ts';
 import { ListPublishRow } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
-import { deliver, state } from '../../state/index.ts';
+import { state } from '../../state/index.ts';
 
 import { MarkItem } from './MarkItem.tsx';
 
@@ -68,16 +67,7 @@ export function MarksPage() {
           </p>
         )}
       </div>
-      <ListPublishRow
-        kind="marks"
-        onGpx={() => {
-          void deliver(
-            marksGpx(state.data.marks.value),
-            'NavIn-marques.gpx',
-            'application/gpx+xml',
-          );
-        }}
-      />
+      <ListPublishRow kind="marks" />
     </>
   );
 }

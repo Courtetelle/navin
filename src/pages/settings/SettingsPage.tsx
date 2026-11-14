@@ -20,6 +20,7 @@ import { nightOK, state, toast } from '../../state/index.ts';
 import { BackupSections } from './BackupSections.tsx';
 import { InstallGuide } from './InstallGuide.tsx';
 import { LakeCenterRow } from './LakeCenterRow.tsx';
+import { LangRow } from './LangRow.tsx';
 import { MarginRows } from './MarginRows.tsx';
 import { OfflineSection } from './OfflineSection.tsx';
 import { SeaCenterRow } from './SeaCenterRow.tsx';
@@ -171,6 +172,7 @@ export function SettingsPage({ from }: PageProps) {
           <SeaCenterRow basin="atl" />
           <SeaCenterRow basin="med" />
           <LakeCenterRow />
+          <LangRow />
           <WakeRow />
           <HelpBubblesRow />
         </SettingsSection>

@@ -6,6 +6,7 @@ import { boatThumb, memberAvatar } from './crossDomain.ts';
 import { dateStamp, documentOf, imagePages, slug } from './listDocument.ts';
 import { LIST_TITLES } from './listKinds.ts';
 import { listTheme } from './listPublishState.ts';
+import { PLAN_PREFIX, planOf } from './planPhoto.ts';
 import type {
   CardsDocument,
   CardsPhoto,
@@ -26,7 +27,10 @@ export async function photoUrls(
   const urls = new Map<string, string>();
   for (const item of list) {
     for (const photo of item.photos ?? []) {
-      const url = await getPhoto(photo.id).catch(() => null);
+      // The plan of a mark is drawn, not kept with the photos.
+      const url = photo.id.startsWith(PLAN_PREFIX)
+        ? await planOf(photo.id).catch(() => null)
+        : await getPhoto(photo.id).catch(() => null);
       if (typeof url === 'string' && url) urls.set(photo.id, url);
     }
   }

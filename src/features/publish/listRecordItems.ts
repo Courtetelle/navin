@@ -2,6 +2,7 @@ import { fmtDur, fmtShortDate, fmtTime, fr, pad } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import type { ChecklistBase, Mark, SosLog } from '../../model/types.ts';
 
+import { markPlanId } from './planPhoto.ts';
 import type { PublishItem, PublishRowData } from './types.ts';
 
 /** A track with its statistics. */
@@ -60,7 +61,13 @@ export function markItems(marks: readonly Mark[]): PublishItem[] {
         ['Position', fmtPos(mark)],
       ];
       if (mark.depth) rows.push(['Profondeur', mark.depth]);
-      return { id: mark.id, name, sections: [{ title: name, rows }] };
+      return {
+        id: mark.id,
+        name,
+        sections: [{ title: name, rows }],
+        // The plan of its situation, drawn when it is shared.
+        photos: [{ id: markPlanId(mark.id), cap: `${name} · situation` }],
+      };
     });
 }
 

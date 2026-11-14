@@ -752,19 +752,16 @@ async function marksShare(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(400);
   check(
     theme,
-    'marks: one « Tout partager » only, no GPX or list row beside it',
+    'marks: one « Tout partager » only, no list row beside it',
     (await page.locator('[data-mk="gpx"], [data-mk="txt"]').count()) === 0 &&
       (await page.locator('[data-lxpub="marks"]').count()) === 1,
   );
   await page.locator('[data-lxpub="marks"]').click();
   await page.waitForTimeout(200);
-  const kinds = await page.locator('.lx-pub [data-share-kind]').count();
-  await page.locator('.lx-pub [data-share-kind="text"]').click();
-  await page.waitForTimeout(200);
   check(
     theme,
-    'marks: Tout partager asks Texte or GPX, then the text network or PDF',
-    kinds === 2 &&
+    'marks: Tout partager goes straight to the network or the PDF, no GPX',
+    (await page.locator('.lx-pub [data-share-kind]').count()) === 0 &&
       (await page.locator('.lx-pub [data-share-fmt]').count()) === 2,
   );
   await page.locator('h1, .page-title').first().click({ force: true });

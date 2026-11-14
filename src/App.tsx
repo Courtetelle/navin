@@ -1,4 +1,3 @@
-import { LangFab } from './i18n/LangFab.tsx';
 import { SideRails } from './pages/tracker/SideRails.tsx';
 import { PageHost } from './shell/PageHost.tsx';
 import { SlideHandles } from './shell/SlideHandles.tsx';
@@ -14,7 +13,7 @@ import { useBoot } from './shell/useBoot.ts';
 /**
  * The whole app: the same body children, in the same order, as the legacy
  * page once its scripts ran (top bar, nav bar, `#view`, bubble, wake video,
- * language button, slide handles, remark pill).
+ * slide handles, remark pill); the language is chosen in the settings.
  * @returns The app chrome around the current screen.
  */
 export function App() {
@@ -28,7 +27,6 @@ export function App() {
       </main>
       <Toast />
       <WakeVideo />
-      <LangFab />
       <SlideHandles />
       <SearchButton />
       <SideRails />

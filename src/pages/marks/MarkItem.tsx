@@ -6,7 +6,6 @@ import { utcText } from '../../components/shared/timeText.ts';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { setGoto } from '../../features/map/goto.ts';
 import { marksFly } from '../../features/map/longPress.ts';
-import { marksGpx } from '../../features/map/marksText.ts';
 import { relativeParts } from '../../features/map/relativeText.ts';
 import { SwipeRow } from '../../features/prep/index.ts';
 import { openListPublish } from '../../features/publish/index.ts';
@@ -16,19 +15,7 @@ import { fmtShortDate } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import type { Mark } from '../../model/types.ts';
 import { go } from '../../shell/router.ts';
-import { deliver, renameMark, updateMarks } from '../../state/index.ts';
-
-/**
- * A name as it can stand in a file name.
- * @param name - The name of the mark.
- * @returns Letters, digits and dashes.
- */
-function fileSafe(name: string): string {
-  return (
-    name.replaceAll(/[^\p{L}\p{N}]+/gu, '-').replaceAll(/^-|-$/g, '') ||
-    'marque'
-  );
-}
+import { renameMark, updateMarks } from '../../state/index.ts';
 
 /** Props of {@link MarkItem}. */
 interface MarkItemProps {
@@ -86,13 +73,6 @@ export function MarkItem({ mark }: MarkItemProps) {
       onView={goTo}
       viewAs={{ icon: '🎯', label: 'Go to' }}
       onShare={(format) => openListPublish('marks', mark.id, format)}
-      onGpx={() => {
-        void deliver(
-          marksGpx([mark]),
-          `NavIn-${fileSafe(mark.name)}.gpx`,
-          'application/gpx+xml',
-        );
-      }}
       onDelete={(id) => {
         updateMarks((marks) => {
           const index = marks.findIndex((item) => item.id === id);

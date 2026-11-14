@@ -72,6 +72,16 @@ export function nextSecondLanguage(): OtherLanguage {
   return next;
 }
 
+/**
+ * Choose the language of the sheets (from the settings).
+ * @param chosen - `fr`, `en`, `it` or `es`.
+ */
+export function setLanguage(chosen: Language): void {
+  if (chosen !== 'fr') secondLanguage.value = chosen;
+  language.value = chosen;
+  saveLanguages();
+}
+
 function saveLanguages(): void {
   try {
     localStorage.setItem('ldb.lang', language.value);
