@@ -10,11 +10,12 @@ import type { ListKind } from './types.ts';
 /** Props of {@link ListPublishRow}. */
 export interface ListPublishRowProps {
   /** The list shown by the page. */
-  kind: Exclude<ListKind, 'boats'>;
+  kind: ListKind;
 }
 
 /**
- * The « 📤 Partager » row at the bottom of a data list. Renders nothing when
+ * The « 📤 Tout partager » row at the bottom of a data list: the whole list,
+ * every element checked (one element is shared by swiping its band). Renders nothing when
  * the list has nothing to publish.
  * @param props - List kind.
  * @returns The row or null.
@@ -27,6 +28,7 @@ export function ListPublishRow({
     <ButtonRow className="row ck-pub-row lx-pub no-print">
       <ShareButton
         data-lxpub={kind}
+        label="📤 Tout partager"
         onShare={(format) => openListPublish(kind, undefined, format)}
       />
     </ButtonRow>

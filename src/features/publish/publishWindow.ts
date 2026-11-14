@@ -25,14 +25,17 @@ export function openListPublish(
   only?: string,
   format: ShareFormat = 'image',
 ): void {
+  const ids = listItems(kind).map((item) => item.id);
   if (only) {
-    const ids = listItems(kind).map((item) => item.id);
     if (ids.includes(only)) {
       keepOnly(
         kind,
         ids.filter((id) => id !== only),
       );
     }
+  } else {
+    // « Tout partager »: the whole list.
+    keepOnly(kind, []);
   }
   prepareList(kind);
   // Its own root, detached from the page tree: the window stays open and keeps

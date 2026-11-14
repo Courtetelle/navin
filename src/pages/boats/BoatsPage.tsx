@@ -10,6 +10,7 @@ import { BoatVersions } from '../../features/boats/BoatVersions.tsx';
 import { addBoat } from '../../features/boats/boatActions.ts';
 import { boatsByNav } from '../../features/boats/navOrder.ts';
 import { BoatFieldsEditor } from '../../features/onwater/index.ts';
+import { ListPublishRow } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { PageValidate } from '../../shell/navbar/PageBack.tsx';
@@ -147,6 +148,7 @@ function BoatList({
           />
         ))}
       </div>
+      {boats.length > 0 ? <ListPublishRow kind="boats" /> : null}
       <ButtonRow className="row b-addrow">
         <Button
           className="btn big primary"

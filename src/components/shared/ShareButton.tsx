@@ -69,6 +69,11 @@ export interface ShareButtonProps extends Omit<
    * @default false
    */
   big?: boolean;
+  /**
+   * The words of the button: « 📤 Tout partager » under a whole list.
+   * @default '📤 Partager'
+   */
+  label?: string;
 }
 
 /**
@@ -82,6 +87,7 @@ export function ShareButton({
   onShare,
   small = false,
   big = false,
+  label = '📤 Partager',
   className = '',
   ...rest
 }: ShareButtonProps): ReactElement {
@@ -115,7 +121,7 @@ export function ShareButton({
           setOpen(true);
         }}
       >
-        📤 Partager
+        {label}
       </Button>
     );
   }

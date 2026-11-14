@@ -52,8 +52,7 @@ export function RemarkPill() {
     Math.min(
       width - 64 - inset.right,
       // On a landscape tablet, clear of the right column of buttons.
-      position.x ??
-        width - inset.right - (width >= 1000 && width > height ? 260 : 72),
+      position.x ?? width - inset.right - pillGap(width, height),
     ),
   );
   const top = Math.max(
@@ -177,6 +176,18 @@ function highlight(element: Element | null): void {
   highlighted?.classList.remove('rem-target');
   highlighted = element;
   element?.classList.add('rem-target');
+}
+
+/**
+ * How far from the right edge the pill stands at first: clear of the right
+ * column of buttons in landscape.
+ * @param width - Width of the screen.
+ * @param height - Its height.
+ * @returns Pixels.
+ */
+function pillGap(width: number, height: number): number {
+  if (width <= height) return 72;
+  return width >= 1000 ? 260 : 160;
 }
 
 /** The margins of the camera and the rounded corners, in pixels. */

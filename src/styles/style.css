@@ -6807,10 +6807,11 @@ html[data-theme='night']
   grid-template-columns: 1fr !important;
   gap: 10px;
 }
+/* One height for every action button of a page: the normal button's */
 #view .row.row-stack > .btn {
   width: 100% !important;
   margin: 0 !important;
-  min-height: 64px;
+  min-height: var(--tap);
 }
 #view .row.row-stack > .btn.act-plain {
   background: var(--bg) !important;
@@ -10851,12 +10852,13 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
     --rb-col: calc(var(--rb-side) + var(--rb-w) + 10px);
   }
 }
-/* A phone sideways: the same columns, smaller to fit its height */
+/* A phone sideways: the columns of X, with exactly the buttons of the phone
+   held upright (its short side is the width of the upright screen) */
 @media (orientation: landscape) and (min-width: 560px) and (max-height: 520px) {
   :root {
-    --rb-h: 36px;
-    --rb-w: 70px;
-    --rb-gap: 4px;
+    --rb-h: 44px;
+    --rb-w: calc((100vh - 2 * 14px - 4 * 6px) / 5);
+    --rb-gap: 6px;
     /* The buttons away from the rounded corners and the camera, the same
        margin on both sides; the map runs under them to every edge. */
     --rb-top: 10px;
@@ -10869,28 +10871,25 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
     left: 0 !important;
     right: 0 !important;
   }
-  html body .rail-btn .rail-svg,
-  html body .rail-btn .rail-icon svg,
-  html body .rail-btn .tb-ico {
-    width: 30px !important;
-    height: 30px !important;
-  }
-  html body .rail-btn .rail-icon {
-    font-size: 24px !important;
-  }
+  /* The clock, NavIn and SOS lettered as upright */
   html body header.topbar #clock {
-    font-size: 11px;
+    font-size: 24px;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'],
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+    font-size: 19px !important;
+  }
+  /* NavIn: its logo inside its button, as upright */
+  html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] svg {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100%;
   }
   html body header.topbar.topbar #gearBtn.theme-btn,
   html body #searchBtn.no-print,
   html body .rail-btn.rail-btn {
     min-height: 0 !important;
     height: var(--rb-h) !important;
-  }
-  html body header.topbar #gearBtn svg,
-  html body #searchBtn svg {
-    width: 26px;
-    height: 26px;
   }
   html body .trk-dash b,
   html body .trk-dash div:nth-child(4) b {
@@ -11533,4 +11532,60 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
 :root[data-theme='night'] .live-chip-off {
   background: var(--fg);
   color: #000;
+}
+
+/* X (and the phone sideways): the right column, top to bottom, the
+   magnifier, NavIn, the photo, and SOS at the very bottom; NavIn unrolls
+   its menus to its left. The left column: the clock, the arrow, START, the
+   mark, the dividers. The figures of the track stand between the two. */
+@media (orientation: landscape) and (min-width: 560px) {
+  html body .side-rail-left .rail-navin-place {
+    display: none;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
+    top: calc(
+      var(--rb-top) + var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
+    left: auto !important;
+    right: var(--rb-side) !important;
+  }
+  html body .side-rail-left .rail-btn.rail-photo {
+    position: fixed;
+    top: calc(var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top));
+    left: auto;
+    right: var(--rb-side);
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+    left: auto !important;
+    right: var(--rb-side) !important;
+  }
+  html body .navin-row {
+    top: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-top));
+    left: auto;
+    right: calc(var(--rb-side) + var(--rb-x));
+    flex-direction: row-reverse;
+  }
+  html body .navin-row-comm {
+    margin-left: 0;
+    margin-right: calc(2 * var(--rb-x));
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    top: calc(
+      var(--rb-top) + var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
+    left: auto !important;
+    right: calc(var(--rb-side) + 2 * var(--rb-x)) !important;
+  }
+  html body header.topbar #gearBtn {
+    top: calc(
+      var(--rb-top) + var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
+    left: auto !important;
+    right: calc(var(--rb-side) + 3 * var(--rb-x)) !important;
+  }
+  html body .trk-full .trk-dash {
+    left: calc(var(--rb-side) + var(--rb-x)) !important;
+    right: calc(var(--rb-side) + var(--rb-x)) !important;
+  }
 }
