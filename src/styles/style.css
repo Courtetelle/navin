@@ -12111,3 +12111,20 @@ html body .lx-modal .ck-ask-box {
 :root[data-theme='night'] .rail-goto-fit circle[fill='#fff'] {
   fill: #200000;
 }
+
+/* X (the tablet, both ways): a larger sun and moon on the magnifier, to be
+   seen for the long press of night and day */
+@media (min-width: 560px) and (min-height: 560px) {
+  html body #searchBtn > .dn-sun,
+  html body #searchBtn > .dn-moon {
+    top: 5px;
+    width: 19px;
+    height: 19px;
+  }
+  html body #searchBtn > .dn-sun {
+    left: 7px;
+  }
+  html body #searchBtn > .dn-moon {
+    right: 7px;
+  }
+}

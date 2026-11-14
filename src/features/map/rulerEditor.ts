@@ -73,7 +73,7 @@ export function openRulerEditor(
       <label>Distance (NM)<input name="nm" inputmode="decimal" autocomplete="off"></label>
       <p class="ruler-edit-km" aria-live="polite"></p>
       <p class="ruler-edit-note">Depuis l’autre pointe, vers la flèche</p>
-      <button type="button" class="btn ruler-flip" data-flip>⇄ Inverser la flèche</button>
+      <button type="button" class="btn ruler-flip" data-flip>⇄ Inverser le sens</button>
       <div class="row c2">
         <button type="button" class="btn" data-close>✖ Annuler</button>
         <button type="submit" class="btn primary">✔ Placer</button>
