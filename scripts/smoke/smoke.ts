@@ -1473,6 +1473,49 @@ for (const [theme, viewport] of [
   check(theme, 'tablet: no error in the page', errors.length === 0);
   await context.close();
 }
+// The tablet held upright: the places of T, the sizes of X.
+for (const theme of ['day', 'night']) {
+  const { context, page, errors } = await open(browser, theme, {
+    width: 800,
+    height: 1280,
+  });
+  try {
+    await bars(page, theme);
+    // ＋ and − shown by the arrow go away first.
+    await page.waitForTimeout(3500);
+    const home = await tabletPlaces(page);
+    await page.locator(NAVIN).click();
+    await page.waitForTimeout(400);
+    await page.locator('.top-tab.tab-data').click();
+    await page.waitForTimeout(1100);
+    const onData = await tabletPlaces(page);
+    check(
+      theme,
+      `X upright: the same buttons at the same places on data${onData === home ? '' : ` (${home} / ${onData})`}`,
+      onData === home,
+    );
+    await page.locator(NAVIN).click();
+    await page.waitForTimeout(800);
+    check(
+      theme,
+      'X upright: the buttons have the sizes of X',
+      await page.evaluate(() => {
+        const box = document
+          .querySelector('.rail-boat')
+          ?.getBoundingClientRect();
+        return box?.width === 96 && box.height === 52;
+      }),
+    );
+  } catch (error) {
+    check(
+      theme,
+      `X upright: no step blocks: ${String(error).slice(0, 700)}`,
+      false,
+    );
+  }
+  check(theme, 'X upright: no error in the page', errors.length === 0);
+  await context.close();
+}
 for (const theme of ['day', 'night']) {
   for (const [where, viewport] of [
     ['phone', PHONE],

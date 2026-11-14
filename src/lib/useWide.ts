@@ -27,9 +27,10 @@ export function useWide(): boolean {
 
 /**
  * The screens laid with the buttons of NavIn around the map: landscape (X,
- * the phone turned) and a phone held upright (T).
+ * the phone turned), a phone held upright (T) and the tablet held upright
+ * (the places of T, the sizes of X).
  */
-export const RAILS_QUERY = `${WIDE_QUERY}, (orientation: portrait) and (max-width: 559px)`;
+export const RAILS_QUERY = `${WIDE_QUERY}, (orientation: portrait)`;
 
 function railsList(): MediaQueryList | null {
   return globalThis.matchMedia?.(RAILS_QUERY) ?? null;
