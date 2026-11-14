@@ -4,11 +4,11 @@ import { Button } from '../../components/shared/Button.tsx';
 import { buzz } from '../../lib/dom.ts';
 import { toast } from '../../state/index.ts';
 
-import { gotoBar, setGoto } from './goto.ts';
+import { fitGoto, gotoBar, setGoto } from './goto.ts';
 
 /**
  * Content of `#gotoBar`: distance, course and correction to the target.
- * @returns The texts and the stop button.
+ * @returns The texts, the button showing the whole route, the stop button.
  */
 export function GotoBar() {
   useSignals();
@@ -27,6 +27,22 @@ export function GotoBar() {
           </>
         )}
       </span>
+      <Button
+        className="btn goto-fit"
+        id="gotoFit"
+        aria-label="Voir toute la route du Go to"
+        onClick={() => {
+          buzz();
+          fitGoto();
+        }}
+      >
+        <svg viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="17" fill="#ff00aa" />
+          <circle cx="20" cy="20" r="12" fill="#fff" />
+          <circle cx="20" cy="20" r="7" fill="#ff00aa" />
+          <circle cx="20" cy="20" r="2.5" fill="#fff" />
+        </svg>
+      </Button>
       <Button
         className="btn"
         id="gotoStop"

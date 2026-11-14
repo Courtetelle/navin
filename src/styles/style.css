@@ -12109,10 +12109,6 @@ html body .lx-modal .ck-ask-box {
     ) !important;
   }
 }
-/* The target of the Go to at night: no white to dazzle */
-:root[data-theme='night'] .rail-goto-fit circle[fill='#fff'] {
-  fill: #200000;
-}
 
 /* X (the tablet, both ways): a larger sun and moon on the magnifier, to be
    seen for the long press of night and day */
@@ -12232,4 +12228,19 @@ html body .lx-modal .ck-ask-box {
   background: #ff4040;
   border-color: #ff4040;
   color: #200000;
+}
+/* The target button in the pink band, beside ■ */
+#gotoBar .btn.goto-fit {
+  margin-left: auto;
+}
+#gotoBar .btn.goto-fit svg {
+  width: 30px;
+  height: 30px;
+}
+:root[data-theme='night'] #gotoBar .btn.goto-fit circle[fill='#fff'] {
+  fill: #200000;
+}
+/* The page of Partager closes with its ◀: no « Fermer » */
+.lx-page [data-lxclose] {
+  display: none;
 }

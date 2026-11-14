@@ -65,7 +65,15 @@ export function ListPublishBox({ kind }: ListPublishBoxProps): ReactElement {
       <div className="lx-in">
         <ShareThemeNote />
         <PhotoOptions kind={kind} items={items} choice={choice} />
-        <div className="row">
+        <p className="help lx-sec-h lx-opt-h">Réglages de l’envoi</p>
+        {severalSections ? <TemplateChoice kind={kind} /> : null}
+        <ItemChecks kind={kind} items={items} choice={choice} />
+        {severalSections ? (
+          <SectionChecks kind={kind} items={items} choice={choice} />
+        ) : null}
+        <PhotoChecks kind={kind} items={items} choice={choice} />
+        {/* Envoyer at the very bottom of the lists, once everything is chosen */}
+        <div className="row lx-send-row">
           <SendButton
             format={format}
             data-lxsend={format}
@@ -87,13 +95,6 @@ export function ListPublishBox({ kind }: ListPublishBoxProps): ReactElement {
             }}
           />
         </div>
-        <p className="help lx-sec-h lx-opt-h">Réglages de l’envoi</p>
-        {severalSections ? <TemplateChoice kind={kind} /> : null}
-        <ItemChecks kind={kind} items={items} choice={choice} />
-        {severalSections ? (
-          <SectionChecks kind={kind} items={items} choice={choice} />
-        ) : null}
-        <PhotoChecks kind={kind} items={items} choice={choice} />
         {hasExtraSends(kind) ? (
           <>
             <p className="help lx-sec-h">Autres envois</p>

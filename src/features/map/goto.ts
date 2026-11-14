@@ -89,10 +89,15 @@ export function setGoto(target: GotoTarget | null): void {
     toast(`Go to ${target.name}`);
     // The band takes the bottom: the figures of the track fold away.
     setBodyClass('bot-hidden', true);
-    // ＋, − and the target button by the arrow, for a moment.
+    // ＋ and − by the arrow for a moment, and the whole route on the screen
+    // at once (the map shown first).
     showZoomOnMap();
+    setTimeout(fitGoto, FIT_AFTER_MS);
   }
 }
+
+/** A Go to started from a list: the map opens, then the route is shown. */
+const FIT_AFTER_MS = 700;
 
 /** Room kept around the route, clear of the buttons (pixels). */
 const FIT_PADDING = 90;
