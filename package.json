@@ -1,6 +1,6 @@
 {
   "name": "navin",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "NavIn: offline logbook for sailing on Lake Geneva and at sea, installable as a PWA",
   "type": "module",
   "private": true,
