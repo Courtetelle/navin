@@ -21,7 +21,7 @@ import { tracker } from '../../features/map/trackerState.ts';
 import { takePhoto } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { useWide } from '../../lib/useWide.ts';
+import { useRails } from '../../lib/useWide.ts';
 import { hasBodyClass } from '../../shell/bodyClass.ts';
 import { inMenu, menuButtonPress } from '../../shell/menuOwner.ts';
 import { navBack } from '../../shell/navbar/navActions.ts';
@@ -121,22 +121,22 @@ function run(key: string): void {
 
 /**
  * The column of the landscape tablet, on the left of the map, top to bottom:
- * the clock, the arrow of the boat with ＋ at its right (3 s after the
- * arrow), NavIn, START (and Amarrage at its right during a track), the mark,
+ * the clock, the arrow of the boat with ＋ and − at its right (3 s after
+ * the arrow), NavIn, START (and Amarrage at its right during a track), the mark,
  * the dividers, the photo, and SOS at the very bottom; the magnifier alone
  * at the top right. NavIn unrolls at its right PréP (Météo during a
  * track), data, the settings and the phone or the VHF.
  * @returns The column, or nothing on a phone held upright.
  */
 export function SideRails() {
-  const wide = useWide();
-  if (!wide) return null;
+  const rails = useRails();
+  if (!rails) return null;
   return (
     <>
       <div className="side-rail side-rail-left">
-        <div className="rail-line">
+        <div className="rail-line rail-arrow-line">
           <BoatButton />
-          <PlusButton />
+          <ZoomPair />
         </div>
         <div className="rail-navin-place" aria-hidden="true" />
         <StartLine />
@@ -176,46 +176,63 @@ function NavinRow() {
   );
 }
 
-/** ＋ is shown this long after a touch on the arrow, or on itself. */
-const PLUS_MS = 3000;
+/** ＋ and − are shown this long after a touch on the arrow, or on them. */
+const ZOOM_MS = 3000;
 
-/** ＋ is shown (for a moment after the arrow). */
-const plusShown = signal(false);
-let plusTimer: ReturnType<typeof setTimeout> | undefined;
+/** ＋ and − are shown (for a moment after the arrow). */
+const zoomShown = signal(false);
+let zoomTimer: ReturnType<typeof setTimeout> | undefined;
 
-function showPlus(): void {
-  plusShown.value = true;
-  clearTimeout(plusTimer);
-  plusTimer = setTimeout(() => {
-    plusShown.value = false;
-  }, PLUS_MS);
+function showZoom(): void {
+  zoomShown.value = true;
+  clearTimeout(zoomTimer);
+  zoomTimer = setTimeout(() => {
+    zoomShown.value = false;
+  }, ZOOM_MS);
 }
 
 /**
- * ＋ at the right of the arrow: zooms in the map shown, one level. It shows
- * for 3 s after a touch on the arrow (each ＋ gives 3 s more), on a map only.
- * @returns The button, or nothing.
+ * ＋ and − at the right of the arrow (under it on T upright): zoom the map
+ * shown one level. They light for 3 s after a touch on the arrow, each touch
+ * on them gives 3 s more; on a map only.
+ * @returns The two buttons, or nothing.
  */
-function PlusButton() {
+function ZoomPair() {
   useSignals();
   const tr = useTr();
   const map = state.view.currentView.value === 'tracker' || shownMap();
-  if (!map || !plusShown.value) return null;
+  if (!map || !zoomShown.value) return null;
   return (
-    <Button
-      type="button"
-      noUiEdit
-      className="rail-btn rail-zoom-in"
-      aria-label={tr('Zoomer')}
-      onClick={() => {
-        showPlus();
-        zoom(1);
-      }}
-    >
-      <span className="rail-icon">
-        <ZoomSign plus />
-      </span>
-    </Button>
+    <>
+      <Button
+        type="button"
+        noUiEdit
+        className="rail-btn rail-zoom-in"
+        aria-label={tr('Zoomer')}
+        onClick={() => {
+          showZoom();
+          zoom(1);
+        }}
+      >
+        <span className="rail-icon">
+          <ZoomSign plus />
+        </span>
+      </Button>
+      <Button
+        type="button"
+        noUiEdit
+        className="rail-btn rail-zoom-out"
+        aria-label={tr('Dézoomer')}
+        onClick={() => {
+          showZoom();
+          zoom(-1);
+        }}
+      >
+        <span className="rail-icon">
+          <ZoomSign plus={false} />
+        </span>
+      </Button>
+    </>
   );
 }
 
@@ -283,9 +300,9 @@ const BOAT_SVG =
   '<svg class="rail-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3 3 10.5l7.5 3 3 7.5z" fill="currentColor"/></svg>';
 
 /**
- * Under the clock: the arrow of the boat, with a small − at its right. The
- * first touch brings the map back on the boat, each further touch zooms out;
- * a long press turns the map to the course of the boat, the arrow red, and
+ * Under the clock: the arrow of the boat. A touch brings the map back on the
+ * boat, always at the same zoom, close to it, and lights ＋ and − for 3 s; a
+ * long press turns the map to the course of the boat, the arrow red, and
  * back to north up, blue.
  * @returns The button.
  */
@@ -309,15 +326,12 @@ function BoatButton() {
       aria-pressed={courseUp}
       onClick={() => {
         boatArrowTap();
-        showPlus();
+        showZoom();
       }}
       {...press.handlers}
     >
       <span className="rail-icon">
         {markupToReact(courseUp ? BOAT_UP_SVG : BOAT_SVG)}
-      </span>
-      <span className="rail-minus" aria-hidden="true">
-        −
       </span>
     </Button>
   );
@@ -434,7 +448,8 @@ function openCalls(zone: 'ext' | 'int'): void {
 }
 
 /**
- * PréP, first of the row of NavIn: it opens the preparation.
+ * PréP, first of the row of NavIn: it opens the PréP menu (zone, weather,
+ * type of outing, check-in, safety briefing).
  * @returns The button.
  */
 function PrepButton() {
@@ -458,7 +473,7 @@ function PrepButton() {
       aria-pressed={prepOn}
       onClick={() => {
         buzz();
-        domainActions.prepStart();
+        go('prepmenu');
       }}
     >
       <span className="rail-icon">

@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { buzz } from '../../lib/dom.ts';
-import { WIDE_QUERY } from '../../lib/useWide.ts';
+import { railsScreen } from '../../lib/useWide.ts';
 import { state } from '../../state/index.ts';
 import { BarChevron } from '../BarChevron.tsx';
 import { hasBodyClass } from '../bodyClass.ts';
@@ -105,7 +105,7 @@ function GearButton({ focused }: { focused: boolean }) {
         gearLongPress = false;
         clearTimeout(gearTimer);
         // Landscape tablet: night and day are on NavIn now.
-        if (globalThis.matchMedia?.(WIDE_QUERY).matches) return;
+        if (railsScreen()) return;
         gearTimer = setTimeout(() => {
           gearLongPress = true;
           toggleThemeFromGear();

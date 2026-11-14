@@ -76,4 +76,4 @@ export { wxNext } from './weatherSources.ts';
 export type { Forecast, ForecastRow } from './weatherSources.ts';
 export { ZONE_CYC, cycleZone, nextZone, zoneSet } from './zone.ts';
 export type { ZoneChoice } from './zone.ts';
-export { ZoneSim } from './ZoneSim.tsx';
+export { LemanIcon, ZoneSim } from './ZoneSim.tsx';

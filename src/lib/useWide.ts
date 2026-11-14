@@ -24,3 +24,40 @@ export function useWide(): boolean {
     () => false,
   );
 }
+
+/**
+ * The screens laid with the buttons of NavIn around the map: landscape (X,
+ * the phone turned) and a phone held upright (T).
+ */
+export const RAILS_QUERY = `${WIDE_QUERY}, (orientation: portrait) and (max-width: 559px)`;
+
+function railsList(): MediaQueryList | null {
+  return globalThis.matchMedia?.(RAILS_QUERY) ?? null;
+}
+
+function subscribeRails(changed: () => void): () => void {
+  const list = railsList();
+  list?.addEventListener('change', changed);
+  return () => list?.removeEventListener('change', changed);
+}
+
+/**
+ * Whether the screen lays the buttons around the map (X, T), following
+ * rotations.
+ * @returns `true` on such a screen.
+ */
+export function useRails(): boolean {
+  return useSyncExternalStore(
+    subscribeRails,
+    () => railsList()?.matches ?? false,
+    () => false,
+  );
+}
+
+/**
+ * Whether the screen lays the buttons around the map, now.
+ * @returns `true` on such a screen.
+ */
+export function railsScreen(): boolean {
+  return railsList()?.matches ?? false;
+}

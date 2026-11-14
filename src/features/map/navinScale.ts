@@ -123,42 +123,38 @@ export function boatScaleTap(): void {
   toast(`Bateau · ${scaleText(boatScale)}`);
 }
 
+/** The zoom the arrow brings back: close to the boat, always the same. */
+export const ARROW_ZOOM = 14;
+
 /**
- * The arrow of the landscape tablet: the first touch brings the map back on
- * the boat and follows it, the zoom unchanged; each further touch, the boat
- * already followed, zooms out one level, and stays at the widest.
+ * The arrow of X and T: back on the GPS, the map on the boat at the same
+ * zoom every time (close to it), following it.
+ * @param tries - Waits left for the map to open.
  */
-export function boatArrowTap(): void {
-  buzz();
-  backToGps();
-  const shown = onMap();
-  const map = tracker.current?.map;
-  const following = Boolean(tracker.current?.follow);
-  if (!shown || !map) {
-    go('tracker');
-    apply(boatScale, 'boat');
+export function boatArrowTap(tries = WAIT_TRIES): void {
+  if (tries === WAIT_TRIES) {
+    buzz();
+    backToGps();
+    if (!onMap()) go('tracker');
+  }
+  const handle = tracker.current;
+  const map = handle?.map;
+  if (!map) {
+    if (tries > 0) {
+      setTimeout(() => boatArrowTap(tries - 1), WAIT_STEP_MS);
+    }
     return;
   }
   const here = herePos();
   const boat =
-    tracker.current?.me?.getLatLng() ??
+    handle.me?.getLatLng() ??
     (here ? leaflet().latLng(here.lat, here.lon) : null);
   if (!boat) {
     toast('Position du bateau inconnue : attendez le GPS.');
     return;
   }
-  if (!following) {
-    setFollow(true);
-    map.setView(boat, map.getZoom());
-    toast('Bateau suivi');
-    return;
-  }
-  if (map.getZoom() <= map.getMinZoom()) {
-    map.setView(boat, map.getZoom());
-    toast('Zoom le plus large');
-    return;
-  }
-  map.setView(boat, map.getZoom() - 1);
+  setFollow(true);
+  map.setView(boat, ARROW_ZOOM);
 }
 
 /**

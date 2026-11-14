@@ -11,7 +11,7 @@ import { navZone, state } from '../../state/index.ts';
 import { cycleZone, nextZone } from './zone.ts';
 
 /** Outline of Lake Geneva, north up (Natural Earth, public domain). */
-function LemanIcon() {
+export function LemanIcon() {
   return (
     <svg className="zone-leman" viewBox="0 0 50 29.6" aria-hidden="true">
       <path

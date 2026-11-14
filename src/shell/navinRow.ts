@@ -7,8 +7,8 @@ import { setBodyClass } from './bodyClass.ts';
 /** The row of menus unrolled at the right of NavIn (landscape tablet). */
 export const navinRowOpen = signal(false);
 
-/** Left alone on the map, the row rolls back after this long. */
-const IDLE_MS = 10_000;
+/** Left without a choice, the row rolls back after this long, as ＋ and −. */
+const IDLE_MS = 3000;
 
 let chosen = false;
 let idle: ReturnType<typeof setTimeout> | undefined;
@@ -54,10 +54,12 @@ export function toggleNavinRow(): void {
 }
 
 /**
- * A menu of the row was opened: the row stays while it is used, and rolls
- * back once the map is shown again.
+ * A menu of the row was chosen: the row rolls back at once, while the menu
+ * chosen shows (after the touch has reached its button).
  */
 export function navinRowChosen(): void {
+  if (!navinRowOpen.peek()) return;
   chosen = true;
   clearTimeout(idle);
+  setTimeout(closeNavinRow, 0);
 }

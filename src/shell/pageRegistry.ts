@@ -124,6 +124,10 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/people/PeoplePage.tsx').then((module) => ({
       default: module.PeoplePage,
     })),
+  prepmenu: () =>
+    import('../pages/prepmenu/PrepMenuPage.tsx').then((module) => ({
+      default: module.PrepMenuPage,
+    })),
   prep: () =>
     import('../pages/prep/PrepPage.tsx').then((module) => ({
       default: module.PrepPage,

@@ -77,6 +77,17 @@ export function prepStart(): void {
   go('prep');
 }
 
+let backToMenu = false;
+
+/**
+ * « Type de sortie » of the PréP menu: the steps up to the choice of the
+ * crew, then back to the menu instead of the check-in.
+ */
+export function prepFromMenu(): void {
+  backToMenu = true;
+  prepStart();
+}
+
 /**
  * Open a step (legacy `prepGo`): the crew page when a person is being added,
  * the check-in once a navigation is open, else the PréP page.
@@ -95,6 +106,11 @@ export function prepGo(step: number, browse = false): void {
   const prep = prepFlow();
   if (prep?.step === 3 && prep.newCrew) {
     go('crew');
+    return;
+  }
+  if (prep?.step === 4 && backToMenu) {
+    backToMenu = false;
+    go('prepmenu');
     return;
   }
   if (prep?.step === 4 && state.data.cruise.value) {

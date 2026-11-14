@@ -9634,7 +9634,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
    left column, the settings, the magnifier, VHF / phone and data the right
    one, SOS at its foot;
    the map takes the whole height. */
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   html body header.topbar.topbar {
     position: fixed !important;
     inset: 0 auto auto 0 !important;
@@ -9955,7 +9956,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 
 /* Tablet in landscape: the time in the middle of its pill */
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   html body header.topbar.topbar #clock {
     display: flex !important;
     flex-direction: column;
@@ -9971,7 +9973,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 
 /* Tablet in landscape: « data » a little larger, same proportions */
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
     font-size: 34px !important;
   }
@@ -9983,7 +9986,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
 
 /* Tablet columns: every drawing the same size; the map shows through each
    pill, blurred, only inside its frame (NavIn keeps its own colour). */
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   html body .rail-btn .rail-svg {
     width: 50px;
     height: 50px;
@@ -10021,7 +10025,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
 }
 
 /* Tablet columns: every button 52 px high, as the magnifier */
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   html body .rail-btn.rail-btn {
     height: var(--rb-h);
     padding: 2px;
@@ -10068,7 +10073,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
 
 /* Tablet: every side and map button in glass, with a little relief. Pressed,
    it sinks in: a short press briefly, a long one deeper with a lit ring. */
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   html:root body .rail-btn.rail-btn,
   html:root body header.topbar.topbar #gearBtn.theme-btn,
   html:root body #searchBtn.no-print,
@@ -10255,7 +10261,8 @@ body.nav-search:not(.trk-mode) #searchBtn {
 .side-rail .rail-btn.rail-hidden {
   pointer-events: none;
 }
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   /* PréP, START and the track keep the drawings and proportions of the
      phone's NavIn button, scaled to the pill */
   html body .rail-btn .tb-ico {
@@ -10890,42 +10897,6 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
     font-size: 11px;
   }
 }
-/* The phone upright is set aside for now: it asks to be turned. */
-.turn-phone {
-  display: none;
-}
-@media (orientation: portrait) and (max-width: 559px) {
-  html:not(.portrait-ok) .turn-phone {
-    position: fixed;
-    inset: 0;
-    z-index: 100000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 18px;
-    padding: 32px;
-    background: var(--bg, #f3f5f9);
-    color: var(--fg, #0b1220);
-    text-align: center;
-    font-size: 22px;
-    font-weight: 700;
-  }
-  html:not(.portrait-ok) .turn-phone .turn-ico {
-    font-size: 72px;
-    animation: turnPhone 2s ease-in-out infinite;
-  }
-}
-@keyframes turnPhone {
-  0%,
-  30% {
-    transform: rotate(0deg);
-  }
-  60%,
-  100% {
-    transform: rotate(-90deg);
-  }
-}
 
 /* The wind bubble on a low screen (a phone sideways): wider, smaller text,
    its two buttons side by side, and it scrolls rather than leaves the
@@ -11124,7 +11095,8 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
    the arrow and ＋, NavIn, START (and Amarrage), the mark, the dividers,
    the photo, and SOS at the very bottom; the magnifier at the top right. NavIn unrolls at its right PréP (Météo
    during a track), data, the settings, the phone or VHF. */
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   html body {
     --rb-x: calc(var(--rb-w) + var(--rb-gap));
   }
@@ -11154,14 +11126,6 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   }
   html body .rail-boat {
     position: relative;
-  }
-  html body .rail-boat .rail-minus {
-    position: absolute;
-    right: 8px;
-    bottom: 2px;
-    font-size: calc(var(--rb-h) * 0.42);
-    font-weight: 900;
-    line-height: 1;
   }
   html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
     top: calc(
@@ -11237,7 +11201,8 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
 }
 
 /* X: in the line of START, FIN (paused) takes its own place, then Amarrage */
-@media (orientation: landscape) and (min-width: 560px) {
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) and (max-width: 559px) {
   html body .side-rail-left .rail-track-wrap {
     display: flex;
     gap: var(--rb-gap);
@@ -11245,4 +11210,200 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   html body .side-rail-left .rail-track-wrap .rail-btn.rail-fin {
     position: static;
   }
+}
+
+/* T, the phone held upright: the buttons in a row at the top, the clock,
+   the arrow (＋ under it for 3 s), START (FIN and Amarrage under it), the
+   mark, the dividers; a row at the bottom, the magnifier, NavIn, the photo,
+   and SOS at the right. NavIn unrolls PréP, data, the settings and the phone
+   or VHF in the row above it. The figures of the track stand on the left
+   edge and fold away. */
+@media (orientation: portrait) and (max-width: 559px) {
+  :root {
+    --rb-h: 44px;
+    --rb-w: calc((100vw - 2 * var(--rb-side) - 4 * var(--rb-gap)) / 5);
+    --rb-gap: 6px;
+    --rb-top: 6px;
+    --rb-side: 6px;
+    --rb-step: calc(var(--rb-h) + var(--rb-gap));
+    --rb-col: 0px;
+  }
+  html body {
+    --rb-x: calc(var(--rb-w) + var(--rb-gap));
+    --rb-bottom: calc(var(--rb-top) + env(safe-area-inset-bottom));
+  }
+  html body header.topbar #clock {
+    top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
+    left: var(--rb-side) !important;
+  }
+  html body .side-rail.side-rail-left {
+    top: calc(var(--rb-top) + env(safe-area-inset-top));
+    left: calc(var(--rb-side) + var(--rb-x));
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  html body .side-rail-left .rail-line {
+    flex-direction: column;
+  }
+  /* ＋ and − under the arrow, side by side, each half its width */
+  html body .side-rail-left .rail-arrow-line {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: var(--rb-w);
+  }
+  html body .side-rail-left .rail-arrow-line .rail-boat {
+    grid-column: 1 / -1;
+  }
+  html body .side-rail-left .rail-arrow-line .rail-zoom-in,
+  html body .side-rail-left .rail-arrow-line .rail-zoom-out {
+    width: auto;
+  }
+  html body .side-rail-left .rail-navin-place {
+    display: none;
+  }
+  html body .side-rail-left .rail-track-wrap {
+    flex-direction: column;
+  }
+  html body .side-rail-left .rail-btn.rail-photo {
+    position: fixed;
+    top: auto;
+    bottom: var(--rb-bottom);
+    left: calc(var(--rb-side) + 2 * var(--rb-x));
+  }
+  html body #searchBtn {
+    top: auto !important;
+    bottom: var(--rb-bottom) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
+    top: auto !important;
+    bottom: var(--rb-bottom) !important;
+    left: calc(var(--rb-side) + var(--rb-x)) !important;
+    right: auto !important;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+    top: auto !important;
+    bottom: var(--rb-bottom) !important;
+    left: auto !important;
+    right: var(--rb-side) !important;
+  }
+  /* The row of NavIn, above the bottom row */
+  html body .navin-row {
+    top: auto;
+    bottom: calc(var(--rb-bottom) + var(--rb-step));
+    left: var(--rb-side);
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    top: auto !important;
+    bottom: calc(var(--rb-bottom) + var(--rb-step)) !important;
+    left: calc(var(--rb-side) + var(--rb-x)) !important;
+  }
+  html body header.topbar #gearBtn {
+    top: auto !important;
+    bottom: calc(var(--rb-bottom) + var(--rb-step)) !important;
+    left: calc(var(--rb-side) + 2 * var(--rb-x)) !important;
+  }
+  /* The pages between the top row and the bottom row */
+  html body main#view {
+    padding-top: calc(
+      var(--rb-top) + var(--rb-h) + 10px + env(safe-area-inset-top)
+    ) !important;
+    padding-bottom: calc(
+      var(--rb-bottom) + 2 * var(--rb-step) + 10px
+    ) !important;
+  }
+  html body #navtop {
+    top: calc(
+      var(--rb-top) + var(--rb-h) + 6px + env(safe-area-inset-top)
+    ) !important;
+  }
+  /* The figures of the track on the left edge, folded away by their
+     chevron, brought back by their handle */
+  html body .trk-full .trk-dash {
+    position: fixed;
+    top: calc(var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top));
+    bottom: auto;
+    left: var(--rb-side);
+    right: auto;
+    width: var(--rb-w);
+    display: flex;
+    flex-direction: column;
+    gap: var(--rb-gap);
+    transition: transform 0.25s;
+  }
+  html body.bot-hidden .trk-full .trk-dash {
+    transform: translateX(calc(-100% - 2 * var(--rb-side)));
+  }
+  html body .trk-full .trk-dash div {
+    width: auto;
+  }
+  html body .slide-handle.sh-bot {
+    top: calc(var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top));
+    bottom: auto !important;
+    left: 0;
+    right: auto;
+    margin-left: 0;
+    width: 22px;
+    height: 120px !important;
+  }
+  html body .trk-full .trk-over {
+    left: var(--rb-side);
+    right: var(--rb-side);
+  }
+}
+@media (orientation: portrait) and (max-width: 559px) {
+  /* The bubbles above the two rows at the bottom */
+  html body #toast {
+    bottom: calc(var(--rb-bottom) + 2 * var(--rb-step) + 8px) !important;
+  }
+}
+@media (orientation: portrait) and (max-width: 559px) {
+  /* NavIn: its logo inside its button */
+  html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] svg {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 100%;
+  }
+}
+
+/* The PréP menu: big rows, an icon and two lines */
+.prep-menu {
+  display: grid;
+  gap: 12px;
+  max-width: 720px;
+}
+.prep-menu-sub {
+  display: grid;
+  gap: 10px;
+  margin-left: 28px;
+}
+.btn.prep-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 84px;
+  text-align: left;
+}
+.prep-menu-btn b {
+  display: block;
+  font-size: 22px;
+}
+.prep-menu-btn small {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.prep-menu-ico {
+  font-size: 36px;
+  line-height: 1;
+  width: 54px;
+  text-align: center;
+}
+.prep-zone-logo svg {
+  display: block;
+  width: 54px;
+  height: 34px;
 }

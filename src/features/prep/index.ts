@@ -20,7 +20,7 @@ export { deleteTrace } from './deleteTrace.ts';
 export { moorNow } from './moor.ts';
 export { navPageRefresh } from './navPage.ts';
 export { prepBarSync } from './prepBarSync.ts';
-export { prepStart } from './prepFlow.ts';
+export { prepFromMenu, prepStart } from './prepFlow.ts';
 export { PrepTrail } from './PrepTrail.tsx';
 export { quickStart } from './quickStart.ts';
 export type { SwipeRowProps } from './swipe/SwipeRow.tsx';

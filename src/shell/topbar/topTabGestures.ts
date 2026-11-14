@@ -1,5 +1,5 @@
 import { buzz } from '../../lib/dom.ts';
-import { WIDE_QUERY } from '../../lib/useWide.ts';
+import { railsScreen } from '../../lib/useWide.ts';
 import { state, toast } from '../../state/index.ts';
 import { menuButtonPress } from '../menuOwner.ts';
 import { navBack } from '../navbar/navActions.ts';
@@ -19,9 +19,9 @@ import {
 
 let pressTimer: ReturnType<typeof setTimeout> | undefined;
 
-/** A tablet in landscape: NavIn holds a row of menus. */
+/** X or T: NavIn holds a row of menus. */
 function wideScreen(): boolean {
-  return globalThis.matchMedia?.(WIDE_QUERY).matches ?? false;
+  return railsScreen();
 }
 let fired = false;
 let keyboardTab: TopTabKey | null = null;

@@ -1,6 +1,6 @@
 import { signal } from '@preact/signals-react';
 
-import { WIDE_QUERY } from '../lib/useWide.ts';
+import { railsScreen } from '../lib/useWide.ts';
 import { state, toast } from '../state/index.ts';
 import { store } from '../storage/store.ts';
 
@@ -34,12 +34,12 @@ const TIPS: ReadonlyArray<readonly [string | null, string]> = [
 /** The same buttons on the landscape tablet, where they work otherwise. */
 const WIDE_TIPS: Readonly<Record<string, string>> = {
   tracker:
-    'NavIn : un toucher déroule à sa droite PréP, data, Réglages et Téléphone ou VHF · son logo montre lac ou mer · appui long : mode nuit ou mode jour',
+    'NavIn : un toucher déroule PréP, data, Réglages et Téléphone ou VHF · son logo montre lac ou mer · appui long : mode nuit ou mode jour',
   gear: 'Curseurs : les réglages (dans la rangée de NavIn)',
 };
 
 function wide(): boolean {
-  return globalThis.matchMedia?.(WIDE_QUERY).matches ?? false;
+  return railsScreen();
 }
 
 /**

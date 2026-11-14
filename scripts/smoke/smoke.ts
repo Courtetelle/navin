@@ -61,15 +61,6 @@ async function open(
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.addInitScript(FAKE_GPS);
-  // The upright phone is set aside for now (it asks to be turned); its
-  // layout stays tested underneath the notice.
-  await page.addInitScript(() => {
-    const mark = () => {
-      document.documentElement.classList.add('portrait-ok');
-    };
-    if (document.documentElement) mark();
-    else document.addEventListener('DOMContentLoaded', mark, { once: true });
-  });
   await page.goto(URL, { waitUntil: 'load' });
   await page.locator('.map-locate-btn').waitFor({ state: 'attached' });
   await page.waitForTimeout(1500);
@@ -88,13 +79,35 @@ async function open(
   return { context, page, errors };
 }
 
+const NAVIN = 'header.topbar nav.topnav .top-tab[data-view="tracker"]';
+
+// data and the settings wait in the row NavIn unrolls (X and T): NavIn is
+// touched until they show (away from the map, it first brings the map).
+async function showRow(page: Page): Promise<void> {
+  /* eslint-disable no-await-in-loop -- one touch after the other */
+  for (let touch = 0; touch < 3; touch++) {
+    if (await page.locator('#gearBtn').isVisible()) return;
+    await page.locator(NAVIN).click();
+    await page.waitForTimeout(400);
+  }
+  /* eslint-enable no-await-in-loop */
+}
+
+async function openGear(page: Page): Promise<void> {
+  await showRow(page);
+  await page.locator('#gearBtn').click();
+}
+
 // data goes back one step at each touch inside its menu: touch it until its
 // home (the tiles) shows.
 async function openData(page: Page): Promise<void> {
   /* eslint-disable no-await-in-loop -- one touch after the other */
   for (let touch = 0; touch < 5; touch++) {
     if ((await page.locator('[data-tile]').count()) > 0) return;
-    await page.getByText('data', { exact: true }).first().click();
+    if (!(await page.locator('.top-tab.tab-data').isVisible())) {
+      await showRow(page);
+    }
+    await page.locator('.top-tab.tab-data').click();
     await page.waitForTimeout(300);
   }
   /* eslint-enable no-await-in-loop */
@@ -109,30 +122,46 @@ const bodyHas = (page: Page, name: string) =>
 async function bars(page: Page, theme: string): Promise<void> {
   check(
     theme,
-    'bottom bar folded without a recording',
+    'the figures of the track folded without a recording',
     await bodyHas(page, 'bot-hidden'),
   );
   await page.locator('#hBot').click();
-  check(theme, 'its handle opens it', !(await bodyHas(page, 'bot-hidden')));
+  check(theme, 'their handle opens them', !(await bodyHas(page, 'bot-hidden')));
   await page.locator('.bar-chevron-bottom').click();
-  check(theme, 'its chevron folds it', await bodyHas(page, 'bot-hidden'));
-  await page.locator('.bar-chevron-top').click();
+  check(theme, 'their chevron folds them', await bodyHas(page, 'bot-hidden'));
   check(
     theme,
-    'the top chevron folds the top bar',
-    await bodyHas(page, 'top-hidden'),
+    'T upright: the top row, clock, arrow, START, mark, dividers',
+    await page.evaluate(() => {
+      // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
+      const top = (selector: string) =>
+        document.querySelector(selector)?.getBoundingClientRect().top ?? -1;
+      const row = [
+        '#clock',
+        '.rail-boat',
+        '.rail-start',
+        '.rail-pin',
+        '.rail-ruler',
+      ].map(top);
+      return row.every((y) => y >= 0 && y < 60);
+    }),
   );
-  await page.locator('#hTop').click();
   check(
     theme,
-    'its handle brings it back',
-    !(await bodyHas(page, 'top-hidden')),
+    'T upright: the bottom row, magnifier, NavIn, photo, SOS',
+    await page.evaluate(() => {
+      // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
+      const bottom = (selector: string) =>
+        document.querySelector(selector)?.getBoundingClientRect().bottom ?? -1;
+      const row = [
+        '#searchBtn',
+        '.top-tab[data-view="tracker"]',
+        '.rail-photo',
+        '.top-tab.tab-sos',
+      ].map(bottom);
+      return row.every((y) => y > globalThis.innerHeight - 60);
+    }),
   );
-  await page.mouse.move(100, 40);
-  await page.mouse.down();
-  await page.mouse.move(100, 5, { steps: 6 });
-  await page.mouse.up();
-  check(theme, 'no swipe moves a bar', !(await bodyHas(page, 'top-hidden')));
 }
 
 async function layers(page: Page, theme: string): Promise<void> {
@@ -245,7 +274,7 @@ async function buoyage(page: Page, theme: string): Promise<void> {
 }
 
 async function myMaps(page: Page, theme: string): Promise<void> {
-  await page.locator('#gearBtn').click();
+  await openGear(page);
   await page.waitForTimeout(300);
   check(
     theme,
@@ -349,8 +378,8 @@ async function follow(page: Page, theme: string): Promise<void> {
     'the map opens north up',
     (await page.locator('.leaflet-container.course-up').count()) === 0,
   );
-  // The boat in the middle: the arrow turns the map to the course.
-  await page.locator('.map-locate-btn').first().click();
+  // A long press on the arrow turns the map to the course.
+  await longPress(page, '.rail-boat');
   await page.waitForTimeout(400);
   check(
     theme,
@@ -748,8 +777,6 @@ const longPress = async (page: Page, selector: string) => {
 const zoneChosen = (page: Page) =>
   page.evaluate(() => localStorage.getItem('ldb.zoneSim'));
 
-const NAVIN = 'header.topbar nav.topnav .top-tab[data-view="tracker"]';
-
 /**
  * The zones of NavIn on the tablet: the Swiss map gives way to OpenStreetMap
  * out of Switzerland; after the boat arrow (GPS on Lake Geneva) a long press
@@ -767,7 +794,7 @@ async function nextZoneX(page: Page): Promise<void> {
     await page.locator(NAVIN).click();
     await page.waitForTimeout(400);
   }
-  await page.locator('#gearBtn').click();
+  await openGear(page);
   await page.waitForTimeout(500);
   const section = page.locator('details[data-sec="zone"]');
   if (!(await section.evaluate((one) => (one as HTMLDetailsElement).open))) {
@@ -897,10 +924,7 @@ async function tablet(page: Page, theme: string): Promise<void> {
   ];
   for (const [name, opener] of screens) {
     /* eslint-disable no-await-in-loop -- one screen after the other */
-    if (!(await page.locator(opener).isVisible())) {
-      await page.locator(NAVIN).click();
-      await page.waitForTimeout(400);
-    }
+    if (!(await page.locator(opener).isVisible())) await showRow(page);
     await page.locator(opener).click();
     // The button touched sinks in a moment (pressFeedback): wait it is back.
     await page.waitForTimeout(1100);
@@ -1058,7 +1082,7 @@ const offlineDrawn = (page: Page) =>
 
 // Two map files side by side, network gone: both show where the boat sails.
 async function offlineFiles(page: Page, theme: string): Promise<void> {
-  await page.locator('#gearBtn').click();
+  await openGear(page);
   await page.waitForTimeout(300);
   await openData(page);
   await page.waitForTimeout(300);
@@ -1186,12 +1210,12 @@ async function trackButton(page: Page, theme: string): Promise<void> {
 async function phoneTrack(page: Page, theme: string): Promise<void> {
   const has = (selector: string) =>
     page.evaluate((query) => document.querySelector(query) !== null, selector);
-  await page.locator('.phone-track .rail-start').click();
+  await page.locator('.side-rail-left .rail-start').click();
   await page.waitForTimeout(800);
   check(
     theme,
     'phone: START records at a short touch',
-    await has('.phone-track .rail-run'),
+    await has('.side-rail-left .rail-run'),
   );
   const navin =
     (await page
@@ -1202,27 +1226,27 @@ async function phoneTrack(page: Page, theme: string): Promise<void> {
     'phone: NavIn does not turn into the track',
     !navin.includes('TRACK'),
   );
-  await page.locator('.phone-track .rail-track').click();
+  await page.locator('.side-rail-left .rail-track').click();
   await page.waitForTimeout(300);
   check(
     theme,
     'phone: the pause holds, FIN beside it',
-    (await has('.phone-track .rail-paused')) &&
-      (await has('.phone-track .rail-fin')),
+    (await has('.side-rail-left .rail-paused')) &&
+      (await has('.side-rail-left .rail-fin')),
   );
-  await page.locator('.phone-track .rail-fin').click();
+  await page.locator('.side-rail-left .rail-fin').click();
   await page.waitForTimeout(300);
-  await page.locator('.phone-track .rail-fin').click();
+  await page.locator('.side-rail-left .rail-fin').click();
   await page.waitForTimeout(800);
   check(
     theme,
     'phone: FIN ends the track, the tick on its button',
-    await has('.phone-track .rail-done'),
+    await has('.side-rail-left .rail-done'),
   );
   await page.waitForTimeout(3500);
 }
 
-// The phone held upright asks to be turned; sideways it has the columns of X.
+// The phone held upright has the buttons of T; sideways the column of X.
 async function turnPhone(browser: Browser): Promise<void> {
   const context = await browser.newContext({ viewport: PHONE });
   await context.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
@@ -1231,16 +1255,16 @@ async function turnPhone(browser: Browser): Promise<void> {
   await page.waitForTimeout(1200);
   check(
     'day',
-    'an upright phone asks to be turned',
-    await page.locator('.turn-phone').isVisible(),
+    'an upright phone has the buttons of T, no notice to turn it',
+    (await page.locator('.side-rail-left').count()) === 1 &&
+      (await page.locator('.turn-phone').count()) === 0,
   );
   await page.setViewportSize({ width: 844, height: 390 });
   await page.waitForTimeout(800);
   check(
     'day',
-    'a phone sideways has the columns of X, the notice gone',
-    !(await page.locator('.turn-phone').isVisible()) &&
-      (await page.locator('.side-rail-left').count()) === 1,
+    'a phone sideways has the column of X',
+    (await page.locator('.side-rail-left').count()) === 1,
   );
   await context.close();
 }

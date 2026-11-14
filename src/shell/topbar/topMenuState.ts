@@ -1,7 +1,7 @@
 import { batch } from '@preact/signals-react';
 
 import { buzz } from '../../lib/dom.ts';
-import { WIDE_QUERY } from '../../lib/useWide.ts';
+import { RAILS_QUERY } from '../../lib/useWide.ts';
 import { navZone, prepReady, state, toast } from '../../state/index.ts';
 import { clearToast } from '../../state/toast.ts';
 import { hasBodyClass } from '../bodyClass.ts';
@@ -39,7 +39,7 @@ function menuContext(): TopMenuContext {
     zone: navZone(),
     wide:
       typeof globalThis.matchMedia === 'function' &&
-      globalThis.matchMedia(WIDE_QUERY).matches,
+      globalThis.matchMedia(RAILS_QUERY).matches,
   };
 }
 

@@ -13,6 +13,7 @@ interface TabContext {
 
 const COMMON_TABS: Record<string, string> = {
   prep: 'tracker',
+  prepmenu: 'tracker',
   dock: 'tracker',
   traces: 'more',
   new: 'tracker',
