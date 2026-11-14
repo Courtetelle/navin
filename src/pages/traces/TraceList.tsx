@@ -17,6 +17,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
 import { renameTrace } from '../../state/index.ts';
+import { showZoomOnMap } from '../tracker/zoomShown.ts';
 
 function deleteAndRefresh(id: string): boolean {
   const deleted = deleteTrace(id);
@@ -72,7 +73,10 @@ function TraceItem({ track }: { track: LakeTrack }) {
       name={track.name}
       silent
       onDelete={deleteAndRefresh}
-      onView={() => showTrace(track)}
+      onView={() => {
+        showTrace(track);
+        showZoomOnMap();
+      }}
       onShare={(format) => {
         void shareTrace(track, format);
       }}
@@ -89,6 +93,7 @@ function TraceItem({ track }: { track: LakeTrack }) {
             onClick={() => {
               buzz();
               showTrace(track);
+              showZoomOnMap();
             }}
             {...press.handlers}
           >

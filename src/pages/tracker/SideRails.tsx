@@ -1,4 +1,3 @@
-import { signal } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 
@@ -55,6 +54,7 @@ import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
 import { RailIcon } from './railIcons.tsx';
 import { MAP_ACTIONS, splitTitle } from './sideRails.ts';
 import { trackDone } from './trackDone.ts';
+import { showZoom, zoomShown } from './zoomShown.ts';
 
 /** A GPS position older than this is read again. */
 const FRESH_FIX_MS = 30_000;
@@ -179,21 +179,6 @@ function NavinRow() {
       </div>
     </div>
   );
-}
-
-/** ＋ and − are shown this long after a touch on the arrow, or on them. */
-const ZOOM_MS = 3000;
-
-/** ＋ and − are shown (for a moment after the arrow). */
-const zoomShown = signal(false);
-let zoomTimer: ReturnType<typeof setTimeout> | undefined;
-
-function showZoom(): void {
-  zoomShown.value = true;
-  clearTimeout(zoomTimer);
-  zoomTimer = setTimeout(() => {
-    zoomShown.value = false;
-  }, ZOOM_MS);
 }
 
 /**

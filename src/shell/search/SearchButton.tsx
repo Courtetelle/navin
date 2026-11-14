@@ -8,6 +8,7 @@ import { beginCrewSetEdit } from '../../features/crew/crewsEdit.ts';
 import { openFiche } from '../../features/crew/ficheNavigation.ts';
 import { showPlace } from '../../features/map/placeTarget.ts';
 import { state } from '../../state/index.ts';
+import { lightBand } from '../lightBand.ts';
 import { go } from '../router.ts';
 import { toggleThemeFromSearch } from '../theme.ts';
 
@@ -121,28 +122,6 @@ export function MagnifierButton({ id }: { id: string }) {
 interface OnlineAnswer {
   query: string;
   places: PlaceEntry[];
-}
-
-/** How long a band found stays lit. */
-const LIT_MS = 2500;
-
-/**
- * Bring the band found into view in its list, lit a moment.
- * @param id - The id of its record.
- */
-function lightBand(id: string): void {
-  setTimeout(() => {
-    const band = [
-      ...document.querySelectorAll<HTMLElement>('[data-sw-id]'),
-    ].find(
-      (one) =>
-        one.dataset.swId === id || one.dataset.swId?.startsWith(`${id}#`),
-    );
-    if (!band) return;
-    band.scrollIntoView({ block: 'center' });
-    band.classList.add('search-found');
-    setTimeout(() => band.classList.remove('search-found'), LIT_MS);
-  }, 400);
 }
 
 /**

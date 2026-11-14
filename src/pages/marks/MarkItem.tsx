@@ -16,6 +16,7 @@ import { fmtPos } from '../../lib/geo.ts';
 import type { Mark } from '../../model/types.ts';
 import { go } from '../../shell/router.ts';
 import { renameMark, updateMarks } from '../../state/index.ts';
+import { showZoomOnMap } from '../tracker/zoomShown.ts';
 
 /** Props of {@link MarkItem}. */
 interface MarkItemProps {
@@ -54,6 +55,7 @@ export function MarkItem({ mark }: MarkItemProps) {
     buzz();
     marksFly.position = [mark.lat, mark.lon];
     go('tracker');
+    showZoomOnMap();
   };
   const goTo = () => {
     setGoto({ lat: mark.lat, lon: mark.lon, name: markLabel(mark) });
@@ -61,6 +63,7 @@ export function MarkItem({ mark }: MarkItemProps) {
     marksFly.position = [mark.lat, mark.lon];
     marksFly.withMe = true;
     go('tracker');
+    showZoomOnMap();
   };
   const save = (text: string) => {
     setEditing(null);

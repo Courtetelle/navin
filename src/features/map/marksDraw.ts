@@ -3,6 +3,7 @@ import type { Map as LeafletMap } from 'leaflet';
 import { fmtShortDate, fmtUtc } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import type { Mark } from '../../model/types.ts';
+import { lightBand } from '../../shell/lightBand.ts';
 import { go } from '../../shell/router.ts';
 import { pinSvg } from '../../shell/topbar/tabIcons.ts';
 import { herePos, state } from '../../state/index.ts';
@@ -97,6 +98,10 @@ function markPopup(mark: Mark): HTMLElement {
   gotoButton?.addEventListener('click', () => {
     setGoto({ lat: mark.lat, lon: mark.lon, name: mark.name });
   });
-  marksButton?.addEventListener('click', () => go('marks'));
+  marksButton?.addEventListener('click', () => {
+    go('marks');
+    // The list scrolls to the mark, which blinks three times.
+    lightBand(mark.id, true);
+  });
   return box;
 }

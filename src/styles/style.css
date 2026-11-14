@@ -11953,3 +11953,32 @@ html body .lx-modal .ck-ask-box {
     100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
   );
 }
+
+/* A band shown from elsewhere (the bubble of a mark): three blinks */
+@keyframes band-blink {
+  0%,
+  100% {
+    outline-color: transparent;
+  }
+  50% {
+    outline-color: #ffd400;
+  }
+}
+.swipe-row.band-blink {
+  outline: 4px solid transparent;
+  outline-offset: 2px;
+  border-radius: 14px;
+  animation: band-blink 0.7s ease-in-out 3;
+}
+:root[data-theme='night'] .swipe-row.band-blink {
+  animation-name: band-blink-night;
+}
+@keyframes band-blink-night {
+  0%,
+  100% {
+    outline-color: transparent;
+  }
+  50% {
+    outline-color: #ff4040;
+  }
+}

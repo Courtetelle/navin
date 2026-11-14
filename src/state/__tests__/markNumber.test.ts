@@ -11,7 +11,11 @@ test('a new mark takes one after the highest number kept', () => {
   expect(nextMarkNumber([mark(1, 'M001'), mark(4, 'M004')])).toBe(5);
 });
 
-test('renamed marks keep their number for the next one', () => {
-  expect(nextMarkNumber([mark(2, 'Port'), mark(7, 'Bouée verte')])).toBe(8);
-  expect(markName(8)).toBe('M008');
+test('a renamed mark no longer counts: one after the highest M###', () => {
+  // M007 renamed « 001 Bretagne »: the next one is M007 again.
+  expect(
+    nextMarkNumber([mark(5, 'M005'), mark(6, 'M006'), mark(7, '001 Bretagne')]),
+  ).toBe(7);
+  expect(nextMarkNumber([mark(2, 'Port'), mark(7, 'Bouée verte')])).toBe(1);
+  expect(markName(7)).toBe('M007');
 });

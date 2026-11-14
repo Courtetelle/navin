@@ -98,14 +98,17 @@ export function mergeMarks(list: unknown): void {
 }
 
 /**
- * The number of a new mark: one after the highest of the marks kept, even
- * renamed (their own texts), 1 when there is none.
+ * The number of a new mark: one after the highest `M###` name kept; a mark
+ * renamed with a text of its own no longer counts. 1 when there is none.
  * @param marks - The marks kept.
  * @returns The number.
  */
 export function nextMarkNumber(marks: readonly Mark[]): number {
   let highest = 0;
-  for (const mark of marks) highest = Math.max(highest, mark.n || 0);
+  for (const mark of marks) {
+    const numbered = /^M(\d+)$/.exec(mark.name.trim());
+    if (numbered) highest = Math.max(highest, Number(numbered[1]));
+  }
   return highest + 1;
 }
 
