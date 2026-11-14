@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { markupToReact } from '../../components/shared/markupToReact.ts';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
+import { fitGoto, gotoTarget } from '../../features/map/goto.ts';
 import { shownMap } from '../../features/map/mapFull.ts';
 import { mapOrientation } from '../../features/map/mapOrientation.ts';
 import {
@@ -22,6 +23,7 @@ import {
 } from '../../features/map/trackerButtons.ts';
 import { trkPointNow } from '../../features/map/trackerPoint.ts';
 import { tracker } from '../../features/map/trackerState.ts';
+import { showZoom, zoomShown } from '../../features/map/zoomShown.ts';
 import { takePhoto } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -54,7 +56,6 @@ import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
 import { RailIcon } from './railIcons.tsx';
 import { MAP_ACTIONS, splitTitle } from './sideRails.ts';
 import { trackDone } from './trackDone.ts';
-import { showZoom, zoomShown } from './zoomShown.ts';
 
 /** A GPS position older than this is read again. */
 const FRESH_FIX_MS = 30_000;
@@ -222,7 +223,39 @@ function ZoomPair() {
           <ZoomSign plus={false} />
         </span>
       </Button>
+      {gotoTarget.value ? (
+        <Button
+          type="button"
+          noUiEdit
+          className="rail-btn rail-goto-fit"
+          aria-label={tr('Voir toute la route du Go to')}
+          onClick={() => {
+            buzz();
+            showZoom();
+            fitGoto();
+          }}
+        >
+          <span className="rail-icon">
+            <TargetSign />
+          </span>
+        </Button>
+      ) : null}
     </>
+  );
+}
+
+/**
+ * The target of a Go to: red and white rings, as on the map.
+ * @returns The drawing.
+ */
+function TargetSign() {
+  return (
+    <svg className="rail-svg" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="17" fill="#ff00aa" />
+      <circle cx="20" cy="20" r="12" fill="#fff" />
+      <circle cx="20" cy="20" r="7" fill="#ff00aa" />
+      <circle cx="20" cy="20" r="2.5" fill="#fff" />
+    </svg>
   );
 }
 

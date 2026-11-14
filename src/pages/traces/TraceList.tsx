@@ -10,6 +10,7 @@ import {
   traceSheet,
   trackStats,
 } from '../../features/map/trackStats.ts';
+import { showZoomOnMap } from '../../features/map/zoomShown.ts';
 import { SwipeRow, deleteTrace } from '../../features/prep/index.ts';
 import { shareCards } from '../../features/publish/index.ts';
 import { tracePlan } from '../../features/publish/planPhoto.ts';
@@ -17,7 +18,6 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
 import { renameTrace } from '../../state/index.ts';
-import { showZoomOnMap } from '../tracker/zoomShown.ts';
 
 function deleteAndRefresh(id: string): boolean {
   const deleted = deleteTrace(id);

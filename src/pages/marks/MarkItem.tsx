@@ -7,6 +7,7 @@ import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { setGoto } from '../../features/map/goto.ts';
 import { marksFly } from '../../features/map/longPress.ts';
 import { relativeParts } from '../../features/map/relativeText.ts';
+import { showZoomOnMap } from '../../features/map/zoomShown.ts';
 import { SwipeRow } from '../../features/prep/index.ts';
 import { openListPublish } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -16,7 +17,6 @@ import { fmtPos } from '../../lib/geo.ts';
 import type { Mark } from '../../model/types.ts';
 import { go } from '../../shell/router.ts';
 import { renameMark, updateMarks } from '../../state/index.ts';
-import { showZoomOnMap } from '../tracker/zoomShown.ts';
 
 /** Props of {@link MarkItem}. */
 interface MarkItemProps {
@@ -63,7 +63,6 @@ export function MarkItem({ mark }: MarkItemProps) {
     marksFly.position = [mark.lat, mark.lon];
     marksFly.withMe = true;
     go('tracker');
-    showZoomOnMap();
   };
   const save = (text: string) => {
     setEditing(null);

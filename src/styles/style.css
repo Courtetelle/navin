@@ -11954,33 +11954,22 @@ html body .lx-modal .ck-ask-box {
   );
 }
 
-/* A band shown from elsewhere (the bubble of a mark): three blinks */
-@keyframes band-blink {
-  0%,
-  100% {
-    outline-color: transparent;
-  }
-  50% {
-    outline-color: #ffd400;
-  }
+/* A band shown from elsewhere (the bubble of a mark): the whole band blinks
+   three times in the colour of the menu buttons lit (PréP), day and night */
+.swipe-row.band-blink .swipe-slide > * {
+  position: relative;
+  isolation: isolate;
 }
-.swipe-row.band-blink {
-  outline: 4px solid transparent;
-  outline-offset: 2px;
-  border-radius: 14px;
-  animation: band-blink 0.7s ease-in-out 3;
-}
-:root[data-theme='night'] .swipe-row.band-blink {
-  animation-name: band-blink-night;
-}
-@keyframes band-blink-night {
-  0%,
-  100% {
-    outline-color: transparent;
-  }
-  50% {
-    outline-color: #ff4040;
-  }
+.swipe-row.band-blink .swipe-slide > *::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #ffe2b8 0%, #f8bb6a 55%, #ee9a3a 100%);
+  pointer-events: none;
+  animation: menuHere 0.7s ease-in-out 3;
+  opacity: 0;
 }
 
 /* Sideways (X, the phone turned): the tab of the track figures exactly as
@@ -12117,4 +12106,8 @@ html body .lx-modal .ck-ask-box {
       max(19px, calc(env(safe-area-inset-bottom) - 2px)) + var(--rb-h)
     ) !important;
   }
+}
+/* The target of the Go to at night: no white to dazzle */
+:root[data-theme='night'] .rail-goto-fit circle[fill='#fff'] {
+  fill: #200000;
 }

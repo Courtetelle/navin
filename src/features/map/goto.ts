@@ -7,8 +7,11 @@ import { herePos, state, toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 import { playAlarm } from './external.ts';
+import { shownMap } from './mapFull.ts';
 import { drawGotoLines, marksRedraw } from './marksDraw.ts';
 import { bearingText, distanceText } from './relativeText.ts';
+import { setFollow, tracker } from './trackerState.ts';
+import { showZoomOnMap } from './zoomShown.ts';
 
 /** A Go to target (`ldb.goto`). */
 interface GotoTarget {
@@ -86,7 +89,36 @@ export function setGoto(target: GotoTarget | null): void {
     toast(`Go to ${target.name}`);
     // The band takes the bottom: the figures of the track fold away.
     setBodyClass('bot-hidden', true);
+    // ＋, − and the target button by the arrow, for a moment.
+    showZoomOnMap();
   }
+}
+
+/** Room kept around the route, clear of the buttons (pixels). */
+const FIT_PADDING = 90;
+
+/**
+ * Show the whole route of the Go to: the map centred on the middle of the
+ * line between the boat and the target, zoomed so both are on the screen,
+ * whatever the distance; the map stops following the boat.
+ */
+export function fitGoto(): void {
+  const target = gotoTarget.peek();
+  const map = tracker.current?.map ?? shownMap();
+  if (!target || !map) return;
+  setFollow(false);
+  const me = herePos();
+  if (!me) {
+    map.setView([target.lat, target.lon], Math.max(map.getZoom(), 13));
+    return;
+  }
+  map.fitBounds(
+    [
+      [me.lat, me.lon],
+      [target.lat, target.lon],
+    ],
+    { padding: [FIT_PADDING, FIT_PADDING], maxZoom: 16 },
+  );
 }
 
 /**
