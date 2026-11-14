@@ -14,6 +14,7 @@ import {
 } from './marksDraw.ts';
 import { crossAttach, longPressDone } from './tapCross.ts';
 import { tracker } from './trackerState.ts';
+import { showZoom } from './zoomShown.ts';
 
 /**
  * Position the tracker shows at its next opening (a mark touched), with my
@@ -93,6 +94,8 @@ export function lpAttach(map: LeafletMap): void {
   // A short tap: the cross of the menus of the point.
   crossAttach(map);
   map.on('movestart zoomstart', cancel);
+  // The map moved with the fingers: ＋ and − for 3 s after the last move.
+  map.on('dragstart drag dragend', showZoom);
   map.whenReady(() => {
     // During `load` Leaflet does not know its bounds yet.
     whileMapLive(
