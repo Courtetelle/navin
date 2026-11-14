@@ -4,7 +4,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { gotoTarget, setGoto } from '../../features/map/goto.ts';
-import { marksGpx, marksText } from '../../features/map/marksText.ts';
+import { marksGpx } from '../../features/map/marksText.ts';
 import { ListPublishRow } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -68,35 +68,16 @@ export function MarksPage() {
           </p>
         )}
       </div>
-      {marks.length > 0 ? (
-        <ButtonRow className="row c2">
-          <Button
-            className="btn"
-            data-mk="gpx"
-            onClick={() => {
-              buzz();
-              void deliver(
-                marksGpx(state.data.marks.value),
-                'NavIn-marques.gpx',
-                'application/gpx+xml',
-              );
-            }}
-          >
-            {tr('📤 Exporter en GPX')}
-          </Button>
-          <Button
-            className="btn"
-            data-mk="txt"
-            onClick={() => {
-              buzz();
-              void deliver(marksText(marks), 'NavIn-marques.txt', 'text/plain');
-            }}
-          >
-            {tr('📋 Partager la liste')}
-          </Button>
-        </ButtonRow>
-      ) : null}
-      <ListPublishRow kind="marks" />
+      <ListPublishRow
+        kind="marks"
+        onGpx={() => {
+          void deliver(
+            marksGpx(state.data.marks.value),
+            'NavIn-marques.gpx',
+            'application/gpx+xml',
+          );
+        }}
+      />
     </>
   );
 }

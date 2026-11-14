@@ -42,6 +42,12 @@ export interface SwipeRowProps {
    * @default undefined
    */
   onShare?: (format: ShareFormat) => void;
+  /**
+   * A GPX file of the item can be shared too: Partager asks 📝 Texte or
+   * 📍 GPX first.
+   * @default undefined
+   */
+  onGpx?: () => void;
   /** The row. */
   children: ReactNode;
 }
@@ -67,6 +73,7 @@ export function SwipeRow({
   silent = false,
   onView,
   onShare,
+  onGpx,
   children,
 }: SwipeRowProps) {
   useSignals();
@@ -173,6 +180,14 @@ export function SwipeRow({
                 }
               : undefined
           }
+          onGpx={
+            onGpx
+              ? () => {
+                  closeSwipeRow();
+                  onGpx();
+                }
+              : undefined
+          }
           onDelete={() => {
             const blocked = block?.(id);
             if (blocked) {
@@ -192,13 +207,14 @@ interface SwipeMenuProps {
   name: string;
   onView: (() => void) | undefined;
   onShare: ((format: ShareFormat) => void) | undefined;
+  onGpx: (() => void) | undefined;
   onDelete: () => void;
 }
 
 /** A trash pressed this long deletes. */
 const HOLD_MS = 650;
 
-function SwipeMenu({ name, onView, onShare, onDelete }: SwipeMenuProps) {
+function SwipeMenu({ name, onView, onShare, onGpx, onDelete }: SwipeMenuProps) {
   const box = useRef<HTMLDivElement>(null);
   const hold = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [done, setDone] = useState(false);
@@ -239,7 +255,12 @@ function SwipeMenu({ name, onView, onShare, onDelete }: SwipeMenuProps) {
         </Button>
       ) : null}
       {onShare ? (
-        <ShareButton small className="sw-share" onShare={onShare} />
+        <ShareButton
+          small
+          className="sw-share"
+          onShare={onShare}
+          onGpx={onGpx}
+        />
       ) : null}
       <Button
         type="button"

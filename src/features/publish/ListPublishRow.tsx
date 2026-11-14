@@ -11,6 +11,11 @@ import type { ListKind } from './types.ts';
 export interface ListPublishRowProps {
   /** The list shown by the page. */
   kind: ListKind;
+  /**
+   * The whole list as a GPX file too (marks): 📝 Texte or 📍 GPX first.
+   * @default undefined
+   */
+  onGpx?: () => void;
 }
 
 /**
@@ -22,6 +27,7 @@ export interface ListPublishRowProps {
  */
 export function ListPublishRow({
   kind,
+  onGpx,
 }: ListPublishRowProps): ReactElement | null {
   if (!listHasContent(kind)) return null;
   return (
@@ -29,6 +35,7 @@ export function ListPublishRow({
       <ShareButton
         data-lxpub={kind}
         label="📤 Tout partager"
+        onGpx={onGpx}
         onShare={(format) => openListPublish(kind, undefined, format)}
       />
     </ButtonRow>

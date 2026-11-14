@@ -11792,3 +11792,19 @@ html body .dn-night > .dn-moon {
 :root[data-theme='night'] #navSearch > .dn-moon {
   fill: #ff4040;
 }
+
+/* A share that can also be a GPX file (marks): 📝 Texte or 📍 GPX first,
+   side by side as the two formats after it. */
+.share-pick .share-kind-btn {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  white-space: nowrap;
+}
+.sw-menu .share-pick-small .share-kind-btn {
+  min-width: 0;
+  min-height: 56px;
+  font-size: 15px;
+}

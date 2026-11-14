@@ -729,6 +729,46 @@ async function swipeMenu(page: Page, theme: string): Promise<void> {
   );
 }
 
+async function marksShare(page: Page, theme: string): Promise<void> {
+  await page.evaluate(() => {
+    localStorage.setItem(
+      'ldb.marks',
+      JSON.stringify([
+        {
+          id: 'mk1',
+          n: 1,
+          name: 'M001',
+          lat: 46.45,
+          lon: 6.6,
+          at: '2026-11-14T10:00:00Z',
+        },
+      ]),
+    );
+  });
+  await page.reload();
+  await page.waitForTimeout(1500);
+  await openData(page);
+  await page.locator('[data-tile="marks"]').click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'marks: one « Tout partager » only, no GPX or list row beside it',
+    (await page.locator('[data-mk="gpx"], [data-mk="txt"]').count()) === 0 &&
+      (await page.locator('[data-lxpub="marks"]').count()) === 1,
+  );
+  await page.locator('[data-lxpub="marks"]').click();
+  await page.waitForTimeout(200);
+  const kinds = await page.locator('.lx-pub [data-share-kind]').count();
+  await page.locator('.lx-pub [data-share-kind="text"]').click();
+  await page.waitForTimeout(200);
+  check(
+    theme,
+    'marks: Tout partager asks Texte or GPX, then the text network or PDF',
+    kinds === 2 &&
+      (await page.locator('.lx-pub [data-share-fmt]').count()) === 2,
+  );
+}
+
 // Where the side buttons of the tablet stand, to the pixel.
 const TABLET_BUTTONS = [
   '#clock',
@@ -1364,6 +1404,7 @@ for (const theme of ['day', 'night']) {
     await crewCard(page, theme);
     await swipeMenu(page, theme);
     await crewAndBoat(page, theme);
+    await marksShare(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }

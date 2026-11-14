@@ -74,6 +74,12 @@ export interface ShareButtonProps extends Omit<
    * @default '📤 Partager'
    */
   label?: string;
+  /**
+   * A GPX file can be shared too (marks): the first choice is then 📝 Texte
+   * or 📍 GPX, the text going on to 💬 image or 🖨 PDF.
+   * @default undefined
+   */
+  onGpx?: () => void;
 }
 
 /**
@@ -88,23 +94,30 @@ export function ShareButton({
   small = false,
   big = false,
   label = '📤 Partager',
+  onGpx,
   className = '',
   ...rest
 }: ShareButtonProps): ReactElement {
-  const [open, setOpen] = useState(false);
+  // Closed, then 📝 Texte or 📍 GPX (when a GPX can be shared), then the
+  // format of the text.
+  const [step, setStep] = useState<'closed' | 'kind' | 'format'>('closed');
+  const open = step !== 'closed';
+  const setOpen = (value: boolean) => {
+    setStep(value ? (onGpx ? 'kind' : 'format') : 'closed');
+  };
   const box = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    if (!open) return undefined;
-    const timer = setTimeout(() => setOpen(false), FOLD_MS);
+    if (step === 'closed') return undefined;
+    const timer = setTimeout(() => setStep('closed'), FOLD_MS);
     const away = (event: PointerEvent) => {
-      if (!box.current?.contains(event.target as Node)) setOpen(false);
+      if (!box.current?.contains(event.target as Node)) setStep('closed');
     };
     document.addEventListener('pointerdown', away, true);
     return () => {
       clearTimeout(timer);
       document.removeEventListener('pointerdown', away, true);
     };
-  }, [open]);
+  }, [step]);
   let size = 'btn ck-pub share-wide';
   if (small) size = 'btn ck-pub';
   else if (big) size = 'btn big ck-pub';
@@ -125,11 +138,44 @@ export function ShareButton({
       </Button>
     );
   }
+  const pick = small ? 'share-pick share-pick-small' : 'share-pick';
+  if (step === 'kind' && onGpx) {
+    return (
+      <span ref={box} className={`${pick} share-kind`}>
+        <Button
+          type="button"
+          noUiEdit
+          className={`${size} share-kind-btn`}
+          data-share-kind="text"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            buzz();
+            setStep('format');
+          }}
+        >
+          📝 Texte
+        </Button>
+        <Button
+          type="button"
+          noUiEdit
+          className={`${size} share-kind-btn`}
+          data-share-kind="gpx"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            buzz();
+            setStep('closed');
+            onGpx();
+          }}
+        >
+          📍 GPX
+        </Button>
+      </span>
+    );
+  }
   return (
-    <span
-      ref={box}
-      className={small ? 'share-pick share-pick-small' : 'share-pick'}
-    >
+    <span ref={box} className={pick}>
       {(['image', 'pdf'] as const).map((format) => (
         <Button
           key={format}
