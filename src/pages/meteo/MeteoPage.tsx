@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import type { LiveStation, MfTally } from '../../features/onwater/index.ts';
 import {
   liveAlertSpot,
@@ -132,7 +133,9 @@ export function MeteoPage() {
       >
         {tr(back.label)}
       </PageBack>
-      <h1 className="live-title">{tr('🌬 LiveMétéo')}</h1>
+      <TitleInNav>
+        <h1 className="live-title">{tr('🌬 LiveMétéo')}</h1>
+      </TitleInNav>
       <div className={station ? 'live-page picked' : 'live-page'}>
         {station ? (
           <StationCard

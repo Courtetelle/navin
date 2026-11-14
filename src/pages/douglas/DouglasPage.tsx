@@ -1,4 +1,5 @@
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { ScaleLanguage } from '../../features/safety/ScaleLanguage.tsx';
 import { useScaleEnglish } from '../../features/safety/useScaleEnglish.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -26,9 +27,11 @@ export function DouglasPage() {
       >
         {tr('◀ Listes')}
       </PageBack>
-      <h1>
-        {tr(`🌊 ${english ? 'Douglas sea scale' : 'Échelle de Douglas'}`)}
-      </h1>
+      <TitleInNav>
+        <h1>
+          {tr(`🌊 ${english ? 'Douglas sea scale' : 'Échelle de Douglas'}`)}
+        </h1>
+      </TitleInNav>
       <ScaleLanguage />
       <table className="scale-tbl">
         <thead>

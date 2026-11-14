@@ -344,7 +344,8 @@ async function myMaps(page: Page, theme: string): Promise<void> {
   );
   await page.locator('[data-tile="cartes"]').click();
   await page.waitForTimeout(500);
-  const title = (await page.locator('main h1').first().textContent()) ?? '';
+  const title =
+    (await page.locator('#navTitle h1, main h1').first().textContent()) ?? '';
   check(theme, 'data leads to my maps', title.includes('Mes cartes'));
   check(
     theme,
@@ -366,18 +367,17 @@ async function myMaps(page: Page, theme: string): Promise<void> {
     'a refused map import says why, under the button',
     failure.includes('notes.pmtiles') && failure.includes('pas une carte'),
   );
-  const box = await page.locator('#navSearch').boundingBox();
+  // The fixed title line: ◀ back to data, the title, no Sortir nor magnifier.
   const back = await page.locator('#navBack').boundingBox();
-  const exit = await page.locator('#navExit').boundingBox();
+  const heading = await page.locator('#navTitle h1').boundingBox();
   check(
     theme,
-    'the magnifier sits in the nav bar, between ◀ and Sortir',
-    box !== null &&
-      back !== null &&
-      exit !== null &&
-      box.x >= back.x + back.width &&
-      box.x + box.width <= exit.x &&
-      Math.abs(box.y + box.height / 2 - (back.y + back.height / 2)) < 6,
+    'the title line holds ◀ and the title of the page, nothing else',
+    back !== null &&
+      heading !== null &&
+      heading.x >= back.x + back.width &&
+      !(await page.locator('#navExit').isVisible()) &&
+      !(await page.locator('#navSearch').isVisible()),
   );
 }
 

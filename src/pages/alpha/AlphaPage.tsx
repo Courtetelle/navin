@@ -2,6 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { MarqueeInput } from '../../features/logbook/index.ts';
 import { NATO, NATO_FR, NATO_KEYS } from '../../features/safety/nato.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -41,7 +42,9 @@ export function AlphaPage() {
       >
         {tr(`◀ ${VIEW_LABELS[back] ?? 'Retour'}`)}
       </PageBack>
-      <h1>{tr('Alphabet phonétique')}</h1>
+      <TitleInNav>
+        <h1>{tr('Alphabet phonétique')}</h1>
+      </TitleInNav>
       <label className="field alpha-spell">
         <span>{tr('Épeler un mot')}</span>
         <MarqueeInput

@@ -4,6 +4,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { BaseButton } from '../../features/checklists/PickBaseScreen.tsx';
 import {
   ListPublishRow,
@@ -64,7 +65,9 @@ export function CkbasesHome({
     <>
       {boats.length > 0 ? (
         <>
-          <h1>{tr('Check-lists')}</h1>
+          <TitleInNav>
+            <h1>{tr('Check-lists')}</h1>
+          </TitleInNav>
           <h2 className="sub-h">{tr('Check-in des bateaux')}</h2>
           {boats.map((boat) => (
             <BoatLists key={boat.id} boat={boat} onBoatList={onBoatList} />

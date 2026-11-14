@@ -1,15 +1,17 @@
 import { signal } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { ReactNode, RefObject } from 'react';
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { navTitleSlot } from '../../components/shared/navTitleSlot.ts';
 import { useAutoRoll } from '../../components/shared/useAutoRoll.tsx';
 import { useTr } from '../../i18n/useTr.ts';
+import { useRails } from '../../lib/useWide.ts';
 import { VIEW_LABELS } from '../../model/views.ts';
 import { state } from '../../state/index.ts';
 import { hasBodyClass, setBodyClass } from '../bodyClass.ts';
-import { backDestination } from '../router.ts';
+import { backDestination, goBackInHistory, previousView } from '../router.ts';
 import { MagnifierButton } from '../search/SearchButton.tsx';
 
 import { PrepLine } from './PrepLine.tsx';
@@ -103,6 +105,16 @@ export function NavTop() {
     lineHidden: !steps,
   };
   const nav = shown ? live : previous;
+  // The screens with the buttons around the map: a fixed title line, ◀ (only
+  // back to a menu of choices, never to the map) and the title of the page.
+  const rails = useRails();
+  const plain = rails && shown && !nav.hasSteps && !okShown && !nav.nextShown;
+  const pageGo = pageBackTarget()?.element()?.dataset.go;
+  const before = previousView();
+  const pageStep = pageBackTarget() !== null && pageGo !== 'tracker';
+  const historyStep = before !== null && before !== 'tracker';
+  const backHidden = plain && !pageStep && !historyStep;
+  const [slot, setSlot] = useState<HTMLDivElement | null>(null);
   const backLabel = tr(nav.backLabel);
   const backReference = useRef<HTMLButtonElement>(null);
   const backRoll = useAutoRoll(
@@ -122,6 +134,9 @@ export function NavTop() {
       shown && !nav.hasSteps && !okShown && !nav.nextShown,
     );
     if (shown && !sameSticky(live, sticky.peek())) sticky.value = live;
+    setBodyClass('nav-plain', plain);
+    const target = plain ? slot : null;
+    if (navTitleSlot.peek() !== target) navTitleSlot.value = target;
   });
   useNavHeight(reference, shown);
 
@@ -140,10 +155,17 @@ export function NavTop() {
         className={backRoll.className ? `btn ${backRoll.className}` : 'btn'}
         id="navBack"
         ref={backReference}
-        onClick={navBack}
+        hidden={backHidden}
+        aria-label={plain ? tr('Retour') : undefined}
+        onClick={() => {
+          // The page's own step back, else the menu it was opened from.
+          if (plain && !pageStep) goBackInHistory();
+          else navBack();
+        }}
       >
-        {backRoll.content}
+        {plain ? null : backRoll.content}
       </Button>
+      {plain ? <div id="navTitle" ref={setSlot} /> : null}
       <div
         id="navMid"
         className="prep-steps"

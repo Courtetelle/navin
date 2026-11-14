@@ -1,6 +1,7 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import type { ReactNode } from 'react';
 import { Fragment } from 'react';
+import { createPortal } from 'react-dom';
 
 import { useTr } from '../../i18n/useTr.ts';
 import { state } from '../../state/index.ts';
@@ -9,6 +10,7 @@ import { HelpPill } from './HelpText.tsx';
 import type { HelpContext } from './helpRules.ts';
 import { helpBubbleText, keepHelp, splitEmptyHelp } from './helpRules.ts';
 import { useIntroLead } from './introLead.ts';
+import { navTitleSlot } from './navTitleSlot.ts';
 
 /** One help paragraph right under the title. */
 interface LeadHelp extends HelpContext {
@@ -63,14 +65,19 @@ export function PageTitle({
   for (const { text, popped } of paragraphs) {
     if (popped) bubble.push(tr(text, { help: true }).trim());
   }
+  const title = (
+    <h1>
+      {typeof children === 'string' ? tr(children) : children}
+      {bubble.length > 0 ? (
+        <HelpPill text={helpBubbleText(bubble.join(' · '))} inTitle />
+      ) : null}
+    </h1>
+  );
+  // The fixed title line of the nav bar holds it, when it is there.
+  const slot = atTop ? navTitleSlot.value : null;
   return (
     <>
-      <h1>
-        {typeof children === 'string' ? tr(children) : children}
-        {bubble.length > 0 ? (
-          <HelpPill text={helpBubbleText(bubble.join(' · '))} inTitle />
-        ) : null}
-      </h1>
+      {slot ? createPortal(title, slot) : title}
       {paragraphs.map((paragraph) => (
         <Fragment key={paragraph.key}>
           <p className={paragraphClass(paragraph, lead)}>

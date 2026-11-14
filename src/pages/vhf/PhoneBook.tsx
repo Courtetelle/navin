@@ -6,6 +6,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { SwipeRow } from '../../features/prep/index.ts';
 import { shareCards } from '../../features/publish/index.ts';
 import { CallButton } from '../../features/safety/Contacts.tsx';
@@ -47,7 +48,9 @@ export function PhoneBook() {
           go('tracker');
         }}
       />
-      <h1>{tr('📞 Téléphones et courriels')}</h1>
+      <TitleInNav>
+        <h1>{tr('📞 Téléphones et courriels')}</h1>
+      </TitleInNav>
       <div className="field">
         <input
           className="text"

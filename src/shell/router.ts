@@ -109,6 +109,15 @@ export function backDestination(): string {
     : backFallback(state.view.currentView.value);
 }
 
+/**
+ * The screen opened just before, from the history only.
+ * @returns Its view, or null when the screen was the first one opened.
+ */
+export function previousView(): string | null {
+  const previous = history.at(-1);
+  return previous !== undefined && isView(previous) ? previous : null;
+}
+
 /** Forget the history (nav bar exit button, nav.js:82). */
 export function clearHistory(): void {
   history.length = 0;

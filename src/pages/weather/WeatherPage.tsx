@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { LinkButton } from '../../components/shared/EditableLinks.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import type { Forecast } from '../../features/tracking/index.ts';
 import { wxNext } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -75,7 +76,9 @@ function WeatherMenu() {
       >
         {tr('◀ NavIn')}
       </PageBack>
-      <h1>{tr('🌤 Météo')}</h1>
+      <TitleInNav>
+        <h1>{tr('🌤 Météo')}</h1>
+      </TitleInNav>
       <div className="wx-menu">
         <Button className="btn big wx-entry" onClick={openForecast}>
           <span className="wx-entry-ico">📈</span>
@@ -139,7 +142,9 @@ function ForecastPage() {
       >
         {tr('◀ Météo')}
       </PageBack>
-      <h1>{tr('📈 Prévisions')}</h1>
+      <TitleInNav>
+        <h1>{tr('📈 Prévisions')}</h1>
+      </TitleInNav>
       <div className="wx-page">
         <section className="wx-fc">
           <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>

@@ -6,6 +6,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpPill, HelpText } from '../../components/shared/HelpText.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { helpBubbleText } from '../../components/shared/helpRules.ts';
 import { useIntroLead } from '../../components/shared/introLead.ts';
 import { LEMAN_ARCGIS } from '../../features/map/constants.ts';
@@ -50,10 +51,12 @@ function CartesContent({ onChange }: { onChange: () => void }) {
   const help = tr(HELP, { help: true });
   return (
     <>
-      <h1>
-        {tr('Mes cartes')}
-        <HelpPill inTitle text={helpBubbleText(help)} />
-      </h1>
+      <TitleInNav>
+        <h1>
+          {tr('Mes cartes')}
+          <HelpPill inTitle text={helpBubbleText(help)} />
+        </h1>
+      </TitleInNav>
       <p className={fresh ? 'help help-pop help-lead' : 'help help-pop'}>
         {help}
       </p>

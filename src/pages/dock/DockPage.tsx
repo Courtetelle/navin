@@ -4,6 +4,7 @@ import { ArmedButton } from '../../components/shared/ArmedButton.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { depthAt } from '../../features/map/index.ts';
 import {
   dockDone,
@@ -41,7 +42,9 @@ export function DockPage() {
   const done = dockDone.value;
   return (
     <>
-      <h1>⚓ Accostage</h1>
+      <TitleInNav>
+        <h1>⚓ Accostage</h1>
+      </TitleInNav>
       <FoldSection title="Hauteur d’eau ici">
         <div className="value" style={{ fontSize: 34 }}>
           {depth || '–'}

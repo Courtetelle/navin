@@ -1,5 +1,6 @@
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { openView } from '../../features/safety/openView.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
@@ -16,7 +17,9 @@ export function ListsPage() {
       <PageBack label="◀ data" data-go="more" onClick={() => openView('more')}>
         {tr('◀ data')}
       </PageBack>
-      <h1>{tr('📋 Listes')}</h1>
+      <TitleInNav>
+        <h1>{tr('📋 Listes')}</h1>
+      </TitleInNav>
       <ButtonRow className="row prep-col">
         <Button
           className="btn big"
