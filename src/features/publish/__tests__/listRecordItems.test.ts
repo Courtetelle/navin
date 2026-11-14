@@ -40,6 +40,7 @@ test('traceItems summarises each track', () => {
         ],
       },
     ],
+    photos: [{ id: 'plan:trace:t', cap: 'Sortie · plan' }],
   });
   expect(items[1]?.sections[0]?.rows).toHaveLength(5);
 });

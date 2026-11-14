@@ -2,7 +2,7 @@ import { fmtDur, fmtShortDate, fmtTime, fr, pad } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import type { ChecklistBase, Mark, SosLog } from '../../model/types.ts';
 
-import { markPlanId } from './planPhoto.ts';
+import { markPlanId, tracePlanId } from './planPhoto.ts';
 import type { PublishItem, PublishRowData } from './types.ts';
 
 /** A track with its statistics. */
@@ -42,6 +42,8 @@ export function traceItems(tracks: readonly PublishableTrack[]): PublishItem[] {
       id: track.id,
       name: track.name,
       sections: [{ title: track.name, rows }],
+      // The plan of the trace, drawn when it is shared.
+      photos: [{ id: tracePlanId(track.id), cap: `${track.name} · plan` }],
     };
   });
 }

@@ -1,17 +1,19 @@
 import { useState } from 'react';
 
-import { Button } from '../../components/shared/Button.tsx';
 import type { ShareFormat } from '../../components/shared/shareFormat.ts';
+import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { exportTrace, showTrace } from '../../features/map/traceActions.ts';
 import { drawTrkList } from '../../features/map/traceList.ts';
 import type { LakeTrack } from '../../features/map/trackStats.ts';
 import {
   allLakeTracks,
+  renameTrace,
   traceSheet,
   trackStats,
 } from '../../features/map/trackStats.ts';
 import { SwipeRow, deleteTrace } from '../../features/prep/index.ts';
 import { shareCards } from '../../features/publish/index.ts';
+import { tracePlan } from '../../features/publish/planPhoto.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
@@ -42,13 +44,28 @@ export function TraceList() {
   );
 }
 
+/**
+ * One trace, a band as a mark: a touch shows it on the map, a long press
+ * changes its text in place; swiped, 👁 Visualiser, Partager (Texte or GPX)
+ * and Effacer.
+ * @param props - The trace.
+ * @param props.track - The trace.
+ * @returns The band.
+ */
 function TraceItem({ track }: { track: LakeTrack }) {
   const tr = useTr();
-  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<string | null>(null);
+  const press = useLongPress(() => setEditing(track.name));
   const stats = trackStats(track.track);
   const start = stats.start ?? 0;
   const end = stats.end ?? 0;
   const top = stats.max ? ` · max ${fr(stats.max)} nd` : '';
+  const save = (text: string) => {
+    setEditing(null);
+    if (text.trim() === track.name) return;
+    renameTrace(track.id, text);
+    drawTrkList();
+  };
   return (
     <SwipeRow
       id={track.id}
@@ -56,47 +73,65 @@ function TraceItem({ track }: { track: LakeTrack }) {
       silent
       onDelete={deleteAndRefresh}
       onView={() => showTrace(track)}
-      onShare={(format) => shareTrace(track, format)}
+      onShare={(format) => {
+        void shareTrace(track, format);
+      }}
+      onGpx={() => exportTrace(track)}
     >
-      <div className="trk-item">
-        <button
-          type="button"
-          className="trk-open"
-          aria-expanded={open}
-          onClick={() => {
-            buzz();
-            setOpen((value) => !value);
-          }}
-        >
-          <b>{track.name}</b>
-          <small>
-            {tr(
-              `${fmtShortDate(new Date(start))} · ${fr(stats.nm)} NM · ${fmtDur(end - start)}${top}`,
+      <div className="section mark-item trk-band" data-trace={track.id}>
+        {editing === null ? (
+          <button
+            type="button"
+            className={`mark-head${press.hit ? ' lp-hit' : ''}`}
+            aria-label={tr(
+              `${track.name} · toucher : sur la carte · appui long : changer le texte`,
             )}
-          </small>
-        </button>
-        <Button
-          className="btn"
-          data-show={track.id}
-          onClick={() => {
-            buzz();
-            showTrace(track);
-          }}
-        >
-          🗺
-        </Button>
-        <Button
-          className="btn"
-          data-gpx={track.id}
-          onClick={() => {
-            buzz();
-            exportTrace(track);
-          }}
-        >
-          GPX
-        </Button>
+            onClick={() => {
+              buzz();
+              showTrace(track);
+            }}
+            {...press.handlers}
+          >
+            <span className="mk-pin" aria-hidden="true">
+              🛰
+            </span>
+            <span className="mk-text">
+              <b className="b-nm">{track.name}</b>
+              <small>
+                {tr(
+                  `${fmtShortDate(new Date(start))} · ${fr(stats.nm)} NM · ${fmtDur(end - start)}${top}`,
+                )}
+              </small>
+            </span>
+          </button>
+        ) : (
+          <form
+            className="mark-head mark-edit"
+            onSubmit={(event) => {
+              event.preventDefault();
+              save(editing);
+            }}
+          >
+            <span className="mk-pin" aria-hidden="true">
+              🛰
+            </span>
+            <input
+              className="text"
+              data-trk="text"
+              // Opened by a long press, to be written in at once.
+              autoFocus
+              enterKeyHint="done"
+              value={editing}
+              aria-label={tr(`Texte de ${track.name}`)}
+              onChange={(event) => setEditing(event.target.value)}
+              onBlur={() => save(editing)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') setEditing(null);
+              }}
+            />
+          </form>
+        )}
       </div>
-      {open ? <TraceFiche track={track} /> : null}
     </SwipeRow>
   );
 }
@@ -129,35 +164,28 @@ function traceRows(track: LakeTrack): Array<[string, string]> {
 }
 
 /**
- * Share a trace: its sheet as an image or a PDF, in the layout of Réglages.
+ * Share a trace: its sheet and its plan as an image or a PDF, in the layout
+ * of Réglages.
  * @param track - The trace.
  * @param format - Image or PDF.
  */
-function shareTrace(track: LakeTrack, format: ShareFormat): void {
+async function shareTrace(
+  track: LakeTrack,
+  format: ShareFormat,
+): Promise<void> {
   const start = trackStats(track.track).start ?? Date.now();
-  void shareCards(
+  // The plan of the trace under its figures, when the network allows it.
+  const plan = await tracePlan(track).catch(() => null);
+  await shareCards(
     {
       title: track.name,
       kicker: 'Trace',
       sub: fmtShortDate(new Date(start)),
       sections: [{ title: 'Trace', rows: traceRows(track) }],
+      photos: plan ? [{ url: plan, cap: track.name }] : [],
+      photosTitle: 'Plan',
     },
-    `trace-${track.name.replaceAll(/[^\w-]+/g, '-')}`,
+    `NavIn-trace-${track.name.replaceAll(/[^\w-]+/g, '-')}`,
     format,
-  );
-}
-
-function TraceFiche({ track }: { track: LakeTrack }) {
-  const tr = useTr();
-  const rows = traceRows(track);
-  return (
-    <dl className="trk-sheet">
-      {rows.map(([label, value]) => (
-        <div key={label}>
-          <dt>{tr(label)}</dt>
-          <dd>{value}</dd>
-        </div>
-      ))}
-    </dl>
   );
 }
