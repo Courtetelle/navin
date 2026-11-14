@@ -98,6 +98,33 @@ export function mergeMarks(list: unknown): void {
 }
 
 /**
+ * The number of a new mark: one after the highest of the marks kept, even
+ * renamed (their own texts), 1 when there is none.
+ * @param marks - The marks kept.
+ * @returns The number.
+ */
+export function nextMarkNumber(marks: readonly Mark[]): number {
+  let highest = 0;
+  for (const mark of marks) highest = Math.max(highest, mark.n || 0);
+  return highest + 1;
+}
+
+/**
+ * Rename a mark with a text of one's own; an empty text gives back its
+ * number (`M007`).
+ * @param id - Mark id.
+ * @param text - The new text.
+ */
+export function renameMark(id: string, text: string): void {
+  updateMarks((marks) => {
+    const found = marks.find((mark) => mark.id === id);
+    if (!found) return;
+    found.name = text.trim() || markName(found.n);
+    found.note = '';
+  });
+}
+
+/**
  * Record a mark at a position (data part of legacy `addMark`; the map redraws itself).
  * @param lat - Latitude.
  * @param lon - Longitude.
@@ -105,7 +132,7 @@ export function mergeMarks(list: unknown): void {
  * @returns The new mark.
  */
 export function addMark(lat: number, lon: number, depth?: string): Mark {
-  const number = store.get('ldb.markSeq', 0) + 1;
+  const number = nextMarkNumber(data.marks.value);
   store.set('ldb.markSeq', number);
   const mark: Mark = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),

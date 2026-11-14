@@ -767,6 +767,26 @@ async function marksShare(page: Page, theme: string): Promise<void> {
     kinds === 2 &&
       (await page.locator('.lx-pub [data-share-fmt]').count()) === 2,
   );
+  await page.locator('h1, .page-title').first().click({ force: true });
+  await page.waitForTimeout(200);
+  await longPress(page, '.mark-item .mark-head');
+  await page.locator('[data-mk="text"]').fill('Bouée verte');
+  await page.locator('[data-mk="text"]').press('Enter');
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'marks: no chevron, a long press changes the text in place',
+    (await page.locator('.mark-item summary').count()) === 0 &&
+      (await page.locator('.mark-item .b-nm').first().textContent()) ===
+        'Bouée verte',
+  );
+  await page.locator('.mark-item .mark-head').first().click();
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    'marks: a touch shows the mark on the map',
+    await page.evaluate(() => document.body.classList.contains('trk-mode')),
+  );
 }
 
 // Where the side buttons of the tablet stand, to the pixel.
@@ -1273,6 +1293,15 @@ async function offlineFiles(page: Page, theme: string): Promise<void> {
 async function trackButton(page: Page, theme: string): Promise<void> {
   const has = (selector: string) =>
     page.evaluate((query) => document.querySelector(query) !== null, selector);
+  await longPress(page, '.rail-start');
+  const title = await page.locator('h1, .page-title').first().textContent();
+  check(
+    theme,
+    'tablet: a long press on START opens Mes traces',
+    title?.includes('Mes traces') === true && !(await has('.rail-run')),
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(1200);
   await page.locator('.rail-start').click();
   await page.waitForTimeout(800);
   check(

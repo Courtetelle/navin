@@ -1,12 +1,9 @@
 import { untracked } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
+import { useState } from 'react';
 
-import { Button } from '../../components/shared/Button.tsx';
-import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { HelpText } from '../../components/shared/HelpText.tsx';
-import { TzTime } from '../../components/shared/TzTime.tsx';
 import { utcText } from '../../components/shared/timeText.ts';
-import { askText } from '../../features/map/dialogs.ts';
+import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { setGoto } from '../../features/map/goto.ts';
 import { marksFly } from '../../features/map/longPress.ts';
 import { marksGpx } from '../../features/map/marksText.ts';
@@ -19,7 +16,7 @@ import { fmtShortDate } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import type { Mark } from '../../model/types.ts';
 import { go } from '../../shell/router.ts';
-import { deliver, updateMarks } from '../../state/index.ts';
+import { deliver, renameMark, updateMarks } from '../../state/index.ts';
 
 /**
  * A name as it can stand in a file name.
@@ -40,40 +37,54 @@ interface MarkItemProps {
 }
 
 /**
- * One mark of the directory: date, position, course from my position, actions.
+ * The text of a mark: its own, or its number, and the note of old.
+ * @param mark - The mark.
+ * @returns The text.
+ */
+function markLabel(mark: Mark): string {
+  return `${mark.name}${mark.note ? ` · ${mark.note}` : ''}`;
+}
+
+/**
+ * One mark of the directory, a band: a touch shows it on the map, a long
+ * press changes its text in place; swiped, 🎯 Go to, Partager, Effacer.
  * @param props - The mark.
- * @returns The `section.mark-item`.
+ * @returns The band.
  */
 export function MarkItem({ mark }: MarkItemProps) {
   useSignals();
   const tr = useTr();
+  const [editing, setEditing] = useState<string | null>(null);
+  const press = useLongPress(() => setEditing(markLabel(mark)));
   const date = fmtShortDate(new Date(mark.at));
-  const position = fmtPos(mark);
   const depth = mark.depth ? ` · 🌊 ${mark.depth}` : '';
   // Read when the list is drawn: the text does not follow the boat.
   const relative = untracked(() => relativeParts(mark));
-  const relativeText = relative
-    ? `${relative.distance} · cap à suivre ${relative.bearing} (vrai)${relative.eta}`
-    : 'Ma position : en attente du GPS…';
-  const plain = `${date} · ${utcText(new Date(mark.at), false)}UTC · ${position}${depth}🧭 ${relativeText}`;
-  const rename = () => {
-    buzz();
-    const note = askText(`Nom ou note pour ${mark.name}`, mark.note || '');
-    if (note === null) return;
-    updateMarks((marks) => {
-      const found = marks.find((item) => item.id === mark.id);
-      if (found) found.note = note.trim();
-    });
-  };
+  const where = relative
+    ? `${relative.distance} · ${relative.bearing}`
+    : fmtPos(mark);
   const view = () => {
+    buzz();
     marksFly.position = [mark.lat, mark.lon];
     go('tracker');
+  };
+  const goTo = () => {
+    setGoto({ lat: mark.lat, lon: mark.lon, name: markLabel(mark) });
+    // The map shows the mark and the boat.
+    marksFly.position = [mark.lat, mark.lon];
+    marksFly.withMe = true;
+    go('tracker');
+  };
+  const save = (text: string) => {
+    setEditing(null);
+    if (text.trim() !== markLabel(mark)) renameMark(mark.id, text);
   };
   return (
     <SwipeRow
       id={mark.id}
       name={mark.name}
-      onView={view}
+      onView={goTo}
+      viewAs={{ icon: '🎯', label: 'Go to' }}
       onShare={(format) => openListPublish('marks', mark.id, format)}
       onGpx={() => {
         void deliver(
@@ -89,55 +100,55 @@ export function MarkItem({ mark }: MarkItemProps) {
         });
       }}
     >
-      <details className="section mark-item" data-id={mark.id}>
-        <summary>
-          <span className="mk-pin">📌</span>
-          <span className="b-nm">
-            {`${mark.name}${mark.note ? ` · ${mark.note}` : ''}`}
-          </span>{' '}
-          <small>
-            {`${date} · `}
-            <TzTime date={mark.at} />
-          </small>
-        </summary>
-        <div className="mk-body">
-          <HelpText text={plain} nextIsRow>
-            <>
-              {`${position}${depth}`}
-              <br />
-              🧭{' '}
-              {relative ? (
-                <>
-                  <b>{relative.distance}</b> · cap à suivre{' '}
-                  <b>{relative.bearing}</b> (vrai){relative.eta}
-                </>
-              ) : (
-                relativeText
-              )}
-            </>
-          </HelpText>
-          <ButtonRow className="row c2">
-            <Button
-              className="btn primary"
-              data-mk="goto"
-              onClick={() => {
-                buzz();
-                const note = mark.note ? ` · ${mark.note}` : '';
-                setGoto({
-                  lat: mark.lat,
-                  lon: mark.lon,
-                  name: `${mark.name}${note}`,
-                });
+      <div className="section mark-item" data-id={mark.id}>
+        {editing === null ? (
+          <button
+            type="button"
+            className={`mark-head${press.hit ? ' lp-hit' : ''}`}
+            aria-label={tr(
+              `${markLabel(mark)} · toucher : sur la carte · appui long : changer le texte`,
+            )}
+            onClick={view}
+            {...press.handlers}
+          >
+            <span className="mk-pin" aria-hidden="true">
+              📌
+            </span>
+            <span className="mk-text">
+              <b className="b-nm">{markLabel(mark)}</b>
+              <small>
+                {`${date} · ${utcText(new Date(mark.at), false)}UTC · ${where}${depth}`}
+              </small>
+            </span>
+          </button>
+        ) : (
+          <form
+            className="mark-head mark-edit"
+            onSubmit={(event) => {
+              event.preventDefault();
+              save(editing);
+            }}
+          >
+            <span className="mk-pin" aria-hidden="true">
+              📌
+            </span>
+            <input
+              className="text"
+              data-mk="text"
+              // Opened by a long press, to be written in at once.
+              autoFocus
+              enterKeyHint="done"
+              value={editing}
+              aria-label={tr(`Texte de ${mark.name}`)}
+              onChange={(event) => setEditing(event.target.value)}
+              onBlur={() => save(editing)}
+              onKeyDown={(event) => {
+                if (event.key === 'Escape') setEditing(null);
               }}
-            >
-              {tr('🎯 Go to')}
-            </Button>
-            <Button className="btn" data-mk="note" onClick={rename}>
-              {tr('✏️ Nom')}
-            </Button>
-          </ButtonRow>
-        </div>
-      </details>
+            />
+          </form>
+        )}
+      </div>
     </SwipeRow>
   );
 }

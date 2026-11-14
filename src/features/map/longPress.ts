@@ -1,7 +1,7 @@
 import type { LatLng, LeafletMouseEvent, Map as LeafletMap } from 'leaflet';
 
 import { buzz } from '../../lib/dom.ts';
-import { addMark, toast } from '../../state/index.ts';
+import { addMark, herePos, toast } from '../../state/index.ts';
 
 import { depthAt } from './isobath.ts';
 import { leaflet } from './leaflet.ts';
@@ -15,8 +15,14 @@ import {
 import { crossAttach, longPressDone } from './tapCross.ts';
 import { tracker } from './trackerState.ts';
 
-/** Position the tracker shows at its next opening (« 🗺 Voir » of a mark). */
-export const marksFly: { position: [number, number] | null } = {
+/**
+ * Position the tracker shows at its next opening (a mark touched), with my
+ * position too after a Go to.
+ */
+export const marksFly: {
+  position: [number, number] | null;
+  withMe?: boolean;
+} = {
   position: null,
 };
 
@@ -97,13 +103,23 @@ export function lpAttach(map: LeafletMap): void {
       },
       0,
     );
-    const { position } = marksFly;
+    const { position, withMe } = marksFly;
     if (position) {
       marksFly.position = null;
+      marksFly.withMe = false;
       whileMapLive(
         map,
         () => {
-          map.setView(position, 15);
+          const me = withMe ? herePos() : null;
+          if (me) {
+            // A Go to: the mark and the boat, both on the screen.
+            map.fitBounds([position, [me.lat, me.lon]], {
+              padding: [70, 70],
+              maxZoom: 15,
+            });
+          } else {
+            map.setView(position, 15);
+          }
           if (tracker.current) tracker.current.follow = false;
         },
         300,

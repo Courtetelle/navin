@@ -58,6 +58,9 @@ export function useLongPress(onLongPress: () => void, delay = 550): LongPress {
       onPointerDown: (event) => {
         clearTimeout(timer.current);
         start.current = null;
+        // A new touch: a long press whose element went away before the
+        // finger rose does not swallow it.
+        swallow.current = false;
         if ((event.target as Element).closest('.b-editbtn')) return;
         start.current = { x: event.clientX, y: event.clientY };
         timer.current = setTimeout(() => {

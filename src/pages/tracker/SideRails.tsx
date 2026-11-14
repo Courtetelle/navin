@@ -39,7 +39,6 @@ import {
   FLAG_SVG,
   FLAG_WAVE_SVG,
   MOOR_SVG,
-  START_SVG,
 } from '../../shell/topbar/tabIcons.ts';
 import {
   addMark,
@@ -51,6 +50,7 @@ import {
   wxCheckState,
 } from '../../state/index.ts';
 
+import { StartButton } from './StartButton.tsx';
 import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
 import { RailIcon } from './railIcons.tsx';
 import { MAP_ACTIONS, splitTitle } from './sideRails.ts';
@@ -540,20 +540,7 @@ function StartLine() {
   useSignals();
   const tr = useTr();
   const tracking = state.view.tracking.value;
-  let start = (
-    <Button
-      type="button"
-      noUiEdit
-      className="rail-btn rail-start"
-      aria-label={tr('START : démarrer la trace')}
-      onClick={() => {
-        buzz();
-        domainActions.quickStart();
-      }}
-    >
-      <span className="rail-icon">{markupToReact(START_SVG)}</span>
-    </Button>
-  );
+  let start = <StartButton />;
   if (tracking) start = <TrackRailButton />;
   else if (trackDone.value) start = <TrackDoneButton />;
   return (

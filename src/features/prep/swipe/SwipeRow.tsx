@@ -38,6 +38,12 @@ export interface SwipeRowProps {
    */
   onView?: (() => void) | null;
   /**
+   * The icon and word of that first button, when it does more than show
+   * (a mark: 🎯 Go to).
+   * @default { icon: '👁', label: 'Visualiser' }
+   */
+  viewAs?: { icon: string; label: string };
+  /**
    * 📤 Partager, in the format chosen; without it, no share button.
    * @default undefined
    */
@@ -51,6 +57,9 @@ export interface SwipeRowProps {
   /** The row. */
   children: ReactNode;
 }
+
+/** The first button of the menu, by default. */
+const VIEW_AS = { icon: '👁', label: 'Visualiser' } as const;
 
 /** Swiped this far to the left, in pixels, the band opens its menu. */
 const SWIPE_ASK_PX = 70;
@@ -72,6 +81,7 @@ export function SwipeRow({
   block,
   silent = false,
   onView,
+  viewAs = VIEW_AS,
   onShare,
   onGpx,
   children,
@@ -180,6 +190,7 @@ export function SwipeRow({
                 }
               : undefined
           }
+          viewAs={viewAs}
           onGpx={
             onGpx
               ? () => {
@@ -206,6 +217,7 @@ export function SwipeRow({
 interface SwipeMenuProps {
   name: string;
   onView: (() => void) | undefined;
+  viewAs: { icon: string; label: string };
   onShare: ((format: ShareFormat) => void) | undefined;
   onGpx: (() => void) | undefined;
   onDelete: () => void;
@@ -214,7 +226,14 @@ interface SwipeMenuProps {
 /** A trash pressed this long deletes. */
 const HOLD_MS = 650;
 
-function SwipeMenu({ name, onView, onShare, onGpx, onDelete }: SwipeMenuProps) {
+function SwipeMenu({
+  name,
+  onView,
+  viewAs,
+  onShare,
+  onGpx,
+  onDelete,
+}: SwipeMenuProps) {
   const box = useRef<HTMLDivElement>(null);
   const hold = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [done, setDone] = useState(false);
@@ -244,14 +263,15 @@ function SwipeMenu({ name, onView, onShare, onGpx, onDelete }: SwipeMenuProps) {
           noUiEdit
           className="btn sw-view"
           data-swview="1"
-          aria-label={`Visualiser « ${name.slice(0, 60)} »`}
+          aria-label={`${viewAs.label} « ${name.slice(0, 60)} »`}
           onClick={(event) => {
             event.preventDefault();
             buzz();
             onView();
           }}
         >
-          👁<small>Visualiser</small>
+          {viewAs.icon}
+          <small>{viewAs.label}</small>
         </Button>
       ) : null}
       {onShare ? (
