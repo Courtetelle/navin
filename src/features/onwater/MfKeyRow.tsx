@@ -7,6 +7,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { lastKnownPos, toast, updateSettings } from '../../state/index.ts';
 
+import { KeyAccount } from './KeyAccount.tsx';
 import { mfCheck } from './coastStations.ts';
 import { seaPlace } from './externals.ts';
 import { checkText } from './mfCheckText.ts';
@@ -82,6 +83,11 @@ export function MfKeyRow() {
           {tr(result)}
         </p>
       ) : null}
+      <KeyAccount
+        id="mf"
+        name="Météo-France"
+        url="https://portail-api.meteofrance.fr"
+      />
       <HelpText>
         Facultatif. Gratuite sur portail-api.meteofrance.fr : créer un compte,
         s’abonner à l’API « Données Publiques Observation », puis générer une
