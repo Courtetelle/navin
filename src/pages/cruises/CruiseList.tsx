@@ -2,7 +2,6 @@ import { useSignals } from '@preact/signals-react/runtime';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
-import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -115,18 +114,6 @@ export function CruiseList({ mode, lines }: CruiseListProps) {
                     {tr('Ouvrir')}
                   </Button>
                 )}
-                <HoldDeleteButton
-                  className="btn danger"
-                  data-act="del"
-                  onClick={buzz}
-                  onDelete={() => {
-                    removeCruise(id);
-                    toast('Supprimée');
-                    go('cruises');
-                  }}
-                >
-                  {tr('Supprimer')}
-                </HoldDeleteButton>
               </div>
             </article>
           </SwipeRow>

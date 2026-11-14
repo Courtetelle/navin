@@ -12,6 +12,3 @@ export const sosRefresh = signal(0);
 export function refreshSosPage(): void {
   sosRefresh.value += 1;
 }
-
-/** Ended log whose delete form is open (legacy `sosDelId`, kept between visits). */
-export const sosDeleteId = signal<string | null>(null);
