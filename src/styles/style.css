@@ -10370,8 +10370,9 @@ body.nav-search:not(.trk-mode) #searchBtn {
   border-radius: 2px;
   pointer-events: none;
 }
+/* Go To on the right, the weather at the bottom */
 .tap-arm-mark,
-.tap-arm-goto {
+.tap-arm-weather {
   left: -1.5px;
   width: 3px;
   height: var(--tap-arm);
@@ -10379,16 +10380,16 @@ body.nav-search:not(.trk-mode) #searchBtn {
 .tap-arm-mark {
   top: calc(-1 * (var(--tap-gap) + var(--tap-arm)));
 }
-.tap-arm-goto {
+.tap-arm-weather {
   top: var(--tap-gap);
 }
-.tap-arm-weather,
+.tap-arm-goto,
 .tap-arm-info {
   top: -1.5px;
   height: 3px;
   width: var(--tap-arm);
 }
-.tap-arm-weather {
+.tap-arm-goto {
   left: var(--tap-gap);
 }
 .tap-arm-info {
@@ -10423,11 +10424,11 @@ body.nav-search:not(.trk-mode) #searchBtn {
   left: calc(var(--tap-logo) / -2);
   top: calc(-1 * (var(--tap-gap) + var(--tap-arm) + var(--tap-logo)));
 }
-.tap-logo-goto {
+.tap-logo-weather {
   left: calc(var(--tap-logo) / -2);
   top: calc(var(--tap-gap) + var(--tap-arm));
 }
-.tap-logo-weather {
+.tap-logo-goto {
   left: calc(var(--tap-gap) + var(--tap-arm));
   top: calc(var(--tap-logo) / -2);
 }

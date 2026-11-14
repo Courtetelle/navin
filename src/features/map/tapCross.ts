@@ -29,7 +29,7 @@ interface Spot {
 }
 
 /** The four branches of the cross, clockwise from the top. */
-const CROSS_BRANCHES = ['mark', 'weather', 'goto', 'info'] as const;
+const CROSS_BRANCHES = ['mark', 'goto', 'weather', 'info'] as const;
 /** A branch of the cross. */
 type CrossBranch = (typeof CROSS_BRANCHES)[number];
 
@@ -38,7 +38,7 @@ const WEATHER_SVG =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="4.2" fill="#f5a623"/><g stroke="#f5a623" stroke-width="1.6" stroke-linecap="round"><path d="M9 1.5v2M3.7 3.7l1.4 1.4M1.5 9h2M14.3 3.7l-1.4 1.4"/></g><path d="M7.5 19.5a4 4 0 0 1 1.2-7.8 5.2 5.2 0 0 1 9.8 1.6 3.2 3.2 0 0 1 .3 6.2z" fill="#fff" stroke="#5f6f86" stroke-width="1.4" stroke-linejoin="round"/></svg>';
 /** Go To: a target, and the arrow of the dividers going into it. */
 const GOTO_SVG =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="15" cy="9" r="6.5" fill="none" stroke="#0b3d91" stroke-width="1.8"/><circle cx="15" cy="9" r="2.4" fill="#0b3d91"/><path d="M2.5 21.5 12 12" stroke="#e6007e" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="3 2.4"/><path d="M13.2 10.8 7.4 12.4 11.6 16.6z" fill="#e6007e"/></svg>';
+  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="15" cy="9" r="6.5" fill="none" stroke="#0b3d91" stroke-width="1.8"/><circle cx="15" cy="9" r="2.4" fill="#0b3d91"/><path d="M2.2 21.8 10.4 13.6" stroke="#e6007e" stroke-width="3" stroke-linecap="round" stroke-dasharray="3.4 2.4"/><path d="M14 10 4.8 12.2 11.8 19.2z" fill="#e6007e"/></svg>';
 const INFO_SVG =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5" fill="#1677ff"/><circle cx="12" cy="7.2" r="1.6" fill="#fff"/><path d="M12 10.6v7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>';
 
@@ -63,7 +63,7 @@ export function longPressDone(): void {
 
 /**
  * A short tap on the map lays a cross on the point: four lines of 2 cm, not
- * meeting in the middle, a logo at the end of each (mark, weather, Go To,
+ * meeting in the middle, a logo at the end of each (mark, Go To, weather,
  * information). A logo opens its menu; a tap beside takes the cross away,
  * and so do 3 s without the map moving.
  * The cross always stands in the middle of the map: the point touched comes
