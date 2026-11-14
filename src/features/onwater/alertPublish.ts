@@ -78,7 +78,12 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
         ? 'prévision d’un modèle, pas une mesure'
         : (reading.net ?? 'MeteoSwiss'),
     ],
-    ['Distance', reading.km == null ? '—' : `${Math.round(reading.km)} km`],
+    forecast && reading.zoneKm
+      ? [
+          'Zone considérée',
+          `cercle de ${reading.zoneKm} km autour du point du modèle`,
+        ]
+      : ['Distance', reading.km == null ? '—' : `${Math.round(reading.km)} km`],
   );
   if (reading.lat != null && reading.lon != null) {
     rows.push(['Position', fmtPos({ lat: reading.lat, lon: reading.lon })]);
@@ -136,6 +141,33 @@ export function snippetZoom(
   return 8;
 }
 
+/**
+ * Pixels of a distance on the map at a latitude and a zoom.
+ * @param km - The distance.
+ * @param lat - Latitude.
+ * @param zoom - Zoom.
+ * @returns Pixels.
+ */
+function kmPixels(km: number, lat: number, zoom: number): number {
+  const metresPerPixel =
+    (156_543.034 * Math.cos((lat * Math.PI) / 180)) / 2 ** zoom;
+  return (km * 1000) / metresPerPixel;
+}
+
+/**
+ * The closest zoom that shows the whole zone of a forecast.
+ * @param lat - Latitude of its centre.
+ * @param km - Its radius.
+ * @param height - Snippet height in pixels.
+ * @returns A zoom from 5 to 12.
+ */
+export function zoneZoom(lat: number, km: number, height: number): number {
+  for (let zoom = 12; zoom > 5; zoom--) {
+    if (kmPixels(km, lat, zoom) <= height / 2 - 50) return zoom;
+  }
+  return 5;
+}
+
 function loadTile(url: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const image = new Image();
@@ -162,12 +194,18 @@ async function drawSnippet(
   report: AlertReport,
   box: { x: number; y: number; width: number; height: number },
 ): Promise<void> {
-  const { reading, boat } = report;
+  const { reading, boat, forecast } = report;
   context.fillStyle = '#dfe7ee';
   context.fillRect(box.x, box.y, box.width, box.height);
   if (reading.lat == null || reading.lon == null) return;
   const station = { lat: reading.lat, lon: reading.lon };
-  const zoom = snippetZoom(station, boat, box.width, box.height);
+  const zone = forecast ? reading.zoneKm : undefined;
+  const zoom = zone
+    ? Math.min(
+        zoneZoom(station.lat, zone, box.height),
+        snippetZoom(station, boat, box.width, box.height),
+      )
+    : snippetZoom(station, boat, box.width, box.height);
   const center = worldPixel(station.lat, station.lon, zoom);
   const left = center.x - box.width / 2;
   const top = center.y - box.height / 2;
@@ -218,11 +256,32 @@ async function drawSnippet(
     context.fillStyle = '#111';
     context.fillText(label, x + 26, y + 10);
   };
+  if (zone) {
+    // The zone the forecaster's value stands for, at the time of the alert.
+    context.beginPath();
+    context.arc(
+      box.x + box.width / 2,
+      box.y + box.height / 2,
+      kmPixels(zone, station.lat, zoom),
+      0,
+      Math.PI * 2,
+    );
+    context.fillStyle = 'rgba(208, 2, 27, 0.14)';
+    context.fill();
+    context.lineWidth = 6;
+    context.strokeStyle = '#d0021b';
+    context.stroke();
+  }
   if (boat) {
     const at = worldPixel(boat.lat, boat.lon, zoom);
     dot(box.x + at.x - left, box.y + at.y - top, '#1677ff', 'Bateau');
   }
-  dot(box.x + box.width / 2, box.y + box.height / 2, '#d0021b', reading.name);
+  dot(
+    box.x + box.width / 2,
+    box.y + box.height / 2,
+    '#d0021b',
+    zone ? 'Zone de la prévision' : reading.name,
+  );
   // The credit is the caption of the picture.
   context.restore();
 }

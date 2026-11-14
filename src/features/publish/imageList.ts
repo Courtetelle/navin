@@ -10,6 +10,7 @@ import { PLAN_PREFIX, planOf } from './planPhoto.ts';
 import type {
   CardsDocument,
   CardsPhoto,
+  CardsSection,
   ListKind,
   PublishItem,
 } from './types.ts';
@@ -90,7 +91,10 @@ async function pageDocument(
   page: readonly PublishItem[],
   { index, count }: { index: number; count: number },
 ): Promise<CardsDocument> {
-  const sheet = documentOf(page, LIST_TITLES[kind], kind);
+  const sheet = await withGroupPlans(
+    documentOf(page, LIST_TITLES[kind], kind),
+    page,
+  );
   const title =
     count > 1 ? `${sheet.title} (${index + 1}/${count})` : sheet.title;
   const photos = index === count - 1 ? await listPhotos(list) : [];
@@ -110,16 +114,52 @@ async function pageDocument(
   };
 }
 
+/**
+ * The plan of a group of marks right under the last mark of its group.
+ * @param sheet - The document of the page.
+ * @param page - Its elements.
+ * @returns The document with its plans.
+ */
+async function withGroupPlans<T extends CardsDocument>(
+  sheet: T,
+  page: readonly PublishItem[],
+): Promise<T> {
+  if (!page.some((item) => (item.photos ?? []).some(isGroupPlan))) {
+    return sheet;
+  }
+  const urls = await photoUrls(page);
+  const sections: CardsSection[] = [];
+  let at = 0;
+  for (const item of page) {
+    const count = item.sections.length;
+    sections.push(...(sheet.sections ?? []).slice(at, at + count));
+    at += count;
+    for (const photo of (item.photos ?? []).filter(isGroupPlan)) {
+      const url = urls.get(photo.id);
+      if (url) {
+        sections.push({
+          title: 'Situation',
+          rows: [['', '', [{ url, cap: photo.cap }]]],
+        });
+      }
+    }
+  }
+  return { ...sheet, sections };
+}
+
+function isGroupPlan(photo: { id: string }): boolean {
+  return photo.id.startsWith(`${PLAN_PREFIX}marks:`);
+}
+
 async function listPhotos(list: readonly PublishItem[]): Promise<CardsPhoto[]> {
   const urls = await photoUrls(list);
   const photos: CardsPhoto[] = [];
   for (const item of list) {
     for (const photo of item.photos ?? []) {
       const url = urls.get(photo.id);
-      if (!url) continue;
-      // The plan of all the marks belongs to none of them.
-      const shared = photo.id.startsWith(`${PLAN_PREFIX}marks:`);
-      const prefix = list.length > 1 && !shared ? `${item.name} · ` : '';
+      // The plans of the groups stand under their marks.
+      if (!url || isGroupPlan(photo)) continue;
+      const prefix = list.length > 1 ? `${item.name} · ` : '';
       photos.push({ url, cap: prefix + photo.cap });
     }
   }

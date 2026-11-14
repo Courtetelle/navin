@@ -20,7 +20,7 @@ import { imageList } from './imageList.ts';
 import { hasExtraSends, listItems } from './listKinds.ts';
 import { listChoice } from './listPublishState.ts';
 import { chosenItems, sectionKeys } from './listSelection.ts';
-import { onePlan } from './planPhoto.ts';
+import { groupPlans } from './planPhoto.ts';
 import { printList } from './printList.tsx';
 import { closeListPublish, openFormat } from './publishWindowState.ts';
 import type { ListKind } from './types.ts';
@@ -72,8 +72,8 @@ export function ListPublishBox({ kind }: ListPublishBoxProps): ReactElement {
             disabled={imageBusy}
             onClick={() => {
               publish((checked) => {
-                // Several marks: one plan with all of them.
-                const list = onePlan(kind, checked);
+                // Several marks: one plan under each group of close marks.
+                const list = groupPlans(kind, checked);
                 if (format === 'pdf') {
                   closeListPublish();
                   void printList(kind, list);

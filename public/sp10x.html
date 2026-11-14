@@ -91,6 +91,31 @@
         box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
         transform-origin: center;
       }
+      /* Real size: the SP10X screen as large as it is in the hand (10.1 inch,
+         217.6 x 136 mm), the iPad drawing 5.2 points to the millimetre; no
+         bar, no border, a small button to come back. */
+      body.real header {
+        display: none;
+      }
+      body.real #stage {
+        inset: 0;
+      }
+      body.real #frame {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+      #leave {
+        display: none;
+        position: fixed;
+        right: 8px;
+        top: 8px;
+        z-index: 2;
+        opacity: 0.7;
+      }
+      body.real #leave {
+        display: block;
+      }
       iframe {
         display: block;
         border: 0;
@@ -105,10 +130,17 @@
         Paysage 1280 × 800
       </button>
       <button type="button" data-size="800x1280">Portrait</button>
+      <button type="button" data-size="800x1280" data-real="1">
+        Portrait taille réelle
+      </button>
+      <button type="button" data-size="1280x800" data-real="1">
+        Paysage taille réelle
+      </button>
       <button type="button" data-size="960x600">Paysage 960 × 600</button>
       <button type="button" data-size="390x844">Téléphone</button>
       <button type="button" id="reload">↻</button>
     </header>
+    <button type="button" id="leave">✕ cadre</button>
     <div id="stage">
       <div id="frame"><iframe id="app" src="./" title="NavIn"></iframe></div>
     </div>
@@ -121,21 +153,30 @@
       const frame = document.getElementById('frame');
       const stage = document.getElementById('stage');
       let size = [1280, 800];
+      let real = false;
+      // The SP10X screen: 10.1 inch, 16:10, 1280 x 800 pixels.
+      const SP10X_MM = [217.6, 136];
+      // An iPad (264 pixels per inch, two to the point): 5.2 points per mm.
+      const IPAD_POINTS_PER_MM = 264 / 2 / 25.4;
       function fit() {
         const [w, h] = size;
         const phone = w < 600;
         document.body.classList.toggle('phone', phone);
+        document.body.classList.toggle('real', real);
         document.getElementById('what').textContent = phone
           ? 'Essai téléphone'
           : 'Essai SP10X';
         app.style.width = `${w}px`;
         app.style.height = `${h}px`;
         const room = stage.getBoundingClientRect();
-        const scale = Math.min(
-          1,
-          (room.width - 16) / (w + 28),
-          (room.height - 16) / (h + 28),
-        );
+        const long = Math.max(w, h);
+        const scale = real
+          ? (SP10X_MM[0] * IPAD_POINTS_PER_MM) / long
+          : Math.min(
+              1,
+              (room.width - 16) / (w + 28),
+              (room.height - 16) / (h + 28),
+            );
         frame.style.transform = `translate(-50%, -50%) scale(${scale})`;
         document.getElementById('size').textContent =
           `${w} × ${h} px, affiché à ${Math.round(scale * 100)} %`;
@@ -143,6 +184,7 @@
       for (const button of document.querySelectorAll('[data-size]')) {
         button.addEventListener('click', () => {
           size = button.dataset.size.split('x').map(Number);
+          real = button.dataset.real === '1';
           for (const other of document.querySelectorAll('[data-size]')) {
             other.setAttribute('aria-pressed', String(other === button));
           }
@@ -152,6 +194,16 @@
       document.getElementById('reload').addEventListener('click', () => {
         app.src = './';
       });
+      document.getElementById('leave').addEventListener('click', () => {
+        real = false;
+        fit();
+      });
+      // sp10x.html?reel=portrait (or paysage) opens straight at real size.
+      const asked = new URLSearchParams(location.search).get('reel');
+      if (asked) {
+        real = true;
+        size = asked === 'paysage' ? [1280, 800] : [800, 1280];
+      }
       addEventListener('resize', fit);
       fit();
     </script>

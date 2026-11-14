@@ -15,6 +15,12 @@ export interface WindReading {
    */
   km?: number;
   /**
+   * A forecast: radius of the zone its value stands for, around the point of
+   * the model (`lat`, `lon`), in km.
+   * @default undefined
+   */
+  zoneKm?: number;
+  /**
    * Forecast model id.
    * @default undefined
    */

@@ -1,3 +1,4 @@
+import { distNM } from '../../lib/geo.ts';
 import { state } from '../../state/index.ts';
 import { planImage } from '../map/planImage.ts';
 import type { LakeTrack } from '../map/trackStats.ts';
@@ -85,32 +86,87 @@ export function planOf(id: string): Promise<string | null> {
   return Promise.resolve(null);
 }
 
+function isPlan(photo: PublishPhoto): boolean {
+  return photo.id.startsWith(`${PLAN_PREFIX}mark:`);
+}
+
+/** Marks closer than this to one another share a plan (nautical miles). */
+const GROUP_NM = 10;
+
 /**
- * Several marks shared together: one plan with all of them, at the end,
- * instead of one plan each.
+ * The marks that go on one plan: closer than 10 NM to one another, step by
+ * step; the groups in the order of their first mark.
+ * @param marks - The marks, in the order of the list.
+ * @returns The groups.
+ */
+export function markGroups<T extends { lat: number; lon: number }>(
+  marks: readonly T[],
+): T[][] {
+  const groupOf = marks.map((_, index) => index);
+  const root = (index: number): number => {
+    let at = index;
+    while (groupOf[at] !== at) at = groupOf[at] as number;
+    return at;
+  };
+  for (const [first, one] of marks.entries()) {
+    for (const [second, other] of marks.entries()) {
+      if (second <= first || distNM(one, other) > GROUP_NM) continue;
+      const [a, b] = [root(first), root(second)];
+      groupOf[Math.max(a, b)] = Math.min(a, b);
+    }
+  }
+  const groups = new Map<number, T[]>();
+  for (const [index, mark] of marks.entries()) {
+    const key = root(index);
+    groups.set(key, [...(groups.get(key) ?? []), mark]);
+  }
+  return [...groups.values()];
+}
+
+/**
+ * Several marks shared together: one plan for each group of marks close to
+ * one another, right under the last mark of its group (the marks of a group
+ * kept together); one mark alone keeps its own plan.
  * @param kind - The list shared.
  * @param list - Its elements, as checked.
  * @returns The elements to send.
  */
-export function onePlan(
+export function groupPlans(
   kind: ListKind,
   list: readonly PublishItem[],
 ): PublishItem[] {
-  const isPlan = (photo: PublishPhoto) =>
-    photo.id.startsWith(`${PLAN_PREFIX}mark:`);
   const planned = list.filter((item) => (item.photos ?? []).some(isPlan));
   if (kind !== 'marks' || planned.length < 2) return [...list];
-  const without = list.map((item) => ({
-    ...item,
-    photos: (item.photos ?? []).filter((photo) => !isPlan(photo)),
-  }));
-  const last = without.at(-1) as PublishItem;
-  last.photos = [
-    ...(last.photos ?? []),
-    {
-      id: `${PLAN_PREFIX}marks:${planned.map((item) => item.id).join(',')}`,
-      cap: 'Situation des marques',
-    },
-  ];
-  return without;
+  const marks = state.data.marks.value;
+  const placed = planned.flatMap((item) => {
+    const mark = marks.find((one) => one.id === item.id);
+    return mark ? [{ item, lat: mark.lat, lon: mark.lon }] : [];
+  });
+  const groups = markGroups(placed);
+  const lastOf = new Map<string, string>();
+  for (const group of groups) {
+    const last = group.at(-1);
+    if (last) {
+      lastOf.set(last.item.id, group.map((one) => one.item.id).join(','));
+    }
+  }
+  const strip = (item: PublishItem): PublishItem => {
+    const ids = lastOf.get(item.id);
+    const photos = (item.photos ?? []).filter((photo) => !isPlan(photo));
+    if (ids) {
+      const names = groups
+        .find((group) => group.at(-1)?.item.id === item.id)
+        ?.map((one) => one.item.name)
+        .join(', ');
+      photos.push({
+        id: `${PLAN_PREFIX}marks:${ids}`,
+        cap: `Situation · ${names ?? ''}`,
+      });
+    }
+    return { ...item, photos };
+  };
+  // The marks of a group together, the groups in the order of the list.
+  const ordered = groups.flatMap((group) => group.map((one) => one.item));
+  const others = list.filter((item) => !planned.includes(item));
+  return [...ordered, ...others].map(strip);
 }

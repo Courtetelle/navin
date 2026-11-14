@@ -4,6 +4,7 @@ import type { MarineReply, ModelReply } from '../windModels.ts';
 import {
   marineState,
   modelReading,
+  modelZoneKm,
   stationReading,
   windRegion,
 } from '../windModels.ts';
@@ -80,4 +81,20 @@ test('windRegion picks the first box containing the position', () => {
   expect(aegean?.bias).toBe(5);
   expect(aegean?.max).toBe(true);
   expect(windRegion({ lat: 10, lon: 10 })).toBeNull();
+});
+
+test('a forecast stands for a zone around the point of the model', () => {
+  expect(modelZoneKm('Météo-France AROME HD 1,5 km')).toBe(6);
+  expect(modelZoneKm('DWD ICON-EU 7 km')).toBe(28);
+  expect(modelZoneKm('meilleur modèle Open-Meteo')).toBe(28);
+  const reading = modelReading(
+    JSON.parse(
+      '{"latitude":46.45,"longitude":6.55,"current":{"time":"2026-11-14T21:45","wind_speed_10m":8}}',
+    ) as ModelReply,
+    ['arome', 'Météo-France AROME HD 1,5 km'],
+    0,
+  );
+  expect([reading?.lat, reading?.lon, reading?.zoneKm]).toStrictEqual([
+    46.45, 6.55, 6,
+  ]);
 });

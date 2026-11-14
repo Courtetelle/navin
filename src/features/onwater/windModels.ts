@@ -44,6 +44,13 @@ export interface ModelReply {
    * @default undefined
    */
   current?: Record<string, number | string | null | undefined>;
+  /**
+   * The point of the model grid the values stand for.
+   * @default undefined
+   */
+  latitude?: number;
+  /** @default undefined */
+  longitude?: number;
 }
 
 /** Reply of the Open-Meteo marine API. */
@@ -164,6 +171,18 @@ export function stationReading(
  * @param now - Epoch milliseconds, when the reply has no time.
  * @returns The reading, or null when the reply has no wind.
  */
+/**
+ * The zone a forecast value stands for: four meshes of the model around its
+ * point, never less than 5 km (the mesh is read in its name, `1,5 km`).
+ * @param label - Name of the model.
+ * @returns Radius in km.
+ */
+export function modelZoneKm(label: string): number {
+  const mesh = /(?<size>\d+(?:[.,]\d+)?)\s*km/.exec(label)?.groups?.size;
+  const size = mesh ? Number(mesh.replace(',', '.')) : 7;
+  return Math.max(5, Math.round(4 * size));
+}
+
 export function modelReading(
   reply: ModelReply,
   [model, label]: WindModel,
@@ -180,6 +199,14 @@ export function modelReading(
     gust: current[WIND_GUSTS] == null ? null : Number(current[WIND_GUSTS]),
     dir:
       current[WIND_DIRECTION] == null ? null : Number(current[WIND_DIRECTION]),
+    // Where the forecaster's value stands: the point of the grid, its zone.
+    ...(Number.isFinite(reply.latitude) && Number.isFinite(reply.longitude)
+      ? {
+          lat: reply.latitude as number,
+          lon: reply.longitude as number,
+          zoneKm: modelZoneKm(label),
+        }
+      : {}),
   };
 }
 
