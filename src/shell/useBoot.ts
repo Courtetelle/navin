@@ -14,6 +14,7 @@ import { preloadPages } from './pageRegistry.ts';
 import { installParityHook, parityStarted } from './parityHook.ts';
 import { installPressFeedback } from './pressFeedback.ts';
 import { addNavigationListener, go } from './router.ts';
+import { followScreenGap } from './screenGap.ts';
 import { installTapScrollHold } from './scrollAnchor.ts';
 import { followTheme } from './theme.ts';
 import { scheduleBootTip } from './tips.ts';
@@ -54,6 +55,7 @@ function boot(): void {
     );
   });
   followTheme();
+  followScreenGap();
   followAutoNight();
   followTopState();
   tickClock();

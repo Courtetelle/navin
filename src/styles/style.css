@@ -11230,7 +11230,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
        buttons to every edge */
     /* Under the camera the same gap as between a button and the side of
        the screen (the safe area ends about 11 px below the camera) */
-    --rb-top: calc(14px - min(11px, env(safe-area-inset-top)));
+    --rb-top: calc(14px - min(14px, env(safe-area-inset-top)));
     --rb-side: calc(
       max(env(safe-area-inset-left), env(safe-area-inset-right)) + 14px
     );
@@ -11240,7 +11240,10 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   html body {
     --rb-x: calc(var(--rb-w) + var(--rb-gap));
     /* Above the home bar, the same gap again */
-    --rb-bottom: max(14px, calc(env(safe-area-inset-bottom) - 6px));
+    --rb-bottom: calc(
+      max(14px, calc(env(safe-area-inset-bottom) - 6px)) -
+        var(--screen-gap, 0px)
+    );
   }
   html body header.topbar #clock {
     top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
@@ -11599,4 +11602,10 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
     bottom: max(10px, calc(env(safe-area-inset-bottom) - 11px)) !important;
   }
+}
+
+/* An iPhone from the home screen tells the page a height short by its
+   status bar: the map reaches the real bottom of the screen. */
+body.trk-mode .trk-full {
+  height: calc(100dvh + var(--screen-gap, 0px));
 }
