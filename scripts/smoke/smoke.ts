@@ -1106,6 +1106,15 @@ async function tapCross(
     `${where}: a tap beside closes the menu`,
     (await page.locator('.lp-pop, .tap-cross').count()) === 0,
   );
+  await page.touchscreen.tap(x, y);
+  await page.waitForTimeout(500);
+  const laid = (await page.locator('.tap-cross').count()) === 1;
+  await page.waitForTimeout(3600);
+  check(
+    theme,
+    `${where}: the cross goes away 3 s after the map last moved`,
+    laid && (await page.locator('.tap-cross').count()) === 0,
+  );
 }
 
 // Whether a map file draws at the middle of the map (its tiles are canvases).

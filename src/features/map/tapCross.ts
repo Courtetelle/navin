@@ -49,6 +49,9 @@ const LOGOS: Record<CrossBranch, { svg: string; label: string }> = {
   info: { svg: INFO_SVG, label: 'Infos du point' },
 };
 
+/** The cross goes away this long after the map last moved. */
+const CROSS_MS = 3000;
+
 /** A tap this soon after a long press is the end of the long press. */
 const AFTER_LONG_MS = 800;
 let longAt = 0;
@@ -61,14 +64,17 @@ export function longPressDone(): void {
 /**
  * A short tap on the map lays a cross on the point: four lines of 2 cm, not
  * meeting in the middle, a logo at the end of each (mark, weather, Go To,
- * information). A logo opens its menu; a tap beside takes the cross away.
+ * information). A logo opens its menu; a tap beside takes the cross away,
+ * and so do 3 s without the map moving.
  * The cross always stands in the middle of the map: the point touched comes
  * under it, and a finger sliding the map moves the map behind it, to aim.
  * @param map - Leaflet map.
  */
 export function crossAttach(map: LeafletMap): void {
   let cross: Marker | null = null;
+  let fade: ReturnType<typeof setTimeout> | undefined;
   const remove = () => {
+    clearTimeout(fade);
     cross?.remove();
     cross = null;
   };
@@ -95,7 +101,15 @@ export function crossAttach(map: LeafletMap): void {
   // Whatever moves the map (finger, zoom, glide), the cross stays in its
   // middle: the map slides behind it.
   map.on('move zoom', () => {
-    cross?.setLatLng(map.getCenter());
+    if (!cross) return;
+    cross.setLatLng(map.getCenter());
+    clearTimeout(fade);
+  });
+  // 3 s after the map last moved, the cross goes away.
+  map.on('moveend zoomend', () => {
+    if (!cross) return;
+    clearTimeout(fade);
+    fade = setTimeout(remove, CROSS_MS);
   });
   map.on('unload', remove);
 }
