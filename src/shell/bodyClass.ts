@@ -60,7 +60,7 @@ export function useBodyClass(className: string, on = true): void {
 
 function apply(className: string): void {
   const present = counts.has(className);
-  globalThis.document?.body.classList.toggle(className, present);
+  globalThis.document?.body?.classList.toggle(className, present);
   if (bodyClasses.value.has(className) === present) return;
   const next = new Set(bodyClasses.value);
   if (present) next.add(className);

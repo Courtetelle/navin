@@ -2,6 +2,7 @@ import { signal } from '@preact/signals-react';
 
 import { fmtDur } from '../../lib/format.ts';
 import { bearing, distNM, rad } from '../../lib/geo.ts';
+import { setBodyClass } from '../../shell/bodyClass.ts';
 import { herePos, state, toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
@@ -81,7 +82,11 @@ export function setGoto(target: GotoTarget | null): void {
   wantPos(Boolean(target));
   gotoUpdate();
   marksRedraw();
-  if (target) toast(`Go to ${target.name}`);
+  if (target) {
+    toast(`Go to ${target.name}`);
+    // The band takes the bottom: the figures of the track fold away.
+    setBodyClass('bot-hidden', true);
+  }
 }
 
 /**
