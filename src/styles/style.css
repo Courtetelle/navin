@@ -10862,8 +10862,9 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
     /* The buttons away from the rounded corners and the camera, the same
        margin on both sides; the map runs under them to every edge. */
     --rb-top: 10px;
-    --rb-edge-x: calc(
-      max(env(safe-area-inset-left), env(safe-area-inset-right)) + 8px
+    --rb-edge-x: max(
+      10px,
+      calc(max(env(safe-area-inset-left), env(safe-area-inset-right)) - 1px)
     );
     --rb-side: var(--rb-edge-x);
   }
@@ -11227,7 +11228,9 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     --rb-gap: 6px;
     /* Away from the camera and the rounded corners; the map runs under the
        buttons to every edge */
-    --rb-top: 10px;
+    /* Under the camera the same gap as between a button and the side of
+       the screen (the safe area ends about 11 px below the camera) */
+    --rb-top: calc(14px - min(11px, env(safe-area-inset-top)));
     --rb-side: calc(
       max(env(safe-area-inset-left), env(safe-area-inset-right)) + 14px
     );
@@ -11236,7 +11239,8 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   }
   html body {
     --rb-x: calc(var(--rb-w) + var(--rb-gap));
-    --rb-bottom: calc(var(--rb-top) + env(safe-area-inset-bottom));
+    /* Above the home bar, the same gap again */
+    --rb-bottom: max(14px, calc(env(safe-area-inset-bottom) - 6px));
   }
   html body header.topbar #clock {
     top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
@@ -11587,5 +11591,12 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   html body .trk-full .trk-dash {
     left: calc(var(--rb-side) + var(--rb-x)) !important;
     right: calc(var(--rb-side) + var(--rb-x)) !important;
+  }
+}
+
+/* A phone sideways: SOS above the home bar with the gap of the top */
+@media (orientation: landscape) and (min-width: 560px) and (max-height: 520px) {
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+    bottom: max(10px, calc(env(safe-area-inset-bottom) - 11px)) !important;
   }
 }

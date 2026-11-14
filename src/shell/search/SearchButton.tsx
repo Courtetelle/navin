@@ -203,11 +203,6 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
             if (first) pick(first);
           }}
         />
-        {typed ? null : (
-          <p className="help">
-            {`Ici : ${context.title.toLowerCase()}. Puis partout dans l’application : fonctions, bateaux, co-équipiers, équipages, marques et lieux.`}
-          </p>
-        )}
         <HitGroup
           title={`Ici · ${context.title}`}
           hits={context.online ? [...here, ...onlineHits] : here}

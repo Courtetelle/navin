@@ -1,6 +1,15 @@
 import { textOf } from '../../lib/format.ts';
 import { crewSetName, memberName, state } from '../../state/index.ts';
 
+import type { RecordLine } from './recordText.ts';
+import {
+  boatLines,
+  crewLines,
+  foundIn,
+  linesText,
+  markLines,
+  memberLines,
+} from './recordText.ts';
 import type { FunctionEntry, PlaceEntry } from './searchIndex.ts';
 import { functionEntries, matches, placeEntries } from './searchIndex.ts';
 
@@ -52,7 +61,7 @@ export function searchContext(view: string): SearchContext {
   if (view === 'boats') {
     return {
       title: 'Bateaux',
-      placeholder: 'Nom d’un bateau…',
+      placeholder: 'Recherche dans Mes bateaux',
       kinds: ['boat'],
       online: false,
     };
@@ -60,7 +69,7 @@ export function searchContext(view: string): SearchContext {
   if (view === 'people' || view === 'crew') {
     return {
       title: 'Co-équipiers',
-      placeholder: 'Nom d’un co-équipier…',
+      placeholder: 'Recherche dans Mes co-équipiers',
       kinds: ['member'],
       online: false,
     };
@@ -68,7 +77,7 @@ export function searchContext(view: string): SearchContext {
   if (view === 'crews') {
     return {
       title: 'Équipages',
-      placeholder: 'Nom d’un équipage…',
+      placeholder: 'Recherche dans Mes équipages',
       kinds: ['crew'],
       online: false,
     };
@@ -76,7 +85,7 @@ export function searchContext(view: string): SearchContext {
   if (view === 'marks') {
     return {
       title: 'Marques',
-      placeholder: 'Nom d’une marque…',
+      placeholder: 'Recherche dans Mes marques',
       kinds: ['mark'],
       online: false,
     };
@@ -123,44 +132,84 @@ function hitsOf(kind: HitKind, query: string): SearchHit[] {
     );
   }
   if (kind === 'boat') {
-    return matches(query, state.data.boats.value, (boat) =>
+    return inRecords(query, state.data.boats.value, boatLines, (boat) =>
       textOf(boat.info.boat),
-    ).map((boat) => ({
+    ).map(([boat, where]) => ({
       kind,
       key: `b-${boat.id}`,
-      label: `${icon} ${boat.info.boat || 'Bateau'}`,
+      label: shown(icon, boat.info.boat || 'Bateau', where),
       id: boat.id,
     }));
   }
   if (kind === 'member') {
-    return matches(query, state.data.members.value, memberName).map(
-      (member) => ({
-        kind,
-        key: `m-${member.id}`,
-        label: `${icon} ${memberName(member)}`,
-        id: member.id,
-      }),
-    );
+    return inRecords(
+      query,
+      state.data.members.value,
+      memberLines,
+      memberName,
+    ).map(([member, where]) => ({
+      kind,
+      key: `m-${member.id}`,
+      label: shown(icon, memberName(member), where),
+      id: member.id,
+    }));
   }
   if (kind === 'crew') {
-    return matches(query, state.data.crewSets.value, crewSetName).map(
-      (set) => ({
-        kind,
-        key: `c-${set.id}`,
-        label: `${icon} ${crewSetName(set)}`,
-        id: set.id,
-      }),
-    );
-  }
-  return matches(query, state.data.marks.value, (mark) => mark.name).map(
-    (mark) => ({
+    return inRecords(
+      query,
+      state.data.crewSets.value,
+      crewLines,
+      crewSetName,
+    ).map(([set, where]) => ({
       kind,
-      key: `k-${mark.id}`,
-      label: `${icon} ${mark.name}`,
-      id: mark.id,
-      place: { name: mark.name, lat: mark.lat, lon: mark.lon },
-    }),
-  );
+      key: `c-${set.id}`,
+      label: shown(icon, crewSetName(set), where),
+      id: set.id,
+    }));
+  }
+  return inRecords(
+    query,
+    state.data.marks.value,
+    markLines,
+    (mark) => mark.name,
+  ).map(([mark, where]) => ({
+    kind,
+    key: `k-${mark.id}`,
+    label: shown(icon, mark.name, where),
+    id: mark.id,
+    place: { name: mark.name, lat: mark.lat, lon: mark.lon },
+  }));
+}
+
+/**
+ * Records holding every word typed, in their name, the content of a field
+ * or its title; the name first.
+ * @param query - Words typed.
+ * @param records - The records.
+ * @param linesOf - The fields of a record.
+ * @param nameOf - The name of a record.
+ * @returns The records found, each with where the words were found.
+ */
+function inRecords<T>(
+  query: string,
+  records: readonly T[],
+  linesOf: (record: T) => RecordLine[],
+  nameOf: (record: T) => string,
+): Array<[T, string]> {
+  const lines = new Map<T, RecordLine[]>();
+  const found = matches(query, records, (record) => {
+    const own = linesOf(record);
+    lines.set(record, own);
+    return `${nameOf(record)} ${linesText(own)}`;
+  });
+  return found.map((record) => [
+    record,
+    foundIn(query, nameOf(record), lines.get(record) ?? []),
+  ]);
+}
+
+function shown(icon: string, name: string, where: string): string {
+  return where ? `${icon} ${name} · ${where}` : `${icon} ${name}`;
 }
 
 const ALL_KINDS: readonly HitKind[] = [
