@@ -117,7 +117,9 @@ async function listPhotos(list: readonly PublishItem[]): Promise<CardsPhoto[]> {
     for (const photo of item.photos ?? []) {
       const url = urls.get(photo.id);
       if (!url) continue;
-      const prefix = list.length > 1 ? `${item.name} · ` : '';
+      // The plan of all the marks belongs to none of them.
+      const shared = photo.id.startsWith(`${PLAN_PREFIX}marks:`);
+      const prefix = list.length > 1 && !shared ? `${item.name} · ` : '';
       photos.push({ url, cap: prefix + photo.cap });
     }
   }

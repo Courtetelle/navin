@@ -19,6 +19,7 @@ export * from './prep.ts';
 export * from './prepReady.ts';
 export * from './templates.ts';
 export * from './toast.ts';
+export * from './traceParts.ts';
 export * from './tracking.ts';
 export * from './wxChecks.ts';
 export type { PrepState, PrepUse, PrepUseLog } from './data.ts';

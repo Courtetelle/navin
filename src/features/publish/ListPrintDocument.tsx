@@ -166,7 +166,11 @@ function Photos({
   if (photos.length === 0) return null;
   return (
     <section className="lx-card lx-phs">
-      <h2>{`${one ? '' : `${item.name} · `}Photos`}</h2>
+      <h2>
+        {photos.every((photo) => photo.id.startsWith('plan:marks:'))
+          ? 'Situation des marques'
+          : `${one ? '' : `${item.name} · `}Photos`}
+      </h2>
       {photos.map((photo) => (
         <Photo
           key={photo.id}

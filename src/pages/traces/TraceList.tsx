@@ -7,7 +7,6 @@ import { drawTrkList } from '../../features/map/traceList.ts';
 import type { LakeTrack } from '../../features/map/trackStats.ts';
 import {
   allLakeTracks,
-  renameTrace,
   traceSheet,
   trackStats,
 } from '../../features/map/trackStats.ts';
@@ -17,6 +16,7 @@ import { tracePlan } from '../../features/publish/planPhoto.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
+import { renameTrace } from '../../state/index.ts';
 
 function deleteAndRefresh(id: string): boolean {
   const deleted = deleteTrace(id);

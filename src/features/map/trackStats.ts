@@ -3,7 +3,7 @@ import { sunEvents } from '../../lib/sun.ts';
 import type { CrewSet } from '../../model/recordTypes.ts';
 import type { Cruise } from '../../model/types.ts';
 import type { TrackPoint } from '../../state/index.ts';
-import { loadTrack, state } from '../../state/index.ts';
+import { loadTrack, state, traceNames } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 /** Statistics of a track (legacy `trackStats`). */
@@ -212,26 +212,6 @@ export function allLakeTracks(): LakeTrack[] {
   return tracks.toSorted(
     (a, b) => (b.track[0] as TrackPoint)[0] - (a.track[0] as TrackPoint)[0],
   );
-}
-
-/** The texts given to traces with a long press, by trace id. */
-const TRACE_NAMES_KEY = 'ldb.traceNames';
-
-function traceNames(): Readonly<Record<string, string>> {
-  return store.get<Record<string, string>>(TRACE_NAMES_KEY, {});
-}
-
-/**
- * Give a trace a text of one's own; an empty text gives back its name.
- * @param id - Trace id.
- * @param text - The new text.
- */
-export function renameTrace(id: string, text: string): void {
-  const names = Object.fromEntries(
-    Object.entries(traceNames()).filter(([key]) => key !== id),
-  );
-  if (text.trim()) names[id] = text.trim();
-  store.set(TRACE_NAMES_KEY, names);
 }
 
 /**

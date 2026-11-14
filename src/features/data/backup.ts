@@ -1,7 +1,12 @@
 import { pad } from '../../lib/format.ts';
 import type { Cruise } from '../../model/types.ts';
 import type { TrackPoint } from '../../state/index.ts';
-import { loadTrack, state } from '../../state/index.ts';
+import {
+  loadTrack,
+  state,
+  traceCutTimes,
+  traceNames,
+} from '../../state/index.ts';
 import { getPhoto } from '../../storage/photos.ts';
 import { store } from '../../storage/store.ts';
 
@@ -16,6 +21,11 @@ interface BackupPhoto {
 interface BackupCruise {
   cruise: Cruise;
   track: TrackPoint[];
+  /**
+   * Times where the recording is cut into several traces.
+   * @default undefined
+   */
+  cuts?: number[];
 }
 
 /** Content of a full backup file (`version: 4`), keys in the legacy file order. */
@@ -64,9 +74,12 @@ export function backupAll(): BackupPack {
   for (const meta of data.index.value) {
     const cruise = store.get<Cruise | null>(`ldb.cruise.${meta.id}`, null);
     if (!cruise) continue;
+    const cuts = traceCutTimes(meta.id);
     cruises.push({
       cruise,
       track: store.get<TrackPoint[]>(`ldb.track.${meta.id}`, []),
+      // Only when the recording holds several traces.
+      ...(cuts.length > 0 ? { cuts } : {}),
     });
   }
   const date = new Date();
@@ -95,6 +108,9 @@ export function backupAll(): BackupPack {
     boatsAt: store.get('ldb.boats.at', ''),
     membersAt: store.get('ldb.members.at', ''),
   };
+  // The texts given to traces, only when there are some.
+  const names = traceNames();
+  if (Object.keys(names).length > 0) content.traceNames = names;
   return {
     name: `NavIn-tout-${dateStamp(date)}.json`,
     data: content,

@@ -157,6 +157,22 @@ export const DAY_SECTIONS: readonly SectionDefinition[] = [
     ],
   },
   {
+    title: 'Courants',
+    sea: true,
+    basins: BASIN_ONLY.currents,
+    fields: [
+      n('courDir', 'Courant : direction', '°'),
+      n('courVit', 'Courant : vitesse', 'nd'),
+      {
+        key: 'courRenverse',
+        label: 'Renverse (heure)',
+        type: 'line',
+        placeholder: 'ex. 14:20',
+      },
+      { key: 'courNotes', label: 'Courants à surveiller', type: 'area' },
+    ],
+  },
+  {
     title: 'Conditions spéciales, quarts',
     sea: true,
     fields: [

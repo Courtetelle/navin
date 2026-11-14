@@ -15,8 +15,10 @@ import {
   mergeCkLib,
   mergeMarks,
   mergeMembers,
+  mergeTraceNames,
   mergeUiEdits,
   openCruise,
+  restoreTraceCuts,
   saveSettings,
   setTaskTpl,
   state,
@@ -83,6 +85,8 @@ export interface BackupFile {
   settings?: Partial<Settings>;
   /** @default undefined */
   current?: string;
+  /** @default undefined */
+  traceNames?: unknown;
 }
 
 /** What a restoration did. */
@@ -122,7 +126,11 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
   );
   const currentId = data.cruise.value?.id;
   let last: Cruise | null = null;
-  for (const { cruise, track } of cruises) last = mergeCruise(cruise, track);
+  for (const { cruise, track, cuts } of cruises) {
+    last = mergeCruise(cruise, track);
+    restoreTraceCuts(cruise.id, cuts);
+  }
+  mergeTraceNames(file.traceNames);
   restoreRecords(file);
   await restorePhotos(file.photos);
   if (file.all && file.settings && data.index.value.length === 0) {
@@ -141,17 +149,18 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
 
 function cruisesOf(
   file: BackupFile,
-): Array<{ cruise: Cruise; track: unknown }> {
+): Array<{ cruise: Cruise; track: unknown; cuts?: unknown }> {
   const list = file.all
     ? file.cruises
     : [{ cruise: file.cruise, track: file.track }];
-  const cruises: Array<{ cruise: Cruise; track: unknown }> = [];
+  const cruises: Array<{ cruise: Cruise; track: unknown; cuts?: unknown }> = [];
   for (const item of (list ?? []) as Array<{
     cruise?: Cruise;
     track?: unknown;
+    cuts?: unknown;
   } | null>) {
     if (item?.cruise?.id && Array.isArray(item.cruise.entries)) {
-      cruises.push({ cruise: item.cruise, track: item.track });
+      cruises.push({ cruise: item.cruise, track: item.track, cuts: item.cuts });
     }
   }
   return cruises;

@@ -84,6 +84,7 @@ test('section definitions keep the legacy keys', () => {
     'Milles parcourus',
     'Contrôles',
     'Marées',
+    'Courants',
     'Conditions spéciales, quarts',
     'Escale et debriefing',
     'Signatures',

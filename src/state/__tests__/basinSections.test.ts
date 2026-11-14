@@ -33,12 +33,14 @@ test('the tides are in the logbook in the Atlantic only', () => {
   state.data.cruise.value = BLANK;
   expect(cruiseBasin()).toBe('atl');
   expect(titles()).toContain('Marées');
+  expect(titles()).toContain('Courants');
   state.preferences.settings.value = {
     ...state.preferences.settings.value,
     seaBasin: 'med',
   };
   expect(cruiseBasin()).toBe('med');
   expect(titles()).not.toContain('Marées');
+  expect(titles()).not.toContain('Courants');
 });
 
 test('in the Mediterranean, tides already written stay shown', () => {
