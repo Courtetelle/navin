@@ -1,3 +1,5 @@
+import { upperKeepBrands } from '../../lib/brand.ts';
+
 import type { CardsPen } from './cardsPen.ts';
 import { CARD_WIDTH, SERIF, font } from './cardsStyle.ts';
 
@@ -45,7 +47,7 @@ function cardsHeader(pen: CardsPen, { title, sub }: HeaderTexts): void {
     context.fillRect(0, height, CARD_WIDTH, 8);
     context.font = font(24, 800);
     context.fillStyle = 'rgba(255,255,255,.7)';
-    context.fillText('⛵ NAVIN', margin, 52);
+    context.fillText('⛵ NavIn', margin, 52);
   }
   let y = 66;
   y += pen.text(lines, {
@@ -126,7 +128,7 @@ function miniHeader(pen: CardsPen, { title, sub, kicker }: HeaderTexts): void {
   if (drawing) {
     context.font = font(22, 700, 'Arial');
     context.fillStyle = '#1c6ef2';
-    pen.spaced(`NAVIN · ${kicker}`.toUpperCase(), margin, y + 22, 4);
+    pen.spaced(upperKeepBrands(`NavIn · ${kicker}`), margin, y + 22, 4);
   }
   y += 40;
   const titleFont = font(84, 800);

@@ -18,7 +18,7 @@ let current: Promise<unknown> | null = null;
 /**
  * Read every station within 60 km of the GPS position and keep all their
  * measurements (wind, gusts, direction, air, pressure; liveStations keeps
- * them), so that Live météo and the alerts have the past of the stations
+ * them), so that LiveMétéo and the alerts have the past of the stations
  * where the boat is. It goes on while NavIn is in the background, as long as
  * the device lets it run. Nothing without a GPS position or network.
  */

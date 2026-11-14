@@ -7,18 +7,18 @@ import { LAST_ALERT_KEY } from './lastWindAlert.ts';
 import { onLake } from './onLake.ts';
 import { showOverlays } from './overlayRoot.ts';
 
-/** Where a wind alert came from, for Live météo opened from its bubble. */
+/** Where a wind alert came from, for LiveMétéo opened from its bubble. */
 export interface AlertSpot {
   /** The station that measured the wind. */
   lat: number;
   lon: number;
   name: string;
-  /** The boat when the alert was given: Live météo opens around it. */
+  /** The boat when the alert was given: LiveMétéo opens around it. */
   boat: { lat: number; lon: number } | null;
 }
 
 /**
- * The alert Live météo was opened from: it shows the whole circle and the
+ * The alert LiveMétéo was opened from: it shows the whole circle and the
  * station of the alert blinking in a red band. Taken by the page once.
  */
 export const liveAlertSpot = signal<AlertSpot | null>(null);

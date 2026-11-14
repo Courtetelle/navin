@@ -63,6 +63,12 @@ export interface ShareButtonProps extends Omit<
    * @default false
    */
   small?: boolean;
+  /**
+   * As tall as big buttons beside it; otherwise the height of a normal
+   * button, the same as the buttons around it.
+   * @default false
+   */
+  big?: boolean;
 }
 
 /**
@@ -75,6 +81,7 @@ export interface ShareButtonProps extends Omit<
 export function ShareButton({
   onShare,
   small = false,
+  big = false,
   className = '',
   ...rest
 }: ShareButtonProps): ReactElement {
@@ -92,7 +99,9 @@ export function ShareButton({
       document.removeEventListener('pointerdown', away, true);
     };
   }, [open]);
-  const size = small ? 'btn ck-pub' : 'btn big ck-pub';
+  let size = 'btn ck-pub share-wide';
+  if (small) size = 'btn ck-pub';
+  else if (big) size = 'btn big ck-pub';
   if (!open) {
     return (
       <Button

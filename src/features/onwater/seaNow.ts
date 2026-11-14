@@ -119,7 +119,7 @@ function trainText(wave: WaveTrain): string {
 }
 
 /**
- * The lines of the sea, as Live météo shows them: the whole sea, the wind
+ * The lines of the sea, as LiveMétéo shows them: the whole sea, the wind
  * sea, the swell, the current and the water.
  * @param sea - The sea from the model.
  * @returns `[label, value]` pairs.

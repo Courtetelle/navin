@@ -184,6 +184,7 @@ export function Fiche({ id }: FicheProps) {
           hidden={!record.recordId}
         >
           <ShareButton
+            big
             className="no-navact"
             id="fImg"
             onShare={(format) => {

@@ -96,7 +96,7 @@ export function CrewPickScreen({ lead }: CrewPickScreenProps) {
       </ButtonRow>
       {cruise.crew.length > 0 ? (
         <ButtonRow className="row ck-pub-row">
-          <ShareButton id="crewPub" onShare={setPublishing} />
+          <ShareButton big id="crewPub" onShare={setPublishing} />
         </ButtonRow>
       ) : null}
       {publishing ? (

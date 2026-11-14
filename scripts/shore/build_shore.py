@@ -1,4 +1,4 @@
-"""Grid of the land farther than 1 km from the sea or a lake, for Live météo.
+"""Grid of the land farther than 1 km from the sea or a lake, for LiveMétéo.
 
 Run in a folder holding water-polygons-split-3857/ (osmdata.openstreetmap.de)
 and water-eu.geojsonseq / water-ex.geojsonseq (osmium tags-filter

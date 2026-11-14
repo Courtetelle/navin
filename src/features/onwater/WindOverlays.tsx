@@ -133,7 +133,7 @@ export function WindPopup() {
         {sea ? <div className="wp-desc">{translate(sea)}</div> : null}
         {content.onLive ? (
           <Button className="btn primary wp-live" noUiEdit>
-            {translate('🌬 Live météo')}
+            {translate('🌬 LiveMétéo')}
           </Button>
         ) : null}
         {content.report ? (

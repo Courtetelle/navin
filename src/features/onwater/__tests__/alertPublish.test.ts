@@ -18,7 +18,7 @@ const reading = {
   baro: 1012.6,
 };
 
-test('the published alert reads like the station card of Live météo', () => {
+test('the published alert reads like the station card of LiveMétéo', () => {
   const rows = Object.fromEntries(
     reportRows({
       reading,
@@ -57,7 +57,7 @@ test('the map snippet zooms out until it shows the station and the boat', () => 
   expect(Math.abs(a.x - b.x)).toBeLessThan(500);
 });
 
-test('the five lines of the sea read as in Live météo', () => {
+test('the five lines of the sea read as in LiveMétéo', () => {
   expect(
     seaRows({
       total: { height: 1.2, dir: 250, period: 6.4 },

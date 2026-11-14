@@ -132,7 +132,7 @@ export function MeteoPage() {
       >
         {tr(back.label)}
       </PageBack>
-      <h1 className="live-title">{tr('🌬 Live météo')}</h1>
+      <h1 className="live-title">{tr('🌬 LiveMétéo')}</h1>
       <div className={station ? 'live-page picked' : 'live-page'}>
         {station ? (
           <StationCard

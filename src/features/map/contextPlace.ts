@@ -16,7 +16,7 @@ export interface ContextPlace {
 const FRESH_MS = 12 * 3600e3;
 
 /**
- * The place every menu speaks of (weather, Live météo, wind alerts, rescue,
+ * The place every menu speaks of (weather, LiveMétéo, wind alerts, rescue,
  * VHF or phone): with a zone chosen with NavIn, the place NavIn looks at (where
  * the map was left with the fingers, else the place of the settings for the
  * sea or the lake); on the GPS (the boat arrow), a recent GPS position, else

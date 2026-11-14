@@ -53,7 +53,7 @@ const HOURS = 12;
 
 /**
  * The Météo screen of the NavIn menu: an entry to its two menus, the
- * forecast (with the checks before leaving) and Live météo.
+ * forecast (with the checks before leaving) and LiveMétéo.
  * @param props - Page props: `forecast` opens the forecast menu.
  * @returns The screen content.
  */
@@ -89,7 +89,7 @@ function WeatherMenu() {
         <Button className="btn big wx-entry" onClick={openLive}>
           <span className="wx-entry-ico">🌬</span>
           <span>
-            <b>{tr('Live météo')}</b>
+            <b>{tr('LiveMétéo')}</b>
             <small>{tr('le vent mesuré maintenant par les stations')}</small>
           </span>
         </Button>

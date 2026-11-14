@@ -7589,6 +7589,10 @@ html {
 .ck-pub-row {
   margin-top: 14px;
 }
+/* « Partager »: the height of the buttons around it, normal or big */
+.btn.ck-pub.share-wide {
+  width: 100%;
+}
 .btn.big.ck-pub {
   background: #2f3337;
   color: #fff;
@@ -9041,7 +9045,7 @@ body:not(.trk-mode) #searchBtn {
   min-height: 300px;
   margin-top: 8px;
 }
-/* Live météo: no text above the map, the title is for screen readers */
+/* LiveMétéo: no text above the map, the title is for screen readers */
 body.has-navtop #view > h1.live-title,
 #view > h1.live-title {
   position: absolute !important;
@@ -9222,7 +9226,7 @@ body.has-navtop #view > h1.live-title,
   width: 100%;
   margin-top: 12px;
 }
-/* « Partager » under Live météo: the one share button of the app. */
+/* « Partager » under LiveMétéo: the one share button of the app. */
 .wind-pop .wp-publish .btn {
   width: 100%;
   margin: 0;

@@ -52,7 +52,7 @@ const OTHER_FUNCTIONS: readonly FunctionEntry[] = [
   },
   {
     key: 'meteo',
-    title: '🌬 Live météo',
+    title: '🌬 LiveMétéo',
     sub: 'vent stations mesures rafales',
   },
   { key: 'beaufort', title: '💨 Échelle de Beaufort', sub: 'vent' },

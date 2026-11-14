@@ -43,7 +43,7 @@ export function ListPrintDocument({
       <header className={one && firstAvatar ? 'lx-hd lx-hd-av' : 'lx-hd'}>
         {one && first ? <Avatar item={first} avatars={avatars} /> : null}
         <div className="lx-k">
-          ⛵ NAVIN{sheet.kicker ? ` · ${sheet.kicker}` : ''}
+          ⛵ NavIn{sheet.kicker ? ` · ${sheet.kicker}` : ''}
         </div>
         <h1>{sheet.title}</h1>
         <p>{sheet.sub}</p>

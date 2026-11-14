@@ -643,7 +643,7 @@ function RailButton({
   useSignals();
   const tr = useTr();
   const press = useLongPress(onPick);
-  // Météo stays Météo during a track: Live météo is inside its menu.
+  // Météo stays Météo during a track: LiveMétéo is inside its menu.
   const shown = entry;
   const { icon, label } = splitTitle(shown.title);
   const drawn = DRAWN.has(shown.key);

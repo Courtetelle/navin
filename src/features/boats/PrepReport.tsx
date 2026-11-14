@@ -26,7 +26,7 @@ export function PrepReport({ document, theme }: PrepReportProps) {
     <div className={`lx-th-${theme}`}>
       <section className={`pg lx-doc prep-print lx-th-${theme}`}>
         <header className="lx-hd">
-          <div className="lx-k">⛵ NAVIN · {document.kicker}</div>
+          <div className="lx-k">⛵ NavIn · {document.kicker}</div>
           <h1>{document.title}</h1>
           <p>{document.sub}</p>
         </header>

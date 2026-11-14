@@ -33,7 +33,7 @@ function popupHtml(station: LiveStation): string {
 
 /**
  * The live weather stations within 60 km laid on the NavIn map (from the
- * PréP menu): one badge per station, as on Live météo, read again every
+ * PréP menu): one badge per station, as on LiveMétéo, read again every
  * 2 min; a band at the top says how many, its ✕ takes them away.
  * @returns The band, or nothing.
  */

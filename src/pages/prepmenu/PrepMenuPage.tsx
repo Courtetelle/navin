@@ -146,7 +146,7 @@ export function PrepMenuPage() {
             {entry(
               'wxlive',
               '🌬',
-              'Stations Live météo',
+              'Stations LiveMétéo',
               'le vent mesuré dans 60 km, sur la carte',
               showLiveOnMap,
             )}

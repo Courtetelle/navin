@@ -177,12 +177,12 @@ function vhfItem(
 }
 
 function weatherItem(actions: TopMenuActions): TopMenuItem {
-  // The same during a track: Live météo is inside the Météo menu.
+  // The same during a track: LiveMétéo is inside the Météo menu.
   return {
     label: 'Météo',
     html: [WEATHER_SVG],
     bare: true,
-    hint: 'Toucher encore : menu suivant · appui long : prévisions et Live météo',
+    hint: 'Toucher encore : menu suivant · appui long : prévisions et LiveMétéo',
     act: () => actions.go('weather'),
   };
 }

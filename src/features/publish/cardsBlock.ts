@@ -1,3 +1,5 @@
+import { upperKeepBrands } from '../../lib/brand.ts';
+
 import type { CardsPen } from './cardsPen.ts';
 import { CARD_WIDTH } from './cardsStyle.ts';
 
@@ -29,7 +31,7 @@ function cardBlock(
   const { context, drawing, style, y } = pen;
   const { margin, cardPadding, sectionFont, sectionColor } = style;
   const titleLines = title
-    ? pen.wrap(title.toUpperCase(), sectionFont, pen.innerWidth)
+    ? pen.wrap(upperKeepBrands(title), sectionFont, pen.innerWidth)
     : [];
   const titleHeight = titleLines.length > 0 ? titleLines.length * 34 + 18 : 0;
   const height = cardPadding + titleHeight + bodyHeight + cardPadding - 8;
@@ -72,7 +74,7 @@ function stampBlock(
   let y = pen.y + 30;
   if (title) {
     context.font = sectionFont;
-    const upper = title.toUpperCase();
+    const upper = upperKeepBrands(title);
     let width = 0;
     for (const letter of upper) width += context.measureText(letter).width + 3;
     width += 36;
@@ -107,7 +109,7 @@ function plainBlock(
     if (drawing) {
       context.font = sectionFont;
       context.fillStyle = sectionColor;
-      pen.spaced(title.toUpperCase(), margin, y + 23, 3);
+      pen.spaced(upperKeepBrands(title), margin, y + 23, 3);
     }
     y += 40;
   }

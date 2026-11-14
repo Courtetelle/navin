@@ -16,7 +16,7 @@ import { chartPaths, trendText } from './trendText.ts';
 import { SEA_MODEL, seaMarks, seaTxt, windAlertConfig } from './windLogic.ts';
 import type { WindReading } from './windTypes.ts';
 
-/** What an alert publishes: the reading, as Live météo shows it, and where. */
+/** What an alert publishes: the reading, as LiveMétéo shows it, and where. */
 export interface AlertReport {
   /** The reading that raised the alert. */
   reading: WindReading;
@@ -32,7 +32,7 @@ const fr = (value: number, digits = 1) =>
   value.toFixed(digits).replace('.', ',');
 
 /**
- * The lines of the report, as the station card of Live météo reads them.
+ * The lines of the report, as the station card of LiveMétéo reads them.
  * @param report - The alert.
  * @returns `[label, value]` pairs.
  */
@@ -250,7 +250,7 @@ function blankCanvas(size: { width: number; height: number }): {
 }
 
 /**
- * The wind of the last hours as a picture, as Live météo draws it: the mean
+ * The wind of the last hours as a picture, as LiveMétéo draws it: the mean
  * wind as a line, the gusts as a light band above it, a scale and a key.
  * @param points - Points, oldest first.
  * @returns A data URL, null without a canvas.
@@ -388,7 +388,7 @@ export async function alertDocument(
   const map = await mapPicture(report);
   return {
     title: `Alerte vent · ${reading.name}`,
-    kicker: 'Live météo',
+    kicker: 'LiveMétéo',
     sub: `${wind} · ${forecast ? 'PRÉVISION, pas une mesure' : 'mesure'}`,
     sections,
     photos: map ? [{ url: map, cap: '© OpenStreetMap France' }] : [],

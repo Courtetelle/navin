@@ -101,7 +101,7 @@ test('cards layout: header, one card, footer', () => {
   expect(drawn).toBe(706);
   const whole = written.filter((item) => item.text.length > 1);
   expect(whole.map(({ text, x, y }) => [text, x, y])).toStrictEqual([
-    ['⛵ NAVIN', 40, 52],
+    ['⛵ NavIn', 40, 52],
     ['Mistral', 40, 116],
     ['Fiche bateau', 40, 163],
     ['PUISSANCE', 76, 376],

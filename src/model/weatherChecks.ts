@@ -26,7 +26,7 @@ export function weatherChecks(lake: boolean): WeatherCheck[] {
         },
     {
       id: 'live',
-      text: 'Live météo : le vent mesuré autour correspond à la prévision',
+      text: 'LiveMétéo : le vent mesuré autour correspond à la prévision',
     },
     lake
       ? {

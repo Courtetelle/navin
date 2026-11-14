@@ -18,7 +18,7 @@ export function boatPlace(): BoatPlace {
 }
 
 /**
- * Where Live météo opens: the place the NavIn map was showing (Saint-Malo
+ * Where LiveMétéo opens: the place the NavIn map was showing (Saint-Malo
  * looked at on the map gives the stations of Saint-Malo), else the boat.
  * @returns The place.
  */
@@ -35,8 +35,8 @@ const BACK_LABELS: Readonly<Record<string, string>> = {
 };
 
 /**
- * Where the ◀ of Live météo leads: back to the screen it was opened from.
- * @param from - The screen left to open Live météo.
+ * Where the ◀ of LiveMétéo leads: back to the screen it was opened from.
+ * @param from - The screen left to open LiveMétéo.
  * @returns The screen and the text of the button.
  */
 export function liveBackFrom(from: string): { view: string; label: string } {

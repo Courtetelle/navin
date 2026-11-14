@@ -1,3 +1,5 @@
+import { upperKeepBrands } from '../../lib/brand.ts';
+
 import { layOutBlock } from './cardsBlock.ts';
 import type { CardsPen } from './cardsPen.ts';
 import { CARD_WIDTH, SERIF, font } from './cardsStyle.ts';
@@ -121,7 +123,7 @@ function wrapLine(
   valueWidth: number,
 ): WrappedRow {
   const { style, theme } = pen;
-  const labelText = style.labelUpper ? row.label.toUpperCase() : row.label;
+  const labelText = style.labelUpper ? upperKeepBrands(row.label) : row.label;
   const label = pen.wrap(labelText, style.labelFont, style.labelWidth - 24);
   const value = pen.wrap(row.value, style.valueFont, valueWidth);
   const labelLine = theme === 'carnet' ? 32 : 27;
@@ -200,7 +202,7 @@ function wrapCell(
   cellWidth: number,
 ): WrappedRow {
   const { style } = pen;
-  const labelText = row.label.toUpperCase();
+  const labelText = upperKeepBrands(row.label);
   const label = pen.wrap(labelText, style.labelFont, cellWidth);
   const value = pen.wrap(row.value, style.valueFont, cellWidth);
   const textHeight = label.length * 25 + value.length * 40 + 34;

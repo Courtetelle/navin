@@ -228,7 +228,7 @@ function showAlertPopup(
       boat: windWatchPlace.peek(),
     },
     onLive: () => {
-      // A measured alert: Live météo shows where it came from.
+      // A measured alert: LiveMétéo shows where it came from.
       liveAlertSpot.value =
         forecast || top.lat == null || top.lon == null
           ? null
