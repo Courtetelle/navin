@@ -238,15 +238,23 @@ function useNavHeight(
   useLayoutEffect(() => {
     const bar = reference.current;
     if (!bar) return undefined;
-    const set = () =>
-      document.documentElement.style.setProperty(
-        '--navtop-h',
-        `${bar.hidden ? 0 : bar.offsetHeight}px`,
+    const set = () => {
+      const style = document.documentElement.style;
+      style.setProperty('--navtop-h', `${bar.hidden ? 0 : bar.offsetHeight}px`);
+      // Where the title line ends: nothing of the page shows above it.
+      style.setProperty(
+        '--navtop-bottom',
+        `${bar.hidden ? 0 : Math.ceil(bar.getBoundingClientRect().bottom)}px`,
       );
+    };
     set();
     if (!globalThis.ResizeObserver) return undefined;
     const observer = new ResizeObserver(set);
     observer.observe(bar);
-    return () => observer.disconnect();
+    globalThis.addEventListener('resize', set);
+    return () => {
+      observer.disconnect();
+      globalThis.removeEventListener('resize', set);
+    };
   }, [reference, shown]);
 }

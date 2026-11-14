@@ -11879,15 +11879,16 @@ html body .dn-night > .dn-moon {
     align-items: center;
     background: var(--bg);
   }
-  /* Nothing of the page shows above the title line */
-  html body.nav-plain #navtop::before {
+  /* Nothing of the page shows above the title line, on the whole width */
+  html body.nav-plain:not(.trk-mode)::before {
     content: '';
-    position: absolute;
+    position: fixed;
     left: 0;
     right: 0;
-    bottom: 100%;
-    height: 100vh;
+    top: 0;
+    height: var(--navtop-bottom, 0px);
     background: var(--bg);
+    z-index: 8;
     pointer-events: none;
   }
   html body.nav-plain #navtop #navExit,
