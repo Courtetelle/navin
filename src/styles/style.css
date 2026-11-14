@@ -1,3 +1,8 @@
+:root {
+  /* The margin of the right column: the left one's, unless the camera of a
+     phone turned sideways is on one side only */
+  --rb-side-r: var(--rb-side);
+}
 /* Mode jour : contraste maximal en plein soleil. Mode nuit : rouge sur noir pour garder la vision nocturne. */
 :root {
   --gap: 12px;
@@ -9552,7 +9557,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   left: var(--rb-side);
 }
 .side-rail-right {
-  right: var(--rb-side);
+  right: var(--rb-side-r);
 }
 .rail-btn {
   display: flex;
@@ -9690,7 +9695,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
       var(--rb-top) + var(--rb-step) + env(safe-area-inset-top)
     ) !important;
     left: auto !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
     height: var(--rb-h) !important;
   }
   /* data, short like the magnifier, right under NavIn */
@@ -9699,18 +9704,18 @@ body.nav-search:not(.trk-mode) #searchBtn {
       var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top)
     ) !important;
     left: auto !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
     height: var(--rb-h) !important;
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
     top: auto !important;
     bottom: calc(var(--rb-top) + env(safe-area-inset-bottom)) !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
     height: var(--rb-h) !important;
   }
   html body header.topbar #gearBtn {
     top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
     height: var(--rb-h) !important;
   }
   /* The magnifier at the bottom left, facing SOS; zoom + and − above it */
@@ -9779,7 +9784,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
      letters tall and narrow almost to the edges. */
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
     width: var(--rb-w) !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
     overflow: hidden;
   }
   html body header.topbar nav.topnav .top-tab.tab-sos .tb-sos {
@@ -11148,7 +11153,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     top: calc(var(--rb-top) + env(safe-area-inset-top)) !important;
     bottom: auto !important;
     left: auto !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
   }
   /* data and the settings: in the row of NavIn, only while it is unrolled */
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
@@ -11193,13 +11198,13 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   /* No column on the right any more: the map and its overlays reach the
      right edge. */
   html body .trk-full .trk-over {
-    right: var(--rb-side);
+    right: var(--rb-side-r);
   }
   html body .trk-full .trk-dash {
-    right: calc(var(--rb-side) + 24px);
+    right: calc(var(--rb-side-r) + 24px);
   }
   html body .trk-full .leaflet-top.ctl-col {
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
   }
 }
 
@@ -11289,7 +11294,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     top: auto !important;
     bottom: var(--rb-bottom) !important;
     left: auto !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
   }
   /* What NavIn unrolls, in a column above it, bottom to top: PréP (Météo
      during a track), data, the settings, the phone or VHF */
@@ -11359,7 +11364,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   }
   html body .trk-full .trk-over {
     left: var(--rb-side);
-    right: var(--rb-side);
+    right: var(--rb-side-r);
   }
 }
 @media (orientation: portrait) and (max-width: 559px) {
@@ -11526,14 +11531,14 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
 @media (orientation: landscape) and (min-width: 560px) {
   html body .live-chip {
     top: calc(var(--rb-top) + env(safe-area-inset-top));
-    right: calc(var(--rb-side) + var(--rb-x));
+    right: calc(var(--rb-side-r) + var(--rb-x));
     height: var(--rb-h);
   }
 }
 @media (orientation: portrait) and (max-width: 559px) {
   html body .live-chip {
     top: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-top));
-    right: var(--rb-side);
+    right: var(--rb-side-r);
   }
 }
 :root[data-theme='night'] .live-chip-off {
@@ -11554,22 +11559,22 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
       var(--rb-top) + var(--rb-step) + env(safe-area-inset-top)
     ) !important;
     left: auto !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
   }
   html body .side-rail-left .rail-btn.rail-photo {
     position: fixed;
     top: calc(var(--rb-top) + 2 * var(--rb-step) + env(safe-area-inset-top));
     left: auto;
-    right: var(--rb-side);
+    right: var(--rb-side-r);
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
     left: auto !important;
-    right: var(--rb-side) !important;
+    right: var(--rb-side-r) !important;
   }
   html body .navin-row {
     top: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-top));
     left: auto;
-    right: calc(var(--rb-side) + var(--rb-x));
+    right: calc(var(--rb-side-r) + var(--rb-x));
     flex-direction: row-reverse;
   }
   html body .navin-row-comm {
@@ -11582,18 +11587,18 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
       var(--rb-top) + var(--rb-step) + env(safe-area-inset-top)
     ) !important;
     left: auto !important;
-    right: calc(var(--rb-side) + 2 * var(--rb-x)) !important;
+    right: calc(var(--rb-side-r) + 2 * var(--rb-x)) !important;
   }
   html body header.topbar #gearBtn {
     top: calc(
       var(--rb-top) + var(--rb-step) + env(safe-area-inset-top)
     ) !important;
     left: auto !important;
-    right: calc(var(--rb-side) + 3 * var(--rb-x)) !important;
+    right: calc(var(--rb-side-r) + 3 * var(--rb-x)) !important;
   }
   html body .trk-full .trk-dash {
     left: calc(var(--rb-side) + var(--rb-x)) !important;
-    right: calc(var(--rb-side) + var(--rb-x)) !important;
+    right: calc(var(--rb-side-r) + var(--rb-x)) !important;
   }
 }
 
@@ -11608,4 +11613,29 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
    status bar: the map reaches the real bottom of the screen. */
 body.trk-mode .trk-full {
   height: calc(100dvh + var(--screen-gap, 0px));
+}
+
+/* A phone sideways: the wide margin only on the side of the camera, the
+   other column as close to its edge as the top */
+@media (orientation: landscape) and (min-width: 560px) and (max-height: 520px) {
+  :root.cam-right {
+    --rb-side: 10px;
+    --rb-side-r: var(--rb-edge-x);
+  }
+  :root.cam-left {
+    --rb-side-r: 10px;
+  }
+}
+
+/* A phone upright, turned over: the camera at the bottom, the same gap
+   under the top edge and above the camera */
+@media (orientation: portrait) and (max-width: 559px) {
+  :root.cam-bottom {
+    --rb-top: 14px;
+  }
+  html:root.cam-bottom body {
+    --rb-bottom: calc(
+      max(14px, env(safe-area-inset-bottom)) - var(--screen-gap, 0px)
+    );
+  }
 }

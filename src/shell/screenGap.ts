@@ -35,7 +35,38 @@ function standalone(): boolean {
   );
 }
 
+/**
+ * The side of the camera of a phone turned sideways.
+ * @param angle - Turn of the screen: 90 counterclockwise, 270 clockwise.
+ * @param landscape - The screen is wider than tall.
+ * @returns `left`, `right`, `bottom` (upright, turned over), or `null`.
+ */
+export function cameraSide(
+  angle: number,
+  landscape: boolean,
+): 'left' | 'right' | 'bottom' | null {
+  const turn = ((angle % 360) + 360) % 360;
+  if (!landscape) return turn === 180 ? 'bottom' : null;
+  if (turn === 90) return 'left';
+  if (turn === 270) return 'right';
+  return null;
+}
+
+function screenAngle(): number {
+  const legacy = (globalThis as { orientation?: unknown }).orientation;
+  if (typeof legacy === 'number') return legacy;
+  return globalThis.screen.orientation?.angle ?? 0;
+}
+
 function apply(): void {
+  const side = cameraSide(
+    screenAngle(),
+    globalThis.innerWidth > globalThis.innerHeight,
+  );
+  const root = document.documentElement.classList;
+  root.toggle('cam-left', side === 'left');
+  root.toggle('cam-right', side === 'right');
+  root.toggle('cam-bottom', side === 'bottom');
   const gap = screenGap({
     standalone: standalone(),
     screenWidth: globalThis.screen.width,
