@@ -1,7 +1,7 @@
 import { useSignals } from '@preact/signals-react/runtime';
 
-import type { SeaBasin } from '../../features/map/seaCenter.ts';
 import { seaPlace, setSeaPlace } from '../../features/map/seaCenter.ts';
+import type { SeaBasin } from '../../model/basins.ts';
 import { state, toast } from '../../state/index.ts';
 
 import { PlaceCenterField } from './PlaceCenterField.tsx';

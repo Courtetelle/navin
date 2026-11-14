@@ -1,3 +1,5 @@
+import type { Basin } from '../model/basins.ts';
+import { inBasin } from '../model/basins.ts';
 import { DAY_SECTIONS } from '../model/daySections.ts';
 import type { FieldDefinition, SectionDefinition } from '../model/field.ts';
 import { FIELDS } from '../model/fields.ts';
@@ -8,6 +10,7 @@ import type { Cruise } from '../model/types.ts';
 import { NIGHT_VIEWS } from '../model/views.ts';
 import { store } from '../storage/store.ts';
 
+import { sailedSea } from './basin.ts';
 import { data } from './data.ts';
 import { view } from './view.ts';
 
@@ -32,16 +35,75 @@ export function curMode(): ModeKey {
 }
 
 /**
- * The field or section applies to the current water type (legacy `forType`).
- * @param item - Field or section with its `sea` / `lake` flags.
+ * The zone of a cruise, for what its logbook shows: the lakes, or the sea
+ * sailed on (the Atlantic, the Mediterranean).
+ * @param cruise - The cruise read, the open one by default.
+ * @returns `atl`, `med` or `lac`.
+ */
+export function cruiseBasin(cruise: Cruise | null = data.cruise.value): Basin {
+  return isLake(cruise) ? 'lac' : sailedSea(cruise);
+}
+
+/**
+ * The field or section applies to the current water type and zone (legacy
+ * `forType`).
+ * @param item - Field or section with its `sea` / `lake` flags and zones.
  * @param lake - Lake outing.
  * @returns `true` when shown.
  */
 function forType(
-  item: { sea?: boolean; lake?: boolean },
+  item: { sea?: boolean; lake?: boolean; basins?: readonly Basin[] },
   lake: boolean = isLake(),
 ): boolean {
-  return lake ? !item.sea : !item.lake;
+  if (!(lake ? !item.sea : !item.lake)) return false;
+  return !item.basins || inBasin(item, lake ? 'lac' : sailedSea());
+}
+
+function filled(value: unknown): boolean {
+  if (value === undefined || value === null) return false;
+  if (value === '') return false;
+  if (Array.isArray(value)) return value.some(filled);
+  if (typeof value === 'object') return Object.values(value).some(filled);
+  return true;
+}
+
+/**
+ * A value is already written in one of these fields of the open cruise (its
+ * sheets, its days, its entries):
+ * what belongs to another zone stays shown then, nothing written is hidden.
+ * @param fields - The fields.
+ * @returns `true` when one holds a value.
+ */
+function written(fields: readonly FieldDefinition[]): boolean {
+  const cruise = data.cruise.value;
+  if (!cruise) return false;
+  const sheets: Array<Readonly<Record<string, unknown>>> = [
+    cruise.info,
+    ...Object.values(cruise.days),
+    ...cruise.entries.map((entry) => entry.v),
+  ];
+  return fields.some((field) =>
+    sheets.some((sheet) => filled(sheet[field.key])),
+  );
+}
+
+/**
+ * Shown for the water type and the zone, or holding values already.
+ * @param item - Field or section.
+ * @param fields - Its fields.
+ * @param lake - Lake outing.
+ * @returns `true` when shown.
+ */
+function kept(
+  item: { sea?: boolean; lake?: boolean; basins?: readonly Basin[] },
+  fields: readonly FieldDefinition[],
+  lake: boolean,
+): boolean {
+  if (forType(item, lake)) return true;
+  // Only the zone hides it: still shown when something is written in it.
+  return Boolean(item.basins) && forType({ ...item, basins: undefined }, lake)
+    ? written(fields)
+    : false;
 }
 
 /**
@@ -52,7 +114,7 @@ function forType(
 export function activeFields(lake: boolean = isLake()): FieldDefinition[] {
   const out: FieldDefinition[] = [];
   for (const field of FIELDS) {
-    if (!forType(field, lake)) continue;
+    if (!kept(field, [field], lake)) continue;
     out.push(
       lake && field.lakeLabel ? { ...field, label: field.lakeLabel } : field,
     );
@@ -71,10 +133,10 @@ export function activeSections(
   lake: boolean = isLake(),
 ): SectionDefinition[] {
   return sections
-    .filter((section) => forType(section, lake))
+    .filter((section) => kept(section, section.fields, lake))
     .map((section) => ({
       ...section,
-      fields: section.fields.filter((field) => forType(field, lake)),
+      fields: section.fields.filter((field) => kept(field, [field], lake)),
     }));
 }
 

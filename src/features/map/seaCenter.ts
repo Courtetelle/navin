@@ -1,3 +1,4 @@
+import type { SeaBasin } from '../../model/basins.ts';
 import type { Settings } from '../../model/settings.ts';
 import { state, updateSettings } from '../../state/index.ts';
 
@@ -16,9 +17,6 @@ export const DEFAULT_SEA_PLACE: Readonly<SeaPlace> = {
   lat: 48.6493,
   lon: -2.0257,
 };
-
-/** The sea chosen with NavIn: the Atlantic coasts, or the Mediterranean. */
-export type SeaBasin = 'atl' | 'med';
 
 /** Where the Mediterranean map opens until another place is chosen. */
 export const DEFAULT_MED_PLACE: Readonly<SeaPlace> = {

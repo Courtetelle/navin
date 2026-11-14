@@ -1,3 +1,4 @@
+import { BASIN_ONLY } from './basins.ts';
 import type { SectionDefinition } from './field.ts';
 import { numField as n } from './field.ts';
 import { STORM_LIGHTS, TREND } from './lists.ts';
@@ -148,6 +149,7 @@ export const DAY_SECTIONS: readonly SectionDefinition[] = [
   {
     title: 'Marées',
     sea: true,
+    basins: BASIN_ONLY.tides,
     fields: [
       { key: 'marPort', label: 'Port', type: 'line' },
       n('marCoeff', 'Coefficient', ''),

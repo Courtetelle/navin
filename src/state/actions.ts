@@ -1,4 +1,5 @@
 /* Public actions and selectors of the state layer (re-exported by `src/state/index.ts`). */
+export * from './basin.ts';
 export * from './boats.ts';
 export * from './boatSync.ts';
 export * from './checklistLibrary.ts';

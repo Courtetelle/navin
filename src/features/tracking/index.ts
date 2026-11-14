@@ -74,17 +74,6 @@ export { applyWeather, fetchWeather, fillPendingWeather } from './weather.ts';
 export type { Weather } from './weather.ts';
 export { wxNext } from './weatherSources.ts';
 export type { Forecast, ForecastRow } from './weatherSources.ts';
-export {
-  BASIN_CYC,
-  BASIN_NAMES,
-  ZONE_CYC,
-  basinOf,
-  currentBasin,
-  cycleZone,
-  nextBasin,
-  nextZone,
-  zoneSet,
-} from './zone.ts';
-export type { Basin } from './zone.ts';
+export { ZONE_CYC, cycleZone, nextBasin, nextZone, zoneSet } from './zone.ts';
 export type { ZoneChoice } from './zone.ts';
 export { BasinIcon, LemanIcon, ZoneSim } from './ZoneSim.tsx';

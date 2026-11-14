@@ -2,7 +2,13 @@ import { batch } from '@preact/signals-react';
 
 import { buzz } from '../../lib/dom.ts';
 import { RAILS_QUERY } from '../../lib/useWide.ts';
-import { navZone, prepReady, state, toast } from '../../state/index.ts';
+import {
+  currentBasin,
+  navZone,
+  prepReady,
+  state,
+  toast,
+} from '../../state/index.ts';
 import { clearToast } from '../../state/toast.ts';
 import { hasBodyClass } from '../bodyClass.ts';
 import { go } from '../router.ts';
@@ -37,7 +43,8 @@ function menuContext(): TopMenuContext {
     tracking: state.view.tracking.value,
     prepReady: prepReady.value,
     zone: navZone(),
-    sea: state.preferences.settings.value.seaBasin === 'med' ? 'med' : 'atl',
+    // On the GPS (the boat arrow), the sea where the boat is.
+    sea: currentBasin() === 'med' ? 'med' : 'atl',
     wide:
       typeof globalThis.matchMedia === 'function' &&
       globalThis.matchMedia(RAILS_QUERY).matches,

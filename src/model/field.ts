@@ -1,3 +1,4 @@
+import type { Basin } from './basins.ts';
 import type { FieldLayout } from './fieldLayout.ts';
 import type { Settings } from './settings.ts';
 
@@ -66,6 +67,11 @@ export interface FieldDefinition extends FieldLayout {
    * @default false
    */
   lake?: boolean;
+  /**
+   * The zones it is shown in (all when not said), see `BASIN_ONLY`.
+   * @default undefined
+   */
+  basins?: readonly Basin[];
   /**
    * Wind speed in knots (Beaufort and km/h shown).
    * @default false
@@ -168,6 +174,11 @@ export interface SectionDefinition {
    * @default false
    */
   lake?: boolean;
+  /**
+   * The zones it is shown in (all when not said), see `BASIN_ONLY`.
+   * @default undefined
+   */
+  basins?: readonly Basin[];
   /**
    * Starts folded.
    * @default false

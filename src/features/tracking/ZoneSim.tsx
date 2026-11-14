@@ -5,11 +5,11 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { navZone, state } from '../../state/index.ts';
-import { seaBasin } from '../map/seaCenter.ts';
+import type { Basin } from '../../model/basins.ts';
+import { BASIN_NAMES } from '../../model/basins.ts';
+import { currentBasin, state } from '../../state/index.ts';
 
-import type { Basin } from './zone.ts';
-import { BASIN_NAMES, basinOf, cycleZone } from './zone.ts';
+import { cycleZone } from './zone.ts';
 
 /** Outline of Lake Geneva, north up (Natural Earth, public domain). */
 export function LemanIcon() {
@@ -71,11 +71,7 @@ export function ZoneSim() {
   useSignals();
   const tr = useTr();
   const zone = state.view.zoneSimV.value || 'auto';
-  const here = basinOf(
-    zone,
-    seaBasin(state.preferences.settings.value),
-    navZone(),
-  );
+  const here = currentBasin();
   return (
     <section className="field zone-set">
       <ButtonRow className="row">

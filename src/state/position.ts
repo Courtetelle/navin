@@ -1,5 +1,8 @@
+import type { Basin } from '../model/basins.ts';
+import { seaAt } from '../model/basins.ts';
 import { inInland } from '../model/contacts.ts';
 
+import { chosenSea } from './basin.ts';
 import { data } from './data.ts';
 import { isLake } from './mode.ts';
 import type { LivePosition, TimedPosition } from './view.ts';
@@ -50,4 +53,17 @@ export function herePos(): LivePosition | TimedPosition | null {
   const live = view.myPos.value;
   if (live && Date.now() - live.t < 120_000) return live;
   return view.lastFix.value ?? live;
+}
+
+/**
+ * The zone NavIn shows now: the one chosen, else the zone of the GPS.
+ * @returns `atl`, `med` or `lac`.
+ */
+export function currentBasin(): Basin {
+  const zone = view.zoneSimV.value;
+  if (zone === 'lac') return 'lac';
+  if (zone === 'mer') return chosenSea();
+  if (navZone() === 'lac') return 'lac';
+  const place = lastKnownPos();
+  return place ? seaAt(place.lat, place.lon) : chosenSea();
 }
