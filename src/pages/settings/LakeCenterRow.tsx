@@ -20,12 +20,12 @@ export function LakeCenterRow() {
   return (
     <PlaceCenterField
       id="lakeCenter"
-      title="🏞 Centre de la carte sur les lacs"
+      title="🏞 Centre de la carte sur les Lacs"
       icon="🏞"
       current={lakePlace(state.preferences.settings.value)}
       known={LAKE_PLACES}
       placeholder="Nom du lac ou d’un lieu au bord"
-      help="Écrivez le nom d’un lac ou d’un lieu au bord, puis touchez-le dans la liste : la carte s’y ouvrira sur un lac quand aucune position GPS n’est connue, et les menus en parleront quand la zone « lac » est choisie avec NavIn (réseau nécessaire pour les lieux hors de la liste)."
+      help="Écrivez le nom d’un lac ou d’un lieu au bord, puis touchez-le dans la liste : la carte s’y ouvrira sur un lac quand aucune position GPS n’est connue, et les menus en parleront quand la zone « Lacs » est choisie avec NavIn (réseau nécessaire pour les lieux hors de la liste)."
       onPick={(place) => {
         setLakePlace(place);
         toast(`Carte des lacs centrée sur ${place.name}`);

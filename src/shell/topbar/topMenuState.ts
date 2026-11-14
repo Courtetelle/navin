@@ -37,6 +37,7 @@ function menuContext(): TopMenuContext {
     tracking: state.view.tracking.value,
     prepReady: prepReady.value,
     zone: navZone(),
+    sea: state.preferences.settings.value.seaBasin === 'med' ? 'med' : 'atl',
     wide:
       typeof globalThis.matchMedia === 'function' &&
       globalThis.matchMedia(RAILS_QUERY).matches,

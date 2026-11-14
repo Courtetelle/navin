@@ -5,7 +5,6 @@ import { menuButtonPress } from '../menuOwner.ts';
 import { navBack } from '../navbar/navActions.ts';
 import { closeNavinRow, navinRowChosen, toggleNavinRow } from '../navinRow.ts';
 import { go } from '../router.ts';
-import { toggleThemeFromNavin } from '../theme.ts';
 
 import { TAB_ORDER, tabDisplays, topMenuDomainActions } from './tabDisplays.ts';
 import type { TopTabKey } from './topMenuModel.ts';
@@ -46,12 +45,8 @@ export function tabPointerDown(key: TopTabKey): void {
     }
     if (item.base && key === 'tracker' && item.label === 'NavIn') {
       resetTab(key);
-      // Landscape tablet: the long press on NavIn is night and day; the
-      // zone is chosen in PréP.
-      if (wideScreen()) {
-        toggleThemeFromNavin();
-        return;
-      }
+      // The long press on NavIn turns the zone: Atlantique, Méditerranée,
+      // Lacs, its logo following (night and day are on the magnifier).
       buzz();
       topMenuDomainActions().cycleZone();
       return;

@@ -3,11 +3,13 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
+import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { beginCrewSetEdit } from '../../features/crew/crewsEdit.ts';
 import { openFiche } from '../../features/crew/ficheNavigation.ts';
 import { showPlace } from '../../features/map/placeTarget.ts';
 import { state } from '../../state/index.ts';
 import { go } from '../router.ts';
+import { toggleThemeFromSearch } from '../theme.ts';
 
 import type { SearchHit } from './searchHits.ts';
 import { searchContext, searchHits } from './searchHits.ts';
@@ -50,20 +52,35 @@ const searchOpen = signal(false);
  */
 export function MagnifierButton({ id }: { id: string }) {
   useSignals();
+  // A long press is night and day: the small sun and moon on its sides say
+  // it, the mode shown lit.
+  const press = useLongPress(toggleThemeFromSearch);
+  const night = state.preferences.settings.value.theme === 'night';
+  const classes = ['no-print', 'no-navact', night ? 'dn-night' : 'dn-day'];
+  if (searchOpen.value) classes.push('menu-here', 'search-open');
+  if (press.hit) classes.push('lp-hit');
   return (
     <button
       type="button"
       id={id}
-      className={
-        searchOpen.value
-          ? 'no-print no-navact menu-here search-open'
-          : 'no-print no-navact'
-      }
-      aria-label="Rechercher une fonction ou un lieu"
+      className={classes.join(' ')}
+      aria-label="Rechercher une fonction ou un lieu · appui long : jour / nuit"
       onClick={() => {
         searchOpen.value = true;
       }}
+      {...press.handlers}
     >
+      <svg className="dn-sun" viewBox="0 0 12 12" aria-hidden="true">
+        <circle cx="6" cy="6" r="2.6" />
+        <path
+          d="M6 .8v1.6M6 9.6v1.6M.8 6h1.6M9.6 6h1.6M2.3 2.3l1.1 1.1M8.6 8.6l1.1 1.1M2.3 9.7l1.1-1.1M8.6 3.4l1.1-1.1"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+        />
+      </svg>
+      <svg className="dn-moon" viewBox="0 0 12 12" aria-hidden="true">
+        <path d="M8.6 9.4A4.6 4.6 0 0 1 5.2 1.2a4.6 4.6 0 1 0 5.6 6.4 4.6 4.6 0 0 1-2.2 1.8z" />
+      </svg>
       <svg
         className="magnifier"
         viewBox="0 0 24 24"

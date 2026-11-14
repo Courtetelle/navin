@@ -168,7 +168,8 @@ export function SettingsPage({ from }: PageProps) {
         <SettingsSection section="zone" title="🧭 Zone et écran">
           {nightOK() ? <ThemeRow /> : null}
           <ZoneSim />
-          <SeaCenterRow />
+          <SeaCenterRow basin="atl" />
+          <SeaCenterRow basin="med" />
           <LakeCenterRow />
           <WakeRow />
           <HelpBubblesRow />

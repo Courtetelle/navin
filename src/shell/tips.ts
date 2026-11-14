@@ -34,7 +34,7 @@ const TIPS: ReadonlyArray<readonly [string | null, string]> = [
 /** The same buttons on the landscape tablet, where they work otherwise. */
 const WIDE_TIPS: Readonly<Record<string, string>> = {
   tracker:
-    'NavIn : un toucher déroule PréP, data, Réglages et Téléphone ou VHF · son logo montre lac ou mer · appui long : mode nuit ou mode jour',
+    'NavIn : un toucher déroule PréP, data, Réglages et Téléphone ou VHF · son logo montre la zone · appui long : Atlantique, Méditerranée ou Lacs',
   gear: 'Curseurs : les réglages (dans la rangée de NavIn)',
 };
 

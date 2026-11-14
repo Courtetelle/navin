@@ -4,6 +4,7 @@ import {
   FLAG_WAVE_SVG,
   MOOR_SVG,
   NAVIN_LAC_SVG,
+  NAVIN_MED_SVG,
   NAVIN_MER_SVG,
   PHONE_SVG,
   PHONE_W_SVG,
@@ -62,6 +63,11 @@ export interface TopMenuContext {
   /** Navigation zone. */
   zone: 'lac' | 'mer';
   /**
+   * The sea chosen with NavIn: the Atlantic, or the Mediterranean.
+   * @default 'atl'
+   */
+  sea?: 'atl' | 'med';
+  /**
    * Landscape tablet: Météo has its own button in the left column, so the
    * NavIn menu goes without it.
    * @default false
@@ -106,16 +112,28 @@ export function topMenu(
 }
 
 /**
+ * The logo of NavIn for the zone chosen: the lake, the swell of the Atlantic,
+ * the sun over the Mediterranean.
+ * @param context - The zone and the sea.
+ * @returns The drawing.
+ */
+export function navinLogo(context: TopMenuContext): string {
+  if (context.zone === 'lac') return NAVIN_LAC_SVG;
+  return context.sea === 'med' ? NAVIN_MED_SVG : NAVIN_MER_SVG;
+}
+
+/**
  * The face of the NavIn tab when it shows its name (legacy `baseNav`).
  * @param context - Screen, PréP, tracking and zone.
  * @returns The face.
  */
 export function baseNav(context: TopMenuContext): TabFace {
   const inland = context.zone === 'lac';
+  const logo = navinLogo(context);
   // Landscape tablet: VHF, PréP and the track have their own buttons in the
   // columns, which show their state; NavIn stays NavIn.
   if (context.wide) {
-    return { label: 'NavIn', html: [inland ? NAVIN_LAC_SVG : NAVIN_MER_SVG] };
+    return { label: 'NavIn', html: [logo] };
   }
   if (context.currentView === 'vhf') {
     return inland
@@ -142,7 +160,7 @@ export function baseNav(context: TopMenuContext): TabFace {
       ready: context.prepReady,
     };
   }
-  return { label: 'NavIn', html: [inland ? NAVIN_LAC_SVG : NAVIN_MER_SVG] };
+  return { label: 'NavIn', html: [logo] };
 }
 
 /**

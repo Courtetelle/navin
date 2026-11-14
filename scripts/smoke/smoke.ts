@@ -839,8 +839,8 @@ const zoneChosen = (page: Page) =>
  * @param theme - Theme checked.
  */
 /**
- * The next zone of navigation, from the settings (the long press on NavIn is
- * night and day on the tablet), then back to the map.
+ * The next zone of navigation, from the settings (as the long press on
+ * NavIn), then back to the map.
  * @param page - The tablet page.
  */
 async function nextZoneX(page: Page): Promise<void> {
@@ -873,13 +873,29 @@ async function zones(page: Page, theme: string): Promise<void> {
         ).theme,
     );
   const before = await night();
-  await longPress(page, NAVIN);
+  await longPress(page, '#searchBtn');
   const after = await night();
-  await longPress(page, NAVIN);
+  await longPress(page, '#searchBtn');
   check(
     theme,
-    'tablet: a long press on NavIn turns night and day',
-    before !== after && (await night()) === before,
+    'tablet: a long press on the magnifier turns night and day',
+    before !== after &&
+      (await night()) === before &&
+      (await page.locator('#searchBtn .dn-sun').count()) === 1 &&
+      (await page.locator('#searchBtn .dn-moon').count()) === 1,
+  );
+  const logo = () => page.locator(NAVIN).innerHTML();
+  const logo0 = await logo();
+  await longPress(page, NAVIN);
+  const logo1 = await logo();
+  await longPress(page, NAVIN);
+  const logo2 = await logo();
+  await longPress(page, NAVIN);
+  const logo3 = await logo();
+  check(
+    theme,
+    'tablet: a long press on NavIn turns Atlantique, Méditerranée, Lacs, each with its logo',
+    new Set([logo1, logo2, logo3]).size === 3 && logo3 === logo0,
   );
   if ((await zoneChosen(page)) !== 'lac') await nextZoneX(page);
   if ((await zoneChosen(page)) !== 'lac') await nextZoneX(page);

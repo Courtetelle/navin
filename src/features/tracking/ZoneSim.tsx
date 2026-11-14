@@ -1,5 +1,4 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { ReactNode } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -7,8 +6,10 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { navZone, state } from '../../state/index.ts';
+import { seaBasin } from '../map/seaCenter.ts';
 
-import { cycleZone, nextZone } from './zone.ts';
+import type { Basin } from './zone.ts';
+import { BASIN_NAMES, basinOf, cycleZone } from './zone.ts';
 
 /** Outline of Lake Geneva, north up (Natural Earth, public domain). */
 export function LemanIcon() {
@@ -26,6 +27,42 @@ export function LemanIcon() {
 }
 
 /**
+ * The logo of a step of the zone button: the long swell of the Atlantic, the
+ * sun over the calm Mediterranean, the outline of a lake.
+ * @param props - The step.
+ * @param props.basin - `atl`, `med` or `lac`.
+ * @returns The drawing.
+ */
+export function BasinIcon({ basin }: { basin: Basin }) {
+  if (basin === 'lac') return <LemanIcon />;
+  if (basin === 'med') {
+    return (
+      <svg className="zone-med" viewBox="0 0 50 30" aria-hidden="true">
+        <circle cx="25" cy="11" r="7" fill="#ffb400" />
+        <path
+          d="M3 22c5-3 9 3 14 0s9 3 14 0 9 3 16 0"
+          fill="none"
+          stroke="#13b3c4"
+          strokeWidth="3.4"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg className="zone-atl" viewBox="0 0 50 30" aria-hidden="true">
+      <path
+        d="M2 12c6-6 10 6 16 0s10 6 16 0 10 6 14 0M2 21c6-6 10 6 16 0s10 6 16 0 10 6 14 0"
+        fill="none"
+        stroke="#1677ff"
+        strokeWidth="3.4"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+/**
  * Choice of the navigation zone in the settings (legacy `zoneSimHtml`): the
  * button says the action (the next zone) and the current zone in small.
  * @returns The section.
@@ -34,44 +71,44 @@ export function ZoneSim() {
   useSignals();
   const tr = useTr();
   const zone = state.view.zoneSimV.value || 'auto';
-  // Legacy translates text nodes: outside the lake icon, the prefix and the
-  // zone are a single node, and that sentence is not in the dictionary.
-  const text = (prefix: string, choice: string): ReactNode => {
-    if (choice === 'lac') {
-      return (
-        <>
-          {tr(prefix)}
-          <LemanIcon />
-          {tr(' En eaux intérieures')}
-        </>
-      );
-    }
-    const zoneName =
-      choice === 'mer'
-        ? '🌊 Maritime'
-        : '📍 Sur la position GPS (flèche du bateau)';
-    return tr(`${prefix}${zoneName}`);
-  };
+  const here = basinOf(
+    zone,
+    seaBasin(state.preferences.settings.value),
+    navZone(),
+  );
   return (
     <section className="field zone-set">
       <ButtonRow className="row">
         <Button
-          className="btn big on"
+          className={`btn big on zone-turn zone-${here}`}
           data-zonesim="1"
+          data-basin={here}
           onClick={() => {
             buzz();
             cycleZone();
           }}
         >
-          {text('Passer à : ', nextZone(zone, navZone()))}
-          <small>{text('zone de navigation actuelle : ', zone)}</small>
+          <span className="zone-turn-logo">
+            <BasinIcon basin={here} />
+          </span>
+          <span>
+            <b>{tr(BASIN_NAMES[here])}</b>
+            <small>
+              {tr(
+                zone === 'auto'
+                  ? 'sur la position GPS · toucher pour changer'
+                  : 'zone de navigation · toucher pour changer',
+              )}
+            </small>
+          </span>
         </Button>
       </ButtonRow>
       <HelpText>
-        Comme l’appui long sur NavIn : lac ou mer, sur le lieu choisi plus bas.
-        Tout suit la zone choisie : heure (UTC d’abord en mer, Zone Time sur le
-        lac), touche VHF / Téléphone, SOS, VHF, météo, rubriques et cartes. La
-        flèche du bateau ramène tout sur la position GPS.
+        Le même bouton tournant qu’au bout de NavIn : Atlantique, Méditerranée,
+        Lacs, chacun sur le lieu choisi plus bas. Tout suit la zone choisie :
+        heure (UTC d’abord en mer, Zone Time sur le lac), touche VHF /
+        Téléphone, SOS, VHF, météo, rubriques et cartes. La flèche du bateau
+        ramène tout sur la position GPS.
       </HelpText>
     </section>
   );

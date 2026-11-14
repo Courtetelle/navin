@@ -11443,11 +11443,6 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   width: 54px;
   text-align: center;
 }
-.prep-zone-logo svg {
-  display: block;
-  width: 54px;
-  height: 34px;
-}
 
 /* The forecast of the PréP: one card per moment, in the colour of its wind */
 .prep-fc {
@@ -11721,4 +11716,79 @@ body.trk-mode .trk-full {
     left: -6px;
     right: -20px;
   }
+}
+
+/* The zone button of the settings: the logo of the zone shown, each touch
+   turns to the next one, as the long press on NavIn. */
+html body .zone-turn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+}
+html body .zone-turn b {
+  display: block;
+  font-size: 22px;
+}
+html body .zone-turn small {
+  display: block;
+  font-weight: 600;
+}
+html body .zone-turn-logo svg {
+  display: block;
+  width: 54px;
+  height: 34px;
+  margin: 0;
+}
+
+/* iPhone opened from the home screen: the page is told a height short by the
+   status bar. Every page reaches the real bottom of the screen, as the map,
+   so the buttons held at the bottom are not cut and the background is whole. */
+html body {
+  min-height: calc(100dvh + var(--screen-gap, 0px));
+}
+
+/* The magnifier is also night and day (long press): a small sun on its left,
+   a small moon on its right, at the top, the mode shown lit. */
+html body #searchBtn,
+html body #navSearch {
+  overflow: visible;
+}
+html body #navSearch {
+  position: relative;
+}
+html body #searchBtn > .dn-sun,
+html body #searchBtn > .dn-moon,
+html body #navSearch > .dn-sun,
+html body #navSearch > .dn-moon {
+  position: absolute;
+  top: 4px;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  opacity: 0.35;
+}
+html body #searchBtn > .dn-sun,
+html body #navSearch > .dn-sun {
+  left: 5px;
+  fill: #f5a800;
+  stroke: #f5a800;
+}
+html body #searchBtn > .dn-moon,
+html body #navSearch > .dn-moon {
+  right: 5px;
+  fill: #5a6fd8;
+}
+html body .dn-day > .dn-sun,
+html body .dn-night > .dn-moon {
+  opacity: 1;
+}
+:root[data-theme='night'] #searchBtn > .dn-sun,
+:root[data-theme='night'] #navSearch > .dn-sun {
+  fill: #ff4040;
+  stroke: #ff4040;
+}
+:root[data-theme='night'] #searchBtn > .dn-moon,
+:root[data-theme='night'] #navSearch > .dn-moon {
+  fill: #ff4040;
 }

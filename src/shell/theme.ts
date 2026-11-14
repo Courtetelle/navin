@@ -29,15 +29,15 @@ export function toggleTheme(): void {
   });
 }
 
-/** Long press on NavIn (landscape tablet): night mode, and back to day. */
-export function toggleThemeFromNavin(): void {
+/** Long press on the magnifier: night mode, and back to day. */
+export function toggleThemeFromSearch(): void {
   buzz();
   updateSettings((settings) => {
     settings.theme = settings.theme === 'night' ? 'day' : 'night';
   });
   toast(
     state.preferences.settings.value.theme === 'night'
-      ? '☾ Mode nuit · appui long sur NavIn pour revenir au jour'
+      ? '☾ Mode nuit · appui long sur la loupe pour revenir au jour'
       : '☀︎ Mode jour',
   );
 }
