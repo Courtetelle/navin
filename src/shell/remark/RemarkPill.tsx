@@ -45,19 +45,23 @@ export function RemarkPill() {
     globalThis.addEventListener('resize', onResize);
     return () => globalThis.removeEventListener('resize', onResize);
   }, []);
+  // Clear of the camera and the rounded corners of a phone.
+  const { width, height, inset } = size;
   const left = Math.max(
-    4,
+    4 + inset.left,
     Math.min(
-      size.width - 64,
+      width - 64 - inset.right,
       // On a landscape tablet, clear of the right column of buttons.
       position.x ??
-        size.width -
-          (size.width >= 1000 && size.width > size.height ? 260 : 72),
+        width - inset.right - (width >= 1000 && width > height ? 260 : 72),
     ),
   );
   const top = Math.max(
-    4,
-    Math.min(size.height - 68, position.y ?? size.height - 164),
+    4 + inset.top,
+    Math.min(
+      height - 68 - inset.bottom,
+      position.y ?? height - 164 - inset.bottom,
+    ),
   );
   const open = () => {
     const pill = reference.current;
@@ -175,6 +179,36 @@ function highlight(element: Element | null): void {
   element?.classList.add('rem-target');
 }
 
-function viewportSize(): { width: number; height: number } {
-  return { width: globalThis.innerWidth, height: globalThis.innerHeight };
+/** The margins of the camera and the rounded corners, in pixels. */
+interface Inset {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+function safeInset(): Inset {
+  const none = { top: 0, right: 0, bottom: 0, left: 0 };
+  if (typeof document === 'undefined' || !document.body) return none;
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:fixed;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)';
+  document.body.append(probe);
+  const style = globalThis.getComputedStyle(probe);
+  const inset = {
+    top: Number.parseFloat(style.paddingTop) || 0,
+    right: Number.parseFloat(style.paddingRight) || 0,
+    bottom: Number.parseFloat(style.paddingBottom) || 0,
+    left: Number.parseFloat(style.paddingLeft) || 0,
+  };
+  probe.remove();
+  return inset;
+}
+
+function viewportSize(): { width: number; height: number; inset: Inset } {
+  return {
+    width: globalThis.innerWidth,
+    height: globalThis.innerHeight,
+    inset: safeInset(),
+  };
 }

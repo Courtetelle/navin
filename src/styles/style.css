@@ -10853,18 +10853,17 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
     --rb-h: 36px;
     --rb-w: 70px;
     --rb-gap: 4px;
-    --rb-top: 4px;
-    /* The rounded corners and the camera: the same margin on both sides */
-    --rb-edge-x: max(
-      6px,
-      env(safe-area-inset-left),
-      env(safe-area-inset-right)
+    /* The buttons away from the rounded corners and the camera, the same
+       margin on both sides; the map runs under them to every edge. */
+    --rb-top: 10px;
+    --rb-edge-x: calc(
+      max(env(safe-area-inset-left), env(safe-area-inset-right)) + 8px
     );
     --rb-side: var(--rb-edge-x);
   }
   html body .trk-full .trk-map {
-    left: var(--rb-edge-x) !important;
-    right: var(--rb-edge-x) !important;
+    left: 0 !important;
+    right: 0 !important;
   }
   html body .rail-btn .rail-svg,
   html body .rail-btn .rail-icon svg,
@@ -11223,8 +11222,12 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     --rb-h: 44px;
     --rb-w: calc((100vw - 2 * var(--rb-side) - 4 * var(--rb-gap)) / 5);
     --rb-gap: 6px;
-    --rb-top: 6px;
-    --rb-side: 6px;
+    /* Away from the camera and the rounded corners; the map runs under the
+       buttons to every edge */
+    --rb-top: 10px;
+    --rb-side: calc(
+      max(env(safe-area-inset-left), env(safe-area-inset-right)) + 14px
+    );
     --rb-step: calc(var(--rb-h) + var(--rb-gap));
     --rb-col: 0px;
   }
@@ -11242,21 +11245,11 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     flex-direction: row;
     align-items: flex-start;
   }
+  /* What a button unrolls goes under it, the size of every button: ＋ and
+     − under the arrow, Prolonger and Nouvelle trace (or FIN and Amarrage)
+     under START */
   html body .side-rail-left .rail-line {
     flex-direction: column;
-  }
-  /* ＋ and − under the arrow, side by side, each half its width */
-  html body .side-rail-left .rail-arrow-line {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    width: var(--rb-w);
-  }
-  html body .side-rail-left .rail-arrow-line .rail-boat {
-    grid-column: 1 / -1;
-  }
-  html body .side-rail-left .rail-arrow-line .rail-zoom-in,
-  html body .side-rail-left .rail-arrow-line .rail-zoom-out {
-    width: auto;
   }
   html body .side-rail-left .rail-navin-place {
     display: none;
@@ -11288,22 +11281,28 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     left: auto !important;
     right: var(--rb-side) !important;
   }
-  /* The row of NavIn, above the bottom row */
+  /* What NavIn unrolls, in a column above it, bottom to top: PréP (Météo
+     during a track), data, the settings, the phone or VHF */
   html body .navin-row {
     top: auto;
     bottom: calc(var(--rb-bottom) + var(--rb-step));
-    left: var(--rb-side);
+    left: calc(var(--rb-side) + var(--rb-x));
+    flex-direction: column-reverse;
+  }
+  html body .navin-row-comm {
+    margin-left: 0;
+    margin-bottom: calc(2 * var(--rb-step));
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
     top: auto !important;
-    bottom: calc(var(--rb-bottom) + var(--rb-step)) !important;
+    bottom: calc(var(--rb-bottom) + 2 * var(--rb-step)) !important;
     left: calc(var(--rb-side) + var(--rb-x)) !important;
   }
   html body header.topbar #gearBtn {
     top: auto !important;
-    bottom: calc(var(--rb-bottom) + var(--rb-step)) !important;
-    left: calc(var(--rb-side) + 2 * var(--rb-x)) !important;
+    bottom: calc(var(--rb-bottom) + 3 * var(--rb-step)) !important;
+    left: calc(var(--rb-side) + var(--rb-x)) !important;
   }
   /* The pages between the top row and the bottom row */
   html body main#view {
@@ -11351,6 +11350,34 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   html body .trk-full .trk-over {
     left: var(--rb-side);
     right: var(--rb-side);
+  }
+}
+@media (orientation: portrait) and (max-width: 559px) {
+  /* Prolonger and Nouvelle trace: a smaller sign, so the word fits */
+  html body .side-rail-left .rail-btn.rail-extend,
+  html body .side-rail-left .rail-btn.rail-new {
+    padding: 2px;
+    gap: 0;
+  }
+  html body .rail-btn.rail-extend .rail-icon,
+  html body .rail-btn.rail-new .rail-icon {
+    font-size: 18px;
+  }
+  html body .rail-btn.rail-extend .rail-label,
+  html body .rail-btn.rail-new .rail-label {
+    font-size: 10px;
+    -webkit-line-clamp: 1;
+  }
+  html body .rail-btn.rail-new .rail-word-more {
+    display: none;
+  }
+}
+@media (orientation: portrait) and (max-width: 559px) {
+  /* The note of a map without network in the middle, clear of what NavIn
+     unrolls above it */
+  html body .map-missing {
+    top: 40%;
+    bottom: auto;
   }
 }
 @media (orientation: portrait) and (max-width: 559px) {
@@ -11406,4 +11433,100 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   display: block;
   width: 54px;
   height: 34px;
+}
+
+/* The forecast of the PréP: one card per moment, in the colour of its wind */
+.prep-fc {
+  margin-left: 28px;
+}
+.prep-fc-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.prep-fc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  line-height: 1.15;
+}
+.prep-fc-when {
+  font-size: 15px;
+  font-weight: 800;
+}
+.prep-fc-wind {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.prep-fc-wind i {
+  font-style: normal;
+  font-weight: 900;
+  font-size: 24px;
+  display: inline-block;
+}
+.prep-fc-wind b {
+  font-size: 34px;
+}
+.prep-fc-wind small {
+  font-size: 15px;
+  font-weight: 700;
+}
+.prep-fc-more {
+  font-size: 14px;
+  font-weight: 600;
+}
+:root[data-theme='night'] .prep-fc-card {
+  filter: brightness(0.7);
+}
+
+/* The live stations on the NavIn map: a band at the top right, its ✕ takes
+   them away */
+.live-chip {
+  position: fixed;
+  z-index: 1400;
+  top: calc(10px + env(safe-area-inset-top));
+  right: 80px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 4px 4px 12px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface, #fff);
+  color: var(--fg, inherit);
+  font-weight: 700;
+  font-size: 15px;
+}
+.btn.live-chip-off,
+.live-chip-off {
+  min-width: 40px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 900;
+}
+@media (orientation: landscape) and (min-width: 560px) {
+  html body .live-chip {
+    top: calc(var(--rb-top) + env(safe-area-inset-top));
+    right: calc(var(--rb-side) + var(--rb-x));
+    height: var(--rb-h);
+  }
+}
+@media (orientation: portrait) and (max-width: 559px) {
+  html body .live-chip {
+    top: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-top));
+    right: var(--rb-side);
+  }
+}
+:root[data-theme='night'] .live-chip-off {
+  background: var(--fg);
+  color: #000;
 }

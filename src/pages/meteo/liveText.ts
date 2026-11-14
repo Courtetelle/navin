@@ -1,8 +1,9 @@
-import type { MfTally } from '../../features/onwater/index.ts';
+import type { LiveStation, MfTally } from '../../features/onwater/index.ts';
 import {
   flashColor,
   flashInk,
   windLevel,
+  windValue,
 } from '../../features/onwater/index.ts';
 import { bft } from '../../lib/wind.ts';
 
@@ -31,6 +32,28 @@ export function windColors(knots: number): { color: string; ink: string } {
   const level = windLevel(knots);
   const color = level < 0 ? CALM : flashColor(level);
   return { color, ink: flashInk(color) };
+}
+
+function escapeHtml(text: string): string {
+  return text.replaceAll(/[&<>"']/gu, (char) => `&#${char.codePointAt(0)};`);
+}
+
+/**
+ * The badge of a station on a map: its colour, the arrow of the wind, the
+ * mean wind in bold, the gusts in small.
+ * @param station - The station.
+ * @param basis - Wind the colours follow, `'gust'` or `'avg'`.
+ * @returns The HTML of the badge.
+ */
+export function stationBadgeHtml(station: LiveStation, basis: string): string {
+  const { color, ink } = windColors(windValue(station, basis));
+  const gust =
+    station.gust == null ? '' : `<small>${Math.round(station.gust)}</small>`;
+  const arrow =
+    station.dir == null
+      ? ''
+      : `<i style="transform:rotate(${Math.round(station.dir)}deg)">↓</i>`;
+  return `<div class="live-mk" data-name="${escapeHtml(station.name)}" style="--c:${color};--ink:${ink}">${arrow}<b>${Math.round(station.avg)}</b>${gust}</div>`;
 }
 
 /**

@@ -162,6 +162,60 @@ async function bars(page: Page, theme: string): Promise<void> {
       return row.every((y) => y > globalThis.innerHeight - 60);
     }),
   );
+  await page.locator('.rail-boat').click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'T upright: ＋ and − one under the other under the arrow, full size',
+    await page.evaluate(() => {
+      // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
+      const box = (selector: string) =>
+        document.querySelector(selector)?.getBoundingClientRect();
+      const [arrow, plus, minus] = [
+        '.rail-boat',
+        '.rail-zoom-in',
+        '.rail-zoom-out',
+      ].map(box);
+      if (!arrow || !plus || !minus) return false;
+      return (
+        plus.top >= arrow.bottom &&
+        minus.top >= plus.bottom &&
+        Math.abs(plus.left - minus.left) < 2 &&
+        plus.height >= arrow.height - 2
+      );
+    }),
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'T upright: NavIn unrolls its menus in a column above it',
+    await page.evaluate(() => {
+      // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
+      const box = (selector: string) =>
+        document.querySelector(selector)?.getBoundingClientRect();
+      const column = [
+        '.top-tab[data-view="tracker"]',
+        '.navin-row .rail-prep',
+        '.top-tab.tab-data',
+        '#gearBtn',
+        '.navin-row .rail-comm',
+      ].map(box);
+      if (column.some((item) => !item)) return false;
+      const boxes = column as DOMRect[];
+      const [first] = boxes;
+      return boxes.every((item, index) => {
+        const below = boxes[index - 1];
+        return (
+          !below ||
+          !first ||
+          (item.bottom <= below.top + 1 && Math.abs(item.left - first.left) < 6)
+        );
+      });
+    }),
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(400);
 }
 
 async function layers(page: Page, theme: string): Promise<void> {

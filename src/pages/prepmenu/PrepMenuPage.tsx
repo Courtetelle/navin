@@ -11,6 +11,9 @@ import { buzz } from '../../lib/dom.ts';
 import { BRIEF_NAME } from '../../model/checklistBases.ts';
 import { go } from '../../shell/router.ts';
 import { navZone, state, toast } from '../../state/index.ts';
+import { showLiveOnMap } from '../tracker/liveOnMap.ts';
+
+import { PrepForecast } from './PrepForecast.tsx';
 
 /** Left on a zone this long, the zone is kept and the map comes back. */
 const ZONE_KEEP_MS = 3000;
@@ -86,6 +89,7 @@ export function PrepMenuPage() {
   useSignals();
   const tr = useTr();
   const [weather, setWeather] = useState(false);
+  const [forecast, setForecast] = useState(false);
   const entry = (
     key: string,
     icon: string,
@@ -136,14 +140,15 @@ export function PrepMenuPage() {
               '📈',
               'Prévision ici',
               'maintenant, dans 3 h, ce soir, demain matin',
-              () => go('weather', 'forecast'),
+              () => setForecast((open) => !open),
             )}
+            {forecast ? <PrepForecast /> : null}
             {entry(
               'wxlive',
               '🌬',
               'Stations Live météo',
-              'le vent mesuré dans 60 km',
-              () => go('meteo'),
+              'le vent mesuré dans 60 km, sur la carte',
+              showLiveOnMap,
             )}
           </div>
         ) : null}

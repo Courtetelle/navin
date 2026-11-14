@@ -17,6 +17,7 @@ import {
 import { useBodyClass } from '../../shell/bodyClass.ts';
 import { state } from '../../state/index.ts';
 
+import { LiveOnMap } from './LiveOnMap.tsx';
 import { PhoneTrackButton } from './PhoneTrackButton.tsx';
 import { TrackerDash } from './TrackerDash.tsx';
 import { TrackerOverlay } from './TrackerOverlay.tsx';
@@ -72,6 +73,7 @@ export function TrackerPage() {
       <TrackerDash />
       <PhoneTrackButton />
       <TrackerOverlay />
+      <LiveOnMap />
     </div>
   );
 }

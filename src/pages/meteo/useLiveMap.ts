@@ -6,11 +6,11 @@ import { OSM_TILES, SEAMARK_TILES } from '../../features/map/constants.ts';
 import { createMap, leaflet, loadLeaflet } from '../../features/map/leaflet.ts';
 import { disposeMap } from '../../features/map/mapExtras.ts';
 import type { AlertSpot, LiveStation } from '../../features/onwater/index.ts';
-import { stationKey, windValue } from '../../features/onwater/index.ts';
+import { stationKey } from '../../features/onwater/index.ts';
 import { distKm } from '../../lib/geo.ts';
 import { toast } from '../../state/index.ts';
 
-import { windColors } from './liveText.ts';
+import { stationBadgeHtml } from './liveText.ts';
 
 /** A place on the map. */
 export interface LivePlace {
@@ -42,9 +42,6 @@ const KM_TO_M = 1000;
 /** The two-finger hint comes back at most this often. */
 const HINT_EVERY_MS = 20_000;
 
-function escapeHtml(text: string): string {
-  return text.replaceAll(/[&<>"']/gu, (char) => `&#${char.codePointAt(0)};`);
-}
 /** How long a station is shown alone. */
 const FOCUS_MS = 4000;
 /** Closest zoom kept when a station is centred. */
@@ -206,20 +203,11 @@ export function useLiveMap(
       interactive: false,
     }).addTo(group);
     for (const station of stations) {
-      const { color, ink } = windColors(windValue(station, basis));
-      const gust =
-        station.gust == null
-          ? ''
-          : `<small>${Math.round(station.gust)}</small>`;
-      const arrow =
-        station.dir == null
-          ? ''
-          : `<i style="transform:rotate(${Math.round(station.dir)}deg)">↓</i>`;
       const key = stationKey(station);
       const marker = L.marker([station.lat, station.lon], {
         icon: L.divIcon({
           className: 'live-mk-wrap',
-          html: `<div class="live-mk" data-name="${escapeHtml(station.name)}" style="--c:${color};--ink:${ink}">${arrow}<b>${Math.round(station.avg)}</b>${gust}</div>`,
+          html: stationBadgeHtml(station, basis),
           iconSize: [0, 0],
         }),
         keyboard: false,

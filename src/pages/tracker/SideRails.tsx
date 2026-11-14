@@ -16,6 +16,11 @@ import {
   flipRuler,
   rulerOn,
 } from '../../features/map/rulerTool.ts';
+import {
+  chooseExtend,
+  chooseNew,
+  startChoice,
+} from '../../features/map/trackerButtons.ts';
 import { trkPointNow } from '../../features/map/trackerPoint.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { takePhoto } from '../../features/onwater/index.ts';
@@ -484,8 +489,51 @@ function PrepButton() {
 }
 
 /**
+ * « Prolonger » and « Nouvelle trace », buttons of the column beside START
+ * (under it on T upright), for 3 s after START when the outing of the day
+ * already has a track.
+ * @returns The two buttons, or nothing.
+ */
+function StartChoice() {
+  useSignals();
+  const tr = useTr();
+  if (!startChoice.value || state.view.tracking.value) return null;
+  return (
+    <>
+      <Button
+        type="button"
+        noUiEdit
+        className="rail-btn rail-extend"
+        id="railExtend"
+        aria-label={tr('Prolonger la trace précédente')}
+        onClick={chooseExtend}
+      >
+        <span className="rail-icon">↪</span>
+        <span className="rail-label">{tr('Prolonger')}</span>
+      </Button>
+      <Button
+        type="button"
+        noUiEdit
+        className="rail-btn rail-new"
+        id="railNew"
+        aria-label={tr('Nouvelle trace : repartir de zéro')}
+        onClick={chooseNew}
+      >
+        <span className="rail-icon">⏺</span>
+        <span className="rail-label">
+          {tr('Nouvelle')}
+          <span className="rail-word-more"> {tr('trace')}</span>
+        </span>
+      </Button>
+    </>
+  );
+}
+
+/**
  * START under NavIn: a short touch starts the track, then the button holds
- * every step of it; during a track Amarrage stands at its right.
+ * every step of it; during a track Amarrage stands at its right; when the
+ * outing of the day has a track, « Prolonger » and « Nouvelle trace » stand
+ * at its right for 3 s.
  * @returns The line.
  */
 function StartLine() {
@@ -511,6 +559,7 @@ function StartLine() {
   return (
     <div className="rail-line rail-depart">
       {start}
+      <StartChoice />
       {tracking ? (
         <Button
           type="button"

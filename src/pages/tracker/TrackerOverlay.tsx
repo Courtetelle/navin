@@ -1,5 +1,4 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect, useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
@@ -22,15 +21,9 @@ const FULL_WIDTH = { gridColumn: '1/-1' };
 export function TrackerOverlay() {
   useSignals();
   const overlay = trackerOverlay.value;
-  const box = useRef<HTMLDivElement>(null);
-  const choosing = overlay.kind === 'choose';
-  useEffect(() => {
-    if (choosing) {
-      box.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [choosing]);
+  // No scrolling into view: it pushed the map up and left a grey band.
   return (
-    <div className="trk-over" id="trkBtns" ref={box}>
+    <div className="trk-over" id="trkBtns">
       {overlay.kind === 'choose' ? (
         <div className="trk-choose" style={FULL_WIDTH}>
           <HelpText nextIsRow style={{ margin: '0 0 8px' }}>
