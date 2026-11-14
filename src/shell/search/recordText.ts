@@ -160,3 +160,44 @@ export function foundIn(
   if (!line.label) return value;
   return value ? `${line.label} : ${value}` : line.label;
 }
+
+/**
+ * A record of any kind, every word it holds.
+ * @param record - The record.
+ * @returns One line.
+ */
+export function anyLines(record: unknown): RecordLine[] {
+  const lines: RecordLine[] = [];
+  collect(record, '', lines);
+  return lines;
+}
+
+/** Keys of the app, never written by anyone: left out of the search. */
+const INTERNAL = new Set([
+  'id',
+  'memberId',
+  'cid',
+  'seed',
+  'at',
+  'created',
+  'updated',
+  't',
+  'kind',
+  'type',
+]);
+
+function collect(value: unknown, key: string, lines: RecordLine[]): void {
+  if (INTERNAL.has(key)) return;
+  if (Array.isArray(value)) {
+    for (const item of value) collect(item, key, lines);
+    return;
+  }
+  if (value && typeof value === 'object') {
+    for (const [inner, item] of Object.entries(value)) {
+      collect(item, inner, lines);
+    }
+    return;
+  }
+  const text = textValue(value);
+  if (text) lines.push({ label: '', value: text });
+}

@@ -108,6 +108,7 @@ export function SwipeRow({
     <>
       <div
         className="swipe-row"
+        data-sw-id={id || undefined}
         onPointerDown={(event) => {
           const inField = (event.target as Element).closest(
             'input, textarea, select',

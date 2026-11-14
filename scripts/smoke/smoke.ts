@@ -277,14 +277,14 @@ async function search(page: Page, theme: string): Promise<void> {
   await page.locator('#searchInput').fill('alarme');
   check(
     theme,
-    'everywhere, it finds a function',
-    (await page.locator('.search-hit[data-hit=function]').count()) > 0,
+    'on the map it looks only on the map: no function',
+    (await page.locator('.search-hit[data-hit=function]').count()) === 0,
   );
   await page.locator('#searchInput').fill('chillon');
   const firstGroup = await page.locator('.search-group').first().textContent();
   check(
     theme,
-    'on the map, places come first (here)',
+    'on the map, the places of the map',
     firstGroup?.includes('Lieux') === true,
   );
   await page.locator('.search-hit', { hasText: 'Chillon' }).first().click();

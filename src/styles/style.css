@@ -11639,3 +11639,14 @@ body.trk-mode .trk-full {
     );
   }
 }
+
+/* A band found by the search, lit a moment */
+.swipe-row.search-found {
+  outline: 4px solid #ffd400;
+  outline-offset: 2px;
+  border-radius: 14px;
+  transition: outline-color 0.3s;
+}
+:root[data-theme='night'] .swipe-row.search-found {
+  outline-color: #ff4040;
+}

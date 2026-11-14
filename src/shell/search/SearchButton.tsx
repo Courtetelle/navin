@@ -106,6 +106,28 @@ interface OnlineAnswer {
   places: PlaceEntry[];
 }
 
+/** How long a band found stays lit. */
+const LIT_MS = 2500;
+
+/**
+ * Bring the band found into view in its list, lit a moment.
+ * @param id - The id of its record.
+ */
+function lightBand(id: string): void {
+  setTimeout(() => {
+    const band = [
+      ...document.querySelectorAll<HTMLElement>('[data-sw-id]'),
+    ].find(
+      (one) =>
+        one.dataset.swId === id || one.dataset.swId?.startsWith(`${id}#`),
+    );
+    if (!band) return;
+    band.scrollIntoView({ block: 'center' });
+    band.classList.add('search-found');
+    setTimeout(() => band.classList.remove('search-found'), LIT_MS);
+  }, 400);
+}
+
 /**
  * Open what a suggestion names.
  * @param hit - The suggestion.
@@ -123,15 +145,18 @@ function openHit(hit: SearchHit): void {
   } else if (hit.kind === 'crew') {
     beginCrewSetEdit(hit.id);
     go('crews');
+  } else if (hit.view) {
+    go(hit.view);
+    lightBand(hit.id);
   } else {
     go(hit.id);
   }
 }
 
 /**
- * The search, over the screen: one field; first what the screen looks for
- * (a place on the map, a name in the boats, the cards, the crews), then
- * everything of the app, suggested from the first letters typed.
+ * The search, over the screen: one field, looking only in what the screen
+ * holds (places on the map, every field of the boats, the cards, the crews,
+ * the marks, the traces, the SOS logs, the navigations, the check-lists).
  * @param props - Closes the window.
  * @returns The window.
  */
@@ -162,7 +187,7 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
   }, [query, asksOnline]);
   const online = answer?.query === query ? answer.places : [];
   const waiting = asksOnline && answer?.query !== query;
-  const { here, everywhere } = searchHits(query, context);
+  const here = searchHits(query, context);
   const pick = (hit: SearchHit) => {
     onClose();
     openHit(hit);
@@ -175,10 +200,7 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
     place,
   }));
   const typed = query.trim().length > 0;
-  const empty =
-    typed &&
-    !waiting &&
-    here.length + everywhere.length + onlineHits.length === 0;
+  const empty = typed && !waiting && here.length + onlineHits.length === 0;
   return createPortal(
     <div
       className="ck-ask search-modal no-print"
@@ -199,18 +221,13 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
             if (event.key !== 'Enter') return;
-            const first = here[0] ?? everywhere[0] ?? onlineHits[0];
+            const first = here[0] ?? onlineHits[0];
             if (first) pick(first);
           }}
         />
         <HitGroup
-          title={`Ici · ${context.title}`}
+          title={context.title}
           hits={context.online ? [...here, ...onlineHits] : here}
-          onPick={pick}
-        />
-        <HitGroup
-          title="Partout"
-          hits={context.online ? everywhere : [...everywhere, ...onlineHits]}
           onPick={pick}
         />
         {waiting ? <p className="help">Recherche en ligne…</p> : null}
