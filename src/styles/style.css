@@ -186,6 +186,9 @@ main {
 .row.c4 {
   grid-template-columns: repeat(4, 1fr);
 }
+.row.c5 {
+  grid-template-columns: repeat(5, 1fr);
+}
 .row + .row {
   margin-top: var(--gap);
 }
@@ -9108,6 +9111,21 @@ body.has-navtop #view > h1.live-title,
 }
 .live-tools {
   margin-top: 0;
+}
+/* Back from « voir sur la carte »: its badge blinks three times */
+.live-blink {
+  z-index: 1000 !important;
+}
+.live-blink .live-mk {
+  animation: live-blink 0.5s ease-in-out 3;
+}
+@keyframes live-blink {
+  50% {
+    opacity: 0.15;
+    box-shadow:
+      0 0 0 4px #fff,
+      0 0 0 10px #d0021b;
+  }
 }
 .live-mk-wrap {
   background: none;

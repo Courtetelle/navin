@@ -44,7 +44,7 @@ export function hideLiveOnMap(): void {
 }
 
 /** The radii LiveMétéo offers in Réglages, in nautical miles. */
-export const LIVE_RADII_NM = [15, 30, 60, 120] as const;
+export const LIVE_RADII_NM = [15, 30, 60, 120, 180] as const;
 
 /**
  * The radius of LiveMétéo around the zone or the GPS, in nautical miles

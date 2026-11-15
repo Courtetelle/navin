@@ -24,7 +24,7 @@ import { liveRadius } from '../tracker/liveOnMap.ts';
 import { StationCard } from './StationCard.tsx';
 import { StationList } from './StationList.tsx';
 import { boatPlace, liveBackFrom, mapPlace } from './boatPlace.ts';
-import { liveDetail } from './liveDetail.ts';
+import { blinkKey, liveBlink, liveDetail } from './liveDetail.ts';
 import { mfTallyText } from './liveText.ts';
 import type { LivePlace } from './useLiveMap.ts';
 import { useLiveMap } from './useLiveMap.ts';
@@ -83,7 +83,10 @@ function LiveDetail({ station }: { station: LiveStation }) {
           loading={loading}
           backLabel="◀ Revenir à la carte"
           onBack={backToMap}
-          onLocate={backToMap}
+          onLocate={() => {
+            liveBlink.value = blinkKey(current);
+            backToMap();
+          }}
           onRefresh={() => {
             buzz();
             setLoading(true);

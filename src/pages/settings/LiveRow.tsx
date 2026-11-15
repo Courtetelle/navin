@@ -20,7 +20,7 @@ export function LiveRow() {
   return (
     <>
       <h3>{tr('Rayon autour de la zone')}</h3>
-      <ButtonRow className="row c4">
+      <ButtonRow className="row c5">
         {LIVE_RADII_NM.map((value) => (
           <Button
             key={value}

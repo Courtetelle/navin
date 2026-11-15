@@ -12,7 +12,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
 import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
-import { liveDetail } from '../meteo/liveDetail.ts';
+import { blinkKey, liveBlink, liveDetail } from '../meteo/liveDetail.ts';
 import { ageText, compassPoint, stationBadgeHtml } from '../meteo/liveText.ts';
 
 import {
@@ -93,6 +93,16 @@ function addBadge(
     .addTo(layer);
   const element = marker.getElement();
   if (!element) return;
+  // Back from « voir sur la carte » on its card: the badge blinks 3 times.
+  if (liveBlink.peek() === blinkKey(station)) {
+    liveBlink.value = null;
+    element.classList.add('live-blink');
+    element.addEventListener(
+      'animationend',
+      () => element.classList.remove('live-blink'),
+      { once: true },
+    );
+  }
   // A long press: the whole card of the station, ◀ back here.
   element.addEventListener('pointerdown', () => {
     long = false;
