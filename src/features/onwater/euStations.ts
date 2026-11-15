@@ -17,6 +17,8 @@ const AMATEUR_NETS = new Set(['mnw', 'meteonetwork']);
 const MS_TO_KN = 3600 / 1852;
 /** A measurement older than this is not the wind of now. */
 const MAX_AGE_MS = 70 * 60_000;
+/** The NOAA buoys and lightships report hourly, often late. */
+const NDBC_MAX_AGE_MS = 3 * 3_600_000;
 /** A whole network read again after this long. */
 const NETWORK_MS = 10 * 60_000;
 const WEEK_MS = 7 * 86_400_000;
@@ -53,8 +55,8 @@ export function nearStations<T extends { lat: number; lon: number }>(
     .slice(0, most);
 }
 
-function fresh(t: number, now: number): boolean {
-  return Number.isFinite(t) && now - t < MAX_AGE_MS && t - now < 10 * 60_000;
+function fresh(t: number, now: number, most = MAX_AGE_MS): boolean {
+  return Number.isFinite(t) && now - t < most && t - now < 10 * 60_000;
 }
 
 function knots(metres: number | null | undefined): number | null {
@@ -1117,7 +1119,8 @@ export function ndbcReading(
     minute ?? 0,
   );
   const avg = cell('WSPD');
-  if (avg == null || !fresh(t, now)) return null;
+  // Hourly, often more than an hour late: a buoy is kept 3 hours.
+  if (avg == null || !fresh(t, now, NDBC_MAX_AGE_MS)) return null;
   return {
     name: station.name,
     km,

@@ -192,8 +192,33 @@ function WeatherMenu() {
             <small>{tr('le vent mesuré maintenant par les stations')}</small>
           </span>
         </Button>
-        <Button className="btn wx-keys-link" data-wx="keys" onClick={openKeys}>
-          {tr('🔑 Clés météo (Réglages)')}
+        <Button
+          className="btn wx-keys-link"
+          data-wx="keys"
+          aria-label={tr('Sortir du menu Météo vers Réglages › Clés météo')}
+          onClick={openKeys}
+        >
+          <svg className="exit-ico" viewBox="0 0 32 32" aria-hidden="true">
+            <path
+              d="M14 5H7a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h7"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+            />
+            <path
+              d="M13 16h15m-5-5 5 5-5 5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>
+            {tr('🔑 Clés météo')}
+            <small>{tr('sortir du menu Météo, vers Réglages')}</small>
+          </span>
         </Button>
       </div>
     </>

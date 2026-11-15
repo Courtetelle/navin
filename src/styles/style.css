@@ -12551,3 +12551,28 @@ html body .lx-modal .ck-ask-box {
   color: var(--fg);
   border-color: var(--fg);
 }
+/* Leaving the menu for another place of NavIn: the exit sign at the left */
+.btn.wx-keys-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  text-align: left;
+}
+.btn.wx-keys-link span {
+  display: grid;
+  gap: 2px;
+}
+.btn.wx-keys-link small {
+  font-weight: 500;
+  opacity: 0.75;
+}
+.exit-ico {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  color: var(--primary, #0b3d91);
+}
+:root[data-theme='night'] .exit-ico {
+  color: var(--fg);
+}
