@@ -43,7 +43,7 @@ export function PrepPage() {
 }
 
 function title({ step, sub }: PrepFlow): string | undefined {
-  if (step === 0) return 'Sortie de type';
+  if (step === 0) return 'Programmation de la sortie';
   if (step === 2 && sub === 'tarif') return 'Tarif';
   if (step === 3 && sub === 'crewEdit') return 'Nouvel équipage';
   return PREP_STEPS[step];

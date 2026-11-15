@@ -17,11 +17,8 @@ export function prepBack(): void {
   buzz();
   const prep = prepFlow();
   if (!prep) return;
-  const { step, sub, type, fill } = prep;
-  if (
-    (step === 0 && sub === 'purpose' && !fill) ||
-    (step === 1 && type === 'mer' && !fill)
-  ) {
+  const { step, sub, fill } = prep;
+  if (step === 0 && sub === 'purpose' && !fill) {
     quit();
     return;
   }
@@ -46,7 +43,8 @@ export function prepBack(): void {
     prepGo(2, true);
     return;
   }
-  if (step === 2 && type === 'lac') {
+  // The boat: back to the format, at sea as on a lake (no step of length).
+  if (step === 2 || step === 1) {
     updatePrepFlow((flow) => {
       flow.sub = 'purpose';
     });

@@ -83,12 +83,21 @@ export function isCkBuiltin(list: string): boolean {
   return list === 'dep' || list === 'quit';
 }
 
-/** Purposes of a lake outing: `[name, icon, sub-label]` (legacy `PREP_PURPOSES`). */
+/**
+ * Formats of an outing: `[name, icon, sub-label]`. « Location » is shown
+ * « Location Savannah »; « Croisière » is an outing of several days.
+ */
 export const PREP_PURPOSES: ReadonlyArray<readonly [string, string, string]> = [
   ['Entraînement', '🎯', 'entre membres'],
   ['Location', '🔑', 'tarif calculé'],
   ['Invitation', '🤝', 'invités à bord'],
+  ['Croisière', '🌙', 'plusieurs jours'],
 ];
+
+/** How a format is written on its button. */
+export const PURPOSE_LABELS: Readonly<Record<string, string>> = {
+  Location: 'Location Savannah',
+};
 
 /** Steps of the PréP flow (legacy `PREP_STEPS`). */
 export const PREP_STEPS: readonly string[] = [

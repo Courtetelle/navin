@@ -23,7 +23,6 @@ import { prepFlow, updatePrepFlow } from './prepTypes.ts';
 export function pickPurpose(purpose: string): void {
   buzz();
   const path = prepPathGet(purpose);
-  const type = prepFlow()?.type;
   updatePrepFlow((prep) => {
     const { type } = prep;
     for (const key of PREP_PATH_KEYS) Reflect.deleteProperty(prep, key);
@@ -36,14 +35,15 @@ export function pickPurpose(purpose: string): void {
       Object.assign(prep, path);
       Reflect.deleteProperty(prep, 't');
     } else {
-      prep.duree = 'jour';
+      // Croisière: several days; the others, one day.
+      prep.duree = purpose === 'Croisière' ? 'croisiere' : 'jour';
       prep.fresh = true;
       prep.reach = 0;
     }
   });
   if (!path) {
-    // At sea the length of the outing comes next; on a lake, the boat.
-    prepGo(type === 'mer' ? 1 : 2);
+    // The length comes with the format: the boat next, at sea as on a lake.
+    prepGo(2);
     return;
   }
   if (
@@ -77,6 +77,8 @@ export function pickBoat(boatId: string): void {
   buzz();
   updatePrepFlow((prep) => {
     prep.boatId = boatId;
+    // At sea the cruise carries the name of the boat chosen.
+    if (prep.type === 'mer') prep.boatName = boatById(boatId)?.info.boat ?? '';
   });
   prepCreateOrFill();
   const prep = prepFlow();

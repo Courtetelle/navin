@@ -4,7 +4,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { prepPathSub } from '../../features/prep/prepPaths.ts';
 import { pickDuree, pickPurpose } from '../../features/prep/prepPicks.ts';
 import type { PrepFlow } from '../../features/prep/prepTypes.ts';
-import { PREP_PURPOSES } from '../../model/modes.ts';
+import { PREP_PURPOSES, PURPOSE_LABELS } from '../../model/modes.ts';
 
 import { PrepNav } from './PrepNav.tsx';
 
@@ -15,7 +15,8 @@ export interface PrepStepProps {
 }
 
 /**
- * Lake outing: Entraînement, Location or Invitation, each with its own path.
+ * The format of the outing: Entraînement, Location Savannah, Invitation or
+ * Croisière, each with its own path, at sea as on a lake.
  * @param props - PréP flow.
  * @returns The three choices.
  */
@@ -34,7 +35,7 @@ export function PrepPurposeStep({ prep }: PrepStepProps) {
               data-v={purpose}
               onClick={() => pickPurpose(purpose)}
             >
-              {icon} {purpose}
+              {icon} {PURPOSE_LABELS[purpose] ?? purpose}
               <small>{current || sub}</small>
             </Button>
           );
