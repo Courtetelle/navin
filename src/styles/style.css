@@ -12480,3 +12480,9 @@ html body .lx-modal .ck-ask-box {
 .key-qr-all .key-qr-code b {
   font-size: 17px;
 }
+.key-row .btn.key-scan-open {
+  margin: 10px 0 0;
+}
+.key-row .key-scan {
+  margin: 10px 0 0;
+}

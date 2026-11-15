@@ -61,7 +61,7 @@ export function KeyQrAll() {
       >
         {open
           ? '📤 Masquer les QR codes'
-          : `📤 Partager toutes les clés (${count})`}
+          : `📤 Partager toutes les clés et le relais (${count})`}
       </Button>
       {code && shown ? (
         <figure className="key-qr-code">
@@ -79,8 +79,9 @@ export function KeyQrAll() {
           </svg>
           <figcaption>
             Sur l’autre appareil, dans NavIn : Réglages › Clés météo › 📥
-            Importer toutes les clés, et viser l’écran : les codes passent l’un
-            après l’autre, chaque clé s’enregistre. Aucun réseau n’est utilisé.
+            Importer toutes les clés et le relais, et viser l’écran : les codes
+            passent l’un après l’autre, chaque clé s’enregistre. Aucun réseau
+            n’est utilisé.
           </figcaption>
         </figure>
       ) : null}

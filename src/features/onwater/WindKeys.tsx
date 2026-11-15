@@ -18,7 +18,6 @@ export function WindKeys() {
         <KeyQrAll />
         <KeyScan all />
       </div>
-      <KeyScan />
       <MfKeyRow />
       <StationKeyRow station={AEMET_KEY} />
       <StationKeyRow station={MET_OFFICE_KEY} />

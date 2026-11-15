@@ -10,6 +10,7 @@ import { state, toast, updateSettings } from '../../state/index.ts';
 import { KeyAccount } from './KeyAccount.tsx';
 import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
+import { KeyScan } from './KeyScan.tsx';
 import type { WindReading } from './windTypes.ts';
 
 /** The key is tried again after this long when nothing came. */
@@ -132,6 +133,7 @@ export function StationKeyRow({ station }: { station: StationKey }) {
         id={station.setting === 'aemetKey' ? 'aemet' : 'metoffice'}
         value={key}
       />
+      <KeyScan only={station.setting === 'aemetKey' ? 'aemet' : 'metoffice'} />
       <KeyGuide id={station.account} name={station.name} />
       <KeyAccount
         id={station.account}

@@ -10,6 +10,7 @@ import { lastKnownPos, toast, updateSettings } from '../../state/index.ts';
 import { KeyAccount } from './KeyAccount.tsx';
 import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
+import { KeyScan } from './KeyScan.tsx';
 import { mfCheck } from './coastStations.ts';
 import { seaPlace } from './externals.ts';
 import { checkText } from './mfCheckText.ts';
@@ -89,6 +90,7 @@ export function MfKeyRow() {
         ) : null}
       </form>
       <KeyQr id="mf" value={key} />
+      <KeyScan only="mf" />
       <KeyGuide id="mf" name="Météo-France" />
       <KeyAccount
         id="mf"

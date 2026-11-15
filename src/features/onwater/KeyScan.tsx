@@ -3,7 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { buzz } from '../../lib/dom.ts';
-import { KEY_LINKS, saveKeyLink, toast } from '../../state/index.ts';
+import type { KeyLinkId } from '../../state/index.ts';
+import {
+  KEY_LINKS,
+  readKeyLink,
+  saveKeyLink,
+  toast,
+} from '../../state/index.ts';
 
 /** The decoder of jsQR, whichever way its CommonJS module is handed. */
 const jsQR = ((jsQRModule as unknown as { default?: unknown }).default ??
@@ -16,6 +22,33 @@ const jsQR = ((jsQRModule as unknown as { default?: unknown }).default ??
 /** Every network a key can come from: all read, the camera closes. */
 const KEY_COUNT = Object.keys(KEY_LINKS).length;
 
+/**
+ * Which key a code holds.
+ * @param text - The text of the code.
+ * @returns The key, or null.
+ */
+function keyOf(text: string): KeyLinkId | null {
+  try {
+    return readKeyLink(new URL(text).hash)?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The words of the button.
+ * @param all - Every key and the relay.
+ * @param only - One key.
+ * @returns The words.
+ */
+function label(all: boolean, only: KeyLinkId | undefined): string {
+  if (all) return '📥 Importer toutes les clés et le relais';
+  if (only === 'relay') return '📥 Importer l’adresse du relais';
+  return only
+    ? `📥 Importer la clé ${KEY_LINKS[only].name}`
+    : '📥 Importer une clé';
+}
+
 /** The camera image is looked at this often for a code. */
 const LOOK_MS = 250;
 
@@ -24,9 +57,18 @@ const LOOK_MS = 250;
  * (Réglages › Clés météo › 📤 Partager la clé): the key is saved here at
  * once, in NavIn itself (on an iPhone, NavIn of the home screen does not
  * see what Safari keeps). No network is used.
+ * @param props - What is read.
+ * @param props.all - Every key and the relay, one code after the other.
+ * @param props.only - Only this key (the button of its row).
  * @returns The button, or the camera while it reads.
  */
-export function KeyScan({ all = false }: { all?: boolean }) {
+export function KeyScan({
+  all = false,
+  only,
+}: {
+  all?: boolean;
+  only?: KeyLinkId;
+}) {
   const [reading, setReading] = useState(false);
   const [read, setRead] = useState<string[]>([]);
   const seen = useRef<string[]>([]);
@@ -49,6 +91,14 @@ export function KeyScan({ all = false }: { all?: boolean }) {
       const image = context.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(image.data, image.width, image.height);
       if (!code?.data) return;
+      // The button of a key reads only that key.
+      const kind = keyOf(code.data);
+      if (only && kind && kind !== only) {
+        toast(
+          `Ce code est la clé ${KEY_LINKS[kind].name}, pas la clé ${KEY_LINKS[only].name}`,
+        );
+        return;
+      }
       const name = saveKeyLink(code.data);
       if (!name) {
         toast('Ce QR code ne contient pas de clé de NavIn');
@@ -91,7 +141,7 @@ export function KeyScan({ all = false }: { all?: boolean }) {
       clearInterval(timer);
       for (const track of stream?.getTracks() ?? []) track.stop();
     };
-  }, [reading, all]);
+  }, [reading, all, only]);
   if (!reading) {
     return (
       <Button
@@ -99,12 +149,16 @@ export function KeyScan({ all = false }: { all?: boolean }) {
         className="btn key-scan-open"
         onClick={() => {
           buzz();
+          seen.current = [];
+          setRead([]);
           setReading(true);
         }}
       >
-        📥 Importer une clé
+        {label(all, only)}
         <small>
-          l’appareil photo de NavIn lit le QR code d’un autre appareil
+          {all
+            ? 'les codes de « Partager toutes les clés et le relais », l’un après l’autre'
+            : 'l’appareil photo de NavIn lit le QR code d’un autre appareil'}
         </small>
       </Button>
     );
@@ -114,7 +168,7 @@ export function KeyScan({ all = false }: { all?: boolean }) {
       <video ref={video} className="key-scan-video" playsInline muted />
       <p className="help">
         {all
-          ? `Viser les codes de « 📤 Partager toutes les clés » sur l’autre appareil. Lues : ${read.length > 0 ? read.join(', ') : 'aucune encore'}.`
+          ? `Viser les codes de « 📤 Partager toutes les clés et le relais » sur l’autre appareil. Lues : ${read.length > 0 ? read.join(', ') : 'aucune encore'}.`
           : 'Viser le QR code affiché par « 📤 Partager la clé » sur l’autre appareil.'}
       </p>
       <Button
