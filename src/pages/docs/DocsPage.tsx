@@ -1,9 +1,9 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useRef, useState } from 'react';
 
-import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import type { StoredDocument } from '../../features/onwater/docStore.ts';
 import { getDoc, putDoc } from '../../features/onwater/docStore.ts';
 import { LEMAN_ARCGIS } from '../../features/onwater/externals.ts';
@@ -68,15 +68,11 @@ export function DocsPage() {
       >
         Documents obligatoires à bord
       </PageTitle>
-      <LinkButton
-        className="btn big link-btn"
-        href={LEMAN_ARCGIS}
-        target="_blank"
-        rel="noopener"
-      >
-        {tr('🌐 Carte interactive du Léman (ArcGIS)')}
-        <small>{tr('en ligne')}</small>
-      </LinkButton>
+      <SiteLink
+        id="docs-arcgis-leman"
+        label="🌐 Carte interactive du Léman (ArcGIS)"
+        url={LEMAN_ARCGIS}
+      />
       <div id="docList">
         {LEMAN_DOCS.map((document) => (
           <DocumentCard

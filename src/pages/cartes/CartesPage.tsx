@@ -2,10 +2,9 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
-import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpPill, HelpText } from '../../components/shared/HelpText.tsx';
+import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { helpBubbleText } from '../../components/shared/helpRules.ts';
 import { useIntroLead } from '../../components/shared/introLead.ts';
@@ -62,7 +61,13 @@ function CartesContent({ onChange }: { onChange: () => void }) {
       </p>
       <MapLayersSection />
       <OfflineMaps />
-      <FoldSection title="🏔 Léman : données hors ligne">
+      <FoldSection title="🏔 Léman : alertes de rive et de profondeur">
+        <HelpText nextIsRow>
+          Pas une carte : ces données hors ligne servent aux alertes des zones
+          de 150 et 300 m, des ports et de la baignade, et à l’alarme de
+          profondeur. La carte elle-même est celle importée plus haut (19 Suisse
+          lacs italiens).
+        </HelpText>
         <LemanTools />
       </FoldSection>
       {zones.length > 0 ? (
@@ -85,17 +90,11 @@ function CartesContent({ onChange }: { onChange: () => void }) {
         <HelpText nextIsRow>
           Réseau nécessaire, s’ouvrent dans le navigateur.
         </HelpText>
-        <ButtonRow>
-          <LinkButton
-            className="btn big link-btn"
-            href={LEMAN_ARCGIS}
-            target="_blank"
-            rel="noopener"
-          >
-            {tr('🌐 Carte ArcGIS du Léman')}
-            <small>{tr('carte en ligne, réseau nécessaire')}</small>
-          </LinkButton>
-        </ButtonRow>
+        <SiteLink
+          id="map-arcgis-leman"
+          label="🌐 Carte ArcGIS du Léman"
+          url={LEMAN_ARCGIS}
+        />
       </FoldSection>
     </>
   );

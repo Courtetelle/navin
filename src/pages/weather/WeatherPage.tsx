@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { LinkButton } from '../../components/shared/EditableLinks.tsx';
+import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { WindAlert } from '../../features/onwater/index.ts';
 import type { Forecast } from '../../features/tracking/index.ts';
@@ -326,26 +326,20 @@ function ForecastPage() {
         </section>
         <section className="wx-links">
           <h2>{tr('Sources officielles')}</h2>
-          <ButtonRow className="row c2">
-            {lake ? (
-              <LinkButton
-                className="btn"
-                href="https://www.meteosuisse.admin.ch/meteo/dangers.html"
-                target="_blank"
-                rel="noopener"
-              >
-                {tr('⚠️ Alertes MeteoSwiss')}
-              </LinkButton>
-            ) : (
-              <LinkButton
-                className="btn"
-                href="https://meteofrance.com/meteo-marine"
-                target="_blank"
-                rel="noopener"
-              >
-                {tr('⚓ Météo marine Météo-France')}
-              </LinkButton>
-            )}
+          {lake ? (
+            <SiteLink
+              id="wx-meteoswiss"
+              label="⚠️ Alertes MeteoSwiss"
+              url="https://www.meteosuisse.admin.ch/meteo/dangers.html"
+            />
+          ) : (
+            <SiteLink
+              id="wx-mf-marine"
+              label="Bulletins Météo Spéciaux (BMS)"
+              url="https://meteofrance.com/meteo-marine"
+            />
+          )}
+          <ButtonRow className="row">
             <Button
               className="btn"
               onClick={() => {

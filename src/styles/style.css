@@ -12609,3 +12609,62 @@ html body .lx-modal .ck-ask-box {
   color: var(--fg);
   border-color: var(--fg);
 }
+
+/* A link to another site, the same everywhere: a pill, the address in full
+   under it, a pencil at the right */
+.site-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--card, #f2f4f7);
+}
+.site-link-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+.site-link-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: var(--primary, #0b3d91);
+  color: #fff;
+  font-weight: 700;
+  font-size: 18px;
+  text-decoration: none;
+}
+.site-link-url {
+  font-size: 14px;
+  color: var(--muted, #5b6575);
+  overflow-wrap: anywhere;
+}
+.btn.site-link-pen {
+  flex: 0 0 auto;
+  width: 56px;
+  min-width: 56px;
+}
+.site-link-edit {
+  display: grid;
+  gap: 10px;
+}
+.site-link-edit label {
+  display: grid;
+  gap: 4px;
+}
+:root[data-theme='night'] .site-link-pill {
+  background: #6a0000;
+  color: var(--fg);
+}
+.wx-links .site-link {
+  margin-bottom: 12px;
+}
+.btn.site-link-reset {
+  width: 100%;
+}

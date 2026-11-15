@@ -4,6 +4,7 @@ import type { TrackPoint } from '../../state/index.ts';
 import {
   keyBook,
   loadTrack,
+  siteLinkEdits,
   state,
   traceCutTimes,
   traceNames,
@@ -116,6 +117,9 @@ export function backupAll(): BackupPack {
   // some: they go to another device with the backup.
   const book = keyBook();
   if (book) content.keyBook = book;
+  // The links to sites changed with their pencil.
+  const links = siteLinkEdits();
+  if (Object.keys(links).length > 0) content.siteLinks = links;
   return {
     name: `NavIn-tout-${dateStamp(date)}.json`,
     data: content,

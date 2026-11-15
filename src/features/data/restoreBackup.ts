@@ -16,6 +16,7 @@ import {
   mergeKeyBook,
   mergeMarks,
   mergeMembers,
+  mergeSiteLinks,
   mergeTraceNames,
   mergeUiEdits,
   openCruise,
@@ -90,6 +91,8 @@ export interface BackupFile {
   traceNames?: unknown;
   /** @default undefined */
   keyBook?: unknown;
+  /** @default undefined */
+  siteLinks?: unknown;
 }
 
 /** What a restoration did. */
@@ -212,6 +215,7 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
   }
   mergeTraceNames(file.traceNames);
   mergeKeyBook(file.keyBook);
+  mergeSiteLinks(file.siteLinks);
   restoreRecords(file);
   await restorePhotos(file.photos);
   if (file.all && file.settings && data.index.value.length === 0) {
