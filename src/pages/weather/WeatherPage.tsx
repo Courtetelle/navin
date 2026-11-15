@@ -37,11 +37,6 @@ import { showLiveAround } from '../tracker/liveOnMap.ts';
 
 import { PrepForecast } from './PrepForecast.tsx';
 
-function openLive() {
-  buzz();
-  go('meteo');
-}
-
 function toggle(id: string): void {
   buzz();
   toggleWxCheck(id);
@@ -178,21 +173,6 @@ function WeatherMenu() {
         {here ? <PrepForecast /> : null}
         <Button
           className="btn big wx-entry"
-          data-wx="map"
-          onClick={showLiveAround}
-        >
-          <span className="wx-entry-ico">🗺</span>
-          <span>
-            <b>{tr('Stations LiveMétéo sur la carte')}</b>
-            <small>
-              {tr(
-                'le vent mesuré sur la carte affichée (appui long sur Météo)',
-              )}
-            </small>
-          </span>
-        </Button>
-        <Button
-          className="btn big wx-entry"
           data-wx="alerts"
           onClick={openAlerts}
         >
@@ -204,11 +184,19 @@ function WeatherMenu() {
             </small>
           </span>
         </Button>
-        <Button className="btn big wx-entry" data-wx="live" onClick={openLive}>
+        <Button
+          className="btn big wx-entry"
+          data-wx="live"
+          onClick={showLiveAround}
+        >
           <span className="wx-entry-ico">🌬</span>
           <span>
             <b>{tr('LiveMétéo')}</b>
-            <small>{tr('le vent mesuré maintenant par les stations')}</small>
+            <small>
+              {tr(
+                'le vent mesuré par les stations de la zone, sur la carte (rayon dans Réglages)',
+              )}
+            </small>
           </span>
         </Button>
         <Button

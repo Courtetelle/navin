@@ -23,6 +23,7 @@ import { BackupSections } from './BackupSections.tsx';
 import { InstallGuide } from './InstallGuide.tsx';
 import { LakeCenterRow } from './LakeCenterRow.tsx';
 import { LangRow } from './LangRow.tsx';
+import { LiveRow } from './LiveRow.tsx';
 import { MarginRows } from './MarginRows.tsx';
 import { OfflineSection } from './OfflineSection.tsx';
 import { SeaCenterRow } from './SeaCenterRow.tsx';
@@ -224,6 +225,9 @@ export function SettingsPage({ from, arg }: PageProps) {
             <GotoArrivalRows />
             <PrefillRow />
             <WeatherRow />
+          </SettingsSection>
+          <SettingsSection section="live" title="🌬 LiveMétéo">
+            <LiveRow />
           </SettingsSection>
           <SettingsSection section="keys" title="🔑 Clés météo">
             <WindKeys />

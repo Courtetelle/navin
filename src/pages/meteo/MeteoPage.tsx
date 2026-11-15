@@ -19,18 +19,17 @@ import { fmtTime } from '../../lib/format.ts';
 import { useWide } from '../../lib/useWide.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go, navigation } from '../../shell/router.ts';
+import { liveRadius } from '../tracker/liveOnMap.ts';
 
 import { StationCard } from './StationCard.tsx';
 import { StationList } from './StationList.tsx';
 import { boatPlace, liveBackFrom, mapPlace } from './boatPlace.ts';
+import { liveDetail } from './liveDetail.ts';
 import { mfTallyText } from './liveText.ts';
 import type { LivePlace } from './useLiveMap.ts';
 import { useLiveMap } from './useLiveMap.ts';
 
 /** Radii offered, in km. */
-const RADII = [30, 60, 120] as const;
-/** LiveMétéo opens on this radius, whatever the radius of the alerts. */
-const LIVE_RADIUS = 60;
 /** The stations are read again this often while the screen is open. */
 const REFRESH_MS = 2 * 60_000;
 
@@ -41,6 +40,73 @@ const REFRESH_MS = 2 * 60_000;
  * @returns The screen content.
  */
 export function MeteoPage() {
+  // Opened by a long press on a badge of the map: the whole card alone.
+  const [detail] = useState(() => liveDetail.peek());
+  useEffect(() => {
+    liveDetail.value = null;
+  }, []);
+  return detail ? <LiveDetail station={detail} /> : <MeteoList />;
+}
+
+/**
+ * The whole card of one station, opened from its badge on the NavIn map:
+ * its past, all its measurements; ◀ back to the map and its badges.
+ * @param props - The station.
+ * @param props.station - The station.
+ * @returns The screen content.
+ */
+function backToMap(): void {
+  buzz();
+  go('tracker');
+}
+
+function LiveDetail({ station }: { station: LiveStation }) {
+  const tr = useTr();
+  const config = windConfig();
+  const [current, setCurrent] = useState(station);
+  const [loading, setLoading] = useState(false);
+  const [now] = useState(Date.now);
+  return (
+    <>
+      <PageBack label="◀ Carte" data-go="livemap" onClick={backToMap}>
+        {tr('◀ Carte')}
+      </PageBack>
+      <TitleInNav>
+        <h1 className="live-title">{tr('🌬 LiveMétéo')}</h1>
+      </TitleInNav>
+      <div className="live-page picked">
+        <StationCard
+          station={current}
+          basis={config.basis}
+          mfKey={config.mfKey}
+          now={now}
+          loading={loading}
+          backLabel="◀ Revenir à la carte"
+          onBack={backToMap}
+          onLocate={backToMap}
+          onRefresh={() => {
+            buzz();
+            setLoading(true);
+            void liveStations(
+              { lat: current.lat, lon: current.lon },
+              5,
+              config.mfKey,
+            )
+              .then((found) => {
+                const same = found.find(
+                  (one) => stationKey(one) === stationKey(current),
+                );
+                if (same) setCurrent(same);
+              })
+              .finally(() => setLoading(false));
+          }}
+        />
+      </div>
+    </>
+  );
+}
+
+function MeteoList() {
   useSignals();
   const tr = useTr();
   const config = windConfig();
@@ -54,7 +120,8 @@ export function MeteoPage() {
   const [center, setCenter] = useState<LivePlace>(
     () => alert?.boat ?? mapPlace(),
   );
-  const [radius, setRadius] = useState<number>(LIVE_RADIUS);
+  // The radius of Réglages › LiveMétéo.
+  const radius = liveRadius();
   const [stations, setStations] = useState<LiveStation[]>([]);
   const [readFor, setReadFor] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -177,20 +244,6 @@ export function MeteoPage() {
               ) : null}
             </div>
           </div>
-          <ButtonRow className="row c3">
-            {RADII.map((value) => (
-              <Button
-                key={value}
-                className={value === radius ? 'btn on' : 'btn'}
-                onClick={() => {
-                  buzz();
-                  setRadius(value);
-                }}
-              >
-                {tr(`${value} km`)}
-              </Button>
-            ))}
-          </ButtonRow>
           <ButtonRow className="row c2 live-tools">
             <Button
               className="btn primary"

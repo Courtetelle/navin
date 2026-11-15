@@ -12764,3 +12764,25 @@ html body .wx-page.wx-one {
   display: block;
   max-width: 900px;
 }
+
+/* LiveMétéo on the map: the badges fade after 6 s, the band shows them again */
+.live-mk-wrap {
+  transition: opacity 0.8s ease;
+}
+.live-faded .live-mk-wrap {
+  opacity: 0;
+  pointer-events: none;
+}
+.live-chip-txt {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  padding: 0 6px;
+  cursor: pointer;
+}
+.live-pop-close {
+  margin-top: 8px;
+  width: 100%;
+  min-height: 44px;
+}
