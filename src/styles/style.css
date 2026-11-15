@@ -12576,3 +12576,12 @@ html body .lx-modal .ck-ask-box {
 :root[data-theme='night'] .exit-ico {
   color: var(--fg);
 }
+
+/* The bubble of a station on the NavIn map: its last 24 hours */
+.live-pop-trend {
+  display: block;
+  width: 300px;
+  max-width: 100%;
+  margin-top: 6px;
+  border-radius: 8px;
+}

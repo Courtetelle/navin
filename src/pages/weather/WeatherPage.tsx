@@ -32,7 +32,7 @@ import {
   compassPoint,
   scaleColors,
 } from '../meteo/liveText.ts';
-import { showLiveOnMap } from '../tracker/liveOnMap.ts';
+import { showLiveAround } from '../tracker/liveOnMap.ts';
 
 import { PrepForecast } from './PrepForecast.tsx';
 
@@ -160,7 +160,7 @@ function WeatherMenu() {
         <Button
           className="btn big wx-entry"
           data-wx="map"
-          onClick={showLiveOnMap}
+          onClick={showLiveAround}
         >
           <span className="wx-entry-ico">🗺</span>
           <span>

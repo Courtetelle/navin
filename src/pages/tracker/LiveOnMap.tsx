@@ -1,19 +1,55 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { LayerGroup } from 'leaflet';
+import type { Circle, LayerGroup, Popup } from 'leaflet';
 import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { leaflet } from '../../features/map/leaflet.ts';
 import { tracker } from '../../features/map/trackerState.ts';
+import { trendPicture } from '../../features/onwater/alertPublish.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
-import { liveStations, windConfig } from '../../features/onwater/index.ts';
+import {
+  liveStations,
+  stationHistory,
+  windConfig,
+} from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
-import { mapPlace } from '../meteo/boatPlace.ts';
+import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
 import { ageText, compassPoint, stationBadgeHtml } from '../meteo/liveText.ts';
 
-import { hideLiveOnMap, liveOnMap } from './liveOnMap.ts';
+import { hideLiveOnMap, liveOnMap, liveOnMapAround } from './liveOnMap.ts';
 
-/** Radius read before the map of NavIn is built, in km. */
+/** The past shown in the bubble of a station: 24 hours. */
+const TREND_MS = 24 * 3_600_000;
+
+/**
+ * The wind of the last 24 hours of a station, drawn in its bubble (NavIn
+ * records the stations around the zone or the GPS every 10 minutes).
+ * @param popup - The bubble.
+ * @param station - The station.
+ * @param mfKey - The Météo-France key.
+ */
+async function trendInto(
+  popup: Popup,
+  station: LiveStation,
+  mfKey: string,
+): Promise<void> {
+  const base = popupHtml(station);
+  popup.setContent(`${base}<br><i>Tendance 24 h…</i>`);
+  const points = await stationHistory(
+    { id: station.id, net: station.net },
+    mfKey,
+    Date.now(),
+    TREND_MS,
+  ).catch(() => []);
+  const picture = points.length >= 3 ? trendPicture(points) : null;
+  popup.setContent(
+    picture
+      ? `${base}<br><img class="live-pop-trend" src="${picture}" alt="Vent des dernières 24 h">`
+      : `${base}<br><i>Pas encore d’historique : NavIn enregistre la station toutes les 10 min.</i>`,
+  );
+}
+
+/** Radius read around the zone, and before the map of NavIn is built, in km. */
 const RADIUS = 60;
 /** The circle read around the map shown stays within these, in km. */
 const LEAST_KM = 5;
@@ -45,6 +81,7 @@ export function LiveOnMap() {
   useSignals();
   const tr = useTr();
   const asked = liveOnMap.value;
+  const around = liveOnMapAround.value;
   const on = asked > 0;
   const [count, setCount] = useState<number | null>(null);
   useEffect(() => {
@@ -52,8 +89,9 @@ export function LiveOnMap() {
     let closed = false;
     let layer: LayerGroup | null = null;
     let wait: ReturnType<typeof setTimeout> | undefined;
-    let center = mapPlace();
+    let center = around ? boatPlace() : mapPlace();
     let radius = RADIUS;
+    let ring: Circle | null = null;
     const config = windConfig();
     const draw = (stations: LiveStation[]) => {
       const map = tracker.current?.map;
@@ -71,7 +109,10 @@ export function LiveOnMap() {
           keyboard: false,
           title: station.name,
         })
-          .bindPopup(popupHtml(station))
+          .bindPopup(popupHtml(station), { maxWidth: 340 })
+          .on('popupopen', (event) => {
+            void trendInto(event.popup, station, config.mfKey);
+          })
           .addTo(layer);
       }
       setCount(stations.length);
@@ -88,11 +129,30 @@ export function LiveOnMap() {
         wait = setTimeout(start, WAIT_MS);
         return;
       }
-      // The map shown: from its middle to its corners.
-      const middle = map.getCenter();
-      center = { lat: middle.lat, lon: middle.lng };
-      const corner = middle.distanceTo(map.getBounds().getNorthEast()) / 1000;
-      radius = Math.min(MOST_KM, Math.max(LEAST_KM, Math.round(corner)));
+      if (around) {
+        // 120 km across around the zone or the GPS: the circle drawn, the
+        // map zoomed on it.
+        const L = leaflet();
+        const middle = L.latLng(center.lat, center.lon);
+        ring?.remove();
+        ring = L.circle(middle, {
+          radius: RADIUS * 1000,
+          color: '#1e5aa8',
+          weight: 2,
+          fill: false,
+          dashArray: '6 6',
+          interactive: false,
+        }).addTo(map);
+        map.fitBounds(middle.toBounds(2 * RADIUS * 1000), {
+          padding: [16, 16],
+        });
+      } else {
+        // The map shown: from its middle to its corners.
+        const middle = map.getCenter();
+        center = { lat: middle.lat, lon: middle.lng };
+        const corner = middle.distanceTo(map.getBounds().getNorthEast()) / 1000;
+        radius = Math.min(MOST_KM, Math.max(LEAST_KM, Math.round(corner)));
+      }
       read();
     };
     start();
@@ -102,9 +162,10 @@ export function LiveOnMap() {
       clearTimeout(wait);
       clearInterval(timer);
       layer?.remove();
+      ring?.remove();
       setCount(null);
     };
-  }, [on, asked]);
+  }, [on, asked, around]);
   if (!on) return null;
   return (
     <div className="live-chip" role="status">
@@ -112,7 +173,7 @@ export function LiveOnMap() {
         {tr(
           count == null
             ? '🌬 Lecture des stations…'
-            : `🌬 ${count} station${count > 1 ? 's' : ''} sur la carte`,
+            : `🌬 ${count} station${count > 1 ? 's' : ''} ${around ? `à moins de ${RADIUS} km` : 'sur la carte'}`,
         )}
       </span>
       <Button

@@ -1,5 +1,4 @@
-import { lastKnownPos } from '../../state/index.ts';
-
+import { contextPlace } from './externals.ts';
 import { liveStations } from './liveStations.ts';
 import { windConfig } from './windWatch.ts';
 
@@ -16,15 +15,18 @@ const MF_MOST = 40;
 let current: Promise<unknown> | null = null;
 
 /**
- * Read every station within 60 km of the GPS position and keep all their
+ * Read every station within 60 km of the zone chosen with NavIn (else the
+ * GPS position) and keep all their
  * measurements (wind, gusts, direction, air, pressure; liveStations keeps
  * them), so that LiveMétéo and the alerts have the past of the stations
  * where the boat is. It goes on while NavIn is in the background, as long as
- * the device lets it run. Nothing without a GPS position or network.
+ * the device lets it run. Nothing without network.
  */
 export async function recordAround(): Promise<void> {
-  const position = lastKnownPos();
-  if (current || !position || !navigator.onLine) return;
+  // The zone chosen with NavIn, else the GPS: the stations where the boat
+  // is, or where it will sail.
+  const position = contextPlace();
+  if (current || !navigator.onLine) return;
   const reading = liveStations(
     { lat: position.lat, lon: position.lon },
     RECORD_RADIUS,

@@ -74,7 +74,7 @@ export function WindTrendChart({ station, mfKey }: WindTrendChartProps) {
         {spans}
         <p className="live-trend-txt">
           {tr(
-            'Pas encore d’historique pour cette station : NavIn enregistre toutes les 10 min les stations autour de votre position GPS, la courbe viendra.',
+            'Pas encore d’historique pour cette station : NavIn enregistre toutes les 10 min les stations à moins de 60 km de la zone ou de la position GPS, la courbe viendra.',
           )}
         </p>
       </>

@@ -11,11 +11,27 @@ import { go } from '../../shell/router.ts';
 export const liveOnMap = signal(0);
 
 /**
- * Lay the live weather stations of the map shown on the NavIn map (long
- * press on Météo, or its menu).
+ * How the stations are chosen: the map shown (long press on Météo), or a
+ * circle of 120 km across around the zone chosen with NavIn, else the GPS
+ * (the Météo menu).
  */
+export const liveOnMapAround = signal(false);
+
+/** Lay the live weather stations of the map shown (long press on Météo). */
 export function showLiveOnMap(): void {
   buzz();
+  liveOnMapAround.value = false;
+  liveOnMap.value = Date.now();
+  go('tracker');
+}
+
+/**
+ * Lay the live weather stations within 60 km of the zone (or the GPS), the
+ * circle drawn and the map zoomed on it (the Météo menu).
+ */
+export function showLiveAround(): void {
+  buzz();
+  liveOnMapAround.value = true;
   liveOnMap.value = Date.now();
   go('tracker');
 }
