@@ -12461,3 +12461,9 @@ html body .lx-modal .ck-ask-box {
   border-radius: 16px;
   background: #000;
 }
+
+/* At the bottom of the Météo menu: the keys, in Réglages */
+.btn.wx-keys-link {
+  width: 100%;
+  margin-top: 6px;
+}

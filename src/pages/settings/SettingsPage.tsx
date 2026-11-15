@@ -149,11 +149,18 @@ function TestsSection() {
  * @param props - Page props.
  * @returns The screen.
  */
-export function SettingsPage({ from }: PageProps) {
+export function SettingsPage({ from, arg }: PageProps) {
   useSignals();
   const tr = useTr();
   const redrawn = useRef(from === 'settings');
+  const section = useRef(typeof arg === 'string' ? arg : '');
   useLayoutEffect(() => {
+    // Opened on a section (the Météo menu opens « Clés météo »).
+    if (section.current) {
+      state.view.settingsOpen.value = section.current;
+      enterSettings(true);
+      return;
+    }
     enterSettings(redrawn.current);
   }, []);
   const zone = state.view.zoneSimV.value;

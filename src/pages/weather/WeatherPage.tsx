@@ -21,6 +21,7 @@ import {
   newWxCheck,
   setWxChecks,
   state,
+  toast,
   toggleWxCheck,
   wxChecks,
   wxTicked,
@@ -70,6 +71,13 @@ export function WeatherPage({ arg }: PageProps) {
 
 /** Argument of the screen for the wind alerts and the keys. */
 const ALERTS = 'alerts';
+
+/** The keys stay in Réglages: the bubble says the Météo menu is left. */
+function openKeys() {
+  buzz();
+  toast('Vous sortez du menu Météo : Réglages › Clés météo');
+  go('settings', 'keys');
+}
 
 function openAlerts() {
   buzz();
@@ -183,6 +191,9 @@ function WeatherMenu() {
             <b>{tr('LiveMétéo')}</b>
             <small>{tr('le vent mesuré maintenant par les stations')}</small>
           </span>
+        </Button>
+        <Button className="btn wx-keys-link" data-wx="keys" onClick={openKeys}>
+          {tr('🔑 Clés météo (Réglages)')}
         </Button>
       </div>
     </>

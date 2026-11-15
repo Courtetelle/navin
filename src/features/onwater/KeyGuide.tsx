@@ -10,6 +10,15 @@ const PART_TITLES: Readonly<Record<GuidePart, string>> = {
   again: 'Ensuite : avec compte et mot de passe, aller chercher la clé',
 };
 
+/** The sites without account (AEMET): the key comes by mail. */
+const MAIL_TITLES: Readonly<Record<GuidePart, string>> = {
+  first: '1ʳᵉ fois : demander la clé, elle arrive par mail',
+  again: 'Ensuite : retrouver la clé dans ses mails, ou en redemander une',
+};
+
+/** The sites that send the key by mail, without account. */
+const MAIL_SITES = new Set(['aemet']);
+
 /**
  * One part of the guide, its steps and its ✏️: emptied, the steps come back
  * to those of NavIn.
@@ -31,7 +40,7 @@ function GuidePartBlock({
   const [text, setText] = useState(() => keyGuide(id, part));
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
-  const title = PART_TITLES[part];
+  const title = (MAIL_SITES.has(id) ? MAIL_TITLES : PART_TITLES)[part];
   return (
     <section className="key-guide-part" data-guide-part={part}>
       <div className="key-guide-head">

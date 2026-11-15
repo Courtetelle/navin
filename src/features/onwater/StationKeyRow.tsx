@@ -12,6 +12,9 @@ import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
 import type { WindReading } from './windTypes.ts';
 
+/** The key is tried again after this long when nothing came. */
+const RETRY_MS = 3000;
+
 /** What a key row needs to know of its network. */
 interface StationKey {
   /** Where the key is kept in `settings.windAlert`. */
@@ -20,6 +23,8 @@ interface StationKey {
   account: string;
   /** Name of the network. */
   name: string;
+  /** No account on its site: only the mail that receives the key. */
+  mailOnly: boolean;
   /** Its flag and words on the field. */
   label: string;
   /** The site where the key is made. */
@@ -66,11 +71,20 @@ export function StationKeyRow({ station }: { station: StationKey }) {
     setBusy(true);
     setResult(`Essai de la clé auprès de ${station.name}…`);
     try {
-      const readings = await station.read(station.sample, value);
+      let readings = await station.read(station.sample, value);
+      // These servers often refuse a first request: once more before saying
+      // the key reads nothing.
+      if (readings.length === 0) {
+        setResult(`${station.name} n’a rien rendu : nouvel essai…`);
+        await new Promise((resolve) => {
+          setTimeout(resolve, RETRY_MS);
+        });
+        readings = await station.read(station.sample, value);
+      }
       setResult(
         readings.length > 0
           ? `Clé acceptée : ${readings.length} station(s) lue(s) autour de l’essai.`
-          : `Aucune station lue avec cette clé : vérifiez-la sur le site de ${station.name}.`,
+          : `Aucune station lue avec cette clé : vérifiez-la sur le site de ${station.name}, ou réessayez plus tard.`,
       );
     } catch {
       setResult(`${station.name} n’a pas répondu : réessayez plus tard.`);
@@ -119,7 +133,12 @@ export function StationKeyRow({ station }: { station: StationKey }) {
         value={key}
       />
       <KeyGuide id={station.account} name={station.name} />
-      <KeyAccount id={station.account} name={station.name} url={station.url} />
+      <KeyAccount
+        id={station.account}
+        name={station.name}
+        url={station.url}
+        mailOnly={station.mailOnly}
+      />
       <HelpText>{station.help}</HelpText>
     </div>
   );

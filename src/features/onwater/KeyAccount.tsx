@@ -26,16 +26,20 @@ function copy(text: string, said: string): void {
  * @param props.id - Its key in the accounts (`mf`…).
  * @param props.name - Its name, as written on the button.
  * @param props.url - Its address by default.
+ * @param props.mailOnly - A site without account (AEMET): only the address
+ *   of the mail the key is sent to, no user name nor password.
  * @returns The button, or the form.
  */
 export function KeyAccount({
   id,
   name,
   url,
+  mailOnly = false,
 }: {
   id: string;
   name: string;
   url: string;
+  mailOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [account, setAccount] = useState(() => siteAccount(id, url));
@@ -52,8 +56,12 @@ export function KeyAccount({
           setOpen(true);
         }}
       >
-        🔐 Compte {name}
-        <small>lien du site, nom d’utilisateur, mot de passe</small>
+        {mailOnly ? `📧 Demande de clé ${name}` : `🔐 Compte ${name}`}
+        <small>
+          {mailOnly
+            ? 'lien du site, adresse mail qui reçoit la clé (pas de compte)'
+            : 'lien du site, nom d’utilisateur, mot de passe'}
+        </small>
       </Button>
     );
   }
@@ -68,7 +76,11 @@ export function KeyAccount({
         buzz();
         saveAccount(id, account);
         setOpen(false);
-        toast(`Compte ${name} enregistré`);
+        toast(
+          mailOnly
+            ? `Demande de clé ${name} enregistrée`
+            : `Compte ${name} enregistré`,
+        );
       }}
     >
       <label>
@@ -102,7 +114,7 @@ export function KeyAccount({
           ↗ Ouvrir {account.url.replace(/^https?:\/\//, '')}
         </a>
       ) : null}
-      {account.user || account.password ? (
+      {!mailOnly && (account.user || account.password) ? (
         <div className="row c2 key-account-copy">
           <Button
             type="button"
@@ -123,47 +135,49 @@ export function KeyAccount({
         </div>
       ) : null}
       <label>
-        <span>Nom d’utilisateur</span>
+        <span>
+          {mailOnly ? 'Adresse mail qui reçoit la clé' : 'Nom d’utilisateur'}
+        </span>
         <input
           className="text"
-          type="text"
-          autoComplete="username"
+          type={mailOnly ? 'email' : 'text'}
+          autoComplete={mailOnly ? 'email' : 'username'}
           autoCapitalize="off"
           spellCheck={false}
           value={account.user}
           onChange={(event) => field('user', event.target.value)}
         />
       </label>
-      <label>
-        <span>Mot de passe</span>
-        <span className="key-account-pass">
-          <input
-            className="text"
-            type={shown ? 'text' : 'password'}
-            autoComplete="current-password"
-            autoCapitalize="off"
-            spellCheck={false}
-            value={account.password}
-            onChange={(event) => field('password', event.target.value)}
-          />
-          <Button
-            type="button"
-            className="btn"
-            aria-label={
-              shown ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
-            }
-            onClick={() => setShown((value) => !value)}
-          >
-            {shown ? '🙈' : '👁'}
-          </Button>
-        </span>
-      </label>
+      {mailOnly ? null : (
+        <label>
+          <span>Mot de passe</span>
+          <span className="key-account-pass">
+            <input
+              className="text"
+              type={shown ? 'text' : 'password'}
+              autoComplete="current-password"
+              autoCapitalize="off"
+              spellCheck={false}
+              value={account.password}
+              onChange={(event) => field('password', event.target.value)}
+            />
+            <Button
+              type="button"
+              className="btn"
+              aria-label={
+                shown ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+              }
+              onClick={() => setShown((value) => !value)}
+            >
+              {shown ? '🙈' : '👁'}
+            </Button>
+          </span>
+        </label>
+      )}
       <p className="help">
-        Gardé sur cet appareil et dans la sauvegarde complète, pour le retrouver
-        sur un autre appareil ; jamais dans un partage. Ouvrir le site copie le
-        mot de passe, prêt à coller. Pour une connexion automatique,
-        l’enregistrer une fois dans les mots de passe de l’appareil quand le
-        site le propose.
+        {mailOnly
+          ? `${name} n’a ni compte ni mot de passe : la clé arrive par mail à cette adresse ; pour la retrouver, chercher ce mail. Gardé sur cet appareil et dans la sauvegarde complète ; jamais dans un partage.`
+          : 'Gardé sur cet appareil et dans la sauvegarde complète, pour le retrouver sur un autre appareil ; jamais dans un partage. Ouvrir le site copie le mot de passe, prêt à coller. Pour une connexion automatique, l’enregistrer une fois dans les mots de passe de l’appareil quand le site le propose.'}
       </p>
       <div className="row c2">
         <Button type="button" className="btn" onClick={() => setOpen(false)}>
