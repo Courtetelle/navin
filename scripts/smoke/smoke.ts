@@ -909,11 +909,9 @@ async function nextZoneX(page: Page): Promise<void> {
   }
   await openGear(page);
   await page.waitForTimeout(500);
-  const section = page.locator('details[data-sec="zone"]');
-  if (!(await section.evaluate((one) => (one as HTMLDetailsElement).open))) {
-    await section.locator('summary').click();
-    await page.waitForTimeout(300);
-  }
+  // Réglages is a menu: the section of the zone opens on its own page.
+  await page.locator('.set-entry[data-sec="zone"]').click();
+  await page.waitForTimeout(300);
   await page.locator('[data-zonesim]').click();
   await page.waitForTimeout(300);
   await page.locator(NAVIN).click();

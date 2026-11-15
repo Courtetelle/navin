@@ -12486,3 +12486,45 @@ html body .lx-modal .ck-ask-box {
 .key-row .key-scan {
   margin: 10px 0 0;
 }
+
+/* Réglages as the Météo menu: a band per section; a section opened alone on
+   its page, its title fixed at the top, ◀ back to the menu */
+.set-menu {
+  display: grid;
+  gap: 10px;
+}
+.btn.big.set-entry {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  font-size: 19px;
+  font-weight: 700;
+  padding: 0 20px;
+}
+.set-page.set-body {
+  display: grid;
+  gap: 10px;
+}
+.set-page.set-body > .row,
+.set-page.set-body .row {
+  margin: 0;
+}
+.set-page.set-body .row:not(.c2):not(.c3):not(.c4) > .btn {
+  width: 100%;
+}
+.set-page.set-body section.field {
+  margin: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border: 0;
+}
+.set-page.set-body h2,
+.set-page.set-body h3 {
+  font-size: 16px;
+  margin: 4px 0 0;
+}
+.set-page.set-body .row + .row,
+.set-page.set-body .row.set-stack {
+  margin-top: 14px !important;
+}

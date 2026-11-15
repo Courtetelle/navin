@@ -89,8 +89,8 @@ test('an exercise is marked, ends in the settings and clears the simulation', ()
   expect(state.view.currentView.value).toBe('settings');
   expect(state.view.settingsOpen.value).toBe('simu');
   expect(state.view.settingsFrom.value).toBe('tracker');
-  expect(section.open).toBe(true);
-  expect(section.scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+  // Réglages opens on the page of the SOS simulation alone.
+  expect(state.view.viewArg.value).toBe('simu');
 });
 
 test('an exercise refuses to start during a real SOS', () => {

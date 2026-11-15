@@ -134,13 +134,14 @@ export function navBackLabel(
 }
 
 /**
- * Whether `#navtop` is shown (nav.js:45): on every non-root screen and on PréP,
+ * Whether `#navtop` is shown (nav.js:45): on every non-root screen, on PréP
+ * and on Réglages (a menu as Météo: its title fixed, ◀ one step back),
  * except in the full-screen tracker (`trk-mode`).
  */
 export const navBarShown = computed(() => {
   const view = state.view.currentView.value;
   return (
-    (!ROOTS.includes(view) || view === 'prep') &&
+    (!ROOTS.includes(view) || view === 'prep' || view === 'settings') &&
     !bodyClasses.value.has('trk-mode')
   );
 });

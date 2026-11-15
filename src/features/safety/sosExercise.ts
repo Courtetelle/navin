@@ -165,9 +165,7 @@ export function sosExEnd(): void {
     }
     state.view.settingsOpen.value = 'simu';
   });
-  const barHeight = navBarHeight();
-  go('settings');
-  revealSimulationSection(20, barHeight);
+  go('settings', 'simu');
   toast(
     '✓ Exercice SOS terminé · log gardé dans data › Logs SOS (🧪 Exercice)',
   );
@@ -204,27 +202,4 @@ function stopSimulation(): void {
     state.view.sosSim.value = null;
     state.view.sosLive.value = null;
   });
-}
-
-function navBarHeight(): string {
-  return document.documentElement.style.getPropertyValue('--navtop-h');
-}
-
-// The settings page is lazily loaded: its section shows up after `go`. The
-// scroll padding still counts the nav bar of the screen just left, which
-// settings hides right after this scroll.
-function revealSimulationSection(attempts: number, barHeight: string): void {
-  const section = document.querySelector<HTMLDetailsElement>(
-    'details.set-sec[data-sec="simu"]',
-  );
-  if (section) {
-    const root = document.documentElement.style;
-    const shown = navBarHeight();
-    section.open = true;
-    root.setProperty('--navtop-h', barHeight);
-    section.scrollIntoView({ block: 'start' });
-    root.setProperty('--navtop-h', shown);
-  } else if (attempts > 0) {
-    setTimeout(() => revealSimulationSection(attempts - 1, barHeight), 50);
-  }
 }

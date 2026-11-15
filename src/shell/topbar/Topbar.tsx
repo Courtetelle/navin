@@ -123,7 +123,15 @@ function GearButton({ focused }: { focused: boolean }) {
         buzz();
         navinRowChosen();
         // One step back in a page of the settings, as data.
-        menuButtonPress('settings', navBack, goFromGear);
+        // A section is a page of the menu: one step back to it first.
+        menuButtonPress(
+          'settings',
+          navBack,
+          goFromGear,
+          () =>
+            state.view.currentView.value === 'settings' &&
+            !state.view.viewArg.value,
+        );
       }}
     >
       <svg
