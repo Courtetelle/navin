@@ -12585,3 +12585,7 @@ html body .lx-modal .ck-ask-box {
   margin-top: 6px;
   border-radius: 8px;
 }
+/* The METAR message itself wraps in the card */
+.live-tbl td {
+  overflow-wrap: anywhere;
+}

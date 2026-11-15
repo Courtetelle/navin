@@ -1,3 +1,5 @@
+import type { MetarDetails } from './metarText.ts';
+
 /** One wind reading: a station or a forecast model. */
 export interface WindReading {
   name: string;
@@ -61,6 +63,12 @@ export interface WindReading {
    * @default undefined
    */
   amateur?: boolean;
+  /**
+   * An airport: what its METAR says beyond the wind (visibility, weather,
+   * clouds, dew point, trend, message).
+   * @default undefined
+   */
+  metar?: MetarDetails;
 }
 
 /** Sea state from the marine model. */

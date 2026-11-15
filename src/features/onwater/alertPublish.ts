@@ -8,6 +8,7 @@ import { deliver, state } from '../../state/index.ts';
 import type { CardsDocument, CardsSection } from '../publish/index.ts';
 import { cardsPng, printImage } from '../publish/index.ts';
 
+import { metarRows } from './metarText.ts';
 import { onLake } from './onLake.ts';
 import type { SeaNow } from './seaNow.ts';
 import { seaNow, seaRows } from './seaNow.ts';
@@ -77,6 +78,8 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
       `${Math.round(reading.baro)} hPa`,
     ]);
   }
+  // An airport: what its METAR says beyond the wind.
+  rows.push(...metarRows(reading.metar));
   const time = fmtDotDateTime(new Date(reading.t));
   rows.push(
     [forecast ? 'Prévu pour le' : 'Mesuré le', time],

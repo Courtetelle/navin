@@ -1,7 +1,7 @@
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import type { LiveStation } from '../../features/onwater/index.ts';
-import { windValue } from '../../features/onwater/index.ts';
+import { metarRows, windValue } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { fmtTime } from '../../lib/format.ts';
 import { bft, windTxt } from '../../lib/wind.ts';
@@ -74,6 +74,8 @@ export function StationCard({
     ]);
   }
   rows.push(
+    // An airport: what its METAR says beyond the wind.
+    ...metarRows(station.metar),
     ['Mesuré', `${fmtTime(new Date(station.t))} · ${ageText(station.t, now)}`],
     [
       'Réseau',

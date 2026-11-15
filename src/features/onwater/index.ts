@@ -111,3 +111,5 @@ export {
 } from './windLogic.ts';
 export { windConfig, windWatchPlace } from './windWatch.ts';
 export { seaPlace } from './externals.ts';
+export { metarRows } from './metarText.ts';
+export type { MetarDetails } from './metarText.ts';

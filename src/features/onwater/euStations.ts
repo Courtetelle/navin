@@ -970,6 +970,12 @@ export interface MetarReport {
   wgst?: number;
   altim?: number;
   temp?: number;
+  dewp?: number;
+  /** Statute miles, `6+` for 10 km or more. */
+  visib?: string | number;
+  wxString?: string;
+  clouds?: Array<{ cover: string; base?: number | null }>;
+  rawOb?: string;
 }
 
 /**
@@ -998,6 +1004,13 @@ export function metarReading(
     dir: typeof report.wdir === 'number' ? report.wdir : null,
     baro: report.altim ?? null,
     air: report.temp ?? null,
+    metar: {
+      ...(report.visib == null ? {} : { visib: report.visib }),
+      ...(report.wxString ? { wx: report.wxString } : {}),
+      ...(report.clouds ? { clouds: report.clouds } : {}),
+      ...(report.dewp == null ? {} : { dewp: report.dewp }),
+      ...(report.rawOb ? { raw: report.rawOb } : {}),
+    },
     net: METAR,
     id: report.icaoId ?? `${report.lat},${report.lon}`,
     lat: report.lat,
