@@ -1,12 +1,19 @@
 import { expect, test } from 'vitest';
 
-import type { HubStation } from '../euStations.ts';
+import type { HubStation, MetOfficeObservation } from '../euStations.ts';
 import {
+  AEMET,
   ITALIA_METEO,
+  MET_OFFICE,
   PUERTOS,
   SOCIB,
+  aemetDegrees,
+  aemetReading,
   hubReading,
+  metOfficeReading,
+  nearBritain,
   nearItaly,
+  nearSpain,
   opendapValues,
   portusReading,
   portusStations,
@@ -117,4 +124,46 @@ test('a SOCIB station: the OPeNDAP values read, seconds since 1970', () => {
   expect(reading?.avg).toBeCloseTo(4.6 * KN);
   expect(reading?.gust).toBeCloseTo(6.6 * KN);
   expect(reading?.dir).toBe(251);
+});
+
+test('AEMET: degrees, minutes, seconds; its latest hourly row, UTC', () => {
+  expect(aemetDegrees('394337N')).toBeCloseTo(39.726_94, 4);
+  expect(aemetDegrees('023654W')).toBeCloseTo(-2.615, 3);
+  expect(Number.isNaN(aemetDegrees('x'))).toBe(true);
+  const reading = aemetReading(
+    [
+      { fint: '2026-11-14T22:00:00', vv: 5, vmax: 9, dv: 250 },
+      { fint: '2026-11-14T23:00:00+0000', vv: 6, vmax: 10, dv: 260 },
+    ],
+    { id: 'B278', name: 'PALMA', lat: 39.55, lon: 2.62 },
+    3,
+    NOW,
+  );
+  expect(reading?.net).toBe(AEMET);
+  expect(reading?.t).toBe(Date.UTC(2026, 10, 14, 23));
+  expect(reading?.avg).toBeCloseTo(6 * KN);
+  expect(reading?.gust).toBeCloseTo(10 * KN);
+});
+
+test('Met Office: the latest observation of a land station', () => {
+  const reading = metOfficeReading(
+    JSON.parse(
+      '[{"datetime":"2026-11-14T22:00Z","wind_speed":7,"wind_direction":230},{"datetime":"2026-11-14T23:00Z","wind_speed":8,"wind_gust":13,"wind_direction":240,"mslp":1012}]',
+    ) as MetOfficeObservation[],
+    { id: 'gcp', name: 'Solent', lat: 50.8, lon: -1.3 },
+    5,
+    NOW,
+  );
+  expect(reading?.net).toBe(MET_OFFICE);
+  expect(reading?.avg).toBeCloseTo(8 * KN);
+  expect(reading?.gust).toBeCloseTo(13 * KN);
+  expect(reading?.baro).toBe(1012);
+});
+
+test('Spain and Britain are read only around them', () => {
+  expect(nearSpain({ lat: 39.55, lon: 2.64 }, 30)).toBe(true);
+  expect(nearSpain({ lat: 28.1, lon: -15.4 }, 30)).toBe(true);
+  expect(nearSpain({ lat: 46.4, lon: 6.5 }, 30)).toBe(false);
+  expect(nearBritain({ lat: 50.8, lon: -1.3 }, 30)).toBe(true);
+  expect(nearBritain({ lat: 46.4, lon: 6.5 }, 30)).toBe(false);
 });

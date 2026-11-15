@@ -1,4 +1,5 @@
 import { distKm } from '../../lib/geo.ts';
+import { state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 import type { WindReading } from './windTypes.ts';
@@ -617,25 +618,351 @@ async function keptList<T>(
   return kept?.list ?? [];
 }
 
+/* ------------------------------------------------- with a key: AEMET */
+
+const AEMET_API = 'https://opendata.aemet.es/opendata/api';
+const AEMET_LIST_KEY = 'ldb.aemet.stations';
+const MONTH_MS = 30 * 86_400_000;
+
+/**
+ * A latitude or longitude of AEMET (`394337N`, `023654W`) in degrees.
+ * @param text - The value.
+ * @returns Degrees, NaN when unreadable.
+ */
+export function aemetDegrees(text: string): number {
+  const found = /^(?<digits>\d{6,7})(?<side>[NSEW])$/.exec(text.trim())?.groups;
+  if (!found) return Number.NaN;
+  const digits = found.digits ?? '';
+  const degrees = Number(digits.slice(0, -4));
+  const minutes = Number(digits.slice(-4, -2));
+  const seconds = Number(digits.slice(-2));
+  const value = degrees + minutes / 60 + seconds / 3600;
+  return found.side === 'S' || found.side === 'W' ? -value : value;
+}
+
+/** One hourly row of an AEMET station (`observacion/convencional`). */
+export interface AemetRow {
+  fint?: string;
+  ubi?: string;
+  vv?: number;
+  vmax?: number;
+  dv?: number;
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+  pres_nmar?: number;
+  ta?: number;
+}
+
+/**
+ * The wind of an AEMET station: its latest row.
+ * @param rows - Its rows of the last day.
+ * @param station - The station.
+ * @param km - Its distance.
+ * @param now - Epoch milliseconds.
+ * @returns The reading, null when old or without wind.
+ */
+export function aemetReading(
+  rows: readonly AemetRow[],
+  station: PlacedStation,
+  km: number,
+  now: number,
+): WindReading | null {
+  const row = rows.findLast((one) => one.vv != null && one.fint);
+  if (!row?.fint) return null;
+  // UTC, with or without its zone.
+  const t = Date.parse(
+    /[Z+]/.test(row.fint.slice(10)) ? row.fint : `${row.fint}Z`,
+  );
+  if (!fresh(t, now)) return null;
+  return {
+    name: station.name,
+    km,
+    t,
+    avg: knots(row.vv) ?? 0,
+    gust: knots(row.vmax),
+    dir: row.dv ?? null,
+    baro: row.pres_nmar ?? null,
+    air: row.ta ?? null,
+    net: AEMET,
+    id: station.id,
+    lat: station.lat,
+    lon: station.lon,
+  };
+}
+
+/** AEMET answers in two steps: a link, then the data (ISO-8859-15). */
+async function aemetData(path: string, key: string): Promise<unknown> {
+  const glue = path.includes('?') ? '&' : '?';
+  const first = await fetch(
+    `${AEMET_API}${path}${glue}api_key=${encodeURIComponent(key)}`,
+    { signal: AbortSignal.timeout(15_000) },
+  );
+  if (!first.ok) throw new Error(`${first.status}`);
+  const link = ((await first.json()) as { datos?: string }).datos;
+  if (!link) throw new Error('no data');
+  const second = await fetch(link, { signal: AbortSignal.timeout(20_000) });
+  if (!second.ok) throw new Error(`${second.status}`);
+  const bytes = await second.arrayBuffer();
+  return JSON.parse(new TextDecoder('iso-8859-15').decode(bytes)) as unknown;
+}
+
+/**
+ * Measured wind of the AEMET stations (all Spain, the Balearics and the
+ * Canaries), with the free key of AEMET OpenData.
+ * @param center - Place searched around.
+ * @param radius - Radius in km.
+ * @param most - Stations read at most.
+ * @param key - The AEMET key; nothing is read without it.
+ * @returns The readings.
+ */
+export async function aemetReadings(
+  center: { lat: number; lon: number },
+  radius: number,
+  most: number,
+  key: string,
+): Promise<WindReading[]> {
+  if (!key || !nearSpain(center, radius)) return [];
+  const stations = await keptList(AEMET_LIST_KEY, MONTH_MS, async () => {
+    const list = (await aemetData(
+      '/valores/climatologicos/inventarioestaciones/todasestaciones',
+      key,
+    )) as Array<{
+      indicativo?: string;
+      nombre?: string;
+      latitud?: string;
+      longitud?: string;
+    }>;
+    return list.flatMap((one): PlacedStation[] => {
+      const lat = aemetDegrees(one.latitud ?? '');
+      const lon = aemetDegrees(one.longitud ?? '');
+      if (!one.indicativo || !Number.isFinite(lat) || !Number.isFinite(lon)) {
+        return [];
+      }
+      return [
+        { id: one.indicativo, name: one.nombre ?? one.indicativo, lat, lon },
+      ];
+    });
+  });
+  const now = Date.now();
+  const readings = await inBatches(
+    nearStations(stations, center, radius, most),
+    async ({ station, km }) => {
+      try {
+        const rows = (await aemetData(
+          `/observacion/convencional/datos/estacion/${encodeURIComponent(station.id)}`,
+          key,
+        )) as AemetRow[];
+        return aemetReading(rows, station, km, now);
+      } catch {
+        return null;
+      }
+    },
+  );
+  return readings.filter((reading) => reading !== null);
+}
+
+/**
+ * Whether a circle reaches Spain, the Balearics or the Canaries.
+ * @param center - Its centre.
+ * @param radius - Its radius in km.
+ * @returns `true` when it may.
+ */
+export function nearSpain(
+  center: { lat: number; lon: number },
+  radius: number,
+): boolean {
+  const margin = radius / 100;
+  const peninsula =
+    center.lat > 35.5 - margin &&
+    center.lat < 44 + margin &&
+    center.lon > -9.6 - margin * 1.3 &&
+    center.lon < 4.6 + margin * 1.3;
+  const canaries =
+    center.lat > 27.4 - margin &&
+    center.lat < 29.5 + margin &&
+    center.lon > -18.3 - margin &&
+    center.lon < -13.3 + margin;
+  return peninsula || canaries;
+}
+
+/* -------------------------------------------- with a key: Met Office */
+
+const MET_OFFICE_API =
+  'https://data.hub.api.metoffice.gov.uk/observation-land/1';
+/** 360 calls a day: a station read again after an hour only. */
+const MET_OFFICE_MS = 3_600_000;
+const metOfficeKept = new Map<
+  string,
+  { at: number; reading: WindReading | null }
+>();
+
+/** One hourly observation of the Met Office (names as documented). */
+export interface MetOfficeObservation {
+  datetime?: string;
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+  wind_speed?: number;
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+  wind_gust?: number;
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+  wind_direction?: number;
+  mslp?: number;
+  temperature?: number;
+}
+
+/**
+ * The wind of a Met Office station: its latest observation (m/s).
+ * @param observations - Its observations of the last hours.
+ * @param station - The station.
+ * @param km - Its distance.
+ * @param now - Epoch milliseconds.
+ * @returns The reading, null when old or without wind.
+ */
+export function metOfficeReading(
+  observations: readonly MetOfficeObservation[],
+  station: PlacedStation,
+  km: number,
+  now: number,
+): WindReading | null {
+  const last = observations.findLast(
+    (one) => one.wind_speed != null && one.datetime,
+  );
+  if (!last?.datetime) return null;
+  const t = Date.parse(last.datetime);
+  if (!Number.isFinite(t) || now - t > 2 * 3_600_000) return null;
+  return {
+    name: station.name,
+    km,
+    t,
+    avg: knots(last.wind_speed) ?? 0,
+    gust: knots(last.wind_gust),
+    dir: last.wind_direction ?? null,
+    baro: last.mslp ?? null,
+    air: last.temperature ?? null,
+    net: MET_OFFICE,
+    id: station.id,
+    lat: station.lat,
+    lon: station.lon,
+  };
+}
+
+/**
+ * Measured wind of the Met Office land stations of Britain closest to a
+ * place, with the free key of the Weather DataHub (kept an hour: 360 calls
+ * a day).
+ * @param center - Place searched around.
+ * @param radius - Radius in km.
+ * @param key - The Met Office key; nothing is read without it.
+ * @returns The readings.
+ */
+export async function metOfficeReadings(
+  center: { lat: number; lon: number },
+  radius: number,
+  key: string,
+): Promise<WindReading[]> {
+  if (!key || !nearBritain(center, radius)) return [];
+  const headers = { apikey: key, accept: 'application/json' };
+  const response = await fetch(
+    `${MET_OFFICE_API}/nearest?lat=${center.lat.toFixed(3)}&lon=${center.lon.toFixed(3)}`,
+    { headers, signal: AbortSignal.timeout(15_000) },
+  );
+  if (!response.ok) return [];
+  const reply = (await response.json()) as unknown;
+  const places = (Array.isArray(reply) ? reply : [reply]) as Array<{
+    geohash?: string;
+    area?: string;
+    name?: string;
+    latitude?: number;
+    longitude?: number;
+  }>;
+  const now = Date.now();
+  const readings = await inBatches(places.slice(0, 3), async (place) => {
+    const { geohash, latitude, longitude, area, name } = place;
+    if (!geohash) return null;
+    const kept = metOfficeKept.get(geohash);
+    if (kept && now - kept.at < MET_OFFICE_MS) return kept.reading;
+    try {
+      const answer = await fetch(`${MET_OFFICE_API}/${geohash}`, {
+        headers,
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (!answer.ok) return null;
+      const lat = latitude ?? center.lat;
+      const lon = longitude ?? center.lon;
+      const reading = metOfficeReading(
+        (await answer.json()) as MetOfficeObservation[],
+        { id: geohash, name: area ?? name ?? geohash, lat, lon },
+        distKm(center.lat, center.lon, lat, lon),
+        now,
+      );
+      metOfficeKept.set(geohash, { at: now, reading });
+      return reading;
+    } catch {
+      return null;
+    }
+  });
+  return readings.filter(
+    (reading): reading is WindReading =>
+      reading !== null && (reading.km ?? 0) < radius,
+  );
+}
+
+/**
+ * Whether a circle reaches Britain and its islands.
+ * @param center - Its centre.
+ * @param radius - Its radius in km.
+ * @returns `true` when it may.
+ */
+export function nearBritain(
+  center: { lat: number; lon: number },
+  radius: number,
+): boolean {
+  const margin = radius / 100;
+  return (
+    center.lat > 49.8 - margin &&
+    center.lat < 61 + margin &&
+    center.lon > -8.7 - margin * 1.6 &&
+    center.lon < 2 + margin * 1.6
+  );
+}
+
 /* ------------------------------------------------------------- together */
 
 /**
- * Measured wind of the networks around Italy, Spain and the Balearics,
- * those that answer without a key; each network failing alone.
+ * The keys of AEMET and of the Met Office saved in the settings.
+ * @returns The keys, empty without them.
+ */
+function savedKeys(): { aemet: string; metOffice: string } {
+  const alert = state.preferences.settings.peek().windAlert ?? {};
+  return {
+    aemet: typeof alert.aemetKey === 'string' ? alert.aemetKey : '',
+    metOffice: typeof alert.metOfficeKey === 'string' ? alert.metOfficeKey : '',
+  };
+}
+
+/**
+ * Measured wind of the networks around Italy, Spain, the Balearics and
+ * Britain (AEMET and the Met Office with their keys); each network failing
+ * alone.
  * @param center - Place searched around.
  * @param radius - Radius in km.
  * @param most - Stations read per network at most.
+ * @param keys - The keys of AEMET and of the Met Office, those of the
+ *   settings by default.
+ * @param keys.aemet - AEMET OpenData key.
+ * @param keys.metOffice - Met Office Weather DataHub key.
  * @returns The readings.
  */
 export async function euReadings(
   center: { lat: number; lon: number },
   radius: number,
   most: number,
+  keys: { aemet?: string; metOffice?: string } = savedKeys(),
 ): Promise<WindReading[]> {
   const lists = await Promise.all([
     hubReadings(center, radius, most).catch(() => []),
     portusReadings(center, radius, most).catch(() => []),
     socibReadings(center, radius, most).catch(() => []),
+    aemetReadings(center, radius, most, keys.aemet ?? '').catch(() => []),
+    metOfficeReadings(center, radius, keys.metOffice ?? '').catch(() => []),
   ]);
   return lists.flat();
 }

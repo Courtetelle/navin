@@ -245,15 +245,19 @@ function isListed(id: string | undefined): boolean {
 }
 
 /**
- * The Météo-France key of a backup comes back on a device that has none,
+ * The keys of a backup (Météo-France, AEMET, Met Office) come back on a
+ * device that has none,
  * whatever else the device keeps of its own settings.
  * @param received - Settings of the backup.
  */
 export function restoreMfKey(received: Partial<Settings> | undefined): void {
-  const key = received?.windAlert?.mfKey;
-  if (!key) return;
-  updateSettings((settings) => {
-    if (settings.windAlert?.mfKey) return;
-    settings.windAlert = { ...settings.windAlert, mfKey: key };
-  });
+  // The keys of the networks, each one when the device has none.
+  for (const name of ['mfKey', 'aemetKey', 'metOfficeKey'] as const) {
+    const key = received?.windAlert?.[name];
+    if (typeof key !== 'string' || !key) continue;
+    updateSettings((settings) => {
+      if (settings.windAlert?.[name]) return;
+      settings.windAlert = { ...settings.windAlert, [name]: key };
+    });
+  }
 }

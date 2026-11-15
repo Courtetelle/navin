@@ -11,7 +11,9 @@ import { ensureDay, getDay, state } from '../../state/index.ts';
 
 import { BoxHelp } from './BoxHelp.tsx';
 import { MfKeyRow } from './MfKeyRow.tsx';
+import { StationKeyRow } from './StationKeyRow.tsx';
 import { onLake } from './onLake.ts';
+import { AEMET_KEY, MET_OFFICE_KEY } from './stationKeys.ts';
 import { useBoxTr } from './useBoxTr.ts';
 import type { WindAlertAction } from './windAlertClick.ts';
 import { windAlertClick } from './windAlertClick.ts';
@@ -90,14 +92,24 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
       <WindLegend keep={keep} />
       <BoxHelp keep={keep} nextIsRow={!noTest}>
         Vent mesuré d’abord : stations MeteoSwiss en Suisse, ailleurs balises
-        OpenWindMap et stations Météo-France (avec une clé). Sans station à
-        moins de 30 km, modèle de prévision le plus fin de la région à la
-        position du bateau, signalé « PRÉVISION » dans l’alerte. Deux bips et
-        deux flashs de couleur avec le vent exact (nœuds et Beaufort) à chaque
-        nouveau degré Beaufort dès 4 Bf (11 nd), de plus en plus aigus et forts.
-        Rappel toutes les 15 min. Appli ouverte et écran allumé seulement.
+        OpenWindMap, stations Météo-France (avec une clé), ItaliaMeteo en
+        Italie, Puertos del Estado et SOCIB en Espagne et aux Baléares, AEMET et
+        Met Office avec leur clé. Sans station à moins de 30 km, modèle de
+        prévision le plus fin de la région à la position du bateau, signalé «
+        PRÉVISION » dans l’alerte. Deux bips et deux flashs de couleur avec le
+        vent exact (nœuds et Beaufort) à chaque nouveau degré Beaufort dès 4 Bf
+        (11 nd), de plus en plus aigus et forts. Rappel toutes les 15 min. Appli
+        ouverte et écran allumé seulement.
       </BoxHelp>
-      {noTest ? <MfKeyRow /> : <TestRow keep={keep} />}
+      {noTest ? (
+        <>
+          <MfKeyRow />
+          <StationKeyRow station={AEMET_KEY} />
+          <StationKeyRow station={MET_OFFICE_KEY} />
+        </>
+      ) : (
+        <TestRow keep={keep} />
+      )}
     </div>
   );
 }
