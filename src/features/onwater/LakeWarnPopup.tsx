@@ -8,7 +8,7 @@ import { translateMessage } from '../../i18n/translate.ts';
 import { go } from '../../shell/router.ts';
 
 import { lakeWarnPop } from './lakeWarnPop.ts';
-import { LIGHT_MEANINGS, lightOf, whenText } from './lakeWarnings.ts';
+import { lightOf, whenText } from './lakeWarnings.ts';
 import { lightningPop } from './lightningPop.ts';
 import { windPopup } from './windOverlayState.ts';
 
@@ -40,7 +40,7 @@ export function LakeWarnPopup() {
   return createPortal(
     <div
       id="lakeWarnPop"
-      className="wind-pop lake-warn-pop no-print"
+      className={`wind-pop lake-warn-pop no-print${light.perMinute >= 90 ? ' lake-storm' : ''}`}
       role="alertdialog"
       style={style}
       onClick={(event) => {
@@ -50,22 +50,25 @@ export function LakeWarnPopup() {
         if (target?.closest('.lw-map')) go('tracker');
       }}
     >
+      {light.perMinute >= 90 ? (
+        <div className="lw-screen-flash" aria-hidden="true" />
+      ) : null}
       <div className="wp-box">
         {test ? <div className="lp-test">{translate('TEST')}</div> : null}
         <div className="lw-lamp" aria-hidden="true" />
-        <div className="wp-big">
-          {translate(`FEUX D’AVIS · ${light.words}`)}
-        </div>
         {warnings.map((warning) => {
           const { words, perMinute } = lightOf(warning.level);
           return (
             <div key={warning.name} className="lw-lake">
+              <div className="wp-big">
+                {translate(`${warning.name} · ${words}`)}
+              </div>
               <div className="wp-name">
-                {translate(`${warning.name} : ${words.toLowerCase()}`)}
+                {translate(`feux ${perMinute} éclats/min`)}
               </div>
               <div className="wp-other">
                 {translate(
-                  `feux ${perMinute} éclats/min · de ${time(warning.onset)} à ${time(warning.expires)}`,
+                  `de ${time(warning.onset)} à ${time(warning.expires)}`,
                 )}
               </div>
               {warning.text ? (
@@ -74,45 +77,6 @@ export function LakeWarnPopup() {
             </div>
           );
         })}
-        <div className="wp-sea">
-          {translate(
-            strongest.level >= 3
-              ? 'Rejoindre un abri sans attendre.'
-              : 'Prudence : préparer le retour à la rive.',
-          )}
-        </div>
-        <div className="lw-meanings">
-          <div className="lw-meanings-title">
-            {translate('Le sens des feux sur les rives')}
-          </div>
-          {LIGHT_MEANINGS.map((meaning) => (
-            <div
-              key={meaning.level}
-              className={
-                meaning.level === strongest.level
-                  ? 'lw-meaning now'
-                  : 'lw-meaning'
-              }
-            >
-              <b>
-                {translate(
-                  `${meaning.perMinute} éclats/min · ${meaning.title}`,
-                )}
-              </b>{' '}
-              {translate(`: ${meaning.text}`)}
-            </div>
-          ))}
-          <div className="lw-meaning">
-            {translate(
-              'Les feux s’allument dès que MétéoSuisse émet l’avis, avant l’arrivée des rafales. Feux éteints : pas d’avis en cours, ce qui ne garantit pas un vent faible.',
-            )}
-          </div>
-        </div>
-        <div className="wp-note">
-          {translate(
-            'Avis de MétéoSuisse pour les lacs, ceux qui allument les feux sur les rives.',
-          )}
-        </div>
         <Button className="btn primary lw-map" noUiEdit>
           {translate('🗺 Voir sur la carte')}
         </Button>

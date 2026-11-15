@@ -8141,6 +8141,37 @@ h1 .help-i.help-i-h1 {
   box-shadow: 0 0 18px 6px rgba(255, 157, 0, 0.9);
   animation: lake-blink var(--blink, 1.5s) steps(1, end) infinite;
 }
+/* 90 flashes a minute: red edge, a bigger and brighter lamp, the screen flashing */
+.wind-pop.lake-warn-pop.lake-storm .wp-box {
+  background: linear-gradient(
+    160deg,
+    rgba(230, 0, 0, 0.8),
+    rgba(150, 0, 0, 0.75)
+  );
+  box-shadow:
+    0 0 0 8px #ff1a1a,
+    0 0 40px 12px rgba(255, 40, 40, 0.8),
+    0 18px 50px rgba(0, 0, 0, 0.45);
+}
+.lake-storm .lw-lamp {
+  width: 56px;
+  height: 56px;
+  background: #fff6b0;
+  box-shadow:
+    0 0 30px 14px rgba(255, 230, 80, 1),
+    0 0 70px 30px rgba(255, 120, 0, 0.8);
+}
+.lw-screen-flash {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: rgba(255, 250, 210, 0.9);
+  animation: lake-blink var(--blink, 0.667s) steps(1, end) infinite;
+}
+:root[data-theme='night'] .lw-screen-flash {
+  background: rgba(255, 60, 40, 0.6);
+}
 .lw-meanings {
   margin-top: 12px;
   padding: 10px 12px;
@@ -8179,11 +8210,20 @@ h1 .help-i.help-i-h1 {
   }
 }
 .lake-warn-list .lw-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
   margin: 8px 0;
   padding: 10px 12px;
   border-radius: 12px;
   border-left: 6px solid #ff8c00;
   background: var(--card, #fff);
+}
+.lw-lamp.lw-lamp-row {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin: 2px 0 0;
 }
 .lake-warn-list .lw-row.storm {
   border-left-color: #d0021b;
@@ -8212,7 +8252,7 @@ h1 .help-i.help-i-h1 {
     0 0 0 6px #ffd400,
     0 18px 50px rgba(0, 0, 0, 0.45);
 }
-.lightning-pop .lp-test {
+.wind-pop .lp-test {
   display: inline-block;
   margin-bottom: 8px;
   padding: 2px 12px;
@@ -13041,4 +13081,13 @@ html body .rail-btn.rail-pin.rail-idle .rail-icon {
   html body .live-detail .live-big b {
     font-size: 54px;
   }
+}
+
+/* Buttons that roll back on their own: 2 s fully shown, then 3 s fading */
+html body .rail-btn.fading,
+html body.navin-fading .navin-row,
+html body.navin-fading header.topbar nav.topnav .top-tab.tab-data,
+html body.navin-fading header.topbar #gearBtn.theme-btn {
+  opacity: 0 !important;
+  transition: opacity 3s linear !important;
 }

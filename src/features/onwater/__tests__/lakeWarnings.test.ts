@@ -79,10 +79,12 @@ test('the lake of the boat', () => {
   expect(lakeSpot('Petit Lac')).not.toBeNull();
   expect(lakeSpot('Lac inconnu')).toBeNull();
   const warnings = litWarnings(lakeWarningsOf(DANGERS), 1_794_774_000_000);
-  // Off Lausanne: the Grand Lac, not Neuchâtel.
+  // Off Lausanne: the Grand Lac only (Neuchâtel and Joux only flash).
   expect(
     warningsNear(warnings, { lat: 46.5, lon: 6.6 }).map((w) => w.name),
   ).toEqual(['Grand Lac']);
+  // On the Lac de Neuchâtel, its storm only flashes on the map.
+  expect(warningsNear(warnings, { lat: 46.9, lon: 6.85 })).toEqual([]);
   // At sea off Saint-Malo: none.
   expect(warningsNear(warnings, { lat: 48.65, lon: -2 })).toEqual([]);
 });

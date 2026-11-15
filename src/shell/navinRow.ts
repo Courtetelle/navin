@@ -7,21 +7,29 @@ import { setBodyClass } from './bodyClass.ts';
 /** The row of menus unrolled at the right of NavIn (landscape tablet). */
 export const navinRowOpen = signal(false);
 
-/** Left without a choice, the row rolls back after this long, as ＋ and −. */
-const IDLE_MS = 3000;
+/** Left without a choice, the row stays fully shown this long… */
+const SOLID_MS = 2000;
+/** …then fades out over this long and rolls back, as ＋ and −. */
+const FADE_MS = 3000;
 
 let chosen = false;
 let idle: ReturnType<typeof setTimeout> | undefined;
+let fade: ReturnType<typeof setTimeout> | undefined;
 let watching = false;
 
 function show(open: boolean): void {
   navinRowOpen.value = open;
   setBodyClass('navin-open', open);
+  setBodyClass('navin-fading', false);
   clearTimeout(idle);
+  clearTimeout(fade);
   if (open && !chosen) {
+    fade = setTimeout(() => {
+      if (!chosen) setBodyClass('navin-fading', true);
+    }, SOLID_MS);
     idle = setTimeout(() => {
       if (!chosen) closeNavinRow();
-    }, IDLE_MS);
+    }, SOLID_MS + FADE_MS);
   }
 }
 
@@ -61,5 +69,7 @@ export function navinRowChosen(): void {
   if (!navinRowOpen.peek()) return;
   chosen = true;
   clearTimeout(idle);
+  clearTimeout(fade);
+  setBodyClass('navin-fading', false);
   setTimeout(closeNavinRow, 0);
 }

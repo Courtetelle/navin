@@ -4,6 +4,7 @@ import { uid } from '../../lib/format.ts';
 import { addEntry, state } from '../../state/index.ts';
 
 import { relayed } from './euStations.ts';
+import { lakeFix } from './lakeFix.ts';
 import type { LakeWarnPop } from './lakeWarnPop.ts';
 import { lakeWarnPop } from './lakeWarnPop.ts';
 import type { LakeWarning } from './lakeWarnings.ts';
@@ -16,9 +17,8 @@ import {
   warningKey,
   warningsNear,
 } from './lakeWarnings.ts';
-import { lookPlace } from './lightningWatch.ts';
 import { showOverlays } from './overlayRoot.ts';
-import { playLightning } from './windAudio.ts';
+import { playLakeLight } from './windAudio.ts';
 
 /** Why the warnings could not be read. */
 export type LakeWarnTrouble = 'no-relay' | 'old-relay' | 'network' | null;
@@ -117,14 +117,15 @@ export async function lakeWarnCheck(): Promise<void> {
   const { warnings } = await readLakeWarnings();
   const lit = litWarnings(warnings, Date.now());
   if (lit.length === 0 || !lakeWarnOn()) return;
-  lookPlace((position) => {
+  // The GPS only: the part of the Léman where the boat is.
+  lakeFix((position) => {
     if (!position) return;
     const fresh = warningsNear(lit, position).filter(
       (warning) => !said.has(warningKey(warning)),
     );
     if (fresh.length === 0) return;
     for (const warning of fresh) said.add(warningKey(warning));
-    playLightning();
+    playLakeLight(Math.max(...fresh.map((warning) => warning.level)));
     showPop({ warnings: fresh });
     if (state.data.cruise.peek()) {
       addEntry({
@@ -146,20 +147,27 @@ export function lakeWarnWatchStart(): void {
   timer = setInterval(() => void lakeWarnCheck(), EVERY_MS);
 }
 
-/** A test of the alert: a strong wind warning on the Grand Lac. */
-export function lakeWarnTest(): void {
+/**
+ * A test of the alert on the Grand Lac: strong wind (40 flashes a minute)
+ * or storm (90 a minute, louder and brighter).
+ * @param level - 2 strong wind, 3 storm.
+ */
+export function lakeWarnTest(level = 2): void {
   const now = Date.now();
-  playLightning();
+  const storm = level >= 3;
+  playLakeLight(level);
   showPop({
     test: true,
     warnings: [
       {
         name: 'Grand Lac',
-        level: 2,
+        level,
         onset: now,
         expires: now + 2 * 3_600_000,
         outlook: false,
-        text: 'Des rafales de 25 à 33 kt de secteur sud-ouest sont possibles.',
+        text: storm
+          ? 'Des rafales de 35 à 45 kt de secteur sud-ouest sont possibles.'
+          : 'Des rafales de 25 à 33 kt de secteur sud-ouest sont possibles.',
       },
     ],
   });

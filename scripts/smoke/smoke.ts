@@ -1161,7 +1161,13 @@ async function tablet(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(3300);
   check(
     theme,
-    'tablet: ＋ goes away after 3 s',
+    'tablet: ＋ fades out from 2 s',
+    (await page.locator('.rail-zoom-in.fading').count()) === 1,
+  );
+  await page.waitForTimeout(2000);
+  check(
+    theme,
+    'tablet: ＋ goes away after 2 s shown and 3 s fading',
     (await page.locator('.rail-zoom-in').count()) === 0,
   );
   const screens: Array<[string, string]> = [

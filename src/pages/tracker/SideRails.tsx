@@ -22,7 +22,11 @@ import {
 } from '../../features/map/trackerButtons.ts';
 import { trkPointNow } from '../../features/map/trackerPoint.ts';
 import { tracker } from '../../features/map/trackerState.ts';
-import { showZoom, zoomShown } from '../../features/map/zoomShown.ts';
+import {
+  showZoom,
+  zoomFading,
+  zoomShown,
+} from '../../features/map/zoomShown.ts';
 import { takePhoto } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -215,7 +219,7 @@ function ZoomPair() {
       <Button
         type="button"
         noUiEdit
-        className="rail-btn rail-zoom-in"
+        className={`rail-btn rail-zoom-in${zoomFading.value ? ' fading' : ''}`}
         aria-label={tr('Zoomer')}
         onClick={() => {
           showZoom();
@@ -229,7 +233,7 @@ function ZoomPair() {
       <Button
         type="button"
         noUiEdit
-        className="rail-btn rail-zoom-out"
+        className={`rail-btn rail-zoom-out${zoomFading.value ? ' fading' : ''}`}
         aria-label={tr('Dézoomer')}
         onClick={() => {
           showZoom();

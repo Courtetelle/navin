@@ -1,4 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
+import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
@@ -10,7 +11,7 @@ import {
   readLakeWarnings,
 } from '../../features/onwater/lakeWarnWatch.ts';
 import {
-  lakeWarningText,
+  LIGHT_MEANINGS,
   lightOf,
   litWarnings,
 } from '../../features/onwater/lakeWarnings.ts';
@@ -61,6 +62,76 @@ export function LakeWarnings() {
   );
   return (
     <div className="lake-warn-list">
+      {trouble ? (
+        <p className="lw-trouble" role="status">
+          {tr(TROUBLES[trouble] ?? '')}
+        </p>
+      ) : null}
+      <h3>{tr('Feux allumés')}</h3>
+      {lit.length === 0 ? (
+        <p data-lakewarn="none">
+          {tr(
+            trouble === 'no-relay' || trouble === 'old-relay'
+              ? 'Avis non lus : voir ci-dessus.'
+              : busy || at === 0
+                ? 'Lecture des avis de MétéoSuisse…'
+                : 'Aucun avis en vigueur : les feux sont éteints.',
+          )}
+        </p>
+      ) : (
+        lit.map((warning) => {
+          const { words, perMinute } = lightOf(warning.level);
+          return (
+            <div
+              key={warning.name}
+              className={warning.level >= 3 ? 'lw-row storm' : 'lw-row'}
+              data-lakewarn="lit"
+            >
+              <Lamp perMinute={perMinute} />
+              <div>
+                <b>{tr(`${warning.name} · ${words}`)}</b>
+                <div>
+                  {tr(
+                    `feux ${perMinute} éclats/min · de ${time(warning.onset)} à ${time(warning.expires)}`,
+                  )}
+                </div>
+                <div>{tr(warning.text)}</div>
+              </div>
+            </div>
+          );
+        })
+      )}
+      {coming.length > 0 ? (
+        <>
+          <h3>{tr('À venir')}</h3>
+          {coming.map((warning) => (
+            <div key={`${warning.name}${warning.onset}`} className="lw-row">
+              <div>
+                <b>
+                  {tr(
+                    `${warning.name} · ${warning.outlook ? 'prévision d’avis' : lightOf(warning.level).words} dès ${time(warning.onset)}`,
+                  )}
+                </b>
+                <div>{tr(warning.text)}</div>
+              </div>
+            </div>
+          ))}
+        </>
+      ) : null}
+      <h3>{tr('Le sens des feux sur les rives')}</h3>
+      {LIGHT_MEANINGS.map((meaning) => (
+        <div
+          key={meaning.level}
+          className={meaning.level >= 3 ? 'lw-row storm' : 'lw-row'}
+          data-lakewarn="meaning"
+        >
+          <Lamp perMinute={meaning.perMinute} />
+          <div>
+            <b>{tr(`${meaning.perMinute} éclats/min · ${meaning.title}`)}</b>
+            <div>{tr(meaning.text)}</div>
+          </div>
+        </div>
+      ))}
       <ButtonRow className="row c2">
         <Button
           className={on ? 'btn on' : 'btn'}
@@ -86,65 +157,36 @@ export function LakeWarnings() {
           {tr('↻ Lire maintenant')}
         </Button>
       </ButtonRow>
-      {trouble ? (
-        <p className="lw-trouble" role="status">
-          {tr(TROUBLES[trouble] ?? '')}
-        </p>
-      ) : null}
-      <h3>{tr('Feux allumés')}</h3>
-      {lit.length === 0 ? (
-        <p data-lakewarn="none">
-          {tr(
-            busy || at === 0
-              ? 'Lecture des avis de MétéoSuisse…'
-              : 'Aucun avis en vigueur : les feux sont éteints.',
-          )}
-        </p>
-      ) : (
-        lit.map((warning) => (
-          <div
-            key={warning.name}
-            className={warning.level >= 3 ? 'lw-row storm' : 'lw-row'}
-            data-lakewarn="lit"
-          >
-            <b>🚨 {tr(lakeWarningText(warning))}</b>
-            <div>{tr(warning.text)}</div>
-          </div>
-        ))
-      )}
-      {coming.length > 0 ? (
-        <>
-          <h3>{tr('À venir')}</h3>
-          {coming.map((warning) => (
-            <div key={`${warning.name}${warning.onset}`} className="lw-row">
-              <b>
-                {tr(
-                  `${warning.name} : ${warning.outlook ? 'prévision d’avis' : `avis de ${lightOf(warning.level).words.toLowerCase()}`} dès ${time(warning.onset)}`,
-                )}
-              </b>
-              <div>{tr(warning.text)}</div>
-            </div>
-          ))}
-        </>
-      ) : null}
       {at > 0 ? (
         <p className="nav-hint">
           {tr(`Lu à ${time(at)} · relu toutes les 5 minutes`)}
         </p>
       ) : null}
       <HelpText>
-        Les avis de MétéoSuisse pour les lacs suisses (Léman en trois parties,
-        Neuchâtel, Bienne, Morat, Joux, Thoune, Zurich, Constance, Lugano,
-        Majeur…) allument les feux sur les rives : 40 éclats par minute pour un
-        avis de vent fort (rafales de 25 à 33 nœuds, 46 à 60 km/h), 90 par
-        minute pour un avis de tempête (34 nœuds et plus). NavIn les lit toutes
-        les 5 minutes par le relais, montre une lampe qui clignote au même
-        rythme au milieu du lac sur la carte, et sonne quand un avis s’allume
-        sur le lac où vous êtes (ou celui de la zone choisie avec NavIn).
-        MétéoSuisse publie ces avis sur son site, sans les documenter comme
+        NavIn lit toutes les 5 minutes par le relais les avis de MétéoSuisse
+        pour les lacs suisses. Sur la carte, une lampe clignote au rythme des
+        feux au milieu de chaque lac en alerte. L’alarme et la bulle ne
+        concernent que la partie du Léman où vous êtes, d’après le GPS.
+        MétéoSuisse publie ces avis sur son site sans les documenter comme
         données ouvertes : la lecture peut cesser si le site change. Le test est
         dans Réglages › Tests.
       </HelpText>
     </div>
+  );
+}
+
+/**
+ * A lamp flashing as the warning lights.
+ * @param props - Its rhythm.
+ * @param props.perMinute - Flashes per minute.
+ * @returns The lamp.
+ */
+function Lamp({ perMinute }: { perMinute: number }) {
+  return (
+    <span
+      className="lw-lamp lw-lamp-row"
+      aria-hidden="true"
+      style={{ '--blink': `${60 / perMinute}s` } as CSSProperties}
+    />
   );
 }

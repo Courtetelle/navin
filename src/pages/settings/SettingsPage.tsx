@@ -193,19 +193,29 @@ function TestsSection() {
       <h3>{tr('🚨 Test des feux d’avis des lacs')}</h3>
       <p className="keep-help nav-hint">
         {tr(
-          'Trois bips et la bulle avec la lampe qui clignote comme les feux, pour un avis de vent fort sur le Grand Lac.',
+          'La bulle et le son pour le Grand Lac : 40 éclats/min (vent fort, trois bips) ou 90 éclats/min (tempête, six bips aigus plus forts, lampe et écran qui flashent).',
         )}
       </p>
-      <ButtonRow>
+      <ButtonRow className="row c2">
         <Button
           className="btn"
           data-lakewarn="test"
           onClick={() => {
             buzz();
-            lakeWarnTest();
+            lakeWarnTest(2);
           }}
         >
-          {tr('▶ Test des feux d’avis des lacs')}
+          {tr('▶ 40 éclats/min · vent fort')}
+        </Button>
+        <Button
+          className="btn"
+          data-lakewarn="test-storm"
+          onClick={() => {
+            buzz();
+            lakeWarnTest(3);
+          }}
+        >
+          {tr('▶ 90 éclats/min · tempête')}
         </Button>
       </ButtonRow>
       <h3>{tr('🔔 Test de plusieurs alertes à la suite')}</h3>

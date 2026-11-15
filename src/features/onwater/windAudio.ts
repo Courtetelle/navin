@@ -122,6 +122,47 @@ function showFlash(
 }
 
 /**
+ * The warning lights of a lake: strong wind, three beeps; storm (90 flashes
+ * a minute), six shrill beeps at full volume, fast as the lights, and the
+ * device shakes longer.
+ * @param level - 2 strong wind, 3 storm.
+ */
+export function playLakeLight(level: number): void {
+  const storm = level >= 3;
+  navigator.vibrate?.(
+    storm
+      ? [400, 150, 400, 150, 400, 150, 400, 150, 400, 150, 400]
+      : [300, 300, 300, 300, 300],
+  );
+  const context = audioContext;
+  if (!context) return;
+  const sound = () => {
+    const start = context.currentTime + 0.05;
+    const beeps = storm ? 6 : 3;
+    const gap = storm ? 0.33 : 0.75;
+    const length = storm ? 0.22 : 0.35;
+    const volume = storm ? 1 : 0.55;
+    for (let index = 0; index < beeps; index++) {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const from = start + index * gap;
+      const to = from + length;
+      oscillator.type = storm ? 'square' : 'triangle';
+      oscillator.frequency.value = storm ? 1320 : 660;
+      gain.gain.setValueAtTime(0, from);
+      gain.gain.linearRampToValueAtTime(volume, from + 0.01);
+      gain.gain.setValueAtTime(volume, to - 0.01);
+      gain.gain.linearRampToValueAtTime(0, to);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(from);
+      oscillator.stop(to + 0.02);
+    }
+  };
+  if (context.state === 'running') sound();
+  else context.resume().then(sound, () => undefined);
+}
+
+/**
  * The lightning alert: three short low beeps, unlike the two long ones of
  * the wind, and the device shakes three times.
  */

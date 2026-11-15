@@ -229,27 +229,36 @@ function distanceKm(
   return 2 * 6371 * Math.asin(Math.min(1, Math.sqrt(h)));
 }
 
-/** A lake whose middle is this near the boat is the boat's lake. */
-const NEAR_KM = 25;
+/** The three parts of the Léman, as MeteoSwiss names them. */
+const LEMAN = ['petit lac', 'grand lac', 'haut lac'];
+
+/** Beyond this from the middle of a part, the boat is not on the Léman. */
+const LEMAN_KM = 30;
 
 /**
- * The lit warnings of the lakes near a place, the nearest first.
+ * The lit warning of the part of the Léman the boat is on (the part whose
+ * middle is nearest the GPS). The other lakes only flash on the map: they
+ * never sound nor show the bubble.
  * @param warnings - The lit warnings.
- * @param place - The boat or the zone.
- * @returns Those within reach.
+ * @param place - The GPS position.
+ * @returns The warning of that part, or nothing.
  */
 export function warningsNear(
   warnings: readonly LakeWarning[],
   place: { lat: number; lon: number },
 ): LakeWarning[] {
-  const near: Array<{ warning: LakeWarning; km: number }> = [];
-  for (const warning of warnings) {
-    const spot = lakeSpot(warning.name);
+  let nearest: { name: string; km: number } | null = null;
+  for (const part of LEMAN) {
+    const spot = LAKES.find((lake) => lake.match === part);
     if (!spot) continue;
     const km = distanceKm(place, spot);
-    if (km <= NEAR_KM) near.push({ warning, km });
+    if (km <= LEMAN_KM && (!nearest || km < nearest.km)) {
+      nearest = { name: part, km };
+    }
   }
-  return near.toSorted((a, b) => a.km - b.km).map(({ warning }) => warning);
+  if (!nearest) return [];
+  const part = nearest.name;
+  return warnings.filter((warning) => plain(warning.name).includes(part));
 }
 
 /** What each light means, as on the shore. */
@@ -258,12 +267,12 @@ export const LIGHT_MEANINGS = [
     level: 2,
     perMinute: 40,
     title: 'Avis de vent fort',
-    text: 'rafales de 25 à 33 nœuds (46 à 60 km/h) attendues sur le lac. Prudence : petites embarcations, rejoindre la rive ; les autres, se préparer à rentrer.',
+    text: 'rafales de 25 à 33 nœuds (46 à 60 km/h) attendues sur le lac.',
   },
   {
     level: 3,
     perMinute: 90,
     title: 'Avis de tempête',
-    text: 'rafales de 34 nœuds et plus (plus de 60 km/h) attendues. Danger : gagner un abri ou la rive sans attendre.',
+    text: 'rafales de 34 nœuds et plus (plus de 60 km/h) attendues sur le lac.',
   },
 ] as const;
