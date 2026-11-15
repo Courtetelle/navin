@@ -8125,6 +8125,40 @@ h1 .help-i.help-i-h1 {
   margin: 0 0 0 8px;
   vertical-align: middle;
 }
+/* Lightning alert: the screen flashes, a bubble edged in yellow */
+.lightning-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 99991;
+  pointer-events: none;
+  background: rgba(255, 250, 200, 0.85);
+  opacity: 0;
+}
+.lightning-flash.on {
+  opacity: 1;
+}
+.wind-pop.lightning-pop .wp-box {
+  box-shadow:
+    0 0 0 6px #ffd400,
+    0 18px 50px rgba(0, 0, 0, 0.45);
+}
+.lightning-pop .lp-test {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 2px 12px;
+  border-radius: 8px;
+  background: #fff;
+  color: #b00;
+  font-weight: 800;
+  text-shadow: none;
+}
+.lightning-pop .lp-map {
+  margin-top: 14px;
+  width: 100%;
+}
+:root[data-theme='night'] .lightning-flash {
+  background: rgba(255, 60, 40, 0.55);
+}
 /* 2026-11-04 (Corban) : bulle d'alerte de vent, rouge vitrée, grande écriture, fermée d'un toucher */
 .wind-pop {
   position: fixed;

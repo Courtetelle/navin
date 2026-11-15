@@ -8,6 +8,7 @@ import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import type { LightningSettings } from '../../features/onwater/lightning.ts';
 import {
   LIGHTNING_RADII_NM,
+  lightningAlertOn,
   lightningOnMap,
   lightningRadiusNm,
   lightningText,
@@ -16,6 +17,7 @@ import {
   lightningBusy,
   lightningCheck,
   lightningLast,
+  lightningTest,
 } from '../../features/onwater/lightningWatch.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -45,7 +47,7 @@ export function LightningAlert() {
   const tr = useTr();
   const settings = (state.preferences.settings.value.lightning ??
     {}) as LightningSettings;
-  const on = Boolean(settings.on);
+  const on = lightningAlertOn(settings);
   const radiusNm = lightningRadiusNm(settings);
   const onMap = lightningOnMap(settings);
   const last = lightningLast.value;
@@ -96,7 +98,7 @@ export function LightningAlert() {
             ? tr(lightningText(last, radiusNm))
             : tr('Pas encore d’image satellite lue.')}
       </p>
-      <ButtonRow className="row">
+      <ButtonRow className="row c2">
         <Button
           className="btn"
           data-lightning="look"
@@ -107,6 +109,16 @@ export function LightningAlert() {
           }}
         >
           {tr('↻ Regarder maintenant')}
+        </Button>
+        <Button
+          className="btn"
+          data-lightning="test"
+          onClick={() => {
+            buzz();
+            lightningTest();
+          }}
+        >
+          {tr('🔔 Tester l’alerte')}
         </Button>
       </ButtonRow>
       <HelpText>

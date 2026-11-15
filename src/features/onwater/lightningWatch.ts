@@ -2,7 +2,7 @@ import { signal } from '@preact/signals-react';
 
 import { uid } from '../../lib/format.ts';
 import type { Position } from '../../model/types.ts';
-import { addEntry, state, toast } from '../../state/index.ts';
+import { addEntry, state } from '../../state/index.ts';
 
 import { contextPlace } from './externals.ts';
 import { lakeFix } from './lakeFix.ts';
@@ -14,6 +14,7 @@ import type {
   LightningSpots,
 } from './lightning.ts';
 import {
+  lightningAlertOn,
   lightningDue,
   lightningRadiusNm,
   lightningReport,
@@ -24,12 +25,24 @@ import {
   lightningUrl,
   nmToKm,
 } from './lightning.ts';
+import type { LightningPop } from './lightningPop.ts';
+import { lightningPop } from './lightningPop.ts';
+import { showOverlays } from './overlayRoot.ts';
 import { playLightning } from './windAudio.ts';
 
 /** The last look at the lightning around the boat. */
 export const lightningLast = signal<LightningReport | null>(null);
 /** A look is running. */
 export const lightningBusy = signal(false);
+
+/**
+ * The bubble of the alert, above every screen.
+ * @param pop - What it shows.
+ */
+function showPop(pop: LightningPop): void {
+  showOverlays();
+  lightningPop.value = pop;
+}
 
 /** The images are read this often while the alert is on. */
 const EVERY_MS = 5 * 60_000;
@@ -159,13 +172,17 @@ export function lightningCheck(quiet = false): Promise<void> {
             lastSignal = null;
             return;
           }
-          if (quiet || !lightningSettings().on) return;
+          if (quiet || !lightningAlertOn(lightningSettings())) return;
           const now = Date.now();
           if (!lightningDue(report, lastSignal, now)) return;
           lastSignal = { km: report.nearestKm, at: now };
           const text = lightningText(report, radiusNm);
           playLightning();
-          toast(`${text}\nIndication du satellite, environ 10 min de retard.`);
+          showPop({
+            report,
+            radiusNm,
+            place: { lat: position.lat, lon: position.lon },
+          });
           if (state.data.cruise.peek()) {
             addEntry({
               id: uid(),
@@ -188,7 +205,32 @@ export function lightningWatchStart(): void {
   clearInterval(timer);
   timer = undefined;
   lastSignal = null;
-  if (!lightningSettings().on) return;
+  if (!lightningAlertOn(lightningSettings())) return;
   void lightningCheck();
   timer = setInterval(() => void lightningCheck(), EVERY_MS);
+}
+
+/**
+ * A test of the alert: the beeps and the bubble as for a storm at 12 NM to
+ * the south-west, coming nearer.
+ */
+export function lightningTest(): void {
+  const now = Date.now();
+  // At once, where the map looks: no wait for the GPS.
+  const { lat, lon } = contextPlace();
+  playLightning();
+  showPop({
+    report: {
+      nearestKm: 22,
+      bearing: 225,
+      cells: 40,
+      strong: true,
+      nearer: true,
+      at: now - 10 * 60_000,
+      readAt: now,
+    },
+    radiusNm: lightningRadiusNm(lightningSettings()),
+    place: { lat, lon },
+    test: true,
+  });
 }

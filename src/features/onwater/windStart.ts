@@ -112,7 +112,8 @@ function alertsOn(): boolean {
 function lightningOn(): boolean {
   const lightning = state.preferences.settings.value.lightning as
     { on?: boolean } | undefined;
-  return Boolean(lightning?.on);
+  // On unless switched off.
+  return lightning?.on !== false;
 }
 
 function lightningStart(): void {

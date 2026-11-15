@@ -22,7 +22,7 @@ const KM_PER_DEG = 111.32;
 
 /** Settings of the lightning alert (`settings.lightning`). */
 export interface LightningSettings {
-  /** The alert is on. */
+  /** The alert is on; yes unless false. */
   on?: boolean;
   /** Its radius, in nautical miles. */
   radiusNm?: number;
@@ -72,6 +72,17 @@ export function lightningRadiusNm(
   return (LIGHTNING_RADII_NM as readonly number[]).includes(chosen)
     ? chosen
     : LIGHTNING_RADIUS_NM;
+}
+
+/**
+ * Whether the alert is on (Météo › Alerte foudre), yes by default.
+ * @param settings - The lightning settings.
+ * @returns True to sound it.
+ */
+export function lightningAlertOn(
+  settings: LightningSettings | undefined,
+): boolean {
+  return settings?.on !== false;
 }
 
 /**
