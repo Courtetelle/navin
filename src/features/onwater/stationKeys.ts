@@ -1,4 +1,5 @@
 import { aemetReadings, metOfficeReadings } from './euStations.ts';
+import { frostReadings } from './northStations.ts';
 
 /** The AEMET key: every station of Spain, the Balearics and the Canaries. */
 export const AEMET_KEY = {
@@ -27,4 +28,19 @@ export const MET_OFFICE_KEY = {
   read: (center: { lat: number; lon: number }, key: string) =>
     metOfficeReadings(center, 80, key),
   sample: { lat: 50.8, lon: -1.3 },
+} as const;
+
+/** The Frost client ID: the coast stations of Norway, through the relay. */
+export const FROST_KEY = {
+  setting: 'frostKey',
+  account: 'frost',
+  name: 'MET Norway (Frost)',
+  // No password: an address of mail gives the client ID at once.
+  mailOnly: true,
+  label: '🇳🇴 Identifiant Frost (Norvège)',
+  url: 'https://frost.met.no/auth/requestCredentials.html',
+  help: 'Facultatif. Gratuit sur frost.met.no : écrire son adresse mail, le « client ID » s’affiche aussitôt (et arrive par mail) ; le coller ici. Il faut aussi le relais (plus bas), à jour. Avec lui, les stations côtières et les phares de Norvège s’ajoutent à LiveMétéo et aux alertes.',
+  read: (center: { lat: number; lon: number }, key: string) =>
+    frostReadings(center, 80, 3, key),
+  sample: { lat: 59.9, lon: 10.7 },
 } as const;

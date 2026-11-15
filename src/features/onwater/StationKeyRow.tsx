@@ -18,7 +18,7 @@ const RETRY_MS = 3000;
 /** What a key row needs to know of its network. */
 interface StationKey {
   /** Where the key is kept in `settings.windAlert`. */
-  setting: 'aemetKey' | 'metOfficeKey';
+  setting: 'aemetKey' | 'metOfficeKey' | 'frostKey';
   /** The account of its site (`aemet`, `metoffice`). */
   account: string;
   /** Name of the network. */
@@ -129,7 +129,13 @@ export function StationKeyRow({ station }: { station: StationKey }) {
         ) : null}
       </form>
       <KeyQr
-        id={station.setting === 'aemetKey' ? 'aemet' : 'metoffice'}
+        id={
+          station.setting === 'aemetKey'
+            ? 'aemet'
+            : station.setting === 'frostKey'
+              ? 'frost'
+              : 'metoffice'
+        }
         value={key}
       />
       <KeyGuide id={station.account} name={station.name} />

@@ -82,6 +82,22 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
       '6. Dans NavIn › Réglages › Clés météo, la coller sous « Clé API Met Office » et toucher Enregistrer : NavIn l’essaie.',
     ].join('\n'),
   },
+  frost: {
+    first: [
+      '1. Frost (MET Norway) n’a ni compte ni mot de passe : seule l’adresse mail compte.',
+      '2. Ouvrir frost.met.no › « Create a user » (page « requestCredentials »).',
+      '3. Écrire l’adresse mail, accepter les conditions (licence CC BY 4.0) et valider.',
+      '4. Le « client ID » s’affiche aussitôt et arrive aussi par mail (de frost@met.no) : une suite de lettres et de chiffres avec des tirets. Le « client secret » n’est pas utile.',
+      '5. Copier le client ID en entier, puis suivre la 2ᵉ partie.',
+      '6. Le relais doit être à jour : « 📋 Copier le code du relais », puis sur Cloudflare « Modifier le code », tout remplacer et « Déployer ».',
+    ].join('\n'),
+    again: [
+      '1. Pas de connexion : le client ID est dans le mail de frost@met.no ; le chercher dans la messagerie.',
+      '2. Le copier en entier.',
+      '3. Dans NavIn › Réglages › Clés météo, le coller sous « Identifiant Frost (Norvège) » et toucher Enregistrer : NavIn l’essaie.',
+      '4. Mail perdu ou identifiant refusé : en redemander un avec la 1ʳᵉ partie, la même adresse convient.',
+    ].join('\n'),
+  },
   relay: {
     first: [
       '1. Ouvrir dash.cloudflare.com et « Sign up » : adresse mail et mot de passe (offre gratuite « Free »), puis confirmer le mail reçu.',

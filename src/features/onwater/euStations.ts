@@ -9,6 +9,7 @@ import {
   ipmaReadings,
   smhiReadings,
 } from './moreStations.ts';
+import { frostReadings, rwsReadings } from './northStations.ts';
 import type { WindReading } from './windTypes.ts';
 
 /** The networks of measured wind around Italy, Spain and Britain. */
@@ -1212,12 +1213,18 @@ function textValue(value: unknown): string {
  * The keys of AEMET and of the Met Office saved in the settings.
  * @returns The keys, empty without them.
  */
-function savedKeys(): { aemet: string; metOffice: string; relay: string } {
+function savedKeys(): {
+  aemet: string;
+  metOffice: string;
+  relay: string;
+  frost: string;
+} {
   const alert = state.preferences.settings.peek().windAlert ?? {};
   return {
     aemet: textValue(alert.aemetKey),
     metOffice: textValue(alert.metOfficeKey),
     relay: textValue(alert.relayUrl),
+    frost: textValue(alert.frostKey),
   };
 }
 
@@ -1239,7 +1246,12 @@ export async function euReadings(
   center: { lat: number; lon: number },
   radius: number,
   most: number,
-  keys: { aemet?: string; metOffice?: string; relay?: string } = savedKeys(),
+  keys: {
+    aemet?: string;
+    metOffice?: string;
+    relay?: string;
+    frost?: string;
+  } = savedKeys(),
 ): Promise<WindReading[]> {
   const lists = await Promise.all([
     hubReadings(center, radius, most).catch(() => []),
@@ -1254,6 +1266,14 @@ export async function euReadings(
     smhiReadings(center, radius, most).catch(() => []),
     fmiReadings(center, radius, most).catch(() => []),
     dhmzReadings(center, radius, most, keys.relay ?? '').catch(() => []),
+    rwsReadings(center, radius, most, keys.relay ?? '').catch(() => []),
+    frostReadings(
+      center,
+      radius,
+      most,
+      keys.frost ?? '',
+      keys.relay ?? '',
+    ).catch(() => []),
   ]);
   return lists.flat();
 }

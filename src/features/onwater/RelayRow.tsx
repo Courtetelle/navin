@@ -122,10 +122,13 @@ export function RelayRow() {
       />
       <HelpText>
         Facultatif. Le petit relais de NavIn, installé gratuitement sur un
-        compte Cloudflare (Workers), lit les METAR des aéroports et les bouées
-        et bateaux-feux de la NOAA (Manche, mer du Nord, Atlantique), dont les
-        serveurs ne se laissent pas lire par une page web. Coller ici son
-        adresse.
+        compte Cloudflare (Workers), lit pour NavIn ce que les serveurs ne
+        laissent pas lire par une page web : les METAR des aéroports, les bouées
+        et bateaux-feux de la NOAA, la Croatie (DHMZ), les Pays-Bas
+        (Rijkswaterstaat), la Norvège (Frost, avec son identifiant) et les feux
+        d’avis des lacs suisses (MétéoSuisse). Il garde aussi 24 h des stations
+        pour tous les appareils. Coller ici son adresse ; après une mise à jour
+        de NavIn qui l’annonce, recoller son code.
       </HelpText>
     </div>
   );

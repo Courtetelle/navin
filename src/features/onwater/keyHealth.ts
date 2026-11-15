@@ -86,6 +86,12 @@ const KEYS = [
     todo: 'Réglages › Clés météo › « Où trouver la clé Met Office » (2ᵉ partie) : « Reset Credentials » sur datahub.metoffice.gov.uk, coller la nouvelle clé et Enregistrer.',
   },
   {
+    id: 'frost',
+    setting: 'frostKey',
+    name: 'Frost (MET Norway)',
+    todo: 'Réglages › Clés météo › « Où trouver l’identifiant Frost » : redemander un client ID sur frost.met.no avec son adresse mail, le coller et Enregistrer.',
+  },
+  {
     id: 'relay',
     setting: 'relayUrl',
     name: 'relais des METAR',
@@ -127,6 +133,10 @@ async function refused(id: string, key: string): Promise<boolean | null> {
         estado?: number;
       } | null;
       return body?.estado === 401 || body?.estado === 403;
+    }
+    if (id === 'frost') {
+      const { frostRefused } = await import('./northStations.ts');
+      return await frostRefused(key);
     }
     if (id === 'metoffice') {
       const response = await fetch(

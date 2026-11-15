@@ -4,7 +4,7 @@ import { KeyScan } from './KeyScan.tsx';
 import { MfKeyRow } from './MfKeyRow.tsx';
 import { RelayRow } from './RelayRow.tsx';
 import { StationKeyRow } from './StationKeyRow.tsx';
-import { AEMET_KEY, MET_OFFICE_KEY } from './stationKeys.ts';
+import { AEMET_KEY, FROST_KEY, MET_OFFICE_KEY } from './stationKeys.ts';
 
 /**
  * The keys of the networks of measured wind (Météo-France, AEMET, Met
@@ -23,6 +23,7 @@ export function WindKeys() {
       <MfKeyRow />
       <StationKeyRow station={AEMET_KEY} />
       <StationKeyRow station={MET_OFFICE_KEY} />
+      <StationKeyRow station={FROST_KEY} />
       <RelayRow />
     </div>
   );

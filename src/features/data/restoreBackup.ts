@@ -341,7 +341,12 @@ function isListed(id: string | undefined): boolean {
  */
 export function restoreMfKey(received: Partial<Settings> | undefined): void {
   // The keys of the networks, each one when the device has none.
-  for (const name of ['mfKey', 'aemetKey', 'metOfficeKey'] as const) {
+  for (const name of [
+    'mfKey',
+    'aemetKey',
+    'metOfficeKey',
+    'frostKey',
+  ] as const) {
     const key = received?.windAlert?.[name];
     if (typeof key !== 'string' || !key) continue;
     updateSettings((settings) => {

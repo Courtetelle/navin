@@ -10,6 +10,7 @@ export const KEY_LINKS = {
   mf: { setting: 'mfKey', name: 'Météo-France' },
   aemet: { setting: 'aemetKey', name: 'AEMET' },
   metoffice: { setting: 'metOfficeKey', name: 'Met Office' },
+  frost: { setting: 'frostKey', name: 'MET Norway (Frost)' },
   relay: { setting: 'relayUrl', name: 'Relais des METAR' },
 } as const;
 

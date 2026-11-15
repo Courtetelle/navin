@@ -22,7 +22,16 @@ const HOSTS = new Set([
   'www.ndbc.noaa.gov',
   'vrijeme.hr',
   'www.meteoschweiz.admin.ch',
+  'frost.met.no',
+  'api.dataplatform.knmi.nl',
+  'ddapi20-waterwebservices.rijkswaterstaat.nl',
 ]);
+
+/** The services that need the key of the skipper, sent as `Authorization`. */
+const KEYED = new Set(['frost.met.no', 'api.dataplatform.knmi.nl']);
+
+/** The services asked with a POST of JSON. */
+const POSTED = new Set(['ddapi20-waterwebservices.rijkswaterstaat.nl']);
 
 /** The only pages allowed to use the relay. */
 const ORIGINS = ['https://courtetelle.github.io', 'http://localhost:11106'];
@@ -168,7 +177,7 @@ export default {
         headers: {
           ...permission(origin),
           'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
     }
@@ -217,7 +226,7 @@ export default {
         origin,
       );
     }
-    if (request.method !== 'GET') {
+    if (request.method !== 'GET' && request.method !== 'POST') {
       return new Response('Forbidden', { status: 403 });
     }
     const asked = url.searchParams.get('url') ?? '';
@@ -236,10 +245,29 @@ export default {
         headers: permission(origin),
       });
     }
-    const answer = await fetch(target.toString(), {
-      headers: { 'User-Agent': 'NavIn relay' },
-      cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true },
-    });
+    const posted = request.method === 'POST';
+    if (posted && !POSTED.has(target.hostname)) {
+      return new Response('Forbidden', {
+        status: 403,
+        headers: permission(origin),
+      });
+    }
+    const sent = { 'User-Agent': 'NavIn relay' };
+    const key = request.headers.get('Authorization');
+    if (key && KEYED.has(target.hostname)) sent.Authorization = key;
+    const answer = posted
+      ? await fetch(target.toString(), {
+          method: 'POST',
+          headers: { ...sent, 'Content-Type': 'application/json' },
+          body: await request.text(),
+        })
+      : await fetch(target.toString(), {
+          headers: sent,
+          // A keyed answer is never kept for another key.
+          ...(key
+            ? {}
+            : { cf: { cacheTtl: CACHE_SECONDS, cacheEverything: true } }),
+        });
     const headers = new Headers(answer.headers);
     for (const [name, value] of Object.entries(permission(origin))) {
       headers.set(name, value);
