@@ -148,7 +148,7 @@ async function bars(page: Page, theme: string): Promise<void> {
   );
   check(
     theme,
-    'T upright: the bottom row, magnifier, NavIn, photo, SOS',
+    'T upright: the bottom row, magnifier, NavIn, photo, Météo, SOS',
     await page.evaluate(() => {
       // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
       const bottom = (selector: string) =>
@@ -157,6 +157,7 @@ async function bars(page: Page, theme: string): Promise<void> {
         '#searchBtn',
         '.top-tab[data-view="tracker"]',
         '.rail-photo',
+        '.rail-weather',
         '.top-tab.tab-sos',
       ].map(bottom);
       return row.every((y) => y > globalThis.innerHeight - 60);
@@ -797,6 +798,7 @@ const TABLET_BUTTONS = [
   '.rail-boat',
   '.rail-ruler',
   '.rail-photo',
+  '.rail-weather',
 ];
 
 async function tabletPlaces(page: Page): Promise<string> {
@@ -1315,9 +1317,10 @@ async function trackButton(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(400);
   check(
     theme,
-    'tablet: during a track the row of NavIn starts with Météo',
-    (await page.locator('.navin-row .rail-btn[aria-label="Météo"]').count()) ===
-      1 && (await page.locator('.navin-row .rail-prep').count()) === 0,
+    'tablet: during a track the row of NavIn keeps PréP, Météo has its own button',
+    (await page.locator('.navin-row .rail-prep').count()) === 1 &&
+      (await page.locator('.navin-row .rail-weather').count()) === 0 &&
+      (await page.locator('.rail-weather').count()) === 1,
   );
   await page.locator(NAVIN).click();
   await page.waitForTimeout(400);

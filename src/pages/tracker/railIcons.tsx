@@ -88,28 +88,22 @@ function Phone() {
   );
 }
 
-/** The sun and cloud of the NavIn menu. */
+/**
+ * Météo: the sun and cloud of its menu (🌤), two dark blue lines of wind
+ * under them.
+ */
 function Weather() {
   return (
     <svg className="rail-svg rail-wx" viewBox="0 0 48 40" aria-hidden="true">
-      <g stroke="#f5a623" strokeWidth="2.4" strokeLinecap="round">
-        <path d="M17 2v4M6.4 6.4l2.8 2.8M2 17h4M27.6 6.4l-2.8 2.8" />
-      </g>
-      <circle
-        cx="17"
-        cy="17"
-        r="7"
-        fill="#f5c518"
-        stroke="#f5a623"
-        strokeWidth="1.6"
-      />
-      <path
-        d="M15 29a7 7 0 0 1 3-13.4 9 9 0 0 1 17 2.4 6 6 0 0 1 1 11z"
-        fill="#fff"
-        stroke="#5f6f86"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
+      <text
+        x="24"
+        y="25"
+        textAnchor="middle"
+        fontSize="27"
+        fontFamily="'Apple Color Emoji', 'Noto Color Emoji', 'Segoe UI Emoji', sans-serif"
+      >
+        🌤
+      </text>
       <g stroke="#0b3d91" strokeWidth="2.6" strokeLinecap="round" fill="none">
         <path d="M10 33.5h22c3 0 3-4 0-4" />
         <path d="M14 38h16" />

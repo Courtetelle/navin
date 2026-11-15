@@ -13,8 +13,11 @@ import { ageText, compassPoint, stationBadgeHtml } from '../meteo/liveText.ts';
 
 import { hideLiveOnMap, liveOnMap } from './liveOnMap.ts';
 
-/** Radius of the stations laid on the map, in km. */
+/** Radius read before the map of NavIn is built, in km. */
 const RADIUS = 60;
+/** The circle read around the map shown stays within these, in km. */
+const LEAST_KM = 5;
+const MOST_KM = 150;
 /** The stations are read again this often. */
 const REFRESH_MS = 2 * 60_000;
 /** The map of NavIn is looked for this often until it is built. */
@@ -32,22 +35,25 @@ function popupHtml(station: LiveStation): string {
 }
 
 /**
- * The live weather stations within 60 km laid on the NavIn map (from the
- * PréP menu): one badge per station, as on LiveMétéo, read again every
+ * The live weather stations of the map shown laid on the NavIn map (long
+ * press on Météo, or its menu): the circle from the middle of the map to its
+ * corners is read, one badge per station, as on LiveMétéo, read again every
  * 2 min; a band at the top says how many, its ✕ takes them away.
  * @returns The band, or nothing.
  */
 export function LiveOnMap() {
   useSignals();
   const tr = useTr();
-  const on = liveOnMap.value;
+  const asked = liveOnMap.value;
+  const on = asked > 0;
   const [count, setCount] = useState<number | null>(null);
   useEffect(() => {
     if (!on) return undefined;
     let closed = false;
     let layer: LayerGroup | null = null;
     let wait: ReturnType<typeof setTimeout> | undefined;
-    const center = mapPlace();
+    let center = mapPlace();
+    let radius = RADIUS;
     const config = windConfig();
     const draw = (stations: LiveStation[]) => {
       const map = tracker.current?.map;
@@ -71,16 +77,22 @@ export function LiveOnMap() {
       setCount(stations.length);
     };
     const read = () => {
-      liveStations(center, RADIUS, config.mfKey)
+      liveStations(center, radius, config.mfKey)
         .then(draw)
         .catch(() => setCount(0));
     };
     const start = () => {
       if (closed) return;
-      if (!tracker.current?.map) {
+      const map = tracker.current?.map;
+      if (!map) {
         wait = setTimeout(start, WAIT_MS);
         return;
       }
+      // The map shown: from its middle to its corners.
+      const middle = map.getCenter();
+      center = { lat: middle.lat, lon: middle.lng };
+      const corner = middle.distanceTo(map.getBounds().getNorthEast()) / 1000;
+      radius = Math.min(MOST_KM, Math.max(LEAST_KM, Math.round(corner)));
       read();
     };
     start();
@@ -92,7 +104,7 @@ export function LiveOnMap() {
       layer?.remove();
       setCount(null);
     };
-  }, [on]);
+  }, [on, asked]);
   if (!on) return null;
   return (
     <div className="live-chip" role="status">
@@ -100,7 +112,7 @@ export function LiveOnMap() {
         {tr(
           count == null
             ? '🌬 Lecture des stations…'
-            : `🌬 ${count} station${count > 1 ? 's' : ''} · ${RADIUS} km`,
+            : `🌬 ${count} station${count > 1 ? 's' : ''} sur la carte`,
         )}
       </span>
       <Button

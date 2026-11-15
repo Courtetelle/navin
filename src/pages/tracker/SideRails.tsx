@@ -52,6 +52,7 @@ import {
 
 import { StartButton } from './StartButton.tsx';
 import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
+import { showLiveOnMap } from './liveOnMap.ts';
 import { RailIcon } from './railIcons.tsx';
 import { MAP_ACTIONS, splitTitle } from './sideRails.ts';
 import { trackDone } from './trackDone.ts';
@@ -128,9 +129,9 @@ function run(key: string): void {
  * The column of the landscape tablet, on the left of the map, top to bottom:
  * the clock, the arrow of the boat with ＋ and − at its right (3 s after
  * the arrow), NavIn, START (and Amarrage at its right during a track), the mark,
- * the dividers, the photo, and SOS at the very bottom; the magnifier alone
- * at the top right. NavIn unrolls at its right PréP (Météo during a
- * track), data, the settings and the phone or the VHF.
+ * the dividers, the photo, Météo, and SOS at the very bottom; the magnifier
+ * alone at the top right. NavIn unrolls at its right PréP, data, the
+ * settings and the phone or the VHF.
  * @returns The column, or nothing on a phone held upright.
  */
 export function SideRails() {
@@ -148,6 +149,7 @@ export function SideRails() {
         <PinButton />
         <RulerButton />
         <PhotoButton />
+        <WeatherButton />
       </div>
       <NavinRow />
     </>
@@ -155,24 +157,37 @@ export function SideRails() {
 }
 
 /**
- * The row NavIn unrolls at its right: PréP (Météo during a track), then data
- * and the settings (their own buttons, placed there), then the phone or the
- * VHF. Leaving one of their menus rolls it back.
+ * Météo, between the photo and SOS: a touch opens its menu (the checks,
+ * the forecast here, LiveMétéo), a long press lays at once the LiveMétéo
+ * stations of the map shown on the map.
+ * @returns The button.
+ */
+function WeatherButton() {
+  const weather = choices().find((entry) => entry.key === 'weather');
+  if (!weather) return null;
+  return (
+    <RailButton
+      entry={weather}
+      onPick={showLiveOnMap}
+      className="rail-weather"
+      label="Météo · appui long : les stations LiveMétéo de la carte"
+    />
+  );
+}
+
+/**
+ * The row NavIn unrolls at its right: PréP, then data and the settings
+ * (their own buttons, placed there), then the phone or the VHF. Leaving one
+ * of their menus rolls it back. Météo has its own button.
  * @returns The row, or nothing while rolled.
  */
 function NavinRow() {
   useSignals();
   if (!navinRowOpen.value) return null;
-  const tracking = state.view.tracking.value;
-  const weather = choices().find((entry) => entry.key === 'weather');
   return (
     <div className="navin-row" onClickCapture={navinRowChosen}>
       <div className="navin-row-first">
-        {tracking && weather ? (
-          <RailButton entry={weather} onPick={noPick} />
-        ) : (
-          <PrepButton />
-        )}
+        <PrepButton />
       </div>
       <div className="navin-row-comm">
         <CommButton />
@@ -273,10 +288,6 @@ function ZoomSign({ plus }: { plus: boolean }) {
       />
     </svg>
   );
-}
-
-function noPick(): void {
-  // The fixed places of the left column are not chosen.
 }
 
 /** Functions shown with a drawing rather than their emoji. */
@@ -608,20 +619,25 @@ function CommButton() {
 function RailButton({
   entry,
   onPick,
+  className = '',
+  label = '',
 }: {
   entry: FunctionEntry;
   onPick: () => void;
+  className?: string;
+  label?: string;
 }) {
   useSignals();
   const tr = useTr();
   const press = useLongPress(onPick);
   // Météo stays Météo during a track: LiveMétéo is inside its menu.
   const shown = entry;
-  const { icon, label } = splitTitle(shown.title);
+  const { icon, label: words } = splitTitle(shown.title);
   const drawn = DRAWN.has(shown.key);
   // A clear drawing speaks for itself: no word under it.
   const bare = drawn;
   const classes = ['rail-btn'];
+  if (className) classes.push(className);
   if (bare) classes.push('rail-bare');
   // Its menu is open: the button blinks yellow, as PréP.
   const weather = shown.key === 'weather';
@@ -644,7 +660,7 @@ function RailButton({
       type="button"
       noUiEdit
       className={classes.join(' ')}
-      aria-label={bare ? tr(label) : undefined}
+      aria-label={bare ? tr(label || words) : undefined}
       onClick={() => {
         if (!weather) {
           run(shown.key);
@@ -665,7 +681,7 @@ function RailButton({
       <span className="rail-icon">
         {drawn ? <RailIcon name={shown.key} /> : icon || '•'}
       </span>
-      {bare ? null : <span className="rail-label">{tr(label)}</span>}
+      {bare ? null : <span className="rail-label">{tr(words)}</span>}
     </Button>
   );
 }

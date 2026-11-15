@@ -30,6 +30,9 @@ import {
   compassPoint,
   scaleColors,
 } from '../meteo/liveText.ts';
+import { showLiveOnMap } from '../tracker/liveOnMap.ts';
+
+import { PrepForecast } from './PrepForecast.tsx';
 
 function openLive() {
   buzz();
@@ -62,34 +65,68 @@ export function WeatherPage({ arg }: PageProps) {
   return arg === FORECAST ? <ForecastPage /> : <WeatherMenu />;
 }
 
+/**
+ * The menu of Météo, opened by its button straight from the map (no ◀):
+ * the weather check-list, the forecast here, the LiveMétéo stations on the
+ * map (also a long press on the button), and LiveMétéo itself.
+ * @returns The menu.
+ */
 function WeatherMenu() {
   const tr = useTr();
+  const [here, setHere] = useState(false);
   return (
     <>
-      <PageBack
-        label="◀ NavIn"
-        data-go="tracker"
-        onClick={() => {
-          buzz();
-          go('tracker');
-        }}
-      >
-        {tr('◀ NavIn')}
-      </PageBack>
       <TitleInNav>
         <h1>{tr('🌤 Météo')}</h1>
       </TitleInNav>
       <div className="wx-menu">
-        <Button className="btn big wx-entry" onClick={openForecast}>
-          <span className="wx-entry-ico">📈</span>
+        <Button
+          className="btn big wx-entry"
+          data-wx="check"
+          onClick={openForecast}
+        >
+          <span className="wx-entry-ico">✅</span>
           <span>
-            <b>{tr('Prévisions')}</b>
+            <b>{tr('Check-list météo')}</b>
             <small>
-              {tr('les prochaines heures et la procédure avant le départ')}
+              {tr(
+                'les points à consulter avant le départ, les prochaines heures',
+              )}
             </small>
           </span>
         </Button>
-        <Button className="btn big wx-entry" onClick={openLive}>
+        <Button
+          className="btn big wx-entry"
+          data-wx="here"
+          aria-expanded={here}
+          onClick={() => {
+            buzz();
+            setHere(!here);
+          }}
+        >
+          <span className="wx-entry-ico">📈</span>
+          <span>
+            <b>{tr('Prévision ici')}</b>
+            <small>{tr('maintenant, dans 3 h, ce soir, demain matin')}</small>
+          </span>
+        </Button>
+        {here ? <PrepForecast /> : null}
+        <Button
+          className="btn big wx-entry"
+          data-wx="map"
+          onClick={showLiveOnMap}
+        >
+          <span className="wx-entry-ico">🗺</span>
+          <span>
+            <b>{tr('Stations LiveMétéo sur la carte')}</b>
+            <small>
+              {tr(
+                'le vent mesuré sur la carte affichée (appui long sur Météo)',
+              )}
+            </small>
+          </span>
+        </Button>
+        <Button className="btn big wx-entry" data-wx="live" onClick={openLive}>
           <span className="wx-entry-ico">🌬</span>
           <span>
             <b>{tr('LiveMétéo')}</b>

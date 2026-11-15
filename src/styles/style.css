@@ -12347,3 +12347,22 @@ html body .lx-modal .ck-ask-box {
 :root[data-theme='night'] .key-qr-code rect {
   fill: #9a9a9a;
 }
+
+/* Météo, between the photo and SOS: T upright, fourth of the bottom row;
+   X and the phone sideways, in the right column under the photo */
+@media (orientation: portrait) {
+  html body .side-rail-left .rail-btn.rail-weather {
+    position: fixed;
+    top: auto;
+    bottom: var(--rb-bottom);
+    left: calc(var(--rb-side) + 3 * var(--rb-x));
+  }
+}
+@media (orientation: landscape) and (min-width: 560px) {
+  html body .side-rail-left .rail-btn.rail-weather {
+    position: fixed;
+    top: calc(var(--rb-top) + 3 * var(--rb-step) + env(safe-area-inset-top));
+    left: auto;
+    right: var(--rb-side-r);
+  }
+}
