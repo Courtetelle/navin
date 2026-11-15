@@ -82,6 +82,25 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
       '6. Dans NavIn › Réglages › Clés météo, la coller sous « Clé API Met Office » et toucher Enregistrer : NavIn l’essaie.',
     ].join('\n'),
   },
+  relay: {
+    first: [
+      '1. Ouvrir dash.cloudflare.com et « Sign up » : adresse mail et mot de passe (offre gratuite « Free »), puis confirmer le mail reçu.',
+      '2. Dans le menu de gauche : « Workers & Pages » (ou « Compute (Workers) ») › « Create » › « Create Worker ».',
+      '3. Le nommer « navin-relay » et toucher « Deploy ».',
+      '4. Dans NavIn, sous le relais : « 📋 Copier le code du relais ».',
+      '5. Sur Cloudflare : « Edit code », tout effacer, coller le code, puis « Deploy ».',
+      '6. Copier l’adresse du Worker (https://navin-relay.<compte>.workers.dev), la coller dans NavIn sous « Relais des METAR et bouées » et toucher Enregistrer : NavIn l’essaie.',
+      '7. Garder ici l’adresse mail et le mot de passe (🔐 Compte Cloudflare).',
+    ].join('\n'),
+    again: [
+      '1. Ouvrir dash.cloudflare.com et « Log in » avec l’adresse mail et le mot de passe.',
+      '2. « Workers & Pages » › ouvrir « navin-relay ».',
+      '3. L’adresse est affichée sous « Domains & Routes » (ou en haut, « Visit ») : https://navin-relay.<compte>.workers.dev.',
+      '4. La copier, la coller dans NavIn sous « Relais des METAR et bouées » et toucher Enregistrer.',
+      '5. Relais refusé après une mise à jour de NavIn : « Edit code », recoller « 📋 Copier le code du relais », puis « Deploy ».',
+      '6. L’offre gratuite permet 100 000 requêtes par jour, très au-delà de NavIn.',
+    ].join('\n'),
+  },
 };
 
 function accounts(): Record<string, SiteAccount> {

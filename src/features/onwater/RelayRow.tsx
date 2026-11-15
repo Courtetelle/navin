@@ -1,12 +1,16 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import { useRef, useState } from 'react';
 
+import RELAY_CODE from '../../../proxy/navin-relay.js?raw';
 import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
 
+import { KeyAccount } from './KeyAccount.tsx';
+import { KeyGuide } from './KeyGuide.tsx';
+import { KeyQr } from './KeyQr.tsx';
 import { metarReadings } from './euStations.ts';
 
 /** A place with airports around, to try the relay. */
@@ -49,38 +53,65 @@ export function RelayRow() {
     );
   };
   return (
-    <form
-      className="field sea-center"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void save();
-      }}
-    >
-      <div className="cf">
-        <label htmlFor="relayUrl">{tr('🛰 Relais des METAR et bouées')}</label>
-        <div className="sea-center-row">
-          <input
-            className="text"
-            id="relayUrl"
-            ref={input}
-            type="url"
-            autoComplete="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            placeholder="https://navin-relay.….workers.dev"
-            defaultValue={relay}
-            key={relay}
-          />
-          <Button className="btn" type="submit" disabled={busy}>
-            {tr(busy ? 'Essai…' : 'Enregistrer')}
-          </Button>
+    <div className="field sea-center key-row">
+      <form
+        className="key-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void save();
+        }}
+      >
+        <div className="cf">
+          <label htmlFor="relayUrl">{tr('🛰 Relais des METAR et bouées')}</label>
+          <div className="sea-center-row">
+            <input
+              className="text"
+              id="relayUrl"
+              ref={input}
+              type="url"
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              placeholder="https://navin-relay.….workers.dev"
+              defaultValue={relay}
+              key={relay}
+            />
+            <Button className="btn" type="submit" disabled={busy}>
+              {tr(busy ? 'Essai…' : 'Enregistrer')}
+            </Button>
+          </div>
         </div>
-      </div>
-      {result ? (
-        <p className="keep-help mf-check" role="status">
-          {tr(result)}
-        </p>
-      ) : null}
+        {result ? (
+          <p className="keep-help mf-check" role="status">
+            {tr(result)}
+          </p>
+        ) : null}
+      </form>
+      <KeyQr id="relay" value={relay} />
+      <Button
+        type="button"
+        className="btn key-guide-open relay-code"
+        onClick={() => {
+          buzz();
+          navigator.clipboard
+            .writeText(RELAY_CODE)
+            .then(() =>
+              toast(
+                'Code du relais copié : le coller sur Cloudflare (« Edit code »)',
+              ),
+            )
+            .catch(() => toast('Copie impossible sur cet appareil'));
+        }}
+      >
+        📋 Copier le code du relais
+        <small>à coller sur Cloudflare, dans « Edit code » du Worker</small>
+      </Button>
+      <KeyGuide id="relay" name="Cloudflare" what="l’adresse du relais" />
+      <KeyAccount
+        id="relay"
+        name="Cloudflare"
+        url="https://dash.cloudflare.com"
+      />
       <HelpText>
         Facultatif. Le petit relais de NavIn, installé gratuitement sur un
         compte Cloudflare (Workers), lit les METAR des aéroports et les bouées
@@ -88,6 +119,6 @@ export function RelayRow() {
         serveurs ne se laissent pas lire par une page web. Coller ici son
         adresse.
       </HelpText>
-    </form>
+    </div>
   );
 }

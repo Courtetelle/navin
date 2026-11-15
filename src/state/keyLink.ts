@@ -10,6 +10,7 @@ export const KEY_LINKS = {
   mf: { setting: 'mfKey', name: 'Météo-France' },
   aemet: { setting: 'aemetKey', name: 'AEMET' },
   metoffice: { setting: 'metOfficeKey', name: 'Met Office' },
+  relay: { setting: 'relayUrl', name: 'Relais des METAR' },
 } as const;
 
 /** A key that can go in a QR code. */

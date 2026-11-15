@@ -124,9 +124,18 @@ function GuidePartBlock({
  * @param props - The site.
  * @param props.id - Its key in the guides (`mf`…).
  * @param props.name - Its name.
+ * @param props.what - What is looked for, `la clé …` by default.
  * @returns The guide.
  */
-export function KeyGuide({ id, name }: { id: string; name: string }) {
+export function KeyGuide({
+  id,
+  name,
+  what = `la clé ${name}`,
+}: {
+  id: string;
+  name: string;
+  what?: string;
+}) {
   const [open, setOpen] = useState(false);
   if (!open) {
     return (
@@ -139,14 +148,14 @@ export function KeyGuide({ id, name }: { id: string; name: string }) {
           setOpen(true);
         }}
       >
-        📋 Où trouver la clé {name}
+        📋 Où trouver {what}
         <small>pas à pas : la 1ʳᵉ fois, puis les fois suivantes</small>
       </Button>
     );
   }
   return (
     <div className="key-guide">
-      <b className="key-guide-title">📋 Où trouver la clé {name}</b>
+      <b className="key-guide-title">📋 Où trouver {what}</b>
       <GuidePartBlock id={id} name={name} part="first" />
       <GuidePartBlock id={id} name={name} part="again" />
       <Button

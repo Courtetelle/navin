@@ -37,7 +37,13 @@ export function KeyQr({ id, value }: { id: KeyLinkId; value: string }) {
           setOpen(!open);
         }}
       >
-        {tr(open ? '📤 Masquer le QR code' : '📤 Partager la clé')}
+        {tr(
+          open
+            ? '📤 Masquer le QR code'
+            : id === 'relay'
+              ? '📤 Partager l’adresse du relais'
+              : '📤 Partager la clé',
+        )}
       </Button>
       {code ? (
         <figure className="key-qr-code">
