@@ -3,8 +3,8 @@ import { expect, test } from 'vitest';
 import {
   DHMZ,
   IPMA,
-  dhmzReadingsOf,
   SMHI,
+  dhmzReadingsOf,
   ipmaReading,
   smhiReadingsOf,
   touches,
