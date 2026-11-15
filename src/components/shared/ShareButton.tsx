@@ -224,7 +224,8 @@ export function SendButton({
     <Button
       type="button"
       noUiEdit
-      className={`btn big ck-pub share-send share-fmt-${format} ${className}`.trim()}
+      // The height of every action button (« Partager » before it), never a menu tile.
+      className={`btn ck-pub share-send share-fmt-${format} ${className}`.trim()}
       data-share-send={format}
       aria-label={`Envoyer · ${SHARE_FORMAT_NAMES[format]}`}
       {...rest}

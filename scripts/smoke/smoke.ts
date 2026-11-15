@@ -785,6 +785,27 @@ async function marksShare(page: Page, theme: string): Promise<void> {
     'marks: a touch shows the mark on the map',
     await page.evaluate(() => document.body.classList.contains('trk-mode')),
   );
+  await openData(page);
+  await page.locator('[data-tile="marks"]').click();
+  await page.waitForTimeout(400);
+  await page.locator('[data-lxpub="marks"]').click();
+  await page.waitForTimeout(200);
+  // Rule of the layout: Envoyer has the height of the action buttons
+  // (« Partager » before it), never the height of a menu tile.
+  await page.locator('.lx-pub [data-share-fmt]').first().click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'marks: Envoyer as tall as the action buttons around it',
+    await page.evaluate(() => {
+      // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
+      const height = (selector: string) =>
+        document.querySelector(selector)?.getBoundingClientRect().height ?? -1;
+      const send = height('.share-send');
+      const share = height('[data-lxpub]');
+      return send > 0 && Math.abs(send - share) <= 1;
+    }),
+  );
 }
 
 // Where the side buttons of the tablet stand, to the pixel.
