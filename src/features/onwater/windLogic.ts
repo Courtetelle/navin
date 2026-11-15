@@ -264,3 +264,29 @@ export function windMutedNote(top: WindReading): string {
   const gust = top.gust == null ? '…' : windTxt(top.gust);
   return `${windTxt(top.avg)}, rafales ${gust} (alerte non diffusée jusqu’à la fin de la trace)`;
 }
+
+/** Colour of a calm wind, under 4 Beaufort. */
+const CALM = '#9ec9e8';
+
+/**
+ * Colours of a station's marker, from the wind the alerts watch; the zone of
+ * a forecast alert takes the same.
+ * @param knots - Wind compared with the thresholds.
+ * @returns Background and text colours.
+ */
+export function windColors(knots: number): { color: string; ink: string } {
+  const level = windLevel(knots);
+  const color = level < 0 ? CALM : flashColor(level);
+  return { color, ink: flashInk(color) };
+}
+
+/**
+ * Colour of the zone of a forecast alert: the colour a station badge of the
+ * same wind takes in LiveMétéo.
+ * @param reading - The reading of the alert.
+ * @param basis - Wind the colours follow, `'gust'` or `'avg'`.
+ * @returns The colour.
+ */
+export function zoneColor(reading: WindReading, basis: string): string {
+  return windColors(windValue(reading, basis)).color;
+}

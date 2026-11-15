@@ -83,7 +83,8 @@ export function alertStation(
  * @param search.center - Centre searched.
  * @param search.radius - Radius in km.
  * @param basis - Wind the colours follow, `'gust'` or `'avg'`.
- * @param alert - The station of a wind alert, blinking in a red band.
+ * @param alert - The station of a wind alert, blinking in a red band; or
+ *   the zone of a forecast alert, a circle in the colour of its wind.
  * @param onPick - A station is touched.
  * @returns The map handle.
  */
@@ -187,6 +188,8 @@ export function useLiveMap(
   }, [ready, lat, lon, radius]);
   const alertLat = alert?.lat;
   const alertLon = alert?.lon;
+  const zoneKm = alert?.zone?.km;
+  const zoneTint = alert?.zone?.color;
   useEffect(() => {
     const group = layer.current;
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- keeps Leaflet, outside React, in step with the props
@@ -202,6 +205,25 @@ export function useLiveMap(
       fillOpacity: 1,
       interactive: false,
     }).addTo(group);
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- keeps Leaflet, outside React, in step with the props
+    if (alertLat != null && alertLon != null && zoneKm && zoneTint) {
+      // A forecast alert: the zone its value stands for, in the colour of
+      // a station badge of the same wind, as in its share.
+      L.circle([alertLat, alertLon], {
+        radius: zoneKm * KM_TO_M,
+        color: zoneTint,
+        weight: 3,
+        fillColor: zoneTint,
+        fillOpacity: 0.28,
+        interactive: false,
+      })
+        .bindTooltip('Zone de la prévision', {
+          permanent: true,
+          direction: 'top',
+          className: 'live-zone-tip',
+        })
+        .addTo(group);
+    }
     for (const station of stations) {
       const key = stationKey(station);
       const marker = L.marker([station.lat, station.lon], {
@@ -221,7 +243,7 @@ export function useLiveMap(
       }
     }
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- keeps Leaflet, outside React, in step with the props
-    if (alertLat == null || alertLon == null) return;
+    if (alertLat == null || alertLon == null || zoneKm) return;
     // The station of the wind alert: its badge in a red band that blinks,
     // the other stations still shown around it.
     // Only on its badge: a station not shown gets no circle of its own.
@@ -230,7 +252,7 @@ export function useLiveMap(
     const marker = markers.current.get(stationKey(alerted));
     marker?.setZIndexOffset(1000);
     marker?.getElement()?.classList.add('live-alerted');
-  }, [ready, stations, basis, lat, lon, alertLat, alertLon]);
+  }, [ready, stations, basis, lat, lon, alertLat, alertLon, zoneKm, zoneTint]);
   return {
     center: () => {
       const shown = map.current;

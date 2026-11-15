@@ -101,6 +101,12 @@ export { METEO_SWISS, liveStations, stationKey } from './liveStations.ts';
 export { liveAlertSpot, replayWindAlert } from './windOverlayState.ts';
 export type { AlertSpot } from './windOverlayState.ts';
 export type { LiveStation } from './liveStations.ts';
-export { flashColor, flashInk, windLevel, windValue } from './windLogic.ts';
+export {
+  flashColor,
+  flashInk,
+  windColors,
+  windLevel,
+  windValue,
+} from './windLogic.ts';
 export { windConfig, windWatchPlace } from './windWatch.ts';
 export { seaPlace } from './externals.ts';

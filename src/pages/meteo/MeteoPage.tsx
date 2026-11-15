@@ -28,7 +28,9 @@ import type { LivePlace } from './useLiveMap.ts';
 import { useLiveMap } from './useLiveMap.ts';
 
 /** Radii offered, in km. */
-const RADII = [15, 30, 60] as const;
+const RADII = [30, 60, 120] as const;
+/** LiveMétéo opens on this radius, whatever the radius of the alerts. */
+const LIVE_RADIUS = 60;
 /** The stations are read again this often while the screen is open. */
 const REFRESH_MS = 2 * 60_000;
 
@@ -52,7 +54,7 @@ export function MeteoPage() {
   const [center, setCenter] = useState<LivePlace>(
     () => alert?.boat ?? mapPlace(),
   );
-  const [radius, setRadius] = useState(config.radius);
+  const [radius, setRadius] = useState<number>(LIVE_RADIUS);
   const [stations, setStations] = useState<LiveStation[]>([]);
   const [readFor, setReadFor] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -241,8 +243,9 @@ export function MeteoPage() {
             Vent mesuré maintenant par les stations MeteoSwiss, les balises
             OpenWindMap et les stations Météo-France (avec la clé des réglages).
             Chiffre en gras : vent moyen ; en petit : rafales ; flèche : sens
-            vers lequel souffle le vent. Couleur des alertes de vent. S’ouvre là
-            où montrait la carte de NavIn ; « Autour du bateau » revient au
+            vers lequel souffle le vent. Couleur des alertes de vent ; une
+            alerte prévue montre la zone du modèle dans cette couleur. S’ouvre
+            là où montrait la carte de NavIn ; « Autour du bateau » revient au
             bateau. Toucher une station pour ses mesures en direct ; déplacer la
             carte puis « Chercher au centre de la carte » pour d’autres
             stations. Mise à jour toutes les 2 min.

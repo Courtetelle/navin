@@ -14,7 +14,13 @@ import { seaNow, seaRows } from './seaNow.ts';
 import type { WindPoint } from './stationHistory.ts';
 import { HISTORY_MS, stationHistory, windTrend } from './stationHistory.ts';
 import { chartPaths, trendText } from './trendText.ts';
-import { SEA_MODEL, seaMarks, seaTxt, windAlertConfig } from './windLogic.ts';
+import {
+  SEA_MODEL,
+  seaMarks,
+  seaTxt,
+  windAlertConfig,
+  zoneColor,
+} from './windLogic.ts';
 import type { WindReading } from './windTypes.ts';
 
 /** What an alert publishes: the reading, as LiveMétéo shows it, and where. */
@@ -27,6 +33,8 @@ export interface AlertReport {
   forecast: boolean;
   /** The boat when the alert was given. */
   boat: { lat: number; lon: number } | null;
+  /** Wind the colours follow, `'gust'` or `'avg'` (the settings when absent). */
+  basis?: string;
 }
 
 const fr = (value: number, digits = 1) =>
@@ -194,7 +202,7 @@ async function drawSnippet(
   report: AlertReport,
   box: { x: number; y: number; width: number; height: number },
 ): Promise<void> {
-  const { reading, boat, forecast } = report;
+  const { reading, boat, forecast, basis } = report;
   context.fillStyle = '#dfe7ee';
   context.fillRect(box.x, box.y, box.width, box.height);
   if (reading.lat == null || reading.lon == null) return;
@@ -256,8 +264,13 @@ async function drawSnippet(
     context.fillStyle = '#111';
     context.fillText(label, x + 26, y + 10);
   };
+  const zoneTint = zoneColor(
+    reading,
+    basis ?? windAlertConfig(state.preferences.settings.value).basis,
+  );
   if (zone) {
-    // The zone the forecaster's value stands for, at the time of the alert.
+    // The zone the forecaster's value stands for, at the time of the alert,
+    // in the colour of a station badge of the same wind.
     context.beginPath();
     context.arc(
       box.x + box.width / 2,
@@ -266,10 +279,12 @@ async function drawSnippet(
       0,
       Math.PI * 2,
     );
-    context.fillStyle = 'rgba(208, 2, 27, 0.14)';
+    context.globalAlpha = 0.28;
+    context.fillStyle = zoneTint;
     context.fill();
+    context.globalAlpha = 1;
     context.lineWidth = 6;
-    context.strokeStyle = '#d0021b';
+    context.strokeStyle = zoneTint;
     context.stroke();
   }
   if (boat) {
@@ -279,7 +294,7 @@ async function drawSnippet(
   dot(
     box.x + box.width / 2,
     box.y + box.height / 2,
-    '#d0021b',
+    zone ? zoneTint : '#d0021b',
     zone ? 'Zone de la prévision' : reading.name,
   );
   // The credit is the caption of the picture.

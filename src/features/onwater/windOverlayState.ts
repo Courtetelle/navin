@@ -15,6 +15,11 @@ export interface AlertSpot {
   name: string;
   /** The boat when the alert was given: LiveMétéo opens around it. */
   boat: { lat: number; lon: number } | null;
+  /**
+   * A forecast alert: the point of the model, the zone its value stands for
+   * and the colour of that wind, as a station badge.
+   */
+  zone?: { km: number; color: string };
 }
 
 /**

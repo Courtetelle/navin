@@ -12294,3 +12294,18 @@ html body .lx-modal .ck-ask-box {
 :root[data-theme='night'] .key-account-link {
   color: #ff4040;
 }
+
+/* The zone of a forecast alert on the LiveMétéo map: its label */
+.leaflet-tooltip.live-zone-tip {
+  font-weight: 700;
+  font-size: 14px;
+  color: #0b1220;
+  background: rgba(255, 255, 255, 0.92);
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+:root[data-theme='night'] .leaflet-tooltip.live-zone-tip {
+  color: var(--on, #ff4040);
+  background: rgba(0, 0, 0, 0.85);
+}

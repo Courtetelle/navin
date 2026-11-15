@@ -1,16 +1,12 @@
 import type { LiveStation, MfTally } from '../../features/onwater/index.ts';
 import {
-  flashColor,
   flashInk,
-  windLevel,
+  windColors,
   windValue,
 } from '../../features/onwater/index.ts';
 import { bft } from '../../lib/wind.ts';
 
 export { compassPoint } from '../../lib/wind.ts';
-
-/** Colour of a calm wind, under 4 Beaufort. */
-const CALM = '#9ec9e8';
 
 /**
  * How old a measurement is, in words.
@@ -23,16 +19,7 @@ export function ageText(t: number, now: number): string {
   return minutes < 1 ? 'à l’instant' : `il y a ${minutes} min`;
 }
 
-/**
- * Colours of a station's marker, from the wind the alerts watch.
- * @param knots - Wind compared with the thresholds.
- * @returns Background and text colours.
- */
-export function windColors(knots: number): { color: string; ink: string } {
-  const level = windLevel(knots);
-  const color = level < 0 ? CALM : flashColor(level);
-  return { color, ink: flashInk(color) };
-}
+export { windColors } from '../../features/onwater/index.ts';
 
 function escapeHtml(text: string): string {
   return text.replaceAll(/[&<>"']/gu, (char) => `&#${char.codePointAt(0)};`);

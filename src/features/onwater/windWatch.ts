@@ -29,6 +29,7 @@ import {
   windAlertNote,
   windMutedNote,
   windValue,
+  zoneColor,
 } from './windLogic.ts';
 import {
   clearWindOverlays,
@@ -227,17 +228,27 @@ function showAlertPopup(
       wind: `${Math.round(knots)} nd ${basis}${forecast ? ' PRÉVUS' : ''}`,
       forecast,
       boat: windWatchPlace.peek(),
+      basis: config.basis,
     },
     onLive: () => {
-      // A measured alert: LiveMétéo shows where it came from.
+      // LiveMétéo shows where the alert came from: the station measuring,
+      // or the zone of the forecast in the colour of its wind.
       liveAlertSpot.value =
-        forecast || top.lat == null || top.lon == null
+        top.lat == null || top.lon == null || (forecast && !top.zoneKm)
           ? null
           : {
               lat: top.lat,
               lon: top.lon,
               name: top.name,
               boat: windWatchPlace.peek(),
+              ...(forecast && top.zoneKm
+                ? {
+                    zone: {
+                      km: top.zoneKm,
+                      color: zoneColor(top, config.basis),
+                    },
+                  }
+                : {}),
             };
       go('meteo');
     },
