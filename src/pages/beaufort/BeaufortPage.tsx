@@ -3,10 +3,7 @@ import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { ScaleLanguage } from '../../features/safety/ScaleLanguage.tsx';
 import { useScaleEnglish } from '../../features/safety/useScaleEnglish.ts';
 import { useTr } from '../../i18n/useTr.ts';
-import { buzz } from '../../lib/dom.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
-import { PageBack } from '../../shell/navbar/PageBack.tsx';
-import { go } from '../../shell/router.ts';
 
 /**
  * Screen `beaufort` (legacy `VIEWS.beaufort`): the Beaufort scale, French or English.
@@ -17,16 +14,7 @@ export function BeaufortPage() {
   const tr = useTr();
   return (
     <>
-      <PageBack
-        label="◀ Listes"
-        data-go="lists"
-        onClick={() => {
-          buzz();
-          go('lists');
-        }}
-      >
-        {tr('◀ Listes')}
-      </PageBack>
+      {/* No back of its own: ◀ goes back where the scale was opened from. */}
       <TitleInNav>
         <h1>{tr(`🌬 ${english ? 'Beaufort scale' : 'Échelle de Beaufort'}`)}</h1>
       </TitleInNav>

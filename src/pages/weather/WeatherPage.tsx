@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { PageLink } from '../../components/shared/PageLink.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { WindAlert } from '../../features/onwater/index.ts';
@@ -193,30 +194,32 @@ function WeatherMenu() {
           </span>
         </Button>
         <Button
-          className="btn wx-keys-link"
+          className="btn big wx-entry wx-keys-link"
           data-wx="keys"
           aria-label={tr('Sortir du menu Météo vers Réglages › Clés météo')}
           onClick={openKeys}
         >
-          <svg className="exit-ico" viewBox="0 0 32 32" aria-hidden="true">
-            <path
-              d="M14 5H7a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h7"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.6"
-              strokeLinecap="round"
-            />
-            <path
-              d="M13 16h15m-5-5 5 5-5 5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <span className="wx-entry-ico exit-box" aria-hidden="true">
+            <svg className="exit-ico" viewBox="0 0 30 40">
+              <path
+                d="M17 3H8a6 6 0 0 0-6 6v22a6 6 0 0 0 6 6h9"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3.2"
+                strokeLinecap="round"
+              />
+              <path
+                d="M11 20h17m-6-6 6 6-6 6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
           <span>
-            {tr('🔑 Clés météo')}
+            <b>{tr('🔑 Clés météo')}</b>
             <small>{tr('sortir du menu Météo, vers Réglages')}</small>
           </span>
         </Button>
@@ -339,17 +342,20 @@ function ForecastPage() {
               url="https://meteofrance.com/meteo-marine"
             />
           )}
-          <ButtonRow className="row">
-            <Button
-              className="btn"
-              onClick={() => {
-                buzz();
-                go(lake ? 'beaufort' : 'douglas');
-              }}
-            >
-              {tr(lake ? '💨 Échelle de Beaufort' : '🌊 Échelle de Douglas')}
-            </Button>
-          </ButtonRow>
+          <div className="page-links">
+            <PageLink
+              view="beaufort"
+              icon="💨"
+              label="Échelle de Beaufort"
+              sub="la force du vent, de 0 à 12"
+            />
+            <PageLink
+              view="douglas"
+              icon="🌊"
+              label="Échelle de Douglas"
+              sub="l’état de la mer, de 0 à 9"
+            />
+          </div>
         </section>
       </div>
     </>

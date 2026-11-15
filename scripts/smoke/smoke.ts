@@ -808,6 +808,62 @@ async function marksShare(page: Page, theme: string): Promise<void> {
   );
 }
 
+/**
+ * The rule of the scales: in French and in English, the same columns, the
+ * same fonts and sizes; nothing moves when the language changes. Opened from
+ * the forecast of Météo, their ◀ comes back to it.
+ * @param page - The page.
+ * @param theme - Theme checked.
+ */
+async function scalesSteady(page: Page, theme: string): Promise<void> {
+  const layout = () =>
+    page.evaluate(() =>
+      [
+        ...document.querySelectorAll(
+          '.scale-tbl th, .scale-tbl tr:nth-child(2) td',
+        ),
+      ]
+        .map((cell) => {
+          const box = cell.getBoundingClientRect();
+          const style = globalThis.getComputedStyle(cell);
+          return `${Math.round(box.left)}:${Math.round(box.width)}:${style.fontSize}:${style.fontFamily}`;
+        })
+        .join('|'),
+    );
+  // A clean start, on the map.
+  await page.reload();
+  await page.waitForTimeout(1500);
+  await page.locator('.rail-weather').click();
+  await page.waitForTimeout(400);
+  await page.locator('[data-wx="check"]').click();
+  await page.waitForTimeout(600);
+  for (const view of ['beaufort', 'douglas']) {
+    /* eslint-disable no-await-in-loop -- one scale after the other */
+    await page.locator(`[data-page-link="${view}"]`).click();
+    await page.waitForTimeout(400);
+    await page.locator('[data-slang="fr"]').click();
+    await page.waitForTimeout(200);
+    const french = await layout();
+    await page.locator('[data-slang="en"]').click();
+    await page.waitForTimeout(200);
+    const english = await layout();
+    await page.locator('[data-slang="fr"]').click();
+    check(
+      theme,
+      `${view}: the same columns and fonts in French and in English`,
+      french.length > 0 && french === english,
+    );
+    await page.locator('#navBack').click();
+    await page.waitForTimeout(400);
+    check(
+      theme,
+      `${view}: its ◀ comes back to the forecast it was opened from`,
+      (await page.locator('.wx-links').count()) === 1,
+    );
+    /* eslint-enable no-await-in-loop */
+  }
+}
+
 // Where the side buttons of the tablet stand, to the pixel.
 const TABLET_BUTTONS = [
   '#clock',
@@ -1453,6 +1509,7 @@ for (const theme of ['day', 'night']) {
     await swipeMenu(page, theme);
     await crewAndBoat(page, theme);
     await marksShare(page, theme);
+    await scalesSteady(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }

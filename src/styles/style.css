@@ -12465,7 +12465,6 @@ html body .lx-modal .ck-ask-box {
 /* At the bottom of the Météo menu: the keys, in Réglages */
 .btn.wx-keys-link {
   width: 100%;
-  margin-top: 6px;
 }
 
 /* Clés météo: every key at once, shared and imported */
@@ -12551,26 +12550,18 @@ html body .lx-modal .ck-ask-box {
   color: var(--fg);
   border-color: var(--fg);
 }
-/* Leaving the menu for another place of NavIn: the exit sign at the left */
-.btn.wx-keys-link {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 14px;
-  text-align: left;
-}
-.btn.wx-keys-link span {
-  display: grid;
-  gap: 2px;
-}
-.btn.wx-keys-link small {
-  font-weight: 500;
-  opacity: 0.75;
+/* Leaving the menu for another place of NavIn: the exit sign in the place
+   of the emoji of the entries above, as tall as the button allows, the text
+   aligned with theirs */
+.exit-box {
+  display: inline-grid;
+  place-items: center;
+  width: 1.2em;
 }
 .exit-ico {
-  flex: 0 0 auto;
-  width: 34px;
-  height: 34px;
+  display: block;
+  width: 100%;
+  height: 1.6em;
   color: var(--primary, #0b3d91);
 }
 :root[data-theme='night'] .exit-ico {
@@ -12667,4 +12658,58 @@ html body .lx-modal .ck-ask-box {
 }
 .btn.site-link-reset {
   width: 100%;
+}
+
+/* A link to a page of NavIn: a grey band, its sign, its text, › at the right
+   (a link to a site is a blue pill with ↗) */
+.page-links {
+  display: grid;
+  gap: 10px;
+}
+.btn.page-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  justify-content: flex-start;
+}
+.page-link-ico {
+  font-size: 28px;
+  line-height: 1;
+}
+.page-link-txt {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+}
+.page-link-txt small {
+  font-weight: 500;
+  opacity: 0.75;
+}
+.page-link-go {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary, #0b3d91);
+}
+:root[data-theme='night'] .page-link-go {
+  color: var(--fg);
+}
+
+/* The scales in French and in English: the same columns, fonts and sizes,
+   nothing moves when the language changes (checked by the smoke test) */
+.scale-tbl {
+  table-layout: fixed;
+}
+.scale-tbl th:nth-child(1),
+.scale-tbl td:nth-child(1) {
+  width: 4.6em;
+}
+.scale-tbl th:nth-child(2),
+.scale-tbl td:nth-child(2) {
+  width: 8.5em;
+}
+.scale-tbl th,
+.scale-tbl td {
+  overflow-wrap: anywhere;
 }

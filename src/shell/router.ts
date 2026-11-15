@@ -47,6 +47,8 @@ export const routedTab = signal<string | null>(null);
 export const voyageName = signal<string>('NavIn');
 
 const history: string[] = [];
+/** The argument of each screen of the history (its part: a section, a sub-page). */
+const historyArgs: unknown[] = [];
 const listeners = new Set<NavigationListener>();
 let goingBack = false;
 
@@ -62,8 +64,12 @@ export function go(view: string, arg: unknown = null): void {
   const from = state.view.currentView.value;
   if (!goingBack && from && from !== view && !ROOTS.includes(view)) {
     history.push(from);
+    historyArgs.push(state.view.viewArg.value);
   }
-  if (ROOTS.includes(view)) history.length = 0;
+  if (ROOTS.includes(view)) {
+    history.length = 0;
+    historyArgs.length = 0;
+  }
   if (ROOTS.includes(view) && from !== view) hideToast();
   goingBack = false;
   render(view, arg);
@@ -93,9 +99,12 @@ export function goFromGear(): void {
  */
 export function goBackInHistory(): void {
   const previous = history.pop();
+  // Back to the very part it was on (a sub-page, a section).
+  const arg = historyArgs.pop() ?? null;
   goingBack = true;
   const known = previous !== undefined && isView(previous);
-  go(known ? previous : backFallback(state.view.currentView.value));
+  if (known) go(previous, arg);
+  else go(backFallback(state.view.currentView.value));
 }
 
 /**
@@ -121,6 +130,7 @@ export function previousView(): string | null {
 /** Forget the history (nav bar exit button, nav.js:82). */
 export function clearHistory(): void {
   history.length = 0;
+  historyArgs.length = 0;
 }
 
 /**
