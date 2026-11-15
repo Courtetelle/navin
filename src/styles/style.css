@@ -12784,20 +12784,23 @@ html body .wx-page.wx-one {
   min-height: 44px;
 }
 
-/* The button of the radius of LiveMétéo: at the left under the dividers (X
-   and the phone sideways), under the clock (T upright); its red cross
-   blinks slowly */
+/* The button of the radius of LiveMétéo, unrolled from Météo: at its left
+   (X and the phone sideways), above it (T upright). The radius large, « nm? »
+   small at its side: a long press opens its setting, as the sun and moon of
+   the magnifier say its long press. Its red cross blinks slowly. */
 .rail-btn.live-radius-btn {
   position: fixed;
   z-index: 1150;
-  display: grid;
-  place-items: center;
-  gap: 0;
-  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 2px 4px;
 }
 .live-radius-ico {
-  width: 30px;
-  height: 30px;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
   color: var(--primary, #0b3d91);
 }
 .live-radius-cross {
@@ -12814,24 +12817,36 @@ html body .wx-page.wx-one {
   }
 }
 .live-radius-nb {
-  font-size: 15px;
+  font-size: 26px;
   font-weight: 800;
   line-height: 1;
+  white-space: nowrap;
 }
 .live-radius-nb sub {
-  font-size: 9px;
+  font-size: 11px;
+  font-weight: 700;
   margin-left: 1px;
+  vertical-align: baseline;
 }
 @media (orientation: landscape) and (min-width: 560px) {
   html body .rail-btn.live-radius-btn {
-    top: calc(var(--rb-top) + 5 * var(--rb-step) + env(safe-area-inset-top));
-    left: var(--rb-side);
+    top: calc(var(--rb-top) + 3 * var(--rb-step) + env(safe-area-inset-top));
+    left: auto;
+    right: calc(var(--rb-side-r) + var(--rb-x));
   }
 }
 @media (orientation: portrait) {
   html body .rail-btn.live-radius-btn {
-    top: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-top));
-    left: var(--rb-side);
+    top: auto;
+    bottom: calc(var(--rb-bottom) + var(--rb-step));
+    left: calc(var(--rb-side) + 3 * var(--rb-x));
+  }
+  html body .live-radius-ico {
+    width: 20px;
+    height: 20px;
+  }
+  html body .live-radius-nb {
+    font-size: 20px;
   }
 }
 :root[data-theme='night'] .live-radius-ico {

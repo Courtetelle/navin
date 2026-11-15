@@ -277,7 +277,7 @@ function RadiusButton() {
       </svg>
       <span className="live-radius-nb">
         {nm}
-        <sub>NM</sub>
+        <sub>nm?</sub>
       </span>
     </Button>
   );
