@@ -862,6 +862,17 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
     );
     /* eslint-enable no-await-in-loop */
   }
+  // The lightning alert: its own page in the Météo menu.
+  await page.locator('.rail-weather').click();
+  await page.waitForTimeout(400);
+  await page.locator('[data-wx="lightning"]').click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'Météo › Alerte foudre: its switch and its three radii',
+    (await page.locator('[data-lightning="toggle"]').count()) === 1 &&
+      (await page.locator('[data-lightning-radius]').count()) === 3,
+  );
 }
 
 // Where the side buttons of the tablet stand, to the pixel.

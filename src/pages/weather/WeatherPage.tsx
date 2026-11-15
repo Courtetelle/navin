@@ -35,6 +35,7 @@ import {
 } from '../meteo/liveText.ts';
 import { showLiveAround } from '../tracker/liveOnMap.ts';
 
+import { LightningAlert } from './LightningAlert.tsx';
 import { PrepForecast } from './PrepForecast.tsx';
 
 function toggle(id: string): void {
@@ -71,6 +72,7 @@ export function WeatherPage({ arg }: PageProps) {
   if (arg === FORECAST) return <ForecastPage part="forecast" />;
   if (arg === BRIEFING) return <ForecastPage part="briefing" />;
   if (arg === ALERTS) return <AlertsPage />;
+  if (arg === LIGHTNING) return <LightningPage />;
   return <WeatherMenu />;
 }
 
@@ -87,6 +89,40 @@ function openKeys() {
 function openAlerts() {
   buzz();
   go('weather', ALERTS);
+}
+
+/** Argument of the screen for the lightning alert. */
+const LIGHTNING = 'lightning';
+
+function openLightning() {
+  buzz();
+  go('weather', LIGHTNING);
+}
+
+/**
+ * The lightning alert of the Météo menu.
+ * @returns The screen content.
+ */
+function LightningPage() {
+  const tr = useTr();
+  return (
+    <>
+      <PageBack
+        label="◀ Météo"
+        data-go="weather"
+        onClick={() => {
+          buzz();
+          go('weather');
+        }}
+      >
+        {tr('◀ Météo')}
+      </PageBack>
+      <TitleInNav>
+        <h1>{tr('⚡ Alerte foudre')}</h1>
+      </TitleInNav>
+      <LightningAlert />
+    </>
+  );
 }
 
 /**
@@ -181,6 +217,19 @@ function WeatherMenu() {
             <b>{tr('Alertes de vent')}</b>
             <small>
               {tr('oui ou non, rafales ou vent moyen, échelle des couleurs')}
+            </small>
+          </span>
+        </Button>
+        <Button
+          className="btn big wx-entry"
+          data-wx="lightning"
+          onClick={openLightning}
+        >
+          <span className="wx-entry-ico">⚡</span>
+          <span>
+            <b>{tr('Alerte foudre')}</b>
+            <small>
+              {tr('les éclairs vus par satellite dans le rayon choisi')}
             </small>
           </span>
         </Button>

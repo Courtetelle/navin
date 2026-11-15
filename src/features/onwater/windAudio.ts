@@ -121,6 +121,36 @@ function showFlash(
   navigator.vibrate?.([SIGNAL_MS, PAUSE_MS, SIGNAL_MS]);
 }
 
+/**
+ * The lightning alert: three short low beeps, unlike the two long ones of
+ * the wind, and the device shakes three times.
+ */
+export function playLightning(): void {
+  navigator.vibrate?.([300, 200, 300, 200, 300]);
+  const context = audioContext;
+  if (!context) return;
+  const sound = () => {
+    const start = context.currentTime + 0.05;
+    for (const offset of [0, 0.5, 1]) {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const from = start + offset;
+      const to = from + 0.3;
+      oscillator.type = 'sawtooth';
+      oscillator.frequency.value = 440;
+      gain.gain.setValueAtTime(0, from);
+      gain.gain.linearRampToValueAtTime(0.6, from + 0.01);
+      gain.gain.setValueAtTime(0.6, to - 0.01);
+      gain.gain.linearRampToValueAtTime(0, to);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(from);
+      oscillator.stop(to + 0.02);
+    }
+  };
+  if (context.state === 'running') sound();
+  else context.resume().then(sound, () => undefined);
+}
+
 function playTones(level: number): void {
   if (!audioContext) return;
   const context = audioContext;

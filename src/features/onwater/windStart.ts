@@ -43,6 +43,15 @@ export function startWindWatch(): void {
       },
     );
   });
+  // The lightning alert: on at the launch, and at once when switched.
+  setTimeout(lightningStart, 3000);
+  let lightningWas = lightningOn();
+  state.preferences.settings.subscribe(() => {
+    const now = lightningOn();
+    if (now === lightningWas) return;
+    lightningWas = now;
+    lightningStart();
+  });
   // Once a day, as long as it is not solved: a key ended or refused.
   setTimeout(checkKeys, 45_000);
   setInterval(checkKeys, 3_600_000);
@@ -97,5 +106,17 @@ function record(): void {
 }
 
 function alertsOn(): boolean {
-  return windAlertConfig(state.preferences.settings.value).on;
+  return windAlertConfig(state.preferences.settings.value).on || lightningOn();
+}
+
+function lightningOn(): boolean {
+  const lightning = state.preferences.settings.value.lightning as
+    { on?: boolean } | undefined;
+  return Boolean(lightning?.on);
+}
+
+function lightningStart(): void {
+  void import('./lightningWatch.ts')
+    .then(({ lightningWatchStart }) => lightningWatchStart())
+    .catch(() => undefined);
 }
