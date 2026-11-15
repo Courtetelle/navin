@@ -249,7 +249,12 @@ function RadiusButton() {
       onClick={hideLiveOnMap}
       {...press.handlers}
     >
-      <svg className="live-radius-ico" viewBox="0 0 40 40" aria-hidden="true">
+      <svg
+        className="live-radius-ico"
+        viewBox="0 0 40 40"
+        preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true"
+      >
         <circle
           cx="20"
           cy="20"
@@ -275,9 +280,9 @@ function RadiusButton() {
           strokeLinecap="round"
         />
       </svg>
-      <span className="live-radius-nb">
-        {nm}
-        <sub>nm?</sub>
+      <span className="live-radius-nb">{nm}</span>
+      <span className="live-radius-more" aria-hidden="true">
+        nm?
       </span>
     </Button>
   );

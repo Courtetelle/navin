@@ -12791,17 +12791,19 @@ html body .wx-page.wx-one {
 .rail-btn.live-radius-btn {
   position: fixed;
   z-index: 1150;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 2px 4px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  overflow: hidden;
 }
+/* The circle laid over the button, the radius in its middle */
 .live-radius-ico {
-  flex: 0 0 auto;
-  width: 26px;
-  height: 26px;
+  grid-area: 1 / 1;
+  width: 100%;
+  height: 100%;
+  max-width: 64px;
   color: var(--primary, #0b3d91);
+  opacity: 0.55;
 }
 .live-radius-cross {
   animation: live-radius-blink 2.4s ease-in-out infinite;
@@ -12817,16 +12819,20 @@ html body .wx-page.wx-one {
   }
 }
 .live-radius-nb {
+  grid-area: 1 / 1;
+  z-index: 1;
   font-size: 26px;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1;
-  white-space: nowrap;
 }
-.live-radius-nb sub {
+/* « nm? » alone in its corner: the button has a second function */
+.live-radius-more {
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
   font-size: 11px;
   font-weight: 700;
-  margin-left: 1px;
-  vertical-align: baseline;
+  line-height: 1;
 }
 @media (orientation: landscape) and (min-width: 560px) {
   html body .rail-btn.live-radius-btn {
@@ -12841,12 +12847,8 @@ html body .wx-page.wx-one {
     bottom: calc(var(--rb-bottom) + var(--rb-step));
     left: calc(var(--rb-side) + 3 * var(--rb-x));
   }
-  html body .live-radius-ico {
-    width: 20px;
-    height: 20px;
-  }
   html body .live-radius-nb {
-    font-size: 20px;
+    font-size: 21px;
   }
 }
 :root[data-theme='night'] .live-radius-ico {
