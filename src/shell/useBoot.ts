@@ -104,5 +104,35 @@ function start(): void {
 function registerServiceWorker(): void {
   if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return;
   if (globalThis.location.protocol === 'file:') return;
-  navigator.serviceWorker.register('sw.js').catch(() => undefined);
+  navigator.serviceWorker
+    .register('sw.js')
+    .then((registration) => {
+      // A new version is looked for every 30 min and on each return to the
+      // app, on every device.
+      setInterval(() => {
+        registration.update().catch(() => undefined);
+      }, UPDATE_EVERY_MS);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registration.update().catch(() => undefined);
+        }
+      });
+    })
+    .catch(() => undefined);
+  // A new version took over: it opens at the next return to the app, never
+  // during a track or a SOS.
+  let fresh = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    fresh = true;
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (!fresh || document.visibilityState !== 'visible') return;
+    if (state.view.tracking.value || state.view.currentView.value === 'sos') {
+      return;
+    }
+    globalThis.location.reload();
+  });
 }
+
+/** How often a new version of NavIn is looked for. */
+const UPDATE_EVERY_MS = 30 * 60_000;
