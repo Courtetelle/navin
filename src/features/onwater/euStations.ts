@@ -924,17 +924,264 @@ export function nearBritain(
   );
 }
 
+/* ------------------------------------- through the relay: METAR, NDBC */
+
+export const METAR = 'METAR';
+export const NDBC = 'NOAA NDBC';
+const NDBC_LIST_KEY = 'ldb.ndbc.stations';
+
+/**
+ * The address of a page read through the relay of NavIn.
+ * @param relay - The relay (a Cloudflare Worker).
+ * @param url - The page.
+ * @returns The address to fetch.
+ */
+export function relayed(relay: string, url: string): string {
+  return `${relay.replace(/\/+$/, '')}/?url=${encodeURIComponent(url)}`;
+}
+
+/** One METAR of aviationweather.gov (`format=json`). */
+export interface MetarReport {
+  icaoId?: string;
+  name?: string;
+  lat?: number;
+  lon?: number;
+  /** Seconds since 1970. */
+  obsTime?: number;
+  /** Degrees, or `VRB`. */
+  wdir?: number | string;
+  /** Knots. */
+  wspd?: number;
+  wgst?: number;
+  altim?: number;
+  temp?: number;
+}
+
+/**
+ * The wind of an airport (METAR, in knots).
+ * @param report - The METAR.
+ * @param km - Its distance.
+ * @param now - Epoch milliseconds.
+ * @returns The reading, null when old or without wind.
+ */
+export function metarReading(
+  report: MetarReport,
+  km: number,
+  now: number,
+): WindReading | null {
+  const t = (report.obsTime ?? Number.NaN) * 1000;
+  if (report.wspd == null || report.lat == null || report.lon == null) {
+    return null;
+  }
+  if (!fresh(t, now)) return null;
+  return {
+    name: (report.name ?? report.icaoId ?? 'aéroport').split(',', 1)[0] ?? '',
+    km,
+    t,
+    avg: report.wspd,
+    gust: report.wgst ?? null,
+    dir: typeof report.wdir === 'number' ? report.wdir : null,
+    baro: report.altim ?? null,
+    air: report.temp ?? null,
+    net: METAR,
+    id: report.icaoId ?? `${report.lat},${report.lon}`,
+    lat: report.lat,
+    lon: report.lon,
+  };
+}
+
+/**
+ * Measured wind of the airports around a place (METAR), through the relay.
+ * @param center - Place searched around.
+ * @param radius - Radius in km.
+ * @param most - Airports kept at most.
+ * @param relay - The address of the relay; nothing is read without it.
+ * @returns The readings.
+ */
+export async function metarReadings(
+  center: { lat: number; lon: number },
+  radius: number,
+  most: number,
+  relay: string,
+): Promise<WindReading[]> {
+  if (!relay) return [];
+  const dLat = radius / 111;
+  const dLon = radius / (111 * Math.cos((center.lat * Math.PI) / 180));
+  const box = [
+    center.lat - dLat,
+    center.lon - dLon,
+    center.lat + dLat,
+    center.lon + dLon,
+  ]
+    .map((value) => value.toFixed(2))
+    .join(',');
+  const response = await fetch(
+    relayed(
+      relay,
+      `https://aviationweather.gov/api/data/metar?bbox=${box}&format=json`,
+    ),
+    { signal: AbortSignal.timeout(20_000) },
+  );
+  if (!response.ok) return [];
+  const reports = (await response.json()) as MetarReport[];
+  const now = Date.now();
+  return nearStations(
+    reports.filter((one) => one.lat != null && one.lon != null) as Array<
+      MetarReport & { lat: number; lon: number }
+    >,
+    center,
+    radius,
+    most,
+  )
+    .map(({ station, km }) => metarReading(station, km, now))
+    .filter((reading) => reading !== null);
+}
+
+function tagField(tag: string, name: string): string | undefined {
+  return new RegExp(String.raw`\s${name}="(?<value>[^"]*)"`).exec(tag)?.groups
+    ?.value;
+}
+
+/**
+ * The stations of the NOAA list (`activestations.xml`) measuring the weather.
+ * @param xml - The list.
+ * @returns The stations with a place.
+ */
+export function ndbcStations(xml: string): PlacedStation[] {
+  const stations: PlacedStation[] = [];
+  for (const match of xml.matchAll(/<station\s[^>]*>/g)) {
+    const tag = match[0];
+    const lat = Number(tagField(tag, 'lat'));
+    const lon = Number(tagField(tag, 'lon'));
+    const id = tagField(tag, 'id');
+    if (
+      !id ||
+      tagField(tag, 'met') !== 'y' ||
+      !Number.isFinite(lat) ||
+      !Number.isFinite(lon)
+    ) {
+      continue;
+    }
+    stations.push({ id, name: tagField(tag, 'name') ?? id, lat, lon });
+  }
+  return stations;
+}
+
+/**
+ * The wind of a NOAA station from its `realtime2` text (m/s, UTC).
+ * @param text - The text, the latest line first.
+ * @param station - The station.
+ * @param km - Its distance.
+ * @param now - Epoch milliseconds.
+ * @returns The reading, null when old or without wind.
+ */
+export function ndbcReading(
+  text: string,
+  station: PlacedStation,
+  km: number,
+  now: number,
+): WindReading | null {
+  const lines = text.split('\n');
+  const head = (lines[0] ?? '').replace(/^#/, '').trim().split(/\s+/);
+  const row = lines.find((line) => line.trim() && !line.startsWith('#'));
+  if (!row) return null;
+  const cells = row.trim().split(/\s+/);
+  const cell = (name: string): number | null => {
+    const value = cells[head.indexOf(name)];
+    const number = Number(value);
+    return value == null || value === 'MM' || !Number.isFinite(number)
+      ? null
+      : number;
+  };
+  const [year, month, day, hour, minute] = ['YY', 'MM', 'DD', 'hh', 'mm'].map(
+    (name) => Number(cells[head.indexOf(name)]),
+  );
+  const t = Date.UTC(
+    year ?? Number.NaN,
+    (month ?? 1) - 1,
+    day ?? 1,
+    hour ?? 0,
+    minute ?? 0,
+  );
+  const avg = cell('WSPD');
+  if (avg == null || !fresh(t, now)) return null;
+  return {
+    name: station.name,
+    km,
+    t,
+    avg: knots(avg) ?? 0,
+    gust: knots(cell('GST')),
+    dir: cell('WDIR'),
+    baro: cell('PRES'),
+    air: cell('ATMP'),
+    net: NDBC,
+    id: station.id,
+    lat: station.lat,
+    lon: station.lon,
+  };
+}
+
+/**
+ * Measured wind of the NOAA buoys and lightships (the Met Office ones in the
+ * Channel and the North Sea among them), through the relay.
+ * @param center - Place searched around.
+ * @param radius - Radius in km.
+ * @param most - Stations read at most.
+ * @param relay - The address of the relay; nothing is read without it.
+ * @returns The readings.
+ */
+export async function ndbcReadings(
+  center: { lat: number; lon: number },
+  radius: number,
+  most: number,
+  relay: string,
+): Promise<WindReading[]> {
+  if (!relay) return [];
+  const stations = await keptList(NDBC_LIST_KEY, WEEK_MS, async () =>
+    ndbcStations(
+      await textOf(
+        relayed(relay, 'https://www.ndbc.noaa.gov/activestations.xml'),
+        30_000,
+      ),
+    ),
+  );
+  const now = Date.now();
+  const readings = await Promise.all(
+    nearStations(stations, center, radius, most).map(
+      async ({ station, km }) => {
+        try {
+          const text = await textOf(
+            relayed(
+              relay,
+              `https://www.ndbc.noaa.gov/data/realtime2/${station.id}.txt`,
+            ),
+          );
+          return ndbcReading(text, station, km, now);
+        } catch {
+          return null;
+        }
+      },
+    ),
+  );
+  return readings.filter((reading) => reading !== null);
+}
+
 /* ------------------------------------------------------------- together */
+
+function textValue(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
 
 /**
  * The keys of AEMET and of the Met Office saved in the settings.
  * @returns The keys, empty without them.
  */
-function savedKeys(): { aemet: string; metOffice: string } {
+function savedKeys(): { aemet: string; metOffice: string; relay: string } {
   const alert = state.preferences.settings.peek().windAlert ?? {};
   return {
-    aemet: typeof alert.aemetKey === 'string' ? alert.aemetKey : '',
-    metOffice: typeof alert.metOfficeKey === 'string' ? alert.metOfficeKey : '',
+    aemet: textValue(alert.aemetKey),
+    metOffice: textValue(alert.metOfficeKey),
+    relay: textValue(alert.relayUrl),
   };
 }
 
@@ -949,13 +1196,14 @@ function savedKeys(): { aemet: string; metOffice: string } {
  *   settings by default.
  * @param keys.aemet - AEMET OpenData key.
  * @param keys.metOffice - Met Office Weather DataHub key.
+ * @param keys.relay - Address of the relay of NavIn (METAR, NOAA buoys).
  * @returns The readings.
  */
 export async function euReadings(
   center: { lat: number; lon: number },
   radius: number,
   most: number,
-  keys: { aemet?: string; metOffice?: string } = savedKeys(),
+  keys: { aemet?: string; metOffice?: string; relay?: string } = savedKeys(),
 ): Promise<WindReading[]> {
   const lists = await Promise.all([
     hubReadings(center, radius, most).catch(() => []),
@@ -963,6 +1211,8 @@ export async function euReadings(
     socibReadings(center, radius, most).catch(() => []),
     aemetReadings(center, radius, most, keys.aemet ?? '').catch(() => []),
     metOfficeReadings(center, radius, keys.metOffice ?? '').catch(() => []),
+    metarReadings(center, radius, most, keys.relay ?? '').catch(() => []),
+    ndbcReadings(center, radius, most, keys.relay ?? '').catch(() => []),
   ]);
   return lists.flat();
 }

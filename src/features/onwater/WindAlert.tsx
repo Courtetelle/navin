@@ -11,6 +11,7 @@ import { ensureDay, getDay, state } from '../../state/index.ts';
 
 import { BoxHelp } from './BoxHelp.tsx';
 import { MfKeyRow } from './MfKeyRow.tsx';
+import { RelayRow } from './RelayRow.tsx';
 import { StationKeyRow } from './StationKeyRow.tsx';
 import { onLake } from './onLake.ts';
 import { AEMET_KEY, MET_OFFICE_KEY } from './stationKeys.ts';
@@ -106,6 +107,7 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
           <MfKeyRow />
           <StationKeyRow station={AEMET_KEY} />
           <StationKeyRow station={MET_OFFICE_KEY} />
+          <RelayRow />
         </>
       ) : (
         <TestRow keep={keep} />

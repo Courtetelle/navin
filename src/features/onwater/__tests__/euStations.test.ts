@@ -4,19 +4,25 @@ import type { HubStation, MetOfficeObservation } from '../euStations.ts';
 import {
   AEMET,
   ITALIA_METEO,
+  METAR,
   MET_OFFICE,
+  NDBC,
   PUERTOS,
   SOCIB,
   aemetDegrees,
   aemetReading,
   hubReading,
   metOfficeReading,
+  metarReading,
+  ndbcReading,
+  ndbcStations,
   nearBritain,
   nearItaly,
   nearSpain,
   opendapValues,
   portusReading,
   portusStations,
+  relayed,
   socibReading,
 } from '../euStations.ts';
 
@@ -166,4 +172,54 @@ test('Spain and Britain are read only around them', () => {
   expect(nearSpain({ lat: 46.4, lon: 6.5 }, 30)).toBe(false);
   expect(nearBritain({ lat: 50.8, lon: -1.3 }, 30)).toBe(true);
   expect(nearBritain({ lat: 46.4, lon: 6.5 }, 30)).toBe(false);
+});
+
+test('through the relay: its address, the METAR of an airport', () => {
+  expect(relayed('https://relay.example.dev/', 'https://a.b/c?d=1')).toBe(
+    'https://relay.example.dev/?url=https%3A%2F%2Fa.b%2Fc%3Fd%3D1',
+  );
+  const reading = metarReading(
+    {
+      icaoId: 'LEPA',
+      name: 'Palma De Mallorca Arpr, IB, ES',
+      lat: 39.561,
+      lon: 2.737,
+      obsTime: NOW / 1000 - 1200,
+      wdir: 260,
+      wspd: 8,
+      altim: 1017,
+    },
+    5,
+    NOW,
+  );
+  expect(reading?.net).toBe(METAR);
+  expect(reading?.name).toBe('Palma De Mallorca Arpr');
+  expect(reading?.avg).toBe(8);
+  expect(
+    metarReading({ wspd: 5, lat: 1, lon: 1, obsTime: 0 }, 1, NOW),
+  ).toBeNull();
+});
+
+test('the NOAA buoys: their list, the latest line of their text', () => {
+  const [station] = ndbcStations(
+    '<station id="62103" lat="49.9" lon="-2.9" name="Channel Lightship" met="y"/><station id="1" lat="1" lon="1" name="x" met="n"/>',
+  );
+  expect(station).toStrictEqual({
+    id: '62103',
+    name: 'Channel Lightship',
+    lat: 49.9,
+    lon: -2.9,
+  });
+  if (!station) throw new Error('no station');
+  const text = `#YY  MM DD hh mm WDIR WSPD GST  WVHT   DPD   APD MWD   PRES  ATMP
+#yr  mo dy hr mn degT m/s  m/s     m   sec   sec degT   hPa  degC
+2026 11 14 23 00 210  8.8   MM    MM    MM    MM  MM 1006.3  11.1
+2026 11 14 22 00 170  7.2   MM    MM    MM    MM  MM 1006.9  11.3`;
+  const reading = ndbcReading(text, station, 20, NOW);
+  expect(reading?.net).toBe(NDBC);
+  expect(reading?.t).toBe(Date.UTC(2026, 10, 14, 23));
+  expect(reading?.avg).toBeCloseTo(8.8 * KN);
+  expect(reading?.gust).toBeNull();
+  expect(reading?.dir).toBe(210);
+  expect(reading?.baro).toBe(1006.3);
 });
