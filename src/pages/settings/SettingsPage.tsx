@@ -13,6 +13,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { installPrompt } from '../../features/data/install.ts';
 import { WindKeys, windAlertClick } from '../../features/onwater/index.ts';
+import { lightningTest } from '../../features/onwater/lightningWatch.ts';
 import { ShareThemePicker } from '../../features/publish/index.ts';
 import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -165,6 +166,24 @@ function TestsSection() {
           }}
         >
           {tr('▶ Test des alertes de vent')}
+        </Button>
+      </ButtonRow>
+      <h3>{tr('⚡ Test de l’alerte foudre')}</h3>
+      <p className="keep-help nav-hint">
+        {tr(
+          'Trois bips courts, l’écran qui flashe et la bulle, comme pour un orage à 12 NM qui se rapproche.',
+        )}
+      </p>
+      <ButtonRow>
+        <Button
+          className="btn"
+          data-lightning="test"
+          onClick={() => {
+            buzz();
+            lightningTest();
+          }}
+        >
+          {tr('▶ Test de l’alerte foudre')}
         </Button>
       </ButtonRow>
       <DepthDev key={settingsRedraws.value} inAlerts />

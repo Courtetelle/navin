@@ -17,7 +17,6 @@ import {
   lightningBusy,
   lightningCheck,
   lightningLast,
-  lightningTest,
 } from '../../features/onwater/lightningWatch.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -98,7 +97,7 @@ export function LightningAlert() {
             ? tr(lightningText(last, radiusNm))
             : tr('Pas encore d’image satellite lue.')}
       </p>
-      <ButtonRow className="row c2">
+      <ButtonRow className="row">
         <Button
           className="btn"
           data-lightning="look"
@@ -109,16 +108,6 @@ export function LightningAlert() {
           }}
         >
           {tr('↻ Regarder maintenant')}
-        </Button>
-        <Button
-          className="btn"
-          data-lightning="test"
-          onClick={() => {
-            buzz();
-            lightningTest();
-          }}
-        >
-          {tr('🔔 Tester l’alerte')}
         </Button>
       </ButtonRow>
       <HelpText>
@@ -132,7 +121,8 @@ export function LightningAlert() {
         de NavIn, les éclairs des 20 dernières minutes sont toujours affichés,
         sans rien demander, même alerte coupée : les plus récents vifs, ceux de
         10 et 20 minutes plus pâles, pour voir où va l’orage ; jaune pour 1
-        éclair en 5 minutes, rouge foncé pour 20 et plus.
+        éclair en 5 minutes, rouge foncé pour 20 et plus. Pour entendre et voir
+        l’alerte : Réglages › Tests.
       </HelpText>
       <SiteLink
         id="blitzortung"
