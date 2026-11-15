@@ -347,10 +347,10 @@ export async function portusReadings(
 
 /* ------------------------------------------------------------ Balearics */
 
-const SOCIB_THREDDS = 'https://thredds.socib.es/thredds';
+export const SOCIB_THREDDS = 'https://thredds.socib.es/thredds';
 
 /** A SOCIB station: its place and the data file of its instrument. */
-interface SocibStation extends PlacedStation {
+export interface SocibStation extends PlacedStation {
   /** OPeNDAP path of its latest file. */
   path: string;
 }
@@ -461,7 +461,7 @@ async function textOf(url: string, timeout = 15_000): Promise<string> {
  * The SOCIB instruments measuring the wind (their path changes when an
  * instrument is replaced: read on 15.11.2026, the live ones only).
  */
-const SOCIB_STATIONS: readonly SocibStation[] = (
+export const SOCIB_STATIONS: readonly SocibStation[] = (
   [
     [
       'station_parcbit-scb_met023',

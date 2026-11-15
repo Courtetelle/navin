@@ -12366,3 +12366,21 @@ html body .lx-modal .ck-ask-box {
     right: var(--rb-side-r);
   }
 }
+
+/* SOCIB changed its instruments: the notice in Réglages › Alertes */
+.socib-notice {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #fff4dc;
+  color: #0b1220;
+}
+.socib-notice p {
+  margin: 0;
+}
+:root[data-theme='night'] .socib-notice {
+  background: #2a0d00;
+  color: var(--fg);
+}

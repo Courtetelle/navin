@@ -27,6 +27,10 @@ export function startWindWatch(): void {
       windWatchStart(),
     );
   }, 2000);
+  // Once a week: has SOCIB changed its instruments?
+  setTimeout(() => {
+    void import('./socibWatch.ts').then(({ checkSocib }) => checkSocib());
+  }, 20_000);
   setInterval(() => {
     void import('./windWatch.ts').then(({ windReminderTick }) =>
       windReminderTick(),
