@@ -12854,3 +12854,29 @@ html body .wx-page.wx-one {
 :root[data-theme='night'] .live-radius-ico {
   color: var(--fg);
 }
+
+/* The pin away from a map: pale, a touch does nothing; a small list in its
+   corner says its long press (Mes marques) */
+html body .rail-btn.rail-pin {
+  position: relative;
+}
+html body .rail-btn.rail-pin.rail-idle .rail-icon {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.rail-list-sign {
+  position: absolute;
+  right: 5px;
+  bottom: 4px;
+  width: 14px;
+  height: 14px;
+  color: var(--primary, #0b3d91);
+}
+.rail-list-sign svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+:root[data-theme='night'] .rail-list-sign {
+  color: var(--fg);
+}

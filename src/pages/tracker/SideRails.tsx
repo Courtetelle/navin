@@ -354,7 +354,12 @@ function PinButton() {
     buzz();
     go('marks');
   });
-  const here = state.view.currentView.value === 'marks';
+  const view = state.view.currentView.value;
+  const here = view === 'marks';
+  // A mark is saved only from a map: elsewhere the pin is pale and a touch
+  // does nothing (its long press still opens « Mes marques »).
+  const onMap = view === 'tracker' || Boolean(shownMap());
+  const idle = !here && !onMap;
   useEffect(() => {
     if (!pressed) return undefined;
     const timer = setTimeout(() => setPressed(0), PRESSED_MS);
@@ -370,12 +375,17 @@ function PinButton() {
         'rail-btn rail-bare rail-pin',
         pressed ? 'rail-pressed' : '',
         here ? 'menu-here' : '',
+        idle ? 'rail-idle' : '',
         press.hit ? 'lp-hit' : '',
       ]
         .filter(Boolean)
         .join(' ')}
       aria-label={tr(
-        here ? 'Retour à la carte' : 'Point ici · appui long : mes marques',
+        here
+          ? 'Retour à la carte'
+          : idle
+            ? 'Marque : sur une carte seulement · appui long : mes marques'
+            : 'Point ici · appui long : mes marques',
       )}
       aria-pressed={pressed > 0}
       onClick={() => {
@@ -387,6 +397,7 @@ function PinButton() {
           if (state.view.tracking.value) setTimeout(boatArrowTap, MAP_BACK_MS);
           return;
         }
+        if (idle) return;
         setPressed(Date.now());
         run(PIN_KEY);
       }}
@@ -394,6 +405,20 @@ function PinButton() {
     >
       <span className="rail-icon">
         <RailIcon name={PIN_KEY} />
+      </span>
+      {/* Its long press opens the list of the marks */}
+      <span className="rail-list-sign" aria-hidden="true">
+        <svg viewBox="0 0 16 16">
+          <path
+            d="M5 4h9M5 8h9M5 12h9"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+          />
+          <circle cx="2" cy="4" r="1.2" fill="currentColor" />
+          <circle cx="2" cy="8" r="1.2" fill="currentColor" />
+          <circle cx="2" cy="12" r="1.2" fill="currentColor" />
+        </svg>
       </span>
     </Button>
   );
