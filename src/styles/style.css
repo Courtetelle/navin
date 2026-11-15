@@ -12857,7 +12857,8 @@ html body .wx-page.wx-one {
 
 /* The pin away from a map: pale, a touch does nothing; a small list in its
    corner says its long press (Mes marques) */
-html body .rail-btn.rail-pin {
+html body .rail-btn.rail-pin,
+html body .rail-btn.rail-start {
   position: relative;
 }
 html body .rail-btn.rail-pin.rail-idle .rail-icon {
@@ -12879,4 +12880,43 @@ html body .rail-btn.rail-pin.rail-idle .rail-icon {
 }
 :root[data-theme='night'] .rail-list-sign {
   color: var(--fg);
+}
+
+/* The whole card of a station, sideways (X, the phone sideways): the page
+   in two columns, no white space; upright, one column as before */
+@media (orientation: landscape) and (min-width: 560px) {
+  html body .live-page.live-detail {
+    display: block;
+    max-width: none;
+  }
+  html body .live-detail .live-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 24px;
+    row-gap: 10px;
+    align-items: start;
+    max-width: none;
+    width: 100%;
+  }
+  /* The ◀ of the title line goes back to the map: no big button too */
+  html body .live-detail .live-card-back {
+    display: none;
+  }
+  html body .live-detail .live-card-a,
+  html body .live-detail .live-card-b {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+  }
+  html body .live-detail .live-map-part {
+    display: none;
+  }
+}
+@media (orientation: landscape) and (max-height: 520px) {
+  html body .live-detail .live-head {
+    padding: 8px 12px;
+  }
+  html body .live-detail .live-big b {
+    font-size: 54px;
+  }
 }

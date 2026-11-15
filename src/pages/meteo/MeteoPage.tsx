@@ -74,7 +74,7 @@ function LiveDetail({ station }: { station: LiveStation }) {
       <TitleInNav>
         <h1 className="live-title">{tr('🌬 LiveMétéo')}</h1>
       </TitleInNav>
-      <div className="live-page picked">
+      <div className="live-page picked live-detail">
         <StationCard
           station={current}
           basis={config.basis}

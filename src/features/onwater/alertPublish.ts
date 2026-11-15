@@ -36,6 +36,8 @@ export interface AlertReport {
   boat: { lat: number; lon: number } | null;
   /** Wind the colours follow, `'gust'` or `'avg'` (the settings when absent). */
   basis?: string;
+  /** A station shared from LiveMétéo, not an alert. */
+  station?: boolean;
 }
 
 const fr = (value: number, digits = 1) =>
@@ -434,7 +436,7 @@ export async function alertDocument(
   sea: SeaNow | null = null,
   trend: readonly WindPoint[] | null = null,
 ): Promise<CardsDocument> {
-  const { reading, wind, forecast } = report;
+  const { reading, wind, forecast, station } = report;
   const sections: CardsSection[] = [
     { title: forecast ? 'Prévision' : 'Station', rows: reportRows(report) },
   ];
@@ -469,7 +471,7 @@ export async function alertDocument(
   }
   const map = await mapPicture(report);
   return {
-    title: `Alerte vent · ${reading.name}`,
+    title: `${station ? 'LiveMétéo' : 'Alerte vent'} · ${reading.name}`,
     kicker: 'LiveMétéo',
     sub: `${wind} · ${forecast ? 'PRÉVISION, pas une mesure' : 'mesure'}`,
     sections,
@@ -552,8 +554,9 @@ export async function publishAlert(
     .slice(0, 16)
     .replace(':', 'h');
   if (image) {
-    if (format === 'pdf') await printImage(image, `alerte-vent-${stamp}`);
-    else await deliver(image, `alerte-vent-${stamp}.png`, 'image/png');
+    const base = report.station ? 'livemeteo' : 'alerte-vent';
+    if (format === 'pdf') await printImage(image, `${base}-${stamp}`);
+    else await deliver(image, `${base}-${stamp}.png`, 'image/png');
     return;
   }
   const text = [

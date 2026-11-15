@@ -7,6 +7,8 @@ import { go } from '../../shell/router.ts';
 import { domainActions } from '../../shell/topbar/tabDisplays.ts';
 import { START_SVG } from '../../shell/topbar/tabIcons.ts';
 
+import { ListSign } from './ListSign.tsx';
+
 /**
  * START: a touch starts the track; a long press opens Mes traces.
  * @returns The button.
@@ -27,6 +29,8 @@ export function StartButton() {
       {...press.handlers}
     >
       <span className="rail-icon">{markupToReact(START_SVG)}</span>
+      {/* Its long press opens Mes traces */}
+      <ListSign />
     </Button>
   );
 }
