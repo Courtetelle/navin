@@ -10,7 +10,11 @@
  */
 
 /** The only hosts the relay asks. */
-const HOSTS = new Set(['aviationweather.gov', 'www.ndbc.noaa.gov']);
+const HOSTS = new Set([
+  'aviationweather.gov',
+  'www.ndbc.noaa.gov',
+  'vrijeme.hr',
+]);
 
 /** The only pages allowed to use the relay. */
 const ORIGINS = ['https://courtetelle.github.io', 'http://localhost:11106'];

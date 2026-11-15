@@ -1,11 +1,14 @@
 import { expect, test } from 'vitest';
 
 import {
+  DHMZ,
   IPMA,
+  dhmzReadingsOf,
   SMHI,
   ipmaReading,
   smhiReadingsOf,
   touches,
+  zagrebTime,
 } from '../moreStations.ts';
 
 const NOW = Date.UTC(2026, 10, 15, 13, 30);
@@ -61,4 +64,23 @@ test('the SMHI stations: speed, direction and gusts joined by station', () => {
   expect(reading?.avg).toBeCloseTo(6.2 * KN);
   expect(reading?.gust).toBeCloseTo(11.5 * KN);
   expect(reading?.dir).toBe(190);
+});
+
+test('the DHMZ stations of Croatia, their hour of Zagreb', () => {
+  expect(new Date(zagrebTime('15.11.2026', 17)).toISOString()).toBe(
+    '2026-11-15T16:00:00.000Z',
+  );
+  const xml =
+    '<Hrvatska><DatumTermin><Datum>15.11.2026</Datum><Termin>17</Termin></DatumTermin><Grad autom="0"><GradIme>Split-aerodrom</GradIme><Lat>43.539</Lat><Lon>16.298 </Lon><Podatci><Temp> 14.1</Temp><Tlak>1012.3</Tlak><VjetarSmjer>NE</VjetarSmjer><VjetarBrzina> 5.8</VjetarBrzina></Podatci></Grad></Hrvatska>';
+  const [reading] = dhmzReadingsOf(
+    xml,
+    { lat: 43.51, lon: 16.44 },
+    60,
+    5,
+    Date.UTC(2026, 10, 15, 16, 40),
+  );
+  expect(reading?.net).toBe(DHMZ);
+  expect(reading?.avg).toBeCloseTo(5.8 * KN);
+  expect(reading?.dir).toBe(45);
+  expect(reading?.baro).toBe(1012.3);
 });

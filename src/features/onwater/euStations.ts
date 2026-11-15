@@ -3,6 +3,7 @@ import { state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 import {
+  dhmzReadings,
   dmiReadings,
   fmiReadings,
   ipmaReadings,
@@ -1252,6 +1253,7 @@ export async function euReadings(
     dmiReadings(center, radius, most).catch(() => []),
     smhiReadings(center, radius, most).catch(() => []),
     fmiReadings(center, radius, most).catch(() => []),
+    dhmzReadings(center, radius, most, keys.relay ?? '').catch(() => []),
   ]);
   return lists.flat();
 }

@@ -578,3 +578,132 @@ export async function fmiReadings(
   );
   return fmiReadingsOf(xml, center, radius, most, Date.now());
 }
+
+/* ------------------------------------------------- Croatia, by the relay */
+
+export const DHMZ = 'DHMZ (Croatie)';
+const CROATIA: Box = [42.3, 13.4, 46.6, 19.5];
+const DHMZ_XML = 'https://vrijeme.hr/hrvatska_n.xml';
+/** Hourly, published a little after the hour. */
+const DHMZ_MAX_AGE_MS = 2 * 3_600_000;
+const POINTS_16: Readonly<Record<string, number>> = {
+  N: 0,
+  NE: 45,
+  E: 90,
+  SE: 135,
+  S: 180,
+  SW: 225,
+  W: 270,
+  NW: 315,
+};
+
+/**
+ * The time of a local hour of Zagreb, in epoch ms.
+ * @param day - `15.11.2026`.
+ * @param hour - The hour, local time of Croatia.
+ * @returns Epoch milliseconds, NaN when unreadable.
+ */
+export function zagrebTime(day: string, hour: number): number {
+  const [d, m, y] = day.split('.').map(Number);
+  if (!d || !m || !y || !Number.isFinite(hour)) return Number.NaN;
+  const guess = Date.UTC(y, m - 1, d, hour);
+  // The offset of Zagreb at that moment (+1 h in winter, +2 h in summer).
+  const local = new Date(guess).toLocaleString('en-US', {
+    timeZone: 'Europe/Zagreb',
+    hour12: false,
+    hour: '2-digit',
+  });
+  const offset = (Number(local) - hour + 24) % 24;
+  return guess - offset * 3_600_000;
+}
+
+function field(text: string, name: string): string {
+  return (
+    new RegExp(`<${name}>([^<]*)</${name}>`, 'u').exec(text)?.[1]?.trim() ?? ''
+  );
+}
+
+/**
+ * The stations of the DHMZ reply (all Croatia, the coast and the islands).
+ * @param xml - The reply.
+ * @param center - Place searched around.
+ * @param radius - Radius in km.
+ * @param most - Stations kept at most.
+ * @param now - Epoch milliseconds.
+ * @returns The readings.
+ */
+export function dhmzReadingsOf(
+  xml: string,
+  center: { lat: number; lon: number },
+  radius: number,
+  most: number,
+  now: number,
+): WindReading[] {
+  const t = zagrebTime(field(xml, 'Datum'), Number(field(xml, 'Termin')));
+  if (!fresh(t, now, DHMZ_MAX_AGE_MS)) return [];
+  const stations = xml
+    .split('<Grad ')
+    .slice(1)
+    .flatMap((part) => {
+      const name = field(part, 'GradIme');
+      const lat = Number(field(part, 'Lat'));
+      const lon = Number(field(part, 'Lon'));
+      const speed = Number(field(part, 'VjetarBrzina'));
+      if (!name || !Number.isFinite(lat) || !Number.isFinite(lon)) return [];
+      if (!Number.isFinite(speed) || field(part, 'VjetarBrzina') === '') {
+        return [];
+      }
+      const baro = Number(field(part, 'Tlak'));
+      const air = Number(field(part, 'Temp'));
+      return [
+        {
+          id: name,
+          name,
+          lat,
+          lon,
+          speed,
+          dir: POINTS_16[field(part, 'VjetarSmjer')] ?? null,
+          baro: Number.isFinite(baro) && baro > 800 ? baro : null,
+          air: Number.isFinite(air) && field(part, 'Temp') !== '-' ? air : null,
+        },
+      ];
+    });
+  return nearStations(stations, center, radius, most).map(
+    ({ station, km }) => ({
+      name: station.name,
+      km,
+      t,
+      avg: knots(station.speed) ?? 0,
+      gust: null,
+      dir: station.dir,
+      air: station.air,
+      baro: station.baro,
+      net: DHMZ,
+      id: station.id,
+      lat: station.lat,
+      lon: station.lon,
+    }),
+  );
+}
+
+/**
+ * Measured wind of the DHMZ stations (Croatia), through the relay: their
+ * server does not let a page read it.
+ * @param center - Place searched around.
+ * @param radius - Radius in km.
+ * @param most - Stations kept at most.
+ * @param relay - The address of the relay; nothing without it.
+ * @returns The readings, empty far from Croatia.
+ */
+export async function dhmzReadings(
+  center: { lat: number; lon: number },
+  radius: number,
+  most: number,
+  relay: string,
+): Promise<WindReading[]> {
+  if (!relay || !touches(center, radius, CROATIA)) return [];
+  const xml = await recent('dhmz', () =>
+    textOf(`${relay.replace(/\/$/u, '')}/?url=${encodeURIComponent(DHMZ_XML)}`),
+  );
+  return dhmzReadingsOf(xml, center, radius, most, Date.now());
+}
