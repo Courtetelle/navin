@@ -95,6 +95,39 @@ export function mergeMarks(list: unknown): void {
   for (const mark of data.marks.value) highest = Math.max(highest, mark.n || 0);
   store.set('ldb.markSeq', highest);
   saveMarks();
+  // Marks made on another device carry the same numbers: they take new ones.
+  renumberDuplicateMarks();
+}
+
+/**
+ * Two marks with the same number (`M009` made on two devices, then a
+ * backup merged): the first saved keeps it, the others take the next free
+ * numbers. A mark renamed with a text of its own is left as it is.
+ * @returns How many marks took a new number.
+ */
+export function renumberDuplicateMarks(): number {
+  const seen = new Set<string>();
+  const again: string[] = [];
+  const byTime = data.marks.value.toSorted((a, b) =>
+    (a.at || '').localeCompare(b.at || ''),
+  );
+  for (const mark of byTime) {
+    if (!/^M\d+$/u.test(mark.name.trim())) continue;
+    if (seen.has(mark.name.trim())) again.push(mark.id);
+    else seen.add(mark.name.trim());
+  }
+  if (again.length === 0) return 0;
+  updateMarks((marks) => {
+    for (const id of again) {
+      const mark = marks.find((one) => one.id === id);
+      if (!mark) continue;
+      const number = nextMarkNumber(marks);
+      mark.n = number;
+      mark.name = markName(number);
+    }
+  });
+  store.set('ldb.markSeq', nextMarkNumber(data.marks.value) - 1);
+  return again.length;
 }
 
 /**

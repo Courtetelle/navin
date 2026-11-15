@@ -62,6 +62,8 @@ const FRESH_FIX_MS = 30_000;
 
 /** The pin has its fixed place in the left column. */
 const PIN_KEY = 'act:point';
+/** Time for the map to open before it comes back on the boat. */
+const MAP_BACK_MS = 500;
 /** How long the pin stays pressed in after a touch. */
 const PRESSED_MS = 1500;
 
@@ -372,9 +374,19 @@ function PinButton() {
       ]
         .filter(Boolean)
         .join(' ')}
-      aria-label={tr('Point ici · appui long : mes marques')}
+      aria-label={tr(
+        here ? 'Retour à la carte' : 'Point ici · appui long : mes marques',
+      )}
       aria-pressed={pressed > 0}
       onClick={() => {
+        // In « Mes marques », a touch saves nothing: back to the map, on the
+        // boat at its usual zoom during a track.
+        if (here) {
+          buzz();
+          go('tracker');
+          if (state.view.tracking.value) setTimeout(boatArrowTap, MAP_BACK_MS);
+          return;
+        }
         setPressed(Date.now());
         run(PIN_KEY);
       }}

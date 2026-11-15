@@ -6,6 +6,7 @@ import {
   applyKeyLink,
   applySkipperMenus,
   followSettingsElsewhere,
+  renumberDuplicateMarks,
   state,
 } from '../state/index.ts';
 import { attachErrorLog } from '../storage/errLog.ts';
@@ -67,6 +68,8 @@ function boot(): void {
   followSettingsElsewhere();
   // The menus the skipper sent, made those of the app (once).
   applySkipperMenus();
+  // Two marks with one number (made on two devices): new numbers.
+  renumberDuplicateMarks();
   // Opened by the camera on the QR code of a key: the key is saved.
   const keyCame = applyKeyLink();
   followScreenGap();
