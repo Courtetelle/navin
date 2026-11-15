@@ -11435,8 +11435,9 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   }
 }
 @media (orientation: portrait) {
-  /* The bubbles above the two rows at the bottom */
-  html body #toast {
+  /* The bubbles above the two rows at the bottom (not one sent to the top:
+     it would get a top and a bottom, and stretch over the screen) */
+  html body #toast:not(.toast-top) {
     bottom: calc(var(--rb-bottom) + 2 * var(--rb-step) + 8px) !important;
   }
 }
