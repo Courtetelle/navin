@@ -91,7 +91,8 @@ export function StationKeyRow({ station }: { station: StationKey }) {
             className="text"
             id={id}
             ref={input}
-            type="text"
+            // The key is a secret: pasted, never shown in clear.
+            type="password"
             autoComplete="off"
             autoCapitalize="off"
             spellCheck={false}

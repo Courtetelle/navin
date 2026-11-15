@@ -65,7 +65,8 @@ export function MfKeyRow() {
             className="text"
             id="mfKey"
             ref={input}
-            type="text"
+            // The key is a secret: pasted, never shown in clear.
+            type="password"
             autoComplete="off"
             autoCapitalize="off"
             spellCheck={false}
