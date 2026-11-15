@@ -11,7 +11,6 @@ import { state, toast, updateSettings } from '../../state/index.ts';
 import { KeyAccount } from './KeyAccount.tsx';
 import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
-import { KeyScan } from './KeyScan.tsx';
 import { metarReadings } from './euStations.ts';
 
 /** A place with airports around, to try the relay. */
@@ -89,7 +88,6 @@ export function RelayRow() {
         ) : null}
       </form>
       <KeyQr id="relay" value={relay} />
-      <KeyScan only="relay" />
       <Button
         type="button"
         className="btn key-guide-open relay-code"

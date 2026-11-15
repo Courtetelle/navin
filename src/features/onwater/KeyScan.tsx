@@ -42,7 +42,7 @@ function keyOf(text: string): KeyLinkId | null {
  * @returns The words.
  */
 function label(all: boolean, only: KeyLinkId | undefined): string {
-  if (all) return '📥 Importer toutes les clés et le relais';
+  if (all) return '📥 Importer les clés et relais disponibles';
   if (only === 'relay') return '📥 Importer l’adresse du relais';
   return only
     ? `📥 Importer la clé ${KEY_LINKS[only].name}`
@@ -157,7 +157,7 @@ export function KeyScan({
         {label(all, only)}
         <small>
           {all
-            ? 'les codes de « Partager toutes les clés et le relais », l’un après l’autre'
+            ? 'NavIn range chaque clé et le relais à leur place'
             : 'l’appareil photo de NavIn lit le QR code d’un autre appareil'}
         </small>
       </Button>

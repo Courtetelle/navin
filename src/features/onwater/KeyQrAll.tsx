@@ -79,9 +79,9 @@ export function KeyQrAll() {
           </svg>
           <figcaption>
             Sur l’autre appareil, dans NavIn : Réglages › Clés météo › 📥
-            Importer toutes les clés et le relais, et viser l’écran : les codes
-            passent l’un après l’autre, chaque clé s’enregistre. Aucun réseau
-            n’est utilisé.
+            Importer les clés et relais disponibles, et viser l’écran : les
+            codes passent l’un après l’autre, chaque clé s’enregistre. Aucun
+            réseau n’est utilisé.
           </figcaption>
         </figure>
       ) : null}

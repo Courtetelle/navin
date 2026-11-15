@@ -80,16 +80,6 @@ function SettingsSection({ section, title, children }: SettingsSectionProps) {
   if (shown !== section) return null;
   return (
     <>
-      <PageBack
-        label="◀ Réglages"
-        data-go="settings"
-        onClick={() => {
-          buzz();
-          go('settings');
-        }}
-      >
-        {tr('◀ Réglages')}
-      </PageBack>
       <TitleInNav>
         <h1>{tr(title)}</h1>
       </TitleInNav>
@@ -204,6 +194,19 @@ export function SettingsPage({ from, arg }: PageProps) {
           <h1>{tr('Réglages')}</h1>
         </TitleInNav>
       )}
+      {section ? (
+        // At the top of the page: it joins the fixed title line.
+        <PageBack
+          label="◀ Réglages"
+          data-go="settings"
+          onClick={() => {
+            buzz();
+            go('settings');
+          }}
+        >
+          {tr('◀ Réglages')}
+        </PageBack>
+      ) : null}
       <ShownSection.Provider value={section}>
         <div className={section ? 'set-one' : 'set-secs set-menu'}>
           <SettingsSection section="zone" title="🧭 Zone et écran">
