@@ -12589,3 +12589,23 @@ html body .lx-modal .ck-ask-box {
 .live-tbl td {
   overflow-wrap: anywhere;
 }
+
+/* A key ended or refused: what to do, at the top of Clés météo */
+.key-health {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #fde8e8;
+  color: #0b1220;
+  border: 2px solid #d0021b;
+}
+.key-health p {
+  margin: 0;
+}
+:root[data-theme='night'] .key-health {
+  background: #2a0000;
+  color: var(--fg);
+  border-color: var(--fg);
+}

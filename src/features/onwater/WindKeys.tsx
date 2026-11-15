@@ -1,3 +1,4 @@
+import { KeyHealthNotice } from './KeyHealthNotice.tsx';
 import { KeyQrAll } from './KeyQrAll.tsx';
 import { KeyScan } from './KeyScan.tsx';
 import { MfKeyRow } from './MfKeyRow.tsx';
@@ -14,6 +15,7 @@ import { AEMET_KEY, MET_OFFICE_KEY } from './stationKeys.ts';
 export function WindKeys() {
   return (
     <div className="wind-alert wind-keys">
+      <KeyHealthNotice />
       <div className="key-all">
         <KeyQrAll />
         <KeyScan all />

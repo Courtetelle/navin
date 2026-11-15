@@ -41,6 +41,9 @@ export function startWindWatch(): void {
       },
     );
   });
+  // Once a day, as long as it is not solved: a key ended or refused.
+  setTimeout(checkKeys, 45_000);
+  setInterval(checkKeys, 3_600_000);
   // Once a week: has SOCIB changed its instruments?
   setTimeout(() => {
     void import('./socibWatch.ts').then(({ checkSocib }) => checkSocib());
@@ -76,6 +79,12 @@ const ZONE_SETTLE_MS = 1500;
 
 /** The stations around the boat are recorded this often. */
 const RECORD_EVERY_MS = 10 * 60_000;
+
+function checkKeys(): void {
+  void import('./keyHealth.ts')
+    .then(({ dailyKeyCheck }) => dailyKeyCheck())
+    .catch(() => undefined);
+}
 
 function record(): void {
   void import('./liveRecorder.ts')
