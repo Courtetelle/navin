@@ -62,11 +62,13 @@ export function prepStart(): void {
     return;
   }
   const lake = navZone() === 'lac';
+  // Always the three choices first (Entraînement, Location, Invitation),
+  // at sea as on a lake.
   const prep: PrepFlow = {
-    step: lake ? 0 : 1,
-    reach: lake ? 0 : 1,
+    step: 0,
+    reach: 0,
     type: lake ? 'lac' : 'mer',
-    sub: lake ? 'purpose' : null,
+    sub: 'purpose',
     duree: null,
     boatId: null,
     boatName: '',
@@ -77,14 +79,11 @@ export function prepStart(): void {
   go('prep');
 }
 
-let backToMenu = false;
-
 /**
  * « Type de sortie » of the PréP menu: the steps up to the choice of the
  * crew, then back to the menu instead of the check-in.
  */
 export function prepFromMenu(): void {
-  backToMenu = true;
   prepStart();
 }
 
@@ -108,13 +107,10 @@ export function prepGo(step: number, browse = false): void {
     go('crew');
     return;
   }
-  if (prep?.step === 4 && backToMenu) {
-    backToMenu = false;
+  // The check-in is no longer a step of the outing: it has its own entry
+  // in the PréP menu, where the steps end.
+  if (prep?.step === 4) {
     go('prepmenu');
-    return;
-  }
-  if (prep?.step === 4 && state.data.cruise.value) {
-    go('checklist', 'dep');
     return;
   }
   go('prep');

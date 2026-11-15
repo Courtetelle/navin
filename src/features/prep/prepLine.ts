@@ -1,7 +1,6 @@
 import { PREP_PURPOSES } from '../../model/modes.ts';
 import type { Cruise } from '../../model/types.ts';
 import { boatById, crewSetName, state } from '../../state/index.ts';
-import { checkItems, checkLeft } from '../checklists/index.ts';
 
 import { prepPathValid } from './prepPaths.ts';
 import type { PrepFlow } from './prepTypes.ts';
@@ -83,7 +82,15 @@ export function prepLineItems(
       status: prep.purpose ? 'part' : '',
     });
   } else {
-    items.push(dureeItem(prep));
+    // At sea too the three choices first, then the length of the outing.
+    items.push(
+      {
+        text: prep.purpose || 'Sortie',
+        target: 0,
+        status: prep.purpose ? 'part' : '',
+      },
+      dureeItem(prep),
+    );
   }
   const boatName = prepBoatName(prep);
   items.push({
@@ -92,11 +99,8 @@ export function prepLineItems(
     status: boatName ? 'ok' : '',
   });
   if (lake && prep.purpose === 'Location') items.push(tarifItem(prep, cruise));
-  items.push(crewItem(prep, cruise), {
-    text: 'Check-in',
-    target: 4,
-    status: checkInStatus(prep, cruise),
-  });
+  // The check-in has its own entry in the PréP menu.
+  items.push(crewItem(prep, cruise));
   const shown = prep.step === 2 && prep.sub === 'tarif' ? '2t' : prep.step;
   return items.map((item) => ({ ...item, current: item.target === shown }));
 }
@@ -149,16 +153,4 @@ function crewItem(
   if (name) status = 'ok';
   else if (prep.crewDraft?.crew.length) status = 'part';
   return { text: name || 'Équipage', target: 3, status };
-}
-
-function checkInStatus(
-  prep: PrepFlow,
-  cruise: Cruise | null,
-): PrepLineItem['status'] {
-  if (!cruise || prep.fresh) return '';
-  const all = checkItems('dep').length;
-  const left = checkLeft('dep').length;
-  if (!all) return '';
-  if (!left) return 'ok';
-  return left < all ? 'part' : '';
 }

@@ -23,6 +23,7 @@ import { prepFlow, updatePrepFlow } from './prepTypes.ts';
 export function pickPurpose(purpose: string): void {
   buzz();
   const path = prepPathGet(purpose);
+  const type = prepFlow()?.type;
   updatePrepFlow((prep) => {
     const { type } = prep;
     for (const key of PREP_PATH_KEYS) Reflect.deleteProperty(prep, key);
@@ -41,7 +42,8 @@ export function pickPurpose(purpose: string): void {
     }
   });
   if (!path) {
-    prepGo(2);
+    // At sea the length of the outing comes next; on a lake, the boat.
+    prepGo(type === 'mer' ? 1 : 2);
     return;
   }
   if (

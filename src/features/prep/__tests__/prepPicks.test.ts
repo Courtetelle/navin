@@ -142,7 +142,7 @@ test('a crew composed becomes a new composition', () => {
   expect(state.data.cruise.value?.crew).toHaveLength(2);
   expect(prepFlow()?.sub).toBeNull();
   expect(prepFlow()?.crewDraft).toBeNull();
-  expect(navigation.value.view).toBe('checklist');
+  expect(navigation.value.view).toBe('prepmenu');
 });
 
 test('adding a person opens the crew page with the crew on board', () => {

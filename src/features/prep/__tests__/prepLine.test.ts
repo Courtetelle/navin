@@ -46,7 +46,6 @@ test('line of a fresh lake PréP', () => {
     { text: 'Sortie', target: 0, status: '', current: true },
     { text: 'Bateau', target: 2, status: '', current: false },
     { text: 'Équipage', target: 3, status: '', current: false },
-    { text: 'Check-in', target: 4, status: '', current: false },
   ]);
 });
 
@@ -55,8 +54,9 @@ test('line of a sea PréP shows the duration and the boat typed', () => {
     prepLineItems(
       { step: 2, type: 'mer', duree: 'croisiere', boatName: 'Bronze Kiss' },
       null,
-    ).slice(0, 2),
+    ).slice(0, 3),
   ).toStrictEqual([
+    { text: 'Sortie', target: 0, status: '', current: false },
     { text: 'Croisière', target: 1, status: 'ok', current: false },
     { text: 'Bronze Kiss', target: 2, status: 'ok', current: true },
   ]);

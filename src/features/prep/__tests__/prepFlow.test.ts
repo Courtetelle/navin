@@ -43,12 +43,12 @@ test('on a lake the PréP opens on the three paths', () => {
   expect(navigation.value.view).toBe('prep');
 });
 
-test('at sea the PréP opens on the duration', () => {
+test('at sea too the PréP opens on its three choices', () => {
   setZoneSim('mer');
   prepStart();
   expect(prepFlow()?.type).toBe('mer');
-  expect(prepFlow()?.step).toBe(1);
-  expect(prepFlow()?.reach).toBe(1);
+  expect(prepFlow()?.step).toBe(0);
+  expect(prepFlow()?.sub).toBe('purpose');
 });
 
 test('a new PréP starts from nothing, even with a quick navigation open', () => {
@@ -102,14 +102,11 @@ test('prepGo stays inside the steps', () => {
   expect(prepFlow()?.step).toBe(0);
 });
 
-test('step 4 opens the check-in once a navigation is open', () => {
+test('after the crew, back to the PréP menu (the check-in has its own entry)', () => {
   setPrep({ step: 3, reach: 3 });
-  prepGo(4);
-  expect(navigation.value.view).toBe('prep');
   setCruise(blankCruise('Test', null));
   prepGo(4);
-  expect(navigation.value.view).toBe('checklist');
-  expect(navigation.value.arg).toBe('dep');
+  expect(navigation.value.view).toBe('prepmenu');
 });
 
 test('the next step of a lake skips the duration', () => {
