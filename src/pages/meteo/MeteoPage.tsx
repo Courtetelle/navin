@@ -225,7 +225,7 @@ export function MeteoPage() {
               {tr(
                 config.mfKey
                   ? 'Aucune station ne mesure le vent ici : élargissez le rayon ou déplacez la carte.'
-                  : 'Aucune station ne mesure le vent ici : élargissez le rayon, déplacez la carte, ou ajoutez la clé Météo-France dans les réglages (stations françaises).',
+                  : 'Aucune station ne mesure le vent ici : élargissez le rayon, déplacez la carte, ou ajoutez la clé Météo-France dans Réglages › Clés météo (stations françaises).',
               )}
             </p>
           ) : null}
@@ -241,14 +241,14 @@ export function MeteoPage() {
           />
           <HelpText>
             Vent mesuré maintenant par les stations MeteoSwiss, les balises
-            OpenWindMap et les stations Météo-France (avec la clé des réglages).
-            Chiffre en gras : vent moyen ; en petit : rafales ; flèche : sens
-            vers lequel souffle le vent. Couleur des alertes de vent ; une
-            alerte prévue montre la zone du modèle dans cette couleur. S’ouvre
-            là où montrait la carte de NavIn ; « Autour du bateau » revient au
-            bateau. Toucher une station pour ses mesures en direct ; déplacer la
-            carte puis « Chercher au centre de la carte » pour d’autres
-            stations. Mise à jour toutes les 2 min.
+            OpenWindMap et les stations Météo-France (avec la clé de Réglages ›
+            Clés météo). Chiffre en gras : vent moyen ; en petit : rafales ;
+            flèche : sens vers lequel souffle le vent. Couleur des alertes de
+            vent ; une alerte prévue montre la zone du modèle dans cette
+            couleur. S’ouvre là où montrait la carte de NavIn ; « Autour du
+            bateau » revient au bateau. Toucher une station pour ses mesures en
+            direct ; déplacer la carte puis « Chercher au centre de la carte »
+            pour d’autres stations. Mise à jour toutes les 2 min.
           </HelpText>
         </div>
       </div>

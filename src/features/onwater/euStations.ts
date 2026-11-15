@@ -549,6 +549,19 @@ export const SOCIB_STATIONS: readonly SocibStation[] = (
   path: `mooring/weather_station/${folder}/L1/${file}_L1_latest.nc`,
 }));
 
+/** Where NavIn keeps the list of SOCIB instruments it made itself. */
+export const SOCIB_LIST_KEY = 'ldb.socibList';
+
+/**
+ * The SOCIB instruments read: the list NavIn made itself from the SOCIB
+ * catalogue (once a week), else the one of 15.11.2026.
+ * @returns The instruments.
+ */
+export function socibStations(): readonly SocibStation[] {
+  const made = store.get<SocibStation[] | null>(SOCIB_LIST_KEY, null);
+  return Array.isArray(made) && made.length > 0 ? made : SOCIB_STATIONS;
+}
+
 const SOCIB_FIELDS = ['time', 'WIN_SPE', 'WIN_SPE_GUS', 'WIN_DIR', 'AIR_PRE'];
 
 /**
@@ -564,7 +577,7 @@ export async function socibReadings(
   most: number,
 ): Promise<WindReading[]> {
   if (distKm(center.lat, center.lon, 39.5, 2.9) > radius + 250) return [];
-  const near = nearStations(SOCIB_STATIONS, center, radius, most);
+  const near = nearStations(socibStations(), center, radius, most);
   const now = Date.now();
   const readings = await inBatches(near, async ({ station, km }) => {
     try {

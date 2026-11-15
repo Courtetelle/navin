@@ -6,7 +6,7 @@
  *
  * Install: dash.cloudflare.com › Workers & Pages › Create › Worker, paste
  * this file, Deploy; then copy its address (https://….workers.dev) into
- * NavIn › Réglages › Alertes › Relais des METAR et bouées.
+ * NavIn › Réglages › Clés météo › Relais des METAR et bouées.
  */
 
 /** The only hosts the relay asks. */

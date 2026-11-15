@@ -6,7 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { installPrompt } from '../../features/data/install.ts';
-import { WindAlert, windAlertClick } from '../../features/onwater/index.ts';
+import { WindKeys, windAlertClick } from '../../features/onwater/index.ts';
 import { ShareThemePicker } from '../../features/publish/index.ts';
 import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -182,9 +182,10 @@ export function SettingsPage({ from }: PageProps) {
           <PrefillRow />
           <WeatherRow />
         </SettingsSection>
-        <SettingsSection section="alert" title="⚠️ Alertes">
-          <h3>{tr('Alertes de vent')}</h3>
-          <WindAlert noTest />
+        <SettingsSection section="keys" title="🔑 Clés météo">
+          <WindKeys />
+        </SettingsSection>
+        <SettingsSection section="alert" title="⚠️ Alerte de profondeur">
           <DepthSet />
         </SettingsSection>
         <SettingsSection section="share" title="📤 Partages">

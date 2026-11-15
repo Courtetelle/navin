@@ -673,7 +673,7 @@ function RailButton({
           () => run('weather'),
           () =>
             state.view.currentView.value === 'weather' &&
-            state.view.viewArg.value !== 'forecast',
+            !state.view.viewArg.value,
         );
       }}
       {...press.handlers}

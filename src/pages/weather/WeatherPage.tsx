@@ -5,6 +5,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { LinkButton } from '../../components/shared/EditableLinks.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
+import { WindAlert } from '../../features/onwater/index.ts';
 import type { Forecast } from '../../features/tracking/index.ts';
 import { wxNext } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -62,7 +63,44 @@ const HOURS = 12;
  * @returns The screen content.
  */
 export function WeatherPage({ arg }: PageProps) {
-  return arg === FORECAST ? <ForecastPage /> : <WeatherMenu />;
+  if (arg === FORECAST) return <ForecastPage />;
+  if (arg === ALERTS) return <AlertsPage />;
+  return <WeatherMenu />;
+}
+
+/** Argument of the screen for the wind alerts and the keys. */
+const ALERTS = 'alerts';
+
+function openAlerts() {
+  buzz();
+  go('weather', ALERTS);
+}
+
+/**
+ * The wind alerts of the Météo menu: their switch and thresholds, the keys
+ * of Météo-France, AEMET and the Met Office, the relay, SOCIB.
+ * @returns The screen content.
+ */
+function AlertsPage() {
+  const tr = useTr();
+  return (
+    <>
+      <PageBack
+        label="◀ Météo"
+        data-go="weather"
+        onClick={() => {
+          buzz();
+          go('weather');
+        }}
+      >
+        {tr('◀ Météo')}
+      </PageBack>
+      <TitleInNav>
+        <h1>{tr('🔔 Alertes de vent')}</h1>
+      </TitleInNav>
+      <WindAlert noTest />
+    </>
+  );
 }
 
 /**
@@ -123,6 +161,19 @@ function WeatherMenu() {
               {tr(
                 'le vent mesuré sur la carte affichée (appui long sur Météo)',
               )}
+            </small>
+          </span>
+        </Button>
+        <Button
+          className="btn big wx-entry"
+          data-wx="alerts"
+          onClick={openAlerts}
+        >
+          <span className="wx-entry-ico">🔔</span>
+          <span>
+            <b>{tr('Alertes de vent')}</b>
+            <small>
+              {tr('oui ou non, rafales ou vent moyen, échelle des couleurs')}
             </small>
           </span>
         </Button>

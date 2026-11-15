@@ -92,6 +92,7 @@ export { usePhotoUrl } from './usePhotoUrl.ts';
 export { wxSummary } from './weatherLogic.ts';
 export type { WeatherNow } from './weatherLogic.ts';
 export { WindAlert } from './WindAlert.tsx';
+export { WindKeys } from './WindKeys.tsx';
 export type { WindAlertProps } from './WindAlert.tsx';
 export { windAlertClick } from './windAlertClick.ts';
 export type { WindAlertAction } from './windAlertClick.ts';

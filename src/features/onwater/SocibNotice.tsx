@@ -12,9 +12,9 @@ import {
 } from './socibWatch.ts';
 
 /**
- * In Réglages › Alertes: SOCIB changed its instruments (NavIn looks once a
- * week); the list of NavIn is to be put up to date, « Vu » hides it until
- * another change.
+ * In Météo › Alertes de vent: SOCIB changed its instruments and NavIn made
+ * its list again by itself (once a week); « Vu » hides it until another
+ * change.
  * @returns The notice, or nothing.
  */
 export function SocibNotice() {
@@ -25,12 +25,12 @@ export function SocibNotice() {
   return (
     <div className="socib-notice" role="status">
       <p>
-        <b>{tr('⚠️ SOCIB (Baléares) a changé ses instruments')}</b>
+        <b>{tr('🔄 SOCIB (Baléares) : instruments mis à jour')}</b>
         <br />
         {tr(socibChangeText(watch))}
         <br />
         {tr(
-          'La liste des instruments de NavIn est à mettre à jour : demander à Claude de la refaire.',
+          'SOCIB a changé ses instruments : NavIn a refait seul sa liste, LiveMétéo et les alertes lisent la nouvelle.',
         )}
       </p>
       <Button
