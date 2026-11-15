@@ -241,14 +241,17 @@ export function MeteoPage() {
           />
           <HelpText>
             Vent mesuré maintenant par les stations MeteoSwiss, les balises
-            OpenWindMap et les stations Météo-France (avec la clé de Réglages ›
-            Clés météo). Chiffre en gras : vent moyen ; en petit : rafales ;
-            flèche : sens vers lequel souffle le vent. Couleur des alertes de
-            vent ; une alerte prévue montre la zone du modèle dans cette
-            couleur. S’ouvre là où montrait la carte de NavIn ; « Autour du
-            bateau » revient au bateau. Toucher une station pour ses mesures en
-            direct ; déplacer la carte puis « Chercher au centre de la carte »
-            pour d’autres stations. Mise à jour toutes les 2 min.
+            OpenWindMap, Météo-France, ItaliaMeteo, Puertos del Estado, SOCIB,
+            AEMET, IPMA (Portugal), DMI (Danemark), SMHI (Suède), FMI
+            (Finlande), le Met Office, les aéroports (METAR) et les bouées NOAA
+            (clés et relais dans Réglages › Clés météo). Chiffre en gras : vent
+            moyen ; en petit : rafales ; flèche : sens vers lequel souffle le
+            vent. Couleur des alertes de vent ; une alerte prévue montre la zone
+            du modèle dans cette couleur. S’ouvre là où montrait la carte de
+            NavIn ; « Autour du bateau » revient au bateau. Toucher une station
+            pour ses mesures en direct ; déplacer la carte puis « Chercher au
+            centre de la carte » pour d’autres stations. Mise à jour toutes les
+            2 min.
           </HelpText>
         </div>
       </div>

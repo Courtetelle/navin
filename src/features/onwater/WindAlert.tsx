@@ -91,13 +91,15 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
       <BoxHelp keep={keep} nextIsRow={!noTest}>
         Vent mesuré d’abord : stations MeteoSwiss en Suisse, ailleurs balises
         OpenWindMap, stations Météo-France (avec une clé), ItaliaMeteo en
-        Italie, Puertos del Estado et SOCIB en Espagne et aux Baléares, AEMET et
-        Met Office avec leur clé. Sans station à moins de 30 km, modèle de
-        prévision le plus fin de la région à la position du bateau, signalé «
-        PRÉVISION » dans l’alerte. Deux bips et deux flashs de couleur avec le
-        vent exact (nœuds et Beaufort) à chaque nouveau degré Beaufort dès 4 Bf
-        (11 nd), de plus en plus aigus et forts. Rappel toutes les 15 min. Appli
-        ouverte et écran allumé seulement.
+        Italie, Puertos del Estado et SOCIB en Espagne et aux Baléares, IPMA au
+        Portugal, DMI au Danemark, SMHI en Suède, FMI en Finlande, AEMET et Met
+        Office avec leur clé, aéroports (METAR) et bouées NOAA par le relais.
+        Sans station à moins de 30 km, modèle de prévision le plus fin de la
+        région à la position du bateau, signalé « PRÉVISION » dans l’alerte.
+        Deux bips et deux flashs de couleur avec le vent exact (nœuds et
+        Beaufort) à chaque nouveau degré Beaufort dès 4 Bf (11 nd), de plus en
+        plus aigus et forts. Rappel toutes les 15 min. Appli ouverte et écran
+        allumé seulement.
       </BoxHelp>
       {noTest ? <SocibNotice /> : <TestRow keep={keep} />}
     </div>

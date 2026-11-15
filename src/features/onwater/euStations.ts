@@ -2,6 +2,12 @@ import { distKm } from '../../lib/geo.ts';
 import { state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
+import {
+  dmiReadings,
+  fmiReadings,
+  ipmaReadings,
+  smhiReadings,
+} from './moreStations.ts';
 import type { WindReading } from './windTypes.ts';
 
 /** The networks of measured wind around Italy, Spain and Britain. */
@@ -1242,6 +1248,10 @@ export async function euReadings(
     metOfficeReadings(center, radius, keys.metOffice ?? '').catch(() => []),
     metarReadings(center, radius, most, keys.relay ?? '').catch(() => []),
     ndbcReadings(center, radius, most, keys.relay ?? '').catch(() => []),
+    ipmaReadings(center, radius, most).catch(() => []),
+    dmiReadings(center, radius, most).catch(() => []),
+    smhiReadings(center, radius, most).catch(() => []),
+    fmiReadings(center, radius, most).catch(() => []),
   ]);
   return lists.flat();
 }

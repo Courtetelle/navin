@@ -5,6 +5,7 @@ export {
   contextPlace,
   entryColor,
   inSwissArea,
+  lakePlace,
   mapData,
   seaPlace,
   segments,
