@@ -76,7 +76,7 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
       'Source',
       forecast
         ? 'prévision d’un modèle, pas une mesure'
-        : (reading.net ?? 'MeteoSwiss'),
+        : `${reading.net ?? 'MeteoSwiss'}${reading.amateur ? ' · station amateur (Meteonetwork), pas un service officiel' : ''}`,
     ],
     forecast && reading.zoneKm
       ? [

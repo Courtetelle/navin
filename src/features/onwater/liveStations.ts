@@ -2,6 +2,7 @@ import { distKm } from '../../lib/geo.ts';
 
 import type { MfTally } from './coastStations.ts';
 import { mfReadings, owmReadings } from './coastStations.ts';
+import { euReadings } from './euStations.ts';
 import { smnNow, smnStations } from './externals.ts';
 import { rememberReadings } from './stationHistory.ts';
 import type { StationRow } from './windModels.ts';
@@ -24,7 +25,8 @@ export type LiveStation = WindReading & {
 
 /**
  * Every wind station measuring now around a place: MeteoSwiss, OpenWindMap,
- * Météo-France (with a key), the closest first.
+ * Météo-France (with a key), ItaliaMeteo, Puertos del Estado and SOCIB, the
+ * closest first.
  * @param center - Place searched around.
  * @param radius - Radius in km.
  * @param mfKey - Météo-France key, empty without one.
@@ -39,14 +41,15 @@ export async function liveStations(
   tally: MfTally | null = null,
   most: { open: number; mf: number } | null = null,
 ): Promise<LiveStation[]> {
-  const [swiss, beacons, french] = await Promise.all([
+  const [swiss, beacons, french, europe] = await Promise.all([
     smnLive(center, radius, most?.open ?? LIVE_MOST).catch(() => []),
     owmReadings(center, radius, most?.open ?? LIVE_MOST).catch(() => []),
     mfReadings(center, radius, mfKey, most?.mf ?? LIVE_MOST, tally).catch(
       () => [],
     ),
+    euReadings(center, radius, most?.open ?? LIVE_MOST).catch(() => []),
   ]);
-  const live = [...swiss, ...beacons, ...french]
+  const live = [...swiss, ...beacons, ...french, ...europe]
     .filter(isLive)
     .toSorted((a, b) => (a.km ?? 0) - (b.km ?? 0));
   void rememberReadings(live, Date.now());

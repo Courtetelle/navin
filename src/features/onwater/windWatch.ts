@@ -207,7 +207,8 @@ function showAlertPopup(
   const force = bft(Math.round(knots));
   const basis = config.basis === 'gust' ? 'en rafales' : 'de vent moyen';
   const forecast = meta.src === 'model';
-  const network = top.net ?? 'MeteoSwiss';
+  // A station of amateurs is said so: not an official measurement.
+  const network = `${top.net ?? 'MeteoSwiss'}${top.amateur ? ', station amateur' : ''}`;
   showWindAlert({
     bf: force,
     kn: `${Math.round(knots)} nd ${basis}${forecast ? ' PRÉVUS' : ''}`,

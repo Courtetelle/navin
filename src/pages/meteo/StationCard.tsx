@@ -75,7 +75,10 @@ export function StationCard({
   }
   rows.push(
     ['Mesuré', `${fmtTime(new Date(station.t))} · ${ageText(station.t, now)}`],
-    ['Réseau', station.net],
+    [
+      'Réseau',
+      station.amateur ? `${station.net} · station amateur` : station.net,
+    ],
     ['Distance', station.km == null ? '—' : `${Math.round(station.km)} km`],
   );
   return (

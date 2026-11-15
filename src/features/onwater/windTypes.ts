@@ -55,6 +55,12 @@ export interface WindReading {
    * @default undefined
    */
   baro?: number | null;
+  /**
+   * A station kept by amateurs, not by an official service (Meteonetwork in
+   * Italy): said in the alerts.
+   * @default undefined
+   */
+  amateur?: boolean;
 }
 
 /** Sea state from the marine model. */

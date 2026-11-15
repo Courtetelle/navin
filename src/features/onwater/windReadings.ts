@@ -2,6 +2,7 @@ import { distKm } from '../../lib/geo.ts';
 import type { Position } from '../../model/types.ts';
 
 import { mfReadings, owmReadings } from './coastStations.ts';
+import { euReadings } from './euStations.ts';
 import { smnNow, smnStations } from './externals.ts';
 import { METEO_SWISS } from './liveStations.ts';
 import { onLake } from './onLake.ts';
@@ -17,6 +18,9 @@ import {
   windRegion,
 } from './windModels.ts';
 import type { SeaState, WindMeta, WindReading } from './windTypes.ts';
+
+/** Stations read per network for an alert, the closest first. */
+const ALERT_MOST = 12;
 
 /** Result of a wind reading around the boat. */
 interface WindCheck {
@@ -83,11 +87,12 @@ export async function coastWind(
   config: WindConfig,
   position: Position,
 ): Promise<WindCheck | null> {
-  const [beacons, official] = await Promise.all([
+  const [beacons, official, europe] = await Promise.all([
     owmReadings(position, config.radius).catch(() => []),
     mfReadings(position, config.radius, config.mfKey).catch(() => []),
+    euReadings(position, config.radius, ALERT_MOST).catch(() => []),
   ]);
-  const readings = await nearWater([...official, ...beacons]);
+  const readings = await nearWater([...official, ...europe, ...beacons]);
   if (readings.length === 0) return null;
   const top = strongest(readings, config.basis);
   const sea = onLake() ? null : await seaStateAt(position);

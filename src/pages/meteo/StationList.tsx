@@ -54,7 +54,7 @@ export function StationList({
               <b>{station.name}</b>
               <small>
                 {tr(
-                  `${Math.round(station.avg)} nd${gust}${from} · ${station.net} · ${Math.round(station.km ?? 0)} km · ${ageText(station.t, now)}`,
+                  `${Math.round(station.avg)} nd${gust}${from} · ${station.net}${station.amateur ? ' (amateur)' : ''} · ${Math.round(station.km ?? 0)} km · ${ageText(station.t, now)}`,
                 )}
               </small>
             </span>
