@@ -8,6 +8,7 @@ import { buzz } from '../../lib/dom.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
 
 import { KeyAccount } from './KeyAccount.tsx';
+import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
 import type { WindReading } from './windTypes.ts';
 
@@ -78,45 +79,48 @@ export function StationKeyRow({ station }: { station: StationKey }) {
   };
   const id = `${station.account}Key`;
   return (
-    <form
-      className="field sea-center"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void save();
-      }}
-    >
-      <div className="cf">
-        <label htmlFor={id}>{tr(station.label)}</label>
-        <div className="sea-center-row">
-          <input
-            className="text"
-            id={id}
-            ref={input}
-            // The key is a secret: pasted, never shown in clear.
-            type="password"
-            autoComplete="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            placeholder={tr('Aucune clé')}
-            defaultValue={key}
-            key={key}
-          />
-          <Button className="btn" type="submit" disabled={busy}>
-            {tr(busy ? 'Essai…' : 'Enregistrer')}
-          </Button>
+    <div className="field sea-center key-row">
+      <form
+        className="key-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void save();
+        }}
+      >
+        <div className="cf">
+          <label htmlFor={id}>{tr(station.label)}</label>
+          <div className="sea-center-row">
+            <input
+              className="text"
+              id={id}
+              ref={input}
+              // The key is a secret: pasted, never shown in clear.
+              type="password"
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              placeholder={tr('Aucune clé')}
+              defaultValue={key}
+              key={key}
+            />
+            <Button className="btn" type="submit" disabled={busy}>
+              {tr(busy ? 'Essai…' : 'Enregistrer')}
+            </Button>
+          </div>
         </div>
-      </div>
-      {result ? (
-        <p className="keep-help mf-check" role="status">
-          {tr(result)}
-        </p>
-      ) : null}
+        {result ? (
+          <p className="keep-help mf-check" role="status">
+            {tr(result)}
+          </p>
+        ) : null}
+      </form>
       <KeyQr
         id={station.setting === 'aemetKey' ? 'aemet' : 'metoffice'}
         value={key}
       />
+      <KeyGuide id={station.account} name={station.name} />
       <KeyAccount id={station.account} name={station.name} url={station.url} />
       <HelpText>{station.help}</HelpText>
-    </form>
+    </div>
   );
 }

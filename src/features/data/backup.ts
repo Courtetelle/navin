@@ -2,6 +2,7 @@ import { pad } from '../../lib/format.ts';
 import type { Cruise } from '../../model/types.ts';
 import type { TrackPoint } from '../../state/index.ts';
 import {
+  keyBook,
   loadTrack,
   state,
   traceCutTimes,
@@ -111,6 +112,10 @@ export function backupAll(): BackupPack {
   // The texts given to traces, only when there are some.
   const names = traceNames();
   if (Object.keys(names).length > 0) content.traceNames = names;
+  // The accounts of the sites of the keys and their guides, when there are
+  // some: they go to another device with the backup.
+  const book = keyBook();
+  if (book) content.keyBook = book;
   return {
     name: `NavIn-tout-${dateStamp(date)}.json`,
     data: content,

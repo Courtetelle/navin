@@ -2,15 +2,13 @@ import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { buzz } from '../../lib/dom.ts';
-import { toast } from '../../state/index.ts';
-
-import type { SiteAccount } from './keyAccounts.ts';
-import { saveAccount, siteAccount } from './keyAccounts.ts';
+import type { SiteAccount } from '../../state/index.ts';
+import { saveAccount, siteAccount, toast } from '../../state/index.ts';
 
 /**
  * Under a key: a button that opens a small form, the exact address of the
  * site (a link to open it), the user name and the password, so as never to
- * forget them. Kept on this device only.
+ * forget them. Kept on the device and in the full backup.
  * @param props - The site.
  * @param props.id - Its key in the accounts (`mf`…).
  * @param props.name - Its name, as written on the button.
@@ -57,7 +55,7 @@ export function KeyAccount({
         buzz();
         saveAccount(id, account);
         setOpen(false);
-        toast(`Compte ${name} gardé sur cet appareil`);
+        toast(`Compte ${name} enregistré`);
       }}
     >
       <label>
@@ -118,8 +116,8 @@ export function KeyAccount({
         </span>
       </label>
       <p className="help">
-        Gardé sur cet appareil seulement : jamais dans une sauvegarde, une
-        synchronisation ou un partage.
+        Gardé sur cet appareil et dans la sauvegarde complète, pour le retrouver
+        sur un autre appareil ; jamais dans un partage.
       </p>
       <div className="row c2">
         <Button type="button" className="btn" onClick={() => setOpen(false)}>

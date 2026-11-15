@@ -8,6 +8,7 @@ import { buzz } from '../../lib/dom.ts';
 import { lastKnownPos, toast, updateSettings } from '../../state/index.ts';
 
 import { KeyAccount } from './KeyAccount.tsx';
+import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
 import { mfCheck } from './coastStations.ts';
 import { seaPlace } from './externals.ts';
@@ -52,40 +53,43 @@ export function MfKeyRow() {
     toast(text.split(' · ', 1)[0] ?? text);
   };
   return (
-    <form
-      className="field sea-center"
-      onSubmit={(event) => {
-        event.preventDefault();
-        void save();
-      }}
-    >
-      <div className="cf">
-        <label htmlFor="mfKey">{tr('🇫🇷 Clé API Météo-France')}</label>
-        <div className="sea-center-row">
-          <input
-            className="text"
-            id="mfKey"
-            ref={input}
-            // The key is a secret: pasted, never shown in clear.
-            type="password"
-            autoComplete="off"
-            autoCapitalize="off"
-            spellCheck={false}
-            placeholder={tr('Aucune clé')}
-            defaultValue={key}
-            key={key}
-          />
-          <Button className="btn" type="submit" disabled={busy}>
-            {tr(busy ? 'Vérification…' : 'Enregistrer')}
-          </Button>
+    <div className="field sea-center key-row">
+      <form
+        className="key-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void save();
+        }}
+      >
+        <div className="cf">
+          <label htmlFor="mfKey">{tr('🇫🇷 Clé API Météo-France')}</label>
+          <div className="sea-center-row">
+            <input
+              className="text"
+              id="mfKey"
+              ref={input}
+              // The key is a secret: pasted, never shown in clear.
+              type="password"
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              placeholder={tr('Aucune clé')}
+              defaultValue={key}
+              key={key}
+            />
+            <Button className="btn" type="submit" disabled={busy}>
+              {tr(busy ? 'Vérification…' : 'Enregistrer')}
+            </Button>
+          </div>
         </div>
-      </div>
-      {result ? (
-        <p className="keep-help mf-check" role="status">
-          {tr(result)}
-        </p>
-      ) : null}
+        {result ? (
+          <p className="keep-help mf-check" role="status">
+            {tr(result)}
+          </p>
+        ) : null}
+      </form>
       <KeyQr id="mf" value={key} />
+      <KeyGuide id="mf" name="Météo-France" />
       <KeyAccount
         id="mf"
         name="Météo-France"
@@ -97,6 +101,6 @@ export function MfKeyRow() {
         clé de type « API Key » et la coller ici. Enregistrer vérifie la clé.
         Sans clé, seules les balises OpenWindMap sont lues hors de Suisse.
       </HelpText>
-    </form>
+    </div>
   );
 }

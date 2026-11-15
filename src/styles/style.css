@@ -12384,3 +12384,49 @@ html body .lx-modal .ck-ask-box {
   background: #2a0d00;
   color: var(--fg);
 }
+
+/* A key: its form only around its field (the account and the guide have
+   their own) */
+.key-row .key-form {
+  display: contents;
+}
+/* Where to find a key, step by step, its pencil at the right */
+.btn.key-guide-open {
+  width: 100%;
+  margin-top: 10px;
+  display: grid;
+  gap: 2px;
+}
+.btn.key-guide-open small {
+  font-weight: 500;
+  opacity: 0.75;
+}
+.key-guide {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 2px solid var(--hair, #c9d2de);
+}
+.key-guide-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.btn.key-guide-pen {
+  width: 56px;
+  min-width: 56px;
+}
+.key-guide-steps {
+  margin: 0;
+  padding-left: 1.4em;
+  display: grid;
+  gap: 6px;
+}
+.key-guide-text {
+  width: 100%;
+  font: inherit;
+  line-height: 1.4;
+}

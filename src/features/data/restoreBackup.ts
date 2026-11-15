@@ -13,6 +13,7 @@ import {
   hooks,
   mergeBoats,
   mergeCkLib,
+  mergeKeyBook,
   mergeMarks,
   mergeMembers,
   mergeTraceNames,
@@ -87,6 +88,8 @@ export interface BackupFile {
   current?: string;
   /** @default undefined */
   traceNames?: unknown;
+  /** @default undefined */
+  keyBook?: unknown;
 }
 
 /** What a restoration did. */
@@ -131,6 +134,7 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
     restoreTraceCuts(cruise.id, cuts);
   }
   mergeTraceNames(file.traceNames);
+  mergeKeyBook(file.keyBook);
   restoreRecords(file);
   await restorePhotos(file.photos);
   if (file.all && file.settings && data.index.value.length === 0) {
