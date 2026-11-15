@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { buzz } from '../../lib/dom.ts';
-import { saveKeyLink, toast } from '../../state/index.ts';
+import { KEY_LINKS, saveKeyLink, toast } from '../../state/index.ts';
 
 /** The decoder of jsQR, whichever way its CommonJS module is handed. */
 const jsQR = ((jsQRModule as unknown as { default?: unknown }).default ??
@@ -12,6 +12,9 @@ const jsQR = ((jsQRModule as unknown as { default?: unknown }).default ??
   width: number,
   height: number,
 ) => { data: string } | null;
+
+/** Every network a key can come from: all read, the camera closes. */
+const KEY_COUNT = Object.keys(KEY_LINKS).length;
 
 /** The camera image is looked at this often for a code. */
 const LOOK_MS = 250;
@@ -23,8 +26,10 @@ const LOOK_MS = 250;
  * see what Safari keeps). No network is used.
  * @returns The button, or the camera while it reads.
  */
-export function KeyScan() {
+export function KeyScan({ all = false }: { all?: boolean }) {
   const [reading, setReading] = useState(false);
+  const [read, setRead] = useState<string[]>([]);
+  const seen = useRef<string[]>([]);
   const video = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (!reading) return undefined;
@@ -49,9 +54,19 @@ export function KeyScan() {
         toast('Ce QR code ne contient pas de clé de NavIn');
         return;
       }
+      if (!all) {
+        buzz();
+        toast(`Clé ${name} lue et enregistrée`);
+        setReading(false);
+        return;
+      }
+      // Every key, one code after the other: the camera stays open.
+      if (seen.current.includes(name)) return;
+      seen.current = [...seen.current, name];
+      setRead(seen.current);
       buzz();
       toast(`Clé ${name} lue et enregistrée`);
-      setReading(false);
+      if (seen.current.length >= KEY_COUNT) setReading(false);
     };
     navigator.mediaDevices
       .getUserMedia({ video: { facingMode: 'environment' }, audio: false })
@@ -76,7 +91,7 @@ export function KeyScan() {
       clearInterval(timer);
       for (const track of stream?.getTracks() ?? []) track.stop();
     };
-  }, [reading]);
+  }, [reading, all]);
   if (!reading) {
     return (
       <Button
@@ -98,8 +113,9 @@ export function KeyScan() {
     <div className="key-scan">
       <video ref={video} className="key-scan-video" playsInline muted />
       <p className="help">
-        Viser le QR code affiché par « 📤 Partager la clé » sur l’autre
-        appareil.
+        {all
+          ? `Viser les codes de « 📤 Partager toutes les clés » sur l’autre appareil. Lues : ${read.length > 0 ? read.join(', ') : 'aucune encore'}.`
+          : 'Viser le QR code affiché par « 📤 Partager la clé » sur l’autre appareil.'}
       </p>
       <Button
         type="button"
@@ -109,7 +125,7 @@ export function KeyScan() {
           setReading(false);
         }}
       >
-        Annuler
+        {all && read.length > 0 ? 'Terminer' : 'Annuler'}
       </Button>
     </div>
   );

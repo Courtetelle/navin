@@ -12467,3 +12467,16 @@ html body .lx-modal .ck-ask-box {
   width: 100%;
   margin-top: 6px;
 }
+
+/* Clés météo: every key at once, shared and imported */
+.key-all {
+  display: grid;
+  gap: 0;
+  margin-bottom: 6px;
+}
+.key-all .key-qr {
+  margin: 0 0 12px;
+}
+.key-qr-all .key-qr-code b {
+  font-size: 17px;
+}
