@@ -16,7 +16,7 @@ import { REON_CHOICES, reOnRule, reOnText, setReOnRule } from './windReOn.ts';
 export function ReOnI({ onOpen }: { onOpen: () => void }) {
   return (
     <span
-      className="help-i reon-i"
+      className="reon-i"
       role="button"
       aria-label="Quand les alertes se rallument"
       onClickCapture={(event) => {
