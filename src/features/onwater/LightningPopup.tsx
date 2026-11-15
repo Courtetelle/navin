@@ -9,9 +9,11 @@ import { go } from '../../shell/router.ts';
 import { leaflet } from '../map/leaflet.ts';
 import { tracker } from '../map/trackerState.ts';
 
+import { lakeWarnPop } from './lakeWarnPop.ts';
 import { nmToKm } from './lightning.ts';
 import type { LightningPop } from './lightningPop.ts';
 import { lightningPop } from './lightningPop.ts';
+import { windPopup } from './windOverlayState.ts';
 
 const POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
 /** The screen flashes three times, as lightning. */
@@ -53,7 +55,8 @@ function showOnMap(pop: LightningPop): void {
  */
 export function LightningPopup() {
   useSignals();
-  const pop = lightningPop.value;
+  // One bubble at a time: this one waits until the wind one is closed.
+  const pop = windPopup.value ? null : lightningPop.value;
   const [lit, setLit] = useState(false);
   useEffect(() => {
     if (!pop) return undefined;
@@ -120,6 +123,11 @@ export function LightningPopup() {
           <Button className="btn primary lp-map" noUiEdit>
             {translate('🗺 Voir sur la carte')}
           </Button>
+          {lakeWarnPop.value ? (
+            <div className="wp-next">
+              {translate('▼ Une autre alerte suit : toucher pour la lire')}
+            </div>
+          ) : null}
           <div className="wp-close">{translate('Toucher pour fermer')}</div>
         </div>
       </div>

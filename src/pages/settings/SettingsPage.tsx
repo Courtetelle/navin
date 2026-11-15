@@ -13,7 +13,10 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { installPrompt } from '../../features/data/install.ts';
 import { WindKeys, windAlertClick } from '../../features/onwater/index.ts';
-import { lakeWarnTest } from '../../features/onwater/lakeWarnWatch.ts';
+import {
+  alertsInTurnTest,
+  lakeWarnTest,
+} from '../../features/onwater/lakeWarnWatch.ts';
 import { lightningTest } from '../../features/onwater/lightningWatch.ts';
 import { ShareThemePicker } from '../../features/publish/index.ts';
 import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
@@ -203,6 +206,24 @@ function TestsSection() {
           }}
         >
           {tr('▶ Test des feux d’avis des lacs')}
+        </Button>
+      </ButtonRow>
+      <h3>{tr('🔔 Test de plusieurs alertes à la suite')}</h3>
+      <p className="keep-help nav-hint">
+        {tr(
+          'Vent, foudre et feux d’avis en même temps : les bulles viennent l’une après l’autre, chacune au toucher de la précédente.',
+        )}
+      </p>
+      <ButtonRow>
+        <Button
+          className="btn"
+          data-alerts="in-turn"
+          onClick={() => {
+            buzz();
+            alertsInTurnTest();
+          }}
+        >
+          {tr('▶ Test de plusieurs alertes à la suite')}
         </Button>
       </ButtonRow>
       <DepthDev key={settingsRedraws.value} inAlerts />

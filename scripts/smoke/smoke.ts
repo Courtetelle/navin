@@ -875,6 +875,38 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   );
 }
 
+/**
+ * Alerts coming together (wind, lightning, warning lights) never pile up:
+ * their bubbles come one after the other, each at a touch on the one before.
+ * @param page - The page.
+ * @param theme - Theme checked.
+ */
+async function alertsInTurn(page: Page, theme: string): Promise<void> {
+  await openGear(page);
+  await page.waitForTimeout(500);
+  await page.locator('.set-entry[data-sec="tests"]').click();
+  await page.waitForTimeout(400);
+  await page.locator('[data-alerts="in-turn"]').click();
+  const seen: string[] = [];
+  /* eslint-disable no-await-in-loop -- one bubble after the other */
+  for (let turn = 0; turn < 4; turn++) {
+    await page.waitForTimeout(1200);
+    const shown = await page
+      .locator('.wind-pop')
+      .evaluateAll((pops) => pops.map((pop) => pop.id));
+    seen.push(shown.join('+') || 'none');
+    if (shown.length > 0) {
+      await page.locator('.wind-pop .wp-close').first().click();
+    }
+  }
+  /* eslint-enable no-await-in-loop */
+  check(
+    theme,
+    'alerts together come one after the other, never piled up',
+    seen.join(' ') === 'windPop lightningPop lakeWarnPop none',
+  );
+}
+
 // Where the side buttons of the tablet stand, to the pixel.
 const TABLET_BUTTONS = [
   '#clock',
@@ -1521,6 +1553,7 @@ for (const theme of ['day', 'night']) {
     await crewAndBoat(page, theme);
     await marksShare(page, theme);
     await scalesSteady(page, theme);
+    await alertsInTurn(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }

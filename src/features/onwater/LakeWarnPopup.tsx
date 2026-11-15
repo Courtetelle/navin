@@ -9,6 +9,8 @@ import { go } from '../../shell/router.ts';
 
 import { lakeWarnPop } from './lakeWarnPop.ts';
 import { LIGHT_MEANINGS, lightOf, whenText } from './lakeWarnings.ts';
+import { lightningPop } from './lightningPop.ts';
+import { windPopup } from './windOverlayState.ts';
 
 function translate(text: string): string {
   return translateMessage(text, screenLanguage.value);
@@ -24,7 +26,9 @@ const time = (t: number) => whenText(t, Date.now());
  */
 export function LakeWarnPopup() {
   useSignals();
-  const pop = lakeWarnPop.value;
+  // One bubble at a time: this one waits until the wind and lightning ones
+  // are closed.
+  const pop = windPopup.value || lightningPop.value ? null : lakeWarnPop.value;
   if (!pop) return null;
   const { warnings, test } = pop;
   const strongest = warnings[0];

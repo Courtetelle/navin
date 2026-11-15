@@ -164,3 +164,24 @@ export function lakeWarnTest(): void {
     ],
   });
 }
+
+/**
+ * A test of alerts coming together: the wind, the lightning and the warning
+ * lights, shown one after the other (each waits until the one before is
+ * closed).
+ */
+export function alertsInTurnTest(): void {
+  void Promise.all([
+    import('./windOverlayState.ts'),
+    import('./lightningWatch.ts'),
+  ]).then(([{ showWindPopup }, { lightningTest }]) => {
+    showWindPopup({
+      bf: 6,
+      kn: '24 nd en rafales',
+      where: 'TEST · mesuré à St-Prex (MeteoSwiss)',
+      closeTxt: 'Toucher pour fermer',
+    });
+    lightningTest();
+    lakeWarnTest();
+  });
+}

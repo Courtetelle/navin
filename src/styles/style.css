@@ -8188,6 +8188,13 @@ h1 .help-i.help-i-h1 {
 .lake-warn-list .lw-row.storm {
   border-left-color: #d0021b;
 }
+.wind-pop .wp-next {
+  margin-top: 12px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: 700;
+}
 /* Lightning alert: the screen flashes, a bubble edged in yellow */
 .lightning-flash {
   position: fixed;

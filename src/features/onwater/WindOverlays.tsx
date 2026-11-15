@@ -10,6 +10,8 @@ import { translateMessage } from '../../i18n/translate.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 
 import { publishAlert } from './alertPublish.ts';
+import { lakeWarnPop } from './lakeWarnPop.ts';
+import { lightningPop } from './lightningPop.ts';
 import { beaufortSea } from './onLake.ts';
 import { flashColor } from './windLogic.ts';
 import type { WindFlash } from './windOverlayState.ts';
@@ -144,6 +146,11 @@ export function WindPopup() {
                 if (content.report) void publishAlert(content.report, format);
               }}
             />
+          </div>
+        ) : null}
+        {lightningPop.value || lakeWarnPop.value ? (
+          <div className="wp-next">
+            {translate('▼ Une autre alerte suit : toucher pour la lire')}
           </div>
         ) : null}
         {content.closeTxt ? (
