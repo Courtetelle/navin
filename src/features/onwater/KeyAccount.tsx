@@ -181,7 +181,7 @@ export function KeyAccount({
       </p>
       <div className="row c2">
         <Button type="button" className="btn" onClick={() => setOpen(false)}>
-          Annuler
+          Fermer
         </Button>
         <Button type="submit" className="btn primary">
           Enregistrer
