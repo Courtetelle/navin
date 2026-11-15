@@ -55,6 +55,14 @@ function openForecast() {
 /** Argument of the screen for the forecast part. */
 const FORECAST = 'forecast';
 
+/** Argument of the screen for the weather briefing (the checks before leaving). */
+const BRIEFING = 'briefing';
+
+function openBriefing() {
+  buzz();
+  go('weather', BRIEFING);
+}
+
 /** Hours of forecast shown. */
 const HOURS = 12;
 
@@ -65,7 +73,8 @@ const HOURS = 12;
  * @returns The screen content.
  */
 export function WeatherPage({ arg }: PageProps) {
-  if (arg === FORECAST) return <ForecastPage />;
+  if (arg === FORECAST) return <ForecastPage part="forecast" />;
+  if (arg === BRIEFING) return <ForecastPage part="briefing" />;
   if (arg === ALERTS) return <AlertsPage />;
   return <WeatherMenu />;
 }
@@ -130,15 +139,24 @@ function WeatherMenu() {
         <Button
           className="btn big wx-entry"
           data-wx="check"
-          onClick={openForecast}
+          onClick={openBriefing}
         >
           <span className="wx-entry-ico">✅</span>
           <span>
-            <b>{tr('Check-list météo')}</b>
+            <b>{tr('Briefing météo')}</b>
+            <small>{tr('les points à vérifier avant le départ')}</small>
+          </span>
+        </Button>
+        <Button
+          className="btn big wx-entry"
+          data-wx="forecast"
+          onClick={openForecast}
+        >
+          <span className="wx-entry-ico">🗓</span>
+          <span>
+            <b>{tr('Prévisions')}</b>
             <small>
-              {tr(
-                'les points à consulter avant le départ, les prochaines heures',
-              )}
+              {tr('les 12 prochaines heures, sources officielles, échelles')}
             </small>
           </span>
         </Button>
@@ -233,7 +251,7 @@ function WeatherMenu() {
  * leaving, ticked for the day.
  * @returns The screen content.
  */
-function ForecastPage() {
+function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
   useSignals();
   const tr = useTr();
   const lake = isLake() || navZone() === 'lac';
@@ -270,93 +288,101 @@ function ForecastPage() {
         {tr('◀ Météo')}
       </PageBack>
       <TitleInNav>
-        <h1>{tr('📈 Prévisions')}</h1>
+        <h1>
+          {tr(part === 'forecast' ? '📈 Prévisions' : '✅ Briefing météo')}
+        </h1>
       </TitleInNav>
-      <div className="wx-page">
-        <section className="wx-fc">
-          <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>
-          <ForecastStrip forecast={forecast} />
-        </section>
-        <section className="wx-checks">
-          <div className="wx-checks-head">
-            <h2>
+      <div className="wx-page wx-one">
+        {part === 'forecast' ? (
+          <section className="wx-fc">
+            <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>
+            <ForecastStrip forecast={forecast} />
+          </section>
+        ) : null}
+        {part === 'briefing' ? (
+          <section className="wx-checks">
+            <div className="wx-checks-head">
+              <h2>
+                {tr(
+                  tracking
+                    ? `Procédure météo · ${done}/${checks.length}`
+                    : `Avant le départ · ${done}/${checks.length}`,
+                )}
+              </h2>
+              <Button
+                className={editing ? 'btn wx-edit on' : 'btn wx-edit'}
+                id="wxEdit"
+                aria-label={tr(editing ? 'Terminer' : 'Modifier la liste')}
+                onClick={() => {
+                  buzz();
+                  setEditing(!editing);
+                }}
+              >
+                {editing ? '✔' : '✎'}
+              </Button>
+            </div>
+            {editing ? <WxChecksEditor lake={lake} /> : null}
+            <ul className="wx-list" hidden={editing}>
+              {checks.map((check) => {
+                const on = ticked.includes(check.id);
+                return (
+                  <li key={check.id}>
+                    <Button
+                      className={on ? 'btn wx-check on' : 'btn wx-check'}
+                      aria-pressed={on}
+                      onClick={() => toggle(check.id)}
+                    >
+                      <span className="wx-box">{on ? '✔' : ''}</span>
+                      <span>{tr(check.text)}</span>
+                    </Button>
+                  </li>
+                );
+              })}
+            </ul>
+            {done === checks.length && checks.length > 0 ? (
+              <p className="wx-done">
+                {tr('✅ Météo vérifiée pour aujourd’hui')}
+              </p>
+            ) : null}
+            <p className="keep-help">
               {tr(
-                tracking
-                  ? `Procédure météo · ${done}/${checks.length}`
-                  : `Avant le départ · ${done}/${checks.length}`,
+                'Les coches valent pour la journée et repartent à zéro demain.',
               )}
-            </h2>
-            <Button
-              className={editing ? 'btn wx-edit on' : 'btn wx-edit'}
-              id="wxEdit"
-              aria-label={tr(editing ? 'Terminer' : 'Modifier la liste')}
-              onClick={() => {
-                buzz();
-                setEditing(!editing);
-              }}
-            >
-              {editing ? '✔' : '✎'}
-            </Button>
-          </div>
-          {editing ? <WxChecksEditor lake={lake} /> : null}
-          <ul className="wx-list" hidden={editing}>
-            {checks.map((check) => {
-              const on = ticked.includes(check.id);
-              return (
-                <li key={check.id}>
-                  <Button
-                    className={on ? 'btn wx-check on' : 'btn wx-check'}
-                    aria-pressed={on}
-                    onClick={() => toggle(check.id)}
-                  >
-                    <span className="wx-box">{on ? '✔' : ''}</span>
-                    <span>{tr(check.text)}</span>
-                  </Button>
-                </li>
-              );
-            })}
-          </ul>
-          {done === checks.length && checks.length > 0 ? (
-            <p className="wx-done">
-              {tr('✅ Météo vérifiée pour aujourd’hui')}
             </p>
-          ) : null}
-          <p className="keep-help">
-            {tr(
-              'Les coches valent pour la journée et repartent à zéro demain.',
+          </section>
+        ) : null}
+        {part === 'forecast' ? (
+          <section className="wx-links">
+            <h2>{tr('Sources officielles')}</h2>
+            {lake ? (
+              <SiteLink
+                id="wx-meteoswiss"
+                label="⚠️ Alertes MeteoSwiss"
+                url="https://www.meteosuisse.admin.ch/meteo/dangers.html"
+              />
+            ) : (
+              <SiteLink
+                id="wx-mf-marine"
+                label="Bulletins Météo Spéciaux (BMS)"
+                url="https://meteofrance.com/meteo-marine"
+              />
             )}
-          </p>
-        </section>
-        <section className="wx-links">
-          <h2>{tr('Sources officielles')}</h2>
-          {lake ? (
-            <SiteLink
-              id="wx-meteoswiss"
-              label="⚠️ Alertes MeteoSwiss"
-              url="https://www.meteosuisse.admin.ch/meteo/dangers.html"
-            />
-          ) : (
-            <SiteLink
-              id="wx-mf-marine"
-              label="Bulletins Météo Spéciaux (BMS)"
-              url="https://meteofrance.com/meteo-marine"
-            />
-          )}
-          <div className="page-links">
-            <PageLink
-              view="beaufort"
-              icon="💨"
-              label="Échelle de Beaufort"
-              sub="la force du vent, de 0 à 12"
-            />
-            <PageLink
-              view="douglas"
-              icon="🌊"
-              label="Échelle de Douglas"
-              sub="l’état de la mer, de 0 à 9"
-            />
-          </div>
-        </section>
+            <div className="page-links">
+              <PageLink
+                view="beaufort"
+                icon="💨"
+                label="Échelle de Beaufort"
+                sub="la force du vent, de 0 à 12"
+              />
+              <PageLink
+                view="douglas"
+                icon="🌊"
+                label="Échelle de Douglas"
+                sub="l’état de la mer, de 0 à 9"
+              />
+            </div>
+          </section>
+        ) : null}
       </div>
     </>
   );

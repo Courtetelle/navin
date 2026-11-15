@@ -835,7 +835,7 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(1500);
   await page.locator('.rail-weather').click();
   await page.waitForTimeout(400);
-  await page.locator('[data-wx="check"]').click();
+  await page.locator('[data-wx="forecast"]').click();
   await page.waitForTimeout(600);
   for (const view of ['beaufort', 'douglas']) {
     /* eslint-disable no-await-in-loop -- one scale after the other */

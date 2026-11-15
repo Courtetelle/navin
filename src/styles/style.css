@@ -12556,7 +12556,7 @@ html body .lx-modal .ck-ask-box {
 .exit-box {
   display: inline-grid;
   place-items: center;
-  width: 1.2em;
+  width: 1em;
 }
 .exit-ico {
   display: block;
@@ -12758,4 +12758,9 @@ html body .lx-modal .ck-ask-box {
 }
 :root[data-theme='night'] .reon-box {
   border-color: var(--fg);
+}
+/* Prévisions and Briefing météo are two pages now: one column each */
+html body .wx-page.wx-one {
+  display: block;
+  max-width: 900px;
 }
