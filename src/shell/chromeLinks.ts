@@ -36,10 +36,26 @@ function device(): LinkDevice {
   return 'other';
 }
 
-function installed(): boolean {
+/**
+ * The window that opens links: the page holding NavIn when NavIn runs in a
+ * frame (the test page of the tablet), the iPad refusing from a frame.
+ * @returns The window.
+ */
+function host(): Window & typeof globalThis {
+  try {
+    const top = globalThis.top as (Window & typeof globalThis) | null;
+    // Reading its address throws when it is another site: then NavIn itself.
+    if (top && top !== globalThis.window && top.location.origin) return top;
+  } catch {
+    // Another site holds NavIn.
+  }
+  return globalThis as Window & typeof globalThis;
+}
+
+function installed(win: Window & typeof globalThis): boolean {
   return (
-    globalThis.matchMedia?.('(display-mode: standalone)').matches ||
-    (navigator as { standalone?: boolean }).standalone === true
+    win.matchMedia?.('(display-mode: standalone)').matches ||
+    (win.navigator as { standalone?: boolean }).standalone === true
   );
 }
 
@@ -51,18 +67,27 @@ function openInChrome(event: MouseEvent): void {
   const link = event.target.closest<HTMLAnchorElement>('a[href]');
   if (!link || !/^https?:/iu.test(link.href)) return;
   if (new URL(link.href).origin === globalThis.location.origin) return;
-  if (!installed()) return;
+  const win = host();
+  const framed = win !== (globalThis as unknown);
+  const { href } = link;
+  if (!installed(win)) {
+    // In a frame of a browser: a new tab of the page holding NavIn.
+    if (framed) {
+      event.preventDefault();
+      win.open(href, '_blank', 'noopener');
+    }
+    return;
+  }
   const kind = device();
-  const target = chromeUrl(link.href, kind);
+  const target = chromeUrl(href, kind);
   if (!target) return;
   event.preventDefault();
-  const { href } = link;
-  globalThis.location.href = target;
+  win.location.href = target;
   if (kind !== 'ios') return;
   // Chrome opened: NavIn went to the background. Still here: no Chrome.
   setTimeout(() => {
-    if (document.visibilityState === 'visible') {
-      globalThis.open(href, '_blank', 'noopener');
+    if (win.document.visibilityState === 'visible') {
+      win.open(href, '_blank', 'noopener');
     }
   }, NO_CHROME_MS);
 }
