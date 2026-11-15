@@ -8,6 +8,7 @@ import { buzz } from '../../lib/dom.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
 
 import { KeyAccount } from './KeyAccount.tsx';
+import { KeyQr } from './KeyQr.tsx';
 import type { WindReading } from './windTypes.ts';
 
 /** What a key row needs to know of its network. */
@@ -110,6 +111,10 @@ export function StationKeyRow({ station }: { station: StationKey }) {
           {tr(result)}
         </p>
       ) : null}
+      <KeyQr
+        id={station.setting === 'aemetKey' ? 'aemet' : 'metoffice'}
+        value={key}
+      />
       <KeyAccount id={station.account} name={station.name} url={station.url} />
       <HelpText>{station.help}</HelpText>
     </form>

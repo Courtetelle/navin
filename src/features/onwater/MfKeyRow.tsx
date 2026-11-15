@@ -8,6 +8,7 @@ import { buzz } from '../../lib/dom.ts';
 import { lastKnownPos, toast, updateSettings } from '../../state/index.ts';
 
 import { KeyAccount } from './KeyAccount.tsx';
+import { KeyQr } from './KeyQr.tsx';
 import { mfCheck } from './coastStations.ts';
 import { seaPlace } from './externals.ts';
 import { checkText } from './mfCheckText.ts';
@@ -84,6 +85,7 @@ export function MfKeyRow() {
           {tr(result)}
         </p>
       ) : null}
+      <KeyQr id="mf" value={key} />
       <KeyAccount
         id="mf"
         name="Météo-France"

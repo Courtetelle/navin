@@ -17,6 +17,7 @@ export * from './position.ts';
 export * from './preferences.ts';
 export * from './prep.ts';
 export * from './prepReady.ts';
+export * from './keyLink.ts';
 export * from './skipperMenus.ts';
 export * from './templates.ts';
 export * from './toast.ts';

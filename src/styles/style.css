@@ -12309,3 +12309,41 @@ html body .lx-modal .ck-ask-box {
   color: var(--on, #ff4040);
   background: rgba(0, 0, 0, 0.85);
 }
+
+/* « Partager la clé »: the key as a QR code, black on white to be read; at
+   night on a dimmer grey, still read by a camera */
+.key-qr {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.key-qr-btn {
+  width: 100%;
+  min-height: 52px;
+}
+.key-qr-code {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  margin: 0;
+}
+.key-qr-code svg {
+  display: block;
+  width: min(100%, 440px);
+  height: auto;
+  border-radius: 12px;
+}
+.key-qr-code rect {
+  fill: #fff;
+}
+.key-qr-code path {
+  fill: #000;
+}
+.key-qr-code figcaption {
+  font-size: 15px;
+  text-align: center;
+  color: var(--muted, #5b6575);
+}
+:root[data-theme='night'] .key-qr-code rect {
+  fill: #9a9a9a;
+}

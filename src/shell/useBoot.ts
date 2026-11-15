@@ -2,7 +2,7 @@ import { effect } from '@preact/signals-react';
 import { useLayoutEffect } from 'react';
 
 import { installDecimalComma } from '../components/shared/decimalComma.ts';
-import { applySkipperMenus, state } from '../state/index.ts';
+import { applyKeyLink, applySkipperMenus, state } from '../state/index.ts';
 import { attachErrorLog } from '../storage/errLog.ts';
 
 import { followAutoNight } from './autoNight.ts';
@@ -57,6 +57,8 @@ function boot(): void {
   followTheme();
   // The menus the skipper sent, made those of the app (once).
   applySkipperMenus();
+  // Opened by the camera on the QR code of a key: the key is saved.
+  const keyCame = applyKeyLink();
   followScreenGap();
   followAutoNight();
   followTopState();
@@ -71,7 +73,7 @@ function boot(): void {
     if (event.phase === 'before') endSunTimes();
     if (event.phase === 'after') setTimeout(refreshBase, 0);
   });
-  scheduleBootTip();
+  if (!keyCame) scheduleBootTip();
   void loadDomains().then(start);
 }
 
