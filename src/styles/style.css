@@ -12713,3 +12713,49 @@ html body .lx-modal .ck-ask-box {
 .scale-tbl td {
   overflow-wrap: anywhere;
 }
+
+/* « Alertes de vent »: its ⓘ, and the window of when they come back on */
+.reon-i {
+  margin-left: 10px;
+  width: 30px;
+  height: 30px;
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 800;
+  vertical-align: middle;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--primary, #0b3d91);
+}
+.reon-box {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 2px solid var(--primary, #0b3d91);
+  background: var(--card, #f2f4f7);
+}
+.reon-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.reon-head p {
+  flex: 1;
+  margin: 0;
+}
+.btn.reon-pen {
+  width: 56px;
+  min-width: 56px;
+}
+.reon-choices {
+  display: grid;
+  gap: 8px;
+}
+:root[data-theme='night'] .reon-i {
+  background: #300000;
+  color: var(--fg);
+}
+:root[data-theme='night'] .reon-box {
+  border-color: var(--fg);
+}

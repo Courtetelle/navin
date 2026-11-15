@@ -1,3 +1,4 @@
+import { dayKey } from '../../lib/format.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
 
 import { refreshLakeButtons } from './lakeRefresh.ts';
@@ -32,7 +33,8 @@ export function windAlertClick(action: WindAlertAction): void {
   if (action === 'toggle') {
     const on = !config.on;
     updateSettings((settings) => {
-      settings.windAlert = { ...config, on };
+      // The day they were switched off: « à minuit » counts from it.
+      settings.windAlert = { ...config, on, offDay: dayKey(new Date()) };
     });
     if (on && !state.preferences.settings.value.wake) {
       toast('Conseil : ⚙︎ › Garder l’écran allumé : OUI');

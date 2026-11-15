@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -11,6 +11,7 @@ import { ensureDay, getDay, state } from '../../state/index.ts';
 
 import { BoxHelp } from './BoxHelp.tsx';
 import { SocibNotice } from './SocibNotice.tsx';
+import { ReOnBox, ReOnI } from './WindReOn.tsx';
 import { onLake } from './onLake.ts';
 import { useBoxTr } from './useBoxTr.ts';
 import type { WindAlertAction } from './windAlertClick.ts';
@@ -55,6 +56,7 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
   const watch = stored || windWatchLast.value;
   // On a lake no sea state: the marine model is for the sea.
   const lake = onLake();
+  const [reOn, setReOn] = useState(false);
   return (
     <div className="wind-alert">
       <p className="keep-help nav-hint">
@@ -69,6 +71,7 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
           onClick={click('toggle')}
         >
           {tr(`🔔 Alertes de vent : ${config.on ? 'OUI' : 'NON'}`)}
+          <ReOnI onOpen={() => setReOn(true)} />
         </Button>
         <Button className="btn" data-walert="basis" onClick={click('basis')}>
           {tr(
@@ -76,6 +79,7 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
           )}
         </Button>
       </ButtonRow>
+      {reOn ? <ReOnBox onClose={() => setReOn(false)} /> : null}
       {config.on ? <MuteRow keep={keep} /> : null}
       {config.on && watch ? (
         <WatchLine watch={watch} config={config} keep={keep} />
