@@ -74,7 +74,8 @@ test('a file of sheets alone is valid when it is a full backup', async () => {
     boats: [{ id: 'b-new', info: { boat: 'Nouveau' } }],
   });
 
-  expect(result).toStrictEqual({ count: 0, last: null });
+  expect(result).toMatchObject({ count: 0, last: null });
+  expect(result.report.boats).toBeGreaterThanOrEqual(0);
   expect(state.data.boats.value.at(-1)?.id).toBe('b-new');
 });
 
@@ -190,4 +191,16 @@ test('the Météo-France key of a backup comes back on a device without one', as
   expect(state.preferences.settings.value.windAlert?.mfKey).toBe('abc');
   restoreMfKey({ windAlert: { mfKey: 'other' } });
   expect(state.preferences.settings.value.windAlert?.mfKey).toBe('abc');
+});
+
+test('the report says added on an empty device, the same when restored again', async () => {
+  const backup = backupOf('data-files-lake');
+  load('empty');
+  const first = await restoreBackup(structuredClone(backup));
+  expect(first.report.added).toHaveLength(2);
+  expect(first.report.completed).toHaveLength(0);
+  const again = await restoreBackup(structuredClone(backup));
+  expect(again.report.added).toHaveLength(0);
+  expect(again.report.same).toHaveLength(2);
+  expect(again.report.boats).toBe(0);
 });

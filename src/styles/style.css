@@ -12528,3 +12528,26 @@ html body .lx-modal .ck-ask-box {
 .set-page.set-body .row.set-stack {
   margin-top: 14px !important;
 }
+
+/* After a restoration: what came from the file, until « OK » */
+.restore-report {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: #e6f6ea;
+  color: #0b1220;
+  border: 2px solid #12a150;
+}
+.restore-report ul {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 6px;
+}
+:root[data-theme='night'] .restore-report {
+  background: #1a0500;
+  color: var(--fg);
+  border-color: var(--fg);
+}

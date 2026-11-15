@@ -8,7 +8,7 @@ import type { BackupFile, RestoreResult } from './restoreBackup.ts';
  */
 export function restoredMessage(
   backup: BackupFile,
-  { count, last }: RestoreResult,
+  { count, last }: Pick<RestoreResult, 'count' | 'last'>,
 ): string {
   if ((backup.version ?? 0) >= 4) {
     return `🔄 Synchronisé : ${count} navigation${count > 1 ? 's' : ''}`;

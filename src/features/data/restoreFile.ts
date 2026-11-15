@@ -4,6 +4,7 @@ import { toast } from '../../state/index.ts';
 import { applyIcon } from './appIcon.ts';
 import type { BackupFile } from './restoreBackup.ts';
 import { restoreBackup } from './restoreBackup.ts';
+import { restoreReport } from './restoreReport.ts';
 import { restoredMessage } from './restoredMessage.ts';
 
 /**
@@ -16,9 +17,10 @@ export async function restoreFile(file: Blob): Promise<void> {
     const backup = JSON.parse(await file.text()) as BackupFile;
     const result = await restoreBackup(backup);
     applyIcon();
+    restoreReport.value = result.report;
     if (result.count === 0) {
       toast('🔄 Fiches récupérées : bateaux, équipage, check-lists');
-      go('more');
+      go('cruises');
       return;
     }
     toast(restoredMessage(backup, result));

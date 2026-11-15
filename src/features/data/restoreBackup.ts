@@ -98,6 +98,54 @@ export interface RestoreResult {
   count: number;
   /** Last cruise merged. */
   last: Cruise | null;
+  /** What the restoration did, for its report. */
+  report: RestoreReport;
+}
+
+/** What a restoration did: added, completed, already here. */
+export interface RestoreReport {
+  /** Navigations this device did not have. */
+  added: string[];
+  /** Navigations already here, completed by the file (the duplicates merged). */
+  completed: string[];
+  /** Navigations already here, identical: nothing to do. */
+  same: string[];
+  /** Records added: boats, crew members, marks, crews. */
+  boats: number;
+  members: number;
+  marks: number;
+  crews: number;
+}
+
+/**
+ * A stored text as its content alone: keys sorted, empty lists dropped (a
+ * merge adds `deleted: []` without changing anything).
+ * @param text - JSON text, or null.
+ * @returns A text equal for the same content.
+ */
+function contentOf(text: string | null): string {
+  if (text == null) return '';
+  const clean = (value: unknown): unknown => {
+    if (Array.isArray(value)) return value.map(clean);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value)
+          .filter(([, inner]) => !(Array.isArray(inner) && inner.length === 0))
+          .toSorted(([one], [two]) => one.localeCompare(two))
+          .map(([key, inner]) => [key, clean(inner)]),
+      );
+    }
+    return value;
+  };
+  try {
+    return JSON.stringify(clean(JSON.parse(text)));
+  } catch {
+    return text;
+  }
+}
+
+function cruiseName(cruise: Cruise): string {
+  return cruise.info.name || cruise.id;
 }
 
 /**
@@ -128,10 +176,39 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
     }),
   );
   const currentId = data.cruise.value?.id;
+  const before = {
+    boats: data.boats.value.length,
+    members: data.members.value.length,
+    marks: data.marks.value.length,
+    crews: data.crewSets.value.length,
+  };
+  const report: RestoreReport = {
+    added: [],
+    completed: [],
+    same: [],
+    boats: 0,
+    members: 0,
+    marks: 0,
+    crews: 0,
+  };
   let last: Cruise | null = null;
   for (const { cruise, track, cuts } of cruises) {
+    const known = data.index.value.some((meta) => meta.id === cruise.id);
+    const was = known ? contentOf(store.raw(`ldb.cruise.${cruise.id}`)) : '';
+    const points = known ? contentOf(store.raw(`ldb.track.${cruise.id}`)) : '';
     last = mergeCruise(cruise, track);
     restoreTraceCuts(cruise.id, cuts);
+    const name = cruiseName(last);
+    if (!known) {
+      report.added.push(name);
+    } else if (
+      was === contentOf(store.raw(`ldb.cruise.${cruise.id}`)) &&
+      points === contentOf(store.raw(`ldb.track.${cruise.id}`))
+    ) {
+      report.same.push(name);
+    } else {
+      report.completed.push(name);
+    }
   }
   mergeTraceNames(file.traceNames);
   mergeKeyBook(file.keyBook);
@@ -148,7 +225,11 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
   saveSettings();
   const pick = pickCruise(currentId, file.current, last);
   if (pick) openCruise(pick);
-  return { count: cruises.length, last };
+  report.boats = Math.max(0, data.boats.value.length - before.boats);
+  report.members = Math.max(0, data.members.value.length - before.members);
+  report.marks = Math.max(0, data.marks.value.length - before.marks);
+  report.crews = Math.max(0, data.crewSets.value.length - before.crews);
+  return { count: cruises.length, last, report };
 }
 
 function cruisesOf(
