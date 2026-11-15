@@ -103,14 +103,16 @@ export function RelayRow() {
             .writeText(RELAY_CODE)
             .then(() =>
               toast(
-                'Code du relais copié : le coller sur Cloudflare (« Edit code »)',
+                'Code du relais copié : le coller sur Cloudflare (« Modifier le code »)',
               ),
             )
             .catch(() => toast('Copie impossible sur cet appareil'));
         }}
       >
         📋 Copier le code du relais
-        <small>à coller sur Cloudflare, dans « Edit code » du Worker</small>
+        <small>
+          à coller sur Cloudflare, dans « Modifier le code » du Worker
+        </small>
       </Button>
       <KeyGuide id="relay" name="Cloudflare" what="l’adresse du relais" />
       <KeyAccount
