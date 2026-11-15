@@ -1,6 +1,12 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import type { ReactNode } from 'react';
-import { createContext, useContext, useLayoutEffect, useRef } from 'react';
+import {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -179,6 +185,10 @@ export function SettingsPage({ from, arg }: PageProps) {
   const redrawn = useRef(from === 'settings');
   // A section opened alone (from the menu, or « Clés météo » of Météo).
   const section = typeof arg === 'string' ? arg : '';
+  // A section opened straight from another screen, not from this menu.
+  const [elsewhere] = useState(() => Boolean(section) && from !== 'settings');
+  // Réglages forgets the history: the screen it came from is kept here.
+  const [cameFrom] = useState(() => from || 'tracker');
   useLayoutEffect(() => {
     enterSettings(redrawn.current);
   }, []);
@@ -197,15 +207,18 @@ export function SettingsPage({ from, arg }: PageProps) {
       )}
       {section ? (
         // At the top of the page: it joins the fixed title line.
+        // Opened from elsewhere (the radius button of the map, the Météo
+        // menu): ◀ goes back there; from the menu of Réglages, back to it.
         <PageBack
-          label="◀ Réglages"
-          data-go="settings"
+          label={elsewhere ? '◀ Retour' : '◀ Réglages'}
+          data-go={elsewhere ? 'back' : 'settings'}
           onClick={() => {
             buzz();
-            go('settings');
+            if (elsewhere) go(cameFrom);
+            else go('settings');
           }}
         >
-          {tr('◀ Réglages')}
+          {tr(elsewhere ? '◀ Retour' : '◀ Réglages')}
         </PageBack>
       ) : null}
       <ShownSection.Provider value={section}>

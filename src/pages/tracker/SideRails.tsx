@@ -52,7 +52,7 @@ import {
 
 import { StartButton } from './StartButton.tsx';
 import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
-import { showLiveOnMap } from './liveOnMap.ts';
+import { showLiveAround } from './liveOnMap.ts';
 import { RailIcon } from './railIcons.tsx';
 import { MAP_ACTIONS, splitTitle } from './sideRails.ts';
 import { trackDone } from './trackDone.ts';
@@ -170,9 +170,9 @@ function WeatherButton() {
   return (
     <RailButton
       entry={weather}
-      onPick={showLiveOnMap}
+      onPick={showLiveAround}
       className="rail-weather"
-      label="Météo · appui long : les stations LiveMétéo de la carte"
+      label="Météo · appui long : LiveMétéo"
     />
   );
 }

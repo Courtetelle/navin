@@ -1,8 +1,9 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { Circle, LayerGroup, Map as LeafletMap } from 'leaflet';
-import { useEffect, useRef, useState } from 'react';
+import type { Circle, LayerGroup } from 'leaflet';
+import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { leaflet } from '../../features/map/leaflet.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
@@ -19,6 +20,7 @@ import {
   liveOnMap,
   liveOnMapAround,
   liveRadius,
+  liveRadiusNm,
 } from './liveOnMap.ts';
 
 /** The stations read before the map of NavIn is built, in km. */
@@ -30,8 +32,6 @@ const MOST_KM = 150;
 const REFRESH_MS = 2 * 60_000;
 /** The map of NavIn is looked for this often until it is built. */
 const WAIT_MS = 300;
-/** The badges stay this long, then fade; a touch on one gives them more. */
-const SHOWN_MS = 6000;
 /** A press this long on a badge opens the whole card of the station. */
 const LONG_MS = 600;
 
@@ -58,16 +58,11 @@ function popupHtml(station: LiveStation): string {
  * @param layer - The layer of the badges.
  * @param station - The station.
  * @param basis - Wind the colours follow.
- * @param hold - Set while a bubble is open.
- * @param hold.on - A bubble is open.
- * @param restart - Shows the badges for 6 s more.
  */
 function addBadge(
   layer: LayerGroup,
   station: LiveStation,
   basis: string,
-  hold: { on: boolean },
-  restart: () => void,
 ): void {
   const L = leaflet();
   let pressing: ReturnType<typeof setTimeout> | undefined;
@@ -87,8 +82,6 @@ function addBadge(
         marker.closePopup();
         return;
       }
-      hold.on = true;
-      restart();
       event.popup
         .getElement()
         ?.querySelector('.live-pop-close')
@@ -96,10 +89,6 @@ function addBadge(
           buzz();
           marker.closePopup();
         });
-    })
-    .on('popupclose', () => {
-      hold.on = false;
-      restart();
     })
     .addTo(layer);
   const element = marker.getElement();
@@ -124,10 +113,9 @@ function addBadge(
 /**
  * LiveMétéo on the NavIn map: the badges of the stations of the zone (the
  * zone chosen with NavIn, else the GPS, the radius of Réglages) or of the
- * map shown (long press on Météo). They stay 6 s then fade; a touch on one
- * shows its short bubble and keeps them; a long press opens its whole card,
- * whose ◀ comes back here. A band at the top says how many: touched, it
- * shows them again; its ✕ takes them away.
+ * map shown. They stay until the button of the radius is touched (it goes
+ * with them); a touch on one shows its short bubble; a long press opens its
+ * whole card, whose ◀ comes back here. A band at the top says how many.
  * @returns The band, or nothing.
  */
 export function LiveOnMap() {
@@ -138,33 +126,15 @@ export function LiveOnMap() {
   const radiusSet = liveRadius();
   const on = asked > 0;
   const [count, setCount] = useState<number | null>(null);
-  const showAgain = useRef<() => void>(() => undefined);
   useEffect(() => {
     if (!on) return undefined;
     let closed = false;
     let layer: LayerGroup | null = null;
     let ring: Circle | null = null;
     let wait: ReturnType<typeof setTimeout> | undefined;
-    let fade: ReturnType<typeof setTimeout> | undefined;
-    const hold = { on: false };
     let center = around ? boatPlace() : mapPlace();
     let radius = around ? radiusSet : RADIUS;
     const config = windConfig();
-    const shown = (map: LeafletMap, visible: boolean) => {
-      map.getContainer().classList.toggle('live-faded', !visible);
-      ring?.setStyle({ opacity: visible ? 1 : 0 });
-    };
-    // Shown for 6 s, then faded, unless a bubble is open.
-    const restart = () => {
-      const map = tracker.current?.map;
-      if (!map || closed) return;
-      shown(map, true);
-      clearTimeout(fade);
-      fade = setTimeout(() => {
-        if (!hold.on) shown(map, false);
-      }, SHOWN_MS);
-    };
-    showAgain.current = restart;
     const draw = (stations: LiveStation[]) => {
       const map = tracker.current?.map;
       if (closed || !map) return;
@@ -172,10 +142,9 @@ export function LiveOnMap() {
       layer?.remove();
       layer = L.layerGroup().addTo(map);
       for (const station of stations) {
-        addBadge(layer, station, config.basis, hold, restart);
+        addBadge(layer, station, config.basis);
       }
       setCount(stations.length);
-      restart();
     };
     const read = () => {
       liveStations(center, radius, config.mfKey)
@@ -219,42 +188,97 @@ export function LiveOnMap() {
     return () => {
       closed = true;
       clearTimeout(wait);
-      clearTimeout(fade);
       clearInterval(timer);
       layer?.remove();
       ring?.remove();
-      tracker.current?.map?.getContainer().classList.remove('live-faded');
-      showAgain.current = () => undefined;
       setCount(null);
     };
   }, [on, asked, around, radiusSet]);
   if (!on) return null;
   return (
-    <div className="live-chip" role="status">
-      <button
-        type="button"
-        className="live-chip-txt"
-        aria-label={tr('Montrer de nouveau les stations')}
-        onClick={() => {
-          buzz();
-          showAgain.current();
-        }}
-      >
-        {tr(
-          count == null
-            ? '🌬 Lecture des stations…'
-            : `🌬 ${count} station${count > 1 ? 's' : ''} ${around ? `à moins de ${radiusSet} km` : 'sur la carte'}`,
+    <>
+      {around ? <RadiusButton /> : null}
+      <div className="live-chip" role="status">
+        <span className="live-chip-txt">
+          {tr(
+            count == null
+              ? '🌬 Lecture des stations…'
+              : `🌬 ${count} station${count > 1 ? 's' : ''} ${around ? `à moins de ${liveRadiusNm()} NM` : 'sur la carte'}`,
+          )}
+        </span>
+        {around ? null : (
+          <Button
+            type="button"
+            noUiEdit
+            className="live-chip-off"
+            aria-label={tr('Retirer les stations de la carte')}
+            onClick={hideLiveOnMap}
+          >
+            ✕
+          </Button>
         )}
-      </button>
-      <Button
-        type="button"
-        noUiEdit
-        className="live-chip-off"
-        aria-label={tr('Retirer les stations de la carte')}
-        onClick={hideLiveOnMap}
-      >
-        ✕
-      </Button>
-    </div>
+      </div>
+    </>
+  );
+}
+
+/**
+ * The button of the radius, at the left while LiveMétéo shows the stations
+ * of the zone: a dashed circle, its radius as an arrow, the centre a red
+ * cross blinking slowly, and the radius in NM. A touch takes the badges
+ * away with the button; a long press opens Réglages › LiveMétéo to change
+ * it (its ◀ comes back to the map).
+ * @returns The button.
+ */
+function RadiusButton() {
+  useSignals();
+  const tr = useTr();
+  const nm = liveRadiusNm();
+  const press = useLongPress(() => {
+    buzz();
+    go('settings', 'live');
+  });
+  return (
+    <Button
+      type="button"
+      noUiEdit
+      className={`rail-btn live-radius-btn${press.hit ? ' lp-hit' : ''}`}
+      aria-label={tr(
+        `Rayon LiveMétéo ${nm} NM · toucher : retirer les stations · appui long : changer le rayon`,
+      )}
+      onClick={hideLiveOnMap}
+      {...press.handlers}
+    >
+      <svg className="live-radius-ico" viewBox="0 0 40 40" aria-hidden="true">
+        <circle
+          cx="20"
+          cy="20"
+          r="16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeDasharray="4 3"
+        />
+        <path
+          d="M20 20h14m-4-3.5 4 3.5-4 3.5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          className="live-radius-cross"
+          d="M16.5 16.5l7 7m0-7-7 7"
+          stroke="#d0021b"
+          strokeWidth="2.8"
+          strokeLinecap="round"
+        />
+      </svg>
+      <span className="live-radius-nb">
+        {nm}
+        <sub>NM</sub>
+      </span>
+    </Button>
   );
 }

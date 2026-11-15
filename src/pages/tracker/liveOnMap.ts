@@ -43,15 +43,23 @@ export function hideLiveOnMap(): void {
   liveOnMap.value = 0;
 }
 
-/** The radii LiveMétéo offers in Réglages, in km. */
-export const LIVE_RADII = [30, 60, 120, 240] as const;
+/** The radii LiveMétéo offers in Réglages, in nautical miles. */
+export const LIVE_RADII_NM = [15, 30, 60, 120] as const;
 
 /**
- * The radius of LiveMétéo around the zone or the GPS (Réglages ›
- * LiveMétéo), 60 km by default.
+ * The radius of LiveMétéo around the zone or the GPS, in nautical miles
+ * (Réglages › LiveMétéo), 30 NM by default.
+ * @returns Nautical miles.
+ */
+export function liveRadiusNm(): number {
+  const chosen = Number(state.preferences.settings.value.liveRadiusNm);
+  return (LIVE_RADII_NM as readonly number[]).includes(chosen) ? chosen : 30;
+}
+
+/**
+ * The same radius in km, for the networks read.
  * @returns Kilometres.
  */
 export function liveRadius(): number {
-  const chosen = Number(state.preferences.settings.value.liveRadius);
-  return (LIVE_RADII as readonly number[]).includes(chosen) ? chosen : 60;
+  return Math.round(liveRadiusNm() * 1.852);
 }

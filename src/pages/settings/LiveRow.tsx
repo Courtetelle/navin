@@ -6,7 +6,7 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { updateSettings } from '../../state/index.ts';
-import { LIVE_RADII, liveRadius } from '../tracker/liveOnMap.ts';
+import { LIVE_RADII_NM, liveRadiusNm } from '../tracker/liveOnMap.ts';
 
 /**
  * Réglages › LiveMétéo: the radius of the stations shown on the map around
@@ -16,12 +16,12 @@ import { LIVE_RADII, liveRadius } from '../tracker/liveOnMap.ts';
 export function LiveRow() {
   useSignals();
   const tr = useTr();
-  const radius = liveRadius();
+  const radius = liveRadiusNm();
   return (
     <>
       <h3>{tr('Rayon autour de la zone')}</h3>
       <ButtonRow className="row c4">
-        {LIVE_RADII.map((value) => (
+        {LIVE_RADII_NM.map((value) => (
           <Button
             key={value}
             className={value === radius ? 'btn on' : 'btn'}
@@ -29,11 +29,11 @@ export function LiveRow() {
             onClick={() => {
               buzz();
               updateSettings((settings) => {
-                settings.liveRadius = value;
+                settings.liveRadiusNm = value;
               });
             }}
           >
-            {tr(`${value} km`)}
+            {tr(`${value} NM`)}
           </Button>
         ))}
       </ButtonRow>

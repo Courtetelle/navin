@@ -12765,14 +12765,7 @@ html body .wx-page.wx-one {
   max-width: 900px;
 }
 
-/* LiveMétéo on the map: the badges fade after 6 s, the band shows them again */
-.live-mk-wrap {
-  transition: opacity 0.8s ease;
-}
-.live-faded .live-mk-wrap {
-  opacity: 0;
-  pointer-events: none;
-}
+/* LiveMétéo on the map: the band says how many stations */
 .live-chip-txt {
   border: 0;
   background: none;
@@ -12785,4 +12778,58 @@ html body .wx-page.wx-one {
   margin-top: 8px;
   width: 100%;
   min-height: 44px;
+}
+
+/* The button of the radius of LiveMétéo: at the left under the dividers (X
+   and the phone sideways), under the clock (T upright); its red cross
+   blinks slowly */
+.rail-btn.live-radius-btn {
+  position: fixed;
+  z-index: 1150;
+  display: grid;
+  place-items: center;
+  gap: 0;
+  padding: 2px;
+}
+.live-radius-ico {
+  width: 30px;
+  height: 30px;
+  color: var(--primary, #0b3d91);
+}
+.live-radius-cross {
+  animation: live-radius-blink 2.4s ease-in-out infinite;
+}
+@keyframes live-radius-blink {
+  50% {
+    opacity: 0.15;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-radius-cross {
+    animation: none;
+  }
+}
+.live-radius-nb {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+.live-radius-nb sub {
+  font-size: 9px;
+  margin-left: 1px;
+}
+@media (orientation: landscape) and (min-width: 560px) {
+  html body .rail-btn.live-radius-btn {
+    top: calc(var(--rb-top) + 5 * var(--rb-step) + env(safe-area-inset-top));
+    left: var(--rb-side);
+  }
+}
+@media (orientation: portrait) {
+  html body .rail-btn.live-radius-btn {
+    top: calc(var(--rb-top) + var(--rb-step) + env(safe-area-inset-top));
+    left: var(--rb-side);
+  }
+}
+:root[data-theme='night'] .live-radius-ico {
+  color: var(--fg);
 }
