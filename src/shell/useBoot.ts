@@ -12,6 +12,7 @@ import { attachErrorLog } from '../storage/errLog.ts';
 
 import { followAutoNight } from './autoNight.ts';
 import { runBootHook } from './bootHooks.ts';
+import { installChromeLinks } from './chromeLinks.ts';
 import { loadDomains } from './domainInit.ts';
 import { errorContext } from './errorContext.ts';
 import { installFrameLinks } from './frameLinks.ts';
@@ -51,6 +52,8 @@ function boot(): void {
   installUiEditCatch();
   installRollListeners();
   installFrameLinks();
+  // Links to other sites open in Chrome, NavIn stays beside them.
+  installChromeLinks();
   installTapScrollHold();
   installPressFeedback();
   effect(() => {
