@@ -35,6 +35,7 @@ import {
 } from '../meteo/liveText.ts';
 import { showLiveAround } from '../tracker/liveOnMap.ts';
 
+import { LakeWarnings } from './LakeWarnings.tsx';
 import { LightningAlert } from './LightningAlert.tsx';
 import { PrepForecast } from './PrepForecast.tsx';
 
@@ -73,6 +74,7 @@ export function WeatherPage({ arg }: PageProps) {
   if (arg === BRIEFING) return <ForecastPage part="briefing" />;
   if (arg === ALERTS) return <AlertsPage />;
   if (arg === LIGHTNING) return <LightningPage />;
+  if (arg === LAKE_LIGHTS) return <LakeLightsPage />;
   return <WeatherMenu />;
 }
 
@@ -89,6 +91,40 @@ function openKeys() {
 function openAlerts() {
   buzz();
   go('weather', ALERTS);
+}
+
+/** Argument of the screen for the warning lights of the lakes. */
+const LAKE_LIGHTS = 'lakelights';
+
+function openLakeLights() {
+  buzz();
+  go('weather', LAKE_LIGHTS);
+}
+
+/**
+ * The warnings of MeteoSwiss for the lakes.
+ * @returns The screen content.
+ */
+function LakeLightsPage() {
+  const tr = useTr();
+  return (
+    <>
+      <PageBack
+        label="◀ Météo"
+        data-go="weather"
+        onClick={() => {
+          buzz();
+          go('weather');
+        }}
+      >
+        {tr('◀ Météo')}
+      </PageBack>
+      <TitleInNav>
+        <h1>{tr('🚨 Feux d’avis des lacs')}</h1>
+      </TitleInNav>
+      <LakeWarnings />
+    </>
+  );
 }
 
 /** Argument of the screen for the lightning alert. */
@@ -217,6 +253,19 @@ function WeatherMenu() {
             <b>{tr('Alertes de vent')}</b>
             <small>
               {tr('oui ou non, rafales ou vent moyen, échelle des couleurs')}
+            </small>
+          </span>
+        </Button>
+        <Button
+          className="btn big wx-entry"
+          data-wx="lakelights"
+          onClick={openLakeLights}
+        >
+          <span className="wx-entry-ico">🚨</span>
+          <span>
+            <b>{tr('Feux d’avis des lacs')}</b>
+            <small>
+              {tr('les avis de vent fort et de tempête de MétéoSuisse')}
             </small>
           </span>
         </Button>

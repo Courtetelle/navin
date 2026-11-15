@@ -8125,6 +8125,69 @@ h1 .help-i.help-i-h1 {
   margin: 0 0 0 8px;
   vertical-align: middle;
 }
+/* Warning lights of the lakes: a lamp flashing as on the shore */
+.wind-pop.lake-warn-pop .wp-box {
+  box-shadow:
+    0 0 0 6px #ff8c00,
+    0 18px 50px rgba(0, 0, 0, 0.45);
+}
+.lw-lamp,
+.lake-light {
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 10px;
+  border-radius: 50%;
+  background: #ff9d00;
+  box-shadow: 0 0 18px 6px rgba(255, 157, 0, 0.9);
+  animation: lake-blink var(--blink, 1.5s) steps(1, end) infinite;
+}
+.lw-meanings {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  text-align: left;
+  font-size: 15px;
+  line-height: 1.35;
+}
+.lw-meanings-title {
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.lw-meaning + .lw-meaning {
+  margin-top: 6px;
+}
+.lw-meaning.now {
+  padding: 4px 6px;
+  border-radius: 8px;
+  outline: 2px solid #ffd27a;
+}
+.lw-lake + .lw-lake {
+  margin-top: 10px;
+}
+.lake-light {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+}
+@keyframes lake-blink {
+  50% {
+    opacity: 0.35;
+    box-shadow: none;
+  }
+}
+.lake-warn-list .lw-row {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border-left: 6px solid #ff8c00;
+  background: var(--card, #fff);
+}
+.lake-warn-list .lw-row.storm {
+  border-left-color: #d0021b;
+}
 /* Lightning alert: the screen flashes, a bubble edged in yellow */
 .lightning-flash {
   position: fixed;

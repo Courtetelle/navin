@@ -124,7 +124,7 @@ export async function readLightning(
  * Where to look: the zone chosen with NavIn, else the GPS, else the map.
  * @param done - Receives the place, or null.
  */
-function lookPlace(done: (position: Position | null) => void): void {
+export function lookPlace(done: (position: Position | null) => void): void {
   if (state.view.zoneSimV.peek()) {
     const { lat, lon } = contextPlace();
     done({ lat, lon });

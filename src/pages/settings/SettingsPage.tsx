@@ -13,6 +13,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { installPrompt } from '../../features/data/install.ts';
 import { WindKeys, windAlertClick } from '../../features/onwater/index.ts';
+import { lakeWarnTest } from '../../features/onwater/lakeWarnWatch.ts';
 import { lightningTest } from '../../features/onwater/lightningWatch.ts';
 import { ShareThemePicker } from '../../features/publish/index.ts';
 import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
@@ -184,6 +185,24 @@ function TestsSection() {
           }}
         >
           {tr('▶ Test de l’alerte foudre')}
+        </Button>
+      </ButtonRow>
+      <h3>{tr('🚨 Test des feux d’avis des lacs')}</h3>
+      <p className="keep-help nav-hint">
+        {tr(
+          'Trois bips et la bulle avec la lampe qui clignote comme les feux, pour un avis de vent fort sur le Grand Lac.',
+        )}
+      </p>
+      <ButtonRow>
+        <Button
+          className="btn"
+          data-lakewarn="test"
+          onClick={() => {
+            buzz();
+            lakeWarnTest();
+          }}
+        >
+          {tr('▶ Test des feux d’avis des lacs')}
         </Button>
       </ButtonRow>
       <DepthDev key={settingsRedraws.value} inAlerts />

@@ -1,3 +1,4 @@
+import { LakeWarnPopup } from './LakeWarnPopup.tsx';
 import { LightningPopup } from './LightningPopup.tsx';
 import { PhotoView } from './PhotoView.tsx';
 import { WindFlashes, WindPopup } from './WindOverlays.tsx';
@@ -12,6 +13,7 @@ export function OnwaterOverlays() {
       <WindFlashes />
       <WindPopup />
       <LightningPopup />
+      <LakeWarnPopup />
       <PhotoView />
     </>
   );

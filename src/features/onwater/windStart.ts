@@ -43,6 +43,12 @@ export function startWindWatch(): void {
       },
     );
   });
+  // The warnings of MeteoSwiss for the lakes (the warning lights).
+  setTimeout(() => {
+    void import('./lakeWarnWatch.ts')
+      .then(({ lakeWarnWatchStart }) => lakeWarnWatchStart())
+      .catch(() => undefined);
+  }, 4000);
   // The lightning alert: on at the launch, and at once when switched.
   setTimeout(lightningStart, 3000);
   let lightningWas = lightningOn();

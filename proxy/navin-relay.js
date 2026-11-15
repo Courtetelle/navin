@@ -21,6 +21,7 @@ const HOSTS = new Set([
   'aviationweather.gov',
   'www.ndbc.noaa.gov',
   'vrijeme.hr',
+  'www.meteoschweiz.admin.ch',
 ]);
 
 /** The only pages allowed to use the relay. */
