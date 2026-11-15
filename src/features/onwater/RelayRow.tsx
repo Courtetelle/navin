@@ -12,6 +12,7 @@ import { KeyAccount } from './KeyAccount.tsx';
 import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
 import { metarReadings } from './euStations.ts';
+import { relayRecords } from './relayRecord.ts';
 
 /** A place with airports around, to try the relay. */
 const SAMPLE = { lat: 50.8, lon: -1.3 };
@@ -45,10 +46,15 @@ export function RelayRow() {
     setBusy(true);
     setResult('Essai du relais…');
     const readings = await metarReadings(SAMPLE, 60, 3, value).catch(() => []);
+    const recording = readings.length > 0 ? await relayRecords() : null;
     setBusy(false);
     setResult(
       readings.length > 0
-        ? `Relais en service : ${readings.length} aéroport(s) lu(s) à l’essai.`
+        ? `Relais en service : ${readings.length} aéroport(s) lu(s) à l’essai. ${
+            recording
+              ? 'Enregistrement actif : 24 h des stations gardées, NavIn fermé, pour tous les appareils.'
+              : 'Enregistrement pas encore installé (étapes 8 à 11 du guide).'
+          }`
         : 'Le relais ne répond pas : vérifiez son adresse.',
     );
   };

@@ -7,6 +7,7 @@ import {
 import { smnNow } from './externals.ts';
 import type { KeptReading, KeptStations } from './liveStore.ts';
 import { readKept, readStation, writeKept } from './liveStore.ts';
+import { relayPoints } from './relayRecord.ts';
 import type { StationRow } from './windModels.ts';
 
 /** One measurement of the trend. */
@@ -89,7 +90,13 @@ export async function stationHistory(
   } catch {
     points = [];
   }
-  return mergePoints(points, await seenPoints(station), now, span);
+  // What this device saw, and what the relay recorded (NavIn closed, or
+  // read by another device).
+  const [seen, relayed] = await Promise.all([
+    seenPoints(station),
+    relayPoints(`${station.net}:${station.id}`),
+  ]);
+  return mergePoints(points, mergePoints(seen, relayed, now, span), now, span);
 }
 
 async function networkHistory(

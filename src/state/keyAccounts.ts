@@ -91,6 +91,10 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
       '5. Sur Cloudflare : « Edit code », tout effacer, coller le code, puis « Deploy ».',
       '6. Copier l’adresse du Worker (https://navin-relay.<compte>.workers.dev), la coller dans NavIn sous « Relais des METAR et bouées » et toucher Enregistrer : NavIn l’essaie.',
       '7. Garder ici l’adresse mail et le mot de passe (🔐 Compte Cloudflare).',
+      '8. Enregistrement (le relais garde 24 h des stations, NavIn fermé, pour tous les appareils) : menu de gauche « Storage & Databases » › « KV » › « Create » ; le nommer « navin-past ».',
+      '9. Ouvrir le Worker « navin-relay » › « Settings » (Paramètres) › « Bindings » (Liaisons) › « Add » › « KV namespace » : nom de la variable NAVIN (en majuscules), espace « navin-past » › « Deploy ».',
+      '10. Même Worker › « Settings » › « Trigger Events » (Déclencheurs) › « Add » › « Cron Triggers » : « Every 10 minutes » (ou */10 * * * *) › « Add ».',
+      '11. Dans NavIn, toucher Enregistrer sous le relais : l’essai dit « Enregistrement actif ».',
     ].join('\n'),
     again: [
       '1. Ouvrir dash.cloudflare.com et « Log in » avec l’adresse mail et le mot de passe.',

@@ -3,6 +3,8 @@ import { lastKnownPos, state } from '../../state/index.ts';
 
 import { lakePlace, seaPlace } from './externals.ts';
 import { liveStations } from './liveStations.ts';
+import { sendToRelay } from './relayRecord.ts';
+import type { WindReading } from './windTypes.ts';
 import { windConfig } from './windWatch.ts';
 
 /** Radius of the stations recorded around each point, in km (120 km across). */
@@ -89,6 +91,7 @@ export async function recordAround(): Promise<void> {
   if (current || !navigator.onLine) return;
   const run = (async () => {
     const points = currentPoints();
+    const read: WindReading[] = [];
     for (const [index, point] of points.entries()) {
       /* eslint-disable no-await-in-loop -- one point after the other, for Météo-France */
       if (index > 0) {
@@ -96,15 +99,22 @@ export async function recordAround(): Promise<void> {
           setTimeout(resolve, BETWEEN_MS);
         });
       }
-      await liveStations(
-        { lat: point.lat, lon: point.lon },
-        RECORD_RADIUS,
-        windConfig().mfKey,
-        null,
-        { open: Infinity, mf: MF_MOST },
-      ).catch(() => []);
+      read.push(
+        ...(await liveStations(
+          { lat: point.lat, lon: point.lon },
+          RECORD_RADIUS,
+          windConfig().mfKey,
+          null,
+          { open: Infinity, mf: MF_MOST },
+        ).catch(() => [])),
+      );
       /* eslint-enable no-await-in-loop */
     }
+    // The relay records the same points NavIn closed, and keeps what was read.
+    await sendToRelay(
+      points.map(({ lat, lon }) => ({ lat, lon, km: RECORD_RADIUS })),
+      read,
+    );
   })().finally(() => {
     current = null;
   });
