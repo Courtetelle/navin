@@ -2,7 +2,12 @@ import { effect } from '@preact/signals-react';
 import { useLayoutEffect } from 'react';
 
 import { installDecimalComma } from '../components/shared/decimalComma.ts';
-import { applyKeyLink, applySkipperMenus, state } from '../state/index.ts';
+import {
+  applyKeyLink,
+  applySkipperMenus,
+  followSettingsElsewhere,
+  state,
+} from '../state/index.ts';
 import { attachErrorLog } from '../storage/errLog.ts';
 
 import { followAutoNight } from './autoNight.ts';
@@ -55,6 +60,8 @@ function boot(): void {
     );
   });
   followTheme();
+  // The settings changed in another window of NavIn are taken here too.
+  followSettingsElsewhere();
   // The menus the skipper sent, made those of the app (once).
   applySkipperMenus();
   // Opened by the camera on the QR code of a key: the key is saved.

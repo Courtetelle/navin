@@ -12430,3 +12430,34 @@ html body .lx-modal .ck-ask-box {
   font: inherit;
   line-height: 1.4;
 }
+.key-guide-part {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hair, #c9d2de);
+}
+
+/* The camera of NavIn reading the QR code of a key */
+.btn.key-scan-open {
+  width: 100%;
+  display: grid;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+.btn.key-scan-open small {
+  font-weight: 500;
+  opacity: 0.75;
+}
+.key-scan {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.key-scan-video {
+  width: min(100%, 440px);
+  aspect-ratio: 1;
+  object-fit: cover;
+  justify-self: center;
+  border-radius: 16px;
+  background: #000;
+}

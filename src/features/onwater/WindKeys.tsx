@@ -1,3 +1,4 @@
+import { KeyScan } from './KeyScan.tsx';
 import { MfKeyRow } from './MfKeyRow.tsx';
 import { RelayRow } from './RelayRow.tsx';
 import { StationKeyRow } from './StationKeyRow.tsx';
@@ -12,6 +13,7 @@ import { AEMET_KEY, MET_OFFICE_KEY } from './stationKeys.ts';
 export function WindKeys() {
   return (
     <div className="wind-alert wind-keys">
+      <KeyScan />
       <MfKeyRow />
       <StationKeyRow station={AEMET_KEY} />
       <StationKeyRow station={MET_OFFICE_KEY} />

@@ -56,3 +56,18 @@ export function updateSettings(recipe: (draft: Settings) => void): boolean {
   preferences.settings.value = produce(preferences.settings.value, recipe);
   return saveSettings();
 }
+
+/**
+ * Another window of NavIn on the device (a tab of Safari, the page of the
+ * tablet test) changed the settings: this one takes them at once, so that
+ * wind alerts cut there are cut here too.
+ */
+export function followSettingsElsewhere(): void {
+  globalThis.addEventListener?.('storage', (event: StorageEvent) => {
+    if (event.key !== 'ldb.settings') return;
+    preferences.settings.value = {
+      ...SETTINGS_DEFAULTS,
+      ...store.get<Partial<Settings>>('ldb.settings', {}),
+    };
+  });
+}

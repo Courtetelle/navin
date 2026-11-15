@@ -16,32 +16,72 @@ const ACCOUNTS_KEY = 'ldb.keyAccounts';
 /** The step-by-step guides to the keys, as the skipper changed them. */
 const GUIDES_KEY = 'ldb.keyGuides';
 
+/** The two parts of a guide: the first time, then each time after. */
+export type GuidePart = 'first' | 'again';
+
 /**
- * The guides of each key, by default: where to go on its site, step by step.
- * The names of the menus of a site may change: the pencil corrects them.
+ * The guides of each key, by default, in two parts: the first time (the
+ * account, the subscription), then each time after (logged in, the path to
+ * the key). The names of the menus of a site may change: the pencil
+ * corrects them.
  */
-export const KEY_GUIDES: Readonly<Record<string, string>> = {
-  mf: [
-    '1. Ouvrir portail-api.meteofrance.fr et se connecter (sinon « Créer un compte », puis confirmer le mail reçu).',
-    '2. Menu « APIs » : chercher « Données Publiques Observation » (DPObs) et « Souscrire » (gratuit).',
-    '3. Menu « Mes API » : ouvrir « Données Publiques Observation ».',
-    '4. « Générer token » : choisir « API Key » et la durée la plus longue, puis « Générer ».',
-    '5. Copier la clé affichée, revenir dans NavIn › Réglages › Clés météo, la coller sous « Clé API Météo-France » et toucher Enregistrer.',
-  ].join('\n'),
-  aemet: [
-    '1. Ouvrir opendata.aemet.es, puis « Obtención de API Key » (« Solicitar »).',
-    '2. Écrire son adresse mail, cocher la case et « Enviar ».',
-    '3. Ouvrir le mail d’AEMET et toucher le lien de confirmation.',
-    '4. Un second mail arrive avec la clé, une longue suite de caractères.',
-    '5. La copier, revenir dans NavIn › Réglages › Clés météo, la coller sous « Clé API AEMET » et toucher Enregistrer.',
-  ].join('\n'),
-  metoffice: [
-    '1. Ouvrir datahub.metoffice.gov.uk, « Register » : créer un compte et confirmer le mail reçu.',
-    '2. Dans le catalogue, ouvrir « Land Observations » et choisir l’offre gratuite (« Free », 360 appels par jour), puis « Subscribe ».',
-    '3. Menu « My account » › « Subscriptions » : ouvrir l’abonnement Land Observations.',
-    '4. Copier la clé (« API key ») affichée.',
-    '5. Revenir dans NavIn › Réglages › Clés météo, la coller sous « Clé API Met Office » et toucher Enregistrer.',
-  ].join('\n'),
+export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
+  mf: {
+    first: [
+      '1. Ouvrir portail-api.meteofrance.fr, toucher l’icône de profil en haut à droite, puis « Créer un compte ».',
+      '2. Remplir le formulaire (adresse mail, nom d’utilisateur, mot de passe) et valider.',
+      '3. Ouvrir le mail de Météo-France et toucher le lien : le compte est « validé par e-mail ».',
+      '4. Revenir sur le portail et se connecter (icône de profil en haut à droite).',
+      '5. Dans le catalogue ou la barre de recherche, ouvrir « Données Publiques Observation » (pas la version « Paquet »).',
+      '6. Toucher « Souscrire à l’API gratuitement ».',
+      '7. Garder ici le nom d’utilisateur et le mot de passe (🔐 Compte Météo-France), puis suivre la 2ᵉ partie pour la clé.',
+    ].join('\n'),
+    again: [
+      '1. Ouvrir portail-api.meteofrance.fr et se connecter (icône de profil en haut à droite).',
+      '2. Menu du profil › « MES API ».',
+      '3. Sur la ligne « Données Publiques Observation », toucher « Générer token ».',
+      '4. Choisir « API Key » (pas « OAuth2 », qui ne dure qu’une heure).',
+      '5. Durée de validité en secondes : écrire 0 (illimitée).',
+      '6. Toucher « Générer token » et copier la clé tout de suite : le portail ne la remontre jamais.',
+      '7. Dans NavIn › Réglages › Clés météo, la coller sous « Clé API Météo-France » et toucher Enregistrer : NavIn la vérifie.',
+      '8. Clé perdue ou refusée : refaire les étapes 2 à 7 pour en générer une nouvelle.',
+    ].join('\n'),
+  },
+  aemet: {
+    first: [
+      '1. AEMET n’a ni compte ni mot de passe : seule l’adresse mail compte, et la clé arrive par mail.',
+      '2. Ouvrir opendata.aemet.es (« centrodedescargas »), cadre « Obtención de API Key » › « Solicitar ».',
+      '3. Formulaire « Obtención API Key » : écrire l’adresse mail sans faute (« Email »), cocher la case de vérification (« Comprobación ») et toucher « Enviar ».',
+      '4. 1ᵉʳ mail (de opendata_apikey@aemet.es) : toucher son lien dans les 5 jours pour confirmer.',
+      '5. 2ᵉ mail, de la même adresse : il contient la clé, une longue suite de caractères. Garder ce mail.',
+      '6. Copier la clé en entier (le premier et le dernier caractère sont souvent oubliés), puis suivre la 2ᵉ partie.',
+    ].join('\n'),
+    again: [
+      '1. Pas de connexion : la clé est dans le 2ᵉ mail d’AEMET (de opendata_apikey@aemet.es) ; le chercher dans la messagerie.',
+      '2. La copier en entier, du premier au dernier caractère.',
+      '3. Dans NavIn › Réglages › Clés météo, la coller sous « Clé API AEMET » et toucher Enregistrer : NavIn l’essaie.',
+      '4. La clé n’expire jamais. Mail perdu ou clé refusée : en redemander une avec la 1ʳᵉ partie, la même adresse mail convient.',
+      '5. Pas de mail après quelques minutes : l’adresse était sans doute mal écrite, refaire la demande.',
+    ].join('\n'),
+  },
+  metoffice: {
+    first: [
+      '1. Ouvrir datahub.metoffice.gov.uk et toucher « Login / Register ».',
+      '2. Suivre les étapes à l’écran : écrire l’adresse mail, « Send verification code », recopier le code reçu par mail, puis choisir un mot de passe.',
+      '3. Une fois connecté : menu du profil (icône en haut à droite) › « My subscriptions » › « Subscribe ».',
+      '4. Choisir le produit « Land Observations » et l’offre gratuite (« Free », jusqu’à 360 appels par jour), puis « Subscribe ».',
+      '5. La clé (« API key ») s’affiche juste après : la copier tout de suite, elle n’est montrée qu’une fois. La coller dans NavIn (2ᵉ partie, étape 6).',
+      '6. Garder ici l’adresse mail et le mot de passe (🔐 Compte Met Office).',
+    ].join('\n'),
+    again: [
+      '1. Ouvrir datahub.metoffice.gov.uk, « Login / Register », et se connecter.',
+      '2. Mot de passe oublié : « Forgotten password », adresse mail, « Send verification code », code reçu, « Continue », puis le nouveau mot de passe deux fois.',
+      '3. Menu du profil › « My subscriptions » › abonnement « Land Observations » › « Manage ».',
+      '4. « API details / refresh credentials » : l’ancienne clé ne peut pas être remontrée.',
+      '5. Pour une nouvelle clé : « Reset Credentials » puis « Confirm », et copier la clé affichée (l’ancienne cesse de marcher).',
+      '6. Dans NavIn › Réglages › Clés météo, la coller sous « Clé API Met Office » et toucher Enregistrer : NavIn l’essaie.',
+    ].join('\n'),
+  },
 };
 
 function accounts(): Record<string, SiteAccount> {
@@ -72,24 +112,28 @@ export function saveAccount(id: string, account: SiteAccount): void {
 }
 
 /**
- * The guide to a key: the skipper's own text, else the one of NavIn.
+ * A part of the guide to a key: the skipper's own text, else the one of
+ * NavIn.
  * @param id - The site.
+ * @param part - The first time, or each time after.
  * @returns The steps, one per line.
  */
-export function keyGuide(id: string): string {
-  return guides()[id] ?? KEY_GUIDES[id] ?? '';
+export function keyGuide(id: string, part: GuidePart): string {
+  return guides()[`${id}.${part}`] ?? KEY_GUIDES[id]?.[part] ?? '';
 }
 
 /**
- * Keep the guide to a key as the skipper wrote it; an empty text gives back
- * the one of NavIn.
+ * Keep a part of the guide to a key as the skipper wrote it; an empty text
+ * gives back the one of NavIn.
  * @param id - The site.
+ * @param part - The first time, or each time after.
  * @param text - The steps.
  */
-export function saveGuide(id: string, text: string): void {
+export function saveGuide(id: string, part: GuidePart, text: string): void {
+  const name = `${id}.${part}`;
   const clean = text.trim();
-  const others = Object.entries(guides()).filter(([site]) => site !== id);
-  if (clean && clean !== KEY_GUIDES[id]) others.push([id, clean]);
+  const others = Object.entries(guides()).filter(([kept]) => kept !== name);
+  if (clean && clean !== KEY_GUIDES[id]?.[part]) others.push([name, clean]);
   store.set(GUIDES_KEY, Object.fromEntries(others));
 }
 

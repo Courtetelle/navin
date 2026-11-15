@@ -150,6 +150,8 @@ function fireWind(
   level: number,
   meta: WindMeta,
 ): void {
+  // Switched off while the wind was being read: no alert.
+  if (!windConfig().on) return;
   const watch: WindWatch = {
     at: Date.now(),
     top,

@@ -27,6 +27,20 @@ export function startWindWatch(): void {
       windWatchStart(),
     );
   }, 2000);
+  // The alerts switched on or off (here or in another window of NavIn):
+  // the watch starts or stops at once.
+  let alertsWere = alertsOn();
+  state.preferences.settings.subscribe(() => {
+    const now = alertsOn();
+    if (now === alertsWere) return;
+    alertsWere = now;
+    void import('./windWatch.ts').then(
+      ({ resetWindSignal, windWatchStart }) => {
+        resetWindSignal();
+        windWatchStart();
+      },
+    );
+  });
   // Once a week: has SOCIB changed its instruments?
   setTimeout(() => {
     void import('./socibWatch.ts').then(({ checkSocib }) => checkSocib());

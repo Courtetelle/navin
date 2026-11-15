@@ -27,9 +27,9 @@ test('the accounts and the guides of the keys go in the full backup', () => {
     user: 'marin',
     password: 'secret-123',
   });
-  saveGuide('aemet', '1. Ma façon');
-  expect(keyGuide('aemet')).toBe('1. Ma façon');
-  expect(keyGuide('mf')).toBe(KEY_GUIDES.mf);
+  saveGuide('aemet', 'again', '1. Ma façon');
+  expect(keyGuide('aemet', 'again')).toBe('1. Ma façon');
+  expect(keyGuide('mf', 'first')).toBe(KEY_GUIDES.mf?.first);
   const book = backupAll().data.keyBook;
   expect(book).toStrictEqual({
     accounts: {
@@ -39,11 +39,11 @@ test('the accounts and the guides of the keys go in the full backup', () => {
         password: 'secret-123',
       },
     },
-    guides: { aemet: '1. Ma façon' },
+    guides: { 'aemet.again': '1. Ma façon' },
   });
   // An emptied guide comes back to the one of NavIn.
-  saveGuide('aemet', '  ');
-  expect(keyGuide('aemet')).toBe(KEY_GUIDES.aemet);
+  saveGuide('aemet', 'again', '  ');
+  expect(keyGuide('aemet', 'again')).toBe(KEY_GUIDES.aemet?.again);
   // Another device: its empty fields are filled, what it wrote stays.
   setStorageBackend(createMemoryStorage());
   saveAccount('mf', { url: '', user: 'autre', password: '' });
@@ -53,9 +53,9 @@ test('the accounts and the guides of the keys go in the full backup', () => {
     user: 'autre',
     password: 'secret-123',
   });
-  expect(keyGuide('aemet')).toBe('1. Ma façon');
+  expect(keyGuide('aemet', 'again')).toBe('1. Ma façon');
   mergeKeyBook('nonsense');
   expect(store.get('ldb.keyGuides', {})).toStrictEqual({
-    aemet: '1. Ma façon',
+    'aemet.again': '1. Ma façon',
   });
 });

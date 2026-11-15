@@ -52,20 +52,43 @@ export function readKeyLink(
 }
 
 /**
- * NavIn opened by the camera on the QR code of a key: the key is saved in
- * the settings, said in a bubble, and taken out of the address at once.
- * @returns Whether a key came: the tip of the start then gives way to its bubble.
+ * Save the key a link brings (the text of its QR code).
+ * @param text - The link.
+ * @returns The name of the network of the key saved, or null.
  */
-export function applyKeyLink(): boolean {
-  const { location, history } = globalThis;
-  if (!location?.hash) return false;
-  const found = readKeyLink(location.hash);
-  if (!found) return false;
-  history.replaceState(null, '', location.pathname + location.search);
+export function saveKeyLink(text: string): string | null {
+  let hash = '';
+  try {
+    hash = new URL(text).hash;
+  } catch {
+    return null;
+  }
+  const found = readKeyLink(hash);
+  if (!found) return null;
   const { setting, name } = KEY_LINKS[found.id];
   updateSettings((settings) => {
     settings.windAlert = { ...settings.windAlert, [setting]: found.key };
   });
-  toast(`Clé ${name} reçue par QR code et enregistrée`);
+  return name;
+}
+
+/**
+ * NavIn opened by the camera on the QR code of a key: the key is saved in
+ * the settings, said in a bubble, and taken out of the address at once. In
+ * Safari of an iPhone, NavIn of the home screen keeps its own settings: the
+ * bubble says to read the code from NavIn itself.
+ * @returns Whether a key came: the tip of the start then gives way to its bubble.
+ */
+export function applyKeyLink(): boolean {
+  const { location, history, navigator } = globalThis;
+  if (!location?.hash || !readKeyLink(location.hash)) return false;
+  const name = saveKeyLink(location.href);
+  history.replaceState(null, '', location.pathname + location.search);
+  const safari = (navigator as { standalone?: boolean }).standalone === false;
+  toast(
+    safari
+      ? `Clé ${name} reçue dans Safari. Pour NavIn de l’écran d’accueil : y ouvrir Réglages › Clés météo › 📥 Importer une clé`
+      : `Clé ${name} reçue par QR code et enregistrée`,
+  );
   return true;
 }

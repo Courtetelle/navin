@@ -6,6 +6,19 @@ import type { SiteAccount } from '../../state/index.ts';
 import { saveAccount, siteAccount, toast } from '../../state/index.ts';
 
 /**
+ * Copy a text of the account, to paste it on the site.
+ * @param text - The text.
+ * @param said - The bubble once copied.
+ */
+function copy(text: string, said: string): void {
+  buzz();
+  navigator.clipboard
+    .writeText(text)
+    .then(() => toast(said))
+    .catch(() => toast('Copie impossible sur cet appareil'));
+}
+
+/**
  * Under a key: a button that opens a small form, the exact address of the
  * site (a link to open it), the user name and the password, so as never to
  * forget them. Kept on the device and in the full backup.
@@ -75,9 +88,39 @@ export function KeyAccount({
           href={account.url}
           target="_blank"
           rel="noreferrer"
+          onClick={() => {
+            // A page cannot fill the fields of another site: the password
+            // waits in the clipboard, to paste in its field there.
+            if (account.password) {
+              copy(
+                account.password,
+                'Mot de passe copié : le coller dans le champ du site',
+              );
+            }
+          }}
         >
           ↗ Ouvrir {account.url.replace(/^https?:\/\//, '')}
         </a>
+      ) : null}
+      {account.user || account.password ? (
+        <div className="row c2 key-account-copy">
+          <Button
+            type="button"
+            className="btn"
+            disabled={!account.user}
+            onClick={() => copy(account.user, 'Nom d’utilisateur copié')}
+          >
+            📋 Copier l’utilisateur
+          </Button>
+          <Button
+            type="button"
+            className="btn"
+            disabled={!account.password}
+            onClick={() => copy(account.password, 'Mot de passe copié')}
+          >
+            📋 Copier le mot de passe
+          </Button>
+        </div>
       ) : null}
       <label>
         <span>Nom d’utilisateur</span>
@@ -117,7 +160,10 @@ export function KeyAccount({
       </label>
       <p className="help">
         Gardé sur cet appareil et dans la sauvegarde complète, pour le retrouver
-        sur un autre appareil ; jamais dans un partage.
+        sur un autre appareil ; jamais dans un partage. Ouvrir le site copie le
+        mot de passe, prêt à coller. Pour une connexion automatique,
+        l’enregistrer une fois dans les mots de passe de l’appareil quand le
+        site le propose.
       </p>
       <div className="row c2">
         <Button type="button" className="btn" onClick={() => setOpen(false)}>
