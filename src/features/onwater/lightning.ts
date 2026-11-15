@@ -26,6 +26,8 @@ export interface LightningSettings {
   on?: boolean;
   /** Its radius, in nautical miles. */
   radiusNm?: number;
+  /** The flashes on the map; yes unless false. */
+  map?: boolean;
 }
 
 /** A point and the circle around it. */
@@ -70,6 +72,17 @@ export function lightningRadiusNm(
   return (LIGHTNING_RADII_NM as readonly number[]).includes(chosen)
     ? chosen
     : LIGHTNING_RADIUS_NM;
+}
+
+/**
+ * Whether the flashes are on the map (Météo › Alerte foudre), yes by default.
+ * @param settings - The lightning settings.
+ * @returns True to show them.
+ */
+export function lightningOnMap(
+  settings: LightningSettings | undefined,
+): boolean {
+  return settings?.map !== false;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { Circle, LayerGroup, TileLayer } from 'leaflet';
+import type { Circle, LayerGroup } from 'leaflet';
 import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
@@ -8,10 +8,6 @@ import { leaflet } from '../../features/map/leaflet.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
 import { liveStations, windConfig } from '../../features/onwater/index.ts';
-import {
-  LIGHTNING_LAYER,
-  LIGHTNING_WMS,
-} from '../../features/onwater/lightning.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
@@ -145,7 +141,6 @@ export function LiveOnMap() {
     let closed = false;
     let layer: LayerGroup | null = null;
     let ring: Circle | null = null;
-    let flashes: TileLayer.WMS | null = null;
     let wait: ReturnType<typeof setTimeout> | undefined;
     let center = around ? boatPlace() : mapPlace();
     let radius = around ? radiusSet : RADIUS;
@@ -189,18 +184,6 @@ export function LiveOnMap() {
         map.fitBounds(middle.toBounds(2 * radius * 1000), {
           padding: [16, 16],
         });
-        // The lightning of the last 5 minutes seen by the satellite MTG.
-        flashes?.remove();
-        flashes = L.tileLayer
-          .wms(LIGHTNING_WMS, {
-            layers: LIGHTNING_LAYER,
-            format: 'image/png',
-            transparent: true,
-            opacity: 0.85,
-            className: 'live-flashes',
-            attribution: 'Éclairs : EUMETSAT MTG',
-          })
-          .addTo(map);
       } else {
         // The map shown: from its middle to its corners.
         const middle = map.getCenter();
@@ -211,18 +194,13 @@ export function LiveOnMap() {
       read();
     };
     start();
-    const timer = setInterval(() => {
-      read();
-      // A new image of the lightning every 5 minutes.
-      flashes?.setParams({ fresh: Date.now() } as never);
-    }, REFRESH_MS);
+    const timer = setInterval(read, REFRESH_MS);
     return () => {
       closed = true;
       clearTimeout(wait);
       clearInterval(timer);
       layer?.remove();
       ring?.remove();
-      flashes?.remove();
       setCount(null);
     };
   }, [on, asked, around, radiusSet]);

@@ -8,6 +8,7 @@ import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import type { LightningSettings } from '../../features/onwater/lightning.ts';
 import {
   LIGHTNING_RADII_NM,
+  lightningOnMap,
   lightningRadiusNm,
   lightningText,
 } from '../../features/onwater/lightning.ts';
@@ -46,6 +47,7 @@ export function LightningAlert() {
     {}) as LightningSettings;
   const on = Boolean(settings.on);
   const radiusNm = lightningRadiusNm(settings);
+  const onMap = lightningOnMap(settings);
   const last = lightningLast.value;
   const busy = lightningBusy.value;
   useEffect(() => {
@@ -63,6 +65,15 @@ export function LightningAlert() {
         </Button>
         <Button className="btn" data-lightning="map" onClick={showLiveAround}>
           {tr('🗺 Voir sur la carte')}
+        </Button>
+      </ButtonRow>
+      <ButtonRow className="row">
+        <Button
+          className={onMap ? 'btn on' : 'btn'}
+          data-lightning="onmap"
+          onClick={() => change({ map: !onMap })}
+        >
+          {tr(`🗺 Éclairs toujours sur la carte : ${onMap ? 'OUI' : 'NON'}`)}
         </Button>
       </ButtonRow>
       <h3>{tr('Rayon autour de la zone')}</h3>
@@ -106,8 +117,10 @@ export function LightningAlert() {
         nettement ou sont encore là 15 minutes après. L’image arrive avec
         environ 10 minutes de retard et montre des zones d’activité, pas chaque
         impact : c’est une aide, pas un système d’alerte officiel. Sur la carte
-        LiveMétéo, les éclairs des 5 dernières minutes sont en jaune (1 éclair)
-        à rouge foncé (20 et plus).
+        de NavIn, les éclairs des 20 dernières minutes sont toujours affichés,
+        sans rien demander, même alerte coupée : les plus récents vifs, ceux de
+        10 et 20 minutes plus pâles, pour voir où va l’orage ; jaune pour 1
+        éclair en 5 minutes, rouge foncé pour 20 et plus.
       </HelpText>
       <SiteLink
         id="blitzortung"

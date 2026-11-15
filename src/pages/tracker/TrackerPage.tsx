@@ -17,6 +17,7 @@ import {
 import { useBodyClass } from '../../shell/bodyClass.ts';
 import { state } from '../../state/index.ts';
 
+import { LightningOnMap } from './LightningOnMap.tsx';
 import { LiveOnMap } from './LiveOnMap.tsx';
 import { PhoneTrackButton } from './PhoneTrackButton.tsx';
 import { TrackerDash } from './TrackerDash.tsx';
@@ -74,6 +75,7 @@ export function TrackerPage() {
       <PhoneTrackButton />
       <TrackerOverlay />
       <LiveOnMap />
+      <LightningOnMap />
     </div>
   );
 }
