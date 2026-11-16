@@ -43,9 +43,6 @@ export function LakeWarnings() {
   useSignals();
   const tr = useTr();
   const { warnings, at, trouble } = lakeWarnState.value;
-  const settings = (state.preferences.settings.value.lakeWarn ??
-    {}) as LakeWarnSettings;
-  const on = settings.on !== false;
   const [busy, setBusy] = useState(false);
   const read = () => {
     setBusy(true);
@@ -118,33 +115,7 @@ export function LakeWarnings() {
           ))}
         </>
       ) : null}
-      <h3>{tr('Le sens des feux sur les rives')}</h3>
-      {LIGHT_MEANINGS.map((meaning) => (
-        <div
-          key={meaning.level}
-          className={meaning.level >= 3 ? 'lw-row storm' : 'lw-row'}
-          data-lakewarn="meaning"
-        >
-          <Lamp perMinute={meaning.perMinute} />
-          <div>
-            <b>{tr(`${meaning.perMinute} éclats/min · ${meaning.title}`)}</b>
-            <div>{tr(meaning.text)}</div>
-          </div>
-        </div>
-      ))}
-      <ButtonRow className="row c2">
-        <Button
-          className={on ? 'btn on' : 'btn'}
-          data-lakewarn="toggle"
-          onClick={() => {
-            buzz();
-            updateSettings((next) => {
-              next.lakeWarn = { ...(next.lakeWarn as object), on: !on };
-            });
-          }}
-        >
-          {tr(`🚨 Alerte des feux : ${on ? 'OUI' : 'NON'}`)}
-        </Button>
+      <ButtonRow className="row">
         <Button
           className="btn"
           data-lakewarn="read"
@@ -168,9 +139,55 @@ export function LakeWarnings() {
         feux au milieu de chaque lac en alerte. L’alarme et la bulle ne
         concernent que la partie du Léman où vous êtes, d’après le GPS.
         MétéoSuisse publie ces avis sur son site sans les documenter comme
-        données ouvertes : la lecture peut cesser si le site change. Le test est
-        dans Réglages › Tests.
+        données ouvertes : la lecture peut cesser si le site change. L’alerte
+        oui ou non et le sens des feux sont dans Réglages › Paramétrage des feux
+        d’avis des lacs ; le test dans Réglages › Tests.
       </HelpText>
+    </div>
+  );
+}
+
+/**
+ * The setting of the warning lights of the lakes (Réglages): the alert on
+ * or off, and what the lights on the shores mean.
+ * @returns The block.
+ */
+export function LakeWarnSetting() {
+  useSignals();
+  const tr = useTr();
+  const settings = (state.preferences.settings.value.lakeWarn ??
+    {}) as LakeWarnSettings;
+  const on = settings.on !== false;
+  return (
+    <div className="lake-warn-list">
+      <ButtonRow className="row">
+        <Button
+          className={on ? 'btn on' : 'btn'}
+          data-lakewarn="toggle"
+          onClick={() => {
+            buzz();
+            updateSettings((next) => {
+              next.lakeWarn = { ...(next.lakeWarn as object), on: !on };
+            });
+          }}
+        >
+          {tr(`🚨 Alerte des feux : ${on ? 'OUI' : 'NON'}`)}
+        </Button>
+      </ButtonRow>
+      <h3>{tr('Le sens des feux sur les rives')}</h3>
+      {LIGHT_MEANINGS.map((meaning) => (
+        <div
+          key={meaning.level}
+          className={meaning.level >= 3 ? 'lw-row storm' : 'lw-row'}
+          data-lakewarn="meaning"
+        >
+          <Lamp perMinute={meaning.perMinute} />
+          <div>
+            <b>{tr(`${meaning.perMinute} éclats/min · ${meaning.title}`)}</b>
+            <div>{tr(meaning.text)}</div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

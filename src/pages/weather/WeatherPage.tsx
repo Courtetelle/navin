@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
 import { PageLink } from '../../components/shared/PageLink.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
@@ -14,6 +15,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtTime } from '../../lib/format.ts';
 import type { WeatherCheck } from '../../model/weatherChecks.ts';
+import { exitOrigin } from '../../shell/exitOrigin.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
@@ -78,18 +80,16 @@ export function WeatherPage({ arg }: PageProps) {
   return <WeatherMenu />;
 }
 
-/** The wind alerts are set in Réglages: the bubble says Météo is left. */
-function openWindSettings() {
+/**
+ * The settings of the weather (wind alerts, lake lights, keys) are in
+ * Réglages: the bubble says Météo is left; « Revenir » at the bottom of
+ * Réglages comes back.
+ */
+function openSettings() {
   buzz();
-  toast('Vous sortez du menu Météo : Réglages › Paramétrage des alertes vent');
-  go('settings', 'wind');
-}
-
-/** The keys stay in Réglages: the bubble says the Météo menu is left. */
-function openKeys() {
-  buzz();
-  toast('Vous sortez du menu Météo : Réglages › Clés météo');
-  go('settings', 'keys');
+  toast('Vous sortez du menu Météo : Réglages');
+  exitOrigin.value = 'weather';
+  go('settings');
 }
 
 /** Argument of the screen for the warning lights of the lakes. */
@@ -169,62 +169,6 @@ function gpsHere(): { lat: number; lon: number } | null {
 }
 
 /**
- * An entry of the Météo menu that leaves it for Réglages: the blue sign of
- * going out at its left.
- * @param props - The entry.
- * @param props.wx - Its `data-wx`.
- * @param props.title - Its title.
- * @param props.aria - What it says to a screen reader.
- * @param props.onClick - Where it goes.
- * @returns The button.
- */
-function ExitEntry({
-  wx,
-  title,
-  aria,
-  onClick,
-}: {
-  wx: string;
-  title: string;
-  aria: string;
-  onClick: () => void;
-}) {
-  const tr = useTr();
-  return (
-    <Button
-      className="btn big wx-entry wx-keys-link"
-      data-wx={wx}
-      aria-label={tr(aria)}
-      onClick={onClick}
-    >
-      <span className="wx-entry-ico exit-box" aria-hidden="true">
-        <svg className="exit-ico" viewBox="0 0 30 40">
-          <path
-            d="M17 3H8a6 6 0 0 0-6 6v22a6 6 0 0 0 6 6h9"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-          />
-          <path
-            d="M11 20h17m-6-6 6 6-6 6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-      <span>
-        <b>{tr(title)}</b>
-        <small>{tr('sortir du menu Météo, vers Réglages')}</small>
-      </span>
-    </Button>
-  );
-}
-
-/**
  * The menu of Météo, opened by its button straight from the map (no ◀):
  * the weather check-list, the forecast here, the LiveMétéo stations on the
  * map (also a long press on the button), and LiveMétéo itself.
@@ -233,7 +177,6 @@ function ExitEntry({
 function WeatherMenu() {
   useSignals();
   const tr = useTr();
-  const [here, setHere] = useState(false);
   // The warning lights of the Swiss lakes: only with NavIn on a lake, or the
   // GPS in Switzerland.
   const lakeLights = isLake() || navZone() === 'lac' || inSwissArea(gpsHere());
@@ -245,69 +188,16 @@ function WeatherMenu() {
       <div className="wx-menu">
         <Button
           className="btn big wx-entry"
-          data-wx="check"
-          onClick={openBriefing}
-        >
-          <span className="wx-entry-ico">✅</span>
-          <span>
-            <b>{tr('Briefing météo')}</b>
-            <small>{tr('les points à vérifier avant le départ')}</small>
-          </span>
-        </Button>
-        <Button
-          className="btn big wx-entry"
           data-wx="forecast"
           onClick={openForecast}
         >
-          <span className="wx-entry-ico">🗓</span>
+          <span className="wx-entry-ico">📈</span>
           <span>
             <b>{tr('Prévisions')}</b>
             <small>
-              {tr('les 12 prochaines heures, sources officielles, échelles')}
-            </small>
-          </span>
-        </Button>
-        <Button
-          className="btn big wx-entry"
-          data-wx="here"
-          aria-expanded={here}
-          onClick={() => {
-            buzz();
-            setHere(!here);
-          }}
-        >
-          <span className="wx-entry-ico">📈</span>
-          <span>
-            <b>{tr('Prévision ici')}</b>
-            <small>{tr('maintenant, dans 3 h, ce soir, demain matin')}</small>
-          </span>
-        </Button>
-        {here ? <PrepForecast /> : null}
-        {lakeLights ? (
-          <Button
-            className="btn big wx-entry"
-            data-wx="lakelights"
-            onClick={openLakeLights}
-          >
-            <span className="wx-entry-ico">🚨</span>
-            <span>
-              <b>{tr('Feux d’avis des lacs')}</b>
-              <small>
-                {tr('les avis de vent fort et de tempête de MétéoSuisse')}
-              </small>
-            </span>
-          </Button>
-        ) : null}
-        <Button
-          className="btn big wx-entry"
-          data-wx="lightning"
-          onClick={openLightning}
-        >
-          <span className="wx-entry-ico">⚡</span>
-          <span>
-            <b>{tr('Alerte foudre')}</b>
-            <small>
-              {tr('les éclairs vus par satellite dans le rayon choisi')}
+              {tr(
+                'ici maintenant, dans 3 h, ce soir, demain matin ; les 12 prochaines heures, sources officielles, échelles',
+              )}
             </small>
           </span>
         </Button>
@@ -326,18 +216,61 @@ function WeatherMenu() {
             </small>
           </span>
         </Button>
-        <ExitEntry
-          wx="wind"
-          title="🔔 Paramétrage des alertes vent"
-          aria="Sortir du menu Météo vers Réglages › Paramétrage des alertes vent"
-          onClick={openWindSettings}
-        />
-        <ExitEntry
-          wx="keys"
-          title="🔑 Clés météo"
-          aria="Sortir du menu Météo vers Réglages › Clés météo"
-          onClick={openKeys}
-        />
+        <Button
+          className="btn big wx-entry"
+          data-wx="lightning"
+          onClick={openLightning}
+        >
+          <span className="wx-entry-ico">⚡</span>
+          <span>
+            <b>{tr('Alerte foudre')}</b>
+            <small>
+              {tr('les éclairs vus par satellite dans le rayon choisi')}
+            </small>
+          </span>
+        </Button>
+        {lakeLights ? (
+          <Button
+            className="btn big wx-entry"
+            data-wx="lakelights"
+            onClick={openLakeLights}
+          >
+            <span className="wx-entry-ico">🚨</span>
+            <span>
+              <b>{tr('Feux d’avis des lacs')}</b>
+              <small>
+                {tr('les avis de vent fort et de tempête de MétéoSuisse')}
+              </small>
+            </span>
+          </Button>
+        ) : null}
+        <Button
+          className="btn big wx-entry"
+          data-wx="check"
+          onClick={openBriefing}
+        >
+          <span className="wx-entry-ico">✅</span>
+          <span>
+            <b>{tr('Briefing météo')}</b>
+            <small>{tr('les points à vérifier avant le départ')}</small>
+          </span>
+        </Button>
+        <Button
+          className="btn big wx-entry wx-keys-link"
+          data-wx="settings"
+          aria-label={tr('Sortir du menu Météo vers Réglages : Paramétrages')}
+          onClick={openSettings}
+        >
+          <ExitIcon />
+          <span>
+            <b>{tr('⚙️ Paramétrages')}</b>
+            <small>
+              {tr(
+                'alertes vent, feux des lacs, clés météo : sortir du menu Météo, vers Réglages',
+              )}
+            </small>
+          </span>
+        </Button>
       </div>
     </>
   );
@@ -390,6 +323,7 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
         </h1>
       </TitleInNav>
       <div className="wx-page wx-one">
+        {part === 'forecast' ? <PrepForecast /> : null}
         {part === 'forecast' ? (
           <section className="wx-fc">
             <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>

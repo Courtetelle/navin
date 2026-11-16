@@ -10,6 +10,7 @@ import {
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { installPrompt } from '../../features/data/install.ts';
 import {
@@ -27,12 +28,14 @@ import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { BUILD_ID } from '../../model/buildId.ts';
+import { exitOrigin } from '../../shell/exitOrigin.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
 import { toggleTheme } from '../../shell/theme.ts';
 import { UiEditSection } from '../../shell/uiEdit/UiEditSection.tsx';
 import { nightOK, state, toast } from '../../state/index.ts';
+import { LakeWarnSetting } from '../weather/LakeWarnings.tsx';
 
 import { BackupSections } from './BackupSections.tsx';
 import { InstallGuide } from './InstallGuide.tsx';
@@ -64,6 +67,11 @@ interface SettingsSectionProps {
   title: string;
   children: ReactNode;
 }
+
+/** Where « Revenir » goes back to, as it says it. */
+const ORIGIN_NAMES: Readonly<Record<string, string>> = {
+  weather: 'au menu Météo',
+};
 
 /** The section shown, empty on the menu of the settings. */
 const ShownSection = createContext('');
@@ -262,6 +270,13 @@ export function SettingsPage({ from, arg }: PageProps) {
   const [elsewhere] = useState(() => Boolean(section) && from !== 'settings');
   // Réglages forgets the history: the screen it came from is kept here.
   const [cameFrom] = useState(() => from || 'tracker');
+  // Opened by a « sortir vers Réglages » link: « Revenir » at the bottom,
+  // on every page of Réglages, until it is left another way.
+  const [origin] = useState(() => {
+    const kept = exitOrigin.peek();
+    if (kept && from !== 'settings' && from !== kept) exitOrigin.value = null;
+    return exitOrigin.peek();
+  });
   useLayoutEffect(() => {
     enterSettings(redrawn.current);
   }, []);
@@ -321,7 +336,16 @@ export function SettingsPage({ from, arg }: PageProps) {
           >
             <WindAlert noTest />
           </SettingsSection>
-          <SettingsSection section="keys" title="🔑 Clés météo">
+          <SettingsSection
+            section="lakes"
+            title="🚨 Paramétrage des feux d’avis des lacs"
+          >
+            <LakeWarnSetting />
+          </SettingsSection>
+          <SettingsSection
+            section="keys"
+            title="🔑 Enregistrement des clés météo et du compte relais Cloudflare"
+          >
             <WindKeys />
           </SettingsSection>
           <SettingsSection section="alert" title="⚠️ Alerte de profondeur">
@@ -361,6 +385,26 @@ export function SettingsPage({ from, arg }: PageProps) {
           </SettingsSection>
         </div>
       </ShownSection.Provider>
+      {origin ? (
+        <Button
+          className="btn big wx-entry wx-keys-link set-return"
+          data-set="return"
+          aria-label={tr('Revenir là d’où vous êtes venu')}
+          onClick={() => {
+            buzz();
+            exitOrigin.value = null;
+            go(origin);
+          }}
+        >
+          <ExitIcon back />
+          <span>
+            <b>{tr('Revenir')}</b>
+            <small>
+              {tr(ORIGIN_NAMES[origin] ?? 'là d’où vous êtes venu')}
+            </small>
+          </span>
+        </Button>
+      ) : null}
       {section ? null : (
         <p className="help" id="buildId">
           Version {BUILD_ID}

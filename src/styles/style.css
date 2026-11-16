@@ -12722,6 +12722,10 @@ html body .lx-modal .ck-ask-box {
 :root[data-theme='night'] .exit-ico {
   color: var(--fg);
 }
+/* « Revenir »: the same sign the other way, the arrow going back */
+.exit-back .exit-ico {
+  transform: scaleX(-1);
+}
 
 /* The bubble of a station on the NavIn map: its last 24 hours */
 .live-pop-trend {
