@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 
 import type { LiveStation } from '../../../features/onwater/index.ts';
-import { alertStation } from '../useLiveMap.ts';
+import { alertStation } from '../alertStation.ts';
 
 function station(id: string, lat: number, lon: number): LiveStation {
   return {

@@ -98,11 +98,26 @@ export function newTracker(): TrackerHandle {
 }
 
 /**
+ * The last position of the boat shown (GPS or instruments), kept when the
+ * map closes: the menus ask where the boat is (in Switzerland or not).
+ */
+let boatSeen: { lat: number; lon: number; at: number } | null = null;
+
+/**
+ * The last position of the boat shown, if fresher than 12 hours.
+ * @returns The position, or null.
+ */
+export function lastBoatSeen(): { lat: number; lon: number } | null {
+  return boatSeen && Date.now() - boatSeen.at < 12 * 3600e3 ? boatSeen : null;
+}
+
+/**
  * Show a position on the open tracker (legacy `trkFix`): boat arrow, accuracy
  * circle, course, map follow and dashboard.
  * @param fix - The position.
  */
 export function trkFix(fix: TrackerFix): void {
+  boatSeen = { lat: fix.lat, lon: fix.lon, at: Date.now() };
   const handle = tracker.current;
   const { map } = handle ?? {};
   if (!handle || !map || state.view.currentView.value !== 'tracker') return;

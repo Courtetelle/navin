@@ -8,16 +8,23 @@ import { leaflet } from '../../features/map/leaflet.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { showZoomOnMap } from '../../features/map/zoomShown.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
-import { liveStations, windConfig } from '../../features/onwater/index.ts';
+import {
+  liveAlertAsk,
+  liveAlertSpot,
+  liveStations,
+  windConfig,
+} from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
+import { alertStation } from '../meteo/alertStation.ts';
 import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
 import { blinkKey, liveBlink, liveDetail } from '../meteo/liveDetail.ts';
 import { ageText, compassPoint, stationBadgeHtml } from '../meteo/liveText.ts';
 
 import {
   hideLiveOnMap,
+  layLiveAround,
   liveOnMap,
   liveOnMapAround,
   liveRadius,
@@ -64,6 +71,7 @@ function addBadge(
   layer: LayerGroup,
   station: LiveStation,
   basis: string,
+  mark: 'none' | 'crown' | 'blink',
 ): void {
   const L = leaflet();
   let pressing: ReturnType<typeof setTimeout> | undefined;
@@ -94,15 +102,21 @@ function addBadge(
     .addTo(layer);
   const element = marker.getElement();
   if (!element) return;
-  // Back from « voir sur la carte » on its card: the badge blinks 3 times.
-  if (liveBlink.peek() === blinkKey(station)) {
-    liveBlink.value = null;
+  // The station of the card just seen, or of the wind alert: larger, a
+  // white crown and a red halo that pulses, its name below; it first blinks
+  // 3 times.
+  if (mark !== 'none') {
+    marker.setZIndexOffset(1000);
+    element.classList.add('live-alerted');
+  }
+  if (mark === 'blink') {
     element.classList.add('live-blink');
-    element.addEventListener(
-      'animationend',
-      () => element.classList.remove('live-blink'),
-      { once: true },
-    );
+    const done = (event: AnimationEvent) => {
+      if (event.animationName !== 'live-blink') return;
+      element.classList.remove('live-blink');
+      element.removeEventListener('animationend', done);
+    };
+    element.addEventListener('animationend', done);
   }
   // A long press: the whole card of the station, ◀ back here.
   element.addEventListener('pointerdown', () => {
@@ -141,13 +155,27 @@ export function LiveOnMap() {
   useEffect(() => {
     if (asked > 0) showZoomOnMap();
   }, [asked]);
+  // « LiveMétéo » of a wind alert: the stations around the boat.
+  const alertAsked = liveAlertAsk.value;
+  useEffect(() => {
+    if (alertAsked === 0) return;
+    liveAlertAsk.value = 0;
+    layLiveAround();
+  }, [alertAsked]);
   useEffect(() => {
     if (!on) return undefined;
     let closed = false;
     let layer: LayerGroup | null = null;
     let ring: Circle | null = null;
+    let zone: Circle | null = null;
     let wait: ReturnType<typeof setTimeout> | undefined;
-    let center = around ? boatPlace() : mapPlace();
+    // The wind alert this was opened from, and the station whose card was
+    // just seen (« voir sur la carte »): crowned; they blink the first time.
+    // Taken once drawn (not here: an effect run twice would lose them).
+    const alert = liveAlertSpot.peek();
+    const seen = liveBlink.peek();
+    let blinked = false;
+    let center = around ? (alert?.boat ?? boatPlace()) : mapPlace();
     let radius = around ? radiusSet : RADIUS;
     const config = windConfig();
     const draw = (stations: LiveStation[]) => {
@@ -156,9 +184,28 @@ export function LiveOnMap() {
       const L = leaflet();
       layer?.remove();
       layer = L.layerGroup().addTo(map);
+      const alerted =
+        alert && !alert.zone
+          ? alertStation(stations, alert.lat, alert.lon)
+          : undefined;
+      const crowned = seen ?? (alerted ? blinkKey(alerted) : null);
       for (const station of stations) {
-        addBadge(layer, station, config.basis);
+        const key = blinkKey(station);
+        let mark: 'none' | 'crown' | 'blink' = 'none';
+        if (key === crowned) mark = blinked ? 'crown' : 'blink';
+        addBadge(layer, station, config.basis, mark);
+        // Back from its card: the map comes to the badge if it is out of
+        // sight.
+        if (mark === 'blink' && seen) {
+          const place = L.latLng(station.lat, station.lon);
+          if (!map.getBounds().contains(place)) map.panTo(place);
+        }
       }
+      if (!blinked) {
+        if (alert) liveAlertSpot.value = null;
+        if (seen) liveBlink.value = null;
+      }
+      blinked = true;
       setCount(stations.length);
     };
     const read = () => {
@@ -189,6 +236,24 @@ export function LiveOnMap() {
         map.fitBounds(middle.toBounds(2 * radius * 1000), {
           padding: [16, 16],
         });
+        if (alert?.zone) {
+          // A forecast alert: the zone its value stands for, in the colour
+          // of a badge of the same wind.
+          zone = L.circle([alert.lat, alert.lon], {
+            radius: alert.zone.km * 1000,
+            color: alert.zone.color,
+            weight: 3,
+            fillColor: alert.zone.color,
+            fillOpacity: 0.28,
+            interactive: false,
+          })
+            .bindTooltip('Zone de la prévision', {
+              permanent: true,
+              direction: 'top',
+              className: 'live-zone-tip',
+            })
+            .addTo(map);
+        }
       } else {
         // The map shown: from its middle to its corners.
         const middle = map.getCenter();
@@ -206,6 +271,7 @@ export function LiveOnMap() {
       clearInterval(timer);
       layer?.remove();
       ring?.remove();
+      zone?.remove();
       setCount(null);
     };
   }, [on, asked, around, radiusSet]);

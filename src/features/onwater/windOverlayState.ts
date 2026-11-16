@@ -24,9 +24,24 @@ export interface AlertSpot {
 
 /**
  * The alert LiveMétéo was opened from: it shows the whole circle and the
- * station of the alert blinking in a red band. Taken by the page once.
+ * station of the alert crowned and blinking. Taken by the map once.
  */
 export const liveAlertSpot = signal<AlertSpot | null>(null);
+
+/**
+ * LiveMétéo asked from a wind alert (« LiveMétéo » of its bubble): the
+ * time asked, 0 once the NavIn map has laid its stations.
+ */
+export const liveAlertAsk = signal(0);
+
+/**
+ * Open LiveMétéo on the NavIn map from a wind alert.
+ * @param spot - Where the alert came from, or null (a test).
+ */
+export function askLiveFromAlert(spot: AlertSpot | null): void {
+  liveAlertSpot.value = spot;
+  liveAlertAsk.value = Date.now();
+}
 
 /** One colour flash of the screen (legacy `.wind-flash`). */
 export interface WindFlash {

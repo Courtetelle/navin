@@ -6,6 +6,8 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageLink } from '../../components/shared/PageLink.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
+import { inSwissArea } from '../../features/map/index.ts';
+import { lastBoatSeen } from '../../features/map/trackerState.ts';
 import type { Forecast } from '../../features/tracking/index.ts';
 import { wxNext } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -74,6 +76,13 @@ export function WeatherPage({ arg }: PageProps) {
   if (arg === LIGHTNING) return <LightningPage />;
   if (arg === LAKE_LIGHTS) return <LakeLightsPage />;
   return <WeatherMenu />;
+}
+
+/** The wind alerts are set in Réglages: the bubble says Météo is left. */
+function openWindSettings() {
+  buzz();
+  toast('Vous sortez du menu Météo : Réglages › Paramétrage des alertes vent');
+  go('settings', 'wind');
 }
 
 /** The keys stay in Réglages: the bubble says the Météo menu is left. */
@@ -152,14 +161,82 @@ function LightningPage() {
 }
 
 /**
+ * The GPS now: the track's last point, else the boat last shown on the map.
+ * @returns The position, or null.
+ */
+function gpsHere(): { lat: number; lon: number } | null {
+  return state.view.lastFix.value ?? lastBoatSeen();
+}
+
+/**
+ * An entry of the Météo menu that leaves it for Réglages: the blue sign of
+ * going out at its left.
+ * @param props - The entry.
+ * @param props.wx - Its `data-wx`.
+ * @param props.title - Its title.
+ * @param props.aria - What it says to a screen reader.
+ * @param props.onClick - Where it goes.
+ * @returns The button.
+ */
+function ExitEntry({
+  wx,
+  title,
+  aria,
+  onClick,
+}: {
+  wx: string;
+  title: string;
+  aria: string;
+  onClick: () => void;
+}) {
+  const tr = useTr();
+  return (
+    <Button
+      className="btn big wx-entry wx-keys-link"
+      data-wx={wx}
+      aria-label={tr(aria)}
+      onClick={onClick}
+    >
+      <span className="wx-entry-ico exit-box" aria-hidden="true">
+        <svg className="exit-ico" viewBox="0 0 30 40">
+          <path
+            d="M17 3H8a6 6 0 0 0-6 6v22a6 6 0 0 0 6 6h9"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+          />
+          <path
+            d="M11 20h17m-6-6 6 6-6 6"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
+      <span>
+        <b>{tr(title)}</b>
+        <small>{tr('sortir du menu Météo, vers Réglages')}</small>
+      </span>
+    </Button>
+  );
+}
+
+/**
  * The menu of Météo, opened by its button straight from the map (no ◀):
  * the weather check-list, the forecast here, the LiveMétéo stations on the
  * map (also a long press on the button), and LiveMétéo itself.
  * @returns The menu.
  */
 function WeatherMenu() {
+  useSignals();
   const tr = useTr();
   const [here, setHere] = useState(false);
+  // The warning lights of the Swiss lakes: only with NavIn on a lake, or the
+  // GPS in Switzerland.
+  const lakeLights = isLake() || navZone() === 'lac' || inSwissArea(gpsHere());
   return (
     <>
       <TitleInNav>
@@ -206,19 +283,21 @@ function WeatherMenu() {
           </span>
         </Button>
         {here ? <PrepForecast /> : null}
-        <Button
-          className="btn big wx-entry"
-          data-wx="lakelights"
-          onClick={openLakeLights}
-        >
-          <span className="wx-entry-ico">🚨</span>
-          <span>
-            <b>{tr('Feux d’avis des lacs')}</b>
-            <small>
-              {tr('les avis de vent fort et de tempête de MétéoSuisse')}
-            </small>
-          </span>
-        </Button>
+        {lakeLights ? (
+          <Button
+            className="btn big wx-entry"
+            data-wx="lakelights"
+            onClick={openLakeLights}
+          >
+            <span className="wx-entry-ico">🚨</span>
+            <span>
+              <b>{tr('Feux d’avis des lacs')}</b>
+              <small>
+                {tr('les avis de vent fort et de tempête de MétéoSuisse')}
+              </small>
+            </span>
+          </Button>
+        ) : null}
         <Button
           className="btn big wx-entry"
           data-wx="lightning"
@@ -247,36 +326,18 @@ function WeatherMenu() {
             </small>
           </span>
         </Button>
-        <Button
-          className="btn big wx-entry wx-keys-link"
-          data-wx="keys"
-          aria-label={tr('Sortir du menu Météo vers Réglages › Clés météo')}
+        <ExitEntry
+          wx="wind"
+          title="🔔 Paramétrage des alertes vent"
+          aria="Sortir du menu Météo vers Réglages › Paramétrage des alertes vent"
+          onClick={openWindSettings}
+        />
+        <ExitEntry
+          wx="keys"
+          title="🔑 Clés météo"
+          aria="Sortir du menu Météo vers Réglages › Clés météo"
           onClick={openKeys}
-        >
-          <span className="wx-entry-ico exit-box" aria-hidden="true">
-            <svg className="exit-ico" viewBox="0 0 30 40">
-              <path
-                d="M17 3H8a6 6 0 0 0-6 6v22a6 6 0 0 0 6 6h9"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3.2"
-                strokeLinecap="round"
-              />
-              <path
-                d="M11 20h17m-6-6 6 6-6 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </span>
-          <span>
-            <b>{tr('🔑 Clés météo')}</b>
-            <small>{tr('sortir du menu Météo, vers Réglages')}</small>
-          </span>
-        </Button>
+        />
       </div>
     </>
   );

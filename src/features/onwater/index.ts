@@ -99,7 +99,12 @@ export type { WindAlertAction } from './windAlertClick.ts';
 export { playAlarm } from './windAudio.ts';
 export { windMuteEnd } from './windWatch.ts';
 export { METEO_SWISS, liveStations, stationKey } from './liveStations.ts';
-export { liveAlertSpot, replayWindAlert } from './windOverlayState.ts';
+export {
+  askLiveFromAlert,
+  liveAlertAsk,
+  liveAlertSpot,
+  replayWindAlert,
+} from './windOverlayState.ts';
 export type { AlertSpot } from './windOverlayState.ts';
 export type { LiveStation } from './liveStations.ts';
 export {

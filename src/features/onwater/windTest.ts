@@ -6,7 +6,11 @@ import { go } from '../../shell/router.ts';
 import { onLake } from './onLake.ts';
 import { playAlarm } from './windAudio.ts';
 import { WIND_POP_DELAY, testSeaTxt, waveOmmTxt } from './windLogic.ts';
-import { clearWindOverlays, showWindPopup } from './windOverlayState.ts';
+import {
+  askLiveFromAlert,
+  clearWindOverlays,
+  showWindPopup,
+} from './windOverlayState.ts';
 
 /** The alert test is running (legacy `windTest`). */
 export const windTestRunning = signal(false);
@@ -63,7 +67,8 @@ function playLevel(level: number): void {
       onStop: windTestStop,
       onLive: () => {
         windTestStop();
-        go('meteo');
+        askLiveFromAlert(null);
+        go('tracker');
       },
       onClose: () => playLevel(level + 1),
     });

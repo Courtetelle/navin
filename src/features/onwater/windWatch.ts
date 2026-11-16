@@ -32,8 +32,8 @@ import {
   zoneColor,
 } from './windLogic.ts';
 import {
+  askLiveFromAlert,
   clearWindOverlays,
-  liveAlertSpot,
   showWindAlert,
 } from './windOverlayState.ts';
 import { applyReOn } from './windReOn.ts';
@@ -238,7 +238,7 @@ function showAlertPopup(
     onLive: () => {
       // LiveMétéo shows where the alert came from: the station measuring,
       // or the zone of the forecast in the colour of its wind.
-      liveAlertSpot.value =
+      askLiveFromAlert(
         top.lat == null || top.lon == null || (forecast && !top.zoneKm)
           ? null
           : {
@@ -254,8 +254,9 @@ function showAlertPopup(
                     },
                   }
                 : {}),
-            };
-      go('meteo');
+            },
+      );
+      go('tracker');
     },
     ...(forecast
       ? {

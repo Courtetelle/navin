@@ -37,6 +37,15 @@ export function showLiveAround(): void {
   go('tracker');
 }
 
+/**
+ * Lay the stations of the zone without a touch (a wind alert asked for
+ * them): no buzz, the map already shown.
+ */
+export function layLiveAround(): void {
+  liveOnMapAround.value = true;
+  liveOnMap.value = Date.now();
+}
+
 /** Take the stations off the map. */
 export function hideLiveOnMap(): void {
   buzz();

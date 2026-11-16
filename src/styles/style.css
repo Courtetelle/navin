@@ -9179,7 +9179,7 @@ body:not(.trk-mode) #searchBtn {
   transition: none;
 }
 
-/* Live weather conditions (screen `meteo`). */
+/* LiveMétéo: the card of a station (screen `meteo`) and its badges. */
 .live-map-part.hidden {
   display: none;
 }
@@ -9262,6 +9262,13 @@ body.has-navtop #view > h1.live-title,
 }
 .live-blink .live-mk {
   animation: live-blink 0.5s ease-in-out 3;
+}
+/* The station of the card just seen or of the alert: it blinks three times,
+   then its red halo pulses */
+.live-alerted.live-blink .live-mk {
+  animation:
+    live-blink 0.5s ease-in-out 3,
+    live-pulse 0.8s ease-in-out 1.5s infinite alternate;
 }
 @keyframes live-blink {
   50% {

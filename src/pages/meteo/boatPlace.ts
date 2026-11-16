@@ -27,21 +27,3 @@ export function mapPlace(): BoatPlace {
   const shown = shownMapCenter();
   return shown ? { lat: shown.lat, lon: shown.lon } : boatPlace();
 }
-
-const BACK_LABELS: Readonly<Record<string, string>> = {
-  tracker: '◀ NavIn',
-  weather: '◀ Météo',
-  more: '◀ data',
-};
-
-/**
- * Where the ◀ of LiveMétéo leads: back to the screen it was opened from.
- * @param from - The screen left to open LiveMétéo.
- * @returns The screen and the text of the button.
- */
-export function liveBackFrom(from: string): { view: string; label: string } {
-  const label = BACK_LABELS[from];
-  return label && from !== 'meteo'
-    ? { view: from, label }
-    : { view: 'more', label: '◀ data' };
-}
