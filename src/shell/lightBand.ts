@@ -12,10 +12,12 @@ const BLINK_MS = 2100;
 export function lightBand(id: string, blink = false): void {
   setTimeout(() => {
     const band = [
-      ...document.querySelectorAll<HTMLElement>('[data-sw-id]'),
+      ...document.querySelectorAll<HTMLElement>('[data-sw-id], [data-band-id]'),
     ].find(
       (one) =>
-        one.dataset.swId === id || one.dataset.swId?.startsWith(`${id}#`),
+        one.dataset.swId === id ||
+        one.dataset.swId?.startsWith(`${id}#`) ||
+        one.dataset.bandId === id,
     );
     if (!band) return;
     band.scrollIntoView({ block: 'center' });

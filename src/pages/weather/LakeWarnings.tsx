@@ -92,6 +92,7 @@ export function LakeWarnings() {
                 warning.level >= 3 ? 'lw-row lw-go storm' : 'lw-row lw-go'
               }
               data-lakewarn="lit"
+              data-band-id={`lake:${warning.name}`}
               aria-label={tr(`${warning.name} : voir le feu sur la carte`)}
               onClick={() => {
                 const area = lakeArea(warning.name);

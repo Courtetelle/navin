@@ -13397,3 +13397,21 @@ main#view .site-link {
     font-size: 21px !important;
   }
 }
+
+/* A band of a list that is not swiped (a warning light) blinks as a mark
+   found from the map */
+[data-band-id].band-blink {
+  position: relative;
+  isolation: isolate;
+}
+[data-band-id].band-blink::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(180deg, #ffe2b8 0%, #f8bb6a 55%, #ee9a3a 100%);
+  pointer-events: none;
+  animation: menuHere 0.7s ease-in-out 3;
+  opacity: 0;
+}
