@@ -12,7 +12,11 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { installPrompt } from '../../features/data/install.ts';
-import { WindKeys, windAlertClick } from '../../features/onwater/index.ts';
+import {
+  WindAlert,
+  WindKeys,
+  windAlertClick,
+} from '../../features/onwater/index.ts';
 import {
   alertsInTurnTest,
   lakeWarnTest,
@@ -310,6 +314,12 @@ export function SettingsPage({ from, arg }: PageProps) {
           </SettingsSection>
           <SettingsSection section="live" title="🌬 LiveMétéo">
             <LiveRow />
+          </SettingsSection>
+          <SettingsSection
+            section="wind"
+            title="🔔 Paramétrage des alertes vent"
+          >
+            <WindAlert noTest />
           </SettingsSection>
           <SettingsSection section="keys" title="🔑 Clés météo">
             <WindKeys />

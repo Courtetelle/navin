@@ -6,7 +6,6 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageLink } from '../../components/shared/PageLink.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
-import { WindAlert } from '../../features/onwater/index.ts';
 import type { Forecast } from '../../features/tracking/index.ts';
 import { wxNext } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -72,25 +71,16 @@ const HOURS = 12;
 export function WeatherPage({ arg }: PageProps) {
   if (arg === FORECAST) return <ForecastPage part="forecast" />;
   if (arg === BRIEFING) return <ForecastPage part="briefing" />;
-  if (arg === ALERTS) return <AlertsPage />;
   if (arg === LIGHTNING) return <LightningPage />;
   if (arg === LAKE_LIGHTS) return <LakeLightsPage />;
   return <WeatherMenu />;
 }
-
-/** Argument of the screen for the wind alerts and the keys. */
-const ALERTS = 'alerts';
 
 /** The keys stay in Réglages: the bubble says the Météo menu is left. */
 function openKeys() {
   buzz();
   toast('Vous sortez du menu Météo : Réglages › Clés météo');
   go('settings', 'keys');
-}
-
-function openAlerts() {
-  buzz();
-  go('weather', ALERTS);
 }
 
 /** Argument of the screen for the warning lights of the lakes. */
@@ -162,33 +152,6 @@ function LightningPage() {
 }
 
 /**
- * The wind alerts of the Météo menu: their switch and thresholds, the keys
- * of Météo-France, AEMET and the Met Office, the relay, SOCIB.
- * @returns The screen content.
- */
-function AlertsPage() {
-  const tr = useTr();
-  return (
-    <>
-      <PageBack
-        label="◀ Météo"
-        data-go="weather"
-        onClick={() => {
-          buzz();
-          go('weather');
-        }}
-      >
-        {tr('◀ Météo')}
-      </PageBack>
-      <TitleInNav>
-        <h1>{tr('🔔 Alertes de vent')}</h1>
-      </TitleInNav>
-      <WindAlert noTest />
-    </>
-  );
-}
-
-/**
  * The menu of Météo, opened by its button straight from the map (no ◀):
  * the weather check-list, the forecast here, the LiveMétéo stations on the
  * map (also a long press on the button), and LiveMétéo itself.
@@ -243,19 +206,6 @@ function WeatherMenu() {
           </span>
         </Button>
         {here ? <PrepForecast /> : null}
-        <Button
-          className="btn big wx-entry"
-          data-wx="alerts"
-          onClick={openAlerts}
-        >
-          <span className="wx-entry-ico">🔔</span>
-          <span>
-            <b>{tr('Alertes de vent')}</b>
-            <small>
-              {tr('oui ou non, rafales ou vent moyen, échelle des couleurs')}
-            </small>
-          </span>
-        </Button>
         <Button
           className="btn big wx-entry"
           data-wx="lakelights"
