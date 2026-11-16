@@ -183,7 +183,7 @@ function WeatherMenu() {
   return (
     <>
       <TitleInNav>
-        <h1>{tr('🌤 Météo')}</h1>
+        <h1>{tr('🌤 Météorologie')}</h1>
       </TitleInNav>
       <div className="wx-menu">
         <Button

@@ -33,6 +33,7 @@ import { buzz } from '../../lib/dom.ts';
 import { useRails } from '../../lib/useWide.ts';
 import { hasBodyClass } from '../../shell/bodyClass.ts';
 import { inMenu, menuButtonPress } from '../../shell/menuOwner.ts';
+import { menusOpen, openMenus } from '../../shell/menusRoll.ts';
 import { navBack } from '../../shell/navbar/navActions.ts';
 import { navinRowChosen, navinRowOpen } from '../../shell/navinRow.ts';
 import { go } from '../../shell/router.ts';
@@ -159,7 +160,42 @@ export function SideRails() {
         <WeatherButton />
       </div>
       <NavinRow />
+      <MenusTab />
     </>
+  );
+}
+
+/**
+ * The tab of data and Paramétrages: at the top in the middle sideways, at
+ * the right edge in the middle upright. A touch unrolls the two beside it
+ * (data at the left or above, Paramétrages at the right or below); left
+ * alone, they fade out as the other buttons that roll back.
+ * @returns The tab.
+ */
+function MenusTab() {
+  useSignals();
+  return (
+    <button
+      type="button"
+      className={menusOpen.value ? 'menus-tab open' : 'menus-tab'}
+      aria-label="data et Paramétrages"
+      aria-expanded={menusOpen.value}
+      onClick={() => {
+        buzz();
+        openMenus();
+      }}
+    >
+      <svg className="menus-tab-ico" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M6 9l6 6 6-6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
   );
 }
 
@@ -183,9 +219,9 @@ function WeatherButton() {
 }
 
 /**
- * The row NavIn unrolls at its right: PréP, then data and the settings
- * (their own buttons, placed there), then the phone or the VHF. Leaving one
- * of their menus rolls it back. Météo has its own button.
+ * The row NavIn unrolls at its right: PréP, then the phone or the VHF
+ * (data and Paramétrages have their own tab). Leaving one of their menus
+ * rolls it back. Météo has its own button.
  * @returns The row, or nothing while rolled.
  */
 function NavinRow() {

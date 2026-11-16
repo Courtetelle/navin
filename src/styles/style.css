@@ -11350,8 +11350,8 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     left: calc(var(--rb-side) + 3 * var(--rb-x)) !important;
     right: auto !important;
   }
-  html body:not(.navin-open) header.topbar nav.topnav .top-tab.top-tab.tab-data,
-  html body:not(.navin-open) header.topbar.topbar #gearBtn.theme-btn {
+  html body:not(.menus-open) header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body:not(.menus-open) header.topbar.topbar #gearBtn.theme-btn {
     display: none !important;
   }
   html body .navin-row {
@@ -11372,7 +11372,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
     margin: 0;
   }
   html body .navin-row-comm {
-    margin-left: calc(2 * var(--rb-x));
+    margin-left: 0;
   }
   /* No column on the right any more: the map and its overlays reach the
      right edge. */
@@ -11484,7 +11484,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   }
   html body .navin-row-comm {
     margin-left: 0;
-    margin-bottom: calc(2 * var(--rb-step));
+    margin-bottom: 0;
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
@@ -11769,7 +11769,7 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   }
   html body .navin-row-comm {
     margin-left: 0;
-    margin-right: calc(2 * var(--rb-x));
+    margin-right: 0;
   }
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
@@ -13090,8 +13090,8 @@ html body .rail-btn.rail-pin.rail-idle .rail-icon {
 /* Buttons that roll back on their own: 2 s fully shown, then 3 s fading */
 html body .rail-btn.fading,
 html body.navin-fading .navin-row,
-html body.navin-fading header.topbar nav.topnav .top-tab.tab-data,
-html body.navin-fading header.topbar #gearBtn.theme-btn {
+html body.menus-fading header.topbar nav.topnav .top-tab.tab-data,
+html body.menus-fading header.topbar #gearBtn.theme-btn {
   opacity: 0 !important;
   transition: opacity 3s linear !important;
 }
@@ -13225,4 +13225,97 @@ html body.navin-fading header.topbar #gearBtn.theme-btn {
 }
 .site-band-text small {
   opacity: 0.75;
+}
+
+/* The tab of data and Paramétrages: sideways at the top in the middle (˅),
+   the two unrolled under it, data at the left, Paramétrages at the right;
+   upright at the right edge in the middle (‹), data above, Paramétrages
+   below. No tab on a phone without the side buttons. */
+.menus-tab {
+  display: none;
+}
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) {
+  html body .menus-tab {
+    position: fixed;
+    z-index: 1500;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    color: var(--fg, #0b1220);
+    background: color-mix(in srgb, var(--surface, #fff) 88%, transparent);
+    border: 2px solid rgba(11, 18, 32, 0.8);
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+  html body .menus-tab::after {
+    content: '';
+    position: absolute;
+    inset: -14px;
+  }
+  .menus-tab-ico {
+    width: 22px;
+    height: 22px;
+  }
+  :root[data-theme='night'] html body .menus-tab,
+  :root[data-theme='night'] body .menus-tab {
+    background: #200000;
+    border-color: #ff4040;
+    color: #ff4040;
+  }
+}
+@media (orientation: landscape) and (min-width: 560px) {
+  html body .menus-tab {
+    top: env(safe-area-inset-top);
+    left: 50%;
+    width: 68px;
+    height: 26px;
+    margin-left: -34px;
+    border-top: 0;
+    border-radius: 0 0 12px 12px;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    top: calc(34px + env(safe-area-inset-top)) !important;
+    bottom: auto !important;
+    left: calc(50% - var(--rb-w) - var(--rb-gap) / 2) !important;
+    right: auto !important;
+    height: var(--rb-h) !important;
+  }
+  html body header.topbar #gearBtn {
+    top: calc(34px + env(safe-area-inset-top)) !important;
+    bottom: auto !important;
+    left: calc(50% + var(--rb-gap) / 2) !important;
+    right: auto !important;
+    height: var(--rb-h) !important;
+  }
+}
+@media (orientation: portrait) {
+  html body .menus-tab {
+    top: 50%;
+    right: env(safe-area-inset-right);
+    width: 26px;
+    height: 68px;
+    margin-top: -34px;
+    border-right: 0;
+    border-radius: 12px 0 0 12px;
+  }
+  html body .menus-tab-ico {
+    transform: rotate(90deg);
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    top: calc(50% - var(--rb-h) - var(--rb-gap) / 2) !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: calc(34px + env(safe-area-inset-right)) !important;
+    height: var(--rb-h) !important;
+  }
+  html body header.topbar #gearBtn {
+    top: calc(50% + var(--rb-gap) / 2) !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: calc(34px + env(safe-area-inset-right)) !important;
+    height: var(--rb-h) !important;
+  }
 }

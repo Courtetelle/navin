@@ -81,13 +81,13 @@ async function open(
 
 const NAVIN = 'header.topbar nav.topnav .top-tab[data-view="tracker"]';
 
-// data and the settings wait in the row NavIn unrolls (X and T): NavIn is
-// touched until they show (away from the map, it first brings the map).
+// data and the settings wait behind their own tab (X and T): it is touched
+// until they show.
 async function showRow(page: Page): Promise<void> {
   /* eslint-disable no-await-in-loop -- one touch after the other */
   for (let touch = 0; touch < 3; touch++) {
     if (await page.locator('#gearBtn').isVisible()) return;
-    await page.locator(NAVIN).click();
+    await page.locator('.menus-tab').click();
     await page.waitForTimeout(400);
   }
   /* eslint-enable no-await-in-loop */
@@ -198,8 +198,6 @@ async function bars(page: Page, theme: string): Promise<void> {
       const column = [
         '.top-tab[data-view="tracker"]',
         '.navin-row .rail-prep',
-        '.top-tab.tab-data',
-        '#gearBtn',
         '.navin-row .rail-comm',
       ].map(box);
       if (column.some((item) => !item)) return false;
@@ -1125,18 +1123,41 @@ async function tablet(page: Page, theme: string): Promise<void> {
   check(theme, 'tablet: every side button is shown', !home.includes('absent'));
   check(
     theme,
-    'tablet: data and the settings wait in the row of NavIn',
+    'tablet: data and the settings wait behind their tab',
     !(await page.locator('.top-tab.tab-data').isVisible()) &&
       !(await page.locator('#gearBtn').isVisible()),
+  );
+  await page.locator('.menus-tab').click();
+  await page.waitForTimeout(400);
+  const tab = await page.locator('.menus-tab').boundingBox();
+  const data = await page.locator('.top-tab.tab-data').boundingBox();
+  const gear = await page.locator('#gearBtn').boundingBox();
+  check(
+    theme,
+    'tablet: the tab at the top in the middle unrolls data at the left and the settings at the right under it',
+    tab !== null &&
+      data !== null &&
+      gear !== null &&
+      tab.y < 2 &&
+      data.y >= tab.y + tab.height &&
+      data.x + data.width <= gear.x + 1 &&
+      data.x < tab.x + tab.width / 2 &&
+      gear.x + gear.width > tab.x + tab.width / 2,
+  );
+  await page.waitForTimeout(5300);
+  check(
+    theme,
+    'tablet: left alone, data and the settings fade and go after 5 s',
+    !(await page.locator('#gearBtn').isVisible()),
   );
   await page.locator(NAVIN).click();
   await page.waitForTimeout(400);
   check(
     theme,
-    'tablet: a touch on NavIn unrolls PréP, data, settings and phone',
+    'tablet: a touch on NavIn unrolls PréP and the phone, no longer data nor the settings',
     (await page.locator('.navin-row .rail-prep').isVisible()) &&
-      (await page.locator('.top-tab.tab-data').isVisible()) &&
-      (await page.locator('#gearBtn').isVisible()) &&
+      !(await page.locator('.top-tab.tab-data').isVisible()) &&
+      !(await page.locator('#gearBtn').isVisible()) &&
       (await page.locator('.navin-row .rail-comm').isVisible()),
   );
   await page.locator(NAVIN).click();
@@ -1613,8 +1634,7 @@ for (const theme of ['day', 'night']) {
     // ＋ and − shown by the arrow go away first.
     await page.waitForTimeout(3500);
     const home = await tabletPlaces(page);
-    await page.locator(NAVIN).click();
-    await page.waitForTimeout(400);
+    await showRow(page);
     await page.locator('.top-tab.tab-data').click();
     await page.waitForTimeout(1100);
     const onData = await tabletPlaces(page);
