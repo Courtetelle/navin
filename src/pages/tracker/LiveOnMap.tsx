@@ -6,6 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { leaflet } from '../../features/map/leaflet.ts';
 import { tracker } from '../../features/map/trackerState.ts';
+import { showZoomOnMap } from '../../features/map/zoomShown.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
 import { liveStations, windConfig } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -136,6 +137,10 @@ export function LiveOnMap() {
   const radiusSet = liveRadius();
   const on = asked > 0;
   const [count, setCount] = useState<number | null>(null);
+  // LiveMétéo laid (or the map back from a station): ＋ and − shown too.
+  useEffect(() => {
+    if (asked > 0) showZoomOnMap();
+  }, [asked]);
   useEffect(() => {
     if (!on) return undefined;
     let closed = false;
