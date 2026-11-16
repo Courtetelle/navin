@@ -57,7 +57,7 @@ test('the map snippet zooms out until it shows the station and the boat', () => 
   expect(Math.abs(a.x - b.x)).toBeLessThan(500);
 });
 
-test('the five lines of the sea read as in LiveMétéo', () => {
+test('the lines of the sea read as in LiveMétéo', () => {
   expect(
     seaRows({
       total: { height: 1.2, dir: 250, period: 6.4 },
@@ -68,9 +68,10 @@ test('the five lines of the sea read as in LiveMétéo', () => {
       t: 0,
     }),
   ).toStrictEqual([
-    ['Mer totale', '1,2 m · 6 s · du OSO'],
-    ['Mer du vent', '0,9 m · 4 s · du SO'],
-    ['Houle', '0,7 m · 10 s · du O'],
+    ['Mer totale (Hs)', '1,2 m · 6 s · du OSO'],
+    ['Mer du vent (Hs)', '0,9 m · 4 s · du SO'],
+    ['Houle (Hs)', '0,7 m · 10 s · du O'],
+    ['Cambrure', '1/53 · houle douce'],
     ['Courant', '0,4 nd · porte vers E'],
     ['Eau', '15,3 °C'],
   ]);

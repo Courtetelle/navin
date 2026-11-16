@@ -1,5 +1,7 @@
 import { compassPoint } from '../../lib/wind.ts';
 
+import { currentAgainst, steepnessOf } from './steepness.ts';
+
 /** One train of waves. */
 export interface WaveTrain {
   /** Height in metres. */
@@ -120,14 +122,27 @@ function trainText(wave: WaveTrain): string {
 
 /**
  * The lines of the sea, as LiveMétéo shows them: the whole sea, the wind
- * sea, the swell, the current and the water.
+ * sea, the swell (significant heights), the steepness of the whole sea, the
+ * current and the water.
  * @param sea - The sea from the model.
  * @returns `[label, value]` pairs.
  */
 export function seaRows(sea: SeaNow): Array<[string, string]> {
-  const rows: Array<[string, string]> = [['Mer totale', trainText(sea.total)]];
-  if (sea.windSea) rows.push(['Mer du vent', trainText(sea.windSea)]);
-  if (sea.swell) rows.push(['Houle', trainText(sea.swell)]);
+  // The heights of the model are significant heights (Hs): the mean of the
+  // highest third of the waves.
+  const rows: Array<[string, string]> = [
+    ['Mer totale (Hs)', trainText(sea.total)],
+  ];
+  if (sea.windSea) rows.push(['Mer du vent (Hs)', trainText(sea.windSea)]);
+  if (sea.swell) rows.push(['Houle (Hs)', trainText(sea.swell)]);
+  const steep = steepnessOf(sea.total.height, sea.total.period);
+  if (steep) {
+    const against = currentAgainst(sea.total.dir, sea.current?.toward);
+    rows.push([
+      'Cambrure',
+      `1/${steep.oneIn} · ${steep.steep.name.toLowerCase()}${steep.small && steep.steep.level >= 2 ? ' · petites vagues : inconfort' : ''}${against ? ' · courant contraire : plus raide' : ''}`,
+    ]);
+  }
   if (sea.current) {
     const { knots, toward } = sea.current;
     rows.push([

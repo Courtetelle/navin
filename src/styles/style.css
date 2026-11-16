@@ -13099,3 +13099,86 @@ html body.navin-fading header.topbar #gearBtn.theme-btn {
   opacity: 0 !important;
   transition: opacity 3s linear !important;
 }
+
+/* The steepness of the waves: a chip per train in the colour of its class,
+   the scale of the five classes with the whole sea marked */
+.steep {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.steep h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.steep-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 10px;
+  border-left: 8px solid var(--c);
+  border-radius: 10px;
+  background: var(--card, #fff);
+}
+.steep-chip {
+  min-width: 54px;
+  padding: 4px 8px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  background: var(--c);
+  color: var(--ink);
+  font-size: 18px;
+  text-align: center;
+}
+.steep-small {
+  font-weight: 700;
+}
+.steep-row small {
+  display: block;
+  margin-top: 2px;
+  opacity: 0.8;
+}
+.steep-warn {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #e53935;
+  color: #fff;
+  font-weight: 700;
+}
+.steep-scale {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 2px;
+  margin-top: 4px;
+}
+.steep-cell {
+  display: grid;
+  place-items: center;
+  min-height: 40px;
+  padding: 2px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--c);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  opacity: 0.45;
+}
+.steep-cell.here {
+  border-color: #000;
+  opacity: 1;
+  transform: scale(1.06);
+}
+:root[data-theme='night'] .steep-cell.here,
+:root[data-theme='night'] .steep-chip {
+  border-color: var(--fg);
+}
+.steep-marks {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.75;
+}
