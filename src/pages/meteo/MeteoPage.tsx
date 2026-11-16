@@ -65,8 +65,9 @@ function LiveDetail({ station }: { station: LiveStation }) {
           now={now}
           loading={loading}
           backLabel="◀ Revenir à la carte"
-          onBack={backToMap}
-          onLocate={() => {
+          onBack={() => {
+            // The blue button: back on the badge of this station, zoomed in
+            // and crowned.
             liveBlink.value = blinkKey(current);
             backToMap();
           }}

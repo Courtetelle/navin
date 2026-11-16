@@ -9209,11 +9209,6 @@ body.has-navtop #view > h1.live-title,
   clip-path: inset(50%);
   white-space: nowrap;
 }
-.live-locate {
-  margin-top: 6px;
-  font-size: 14px;
-  opacity: 0.8;
-}
 /* A station shown alone for a moment, ringed and pulsing */
 .live-focus .live-mk-wrap:not(.live-focused) {
   visibility: hidden;
@@ -9255,28 +9250,6 @@ body.has-navtop #view > h1.live-title,
 }
 .live-tools {
   margin-top: 0;
-}
-/* Back from « voir sur la carte »: its badge blinks three times */
-.live-blink {
-  z-index: 1000 !important;
-}
-.live-blink .live-mk {
-  animation: live-blink 0.5s ease-in-out 3;
-}
-/* The station of the card just seen or of the alert: it blinks three times,
-   then its red halo pulses */
-.live-alerted.live-blink .live-mk {
-  animation:
-    live-blink 0.5s ease-in-out 3,
-    live-pulse 0.8s ease-in-out 1.5s infinite alternate;
-}
-@keyframes live-blink {
-  50% {
-    opacity: 0.15;
-    box-shadow:
-      0 0 0 4px #fff,
-      0 0 0 10px #d0021b;
-  }
 }
 .live-mk-wrap {
   background: none;
@@ -9344,7 +9317,6 @@ body.has-navtop #view > h1.live-title,
   display: block;
   width: 100%;
   font: inherit;
-  cursor: pointer;
   margin: 12px 0;
   padding: 16px;
   border: 3px solid #000;

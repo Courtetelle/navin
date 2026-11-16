@@ -26,10 +26,8 @@ interface StationCardProps {
   loading: boolean;
   /** Text of the back button. */
   backLabel: string;
-  /** Back to the map. */
+  /** Back to the map, zoomed in on the badge of this station. */
   onBack: () => void;
-  /** Back to the map, centred on this station alone for a moment. */
-  onLocate: () => void;
   /** Read the stations again now. */
   onRefresh: () => void;
 }
@@ -47,7 +45,6 @@ export function StationCard({
   loading,
   backLabel,
   onBack,
-  onLocate,
   onRefresh,
 }: StationCardProps) {
   const tr = useTr();
@@ -93,12 +90,7 @@ export function StationCard({
         </Button>
       </ButtonRow>
       <div className="live-card-a">
-        <Button
-          className="live-head"
-          style={{ background: color, color: ink }}
-          onClick={onLocate}
-          aria-label={tr(`${station.name} : voir sur la carte`)}
-        >
+        <div className="live-head" style={{ background: color, color: ink }}>
           <div className="live-name">{station.name}</div>
           <div className="live-big">
             {station.dir == null ? null : (
@@ -114,10 +106,7 @@ export function StationCard({
           <div className="live-force">
             {tr(`${forceText(station.avg)} · ${row?.[2] ?? ''}`)}
           </div>
-          <div className="live-locate">
-            {tr('📍 Toucher : voir sur la carte')}
-          </div>
-        </Button>
+        </div>
         <WindTrendChart station={station} mfKey={mfKey} />
         <ShareButton
           onShare={(format) => {

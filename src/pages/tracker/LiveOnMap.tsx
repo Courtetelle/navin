@@ -40,6 +40,10 @@ const MOST_KM = 150;
 const REFRESH_MS = 2 * 60_000;
 /** The map of NavIn is looked for this often until it is built. */
 const WAIT_MS = 300;
+/** Back from a station card, the map zooms in at least this close. */
+const FOCUS_ZOOM = 12;
+/** The map settles this long after coming back. */
+const SETTLE_MS = 600;
 /** A press this long on a badge opens the whole card of the station. */
 const LONG_MS = 600;
 
@@ -71,7 +75,7 @@ function addBadge(
   layer: LayerGroup,
   station: LiveStation,
   basis: string,
-  mark: 'none' | 'crown' | 'blink',
+  crowned: boolean,
 ): void {
   const L = leaflet();
   let pressing: ReturnType<typeof setTimeout> | undefined;
@@ -103,20 +107,10 @@ function addBadge(
   const element = marker.getElement();
   if (!element) return;
   // The station of the card just seen, or of the wind alert: larger, a
-  // white crown and a red halo that pulses, its name below; it first blinks
-  // 3 times.
-  if (mark !== 'none') {
+  // white crown and a red halo that pulses calmly, its name below.
+  if (crowned) {
     marker.setZIndexOffset(1000);
     element.classList.add('live-alerted');
-  }
-  if (mark === 'blink') {
-    element.classList.add('live-blink');
-    const done = (event: AnimationEvent) => {
-      if (event.animationName !== 'live-blink') return;
-      element.classList.remove('live-blink');
-      element.removeEventListener('animationend', done);
-    };
-    element.addEventListener('animationend', done);
   }
   // A long press: the whole card of the station, ◀ back here.
   element.addEventListener('pointerdown', () => {
@@ -170,11 +164,12 @@ export function LiveOnMap() {
     let zone: Circle | null = null;
     let wait: ReturnType<typeof setTimeout> | undefined;
     // The wind alert this was opened from, and the station whose card was
-    // just seen (« voir sur la carte »): crowned; they blink the first time.
+    // just seen (« voir sur la carte »): crowned; back from the card the map
+    // first zooms in on it.
     // Taken once drawn (not here: an effect run twice would lose them).
     const alert = liveAlertSpot.peek();
     const seen = liveBlink.peek();
-    let blinked = false;
+    let drawn = false;
     let center = around ? (alert?.boat ?? boatPlace()) : mapPlace();
     let radius = around ? radiusSet : RADIUS;
     const config = windConfig();
@@ -189,23 +184,30 @@ export function LiveOnMap() {
           ? alertStation(stations, alert.lat, alert.lon)
           : undefined;
       const crowned = seen ?? (alerted ? blinkKey(alerted) : null);
+      let focused: LiveStation | null = null;
       for (const station of stations) {
-        const key = blinkKey(station);
-        let mark: 'none' | 'crown' | 'blink' = 'none';
-        if (key === crowned) mark = blinked ? 'crown' : 'blink';
-        addBadge(layer, station, config.basis, mark);
-        // Back from its card: the map comes to the badge if it is out of
-        // sight.
-        if (mark === 'blink' && seen) {
-          const place = L.latLng(station.lat, station.lon);
-          if (!map.getBounds().contains(place)) map.panTo(place);
-        }
+        const mine = blinkKey(station) === crowned;
+        addBadge(layer, station, config.basis, mine);
+        // Back from its card: the map zoomed in on its badge, as close as
+        // the old LiveMétéo screen.
+        if (mine && seen && !drawn) focused = station;
       }
-      if (!blinked) {
+      if (focused) {
+        const { lat, lon } = focused;
+        const focus = () => {
+          if (closed || map.getZoom() >= FOCUS_ZOOM) return;
+          map.setView([lat, lon], FOCUS_ZOOM, { animate: false });
+        };
+        focus();
+        // Again once the map has settled after coming back (it may set its
+        // own view just after).
+        setTimeout(focus, SETTLE_MS);
+      }
+      if (!drawn) {
         if (alert) liveAlertSpot.value = null;
         if (seen) liveBlink.value = null;
       }
-      blinked = true;
+      drawn = true;
       setCount(stations.length);
     };
     const read = () => {
