@@ -13068,10 +13068,6 @@ html body .rail-btn.rail-pin.rail-idle .rail-icon {
     max-width: none;
     width: 100%;
   }
-  /* The ◀ of the title line goes back to the map: no big button too */
-  html body .live-detail .live-card-back {
-    display: none;
-  }
   html body .live-detail .live-card-a,
   html body .live-detail .live-card-b {
     display: grid;

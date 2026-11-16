@@ -51,7 +51,16 @@ function LiveDetail({ station }: { station: LiveStation }) {
   const [now] = useState(Date.now);
   return (
     <>
-      <PageBack label="◀ Carte" data-go="livemap" onClick={backToMap}>
+      <PageBack
+        label="◀ Carte"
+        data-go="livemap"
+        data-instant="1"
+        onClick={() => {
+          // Back on the badge of this station, zoomed in and crowned.
+          liveBlink.value = blinkKey(current);
+          backToMap();
+        }}
+      >
         {tr('◀ Carte')}
       </PageBack>
       <TitleInNav>
@@ -64,13 +73,6 @@ function LiveDetail({ station }: { station: LiveStation }) {
           mfKey={config.mfKey}
           now={now}
           loading={loading}
-          backLabel="◀ Revenir à la carte"
-          onBack={() => {
-            // The blue button: back on the badge of this station, zoomed in
-            // and crowned.
-            liveBlink.value = blinkKey(current);
-            backToMap();
-          }}
           onRefresh={() => {
             buzz();
             setLoading(true);

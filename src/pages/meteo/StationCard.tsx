@@ -24,10 +24,6 @@ interface StationCardProps {
   now: number;
   /** The stations are being read again. */
   loading: boolean;
-  /** Text of the back button. */
-  backLabel: string;
-  /** Back to the map, zoomed in on the badge of this station. */
-  onBack: () => void;
   /** Read the stations again now. */
   onRefresh: () => void;
 }
@@ -43,8 +39,6 @@ export function StationCard({
   mfKey,
   now,
   loading,
-  backLabel,
-  onBack,
   onRefresh,
 }: StationCardProps) {
   const tr = useTr();
@@ -84,11 +78,6 @@ export function StationCard({
   );
   return (
     <section className="live-card" aria-live="polite">
-      <ButtonRow className="row live-card-back">
-        <Button className="btn primary" onClick={onBack}>
-          {tr(backLabel)}
-        </Button>
-      </ButtonRow>
       <div className="live-card-a">
         <div className="live-head" style={{ background: color, color: ink }}>
           <div className="live-name">{station.name}</div>

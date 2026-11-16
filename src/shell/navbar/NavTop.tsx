@@ -65,6 +65,22 @@ function PencilIcon() {
   );
 }
 
+/** The click after a touch that already acted is ignored this long. */
+const SWALLOW_MS = 800;
+
+function stop(event: Event): void {
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+/** Ignore the next click anywhere (the touch already acted). */
+function swallowNextClick(): void {
+  globalThis.addEventListener('click', stop, { capture: true, once: true });
+  setTimeout(() => {
+    globalThis.removeEventListener('click', stop, { capture: true });
+  }, SWALLOW_MS);
+}
+
 /**
  * The nav bar under the top bar (`#navtop`, nav.js:10-96 and 1242-1336):
  * « ◀ Retour » (the page's own back button or the history), the PréP pills and
@@ -157,6 +173,14 @@ export function NavTop() {
         ref={backReference}
         hidden={backHidden}
         aria-label={plain ? tr('Retour') : undefined}
+        onPointerDown={() => {
+          // A page whose ◀ must answer a mere touch (data-instant): it goes
+          // at once, and the click that follows is swallowed so it does not
+          // land on the screen that opens.
+          if (pageBackTarget()?.element()?.dataset.instant !== '1') return;
+          swallowNextClick();
+          navBack();
+        }}
         onClick={() => {
           // The page's own step back, else the menu it was opened from.
           if (plain && !pageStep) goBackInHistory();

@@ -50,6 +50,7 @@ import {
   trkFix,
 } from '../../features/map/trackerState.ts';
 import { isLake, state } from '../../state/index.ts';
+import { LIVE_FOCUS_ZOOM, liveFocusPlace } from '../meteo/liveDetail.ts';
 
 const KNOTS_PER_METRE_SECOND = 1.943_844;
 
@@ -166,6 +167,13 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
     map.setView(lakeCenter(), lakeZoom());
   } else {
     map.setView(seaCenter(), SEA_ZOOM);
+  }
+  // Back from a LiveMétéo station card: straight on its badge, zoomed in,
+  // the map no longer following the boat.
+  const focus = liveFocusPlace();
+  if (focus) {
+    map.setView([focus.lat, focus.lon], LIVE_FOCUS_ZOOM, { animate: false });
+    setFollow(false);
   }
   showPosition();
   whileMapLive(map, () => map.invalidateSize(), 100);

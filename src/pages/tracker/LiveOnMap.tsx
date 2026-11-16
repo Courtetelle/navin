@@ -40,10 +40,6 @@ const MOST_KM = 150;
 const REFRESH_MS = 2 * 60_000;
 /** The map of NavIn is looked for this often until it is built. */
 const WAIT_MS = 300;
-/** Back from a station card, the map zooms in at least this close. */
-const FOCUS_ZOOM = 12;
-/** The map settles this long after coming back. */
-const SETTLE_MS = 600;
 /** A press this long on a badge opens the whole card of the station. */
 const LONG_MS = 600;
 
@@ -164,8 +160,8 @@ export function LiveOnMap() {
     let zone: Circle | null = null;
     let wait: ReturnType<typeof setTimeout> | undefined;
     // The wind alert this was opened from, and the station whose card was
-    // just seen (« voir sur la carte »): crowned; back from the card the map
-    // first zooms in on it.
+    // just seen (◀ of its card): crowned; the map opens on it (see
+    // buildTrackerMap).
     // Taken once drawn (not here: an effect run twice would lose them).
     const alert = liveAlertSpot.peek();
     const seen = liveBlink.peek();
@@ -184,24 +180,9 @@ export function LiveOnMap() {
           ? alertStation(stations, alert.lat, alert.lon)
           : undefined;
       const crowned = seen ?? (alerted ? blinkKey(alerted) : null);
-      let focused: LiveStation | null = null;
       for (const station of stations) {
         const mine = blinkKey(station) === crowned;
         addBadge(layer, station, config.basis, mine);
-        // Back from its card: the map zoomed in on its badge, as close as
-        // the old LiveMétéo screen.
-        if (mine && seen && !drawn) focused = station;
-      }
-      if (focused) {
-        const { lat, lon } = focused;
-        const focus = () => {
-          if (closed || map.getZoom() >= FOCUS_ZOOM) return;
-          map.setView([lat, lon], FOCUS_ZOOM, { animate: false });
-        };
-        focus();
-        // Again once the map has settled after coming back (it may set its
-        // own view just after).
-        setTimeout(focus, SETTLE_MS);
       }
       if (!drawn) {
         if (alert) liveAlertSpot.value = null;
@@ -235,9 +216,12 @@ export function LiveOnMap() {
           dashArray: '6 6',
           interactive: false,
         }).addTo(map);
-        map.fitBounds(middle.toBounds(2 * radius * 1000), {
-          padding: [16, 16],
-        });
+        // Back from a station card the map is already on its badge.
+        if (!seen) {
+          map.fitBounds(middle.toBounds(2 * radius * 1000), {
+            padding: [16, 16],
+          });
+        }
         if (alert?.zone) {
           // A forecast alert: the zone its value stands for, in the colour
           // of a badge of the same wind.
