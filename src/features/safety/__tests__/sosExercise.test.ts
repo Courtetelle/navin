@@ -89,7 +89,7 @@ test('an exercise is marked, ends in the settings and clears the simulation', ()
   expect(state.view.currentView.value).toBe('settings');
   expect(state.view.settingsOpen.value).toBe('simu');
   expect(state.view.settingsFrom.value).toBe('tracker');
-  // Réglages opens on the page of the SOS simulation alone.
+  // Paramétrages opens on the page of the SOS simulation alone.
   expect(state.view.viewArg.value).toBe('simu');
 });
 

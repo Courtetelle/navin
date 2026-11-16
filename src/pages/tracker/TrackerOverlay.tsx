@@ -48,10 +48,10 @@ export function TrackerOverlay() {
         <>
           <p className="gps-denied" style={FULL_WIDTH}>
             📍 La localisation est refusée : la trace ne peut pas s’enregistrer.
-            Sur iPhone : Réglages › Confidentialité › Service de localisation ›
-            Safari (ou NavIn) › « Lorsque l’app est active ». Dans l’aperçu
-            ouvert depuis Claude, le GPS est souvent bloqué : l’essai réel se
-            fera dans l’appli installée.
+            Sur iPhone : Paramétrages › Confidentialité › Service de
+            localisation › Safari (ou NavIn) › « Lorsque l’app est active ».
+            Dans l’aperçu ouvert depuis Claude, le GPS est souvent bloqué :
+            l’essai réel se fera dans l’appli installée.
           </p>
           {overlay.framed ? (
             <Button

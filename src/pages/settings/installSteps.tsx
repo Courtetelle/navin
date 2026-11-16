@@ -45,7 +45,7 @@ export function IosSteps({ host }: InstallStepsProps) {
       </li>
       <li>
         {tr(
-          `Si l’aperçu montre encore un simple « L » : l’iPhone garde en mémoire une ancienne icône ratée. Allez dans Réglages › Apps › Safari › Avancé › Données des sites web, cherchez le nom du site, supprimez ${host}, puis rouvrez le site dans Safari et recommencez à l’étape 2. Vérifiez aussi que Safari n’est pas en navigation privée.`,
+          `Si l’aperçu montre encore un simple « L » : l’iPhone garde en mémoire une ancienne icône ratée. Allez dans Paramétrages › Apps › Safari › Avancé › Données des sites web, cherchez le nom du site, supprimez ${host}, puis rouvrez le site dans Safari et recommencez à l’étape 2. Vérifiez aussi que Safari n’est pas en navigation privée.`,
         )}
       </li>
       <li>

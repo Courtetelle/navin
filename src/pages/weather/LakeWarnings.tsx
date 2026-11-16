@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
+import { askMapArea } from '../../features/map/pendingArea.ts';
 import type { LakeWarnSettings } from '../../features/onwater/lakeWarnWatch.ts';
 import {
   lakeWarnState,
@@ -12,18 +15,21 @@ import {
 } from '../../features/onwater/lakeWarnWatch.ts';
 import {
   LIGHT_MEANINGS,
+  lakeArea,
   lightOf,
   litWarnings,
 } from '../../features/onwater/lakeWarnings.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { state, updateSettings } from '../../state/index.ts';
+import { exitOrigin } from '../../shell/exitOrigin.ts';
+import { go } from '../../shell/router.ts';
+import { state, toast, updateSettings } from '../../state/index.ts';
 
 const TROUBLES: Readonly<Record<string, string>> = {
   'no-relay':
-    'Il faut le relais (Réglages › Clés météo › Relais des METAR et bouées) : MétéoSuisse ne laisse pas une appli lire ses avis directement.',
+    'Il faut le relais (Paramétrages › Clés météo › Relais des METAR et bouées) : MétéoSuisse ne laisse pas une appli lire ses avis directement.',
   'old-relay':
-    'Le relais doit être mis à jour : Réglages › Clés météo › « 📋 Copier le code du relais », puis sur Cloudflare « Modifier le code », tout remplacer et « Déployer ».',
+    'Le relais doit être mis à jour : Paramétrages › Clés météo › « 📋 Copier le code du relais », puis sur Cloudflare « Modifier le code », tout remplacer et « Déployer ».',
   network: 'MétéoSuisse n’a pas répondu : nouvel essai dans 5 minutes.',
 };
 
@@ -79,10 +85,24 @@ export function LakeWarnings() {
         lit.map((warning) => {
           const { words, perMinute } = lightOf(warning.level);
           return (
-            <div
+            <button
+              type="button"
               key={warning.name}
-              className={warning.level >= 3 ? 'lw-row storm' : 'lw-row'}
+              className={
+                warning.level >= 3 ? 'lw-row lw-go storm' : 'lw-row lw-go'
+              }
               data-lakewarn="lit"
+              aria-label={tr(`${warning.name} : voir le feu sur la carte`)}
+              onClick={() => {
+                const area = lakeArea(warning.name);
+                if (!area) {
+                  toast('Ce lac n’est pas encore placé sur la carte');
+                  return;
+                }
+                buzz();
+                askMapArea(area);
+                go('tracker');
+              }}
             >
               <Lamp perMinute={perMinute} />
               <div>
@@ -93,8 +113,11 @@ export function LakeWarnings() {
                   )}
                 </div>
                 <div>{tr(warning.text)}</div>
+                <small className="lw-go-hint">
+                  {tr('🗺 toucher : le feu sur la carte')}
+                </small>
               </div>
-            </div>
+            </button>
           );
         })
       )}
@@ -128,6 +151,28 @@ export function LakeWarnings() {
           {tr('↻ Lire maintenant')}
         </Button>
       </ButtonRow>
+      <Button
+        className="btn big wx-entry wx-keys-link"
+        data-lakewarn="settings"
+        aria-label={tr(
+          'Paramétrage des feux d’avis des lacs : sortir vers Paramétrages',
+        )}
+        onClick={() => {
+          buzz();
+          toast('Vous sortez de Météorologie : Paramétrages');
+          exitOrigin.value = { view: 'weather', arg: 'lakelights' };
+          go('settings', 'lakes');
+        }}
+      >
+        <ExitIcon />
+        <span>
+          <b className="wx-settings-title">
+            <SettingsIcon className="wx-settings-ico" />
+            {tr('Paramétrage des feux d’avis des lacs')}
+          </b>
+          <small>{tr('l’alerte oui ou non, le sens des feux')}</small>
+        </span>
+      </Button>
       {at > 0 ? (
         <p className="nav-hint">
           {tr(`Lu à ${time(at)} · relu toutes les 5 minutes`)}
@@ -140,15 +185,15 @@ export function LakeWarnings() {
         concernent que la partie du Léman où vous êtes, d’après le GPS.
         MétéoSuisse publie ces avis sur son site sans les documenter comme
         données ouvertes : la lecture peut cesser si le site change. L’alerte
-        oui ou non et le sens des feux sont dans Réglages › Paramétrage des feux
-        d’avis des lacs ; le test dans Réglages › Tests.
+        oui ou non et le sens des feux sont dans Paramétrages › Paramétrage des
+        feux d’avis des lacs ; le test dans Paramétrages › Tests.
       </HelpText>
     </div>
   );
 }
 
 /**
- * The setting of the warning lights of the lakes (Réglages): the alert on
+ * The setting of the warning lights of the lakes (Paramétrages): the alert on
  * or off, and what the lights on the shores mean.
  * @returns The block.
  */

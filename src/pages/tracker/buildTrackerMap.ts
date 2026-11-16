@@ -26,6 +26,7 @@ import {
   BACKGROUND_Z,
   addOfflineMaps,
 } from '../../features/map/offlineMapLayer.ts';
+import { pendingMapArea } from '../../features/map/pendingArea.ts';
 import { showPendingPlace } from '../../features/map/placeTarget.ts';
 import { recenterAfterDrag } from '../../features/map/recenterAfterDrag.ts';
 import {
@@ -173,6 +174,16 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   const focus = liveFocusPlace();
   if (focus) {
     map.setView([focus.lat, focus.lon], LIVE_FOCUS_ZOOM, { animate: false });
+    setFollow(false);
+  }
+  // A warning light of a lake touched in its list: the map on its part of
+  // the lake, the whole of it in view.
+  const area = pendingMapArea();
+  if (area) {
+    map.fitBounds(L.latLng(area.lat, area.lon).toBounds(2 * area.km * 1000), {
+      padding: [20, 20],
+      animate: false,
+    });
     setFollow(false);
   }
   showPosition();

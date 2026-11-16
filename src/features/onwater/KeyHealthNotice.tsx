@@ -5,7 +5,7 @@ import { state } from '../../state/index.ts';
 import { keyProblems, standing } from './keyHealth.ts';
 
 /**
- * At the top of Réglages › Clés météo: a key ended, ending soon or refused,
+ * At the top of Paramétrages › Clés météo: a key ended, ending soon or refused,
  * and what to do, until a new key is saved (NavIn says it once a day too).
  * @returns The notice, or nothing.
  */

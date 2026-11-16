@@ -62,7 +62,7 @@ export function activeTemplate(kind: ListKind): PublishTemplate {
 /**
  * Layout chosen for a list (legacy `window.lxTheme`).
  * @param kind - List kind.
- * @returns The layout of every share, chosen in Réglages.
+ * @returns The layout of every share, chosen in Paramétrages.
  */
 export function listTheme(kind: ListKind): LxTheme {
   prepareList(kind);

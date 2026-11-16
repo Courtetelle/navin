@@ -50,7 +50,7 @@ export function toggleThemeFromGear(): void {
   });
   toast(
     state.preferences.settings.value.theme === 'night'
-      ? '☾ Mode nuit · appui long sur le bouton Réglages pour revenir au jour'
+      ? '☾ Mode nuit · appui long sur le bouton Paramétrages pour revenir au jour'
       : '☀︎ Mode jour',
   );
 }

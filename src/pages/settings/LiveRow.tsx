@@ -9,7 +9,7 @@ import { updateSettings } from '../../state/index.ts';
 import { LIVE_RADII_NM, liveRadiusNm } from '../tracker/liveOnMap.ts';
 
 /**
- * Réglages › LiveMétéo: the radius of the stations shown on the map around
+ * Paramétrages › LiveMétéo: the radius of the stations shown on the map around
  * the zone chosen with NavIn (else the GPS position).
  * @returns The row.
  */

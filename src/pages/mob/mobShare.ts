@@ -7,7 +7,7 @@ import { fmtPos } from '../../lib/geo.ts';
 import { state } from '../../state/index.ts';
 
 /**
- * A man-overboard log as a document of the layout of Réglages.
+ * A man-overboard log as a document of the layout of Paramétrages.
  * @param log - The log.
  * @param cruiseName - Name of the open cruise, if any.
  * @returns The document.

@@ -41,7 +41,7 @@ const OTHER_FUNCTIONS: readonly FunctionEntry[] = [
   },
   {
     key: 'settings',
-    title: '⚙️ Réglages',
+    title: '⚙️ Paramétrages',
     sub: 'alarme profondeur sonde mode nuit sauvegarde',
   },
   { key: 'marks', title: '◆ Mes repères', sub: 'points marques' },

@@ -47,7 +47,7 @@ export interface CachedPrepReport {
 let cached: CachedPrepReport | null = null;
 
 /**
- * Layout of the report: the one of every share, chosen in Réglages.
+ * Layout of the report: the one of every share, chosen in Paramétrages.
  * @returns The layout.
  */
 export function reportTheme(): LxTheme {
@@ -162,7 +162,7 @@ export function reportKey(): string {
 }
 
 /**
- * The PréP + check-in report as a PNG, in the layout of Réglages.
+ * The PréP + check-in report as a PNG, in the layout of Paramétrages.
  * @returns The image, null without an open outing.
  */
 export async function prepReportPng(): Promise<Blob | null> {

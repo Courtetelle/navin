@@ -2,6 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
 import { buzz } from '../../lib/dom.ts';
 import { railsScreen } from '../../lib/useWide.ts';
 import { state } from '../../state/index.ts';
@@ -80,7 +81,6 @@ function setTopbarVariables(header: HTMLElement): void {
   }
 }
 
-const GEAR_PATH = 'M6 12h20M36 12h6M6 24h5M21 24h21M6 36h24M40 36h2';
 let gearTimer: ReturnType<typeof setTimeout> | undefined;
 let gearLongPress = false;
 
@@ -100,7 +100,7 @@ function GearButton({ focused }: { focused: boolean }) {
         .filter(Boolean)
         .join(' ')}
       id="gearBtn"
-      aria-label="Réglages"
+      aria-label="Paramétrages"
       onPointerDown={() => {
         gearLongPress = false;
         clearTimeout(gearTimer);
@@ -134,23 +134,7 @@ function GearButton({ focused }: { focused: boolean }) {
         );
       }}
     >
-      <svg
-        className="gear-ico gear-sliders"
-        viewBox="0 0 48 48"
-        aria-hidden="true"
-      >
-        <g
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="3.4"
-          strokeLinecap="round"
-        >
-          <path d={GEAR_PATH} />
-          <circle cx="31" cy="12" r="4.6" />
-          <circle cx="16" cy="24" r="4.6" />
-          <circle cx="35" cy="36" r="4.6" />
-        </g>
-      </svg>
+      <SettingsIcon />
     </Button>
   );
 }

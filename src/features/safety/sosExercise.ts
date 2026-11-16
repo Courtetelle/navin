@@ -145,7 +145,7 @@ export function sosExStart(kind: string): void {
 }
 
 /**
- * End the exercise and go back to Réglages › Simulation SOS (legacy `sosExEnd`).
+ * End the exercise and go back to Paramétrages › Simulation SOS (legacy `sosExEnd`).
  */
 export function sosExEnd(): void {
   const back = exerciseBack;

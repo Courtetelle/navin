@@ -42,7 +42,7 @@ function watch(): void {
   });
 }
 
-/** Unroll the row: PréP (Météo during a track), data, Réglages, phone or VHF. */
+/** Unroll the row: PréP (Météo during a track), data, Paramétrages, phone or VHF. */
 export function openNavinRow(): void {
   watch();
   chosen = false;

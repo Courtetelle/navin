@@ -43,7 +43,7 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
       '4. Choisir « API Key » (pas « OAuth2 », qui ne dure qu’une heure).',
       '5. Durée de validité en secondes : écrire 0 (illimitée).',
       '6. Toucher « Générer token » et copier la clé tout de suite : le portail ne la remontre jamais.',
-      '7. Dans NavIn › Réglages › Clés météo, la coller sous « Clé API Météo-France » et toucher Enregistrer : NavIn la vérifie.',
+      '7. Dans NavIn › Paramétrages › Clés météo, la coller sous « Clé API Météo-France » et toucher Enregistrer : NavIn la vérifie.',
       '8. Clé perdue ou refusée : refaire les étapes 2 à 7 pour en générer une nouvelle.',
     ].join('\n'),
   },
@@ -59,7 +59,7 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
     again: [
       '1. Pas de connexion : la clé est dans le 2ᵉ mail d’AEMET (de opendata_apikey@aemet.es) ; le chercher dans la messagerie.',
       '2. La copier en entier, du premier au dernier caractère.',
-      '3. Dans NavIn › Réglages › Clés météo, la coller sous « Clé API AEMET » et toucher Enregistrer : NavIn l’essaie.',
+      '3. Dans NavIn › Paramétrages › Clés météo, la coller sous « Clé API AEMET » et toucher Enregistrer : NavIn l’essaie.',
       '4. La clé n’expire jamais. Mail perdu ou clé refusée : en redemander une avec la 1ʳᵉ partie, la même adresse mail convient.',
       '5. Pas de mail après quelques minutes : l’adresse était sans doute mal écrite, refaire la demande.',
     ].join('\n'),
@@ -79,7 +79,7 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
       '3. Menu du profil › « My subscriptions » › abonnement « Land Observations » › « Manage ».',
       '4. « API details / refresh credentials » : l’ancienne clé ne peut pas être remontrée.',
       '5. Pour une nouvelle clé : « Reset Credentials » puis « Confirm », et copier la clé affichée (l’ancienne cesse de marcher).',
-      '6. Dans NavIn › Réglages › Clés météo, la coller sous « Clé API Met Office » et toucher Enregistrer : NavIn l’essaie.',
+      '6. Dans NavIn › Paramétrages › Clés météo, la coller sous « Clé API Met Office » et toucher Enregistrer : NavIn l’essaie.',
     ].join('\n'),
   },
   frost: {
@@ -94,7 +94,7 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
     again: [
       '1. Pas de connexion : le client ID est dans le mail de frost@met.no ; le chercher dans la messagerie.',
       '2. Le copier en entier.',
-      '3. Dans NavIn › Réglages › Clés météo, le coller sous « Identifiant Frost (Norvège) » et toucher Enregistrer : NavIn l’essaie.',
+      '3. Dans NavIn › Paramétrages › Clés météo, le coller sous « Identifiant Frost (Norvège) » et toucher Enregistrer : NavIn l’essaie.',
       '4. Mail perdu ou identifiant refusé : en redemander un avec la 1ʳᵉ partie, la même adresse convient.',
     ].join('\n'),
   },

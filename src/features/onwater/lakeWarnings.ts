@@ -34,34 +34,49 @@ interface LakeSpot {
   match: string;
   lat: number;
   lon: number;
+  /** Half the size of the part of the lake the light speaks for, km. */
+  km: number;
 }
 
-/** The lakes watched by MeteoSwiss and where their light is drawn. */
+/**
+ * The lakes watched by MeteoSwiss and where their light is drawn (the
+ * parts first, then the whole lakes; French and German names).
+ */
 const LAKES: readonly LakeSpot[] = [
-  { match: 'petit lac', lat: 46.33, lon: 6.22 },
-  { match: 'grand lac', lat: 46.44, lon: 6.55 },
-  { match: 'haut lac', lat: 46.43, lon: 6.83 },
-  { match: 'neuchatel', lat: 46.9, lon: 6.85 },
-  { match: 'bienne', lat: 47.09, lon: 7.17 },
-  { match: 'morat', lat: 46.93, lon: 7.08 },
-  { match: 'joux', lat: 46.63, lon: 6.28 },
-  { match: 'thoune', lat: 46.69, lon: 7.71 },
-  { match: 'brienz', lat: 46.73, lon: 7.97 },
-  { match: 'quatre-cantons', lat: 47, lon: 8.45 },
-  { match: 'zoug', lat: 47.13, lon: 8.49 },
-  { match: 'zurich', lat: 47.25, lon: 8.65 },
-  { match: 'walenstadt', lat: 47.12, lon: 9.2 },
-  { match: 'untersee', lat: 47.68, lon: 9.05 },
-  { match: 'constance', lat: 47.6, lon: 9.4 },
-  { match: 'sempach', lat: 47.14, lon: 8.15 },
-  { match: 'hallwil', lat: 47.28, lon: 8.22 },
-  { match: 'baldegg', lat: 47.2, lon: 8.26 },
-  { match: 'sihl', lat: 47.14, lon: 8.78 },
-  { match: 'ageri', lat: 47.12, lon: 8.63 },
-  { match: 'greifen', lat: 47.35, lon: 8.68 },
-  { match: 'pfaffikon', lat: 47.35, lon: 8.78 },
-  { match: 'majeur', lat: 46.1, lon: 8.72 },
-  { match: 'lugano', lat: 45.98, lon: 8.97 },
+  { match: 'petit lac', lat: 46.33, lon: 6.22, km: 10 },
+  { match: 'grand lac', lat: 46.44, lon: 6.55, km: 14 },
+  { match: 'haut lac', lat: 46.43, lon: 6.83, km: 8 },
+  { match: 'neuchatel', lat: 46.9, lon: 6.85, km: 20 },
+  { match: 'bienne', lat: 47.09, lon: 7.17, km: 8 },
+  { match: 'biel', lat: 47.09, lon: 7.17, km: 8 },
+  { match: 'morat', lat: 46.93, lon: 7.08, km: 5 },
+  { match: 'murten', lat: 46.93, lon: 7.08, km: 5 },
+  { match: 'joux', lat: 46.63, lon: 6.28, km: 5 },
+  { match: 'thoune', lat: 46.69, lon: 7.71, km: 10 },
+  { match: 'thun', lat: 46.69, lon: 7.71, km: 10 },
+  { match: 'brienz', lat: 46.73, lon: 7.97, km: 8 },
+  { match: 'quatre-cantons', lat: 47, lon: 8.45, km: 18 },
+  { match: 'vierwaldstatt', lat: 47, lon: 8.45, km: 18 },
+  { match: 'zoug', lat: 47.13, lon: 8.49, km: 7 },
+  { match: 'zug', lat: 47.13, lon: 8.49, km: 7 },
+  { match: 'zurich', lat: 47.25, lon: 8.65, km: 18 },
+  { match: 'walenstadt', lat: 47.12, lon: 9.2, km: 8 },
+  { match: 'walensee', lat: 47.12, lon: 9.2, km: 8 },
+  { match: 'untersee', lat: 47.68, lon: 9.05, km: 10 },
+  { match: 'bodensee west', lat: 47.755, lon: 9.13, km: 15 },
+  { match: 'bodensee ost', lat: 47.55, lon: 9.55, km: 15 },
+  { match: 'bodensee', lat: 47.6, lon: 9.4, km: 22 },
+  { match: 'constance', lat: 47.6, lon: 9.4, km: 22 },
+  { match: 'sempach', lat: 47.14, lon: 8.15, km: 4 },
+  { match: 'hallwil', lat: 47.28, lon: 8.22, km: 4 },
+  { match: 'baldegg', lat: 47.2, lon: 8.26, km: 3 },
+  { match: 'sihl', lat: 47.14, lon: 8.78, km: 4 },
+  { match: 'ageri', lat: 47.12, lon: 8.63, km: 4 },
+  { match: 'greifen', lat: 47.35, lon: 8.68, km: 4 },
+  { match: 'pfaffikon', lat: 47.35, lon: 8.78, km: 3 },
+  { match: 'majeur', lat: 46.1, lon: 8.72, km: 25 },
+  { match: 'maggiore', lat: 46.1, lon: 8.72, km: 25 },
+  { match: 'lugano', lat: 45.98, lon: 8.97, km: 12 },
 ];
 
 function plain(text: string): string {
@@ -77,9 +92,21 @@ function plain(text: string): string {
  * @returns Its middle, or null when unknown.
  */
 export function lakeSpot(name: string): { lat: number; lon: number } | null {
+  const area = lakeArea(name);
+  return area ? { lat: area.lat, lon: area.lon } : null;
+}
+
+/**
+ * The part of the lake a light speaks for: its middle and its half size.
+ * @param name - The lake, as MeteoSwiss names it.
+ * @returns The area, or null when unknown.
+ */
+export function lakeArea(
+  name: string,
+): { lat: number; lon: number; km: number } | null {
   const words = plain(name);
   const spot = LAKES.find((lake) => words.includes(lake.match));
-  return spot ? { lat: spot.lat, lon: spot.lon } : null;
+  return spot ? { lat: spot.lat, lon: spot.lon, km: spot.km } : null;
 }
 
 /**

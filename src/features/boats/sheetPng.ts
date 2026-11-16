@@ -41,7 +41,7 @@ async function pictures(sheet: SheetImageContent): Promise<CardsPhoto[]> {
 
 /**
  * A sheet (a day, the crew list) as a document of the layout chosen in
- * Réglages: its tables, checklists, observations, journal lines, then the
+ * Paramétrages: its tables, checklists, observations, journal lines, then the
  * trace, the photos and the signature.
  * @param sheet - Sheet content.
  * @returns The document.
@@ -87,7 +87,7 @@ export async function sheetDocument(
 }
 
 /**
- * Draw a sheet as a PNG in the layout chosen in Réglages (legacy `sheetPng`).
+ * Draw a sheet as a PNG in the layout chosen in Paramétrages (legacy `sheetPng`).
  * @param sheet - Sheet content.
  * @returns The PNG blob.
  */

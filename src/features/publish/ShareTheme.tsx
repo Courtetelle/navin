@@ -8,7 +8,7 @@ import { setShareTheme, shareTheme } from './shareTheme.ts';
 import { LX_THEMES } from './themes.ts';
 
 /**
- * The choice of the layout of every share, in Réglages. A new layout added
+ * The choice of the layout of every share, in Paramétrages. A new layout added
  * to {@link LX_THEMES} shows here.
  * @returns The buttons.
  */
@@ -53,7 +53,7 @@ export function ShareThemeNote() {
   const label = LX_THEMES.find(([id]) => id === shareTheme())?.[1] ?? '';
   return (
     <p className="help pub-h share-theme-note">
-      {tr(`Mise en page : ${label} (se change dans Réglages › Partages)`)}
+      {tr(`Mise en page : ${label} (se change dans Paramétrages › Partages)`)}
     </p>
   );
 }

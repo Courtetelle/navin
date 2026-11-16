@@ -424,7 +424,7 @@ async function mapPicture(report: AlertReport): Promise<string | null> {
 }
 
 /**
- * The alert as a document of the layout chosen in Réglages: the card of the
+ * The alert as a document of the layout chosen in Paramétrages: the card of the
  * station, the trend, the sea and its marks, then the map.
  * @param report - The alert.
  * @param sea - The sea of the model, at sea only.
@@ -481,7 +481,7 @@ export async function alertDocument(
 }
 
 /**
- * The image of an alert, in the layout chosen in Réglages.
+ * The image of an alert, in the layout chosen in Paramétrages.
  * @param report - The alert.
  * @param sea - The sea of the model, at sea only.
  * @param trend - The wind of the last hours, when the station has enough past.

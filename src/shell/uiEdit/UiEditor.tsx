@@ -89,7 +89,7 @@ function finishEditing(): void {
   buzz();
   uiEditMode.value = false;
   toast(
-    `${Object.keys(state.data.uiEdits.value).length} bouton(s) modifié(s). Exportez-les depuis Réglages pour les envoyer à Claude.`,
+    `${Object.keys(state.data.uiEdits.value).length} bouton(s) modifié(s). Exportez-les depuis Paramétrages pour les envoyer à Claude.`,
   );
 }
 

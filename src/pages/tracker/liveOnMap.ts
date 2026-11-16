@@ -52,12 +52,12 @@ export function hideLiveOnMap(): void {
   liveOnMap.value = 0;
 }
 
-/** The radii LiveMétéo offers in Réglages, in nautical miles. */
+/** The radii LiveMétéo offers in Paramétrages, in nautical miles. */
 export const LIVE_RADII_NM = [15, 30, 60, 120, 180] as const;
 
 /**
  * The radius of LiveMétéo around the zone or the GPS, in nautical miles
- * (Réglages › LiveMétéo), 30 NM by default.
+ * (Paramétrages › LiveMétéo), 30 NM by default.
  * @returns Nautical miles.
  */
 export function liveRadiusNm(): number {

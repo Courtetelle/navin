@@ -5,6 +5,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
 import { PageLink } from '../../components/shared/PageLink.tsx';
+import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { inSwissArea } from '../../features/map/index.ts';
@@ -82,13 +83,13 @@ export function WeatherPage({ arg }: PageProps) {
 
 /**
  * The settings of the weather (wind alerts, lake lights, keys) are in
- * Réglages: the bubble says Météo is left; « Revenir » at the bottom of
- * Réglages comes back.
+ * Paramétrages: the bubble says Météo is left; « Revenir » at the bottom of
+ * Paramétrages comes back.
  */
 function openSettings() {
   buzz();
-  toast('Vous sortez du menu Météo : Réglages');
-  exitOrigin.value = 'weather';
+  toast('Vous sortez du menu Météo : Paramétrages');
+  exitOrigin.value = { view: 'weather' };
   go('settings');
 }
 
@@ -211,7 +212,7 @@ function WeatherMenu() {
             <b>{tr('LiveMétéo')}</b>
             <small>
               {tr(
-                'le vent mesuré par les stations de la zone, sur la carte (rayon dans Réglages)',
+                'le vent mesuré par les stations de la zone, sur la carte (rayon dans Paramétrages)',
               )}
             </small>
           </span>
@@ -258,15 +259,18 @@ function WeatherMenu() {
         <Button
           className="btn big wx-entry wx-keys-link"
           data-wx="settings"
-          aria-label={tr('Sortir du menu Météo vers Réglages : Paramétrages')}
+          aria-label={tr('Paramétrages : sortir du menu Météo')}
           onClick={openSettings}
         >
           <ExitIcon />
           <span>
-            <b>{tr('⚙️ Paramétrages')}</b>
+            <b className="wx-settings-title">
+              <SettingsIcon className="wx-settings-ico" />
+              {tr('Paramétrages')}
+            </b>
             <small>
               {tr(
-                'alertes vent, feux des lacs, clés météo : sortir du menu Météo, vers Réglages',
+                'alertes vent, feux des lacs, clés météo : sortir du menu Météo, vers Paramétrages',
               )}
             </small>
           </span>

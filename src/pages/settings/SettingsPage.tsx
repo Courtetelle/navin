@@ -11,6 +11,7 @@ import {
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
+import { WindsockIcon } from '../../components/shared/WindsockIcon.tsx';
 import { installPrompt } from '../../features/data/install.ts';
 import {
   WindAlert,
@@ -64,6 +65,11 @@ interface SettingsSectionProps {
   section: string;
   /** Text of the banner. */
   title: string;
+  /**
+   * A drawn sign before the text (instead of an emoji).
+   * @default undefined
+   */
+  icon?: ReactNode;
   children: ReactNode;
 }
 
@@ -77,7 +83,12 @@ const ShownSection = createContext('');
  * @param props - The section.
  * @returns The band, the content, or nothing.
  */
-function SettingsSection({ section, title, children }: SettingsSectionProps) {
+function SettingsSection({
+  section,
+  title,
+  icon,
+  children,
+}: SettingsSectionProps) {
   const tr = useTr();
   const shown = useContext(ShownSection);
   if (!shown) {
@@ -91,6 +102,7 @@ function SettingsSection({ section, title, children }: SettingsSectionProps) {
           go('settings', section);
         }}
       >
+        {icon ? <span className="set-entry-ico">{icon}</span> : null}
         {tr(title)}
       </Button>
     );
@@ -99,7 +111,10 @@ function SettingsSection({ section, title, children }: SettingsSectionProps) {
   return (
     <>
       <TitleInNav>
-        <h1>{tr(title)}</h1>
+        <h1>
+          {icon ? <span className="set-entry-ico">{icon}</span> : null}
+          {tr(title)}
+        </h1>
       </TitleInNav>
       <div className="set-page set-body" data-sec={section}>
         {children}
@@ -262,13 +277,15 @@ export function SettingsPage({ from, arg }: PageProps) {
   const section = typeof arg === 'string' ? arg : '';
   // A section opened straight from another screen, not from this menu.
   const [elsewhere] = useState(() => Boolean(section) && from !== 'settings');
-  // Réglages forgets the history: the screen it came from is kept here.
+  // Paramétrages forgets the history: the screen it came from is kept here.
   const [cameFrom] = useState(() => from || 'tracker');
-  // Opened by a « sortir vers Réglages » link: « Revenir » in the fixed
-  // line of the menu of Réglages, until it is left another way.
+  // Opened by a « sortir vers Paramétrages » link: « Revenir » in the fixed
+  // line of the menu of Paramétrages, until it is left another way.
   const [origin] = useState(() => {
     const kept = exitOrigin.peek();
-    if (kept && from !== 'settings' && from !== kept) exitOrigin.value = null;
+    if (kept && from !== 'settings' && from !== kept.view) {
+      exitOrigin.value = null;
+    }
     return exitOrigin.peek();
   });
   useLayoutEffect(() => {
@@ -284,31 +301,31 @@ export function SettingsPage({ from, arg }: PageProps) {
     <>
       {section ? null : (
         <TitleInNav>
-          <h1>{tr('Réglages')}</h1>
+          <h1>{tr('Paramétrages')}</h1>
         </TitleInNav>
       )}
-      {!section && origin ? (
-        // Opened by a « sortir vers Réglages » link: « Revenir » in the
+      {origin && (!section || elsewhere) ? (
+        // Opened by a « sortir vers Paramétrages » link: « Revenir » in the
         // fixed line, at the left of the title, back there.
         <PageBack
           label="◀ Revenir"
-          data-go={origin}
+          data-go={origin.view}
           data-revenir="1"
           onClick={() => {
             buzz();
             exitOrigin.value = null;
-            go(origin);
+            go(origin.view, origin.arg);
           }}
         >
           {tr('◀ Revenir')}
         </PageBack>
       ) : null}
-      {section ? (
+      {section && !(origin && elsewhere) ? (
         // At the top of the page: it joins the fixed title line.
         // Opened from elsewhere (the radius button of the map, the Météo
-        // menu): ◀ goes back there; from the menu of Réglages, back to it.
+        // menu): ◀ goes back there; from the menu of Paramétrages, back to it.
         <PageBack
-          label={elsewhere ? '◀ Retour' : '◀ Réglages'}
+          label={elsewhere ? '◀ Retour' : '◀ Paramétrages'}
           data-go={elsewhere ? 'back' : 'settings'}
           onClick={() => {
             buzz();
@@ -316,7 +333,7 @@ export function SettingsPage({ from, arg }: PageProps) {
             else go('settings');
           }}
         >
-          {tr(elsewhere ? '◀ Retour' : '◀ Réglages')}
+          {tr(elsewhere ? '◀ Retour' : '◀ Paramétrages')}
         </PageBack>
       ) : null}
       <ShownSection.Provider value={section}>
@@ -337,12 +354,13 @@ export function SettingsPage({ from, arg }: PageProps) {
             <PrefillRow />
             <WeatherRow />
           </SettingsSection>
-          <SettingsSection section="live" title="🌬 LiveMétéo">
+          <SettingsSection section="live" title="🌬 Paramétrages LiveMétéo">
             <LiveRow />
           </SettingsSection>
           <SettingsSection
             section="wind"
-            title="🔔 Paramétrage des alertes vent"
+            title="Paramétrage des alertes vent"
+            icon={<WindsockIcon />}
           >
             <WindAlert noTest />
           </SettingsSection>

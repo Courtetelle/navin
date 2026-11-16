@@ -8,7 +8,7 @@ import { AEMET_KEY, FROST_KEY, MET_OFFICE_KEY } from './stationKeys.ts';
 
 /**
  * The keys of the networks of measured wind (Météo-France, AEMET, Met
- * Office) and the address of the relay, in Réglages: the wind alerts
+ * Office) and the address of the relay, in Paramétrages: the wind alerts
  * themselves are in the Météo menu.
  * @returns The rows.
  */

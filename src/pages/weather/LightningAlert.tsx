@@ -122,7 +122,7 @@ export function LightningAlert() {
         sans rien demander, même alerte coupée : les plus récents vifs, ceux de
         10 et 20 minutes plus pâles, pour voir où va l’orage ; jaune pour 1
         éclair en 5 minutes, rouge foncé pour 20 et plus. Pour entendre et voir
-        l’alerte : Réglages › Tests.
+        l’alerte : Paramétrages › Tests.
       </HelpText>
       <SiteLink id="blitzortung" />
     </div>

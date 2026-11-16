@@ -170,7 +170,7 @@ function traceRows(track: LakeTrack): Array<[string, string]> {
 
 /**
  * Share a trace: its sheet and its plan as an image or a PDF, in the layout
- * of Réglages.
+ * of Paramétrages.
  * @param track - The trace.
  * @param format - Image or PDF.
  */

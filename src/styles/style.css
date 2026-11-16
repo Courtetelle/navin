@@ -3421,7 +3421,7 @@ body.has-goto #view {
   }
 }
 
-/* Réglages selon l'onglet (v78) */
+/* Paramétrages selon l'onglet (v78) */
 .ctx-set {
   border: 2px solid var(--primary, #0050d0);
 }
@@ -6532,7 +6532,7 @@ body.prep-top.prep-on #view {
     transform: none !important;
   }
 }
-/* v343 (Corban) — Réglages : rubriques dépliables pleine largeur, même présentation partout */
+/* v343 (Corban) — Paramétrages : rubriques dépliables pleine largeur, même présentation partout */
 .set-secs {
   display: grid;
   gap: 10px;
@@ -12540,7 +12540,7 @@ html body .lx-modal .ck-ask-box {
   }
 }
 
-/* SOCIB changed its instruments: the notice in Réglages › Paramétrage des alertes vent */
+/* SOCIB changed its instruments: the notice in Paramétrages › Paramétrage des alertes vent */
 .socib-notice {
   display: grid;
   gap: 10px;
@@ -12635,7 +12635,7 @@ html body .lx-modal .ck-ask-box {
   background: #000;
 }
 
-/* At the bottom of the Météo menu: the keys, in Réglages */
+/* At the bottom of the Météo menu: the keys, in Paramétrages */
 .btn.wx-keys-link {
   width: 100%;
 }
@@ -12659,7 +12659,7 @@ html body .lx-modal .ck-ask-box {
   margin: 10px 0 0;
 }
 
-/* Réglages as the Météo menu: a band per section; a section opened alone on
+/* Paramétrages as the Météo menu: a band per section; a section opened alone on
    its page, its title fixed at the top, ◀ back to the menu */
 .set-menu {
   display: grid;
@@ -13179,11 +13179,18 @@ html body.menus-fading header.topbar #gearBtn.theme-btn {
   opacity: 0.75;
 }
 
-/* The sign of a site, at the left of its button and of its band */
+/* The sign of a site, at the left of its button and of its band: a hand
+   that touches, the touch in green */
 .site-logo {
   flex: 0 0 auto;
-  width: 1.4em;
-  height: 1.4em;
+  width: 1.6em;
+  height: 1.6em;
+}
+.site-logo-tap {
+  stroke: #7cd3a8;
+}
+:root[data-theme='night'] .site-logo-tap {
+  stroke: #ff7070;
 }
 /* data › Sites Internet: one band per site */
 .sites-list {
@@ -13318,4 +13325,58 @@ html body.menus-fading header.topbar #gearBtn.theme-btn {
     right: calc(34px + env(safe-area-inset-right)) !important;
     height: var(--rb-h) !important;
   }
+}
+
+/* « Paramétrages » in the Météo menu: the sliders of its button */
+.btn.wx-entry b.wx-settings-title,
+.wx-settings-title {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+}
+.wx-settings-ico.gear-ico {
+  width: 1.2em;
+  height: 1.2em;
+  color: var(--primary, #0b3d91);
+}
+:root[data-theme='night'] .wx-settings-ico.gear-ico {
+  color: var(--fg);
+}
+
+/* A lit warning light in its list: touched, the map on its part of the lake */
+button.lw-row.lw-go {
+  width: 100%;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.lw-go-hint {
+  display: block;
+  margin-top: 4px;
+  opacity: 0.75;
+}
+
+/* The windsock of the wind alerts: drawn as the other signs, its bands
+   orange */
+.windsock-ico {
+  flex: 0 0 auto;
+  width: 1.3em;
+  height: 1.3em;
+  margin-right: 6px;
+  vertical-align: -0.25em;
+}
+.windsock-band {
+  fill: #f08c00;
+}
+:root[data-theme='night'] .windsock-band {
+  fill: #ff4040;
+}
+.set-entry-ico {
+  display: inline-flex;
+  vertical-align: middle;
 }

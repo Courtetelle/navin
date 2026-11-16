@@ -1027,7 +1027,7 @@ async function nextZoneX(page: Page): Promise<void> {
   }
   await openGear(page);
   await page.waitForTimeout(500);
-  // Réglages is a menu: the section of the zone opens on its own page.
+  // Paramétrages is a menu: the section of the zone opens on its own page.
   await page.locator('.set-entry[data-sec="zone"]').click();
   await page.waitForTimeout(300);
   await page.locator('[data-zonesim]').click();

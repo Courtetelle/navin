@@ -30,7 +30,7 @@ const KEY = 'ldb.keyHealth';
 /** A key ending within this time is said before it stops. */
 const SOON_MS = 10 * 86_400_000;
 
-/** The problems of the keys, for Réglages › Clés météo. */
+/** The problems of the keys, for Paramétrages › Clés météo. */
 export const keyProblems = signal<KeyProblem[]>(
   store.get<KeyHealth | null>(KEY, null)?.problems ?? [],
 );
@@ -71,31 +71,31 @@ const KEYS = [
     id: 'mf',
     setting: 'mfKey',
     name: 'Météo-France',
-    todo: 'Réglages › Clés météo › « Où trouver la clé Météo-France » (2ᵉ partie) : générer une nouvelle « API Key » sur portail-api.meteofrance.fr, la coller et Enregistrer.',
+    todo: 'Paramétrages › Clés météo › « Où trouver la clé Météo-France » (2ᵉ partie) : générer une nouvelle « API Key » sur portail-api.meteofrance.fr, la coller et Enregistrer.',
   },
   {
     id: 'aemet',
     setting: 'aemetKey',
     name: 'AEMET',
-    todo: 'Réglages › Clés météo › « Où trouver la clé AEMET » : redemander une clé par mail sur opendata.aemet.es, la coller et Enregistrer.',
+    todo: 'Paramétrages › Clés météo › « Où trouver la clé AEMET » : redemander une clé par mail sur opendata.aemet.es, la coller et Enregistrer.',
   },
   {
     id: 'metoffice',
     setting: 'metOfficeKey',
     name: 'Met Office',
-    todo: 'Réglages › Clés météo › « Où trouver la clé Met Office » (2ᵉ partie) : « Reset Credentials » sur datahub.metoffice.gov.uk, coller la nouvelle clé et Enregistrer.',
+    todo: 'Paramétrages › Clés météo › « Où trouver la clé Met Office » (2ᵉ partie) : « Reset Credentials » sur datahub.metoffice.gov.uk, coller la nouvelle clé et Enregistrer.',
   },
   {
     id: 'frost',
     setting: 'frostKey',
     name: 'Frost (MET Norway)',
-    todo: 'Réglages › Clés météo › « Où trouver l’identifiant Frost » : redemander un client ID sur frost.met.no avec son adresse mail, le coller et Enregistrer.',
+    todo: 'Paramétrages › Clés météo › « Où trouver l’identifiant Frost » : redemander un client ID sur frost.met.no avec son adresse mail, le coller et Enregistrer.',
   },
   {
     id: 'relay',
     setting: 'relayUrl',
     name: 'relais des METAR',
-    todo: 'Réglages › Clés météo › « Où trouver l’adresse du relais » : vérifier le Worker « navin-relay » sur dash.cloudflare.com, y recoller « 📋 Copier le code du relais » puis « Deploy », et vérifier son adresse.',
+    todo: 'Paramétrages › Clés météo › « Où trouver l’adresse du relais » : vérifier le Worker « navin-relay » sur dash.cloudflare.com, y recoller « 📋 Copier le code du relais » puis « Deploy », et vérifier son adresse.',
   },
 ] as const;
 
@@ -229,7 +229,7 @@ export function standing(
 
 /**
  * Once a day, as long as it is not solved: the keys are looked at, and a
- * bubble says each problem and what to do; Réglages › Clés météo shows them
+ * bubble says each problem and what to do; Paramétrages › Clés météo shows them
  * until a new key is saved. Without network, nothing is said and NavIn
  * looks again later the same day.
  * @param now - Epoch milliseconds.

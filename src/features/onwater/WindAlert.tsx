@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { WindsockIcon } from '../../components/shared/WindsockIcon.tsx';
 import { buzz } from '../../lib/dom.ts';
 import { dayKey, fmtTime } from '../../lib/format.ts';
 import { windTxt } from '../../lib/wind.ts';
@@ -70,7 +71,8 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
           data-walert="toggle"
           onClick={click('toggle')}
         >
-          {tr(`🔔 Alertes de vent : ${config.on ? 'OUI' : 'NON'}`)}
+          <WindsockIcon />
+          {tr(`Alertes de vent : ${config.on ? 'OUI' : 'NON'}`)}
           <ReOnI onOpen={() => setReOn(true)} />
         </Button>
         <Button className="btn" data-walert="basis" onClick={click('basis')}>

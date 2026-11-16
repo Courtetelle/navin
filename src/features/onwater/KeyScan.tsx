@@ -54,7 +54,7 @@ const LOOK_MS = 250;
 
 /**
  * The camera of NavIn reads the QR code of a key shown by another device
- * (Réglages › Clés météo › 📤 Partager la clé): the key is saved here at
+ * (Paramétrages › Clés météo › 📤 Partager la clé): the key is saved here at
  * once, in NavIn itself (on an iPhone, NavIn of the home screen does not
  * see what Safari keeps). No network is used.
  * @param props - What is read.

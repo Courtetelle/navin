@@ -70,7 +70,7 @@ function ImportPreview({ plan }: { plan: ImportPlan }) {
           ))}
         </ul>
         <HelpText nextIsRow>
-          {`${legs.length > 1 ? `${legs.length} navigations séparées. ` : ''}Départ, arrivée et environ ${perHourText(settings.autoPerHour)} au plus, moins si la navigation est longue (modifiable dans Réglages).${settings.autoWeather ? ' La météo du modèle complète ce qui manque s’il y a du réseau.' : ''}`}
+          {`${legs.length > 1 ? `${legs.length} navigations séparées. ` : ''}Départ, arrivée et environ ${perHourText(settings.autoPerHour)} au plus, moins si la navigation est longue (modifiable dans Paramétrages).${settings.autoWeather ? ' La météo du modèle complète ce qui manque s’il y a du réseau.' : ''}`}
         </HelpText>
         <ButtonRow className="row c2">
           <Button className="btn" id="gpxCancel" onClick={() => go('export')}>

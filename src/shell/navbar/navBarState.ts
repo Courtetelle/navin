@@ -135,7 +135,7 @@ export function navBackLabel(
 
 /**
  * Whether `#navtop` is shown (nav.js:45): on every non-root screen, on PréP
- * and on Réglages (a menu as Météo: its title fixed, ◀ one step back),
+ * and on Paramétrages (a menu as Météo: its title fixed, ◀ one step back),
  * except in the full-screen tracker (`trk-mode`).
  */
 export const navBarShown = computed(() => {

@@ -87,7 +87,7 @@ function slices(
 }
 
 /**
- * Share a document drawn in the layout of Réglages: the image to the share
+ * Share a document drawn in the layout of Paramétrages: the image to the share
  * sheet, or the same image as a PDF.
  * @param document - What to draw.
  * @param name - File name without extension.

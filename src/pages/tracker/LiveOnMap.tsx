@@ -127,7 +127,7 @@ function addBadge(
 
 /**
  * LiveMétéo on the NavIn map: the badges of the stations of the zone (the
- * zone chosen with NavIn, else the GPS, the radius of Réglages) or of the
+ * zone chosen with NavIn, else the GPS, the radius of Paramétrages) or of the
  * map shown. They stay until the button of the radius is touched (it goes
  * with them); a touch on one shows its short bubble; a long press opens its
  * whole card, whose ◀ comes back here. A band at the top says how many.
@@ -293,7 +293,7 @@ export function LiveOnMap() {
  * The button of the radius, at the left while LiveMétéo shows the stations
  * of the zone: a dashed circle, its radius as an arrow, the centre a red
  * big red cross blinking, and the radius in NM. A touch takes the badges
- * away with the button; a long press opens Réglages › LiveMétéo to change
+ * away with the button; a long press opens Paramétrages › LiveMétéo to change
  * it (its ◀ comes back to the map).
  * @returns The button.
  */

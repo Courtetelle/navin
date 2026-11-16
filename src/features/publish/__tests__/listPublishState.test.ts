@@ -95,7 +95,7 @@ test('keepOnly unchecks all the others, whatever the session did', () => {
   expect(listChoice('people').off).toStrictEqual(['a', 'b']);
 });
 
-test('every list takes the layout chosen in Réglages', () => {
+test('every list takes the layout chosen in Paramétrages', () => {
   prepareList('crews');
   expect(listTheme('crews')).toBe('cards');
   setShareTheme('carnet');
@@ -173,7 +173,7 @@ test('a stored template is read at the first opening', () => {
     },
   });
   resetListPublishState();
-  // The layout of a stored template gives way to the one of Réglages.
+  // The layout of a stored template gives way to the one of Paramétrages.
   expect(listTheme('boats')).toBe('cards');
   expect(listChoice('boats')).toStrictEqual({
     off: [],

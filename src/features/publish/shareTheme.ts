@@ -7,7 +7,7 @@ const known = (value: unknown): value is LxTheme =>
   LX_THEMES.some(([id]) => id === value);
 
 /**
- * The layout of every share, chosen once in Réglages. Before that choice,
+ * The layout of every share, chosen once in Paramétrages. Before that choice,
  * the one last picked for the PréP report is kept.
  * @returns The layout.
  */
