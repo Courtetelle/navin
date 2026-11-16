@@ -10,7 +10,6 @@ import {
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { installPrompt } from '../../features/data/install.ts';
 import {
@@ -67,11 +66,6 @@ interface SettingsSectionProps {
   title: string;
   children: ReactNode;
 }
-
-/** Where « Revenir » goes back to, as it says it. */
-const ORIGIN_NAMES: Readonly<Record<string, string>> = {
-  weather: 'au menu Météo',
-};
 
 /** The section shown, empty on the menu of the settings. */
 const ShownSection = createContext('');
@@ -270,8 +264,8 @@ export function SettingsPage({ from, arg }: PageProps) {
   const [elsewhere] = useState(() => Boolean(section) && from !== 'settings');
   // Réglages forgets the history: the screen it came from is kept here.
   const [cameFrom] = useState(() => from || 'tracker');
-  // Opened by a « sortir vers Réglages » link: « Revenir » at the bottom,
-  // on every page of Réglages, until it is left another way.
+  // Opened by a « sortir vers Réglages » link: « Revenir » in the fixed
+  // line of the menu of Réglages, until it is left another way.
   const [origin] = useState(() => {
     const kept = exitOrigin.peek();
     if (kept && from !== 'settings' && from !== kept) exitOrigin.value = null;
@@ -293,6 +287,22 @@ export function SettingsPage({ from, arg }: PageProps) {
           <h1>{tr('Réglages')}</h1>
         </TitleInNav>
       )}
+      {!section && origin ? (
+        // Opened by a « sortir vers Réglages » link: « Revenir » in the
+        // fixed line, at the left of the title, back there.
+        <PageBack
+          label="◀ Revenir"
+          data-go={origin}
+          data-revenir="1"
+          onClick={() => {
+            buzz();
+            exitOrigin.value = null;
+            go(origin);
+          }}
+        >
+          {tr('◀ Revenir')}
+        </PageBack>
+      ) : null}
       {section ? (
         // At the top of the page: it joins the fixed title line.
         // Opened from elsewhere (the radius button of the map, the Météo
@@ -385,26 +395,6 @@ export function SettingsPage({ from, arg }: PageProps) {
           </SettingsSection>
         </div>
       </ShownSection.Provider>
-      {origin ? (
-        <Button
-          className="btn big wx-entry wx-keys-link set-return"
-          data-set="return"
-          aria-label={tr('Revenir là d’où vous êtes venu')}
-          onClick={() => {
-            buzz();
-            exitOrigin.value = null;
-            go(origin);
-          }}
-        >
-          <ExitIcon back />
-          <span>
-            <b>{tr('Revenir')}</b>
-            <small>
-              {tr(ORIGIN_NAMES[origin] ?? 'là d’où vous êtes venu')}
-            </small>
-          </span>
-        </Button>
-      ) : null}
       {section ? null : (
         <p className="help" id="buildId">
           Version {BUILD_ID}

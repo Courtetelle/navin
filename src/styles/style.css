@@ -12060,6 +12060,24 @@ html body .dn-night > .dn-moon {
   html body.nav-plain #navtop #navBack[hidden] {
     display: none !important;
   }
+  /* « Revenir » to where a « sortir vers… » link was touched: the word
+     and the blue sign of coming back, no ◀ */
+  html body.nav-plain #navtop #navBack.nav-revenir {
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    font-weight: 800;
+    font-size: 18px;
+  }
+  html body.nav-plain #navtop #navBack.nav-revenir::before {
+    content: none;
+  }
+  html body.nav-plain #navtop #navBack.nav-revenir .exit-box {
+    width: 22px;
+    font-size: 18px;
+  }
   html body.nav-plain #navtop #navBack::before {
     left: 50%;
     transform: translate(-50%, -50%);

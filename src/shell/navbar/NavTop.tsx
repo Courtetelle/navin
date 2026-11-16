@@ -4,6 +4,7 @@ import type { ReactNode, RefObject } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
 import { navTitleSlot } from '../../components/shared/navTitleSlot.ts';
 import { useAutoRoll } from '../../components/shared/useAutoRoll.tsx';
 import { useTr } from '../../i18n/useTr.ts';
@@ -128,6 +129,9 @@ export function NavTop() {
   const pageGo = pageBackTarget()?.element()?.dataset.go;
   const before = previousView();
   const pageStep = pageBackTarget() !== null && pageGo !== 'tracker';
+  // Back to where a « sortir vers… » link was touched: « Revenir » written,
+  // with the blue sign of coming back.
+  const revenir = pageBackTarget()?.element()?.dataset.revenir === '1';
   const historyStep = before !== null && before !== 'tracker';
   const backHidden = plain && !pageStep && !historyStep;
   const [slot, setSlot] = useState<HTMLDivElement | null>(null);
@@ -168,11 +172,17 @@ export function NavTop() {
       ref={reference}
     >
       <Button
-        className={backRoll.className ? `btn ${backRoll.className}` : 'btn'}
+        className={[
+          'btn',
+          backRoll.className,
+          plain && revenir ? 'nav-revenir' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         id="navBack"
         ref={backReference}
         hidden={backHidden}
-        aria-label={plain ? tr('Retour') : undefined}
+        aria-label={plain ? tr(revenir ? 'Revenir' : 'Retour') : undefined}
         onPointerDown={() => {
           // A page whose ◀ must answer a mere touch (data-instant): it goes
           // at once, and the click that follows is swallowed so it does not
@@ -187,6 +197,12 @@ export function NavTop() {
           else navBack();
         }}
       >
+        {plain && revenir ? (
+          <>
+            <ExitIcon back />
+            <span>{tr('Revenir')}</span>
+          </>
+        ) : null}
         {plain ? null : backRoll.content}
       </Button>
       {plain ? <div id="navTitle" ref={setSlot} /> : null}
