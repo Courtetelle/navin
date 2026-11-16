@@ -11,6 +11,7 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
+import { layLiveAround } from '../tracker/liveOnMap.ts';
 
 import { StationCard } from './StationCard.tsx';
 import { blinkKey, liveBlink, liveDetail } from './liveDetail.ts';
@@ -25,8 +26,11 @@ export function MeteoPage() {
   const [detail] = useState(() => liveDetail.peek());
   useEffect(() => {
     liveDetail.value = null;
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- opened without a station (an old link): back to the map
-    if (!detail) go('tracker');
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- opened without a station (the data tile): LiveMétéo on the map
+    if (detail) return;
+    // The LiveMétéo tile of data: the stations of the zone on the map.
+    layLiveAround();
+    go('tracker');
   }, [detail]);
   return detail ? <LiveDetail station={detail} /> : null;
 }

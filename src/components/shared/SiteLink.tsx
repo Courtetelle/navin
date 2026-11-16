@@ -1,122 +1,37 @@
-import { useState } from 'react';
+import { useSignals } from '@preact/signals-react/runtime';
 
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { saveSiteLink, siteLink, toast } from '../../state/index.ts';
+import { siteLinksVersion, siteShown } from '../../state/index.ts';
 
-import { Button } from './Button.tsx';
+import { SiteLogo } from './SiteLogo.tsx';
 
 /**
- * A link to another site, the same everywhere: a pill to touch with its
- * text, the address of the site written in full under it, and a ✏️ to
- * change both (emptied, NavIn's come back).
+ * A link to a site, the same everywhere: a button with the sign of a site
+ * and its text. Its address, and the text, are changed in data › Sites
+ * Internet only; a site taken away there shows no button.
  * @param props - The link.
- * @param props.id - Its key, for the changes kept.
- * @param props.label - Its text by default.
- * @param props.url - Its address by default.
- * @returns The link.
+ * @param props.id - The site, in the list of data › Sites Internet.
+ * @returns The button, or nothing.
  */
-export function SiteLink({
-  id,
-  label,
-  url,
-}: {
-  id: string;
-  label: string;
-  url: string;
-}) {
+export function SiteLink({ id }: { id: string }) {
+  useSignals();
   const tr = useTr();
-  const [shown, setShown] = useState(() => siteLink(id, label, url));
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(shown);
-  if (editing) {
-    return (
-      <form
-        className="site-link site-link-edit"
-        onSubmit={(event) => {
-          event.preventDefault();
-          buzz();
-          saveSiteLink(
-            id,
-            draft.label === label && draft.url === url
-              ? { label: '', url: '' }
-              : draft,
-          );
-          setShown(siteLink(id, label, url));
-          setEditing(false);
-          toast('Lien enregistré');
-        }}
-      >
-        <label>
-          <span>{tr('Texte de la pastille')}</span>
-          <input
-            className="text"
-            value={draft.label}
-            onChange={(event) =>
-              setDraft({ ...draft, label: event.target.value })
-            }
-          />
-        </label>
-        <label>
-          <span>{tr('Adresse du site')}</span>
-          <input
-            className="text"
-            type="url"
-            autoCapitalize="off"
-            spellCheck={false}
-            value={draft.url}
-            onChange={(event) =>
-              setDraft({ ...draft, url: event.target.value })
-            }
-          />
-        </label>
-        <div className="row c2">
-          <Button
-            type="button"
-            className="btn"
-            onClick={() => setEditing(false)}
-          >
-            {tr('Fermer')}
-          </Button>
-          <Button type="submit" className="btn primary">
-            {tr('Enregistrer')}
-          </Button>
-        </div>
-        <Button
-          type="button"
-          className="btn site-link-reset"
-          onClick={() => setDraft({ label, url })}
-        >
-          {tr('Rétablir le lien de NavIn')}
-        </Button>
-      </form>
-    );
-  }
+  // Read again at each change of the list (the version is read to redraw).
+  const shown = siteLinksVersion.value >= 0 ? siteShown(id) : null;
+  if (!shown || shown.hidden) return null;
   return (
     <div className="site-link" data-site-link={id}>
-      <div className="site-link-main">
-        <a
-          className="site-link-pill"
-          href={shown.url}
-          target="_blank"
-          rel="noopener"
-        >
-          <span aria-hidden="true">↗</span> {shown.label}
-        </a>
-        <span className="site-link-url">{shown.url}</span>
-      </div>
-      <Button
-        type="button"
-        className="btn site-link-pen"
-        aria-label={tr(`Modifier le lien : ${shown.label}`)}
-        onClick={() => {
-          buzz();
-          setDraft(shown);
-          setEditing(true);
-        }}
+      <a
+        className="site-link-pill"
+        href={shown.url}
+        target="_blank"
+        rel="noopener"
+        onClick={() => buzz()}
       >
-        ✏️
-      </Button>
+        <SiteLogo />
+        <span>{tr(shown.label)}</span>
+      </a>
     </div>
   );
 }

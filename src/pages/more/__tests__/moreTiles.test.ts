@@ -36,6 +36,7 @@ test('without a cruise, the menu lists the records of the phone', () => {
     'nmea',
     'marks',
     'lists',
+    'sites',
   ]);
   expect(tiles[3]?.sub).toBe('5 bateaux, données et check-lists du lac');
   expect(tiles[5]?.sub).toBe('3 groupes de navigants, avec les rôles');
@@ -65,6 +66,7 @@ test('a lake outing shows its sheet, its rules and the lake totals', () => {
     'marks',
     'cartes',
     'nmea',
+    'sites',
     'print',
     'export',
   ]);

@@ -160,6 +160,10 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/stats/StatsPage.tsx').then((module) => ({
       default: module.StatsPage,
     })),
+  sites: () =>
+    import('../pages/sites/SitesPage.tsx').then((module) => ({
+      default: module.SitesPage,
+    })),
   tasktpl: () =>
     import('../pages/tasktpl/TasktplPage.tsx').then((module) => ({
       default: module.TasktplPage,

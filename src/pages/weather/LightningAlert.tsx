@@ -124,11 +124,7 @@ export function LightningAlert() {
         éclair en 5 minutes, rouge foncé pour 20 et plus. Pour entendre et voir
         l’alerte : Réglages › Tests.
       </HelpText>
-      <SiteLink
-        id="blitzortung"
-        label="Carte Blitzortung (à regarder)"
-        url="https://map.blitzortung.org/"
-      />
+      <SiteLink id="blitzortung" />
     </div>
   );
 }

@@ -12760,22 +12760,10 @@ html body .lx-modal .ck-ask-box {
   border-color: var(--fg);
 }
 
-/* A link to another site, the same everywhere: a pill, the address in full
-   under it, a pencil at the right */
+/* A link to another site, the same everywhere: a button, the sign of a
+   site at its left (the address shows in data › Sites Internet only) */
 .site-link {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: var(--card, #f2f4f7);
-}
-.site-link-main {
-  flex: 1;
-  min-width: 0;
-  display: grid;
-  gap: 6px;
-  justify-items: start;
 }
 .site-link-pill {
   display: inline-flex;
@@ -12789,16 +12777,6 @@ html body .lx-modal .ck-ask-box {
   font-weight: 700;
   font-size: 18px;
   text-decoration: none;
-}
-.site-link-url {
-  font-size: 14px;
-  color: var(--muted, #5b6575);
-  overflow-wrap: anywhere;
-}
-.btn.site-link-pen {
-  flex: 0 0 auto;
-  width: 56px;
-  min-width: 56px;
 }
 .site-link-edit {
   display: grid;
@@ -13180,5 +13158,53 @@ html body.navin-fading header.topbar #gearBtn.theme-btn {
 .steep-marks {
   margin: 0;
   font-size: 12px;
+  opacity: 0.75;
+}
+
+/* The sign of a site, at the left of its button and of its band */
+.site-logo {
+  flex: 0 0 auto;
+  width: 1.4em;
+  height: 1.4em;
+}
+/* data › Sites Internet: one band per site */
+.sites-list {
+  display: grid;
+  gap: 8px;
+}
+.section.site-band {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--card, #fff);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.site-band .site-logo {
+  width: 32px;
+  height: 32px;
+  color: var(--primary, #0b3d91);
+}
+:root[data-theme='night'] .site-band .site-logo {
+  color: var(--fg);
+}
+.site-band-text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.site-band-url {
+  font-size: 14px;
+  color: var(--muted, #5b6575);
+  overflow-wrap: anywhere;
+}
+.site-band-text small {
   opacity: 0.75;
 }

@@ -386,17 +386,9 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
           <section className="wx-links">
             <h2>{tr('Sources officielles')}</h2>
             {lake ? (
-              <SiteLink
-                id="wx-meteoswiss"
-                label="⚠️ Alertes MeteoSwiss"
-                url="https://www.meteosuisse.admin.ch/meteo/dangers.html"
-              />
+              <SiteLink id="wx-meteoswiss" />
             ) : (
-              <SiteLink
-                id="wx-mf-marine"
-                label="Bulletins Météo Spéciaux (BMS)"
-                url="https://meteofrance.com/meteo-marine"
-              />
+              <SiteLink id="wx-mf-marine" />
             )}
             <div className="page-links">
               <PageLink

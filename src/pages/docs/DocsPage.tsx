@@ -6,7 +6,6 @@ import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import type { StoredDocument } from '../../features/onwater/docStore.ts';
 import { getDoc, putDoc } from '../../features/onwater/docStore.ts';
-import { LEMAN_ARCGIS } from '../../features/onwater/externals.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
@@ -68,11 +67,7 @@ export function DocsPage() {
       >
         Documents obligatoires à bord
       </PageTitle>
-      <SiteLink
-        id="docs-arcgis-leman"
-        label="🌐 Carte interactive du Léman (ArcGIS)"
-        url={LEMAN_ARCGIS}
-      />
+      <SiteLink id="docs-arcgis-leman" />
       <div id="docList">
         {LEMAN_DOCS.map((document) => (
           <DocumentCard

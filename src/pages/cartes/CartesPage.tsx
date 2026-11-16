@@ -8,7 +8,6 @@ import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { helpBubbleText } from '../../components/shared/helpRules.ts';
 import { useIntroLead } from '../../components/shared/introLead.ts';
-import { LEMAN_ARCGIS } from '../../features/map/constants.ts';
 import { marksFly } from '../../features/map/longPress.ts';
 import { showPlace } from '../../features/map/placeTarget.ts';
 import { zoneDelete } from '../../features/map/zoneDownload.ts';
@@ -90,11 +89,7 @@ function CartesContent({ onChange }: { onChange: () => void }) {
         <HelpText nextIsRow>
           Réseau nécessaire, s’ouvrent dans le navigateur.
         </HelpText>
-        <SiteLink
-          id="map-arcgis-leman"
-          label="🌐 Carte ArcGIS du Léman"
-          url={LEMAN_ARCGIS}
-        />
+        <SiteLink id="map-arcgis-leman" />
       </FoldSection>
     </>
   );

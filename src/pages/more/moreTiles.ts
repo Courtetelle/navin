@@ -41,6 +41,11 @@ const NMEA: MoreTile = {
   title: '📡 Instruments du bateau',
   sub: 'NMEA en Wi-Fi (Signal K), import de fichiers NMEA',
 };
+const SITES: MoreTile = {
+  key: 'sites',
+  title: '🌐 Sites Internet',
+  sub: 'les sites liés dans NavIn : texte des boutons et adresses',
+};
 const STATS: MoreTile = {
   key: 'stats',
   title: '📊 Cumul sur le lac',
@@ -90,6 +95,7 @@ export function tilesWithoutCruise(): MoreTile[] {
     NMEA,
     marksTile(marks.value.length),
     LISTS,
+    SITES,
   ];
   if (hasLakeCruise()) tiles.push(STATS);
   return tiles;
@@ -164,6 +170,7 @@ export function tilesWithCruise(): MoreTile[] {
     marksTile(marks.value.length),
     chartsTile(),
     NMEA,
+    SITES,
     {
       key: 'print',
       title: '📤 Partager le livre de bord',
