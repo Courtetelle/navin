@@ -12,7 +12,7 @@ export const LIGHTNING_LAYER = 'mtg_fd:li_afa';
 /** One image every 5 minutes. */
 const STEP_MS = 5 * 60_000;
 /** The radii offered for the alert, in nautical miles. */
-export const LIGHTNING_RADII_NM = [15, 30, 60] as const;
+export const LIGHTNING_RADII_NM = [15, 30, 45, 60] as const;
 /** The radius by default, in nautical miles. */
 export const LIGHTNING_RADIUS_NM = 30;
 /** Kilometres in a nautical mile. */
@@ -184,6 +184,56 @@ function distanceKm(
     Math.sin(dLat / 2) ** 2 +
     Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLon / 2) ** 2;
   return 2 * 6371 * Math.asin(Math.min(1, Math.sqrt(a)));
+}
+
+/**
+ * The point at a distance and a bearing from a place.
+ * @param lat - Latitude of the place.
+ * @param lon - Its longitude.
+ * @param bearing - Degrees from north.
+ * @param km - Distance.
+ * @returns The point.
+ */
+export function pointAt(
+  lat: number,
+  lon: number,
+  bearing: number,
+  km: number,
+): { lat: number; lon: number } {
+  const rad = Math.PI / 180;
+  const angle = km / 6371;
+  const phi = lat * rad;
+  const theta = bearing * rad;
+  const lat2 = Math.asin(
+    Math.sin(phi) * Math.cos(angle) +
+      Math.cos(phi) * Math.sin(angle) * Math.cos(theta),
+  );
+  const lon2 =
+    lon * rad +
+    Math.atan2(
+      Math.sin(theta) * Math.sin(angle) * Math.cos(phi),
+      Math.cos(angle) - Math.sin(phi) * Math.sin(lat2),
+    );
+  return { lat: lat2 / rad, lon: ((lon2 / rad + 540) % 360) - 180 };
+}
+
+/**
+ * The map that shows the boat (or the zone) and the nearest flashes: the
+ * middle between them, wide enough for both.
+ * @param place - The boat or the zone.
+ * @param storm - The nearest flashes.
+ * @returns Middle and half size, km.
+ */
+export function stormView(
+  place: { lat: number; lon: number },
+  storm: { lat: number; lon: number },
+): { lat: number; lon: number; km: number } {
+  const km = distanceKm(place.lat, place.lon, storm.lat, storm.lon);
+  return {
+    lat: (place.lat + storm.lat) / 2,
+    lon: (place.lon + storm.lon) / 2,
+    km: Math.max(15, km / 2 + 15),
+  };
 }
 
 function bearingOf(

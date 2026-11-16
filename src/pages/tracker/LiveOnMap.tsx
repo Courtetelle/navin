@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { leaflet } from '../../features/map/leaflet.ts';
+import { pendingMapArea } from '../../features/map/pendingArea.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { showZoomOnMap } from '../../features/map/zoomShown.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
@@ -141,6 +142,11 @@ export function LiveOnMap() {
   const radiusSet = liveRadius();
   const on = asked > 0;
   const [count, setCount] = useState<number | null>(null);
+  // The map opened on a storm or a warning light: the winds of LiveMétéo
+  // and their circle leave it.
+  useEffect(() => {
+    if (pendingMapArea() && liveOnMap.peek() > 0) liveOnMap.value = 0;
+  }, []);
   // LiveMétéo laid (or the map back from a station): ＋ and − shown too.
   useEffect(() => {
     if (asked > 0) showZoomOnMap();

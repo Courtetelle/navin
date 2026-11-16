@@ -6,11 +6,10 @@ import { Button } from '../../components/shared/Button.tsx';
 import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { go } from '../../shell/router.ts';
-import { leaflet } from '../map/leaflet.ts';
-import { tracker } from '../map/trackerState.ts';
+import { askMapArea } from '../map/pendingArea.ts';
 
 import { lakeWarnPop } from './lakeWarnPop.ts';
-import { nmToKm } from './lightning.ts';
+import { nmToKm, pointAt, stormView } from './lightning.ts';
 import type { LightningPop } from './lightningPop.ts';
 import { lightningPop } from './lightningPop.ts';
 import { windPopup } from './windOverlayState.ts';
@@ -30,21 +29,18 @@ function translate(text: string): string {
  * @param pop - The alert.
  */
 function showOnMap(pop: LightningPop): void {
+  const { place, report, radiusNm } = pop;
+  // The nearest flashes and the boat (or the zone) in view; LiveMétéo and
+  // its circle leave the map (see LiveOnMap).
+  askMapArea(
+    report.nearestKm != null && report.bearing != null
+      ? stormView(
+          place,
+          pointAt(place.lat, place.lon, report.bearing, report.nearestKm),
+        )
+      : { ...place, km: nmToKm(radiusNm) * 1.2 },
+  );
   go('tracker');
-  const fit = (left: number) => {
-    const map = tracker.current?.map;
-    if (!map) {
-      if (left > 0) setTimeout(() => fit(left - 1), 300);
-      return;
-    }
-    const L = leaflet();
-    map.fitBounds(
-      L.latLng(pop.place.lat, pop.place.lon).toBounds(
-        2 * nmToKm(pop.radiusNm) * 1000 * 1.2,
-      ),
-    );
-  };
-  setTimeout(() => fit(10), 100);
 }
 
 /**

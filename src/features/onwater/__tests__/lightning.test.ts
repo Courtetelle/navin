@@ -11,6 +11,8 @@ import {
   lightningText,
   lightningTimes,
   lightningUrl,
+  pointAt,
+  stormView,
 } from '../lightning.ts';
 
 const AREA = { lat: 48.65, lon: -2, km: 55.56 };
@@ -30,7 +32,8 @@ function image(size: number, lit: Array<[number, number, number]>) {
 test('the radius of the alert is one of those offered, 30 NM by default', () => {
   expect(lightningRadiusNm(undefined)).toBe(30);
   expect(lightningRadiusNm({ radiusNm: 60 })).toBe(60);
-  expect(lightningRadiusNm({ radiusNm: 45 })).toBe(30);
+  expect(lightningRadiusNm({ radiusNm: 45 })).toBe(45);
+  expect(lightningRadiusNm({ radiusNm: 50 })).toBe(30);
 });
 
 test('the images of the last quarter of an hour, on the 5-minute steps', () => {
@@ -127,4 +130,15 @@ test('no black of no data counted as a flash', () => {
   const black = new Uint8ClampedArray(4 * 4).fill(0);
   for (let at = 3; at < black.length; at += 4) black[at] = 255;
   expect(lightningSpots(black, 2, { lat: 70, lon: 20, km: 500 }).cells).toBe(0);
+});
+
+test('a point at a distance and a bearing, and the view of a storm', () => {
+  const east = pointAt(46.5, 6.5, 90, 100);
+  expect(east.lat).toBeCloseTo(46.49, 1);
+  expect(east.lon).toBeCloseTo(7.81, 1);
+  const north = pointAt(46.5, 6.5, 0, 111.2);
+  expect(north.lat).toBeCloseTo(47.5, 1);
+  const view = stormView({ lat: 46.5, lon: 6.5 }, { lat: 47.5, lon: 6.5 });
+  expect(view.lat).toBeCloseTo(47, 3);
+  expect(Math.round(view.km)).toBe(71);
 });

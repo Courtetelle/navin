@@ -24,6 +24,7 @@ import {
   lightningTimes,
   lightningUrl,
   nmToKm,
+  pointAt,
 } from './lightning.ts';
 import type { LightningPop } from './lightningPop.ts';
 import { lightningPop } from './lightningPop.ts';
@@ -233,4 +234,36 @@ export function lightningTest(): void {
     place: { lat, lon },
     test: true,
   });
+}
+
+/** Farther and farther, the nearest flashes are looked for this far, km. */
+const NEAREST_KM = [60, 150, 400] as const;
+
+/**
+ * The nearest flashes of the last quarter of an hour from the GPS, or from
+ * the zone chosen with NavIn: looked for farther and farther.
+ * @returns The place looked from and the nearest flashes (null when none
+ *   within 400 km, or the images could not be read).
+ */
+export async function nearestStorm(): Promise<{
+  place: { lat: number; lon: number };
+  storm: { lat: number; lon: number } | null;
+}> {
+  const place = await new Promise<{ lat: number; lon: number }>((resolve) => {
+    lookPlace((position) => {
+      const { lat, lon } = position ?? contextPlace();
+      resolve({ lat, lon });
+    });
+  });
+  for (const km of NEAREST_KM) {
+    // eslint-disable-next-line no-await-in-loop -- farther only when nothing nearer
+    const report = await readLightning({ ...place, km });
+    if (report?.nearestKm != null && report.bearing != null) {
+      return {
+        place,
+        storm: pointAt(place.lat, place.lon, report.bearing, report.nearestKm),
+      };
+    }
+  }
+  return { place, storm: null };
 }

@@ -9525,11 +9525,12 @@ body.has-navtop #view > h1.live-title,
 }
 .wx-list {
   list-style: none;
-  margin: 0;
+  margin: 12px 0 0;
   padding: 0;
 }
+/* The same gap between the points as between the buttons of the menus */
 .wx-list li {
-  margin: 0 0 6px;
+  margin: 0 0 12px;
 }
 .wx-check {
   display: flex;
@@ -13179,19 +13180,13 @@ html body.menus-fading header.topbar #gearBtn.theme-btn {
   opacity: 0.75;
 }
 
-/* The sign of a site, at the left of its button and of its band: a hand
-   that touches, the touch in green */
+/* The sign of a site, at the left of its button and of its band: a globe */
 .site-logo {
   flex: 0 0 auto;
-  width: 1.6em;
-  height: 1.6em;
+  width: 1.4em;
+  height: 1.4em;
 }
-.site-logo-tap {
-  stroke: #7cd3a8;
-}
-:root[data-theme='night'] .site-logo-tap {
-  stroke: #ff7070;
-}
+
 /* data › Sites Internet: one band per site */
 .sites-list {
   display: grid;
@@ -13255,10 +13250,11 @@ html body.menus-fading header.topbar #gearBtn.theme-btn {
     box-sizing: border-box;
     cursor: pointer;
   }
+  /* A larger touch area, but never over the title line (its ⓘ) */
   html body .menus-tab::after {
     content: '';
     position: absolute;
-    inset: -14px;
+    inset: 0 -12px -4px;
   }
   .menus-tab-ico {
     width: 22px;
@@ -13306,6 +13302,9 @@ html body.menus-fading header.topbar #gearBtn.theme-btn {
     margin-top: -34px;
     border-right: 0;
     border-radius: 12px 0 0 12px;
+  }
+  html body .menus-tab::after {
+    inset: -12px 0 -12px -6px;
   }
   html body .menus-tab-ico {
     transform: rotate(90deg);
@@ -13379,4 +13378,22 @@ button.lw-row.lw-go {
 .set-entry-ico {
   display: inline-flex;
   vertical-align: middle;
+}
+
+/* The same gap between buttons on top of each other in a page as in the
+   menus (12 px): the links out to Paramétrages and the links to sites */
+main#view .btn.wx-entry.wx-keys-link,
+main#view .site-link {
+  margin-top: 12px;
+}
+.wx-menu .btn.wx-entry.wx-keys-link {
+  margin-top: 0;
+}
+
+/* T upright: « data » in proportion with its button (the size of the
+   others) */
+@media (orientation: portrait) and (max-width: 559px) {
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    font-size: 21px !important;
+  }
 }

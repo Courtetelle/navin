@@ -178,9 +178,17 @@ function gpsHere(): { lat: number; lon: number } | null {
 function WeatherMenu() {
   useSignals();
   const tr = useTr();
-  // The warning lights of the Swiss lakes: only with NavIn on a lake, or the
-  // GPS in Switzerland.
-  const lakeLights = isLake() || navZone() === 'lac' || inSwissArea(gpsHere());
+  // The warning lights of the Swiss lakes.
+  // NavIn forced to a sea (Atlantique, Méditerranée): never; forced to the
+  // lakes: always; on the GPS: on a lake or in Switzerland.
+  const forced = state.view.zoneSimV.value;
+  const lakeLights =
+    forced === 'mer'
+      ? false
+      : forced === 'lac' ||
+        isLake() ||
+        navZone() === 'lac' ||
+        inSwissArea(gpsHere());
   return (
     <>
       <TitleInNav>

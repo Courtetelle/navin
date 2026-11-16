@@ -148,7 +148,7 @@ export function LakeWarnings() {
             read();
           }}
         >
-          {tr('↻ Lire maintenant')}
+          {tr('↻ Actualiser maintenant')}
         </Button>
       </ButtonRow>
       <Button

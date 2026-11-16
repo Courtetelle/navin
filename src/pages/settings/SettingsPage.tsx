@@ -36,6 +36,7 @@ import { toggleTheme } from '../../shell/theme.ts';
 import { UiEditSection } from '../../shell/uiEdit/UiEditSection.tsx';
 import { nightOK, state, toast } from '../../state/index.ts';
 import { LakeWarnSetting } from '../weather/LakeWarnings.tsx';
+import { LightningSetting } from '../weather/LightningAlert.tsx';
 
 import { BackupSections } from './BackupSections.tsx';
 import { InstallGuide } from './InstallGuide.tsx';
@@ -363,6 +364,12 @@ export function SettingsPage({ from, arg }: PageProps) {
             icon={<WindsockIcon />}
           >
             <WindAlert noTest />
+          </SettingsSection>
+          <SettingsSection
+            section="lightning"
+            title="⚡ Paramétrage des alertes foudre"
+          >
+            <LightningSetting />
           </SettingsSection>
           <SettingsSection
             section="lakes"

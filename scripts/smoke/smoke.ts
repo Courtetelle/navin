@@ -81,6 +81,51 @@ async function open(
 
 const NAVIN = 'header.topbar nav.topnav .top-tab[data-view="tracker"]';
 
+/** Buttons on top of each other keep at least this gap, in pixels. */
+const LEAST_GAP_PX = 8;
+
+/**
+ * The rule of the layouts: two buttons one above the other never touch
+ * (the same gap as in the menus). Lists the pairs too close.
+ * @param page - The page shown.
+ * @returns The pairs closer than {@link LEAST_GAP_PX}.
+ */
+async function tightButtons(page: Page): Promise<string[]> {
+  return page.evaluate((least) => {
+    const boxes = [
+      ...document.querySelectorAll(
+        'main#view .btn, main#view button.lw-row, main#view .site-link-pill',
+      ),
+    ]
+      .map((element) => ({ element, box: element.getBoundingClientRect() }))
+      .filter(
+        ({ element, box }) =>
+          box.width > 0 &&
+          box.height > 0 &&
+          !element.closest('.help-i, .swipe-row, .sw-menu'),
+      );
+    const tight: string[] = [];
+    for (const upper of boxes) {
+      let below: (typeof boxes)[number] | null = null;
+      for (const other of boxes) {
+        if (other === upper || upper.element.contains(other.element)) continue;
+        if (other.element.contains(upper.element)) continue;
+        const overlap =
+          Math.min(upper.box.right, other.box.right) -
+          Math.max(upper.box.left, other.box.left);
+        if (overlap < 20 || other.box.top < upper.box.bottom - 2) continue;
+        if (!below || other.box.top < below.box.top) below = other;
+      }
+      if (below && below.box.top - upper.box.bottom < least) {
+        const name = (element: Element) =>
+          (element.textContent ?? '').trim().slice(0, 24);
+        tight.push(`${name(upper.element)} / ${name(below.element)}`);
+      }
+    }
+    return tight;
+  }, LEAST_GAP_PX);
+}
+
 // data and the settings wait behind their own tab (X and T): it is touched
 // until they show.
 async function showRow(page: Page): Promise<void> {
@@ -807,6 +852,61 @@ async function marksShare(page: Page, theme: string): Promise<void> {
 }
 
 /**
+ * The rule of the layouts on the menus and their pages: two buttons one
+ * above the other never touch (Météorologie and its pages, data,
+ * Paramétrages and each of its sections).
+ * @param page - The page.
+ * @param theme - Theme checked.
+ */
+async function layoutGaps(page: Page, theme: string): Promise<void> {
+  const tight: string[] = [];
+  const look = async (where: string) => {
+    await page.waitForTimeout(500);
+    for (const pair of await tightButtons(page)) {
+      tight.push(`${where}: ${pair}`);
+    }
+  };
+  /* eslint-disable no-await-in-loop -- one page after the other */
+  for (const entry of ['', 'forecast', 'lightning', 'check']) {
+    await page.locator(NAVIN).click();
+    await page.waitForTimeout(500);
+    await page.locator('.rail-weather').first().click();
+    await page.waitForTimeout(500);
+    if (entry) {
+      await page.locator(`[data-wx="${entry}"]`).click();
+      await page.waitForTimeout(800);
+    }
+    await look(entry || 'Météorologie');
+  }
+  await openData(page);
+  await look('data');
+  await openGear(page);
+  await look('Paramétrages');
+  const sections = await page
+    .locator('button[data-sec]')
+    .evaluateAll((items) =>
+      items.map((item) => (item as HTMLElement).dataset.sec ?? ''),
+    );
+  for (const section of sections) {
+    // Back on the menu of Paramétrages by its ◀.
+    if ((await page.locator('button[data-sec]').count()) === 0) {
+      await page.locator('#navBack').click();
+      await page.waitForTimeout(400);
+    }
+    await page.locator(`button[data-sec="${section}"]`).click();
+    await look(`Paramétrages › ${section}`);
+  }
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(400);
+  /* eslint-enable no-await-in-loop */
+  check(
+    theme,
+    `layouts: buttons one above the other never touch${tight.length > 0 ? ` (${tight.join(' · ')})` : ''}`,
+    tight.length === 0,
+  );
+}
+
+/**
  * The rule of the scales: in French and in English, the same columns, the
  * same fonts and sizes; nothing moves when the language changes. Opened from
  * the forecast of Météo, their ◀ comes back to it.
@@ -867,10 +967,28 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(400);
   check(
     theme,
-    'Météo › Alerte foudre: its switch and its three radii',
-    (await page.locator('[data-lightning="toggle"]').count()) === 1 &&
-      (await page.locator('[data-lightning-radius]').count()) === 3,
+    'Météo › Alerte foudre: the map, a look now and the way to its settings',
+    (await page.locator('[data-lightning="map"]').count()) === 1 &&
+      (await page.locator('[data-lightning="settings"]').count()) === 1 &&
+      (await page.locator('[data-lightning-radius]').count()) === 0,
   );
+  const lightningTight = await tightButtons(page);
+  check(
+    theme,
+    `Météo › Alerte foudre: the buttons one above the other never touch${lightningTight.length > 0 ? ` (${lightningTight.join(', ')})` : ''}`,
+    lightningTight.length === 0,
+  );
+  await page.locator('[data-lightning="settings"]').click();
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    'Paramétrage des alertes foudre: its switch and its four distances',
+    (await page.locator('[data-lightning="toggle"]').count()) === 1 &&
+      (await page.locator('[data-lightning-radius]').count()) === 4,
+  );
+  // Back to the map, Paramétrages left.
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(500);
 }
 
 /**
@@ -1581,6 +1699,7 @@ for (const theme of ['day', 'night']) {
     await marksShare(page, theme);
     await scalesSteady(page, theme);
     await alertsInTurn(page, theme);
+    await layoutGaps(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }
