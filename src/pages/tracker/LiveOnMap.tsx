@@ -240,7 +240,7 @@ export function LiveOnMap() {
 /**
  * The button of the radius, at the left while LiveMétéo shows the stations
  * of the zone: a dashed circle, its radius as an arrow, the centre a red
- * cross blinking slowly, and the radius in NM. A touch takes the badges
+ * big red cross blinking, and the radius in NM. A touch takes the badges
  * away with the button; a long press opens Réglages › LiveMétéo to change
  * it (its ◀ comes back to the map).
  * @returns The button.
@@ -287,12 +287,21 @@ function RadiusButton() {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
+      </svg>
+      {/* The big red cross: a touch takes LiveMétéo away. */}
+      <svg
+        className="live-radius-x"
+        viewBox="0 0 40 40"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
         <path
           className="live-radius-cross"
-          d="M16.5 16.5l7 7m0-7-7 7"
-          stroke="#d0021b"
-          strokeWidth="2.8"
+          d="M5 5l30 30m0-30-30 30"
+          stroke="#e00016"
+          strokeWidth="6"
           strokeLinecap="round"
+          vectorEffect="non-scaling-stroke"
         />
       </svg>
       <span className="live-radius-nb">{nm}</span>

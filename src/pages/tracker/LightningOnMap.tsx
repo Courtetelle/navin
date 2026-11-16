@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { TileLayer } from 'leaflet';
+import type { Coords, DoneCallback, TileLayer } from 'leaflet';
 import { useEffect } from 'react';
 
 import { leaflet } from '../../features/map/leaflet.ts';
@@ -8,6 +8,7 @@ import type { LightningSettings } from '../../features/onwater/lightning.ts';
 import {
   LIGHTNING_LAYER,
   LIGHTNING_WMS,
+  lightningClearNoData,
   lightningOnMap,
   lightningTimes,
 } from '../../features/onwater/lightning.ts';
@@ -31,6 +32,54 @@ const TRAIL = [
 
 function stamp(time: number): string {
   return new Date(time).toISOString().replace('.000Z', 'Z');
+}
+
+/**
+ * An image of the flashes with the black of no data made clear: the server
+ * lays black bands where the satellite stops seeing (the far north).
+ * @param source - The image read.
+ * @returns The image cleaned, as a data URL.
+ */
+function cleaned(source: HTMLImageElement): string {
+  const canvas = document.createElement('canvas');
+  canvas.width = source.naturalWidth;
+  canvas.height = source.naturalHeight;
+  const context = canvas.getContext('2d');
+  if (!context) return source.src;
+  context.drawImage(source, 0, 0);
+  const image = context.getImageData(0, 0, canvas.width, canvas.height);
+  if (lightningClearNoData(image.data) === 0) return source.src;
+  context.putImageData(image, 0, 0);
+  return canvas.toDataURL('image/png');
+}
+
+/**
+ * The WMS layer whose tiles come cleaned of the black of no data.
+ * @returns Its class.
+ */
+function cleanWms() {
+  const L = leaflet();
+  return class CleanWms extends L.TileLayer.WMS {
+    override createTile(coords: Coords, done: DoneCallback): HTMLElement {
+      const tile = document.createElement('img');
+      tile.alt = '';
+      tile.setAttribute('role', 'presentation');
+      const source = new Image();
+      source.crossOrigin = 'anonymous';
+      tile.addEventListener('load', () => done(undefined, tile));
+      tile.addEventListener('error', () => done(new Error('tile'), tile));
+      source.addEventListener('load', () => {
+        try {
+          tile.src = cleaned(source);
+        } catch {
+          tile.src = source.src;
+        }
+      });
+      source.addEventListener('error', () => done(new Error('tile'), tile));
+      source.src = this.getTileUrl(coords);
+      return tile;
+    }
+  };
 }
 
 /**
@@ -61,21 +110,19 @@ export function LightningOnMap() {
         wait = setTimeout(start, WAIT_MS);
         return;
       }
-      const L = leaflet();
+      const Wms = cleanWms();
       const shown = times();
       for (const [index, { opacity }] of TRAIL.entries()) {
         layers.push(
-          L.tileLayer
-            .wms(LIGHTNING_WMS, {
-              layers: LIGHTNING_LAYER,
-              format: 'image/png',
-              transparent: true,
-              opacity,
-              className: 'map-flashes',
-              attribution: 'Éclairs : EUMETSAT MTG',
-              time: shown[index],
-            } as never)
-            .addTo(map),
+          new Wms(LIGHTNING_WMS, {
+            layers: LIGHTNING_LAYER,
+            format: 'image/png',
+            transparent: true,
+            opacity,
+            className: 'map-flashes',
+            attribution: 'Éclairs : EUMETSAT MTG',
+            time: shown[index],
+          } as never).addTo(map),
         );
       }
     };

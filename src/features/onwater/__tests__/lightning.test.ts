@@ -3,6 +3,7 @@ import { expect, test } from 'vitest';
 import type { LightningSpots } from '../lightning.ts';
 import {
   lightningBox,
+  lightningClearNoData,
   lightningDue,
   lightningRadiusNm,
   lightningReport,
@@ -110,4 +111,20 @@ test('the alert sounds when the storm enters, comes much nearer, or stays', () =
   expect(lightningDue(lightningReport([spot(null)], 0, 0), null, 0)).toBe(
     false,
   );
+});
+
+test('the black of no data is cleared, the flashes kept', () => {
+  const pixels = new Uint8ClampedArray([
+    0, 0, 0, 255, 254, 249, 189, 255, 160, 20, 20, 255, 0, 0, 0, 0,
+  ]);
+  expect(lightningClearNoData(pixels)).toBe(1);
+  expect([...pixels]).toEqual([
+    0, 0, 0, 0, 254, 249, 189, 255, 160, 20, 20, 255, 0, 0, 0, 0,
+  ]);
+});
+
+test('no black of no data counted as a flash', () => {
+  const black = new Uint8ClampedArray(4 * 4).fill(0);
+  for (let at = 3; at < black.length; at += 4) black[at] = 255;
+  expect(lightningSpots(black, 2, { lat: 70, lon: 20, km: 500 }).cells).toBe(0);
 });

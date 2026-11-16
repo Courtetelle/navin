@@ -201,6 +201,41 @@ function bearingOf(
 }
 
 /**
+ * Whether a pixel is the black the server lays at the edge of what the
+ * satellite sees (no data), not a flash: the flashes go from pale yellow to
+ * dark red, never black.
+ * @param pixels - RGBA, row after row.
+ * @param at - Index of the pixel's red.
+ * @returns It is the black of no data.
+ */
+export function lightningNoData(
+  pixels: ArrayLike<number>,
+  at: number,
+): boolean {
+  return (
+    (pixels[at] ?? 0) < 60 &&
+    (pixels[at + 1] ?? 0) < 60 &&
+    (pixels[at + 2] ?? 0) < 60
+  );
+}
+
+/**
+ * Make the black of no data clear in an image, the flashes left as they are.
+ * @param pixels - RGBA, row after row, changed in place.
+ * @returns How many pixels were cleared.
+ */
+export function lightningClearNoData(pixels: Uint8ClampedArray): number {
+  let cleared = 0;
+  for (let at = 0; at < pixels.length; at += 4) {
+    if ((pixels[at + 3] ?? 0) > 0 && lightningNoData(pixels, at)) {
+      pixels[at + 3] = 0;
+      cleared++;
+    }
+  }
+  return cleared;
+}
+
+/**
  * The flashes one image shows inside the circle. The colours go from pale
  * yellow (1 flash in 5 minutes) to dark red (20 and more): the green fades.
  * @param pixels - RGBA of the image, row after row from the north.
@@ -222,7 +257,7 @@ export function lightningSpots(
     const lat = north - ((row + 0.5) / size) * (north - south);
     for (let col = 0; col < size; col++) {
       const at = (row * size + col) * 4;
-      if ((pixels[at + 3] ?? 0) < 40) continue;
+      if ((pixels[at + 3] ?? 0) < 40 || lightningNoData(pixels, at)) continue;
       const lon = west + ((col + 0.5) / size) * (east - west);
       const km = distanceKm(area.lat, area.lon, lat, lon);
       if (km > area.km) continue;

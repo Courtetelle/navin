@@ -12963,7 +12963,7 @@ html body .wx-page.wx-one {
 /* The button of the radius of LiveMétéo, unrolled from Météo: at its left
    (X and the phone sideways), above it (T upright). The radius large, « nm? »
    small at its side: a long press opens its setting, as the sun and moon of
-   the magnifier say its long press. Its red cross blinks slowly. */
+   the magnifier say its long press. Its big red cross blinks. */
 .rail-btn.live-radius-btn {
   position: fixed;
   z-index: 1150;
@@ -12981,12 +12981,20 @@ html body .wx-page.wx-one {
   color: var(--primary, #0b3d91);
   opacity: 0.55;
 }
+/* The big red cross over the whole button, blinking well seen */
+.live-radius-x {
+  position: absolute;
+  inset: 5px 8px;
+  width: calc(100% - 16px);
+  height: calc(100% - 10px);
+  pointer-events: none;
+}
 .live-radius-cross {
-  animation: live-radius-blink 2.4s ease-in-out infinite;
+  animation: live-radius-blink 1.2s ease-in-out infinite;
 }
 @keyframes live-radius-blink {
   50% {
-    opacity: 0.15;
+    opacity: 0.12;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -12997,6 +13005,10 @@ html body .wx-page.wx-one {
 .live-radius-nb {
   grid-area: 1 / 1;
   z-index: 1;
+  /* readable over the cross */
+  text-shadow:
+    0 0 2px var(--card, #fff),
+    0 0 2px var(--card, #fff);
   font-size: 26px;
   font-weight: 900;
   line-height: 1;
@@ -13029,6 +13041,9 @@ html body .wx-page.wx-one {
 }
 :root[data-theme='night'] .live-radius-ico {
   color: var(--fg);
+}
+:root[data-theme='night'] .live-radius-cross {
+  stroke: #ff3b3b;
 }
 
 /* The pin away from a map: pale, a touch does nothing; a small list in its
