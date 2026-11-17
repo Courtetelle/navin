@@ -13496,3 +13496,16 @@ main#view .site-link {
   margin-top: 8px;
   font-size: 0.95em;
 }
+.lightning-tag.move {
+  border-color: #e00016;
+  color: #b00010;
+}
+:root[data-theme='night'] .lightning-tag.move {
+  border-color: #b30000;
+  color: #ff5a4a;
+}
+.lightning-tag.move {
+  left: 0;
+  top: -16px;
+  transform: translate(-50%, -100%);
+}

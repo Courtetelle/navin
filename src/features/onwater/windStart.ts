@@ -84,6 +84,11 @@ export function startWindWatch(): void {
       void import('./windWatch.ts').then(({ windWatchRestart }) =>
         windWatchRestart(),
       );
+      // The storm is looked for again from the new place: the yellow arrow
+      // always starts from the GPS or the zone chosen.
+      void import('./lightningWatch.ts').then(({ lightningNewPlace }) =>
+        lightningNewPlace(),
+      );
     }, ZONE_SETTLE_MS);
   });
   // Every station within 120 NM of the GPS position is recorded, all its

@@ -350,3 +350,16 @@ export async function nearestStorm(fresh = false): Promise<NearestStorm> {
     nearestBusy.value = false;
   }
 }
+
+/**
+ * Another place of navigation (a zone chosen with NavIn, or the GPS again):
+ * the storms seen from the old place are forgotten and looked for again.
+ */
+export function lightningNewPlace(): void {
+  lightningLast.value = null;
+  const looked = lightningNearest.peek() != null;
+  lightningNearest.value = null;
+  lightningWatchStart();
+  if (!lightningAlertOn(lightningSettings())) void lightningCheck(true);
+  if (looked) void nearestStorm();
+}

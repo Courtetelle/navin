@@ -165,7 +165,9 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
     keyboard: false,
   }).addTo(layer);
   const now = Date.now();
-  const words = [`⚡ ${nmOf(nearestKm)} NM au ${pointOf(bearing)}`];
+  const words = [
+    `⚡ ${nmOf(nearestKm)} NM au ${pointOf(bearing)} (${String(Math.round(bearing) % 360).padStart(3, '0')}°)`,
+  ];
   if (motion?.towardDeg != null && motion.speedKn != null) {
     const ahead = pointAt(
       storm.lat,
@@ -189,9 +191,18 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
       interactive: false,
       keyboard: false,
     }).addTo(layer);
-    words.push(
-      `va vers ${pointOf(motion.towardDeg)} à ${Math.round(motion.speedKn)} nd`,
-    );
+    // Its own label at the tip of the vector: where the storm goes.
+    const course = String(Math.round(motion.towardDeg) % 360).padStart(3, '0');
+    L.marker([ahead.lat, ahead.lon], {
+      icon: L.divIcon({
+        className: 'lightning-tag-wrap',
+        html: `<div class="lightning-tag move">déplacement ${course}° · ${Math.round(motion.speedKn)} nd</div>`,
+        iconSize: [0, 0],
+      }),
+      interactive: false,
+      keyboard: false,
+      zIndexOffset: 800,
+    }).addTo(layer);
   }
   if (motion && motion.closingKn >= 2) {
     words.push(`se rapproche à ${Math.round(motion.closingKn)} nd`);
