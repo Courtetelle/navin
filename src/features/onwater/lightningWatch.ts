@@ -27,6 +27,7 @@ import {
   lightningUrl,
   nmToKm,
   pointAt,
+  stormLines,
 } from './lightning.ts';
 import type { LightningPop } from './lightningPop.ts';
 import { lightningPop } from './lightningPop.ts';
@@ -46,7 +47,7 @@ function showPop(pop: LightningPop): void {
   showOverlays();
   lightningPop.value = {
     ...pop,
-    lines: lightningMotionLines(pop.report, Date.now()),
+    lines: stormLines(pop.report, Date.now()),
   };
 }
 

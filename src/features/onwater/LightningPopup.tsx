@@ -9,7 +9,7 @@ import { go } from '../../shell/router.ts';
 import { askMapArea } from '../map/pendingArea.ts';
 
 import { lakeWarnPop } from './lakeWarnPop.ts';
-import { nmOf, nmToKm, pointAt, pointOf, stormView } from './lightning.ts';
+import { nmOf, nmToKm, pointAt, stormView } from './lightning.ts';
 import type { LightningPop } from './lightningPop.ts';
 import { lightningPop } from './lightningPop.ts';
 import { windPopup } from './windOverlayState.ts';
@@ -71,7 +71,6 @@ export function LightningPopup() {
   if (!pop) return null;
   const { report, test, radiusNm, reason, clear, lines } = pop;
   const nm = nmOf(report.nearestKm ?? 0);
-  const point = report.bearing == null ? '' : pointOf(report.bearing);
   const hour = new Date(report.at).toISOString().slice(11, 16);
   const motion = clear ? [] : (lines ?? []);
   const title = clear
@@ -105,9 +104,6 @@ export function LightningPopup() {
             </div>
           ) : (
             <>
-              {point ? (
-                <div className="wp-name">{translate(`direction ${point}`)}</div>
-              ) : null}
               <div className="wp-other">
                 {translate(
                   [

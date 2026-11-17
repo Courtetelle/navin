@@ -5,6 +5,8 @@
  * It is a help to see a storm coming, not a warning system.
  */
 
+import { fmtPos } from '../../lib/geo.ts';
+
 /** The map server of EUMETView. */
 export const LIGHTNING_WMS = 'https://view.eumetsat.int/geoserver/ows';
 /** The layer of the flashes: Accumulated Flash Area, every 5 minutes. */
@@ -437,7 +439,7 @@ export function lightningMotion(
   const fit = fitLine(
     seen.map((one) => ({ t: one.t ?? 0, v: one.nearestKm ?? 0 })),
   );
-  const closingKn = -fit.slope * knPerKmMs;
+  let closingKn = -fit.slope * knPerKmMs;
   if (Math.abs(closingKn) > MOST_KN) return null;
   // The middle of the storm, in km east and north of the place.
   const cores = seen.filter((one) => one.core);
@@ -460,6 +462,12 @@ export function lightningMotion(
     const speed = Math.hypot(east.slope, north.slope) * knPerKmMs;
     if (speed <= MOST_KN) {
       speedKn = speed;
+      // The speed of approach: the part of the motion along the yellow
+      // arrow, from the storm towards the boat (or the zone).
+      const side = ((newest.bearing ?? 0) * Math.PI) / 180;
+      closingKn =
+        -(east.slope * Math.sin(side) + north.slope * Math.cos(side)) *
+        knPerKmMs;
       towardDeg =
         speed < STILL_KN
           ? null
@@ -556,6 +564,41 @@ export function durationText(ms: number): string {
 }
 
 /**
+ * Degrees on three figures: 045°.
+ * @param degrees - From north.
+ * @returns The text.
+ */
+export function degreesText(degrees: number): string {
+  return `${String(Math.round(degrees) % 360).padStart(3, '0')}°`;
+}
+
+/**
+ * Everything said of the nearest storm, the same on the page, in the bubble
+ * of the alert: where it is from the boat (the yellow arrow), its position,
+ * its motion (the red vector), its speed of approach, when it is on the boat.
+ * @param report - What the images show.
+ * @param now - Epoch ms.
+ * @returns The lines, none without storm.
+ */
+export function stormLines(report: LightningReport, now: number): string[] {
+  const { nearestKm, bearing, place, motion } = report;
+  if (nearestKm == null || bearing == null) return [];
+  const lines = [
+    `⚡ Orage le plus proche : ${nmOf(nearestKm)} NM au ${pointOf(bearing)} (${degreesText(bearing)})`,
+  ];
+  if (place) {
+    lines.push(
+      `Position : ${fmtPos(pointAt(place.lat, place.lon, bearing, nearestKm))}`,
+    );
+  }
+  lines.push(...lightningMotionLines(report, now, true));
+  if (!motion) {
+    lines.push('Vitesse et durée jusqu’à vous : pas encore assez d’images.');
+  }
+  return lines;
+}
+
+/**
  * A compass point in French.
  * @param degrees - From north.
  * @returns N, NE, E, SE, S, SO, O or NO.
@@ -591,8 +634,8 @@ export function lightningMotionLines(
   if (motion.speedKn != null) {
     lines.push(
       motion.towardDeg == null
-        ? 'L’orage reste sur place.'
-        : `L’orage se déplace vers le ${pointOf(motion.towardDeg)} à ${Math.round(motion.speedKn)} nd.`,
+        ? 'Déplacement : l’orage reste sur place.'
+        : `Déplacement : ${degreesText(motion.towardDeg)} (vers le ${pointOf(motion.towardDeg)}) à ${Math.round(motion.speedKn)} nd.`,
     );
   }
   const closing = Math.round(Math.abs(motion.closingKn));

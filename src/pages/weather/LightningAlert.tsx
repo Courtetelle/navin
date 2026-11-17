@@ -12,12 +12,10 @@ import type { LightningSettings } from '../../features/onwater/lightning.ts';
 import {
   LIGHTNING_RADII_NM,
   lightningAlertOn,
-  lightningMotionLines,
   lightningOnMap,
   lightningRadiusNm,
   lightningText,
-  nmOf,
-  pointOf,
+  stormLines,
   stormView,
 } from '../../features/onwater/lightning.ts';
 import {
@@ -30,7 +28,6 @@ import {
 } from '../../features/onwater/lightningWatch.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { fmtPos } from '../../lib/geo.ts';
 import { exitOrigin } from '../../shell/exitOrigin.ts';
 import { go } from '../../shell/router.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
@@ -89,16 +86,7 @@ function NearestStormBlock() {
   } else if (!found.storm || found.report?.nearestKm == null) {
     lines = ['Aucun éclair à moins de 216 NM.'];
   } else {
-    const { report, storm } = found;
-    const bearing = report.bearing ?? 0;
-    lines = [
-      `⚡ Orage le plus proche : ${nmOf(report.nearestKm ?? 0)} NM au ${pointOf(bearing)} (${String(Math.round(bearing)).padStart(3, '0')}°)`,
-      `Position : ${fmtPos(storm)}`,
-      ...lightningMotionLines(report, now, true),
-    ];
-    if (!report.motion) {
-      lines.push('Vitesse et durée jusqu’à vous : pas encore assez d’images.');
-    }
+    lines = stormLines(found.report, now);
   }
   return (
     <div className="lightning-nearest" data-lightning="nearest" role="status">

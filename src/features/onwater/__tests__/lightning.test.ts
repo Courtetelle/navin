@@ -184,7 +184,7 @@ test('when it is on the boat: the delay of the image counted', () => {
   expect(((eta?.etaAt ?? 0) - 70 * MIN) / MIN).toBeCloseTo(10, 0);
   expect(eta?.onUs).toBe(false);
   const lines = lightningMotionLines(report, 70 * MIN);
-  expect(lines[0]).toBe('L’orage se déplace vers le O à 43 nd.');
+  expect(lines[0]).toBe('Déplacement : 270° (vers le O) à 43 nd.');
   expect(lines[1]).toBe('Vitesse de rapprochement : 43 nd.');
   expect(lines[2]).toBe(
     'Estimé maintenant à 9 NM (retard de l’image de 10 min compté).',
@@ -244,4 +244,24 @@ test('a point at a distance and a bearing, and the view of a storm', () => {
   const view = stormView({ lat: 46.5, lon: 6.5 }, { lat: 47.5, lon: 6.5 });
   expect(view.lat).toBeCloseTo(47, 3);
   expect(Math.round(view.km)).toBe(71);
+});
+
+test('a storm passing by does not come nearer: the approach along the arrow', () => {
+  // Due east at 30 km, going north at 20 km in 15 minutes.
+  const passing: LightningSpots[] = [0, 1, 2, 3].map((back) => {
+    const core = pointAt(HERE.lat, HERE.lon, 90, 30);
+    const north = pointAt(core.lat, core.lon, 0, -back * (20 / 3));
+    return {
+      nearestKm: 30,
+      bearing: 90,
+      cells: 5 + back,
+      strong: false,
+      core: north,
+      t: 60 * MIN - back * 5 * MIN,
+    };
+  });
+  const report = lightningReport(passing, 60 * MIN, 70 * MIN, HERE);
+  expect(report.motion?.towardDeg).toBeCloseTo(0, -1);
+  expect(Math.abs(report.motion?.closingKn ?? 99)).toBeLessThan(2);
+  expect(lightningEta(report, 70 * MIN)?.etaAt).toBeNull();
 });
