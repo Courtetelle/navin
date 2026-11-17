@@ -67,14 +67,6 @@ export function trackStats(track: readonly TrackPoint[]): TrackStatsResult {
   };
 }
 
-const PURPOSE_CODES: Record<string, string> = {
-  Entraînement: 'Ent',
-  Location: 'Loc',
-  Invitation: 'Inv',
-};
-const BOAT_LETTERS = 5;
-const CREW_LETTERS = 4;
-
 /**
  * The saved crew made of exactly the people aboard an outing.
  * @param cruise - The outing.
@@ -95,8 +87,8 @@ function crewNameOf(cruise: Cruise, sets: readonly CrewSet[]): string {
 }
 
 /**
- * Short name of a track: date, boat, type of outing and saved crew, abbreviated,
- * e.g. `20260226_Savan Ent-Réga`.
+ * Name of a track: date, boat, type of outing and saved crew, written whole,
+ * e.g. `20260226_Savannah · Entraînement · Régate du jeudi`.
  * @param cruise - The outing.
  * @param time - Start of the track, epoch ms.
  * @param sets - The saved crews.
@@ -109,12 +101,11 @@ export function traceTitle(
 ): string {
   const date = new Date(time);
   const day = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
-  const boat = (cruise.info.boat ?? '').trim().slice(0, BOAT_LETTERS);
+  const boat = (cruise.info.boat ?? '').trim();
   const purpose =
-    (cruise.purpose && PURPOSE_CODES[cruise.purpose]) ||
-    (cruise.type === 'lac' ? 'Lac' : 'Mer');
-  const crew = crewNameOf(cruise, sets).trim().slice(0, CREW_LETTERS);
-  return `${day}_${boat} ${crew ? `${purpose}-${crew}` : purpose}`;
+    cruise.purpose?.trim() || (cruise.type === 'lac' ? 'Lac' : 'Mer');
+  const crew = crewNameOf(cruise, sets).trim();
+  return `${day}_${[boat, purpose, crew].filter(Boolean).join(' · ')}`;
 }
 
 /** What a sheet of a track shows. */

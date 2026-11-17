@@ -98,7 +98,7 @@ test('currentTrack shows only the recording in progress', () => {
   expect(currentTrack()).toStrictEqual([[9_950_000, 2, 2]]);
 });
 
-test('traceTitle gives date, boat, type and saved crew', () => {
+test('traceTitle gives date, boat, type and saved crew, whole', () => {
   const cruise = {
     id: 'a',
     created: '',
@@ -114,28 +114,30 @@ test('traceTitle gives date, boat, type and saved crew', () => {
     { id: 's1', name: 'Autre', crew: [{ memberId: 'm1' }] },
     {
       id: 's2',
-      name: 'Régate',
+      name: 'Régate du jeudi',
       crew: [{ memberId: 'm2' }, { memberId: 'm1' }],
     },
   ];
   expect(traceTitle(cruise as never, time, sets)).toBe(
-    '20260226_Savan Ent-Réga',
+    '20260226_Savannah · Entraînement · Régate du jeudi',
   );
-  expect(traceTitle(cruise as never, time, [])).toBe('20260226_Savan Ent');
+  expect(traceTitle(cruise as never, time, [])).toBe(
+    '20260226_Savannah · Entraînement',
+  );
   expect(
     traceTitle(
       { ...cruise, purpose: 'Location', crew: [] } as never,
       time,
       sets,
     ),
-  ).toBe('20260226_Savan Loc');
+  ).toBe('20260226_Savannah · Location');
   expect(
     traceTitle(
       { ...cruise, purpose: undefined, type: 'mer' } as never,
       time,
       [],
     ),
-  ).toBe('20260226_Savan Mer');
+  ).toBe('20260226_Savannah · Mer');
 });
 
 test('traceSheet gives speeds, wind when recorded, and the sun during the track', () => {
