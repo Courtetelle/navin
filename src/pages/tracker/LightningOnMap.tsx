@@ -25,13 +25,13 @@ import {
 } from '../../features/onwater/lightning.ts';
 import {
   alertPlace,
-  lightningCheck,
+  lightningImagesAt,
   lightningLast,
   lightningNearest,
   lightningNewPlace,
   lightningNewest,
+  lightningRefresh,
   lookName,
-  nearestStorm,
 } from '../../features/onwater/lightningWatch.ts';
 import { buzz } from '../../lib/dom.ts';
 import { distKm } from '../../lib/geo.ts';
@@ -163,9 +163,7 @@ async function lookAgain(): Promise<void> {
   buzz();
   aimLook.value = 'running';
   const started = Date.now();
-  await Promise.all([lightningCheck(true), nearestStorm()]).catch(
-    () => undefined,
-  );
+  await lightningRefresh();
   const left = started + LEAST_LOOK_MS - Date.now();
   if (left > 0) {
     await new Promise<void>((done) => {
@@ -462,6 +460,10 @@ export function LightningOnMap() {
             className: 'map-flashes',
             attribution: 'Éclairs : EUMETSAT MTG',
             time: shown[index],
+            // Read again by hand from the menu: no image from the cache.
+            ...(lightningImagesAt.peek()
+              ? { fresh: lightningImagesAt.peek() }
+              : {}),
           } as never).addTo(map),
         );
       }
@@ -473,10 +475,20 @@ export function LightningOnMap() {
         layer.setParams({ time: shown[index] } as never);
       }
     }, REFRESH_MS);
+    // A reading forced by hand loads the image again, even of the same time
+    // (« fresh » makes a new address, never taken from the cache).
+    const forced = lightningImagesAt.subscribe((at) => {
+      if (!at) return;
+      const shown = times();
+      for (const [index, layer] of layers.entries()) {
+        layer.setParams({ time: shown[index], fresh: at } as never);
+      }
+    });
     return () => {
       closed = true;
       clearTimeout(wait);
       clearInterval(timer);
+      forced();
       for (const layer of layers) layer.remove();
     };
   }, [on]);

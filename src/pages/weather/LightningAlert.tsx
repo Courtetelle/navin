@@ -24,6 +24,7 @@ import {
   lightningCheck,
   lightningLast,
   lightningNearest,
+  lightningRefresh,
   nearestBusy,
   nearestStorm,
 } from '../../features/onwater/lightningWatch.ts';
@@ -141,7 +142,7 @@ export function LightningAlert() {
         <RefreshButton
           data-lightning="look"
           busy={busy || nearestBusy.value}
-          onRefresh={() => Promise.all([lightningCheck(true), nearestStorm()])}
+          onRefresh={lightningRefresh}
         />
       </ButtonRow>
       <HelpText>

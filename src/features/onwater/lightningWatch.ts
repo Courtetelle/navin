@@ -459,6 +459,23 @@ export async function nearestStorm(fresh = false): Promise<NearestStorm> {
   }
 }
 
+/** Each forced reading of the storms (map label or menu): its time, epoch ms. */
+export const lightningImagesAt = signal(0);
+
+/**
+ * The storm alert read again now, by hand (the label on the map, « Actualiser »
+ * of the menu): the server is asked its newest image again, the alert and the
+ * nearest storm are read, then the storm image of the map is loaded again.
+ * @returns Resolves when done.
+ */
+export async function lightningRefresh(): Promise<void> {
+  if (newestKnown) newestKnown = { ...newestKnown, at: 0 };
+  await Promise.all([lightningCheck(true), nearestStorm()]).catch(
+    () => undefined,
+  );
+  lightningImagesAt.value = Date.now();
+}
+
 /**
  * Another place of navigation (a zone chosen with NavIn, or the GPS again):
  * the storms seen from the old place are forgotten and looked for again.
