@@ -5,6 +5,7 @@ import { installDecimalComma } from '../components/shared/decimalComma.ts';
 import {
   applyKeyLink,
   applySkipperMenus,
+  followBoatRadio,
   followSettingsElsewhere,
   renumberDuplicateMarks,
   state,
@@ -64,6 +65,8 @@ function boot(): void {
     );
   });
   followTheme();
+  // The VHF of a sea cruise is the one of its boat sheet.
+  followBoatRadio();
   // The settings changed in another window of NavIn are taken here too.
   followSettingsElsewhere();
   // The menus the skipper sent, made those of the app (once).

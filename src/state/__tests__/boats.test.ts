@@ -115,6 +115,7 @@ test('blankOuting copies the boat and continues its engine counter', () => {
     'Croisière',
     'Données techniques',
     'Informations',
+    'Radio VHF',
     'Numéros utiles (page SOS)',
   ]);
 });

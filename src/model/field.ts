@@ -114,6 +114,16 @@ export interface FieldDefinition extends FieldLayout {
    */
   fmt?: (value: string) => string;
   /**
+   * Typed form of a line, applied as it is typed (e.g. MMSI by groups of three).
+   * @default undefined
+   */
+  clean?: (value: string) => string;
+  /**
+   * Short note under a line about its value (e.g. the flag of an MMSI).
+   * @default undefined
+   */
+  note?: (value: string) => string;
+  /**
    * Critical value: protected against accidental edits.
    * @default false
    */

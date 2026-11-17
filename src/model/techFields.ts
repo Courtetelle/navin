@@ -138,10 +138,8 @@ export const TECH_FIELDS: readonly FieldDefinition[] = [
   n('sails', 'Surface de voilure au près', 'm²', { wide: true, frame: 'rig' }),
 ];
 
-/** Radio fields hidden in inland waters. */
+/** Radio fields hidden in inland waters (MMSI and call sign stay: VHF on lakes too). */
 export const WATERS_SEA_ONLY: readonly string[] = [
-  'callsign',
-  'mmsi',
   'vhfMarina',
   'coastStation',
   'desc',

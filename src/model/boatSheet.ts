@@ -2,7 +2,7 @@ import { textOf } from '../lib/format.ts';
 
 import type { FieldDefinition, SectionDefinition } from './field.ts';
 import { flatFields } from './field.ts';
-import { INFO_SECTIONS } from './infoSections.ts';
+import { INFO_SECTIONS, RADIO_ID_FIELDS } from './infoSections.ts';
 import type { Boat, BoatVersion, CruiseInfo } from './types.ts';
 
 /** "Bateau et croisière" sections that belong to the boat (taken over on each outing). */
@@ -10,7 +10,7 @@ const BOAT_SECTIONS_ALL: readonly SectionDefinition[] = INFO_SECTIONS.filter(
   (section) => !['Croisière', 'Météo'].includes(section.title),
 );
 
-/** Sections shown on the boat sheet (rental, base and radio values are kept but not shown). */
+/** Sections shown on the boat sheet (rental, base and radio values are kept but not shown), with its VHF. */
 export const BOAT_SECTIONS: readonly SectionDefinition[] =
   BOAT_SECTIONS_ALL.filter(
     (section) =>
@@ -19,6 +19,10 @@ export const BOAT_SECTIONS: readonly SectionDefinition[] =
         'Location et règlement du bateau',
         'Radio et identification',
       ].includes(section.title),
+  ).flatMap((section) =>
+    section.title === 'Informations'
+      ? [section, { title: 'Radio VHF', fields: RADIO_ID_FIELDS }]
+      : [section],
   );
 
 /** Keys of the boat values (legacy `BOAT_KEYS`). */

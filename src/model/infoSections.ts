@@ -1,8 +1,39 @@
 import { radioDesc } from '../lib/boatDescription.ts';
+import {
+  callsignClean,
+  callsignNote,
+  mmsiClean,
+  mmsiNote,
+} from '../lib/radioId.ts';
 
 import { BOAT_DATA_FIELDS } from './boatDataFields.ts';
-import type { SectionDefinition } from './field.ts';
+import type { FieldDefinition, SectionDefinition } from './field.ts';
 import { TECH_FIELDS, powerPair } from './techFields.ts';
+
+/** MMSI and call sign of the boat VHF (cruise sheet and boat sheet). */
+export const RADIO_ID_FIELDS: readonly FieldDefinition[] = [
+  {
+    key: 'mmsi',
+    label: 'Numéro MMSI',
+    type: 'line',
+    lock: true,
+    inputmode: 'numeric',
+    wide: true,
+    placeholder: 'ex. 269 123 456',
+    clean: mmsiClean,
+    note: mmsiNote,
+  },
+  {
+    key: 'callsign',
+    label: 'Call sign (indicatif)',
+    type: 'line',
+    lock: true,
+    wide: true,
+    placeholder: 'ex. HBY1234',
+    clean: callsignClean,
+    note: callsignNote,
+  },
+];
 
 /** Sections of the "Bateau et croisière" sheet (legacy `INFO_SECTIONS`). */
 export const INFO_SECTIONS: readonly SectionDefinition[] = [
@@ -67,19 +98,7 @@ export const INFO_SECTIONS: readonly SectionDefinition[] = [
   {
     title: 'Radio et identification',
     fields: [
-      {
-        key: 'callsign',
-        label: 'Indicatif (call sign)',
-        type: 'line',
-        lock: true,
-      },
-      {
-        key: 'mmsi',
-        label: 'MMSI',
-        type: 'line',
-        lock: true,
-        inputmode: 'numeric',
-      },
+      ...RADIO_ID_FIELDS,
       {
         key: 'sailColor',
         label: 'Couleur des voiles',

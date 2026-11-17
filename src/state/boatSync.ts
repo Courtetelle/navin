@@ -1,3 +1,5 @@
+import { computed, effect, untracked } from '@preact/signals-react';
+
 import { dayKey } from '../lib/format.ts';
 import {
   boatInfoOf,
@@ -57,12 +59,93 @@ export function blankOuting(name: string, boat: Boat, duree?: string): Cruise {
   return cruise;
 }
 
+/** Keys of the boat VHF: the boat sheet is their source, on every cruise. */
+const RADIO_KEYS: readonly string[] = ['mmsi', 'callsign'];
+
+function filled(value: unknown): boolean {
+  return value != null && value !== '';
+}
+
+/**
+ * The boat of the collection a sea cruise sails on: the one of the same name.
+ * @param cruise - Cruise.
+ * @returns The boat, or `undefined` when none or several have that name.
+ */
+export function seaCruiseBoat(cruise: Cruise | null): Boat | undefined {
+  const name = (cruise?.info.boat ?? '').trim().toLowerCase();
+  if (!cruise || cruise.boatId || !name) return undefined;
+  const same = data.boats.value.filter(
+    (boat) => (boat.info.boat ?? '').trim().toLowerCase() === name,
+  );
+  return same.length === 1 ? same[0] : undefined;
+}
+
+/**
+ * The VHF values of a sea cruise come from its boat sheet; one typed only
+ * in the cruise goes to the boat sheet first, never lost.
+ * @param boat - Boat of the open sea cruise.
+ * @param mirror - The boat sheet was just changed: the cruise takes it as it
+ *   is, an emptied value too.
+ */
+function pullRadio(boat: Boat, mirror: boolean): void {
+  const cruise = data.cruise.value;
+  if (!cruise) return;
+  const toBoat = mirror
+    ? []
+    : RADIO_KEYS.filter(
+        (key) => !filled(boat.info[key]) && filled(cruise.info[key]),
+      );
+  if (toBoat.length > 0) {
+    updateBoat(boat.id, (draft) => {
+      for (const key of toBoat) draft.info[key] = cruise.info[key];
+    });
+  }
+  const toCruise = RADIO_KEYS.filter(
+    (key) =>
+      (mirror || filled(boat.info[key])) &&
+      (boat.info[key] ?? null) !== (cruise.info[key] ?? null),
+  );
+  if (toCruise.length === 0) return;
+  updateCruise((draft) => {
+    for (const key of toCruise) {
+      if (boat.info[key] == null) Reflect.deleteProperty(draft.info, key);
+      else draft.info[key] = boat.info[key];
+    }
+  });
+}
+
+/**
+ * Whatever screen reads it (SOS, VHF, book), the open sea cruise carries the
+ * VHF of its boat sheet: taken at each cruise opened (a change of the boat
+ * sheet is taken by `syncCruiseFromBoat`).
+ * @returns The stop function.
+ */
+export function followBoatRadio(): () => void {
+  const openId = computed(() => data.cruise.value?.id);
+  return effect(() => {
+    if (!openId.value) return;
+    untracked(() => {
+      const boat = seaCruiseBoat(data.cruise.value);
+      if (boat) pullRadio(boat, false);
+    });
+  });
+}
+
 /**
  * A value corrected in the outing sheet goes back to its boat (legacy `syncBoatFromCruise`).
  * @param key - The changed key.
  */
 export function syncBoatFromCruise(key: string): void {
   const cruise = data.cruise.value;
+  const seaBoat = RADIO_KEYS.includes(key) ? seaCruiseBoat(cruise) : undefined;
+  if (cruise && seaBoat) {
+    updateBoat(seaBoat.id, (draft) => {
+      const value = cruise.info[key];
+      if (value != null && value !== '') draft.info[key] = value;
+      else Reflect.deleteProperty(draft.info, key);
+    });
+    return;
+  }
   const boat = cruise?.boatId ? boatById(cruise.boatId) : undefined;
   if (!cruise || !boat || !key || !boatKeys(boat).includes(key)) return;
   updateBoat(boat.id, (draft) => {
@@ -80,6 +163,11 @@ export function syncBoatFromCruise(key: string): void {
 /** The outing sheet takes the current values of its boat (legacy `pullBoatIntoCruise`). */
 export function pullBoatIntoCruise(): void {
   const cruise = data.cruise.value;
+  const seaBoat = seaCruiseBoat(cruise);
+  if (seaBoat) {
+    pullRadio(seaBoat, false);
+    return;
+  }
   const boat = cruise?.boatId ? boatById(cruise.boatId) : undefined;
   if (!cruise || !boat) return;
   if (
@@ -104,6 +192,10 @@ export function pullBoatIntoCruise(): void {
  * @param boat - Boat.
  */
 export function syncCruiseFromBoat(boat: Boat): void {
+  if (seaCruiseBoat(data.cruise.value)?.id === boat.id) {
+    pullRadio(boat, true);
+    return;
+  }
   if (data.cruise.value?.boatId !== boat.id) return;
   updateCruise((draft) => {
     for (const key of boatKeys(boat)) {

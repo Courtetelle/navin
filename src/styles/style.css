@@ -5106,6 +5106,11 @@ small.exp-note:empty {
 .exp-bad + small.exp-note {
   color: #d00000;
 }
+/* MMSI and call sign: the flag they tell, as the computed-value rules */
+small.exp-note.radio-note {
+  font-weight: 600;
+  color: var(--muted, #5b6472);
+}
 /* v234 (Corban) : imprimer / envoyer une liste de data (PDF ou image) */
 .lx-box {
   margin-top: 18px;

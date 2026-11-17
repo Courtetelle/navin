@@ -38,7 +38,7 @@ export function LineField({ field }: { field: FieldDefinition }) {
   const lock = useFieldLock(field, cell.text, cell.focused, input);
   useMarquee(input);
   useDependentPicker(field, input);
-  const { key, type, prefix, expiry, wind, minFrom } = field;
+  const { key, type, prefix, expiry, wind, minFrom, clean, note } = field;
   const { inputmode, placeholder = '' } = field;
   const formStore = form.store;
   useEffect(() => {
@@ -52,7 +52,7 @@ export function LineField({ field }: { field: FieldDefinition }) {
   const minimum = minFrom ? textOf(form.values[minFrom]) : '';
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
+    const value = clean ? clean(event.target.value) : event.target.value;
     cell.setText(value);
     form.set(key, value.trim() === '' ? null : value);
     for (const other of form.fields) {
@@ -98,6 +98,11 @@ export function LineField({ field }: { field: FieldDefinition }) {
       {expiry ? (
         <small className="exp-note">
           {tr(expNote(expired), { help: true })}
+        </small>
+      ) : null}
+      {note ? (
+        <small className="exp-note radio-note">
+          {tr(note(cell.text), { help: true })}
         </small>
       ) : null}
       {wind ? <small className="conv">{windConv(cell.text)}</small> : null}
