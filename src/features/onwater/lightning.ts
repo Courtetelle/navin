@@ -329,14 +329,16 @@ export function lightningClearNoData(pixels: Uint8ClampedArray): number {
  * @param pixels - RGBA of the image, row after row from the north.
  * @param size - Width and height.
  * @param area - Centre and radius.
+ * @param boxKm - Half the side of the image, km (the circle by default).
  * @returns The spots.
  */
 export function lightningSpots(
   pixels: ArrayLike<number>,
   size: number,
   area: LightningArea,
+  boxKm = area.km,
 ): LightningSpots {
-  const [west, south, east, north] = lightningBox(area);
+  const [west, south, east, north] = lightningBox({ ...area, km: boxKm });
   let nearestKm: number | null = null;
   let bearing: number | null = null;
   let cells = 0;
@@ -521,38 +523,66 @@ export function lightningMotion(
   };
 }
 
-/** The flashes are spread over this many pixels around, to be followed. */
-const BLUR_PX = 2;
+/** The flashes are spread this far around, to be followed (they flicker), km. */
+const BLUR_KM = 6;
 /** A storm faster than this is not followed, knots. */
 const DRIFT_MOST_KN = 80;
-/** Two pairs of images fitting less than this say nothing. */
-const LEAST_FIT = 0.35;
+/** Images fitting the newest less than this say nothing. */
+const LEAST_FIT = 0.4;
+/** The older images laid on the newest: from this far back… */
+const LAG_LEAST_MS = 9 * 60_000;
+/** …to this far back. */
+const LAG_MOST_MS = 45 * 60_000;
+/** Around where its motion so far puts it, a storm is looked for this far at least, km… */
+const TRACK_KM = 12;
+/** …or this part of the way it went. */
+const TRACK_PART = 0.3;
+
+/** How fast the storms go, and on how many images it rests. */
+export interface StormDrift {
+  /** Km per ms east. */
+  east: number;
+  /** Km per ms north. */
+  north: number;
+  /** How many older images were found again. */
+  lags: number;
+}
+
+/** Pixels each way, east and north. */
+interface PixelReach {
+  col: number;
+  row: number;
+}
 
 /**
- * The flashes of two images together, spread around (they flicker from
- * one image to the next).
- * @param first - One mask.
- * @param second - The other.
+ * The flashes of some images together, spread around (they flicker from
+ * one image to the next), the most in the middle.
+ * @param masks - The masks.
  * @param size - Width and height.
+ * @param blur - How far they are spread, pixels.
  * @returns The spread flashes.
  */
 function spread(
-  first: Uint8Array,
-  second: Uint8Array,
+  masks: readonly Uint8Array[],
   size: number,
+  blur: PixelReach,
 ): Float32Array {
   const out = new Float32Array(size * size);
-  for (let at = 0; at < first.length; at++) {
-    if (!first[at] && !second[at]) continue;
-    const row = Math.floor(at / size);
-    const col = at % size;
-    for (let dy = -BLUR_PX; dy <= BLUR_PX; dy++) {
-      const y = row + dy;
-      if (y < 0 || y >= size) continue;
-      for (let dx = -BLUR_PX; dx <= BLUR_PX; dx++) {
-        const x = col + dx;
-        if (x < 0 || x >= size) continue;
-        out[y * size + x] = (out[y * size + x] ?? 0) + 1;
+  for (const mask of masks) {
+    for (let at = 0; at < mask.length; at++) {
+      if (!mask[at]) continue;
+      const row = Math.floor(at / size);
+      const col = at % size;
+      for (let dy = -blur.row; dy <= blur.row; dy++) {
+        const y = row + dy;
+        if (y < 0 || y >= size) continue;
+        for (let dx = -blur.col; dx <= blur.col; dx++) {
+          const x = col + dx;
+          if (x < 0 || x >= size) continue;
+          const weight =
+            1 - Math.hypot(dx / (blur.col + 1), dy / (blur.row + 1));
+          if (weight > 0) out[y * size + x] = (out[y * size + x] ?? 0) + weight;
+        }
       }
     }
   }
@@ -560,20 +590,21 @@ function spread(
 }
 
 /**
- * The shift of the newer flashes that fits the older ones best.
+ * The shift of the older flashes that fits the newer ones best, looked for
+ * around a shift guessed, refined between the pixels.
  * @param older - The older flashes, spread.
  * @param newer - The newer, spread.
  * @param size - Width and height.
- * @param reach - The farthest shift, in pixels east and north.
- * @param reach.col - Columns.
- * @param reach.row - Rows.
+ * @param around - The shift guessed, pixels east (col) and south (row).
+ * @param reach - How far from it, pixels.
  * @returns The shift in pixels and how well it fits (0 to 1).
  */
 function bestShift(
   older: Float32Array,
   newer: Float32Array,
   size: number,
-  reach: { col: number; row: number },
+  around: PixelReach,
+  reach: PixelReach,
 ): { dx: number; dy: number; fit: number } {
   const lit: number[] = [];
   let aa = 0;
@@ -589,9 +620,14 @@ function bestShift(
   let best = { dx: 0, dy: 0, fit: 0 };
   if (aa === 0 || bb === 0) return best;
   const norm = Math.sqrt(aa * bb);
-  for (let dy = -reach.row; dy <= reach.row; dy++) {
-    for (let dx = -reach.col; dx <= reach.col; dx++) {
-      if ((dx / reach.col) ** 2 + (dy / reach.row) ** 2 > 1) continue;
+  const fits = new Map<string, number>();
+  const x0 = Math.round(around.col);
+  const y0 = Math.round(around.row);
+  for (let dy = y0 - reach.row; dy <= y0 + reach.row; dy++) {
+    for (let dx = x0 - reach.col; dx <= x0 + reach.col; dx++) {
+      if (((dx - x0) / reach.col) ** 2 + ((dy - y0) / reach.row) ** 2 > 1) {
+        continue;
+      }
       let ab = 0;
       for (const at of lit) {
         const y = Math.floor(at / size) + dy;
@@ -600,42 +636,45 @@ function bestShift(
         ab += (older[at] ?? 0) * (newer[y * size + x] ?? 0);
       }
       const fit = ab / norm;
+      fits.set(`${dx},${dy}`, fit);
       if (fit > best.fit) best = { dx, dy, fit };
     }
   }
-  return best;
-}
-
-function median(values: readonly number[]): number {
-  const sorted = values.toSorted((a, b) => a - b);
-  const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2
-    ? (sorted[middle] ?? 0)
-    : ((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2;
+  // Between the pixels: the top of the parabola through the neighbours.
+  const at = (dx: number, dy: number) => fits.get(`${dx},${dy}`) ?? best.fit;
+  const between = (low: number, high: number) => {
+    const curve = low - 2 * best.fit + high;
+    const step = curve < 0 ? (low - high) / (2 * curve) : 0;
+    return Math.abs(step) < 1 ? step : 0;
+  };
+  return {
+    dx: best.dx + between(at(best.dx - 1, best.dy), at(best.dx + 1, best.dy)),
+    dy: best.dy + between(at(best.dx, best.dy - 1), at(best.dx, best.dy + 1)),
+    fit: best.fit,
+  };
 }
 
 /**
- * How fast the storms go: the flashes of two images together laid on those
- * of the two images 10 minutes before, at every step of the half hour, the
- * middle value kept (the flashes flicker, one image alone says little).
+ * How fast the storms go. The flashes of the newest images (5 minutes) are
+ * laid on those of each pair of older images, from 10 to 45 minutes back,
+ * one after the other: each is looked for where the motion found so far puts
+ * it (so that a storm is not taken for its neighbour), and the motion is the
+ * line through all of them (a storm in a long band shows well where it goes,
+ * badly how fast: the longer the time, the surer).
  * @param images - The images, each with its mask and its time.
- * @param window - One cell only: where its flashes are on the newest
- *   images (it is followed back in time).
  * @returns The speed east and north in km per ms, or null.
  */
 export function imageDrift(
   images: readonly LightningSpots[],
-  window: CellWindow | null = null,
-): { east: number; north: number } | null {
-  let cell = window;
+): StormDrift | null {
   const masked = images
     .filter(
       (one) => one.mask && (one.size ?? 0) > 0 && one.box && one.t != null,
     )
     .toSorted((a, b) => (b.t ?? 0) - (a.t ?? 0));
   const first = masked[0];
-  if (!first?.box || first.size == null || masked.length < 4) return null;
-  const { size, box } = first;
+  if (!first?.box || first.size == null || first.t == null) return null;
+  const { size, box, t: newestAt } = first;
   const [west, south, east, north] = box;
   const kmEast =
     ((east - west) *
@@ -643,113 +682,73 @@ export function imageDrift(
       Math.cos((((north + south) / 2) * Math.PI) / 180)) /
     size;
   const kmNorth = ((north - south) * KM_PER_DEG) / size;
-  const easts: number[] = [];
-  const norths: number[] = [];
-  for (let index = 0; index + 3 < masked.length; index++) {
-    const [b1, b2, a1, a2] = masked.slice(index, index + 4);
-    if (!b1?.mask || !b2?.mask || !a1?.mask || !a2?.mask) continue;
-    if (b1.size !== size || a2.size !== size) continue;
-    const span = ((b1.t ?? 0) + (b2.t ?? 0) - (a1.t ?? 0) - (a2.t ?? 0)) / 2;
-    if (span <= 0) continue;
-    const most = (DRIFT_MOST_KN * KM_PER_NM * span) / 3_600_000;
+  const blur = {
+    col: Math.max(1, Math.round(BLUR_KM / kmEast)),
+    row: Math.max(1, Math.round(BLUR_KM / kmNorth)),
+  };
+  const same = masked.filter((one) => one.size === size);
+  const newest = same.filter((one) => newestAt - (one.t ?? 0) <= STEP_MS);
+  const newestMid =
+    newest.reduce((sum, one) => sum + (one.t ?? 0), 0) / newest.length;
+  const reference = spread(
+    newest.map((one) => one.mask ?? new Uint8Array(0)),
+    size,
+    blur,
+  );
+  const seen: Array<{ lag: number; east: number; north: number; fit: number }> =
+    [];
+  let speed: StormDrift | null = null;
+  for (let index = 0; index + 1 < same.length; index++) {
+    const pair = [same[index], same[index + 1]];
+    const lag = newestMid - ((pair[0]?.t ?? 0) + (pair[1]?.t ?? 0)) / 2;
+    if (lag < LAG_LEAST_MS || lag > LAG_MOST_MS) continue;
+    // Where the motion so far puts the storm then, and how far around.
+    const guess = speed
+      ? { east: speed.east * lag, north: speed.north * lag }
+      : { east: 0, north: 0 };
+    const far = speed
+      ? Math.max(TRACK_KM, TRACK_PART * Math.hypot(guess.east, guess.north))
+      : (DRIFT_MOST_KN * KM_PER_NM * lag) / 3_600_000;
     const reach = {
-      col: Math.ceil(most / kmEast),
-      row: Math.ceil(most / kmNorth),
+      col: Math.ceil(far / kmEast),
+      row: Math.ceil(far / kmNorth),
     };
-    // One cell: its own flashes then, laid on all those around before.
-    const near = cell ? grown(cell, reach) : null;
+    const around = { col: guess.east / kmEast, row: -guess.north / kmNorth };
     const shift = bestShift(
-      spread(part(a1.mask, size, near), part(a2.mask, size, near), size),
-      spread(part(b1.mask, size, cell), part(b2.mask, size, cell), size),
+      spread(
+        pair.map((one) => one?.mask ?? new Uint8Array(0)),
+        size,
+        blur,
+      ),
+      reference,
       size,
+      around,
       reach,
     );
     if (shift.fit < LEAST_FIT) continue;
-    easts.push((shift.dx * kmEast) / span);
-    norths.push((-shift.dy * kmNorth) / span);
-    // Back one image in time, the cell is where it was 5 minutes before.
-    if (cell) {
-      const back = STEP_MS / span;
-      cell = moved(cell, -shift.dy * back, -shift.dx * back);
+    seen.push({
+      lag,
+      east: shift.dx * kmEast,
+      north: -shift.dy * kmNorth,
+      fit: shift.fit,
+    });
+    // The line through the origin and every shift found, the best fits
+    // weighing most.
+    let sumEast = 0;
+    let sumNorth = 0;
+    let sumLag = 0;
+    for (const one of seen) {
+      sumEast += one.fit * one.lag * one.east;
+      sumNorth += one.fit * one.lag * one.north;
+      sumLag += one.fit * one.lag * one.lag;
     }
+    speed = {
+      east: sumEast / sumLag,
+      north: sumNorth / sumLag,
+      lags: seen.length,
+    };
   }
-  if (easts.length === 0) return null;
-  return { east: median(easts), north: median(norths) };
-}
-
-/** A part of the images, in pixels: rows and columns from, to (included). */
-export interface CellWindow {
-  rows: [number, number];
-  cols: [number, number];
-}
-
-/**
- * The flashes of a mask in a part of it only.
- * @param mask - The flashes.
- * @param size - Width and height.
- * @param window - The part kept.
- * @returns A new mask.
- */
-function windowed(
-  mask: Uint8Array,
-  size: number,
-  window: CellWindow,
-): Uint8Array {
-  const out = new Uint8Array(mask.length);
-  const [top, bottom] = window.rows;
-  const [left, right] = window.cols;
-  for (let row = Math.max(0, top); row <= Math.min(size - 1, bottom); row++) {
-    for (let col = Math.max(0, left); col <= Math.min(size - 1, right); col++) {
-      out[row * size + col] = mask[row * size + col] ?? 0;
-    }
-  }
-  return out;
-}
-
-/**
- * A mask, or only a part of it.
- * @param mask - The flashes.
- * @param size - Width and height.
- * @param window - The part kept; none: all.
- * @returns The mask.
- */
-function part(
-  mask: Uint8Array,
-  size: number,
-  window: CellWindow | null,
-): Uint8Array {
-  return window ? windowed(mask, size, window) : mask;
-}
-
-/**
- * A part of the images made larger.
- * @param part - The part.
- * @param by - Pixels more on each side.
- * @param by.col - Columns.
- * @param by.row - Rows.
- * @returns The larger part.
- */
-function grown(part: CellWindow, by: { col: number; row: number }): CellWindow {
-  return {
-    rows: [part.rows[0] - by.row, part.rows[1] + by.row],
-    cols: [part.cols[0] - by.col, part.cols[1] + by.col],
-  };
-}
-
-/**
- * A part of the images moved.
- * @param part - The part.
- * @param rows - Rows down.
- * @param cols - Columns east.
- * @returns The part moved, on whole pixels.
- */
-function moved(part: CellWindow, rows: number, cols: number): CellWindow {
-  const dy = Math.round(rows);
-  const dx = Math.round(cols);
-  return {
-    rows: [part.rows[0] + dy, part.rows[1] + dy],
-    cols: [part.cols[0] + dx, part.cols[1] + dx],
-  };
+  return speed;
 }
 
 /** Flashes nearer than this to each other are one storm cell, km. */
@@ -765,8 +764,6 @@ export interface StormCell {
   bearing: number;
   /** Some flashes of 10 and more in 5 minutes. */
   strong: boolean;
-  /** The part of the newest images where its flashes are. */
-  window: CellWindow;
 }
 
 /**
@@ -817,18 +814,10 @@ export function stormCells(
     let km = Infinity;
     let bearing = 0;
     let strong = false;
-    let top = size;
-    let bottom = 0;
-    let left = size;
-    let right = 0;
     while (queue.length > 0) {
       const at = queue.pop() ?? 0;
       const row = Math.floor(at / size);
       const col = at % size;
-      top = Math.min(top, row);
-      bottom = Math.max(bottom, row);
-      left = Math.min(left, col);
-      right = Math.max(right, col);
       if (lit[at] === 2) strong = true;
       const lat = north - ((row + 0.5) / size) * (north - south);
       const lon = west + ((col + 0.5) / size) * (east - west);
@@ -856,7 +845,6 @@ export function stormCells(
       km,
       bearing,
       strong,
-      window: grown({ rows: [top, bottom], cols: [left, right] }, link),
     });
   }
   return cells.toSorted((a, b) => a.km - b.km).slice(0, MOST_CELLS);
@@ -902,9 +890,10 @@ export interface ChosenStorm {
  * Among all the storm cells in the circle, the one to watch: of those that
  * come nearer, the first on the boat (the nearest and the fastest weighed
  * together: its distance over its speed of approach); none comes nearer, the
- * nearest that does not go away; else the nearest. Each cell is followed on
- * its own (its own flashes laid on those 10 minutes before), else with the
- * motion of all the flashes.
+ * nearest that does not go away; else the nearest. The storms of a region
+ * go with the same wind aloft: they all move as all the flashes read (a
+ * cell alone is too small to show its speed); each comes nearer as its own
+ * bearing says.
  * @param images - The images, each with its mask and its time.
  * @param area - The place looked from and the radius of the circle.
  * @param area.lat - Latitude.
@@ -918,9 +907,8 @@ export function chosenStorm(
 ): ChosenStorm | null {
   const cells = stormCells(images, area);
   if (cells.length === 0) return null;
-  const all = imageDrift(images);
+  const drift = imageDrift(images);
   const judged = cells.map((cell) => {
-    const drift = imageDrift(images, cell.window) ?? all;
     const motion = drift ? driftMotion(drift, cell.bearing, cell.km) : null;
     const closing = motion?.closingKn ?? 0;
     const soon =
@@ -1136,20 +1124,13 @@ export function lightningReport(
   readAt: number,
   place?: { lat: number; lon: number; km?: number },
 ): LightningReport {
-  let images = read;
-  let at = read[0]?.t ?? readFirst;
-  // The newest time not out yet gives the image before: the same twice.
-  const [first, second] = read;
-  if (
-    first &&
-    second &&
-    first.cells > 0 &&
-    first.cells === second.cells &&
-    first.nearestKm === second.nearestKm
-  ) {
-    images = read.slice(1);
-    at = second.t ?? at - STEP_MS;
-  }
+  // A time not out yet, or missing, gives the image nearest: the same image
+  // twice, the newer time false. It is read once, at the older time.
+  const images = read.filter((one, index) => {
+    const older = read[index + 1];
+    return !(older && sameImage(one, older));
+  });
+  const at = images[0]?.t ?? readFirst;
   const recent = images.slice(0, 3);
   let nearest: LightningSpots = {
     nearestKm: null,
@@ -1199,6 +1180,21 @@ export function lightningReport(
     motion: motion ?? (storms === 1 ? report.motion : null),
     nearer: motion ? motion.closingKn >= COMING_KN : nearer,
   };
+}
+
+/**
+ * Whether two images are the same (the server gives the nearest one for a
+ * time it does not have).
+ * @param one - An image.
+ * @param other - Another.
+ * @returns They are the same, with flashes.
+ */
+function sameImage(one: LightningSpots, other: LightningSpots): boolean {
+  if (one.cells === 0 || one.cells !== other.cells) return false;
+  if (one.nearestKm !== other.nearestKm) return false;
+  if (!one.mask || !other.mask) return true;
+  if (one.mask.length !== other.mask.length) return false;
+  return one.mask.every((value, at) => value === other.mask?.[at]);
 }
 
 /** The last alert given: its distance and time. */

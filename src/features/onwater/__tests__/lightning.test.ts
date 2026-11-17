@@ -314,8 +314,8 @@ test('several storms: the one first on the boat is said, and no alert for one go
     6.5 + dLon,
     46.5 + dLat,
   ];
-  // A near cell to the north going north, a farther one to the west coming
-  // east fast: two pixels a step each.
+  // Both go east with the wind aloft, three pixels a step: the near cell to
+  // the north passes by, the farther one to the west comes on the boat.
   const frame = (back: number): LightningSpots => {
     const mask = new Uint8Array(size * size);
     const square = (row0: number, col0: number) => {
@@ -325,7 +325,7 @@ test('several storms: the one first on the boat is said, and no alert for one go
         }
       }
     };
-    square(34 + 2 * back, 48);
+    square(34, 48 - 3 * back);
     square(48, 12 - 3 * back);
     return {
       nearestKm: 15,
@@ -365,4 +365,37 @@ test('several storms: the one first on the boat is said, and no alert for one go
   expect(lightningDue(here, null, 36 * MIN, 100)).toBeNull();
   // Out of the circle: no alert.
   expect(lightningDue(report, null, 36 * MIN, 10)).toBeNull();
+});
+
+test('an image the server gives twice (a time it does not have) is read once, at its older time', () => {
+  const mask = new Uint8Array(4).fill(1);
+  const other = new Uint8Array(4);
+  other[0] = 1;
+  const spotAt = (m: Uint8Array, t: number): LightningSpots => ({
+    nearestKm: 10,
+    bearing: 0,
+    cells: m.reduce((sum, value) => sum + value, 0),
+    strong: false,
+    mask: m,
+    size: 2,
+    box: [0, 0, 1, 1],
+    t,
+  });
+  const report = lightningReport(
+    [
+      spotAt(other, 20 * MIN),
+      spotAt(mask, 15 * MIN),
+      spotAt(mask, 10 * MIN),
+      spotAt(other, 5 * MIN),
+    ],
+    20 * MIN,
+    30 * MIN,
+  );
+  expect(report.at).toBe(20 * MIN);
+  const twiceNewest = lightningReport(
+    [spotAt(mask, 20 * MIN), spotAt(mask, 15 * MIN), spotAt(other, 10 * MIN)],
+    20 * MIN,
+    30 * MIN,
+  );
+  expect(twiceNewest.at).toBe(15 * MIN);
 });

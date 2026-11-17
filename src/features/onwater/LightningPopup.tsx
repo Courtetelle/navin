@@ -73,6 +73,7 @@ export function LightningPopup() {
   const { report, test, radiusNm, reason, clear, lines } = pop;
   const nm = nmOf(report.nearestKm ?? 0);
   const hour = new Date(report.at).toISOString().slice(11, 16);
+  const late = Math.max(0, Math.round((report.readAt - report.at) / 60_000));
   const motion = clear ? [] : (lines ?? []);
   const title = clear
     ? 'FIN DE L’ALERTE ORAGE'
@@ -133,7 +134,7 @@ export function LightningPopup() {
           )}
           <div className="wp-note">
             {translate(
-              `Satellite EUMETSAT MTG, image de ${hour} UTC (environ 10 min de retard). Aide indicative, pas une alerte officielle.`,
+              `Satellite EUMETSAT MTG, image de ${hour} UTC (${late} min de retard). Aide indicative, pas une alerte officielle.`,
             )}
           </div>
           <Button className="btn primary lp-map" noUiEdit>

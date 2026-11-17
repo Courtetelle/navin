@@ -149,21 +149,25 @@ export function LightningAlert() {
         européen MTG (EUMETSAT) autour de la zone choisie avec NavIn, sinon de
         la position GPS. Il sonne trois bips courts et l’écrit dans le journal
         quand des éclairs entrent dans le rayon, puis s’ils se rapprochent
-        nettement ou sont encore là 15 minutes après. L’image arrive avec
-        environ 10 minutes de retard et montre des zones d’activité, pas chaque
-        impact : c’est une aide, pas un système d’alerte officiel. Sur la carte
-        de NavIn, les éclairs des 20 dernières minutes sont toujours affichés,
-        sans rien demander, même alerte coupée : les plus récents vifs, ceux de
-        10 et 20 minutes plus pâles, pour voir où va l’orage ; jaune pour 1
-        éclair en 5 minutes, rouge foncé pour 20 et plus. Pour entendre et voir
-        l’alerte : Paramétrages › Tests. « Voir sur la carte » montre l’orage le
-        plus proche de la position GPS (ou de la zone choisie avec NavIn),
-        cherché jusqu’à 216 NM. Plusieurs cellules orageuses : chacune est
-        suivie sur les images des 35 dernières minutes, et NavIn retient celle
-        qui sera la première sur vous (la plus proche et la plus rapide pesées
-        ensemble) ; il peut donc changer d’orage d’un regard à l’autre.
-        Au-dessus des boutons : sa distance, sa position, sa vitesse de
-        rapprochement et la durée jusqu’à vous ; le retard de l’image est
+        nettement ou sont encore là 15 minutes après. L’image arrive avec 10 à
+        30 minutes de retard et montre des zones d’activité, pas chaque impact :
+        c’est une aide, pas un système d’alerte officiel. Sur la carte de NavIn,
+        les éclairs des 20 dernières minutes sont toujours affichés, sans rien
+        demander, même alerte coupée : les plus récents vifs, ceux de 10 et 20
+        minutes plus pâles, pour voir où va l’orage ; jaune pour 1 éclair en 5
+        minutes, rouge foncé pour 20 et plus. Pour entendre et voir l’alerte :
+        Paramétrages › Tests. « Voir sur la carte » montre l’orage le plus
+        proche de la position GPS (ou de la zone choisie avec NavIn), cherché
+        jusqu’à 216 NM. Le déplacement des orages est mesuré sur les images des
+        45 dernières minutes, à au moins 80 NM autour : les éclairs récents sont
+        posés sur ceux de 10, 15… 45 minutes avant, et la vitesse est la droite
+        qui passe par tous. Les orages d’une même région vont avec le même vent
+        d’altitude ; parmi plusieurs cellules orageuses, NavIn retient celle qui
+        sera la première sur vous (la plus proche et la plus rapide pesées
+        ensemble) : il peut donc changer d’orage d’un regard à l’autre. L’heure
+        de la dernière image est demandée au serveur (elle a de 10 à 30 minutes
+        de retard). Au-dessus des boutons : sa distance, sa position, sa vitesse
+        de rapprochement et la durée jusqu’à vous ; le retard de l’image est
         compté, la distance est estimée pour maintenant. Une seconde alerte
         sonne quand l’orage passe sous la moitié de votre distance d’alerte, et
         une fin d’alerte quand il n’y a plus d’éclairs depuis 30 minutes. Plus

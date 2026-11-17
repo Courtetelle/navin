@@ -117,16 +117,24 @@ export async function readLightning(
   area: LightningArea,
   now = Date.now(),
 ): Promise<LightningReport | null> {
-  const size = lightningSize(area.km);
-  // The last 35 minutes: the motion of the storms needs them.
-  const times = lightningTimes(now, 8);
+  // Wide enough to follow a storm 45 minutes back, even at the edge of
+  // the circle.
+  const boxKm = Math.max(area.km + MOTION_MARGIN_KM, MOTION_BOX_KM);
+  const size = lightningSize(boxKm);
+  const box = { ...area, km: boxKm };
+  // From the newest image out (its time asked to the server), 45 minutes back.
+  const newest = await newestImage(now);
+  const times = lightningTimes(newest + STEP_MS, IMAGES);
   const images = await Promise.all(
-    times.map((time) => readPixels(lightningUrl(area, size, time), size)),
+    times.map((time) => readPixels(lightningUrl(box, size, time), size)),
   );
   const spots: LightningSpots[] = [];
   for (const [index, pixels] of images.entries()) {
     if (pixels) {
-      spots.push({ ...lightningSpots(pixels, size, area), t: times[index] });
+      spots.push({
+        ...lightningSpots(pixels, size, area, boxKm),
+        t: times[index],
+      });
     }
   }
   if (spots.length === 0) return null;
@@ -135,6 +143,74 @@ export async function readLightning(
     lon: area.lon,
     km: area.km,
   });
+}
+
+/** The images are read around the place at least this far, km… */
+const MOTION_BOX_KM = 150;
+/** …and this far beyond the circle. */
+const MOTION_MARGIN_KM = 80;
+/** How many images are read: 45 minutes. */
+const IMAGES = 10;
+/** Five minutes between two images. */
+const STEP_MS = 5 * 60_000;
+/** Where the server says which is its newest image. */
+const LIGHTNING_CAPS =
+  'https://view.eumetsat.int/geoserver/mtg_fd/li_afa/ows?service=WMS&version=1.3.0&request=GetCapabilities';
+/** The newest image is asked again after this time. */
+const CAPS_FRESH_MS = 2 * 60_000;
+let newestKnown: { time: number; at: number } | null = null;
+
+/**
+ * The time of the newest image out, as last asked to the server.
+ * @returns Epoch ms, or null when not known yet.
+ */
+export function lightningNewest(): number | null {
+  return newestKnown?.time ?? null;
+}
+
+/**
+ * The time of the newest image out (it comes 10 to 30 minutes late); else
+ * the guess of 10 minutes.
+ * @param now - Epoch ms.
+ * @returns Epoch ms.
+ */
+async function newestImage(now: number): Promise<number> {
+  const known = lightningNewest();
+  if (known != null && newestKnown && now - newestKnown.at < CAPS_FRESH_MS) {
+    return known;
+  }
+  const time = await askNewest();
+  if (time != null && time <= now) {
+    keepNewest(time, now);
+    return time;
+  }
+  return lightningTimes(now)[0] ?? now;
+}
+
+/**
+ * Ask the server the time of its newest image.
+ * @returns Epoch ms, or null.
+ */
+async function askNewest(): Promise<number | null> {
+  try {
+    const response = await fetch(LIGHTNING_CAPS);
+    const text = await response.text();
+    const time = Date.parse(
+      /default="(?<time>[^"]+)"/.exec(text)?.groups?.time ?? '',
+    );
+    return Number.isFinite(time) ? time : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Keep the time of the newest image.
+ * @param time - Epoch ms.
+ * @param now - When asked.
+ */
+function keepNewest(time: number, now: number): void {
+  newestKnown = { time, at: now };
 }
 
 /**

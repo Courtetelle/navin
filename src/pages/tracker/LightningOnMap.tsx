@@ -27,6 +27,7 @@ import {
   lightningLast,
   lightningNearest,
   lightningNewPlace,
+  lightningNewest,
   lookName,
 } from '../../features/onwater/lightningWatch.ts';
 import { distKm } from '../../lib/geo.ts';
@@ -181,6 +182,19 @@ function tag(
 }
 
 /**
+ * The side of the label of the yellow arrow: ahead, towards the storm (away
+ * from the label of the place), and on the side away from the red vector.
+ * @param bearing - Of the storm.
+ * @param toward - Where the storm goes, or null.
+ * @returns Degrees.
+ */
+function aimSide(bearing: number, toward: number | null): number {
+  const right =
+    toward != null && Math.sin(((toward - bearing) * Math.PI) / 180) > 0;
+  return bearing + (right ? -60 : 60);
+}
+
+/**
  * The yellow arrow from where NavIn looks from (the GPS, or the zone chosen:
  * Atlantique, Méditerranée, Lacs), marked and named, to the nearest storm,
  * its distance and bearing in the middle; from the storm the red vector of
@@ -248,12 +262,20 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
     const warn = lightningEtaShown(eta, now) ? '⚠️ ' : '';
     words.push(`${warn}sur vous vers ${hourText(eta.etaAt)}`);
   }
+  // No red vector: said in the same label, not over it.
+  if (motion?.towardDeg == null || motion.speedKn == null) {
+    words.push(
+      motion?.speedKn == null
+        ? 'déplacement pas encore connu'
+        : 'l’orage reste sur place',
+    );
+  }
   tag(
     layer,
     middle,
     words.map((word) => `<div>${word}</div>`).join(''),
     'aim',
-    bearing,
+    aimSide(bearing, motion?.towardDeg ?? null),
   );
   // The red vector: where the storm goes, from the storm, 30 minutes long.
   if (motion?.towardDeg != null && motion.speedKn != null) {
@@ -291,15 +313,7 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
       ahead,
       `déplacement ${degreesText(motion.towardDeg)} · ${Math.round(motion.speedKn)} nd`,
       'move',
-    );
-  } else {
-    tag(
-      layer,
-      storm,
-      motion?.speedKn == null
-        ? 'déplacement pas encore connu'
-        : 'l’orage reste sur place',
-      'move',
+      motion.towardDeg,
     );
   }
 }
@@ -373,7 +387,7 @@ export function LightningOnMap() {
     const layers: TileLayer.WMS[] = [];
     const times = () => {
       const now = Date.now();
-      const newest = lightningTimes(now)[0] ?? now;
+      const newest = lightningNewest() ?? lightningTimes(now)[0] ?? now;
       return TRAIL.map(({ back }) => stamp(newest - back * STEP_MS));
     };
     const start = () => {
