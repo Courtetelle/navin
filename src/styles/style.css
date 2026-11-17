@@ -13466,6 +13466,48 @@ main#view .site-link {
   border-color: #b30000;
   color: #ff5a4a;
 }
+/* the yellow label, touched: the storm read again on the map; it blinks
+   yellow (red at night) while read, then twice green */
+.lightning-tag.tappable {
+  pointer-events: auto;
+  cursor: pointer;
+}
+.lightning-tag.aim.looking {
+  animation: aim-looking 0.8s ease-in-out infinite;
+}
+@keyframes aim-looking {
+  50% {
+    background: #ffd400;
+  }
+}
+:root[data-theme='night'] .lightning-tag.aim.looking {
+  animation-name: aim-looking-night;
+}
+@keyframes aim-looking-night {
+  50% {
+    background: #6a0000;
+    color: #ffb0a8;
+  }
+}
+.lightning-tag.aim.looked {
+  animation: aim-looked 0.6s ease-in-out 2;
+}
+@keyframes aim-looked {
+  50% {
+    background: #2ecc40;
+    border-color: #1a8f2a;
+  }
+}
+:root[data-theme='night'] .lightning-tag.aim.looked {
+  animation-name: aim-looked-night;
+}
+@keyframes aim-looked-night {
+  50% {
+    background: #0b4a18;
+    border-color: #1f7a2e;
+    color: #8fe39a;
+  }
+}
 :root[data-theme='night'] .leaflet-overlay-pane path.lightning-aim-line,
 :root[data-theme='night'] .lightning-head.aim path {
   stroke: #ff3b2a;

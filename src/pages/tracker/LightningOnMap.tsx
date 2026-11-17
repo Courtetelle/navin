@@ -1,3 +1,4 @@
+import { signal } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import type { Coords, DoneCallback, LayerGroup, TileLayer } from 'leaflet';
 import { useEffect } from 'react';
@@ -24,12 +25,15 @@ import {
 } from '../../features/onwater/lightning.ts';
 import {
   alertPlace,
+  lightningCheck,
   lightningLast,
   lightningNearest,
   lightningNewPlace,
   lightningNewest,
   lookName,
+  nearestStorm,
 } from '../../features/onwater/lightningWatch.ts';
+import { buzz } from '../../lib/dom.ts';
 import { distKm } from '../../lib/geo.ts';
 import { state } from '../../state/index.ts';
 
@@ -139,6 +143,41 @@ function headHtml(degrees: number, kind: string): string {
   return `<svg class="lightning-head ${kind}" viewBox="-10 -10 20 20" style="transform:rotate(${Math.round(degrees)}deg)"><path d="M0-9 7 7 0 3-7 7z"/></svg>`;
 }
 
+/** The look « en cours » lasts at least this long, even for a quick read. */
+const LEAST_LOOK_MS = 1200;
+/** The two green blinks once read. */
+const LOOKED_MS = 1300;
+
+/**
+ * The touch on the yellow label: idle, reading the storm again (it blinks
+ * yellow, red at night), just read (two green blinks).
+ */
+const aimLook = signal<'idle' | 'running' | 'done'>('idle');
+
+/**
+ * A touch on the yellow label: the storm alert read again, on the map.
+ * @returns Resolves when read.
+ */
+async function lookAgain(): Promise<void> {
+  if (aimLook.peek() === 'running') return;
+  buzz();
+  aimLook.value = 'running';
+  const started = Date.now();
+  await Promise.all([lightningCheck(true), nearestStorm()]).catch(
+    () => undefined,
+  );
+  const left = started + LEAST_LOOK_MS - Date.now();
+  if (left > 0) {
+    await new Promise<void>((done) => {
+      setTimeout(done, left);
+    });
+  }
+  aimLook.value = 'done';
+  setTimeout(() => {
+    if (aimLook.peek() === 'done') aimLook.value = 'idle';
+  }, LOOKED_MS);
+}
+
 /** The gap between a point and its label, in pixels. */
 const TAG_GAP = 16;
 
@@ -150,6 +189,7 @@ const TAG_GAP = 16;
  * @param html - What it says.
  * @param kind - Its class: the aim, the motion.
  * @param side - The bearing of the side it stands on; none: centred above.
+ * @param onTap - What a touch on it does; none: it cannot be touched.
  */
 function tag(
   layer: LayerGroup,
@@ -157,6 +197,7 @@ function tag(
   html: string,
   kind: string,
   side?: number,
+  onTap?: () => void,
 ): void {
   const L = leaflet();
   let style = '';
@@ -169,16 +210,18 @@ function tag(
     const uy = dy / most;
     style = ` style="left:0;top:0;transform:translate(calc(${(-50 + ux * 50).toFixed(1)}% + ${(dx * TAG_GAP).toFixed(1)}px),calc(${(-50 + uy * 50).toFixed(1)}% + ${(dy * TAG_GAP).toFixed(1)}px))"`;
   }
-  L.marker([at.lat, at.lon], {
+  const marker = L.marker([at.lat, at.lon], {
     icon: L.divIcon({
       className: 'lightning-tag-wrap',
-      html: `<div class="lightning-tag ${kind}"${style}>${html}</div>`,
+      html: `<div class="lightning-tag ${kind}${onTap ? ' tappable' : ''}"${style}${onTap ? ' data-lightning="aim-tag" role="button"' : ''}>${html}</div>`,
       iconSize: [0, 0],
     }),
-    interactive: false,
+    interactive: Boolean(onTap),
     keyboard: false,
     zIndexOffset: 800,
   }).addTo(layer);
+  // Leaflet hands the touch to the marker only, not to the map below.
+  if (onTap) marker.on('click', () => onTap());
 }
 
 /**
@@ -204,7 +247,7 @@ function aimSide(bearing: number, toward: number | null): number {
  */
 function drawAim(layer: LayerGroup, report: LightningReport): void {
   const L = leaflet();
-  const { place, nearestKm, bearing, motion } = report;
+  const { place, nearestKm, bearing, motion, readAt } = report;
   if (!place || nearestKm == null || bearing == null) return;
   const storm = pointAt(place.lat, place.lon, bearing, nearestKm);
   const line: Array<[number, number]> = [
@@ -269,12 +312,22 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
         : 'l’orage reste sur place',
     );
   }
+  // Touched, the label reads the storm again: when it was read last.
+  const look = aimLook.peek();
+  words.push(
+    look === 'running'
+      ? '↻ actualisation en cours…'
+      : `${look === 'done' ? '✓' : '↻'} actualisé à ${hourText(readAt)}`,
+  );
+  const lookClass =
+    look === 'running' ? ' looking' : look === 'done' ? ' looked' : '';
   tag(
     layer,
     middle,
     words.map((word) => `<div>${word}</div>`).join(''),
-    'aim',
+    `aim${lookClass}`,
     aimSide(bearing, motion?.towardDeg ?? null),
+    () => void lookAgain(),
   );
   // The red vector: where the storm goes, from the storm, 30 minutes long.
   if (motion?.towardDeg != null && motion.speedKn != null) {
@@ -325,6 +378,7 @@ function LightningAim() {
   useSignals();
   const last = lightningLast.value;
   const nearest = lightningNearest.value;
+  const look = aimLook.value;
   // Another place to look from (another zone, the GPS again, the boat gone
   // on): the storm is looked for again from there; moving the map does not.
   useEffect(() => {
@@ -364,7 +418,7 @@ function LightningAim() {
       clearTimeout(wait);
       layer?.remove();
     };
-  }, [last, nearest]);
+  }, [last, nearest, look]);
   return null;
 }
 
