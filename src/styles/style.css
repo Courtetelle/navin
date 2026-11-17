@@ -13510,28 +13510,33 @@ main#view .site-link {
   transform: translate(-50%, -100%);
 }
 /* the place looked from, the red vector cased, the labels of the arrows */
-.leaflet-overlay-pane path.lightning-origin {
-  stroke: #ffd400;
-  fill: #1a1a1a;
-  fill-opacity: 0.85;
-}
 .leaflet-overlay-pane path.lightning-move-case {
   stroke: rgba(255, 255, 255, 0.85);
   fill: none;
 }
 .lightning-tag.origin {
-  left: 12px;
-  top: -12px;
   border-color: #1a1a1a;
 }
-.lightning-tag.aim {
-  left: 0;
-  top: 0;
-  transform: translate(-50%, -50%);
+/* my position (or the zone): a point above the flashes */
+.lightning-me {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: #1a1a1a;
+  border: 4px solid #ffd400;
+  box-shadow:
+    0 0 0 2px #1a1a1a,
+    0 1px 4px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
 }
-:root[data-theme='night'] .leaflet-overlay-pane path.lightning-origin {
-  stroke: #ff3b2a;
-  fill: #200;
+:root[data-theme='night'] .lightning-me {
+  background: #200;
+  border-color: #ff3b2a;
+  box-shadow: 0 0 0 2px #000;
 }
 :root[data-theme='night'] .leaflet-overlay-pane path.lightning-move-case {
   stroke: rgba(40, 0, 0, 0.85);

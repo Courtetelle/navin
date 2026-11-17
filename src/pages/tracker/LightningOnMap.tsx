@@ -138,24 +138,40 @@ function headHtml(degrees: number, kind: string): string {
   return `<svg class="lightning-head ${kind}" viewBox="-10 -10 20 20" style="transform:rotate(${Math.round(degrees)}deg)"><path d="M0-9 7 7 0 3-7 7z"/></svg>`;
 }
 
+/** The gap between a point and its label, in pixels. */
+const TAG_GAP = 16;
+
 /**
- * A label on the map.
+ * A label on the map, wholly on one side of its point (towards a bearing),
+ * so that two labels on either side never cover each other.
  * @param layer - Where it is drawn.
  * @param at - Where.
  * @param html - What it says.
  * @param kind - Its class: the place, the aim, the motion.
+ * @param side - The bearing of the side it stands on; none: centred above.
  */
 function tag(
   layer: LayerGroup,
   at: { lat: number; lon: number },
   html: string,
   kind: string,
+  side?: number,
 ): void {
   const L = leaflet();
+  let style = '';
+  if (side != null) {
+    const rad = (side * Math.PI) / 180;
+    const dx = Math.sin(rad);
+    const dy = -Math.cos(rad);
+    const most = Math.max(Math.abs(dx), Math.abs(dy));
+    const ux = dx / most;
+    const uy = dy / most;
+    style = ` style="left:0;top:0;transform:translate(calc(${(-50 + ux * 50).toFixed(1)}% + ${(dx * TAG_GAP).toFixed(1)}px),calc(${(-50 + uy * 50).toFixed(1)}% + ${(dy * TAG_GAP).toFixed(1)}px))"`;
+  }
   L.marker([at.lat, at.lon], {
     icon: L.divIcon({
       className: 'lightning-tag-wrap',
-      html: `<div class="lightning-tag ${kind}">${html}</div>`,
+      html: `<div class="lightning-tag ${kind}"${style}>${html}</div>`,
       iconSize: [0, 0],
     }),
     interactive: false,
@@ -192,14 +208,19 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
     dashArray: '10 8',
     interactive: false,
   }).addTo(layer);
-  // Where NavIn looks from: a yellow ring and its name.
-  L.circleMarker([place.lat, place.lon], {
-    className: 'lightning-origin',
-    radius: 7,
-    weight: 3,
+  // Where NavIn looks from (my position): a point above the flashes and
+  // everything, its name on the side away from the storm.
+  L.marker([place.lat, place.lon], {
+    icon: L.divIcon({
+      className: 'lightning-me-wrap',
+      html: '<div class="lightning-me" data-lightning="me"></div>',
+      iconSize: [0, 0],
+    }),
     interactive: false,
+    keyboard: false,
+    zIndexOffset: 900,
   }).addTo(layer);
-  tag(layer, place, `📍 ${placeName ?? 'GPS'}`, 'origin');
+  tag(layer, place, `📍 ${placeName ?? 'GPS'}`, 'origin', bearing + 180);
   L.marker([storm.lat, storm.lon], {
     icon: L.divIcon({
       className: 'lightning-head-wrap',
@@ -227,7 +248,13 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
     const warn = lightningEtaShown(eta, now) ? '⚠️ ' : '';
     words.push(`${warn}sur vous vers ${hourText(eta.etaAt)}`);
   }
-  tag(layer, middle, words.map((word) => `<div>${word}</div>`).join(''), 'aim');
+  tag(
+    layer,
+    middle,
+    words.map((word) => `<div>${word}</div>`).join(''),
+    'aim',
+    bearing,
+  );
   // The red vector: where the storm goes, from the storm, 30 minutes long.
   if (motion?.towardDeg != null && motion.speedKn != null) {
     const ahead = pointAt(
