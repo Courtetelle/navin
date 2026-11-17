@@ -31,7 +31,7 @@ export const SITES: readonly SiteDef[] = [
     id: 'blitzortung',
     label: 'Carte Blitzortung (à regarder)',
     url: 'https://map.blitzortung.org/',
-    where: 'Météo › Alerte foudre',
+    where: 'Météo › Alerte orage',
   },
   {
     id: 'map-arcgis-leman',

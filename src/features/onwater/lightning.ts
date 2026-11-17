@@ -93,6 +93,8 @@ export interface LightningReport extends LightningSpots {
   place?: { lat: number; lon: number };
   /** Its name: GPS, Atlantique, Méditerranée or Lacs. */
   placeName?: string;
+  /** How many storm cells were seen in the circle (the one said: the first on us). */
+  storms?: number;
 }
 
 /**
@@ -346,7 +348,8 @@ export function lightningSpots(
     for (let col = 0; col < size; col++) {
       const at = (row * size + col) * 4;
       if ((pixels[at + 3] ?? 0) < 40 || lightningNoData(pixels, at)) continue;
-      mask[row * size + col] = 1;
+      // 10 flashes and more (orange to red): 2, to know the active cells.
+      mask[row * size + col] = (pixels[at + 1] ?? 255) < 140 ? 2 : 1;
       const lon = west + ((col + 0.5) / size) * (east - west);
       const km = distanceKm(area.lat, area.lon, lat, lon);
       if (km > area.km) continue;
@@ -404,6 +407,10 @@ function coreOf(
 const MOST_KN = 60;
 /** Slower than this, a storm stays where it is, knots. */
 const STILL_KN = 3;
+/** Nearer than this, the storm is on the boat, km. */
+const ON_US_KM = 3;
+/** Coming nearer slower than this, it does not come, knots. */
+const COMING_KN = 2;
 /** The motion is known over this time at least. */
 const LEAST_SPAN_MS = 9 * 60_000;
 
@@ -612,11 +619,15 @@ function median(values: readonly number[]): number {
  * of the two images 10 minutes before, at every step of the half hour, the
  * middle value kept (the flashes flicker, one image alone says little).
  * @param images - The images, each with its mask and its time.
+ * @param window - One cell only: where its flashes are on the newest
+ *   images (it is followed back in time).
  * @returns The speed east and north in km per ms, or null.
  */
 export function imageDrift(
   images: readonly LightningSpots[],
+  window: CellWindow | null = null,
 ): { east: number; north: number } | null {
+  let cell = window;
   const masked = images
     .filter(
       (one) => one.mask && (one.size ?? 0) > 0 && one.box && one.t != null,
@@ -641,18 +652,290 @@ export function imageDrift(
     const span = ((b1.t ?? 0) + (b2.t ?? 0) - (a1.t ?? 0) - (a2.t ?? 0)) / 2;
     if (span <= 0) continue;
     const most = (DRIFT_MOST_KN * KM_PER_NM * span) / 3_600_000;
+    const reach = {
+      col: Math.ceil(most / kmEast),
+      row: Math.ceil(most / kmNorth),
+    };
+    // One cell: its own flashes then, laid on all those around before.
+    const near = cell ? grown(cell, reach) : null;
     const shift = bestShift(
-      spread(a1.mask, a2.mask, size),
-      spread(b1.mask, b2.mask, size),
+      spread(part(a1.mask, size, near), part(a2.mask, size, near), size),
+      spread(part(b1.mask, size, cell), part(b2.mask, size, cell), size),
       size,
-      { col: Math.ceil(most / kmEast), row: Math.ceil(most / kmNorth) },
+      reach,
     );
     if (shift.fit < LEAST_FIT) continue;
     easts.push((shift.dx * kmEast) / span);
     norths.push((-shift.dy * kmNorth) / span);
+    // Back one image in time, the cell is where it was 5 minutes before.
+    if (cell) {
+      const back = STEP_MS / span;
+      cell = moved(cell, -shift.dy * back, -shift.dx * back);
+    }
   }
   if (easts.length === 0) return null;
   return { east: median(easts), north: median(norths) };
+}
+
+/** A part of the images, in pixels: rows and columns from, to (included). */
+export interface CellWindow {
+  rows: [number, number];
+  cols: [number, number];
+}
+
+/**
+ * The flashes of a mask in a part of it only.
+ * @param mask - The flashes.
+ * @param size - Width and height.
+ * @param window - The part kept.
+ * @returns A new mask.
+ */
+function windowed(
+  mask: Uint8Array,
+  size: number,
+  window: CellWindow,
+): Uint8Array {
+  const out = new Uint8Array(mask.length);
+  const [top, bottom] = window.rows;
+  const [left, right] = window.cols;
+  for (let row = Math.max(0, top); row <= Math.min(size - 1, bottom); row++) {
+    for (let col = Math.max(0, left); col <= Math.min(size - 1, right); col++) {
+      out[row * size + col] = mask[row * size + col] ?? 0;
+    }
+  }
+  return out;
+}
+
+/**
+ * A mask, or only a part of it.
+ * @param mask - The flashes.
+ * @param size - Width and height.
+ * @param window - The part kept; none: all.
+ * @returns The mask.
+ */
+function part(
+  mask: Uint8Array,
+  size: number,
+  window: CellWindow | null,
+): Uint8Array {
+  return window ? windowed(mask, size, window) : mask;
+}
+
+/**
+ * A part of the images made larger.
+ * @param part - The part.
+ * @param by - Pixels more on each side.
+ * @param by.col - Columns.
+ * @param by.row - Rows.
+ * @returns The larger part.
+ */
+function grown(part: CellWindow, by: { col: number; row: number }): CellWindow {
+  return {
+    rows: [part.rows[0] - by.row, part.rows[1] + by.row],
+    cols: [part.cols[0] - by.col, part.cols[1] + by.col],
+  };
+}
+
+/**
+ * A part of the images moved.
+ * @param part - The part.
+ * @param rows - Rows down.
+ * @param cols - Columns east.
+ * @returns The part moved, on whole pixels.
+ */
+function moved(part: CellWindow, rows: number, cols: number): CellWindow {
+  const dy = Math.round(rows);
+  const dx = Math.round(cols);
+  return {
+    rows: [part.rows[0] + dy, part.rows[1] + dy],
+    cols: [part.cols[0] + dx, part.cols[1] + dx],
+  };
+}
+
+/** Flashes nearer than this to each other are one storm cell, km. */
+const LINK_KM = 10;
+/** At most this many cells are followed, the nearest. */
+const MOST_CELLS = 8;
+
+/** One storm cell of the newest images. */
+export interface StormCell {
+  /** Its nearest flashes, km. */
+  km: number;
+  /** Their bearing from the place, degrees. */
+  bearing: number;
+  /** Some flashes of 10 and more in 5 minutes. */
+  strong: boolean;
+  /** The part of the newest images where its flashes are. */
+  window: CellWindow;
+}
+
+/**
+ * The storm cells of the two newest images: flashes nearer than 10 km to
+ * each other are one cell; the cells within the circle, nearest first.
+ * @param images - The images, each with its mask and its time.
+ * @param area - The place looked from, and the radius of the circle (km).
+ * @param area.lat - Latitude.
+ * @param area.lon - Longitude.
+ * @param area.km - Radius; none: the whole image.
+ * @returns The cells.
+ */
+export function stormCells(
+  images: readonly LightningSpots[],
+  area: { lat: number; lon: number; km?: number },
+): StormCell[] {
+  const masked = images
+    .filter(
+      (one) => one.mask && (one.size ?? 0) > 0 && one.box && one.t != null,
+    )
+    .toSorted((a, b) => (b.t ?? 0) - (a.t ?? 0));
+  const [first, second] = masked;
+  if (!first?.mask || !first.box || first.size == null) return [];
+  const { size, box, mask } = first;
+  const [west, south, east, north] = box;
+  const lit = Uint8Array.from(mask);
+  if (second?.mask && second.size === size) {
+    for (let at = 0; at < lit.length; at++) {
+      lit[at] = Math.max(lit[at] ?? 0, second.mask[at] ?? 0);
+    }
+  }
+  const kmEast =
+    ((east - west) *
+      KM_PER_DEG *
+      Math.cos((((north + south) / 2) * Math.PI) / 180)) /
+    size;
+  const kmNorth = ((north - south) * KM_PER_DEG) / size;
+  const link = {
+    col: Math.max(1, Math.ceil(LINK_KM / kmEast)),
+    row: Math.max(1, Math.ceil(LINK_KM / kmNorth)),
+  };
+  const seen = new Uint8Array(lit.length);
+  const cells: StormCell[] = [];
+  for (let start = 0; start < lit.length; start++) {
+    if (!lit[start] || seen[start]) continue;
+    seen[start] = 1;
+    const queue = [start];
+    let km = Infinity;
+    let bearing = 0;
+    let strong = false;
+    let top = size;
+    let bottom = 0;
+    let left = size;
+    let right = 0;
+    while (queue.length > 0) {
+      const at = queue.pop() ?? 0;
+      const row = Math.floor(at / size);
+      const col = at % size;
+      top = Math.min(top, row);
+      bottom = Math.max(bottom, row);
+      left = Math.min(left, col);
+      right = Math.max(right, col);
+      if (lit[at] === 2) strong = true;
+      const lat = north - ((row + 0.5) / size) * (north - south);
+      const lon = west + ((col + 0.5) / size) * (east - west);
+      const far = distanceKm(area.lat, area.lon, lat, lon);
+      if (far < km) {
+        km = far;
+        bearing = bearingOf(area.lat, area.lon, lat, lon);
+      }
+      for (let dy = -link.row; dy <= link.row; dy++) {
+        const y = row + dy;
+        if (y < 0 || y >= size) continue;
+        for (let dx = -link.col; dx <= link.col; dx++) {
+          const x = col + dx;
+          if (x < 0 || x >= size) continue;
+          if ((dx / link.col) ** 2 + (dy / link.row) ** 2 > 1) continue;
+          const next = y * size + x;
+          if (!lit[next] || seen[next]) continue;
+          seen[next] = 1;
+          queue.push(next);
+        }
+      }
+    }
+    if (area.km != null && km > area.km) continue;
+    cells.push({
+      km,
+      bearing,
+      strong,
+      window: grown({ rows: [top, bottom], cols: [left, right] }, link),
+    });
+  }
+  return cells.toSorted((a, b) => a.km - b.km).slice(0, MOST_CELLS);
+}
+
+/**
+ * The motion of a cell from the drift of its flashes: its course, its speed,
+ * and how fast it comes nearer along the yellow arrow (its bearing).
+ * @param drift - Speed east and north, km per ms.
+ * @param bearing - The bearing of the cell from the place.
+ * @param km - Its distance.
+ * @returns The motion.
+ */
+function driftMotion(
+  drift: { east: number; north: number },
+  bearing: number,
+  km: number,
+): LightningMotion {
+  const knPerKmMs = 3_600_000 / KM_PER_NM;
+  const speedKn = Math.hypot(drift.east, drift.north) * knPerKmMs;
+  const side = (bearing * Math.PI) / 180;
+  return {
+    towardDeg:
+      speedKn < STILL_KN
+        ? null
+        : ((Math.atan2(drift.east, drift.north) * 180) / Math.PI + 360) % 360,
+    speedKn,
+    closingKn:
+      -(drift.east * Math.sin(side) + drift.north * Math.cos(side)) * knPerKmMs,
+    kmAt: km,
+  };
+}
+
+/** The storm said, among all the cells seen. */
+export interface ChosenStorm {
+  cell: StormCell;
+  motion: LightningMotion | null;
+  /** How many cells were seen. */
+  storms: number;
+}
+
+/**
+ * Among all the storm cells in the circle, the one to watch: of those that
+ * come nearer, the first on the boat (the nearest and the fastest weighed
+ * together: its distance over its speed of approach); none comes nearer, the
+ * nearest that does not go away; else the nearest. Each cell is followed on
+ * its own (its own flashes laid on those 10 minutes before), else with the
+ * motion of all the flashes.
+ * @param images - The images, each with its mask and its time.
+ * @param area - The place looked from and the radius of the circle.
+ * @param area.lat - Latitude.
+ * @param area.lon - Longitude.
+ * @param area.km - Radius.
+ * @returns The storm, or null without any cell.
+ */
+export function chosenStorm(
+  images: readonly LightningSpots[],
+  area: { lat: number; lon: number; km?: number },
+): ChosenStorm | null {
+  const cells = stormCells(images, area);
+  if (cells.length === 0) return null;
+  const all = imageDrift(images);
+  const judged = cells.map((cell) => {
+    const drift = imageDrift(images, cell.window) ?? all;
+    const motion = drift ? driftMotion(drift, cell.bearing, cell.km) : null;
+    const closing = motion?.closingKn ?? 0;
+    const soon =
+      closing >= COMING_KN ? Math.max(0, cell.km - ON_US_KM) / closing : null;
+    return { cell, motion, soon };
+  });
+  const coming = judged
+    .filter((one) => one.soon != null)
+    .toSorted((a, b) => (a.soon ?? 0) - (b.soon ?? 0));
+  const staying = judged.find(
+    (one) => (one.motion?.closingKn ?? 0) > -COMING_KN,
+  );
+  const pick = coming[0] ?? staying ?? judged[0];
+  if (!pick) return null;
+  return { cell: pick.cell, motion: pick.motion, storms: cells.length };
 }
 
 /** When the storm is on the boat, as NavIn guesses it. */
@@ -666,11 +949,6 @@ export interface LightningEta {
   /** It is on the boat now, as far as NavIn can tell. */
   onUs: boolean;
 }
-
-/** Nearer than this, the storm is on the boat, km. */
-const ON_US_KM = 3;
-/** Coming nearer slower than this, it does not come, knots. */
-const COMING_KN = 2;
 
 /**
  * Where the storm is now and when it is on the boat: the images come late
@@ -754,10 +1032,14 @@ export function degreesText(degrees: number): string {
  * @returns The lines, none without storm.
  */
 export function stormLines(report: LightningReport, now: number): string[] {
-  const { nearestKm, bearing, place, motion } = report;
+  const { nearestKm, bearing, place, motion, storms } = report;
   if (nearestKm == null || bearing == null) return [];
+  const which =
+    storms != null && storms > 1
+      ? `Orage le plus menaçant (${storms} cellules vues)`
+      : 'Orage le plus proche';
   const lines = [
-    `⚡ Orage le plus proche : ${nmOf(nearestKm)} NM au ${pointOf(bearing)} (${degreesText(bearing)})`,
+    `⚡ ${which} : ${nmOf(nearestKm)} NM au ${pointOf(bearing)} (${degreesText(bearing)})`,
   ];
   if (place) {
     lines.push(
@@ -852,7 +1134,7 @@ export function lightningReport(
   read: readonly LightningSpots[],
   readFirst: number,
   readAt: number,
-  place?: { lat: number; lon: number },
+  place?: { lat: number; lon: number; km?: number },
 ): LightningReport {
   let images = read;
   let at = read[0]?.t ?? readFirst;
@@ -893,7 +1175,7 @@ export function lightningReport(
   const nearer =
     newest != null &&
     (oldest == null ? images.length > 1 : newest < oldest - 5);
-  return {
+  const report: LightningReport = {
     nearestKm: nearest.nearestKm,
     bearing: nearest.bearing,
     cells,
@@ -902,7 +1184,20 @@ export function lightningReport(
     at,
     readAt,
     motion: place ? lightningMotion(images, place) : null,
-    ...(place ? { place } : {}),
+    ...(place ? { place: { lat: place.lat, lon: place.lon } } : {}),
+  };
+  // Several storm cells: the one first on the boat is the one said.
+  const chosen = place ? chosenStorm(images, place) : null;
+  if (!chosen) return report;
+  const { cell, motion, storms } = chosen;
+  return {
+    ...report,
+    nearestKm: cell.km,
+    bearing: cell.bearing,
+    strong: cell.strong,
+    storms,
+    motion: motion ?? (storms === 1 ? report.motion : null),
+    nearer: motion ? motion.closingKn >= COMING_KN : nearer,
   };
 }
 
@@ -924,7 +1219,8 @@ export type LightningReason = 'first' | 'half' | 'nearer' | 'again';
 const AGAIN_MS = 15 * 60_000;
 
 /**
- * Whether to sound the alert: flashes inside the circle for the first time,
+ * Whether to sound the alert: never for a storm that goes away or is on the
+ * boat already; else flashes inside the circle for the first time,
  * under half the distance of the alert (a second alert), much nearer than at
  * the last alert, or still there 15 minutes after it.
  * @param report - What the images show.
@@ -939,10 +1235,15 @@ export function lightningDue(
   now: number,
   radiusKm: number,
 ): LightningReason | null {
-  if (report.nearestKm == null) return null;
+  const { nearestKm, motion } = report;
+  if (nearestKm == null || nearestKm > radiusKm) return null;
+  // No alert for a storm that goes away, nor for one already on the boat
+  // (or the zone): nothing more to warn of.
+  if (motion && motion.closingKn <= -COMING_KN) return null;
+  if (lightningEta(report, now)?.onUs) return null;
   if (!last) return 'first';
-  if (!last.half && report.nearestKm < radiusKm / 2) return 'half';
-  if (report.nearestKm < last.km * 0.6) return 'nearer';
+  if (!last.half && nearestKm < radiusKm / 2) return 'half';
+  if (nearestKm < last.km * 0.6) return 'nearer';
   return now - last.at >= AGAIN_MS ? 'again' : null;
 }
 

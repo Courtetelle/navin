@@ -158,14 +158,19 @@ export function LightningAlert() {
         éclair en 5 minutes, rouge foncé pour 20 et plus. Pour entendre et voir
         l’alerte : Paramétrages › Tests. « Voir sur la carte » montre l’orage le
         plus proche de la position GPS (ou de la zone choisie avec NavIn),
-        cherché jusqu’à 216 NM. Au-dessus des boutons : sa distance, sa
-        position, sa vitesse de rapprochement et la durée jusqu’à vous,
-        calculées sur les images des 15 dernières minutes ; le retard de l’image
-        est compté, la distance est estimée pour maintenant. Une seconde alerte
+        cherché jusqu’à 216 NM. Plusieurs cellules orageuses : chacune est
+        suivie sur les images des 35 dernières minutes, et NavIn retient celle
+        qui sera la première sur vous (la plus proche et la plus rapide pesées
+        ensemble) ; il peut donc changer d’orage d’un regard à l’autre.
+        Au-dessus des boutons : sa distance, sa position, sa vitesse de
+        rapprochement et la durée jusqu’à vous ; le retard de l’image est
+        compté, la distance est estimée pour maintenant. Une seconde alerte
         sonne quand l’orage passe sous la moitié de votre distance d’alerte, et
-        une fin d’alerte quand il n’y a plus d’éclairs depuis 30 minutes. Sur la
-        carte, une flèche relie le bateau à l’orage le plus proche, avec sa
-        distance et son déplacement.
+        une fin d’alerte quand il n’y a plus d’éclairs depuis 30 minutes. Plus
+        d’alerte pour un orage qui s’éloigne, ni pour un orage déjà sur vous.
+        Sur la carte, la flèche jaune relie votre position (le GPS ou la zone
+        active) à l’orage, avec sa distance ; la flèche rouge montre son
+        déplacement.
       </HelpText>
       <SiteLink id="blitzortung" />
       <Button
@@ -173,7 +178,7 @@ export function LightningAlert() {
         data-lightning="settings"
         data-settings-exit
         aria-label={tr(
-          'Paramétrage des alertes foudre : sortir vers Paramétrages',
+          'Paramétrage des alertes orage : sortir vers Paramétrages',
         )}
         onClick={() => {
           buzz();
@@ -186,7 +191,7 @@ export function LightningAlert() {
         <span>
           <b className="wx-settings-title">
             <SettingsIcon className="wx-settings-ico" />
-            {tr('Paramétrage des alertes foudre')}
+            {tr('Paramétrage des alertes orage')}
           </b>
           <small>
             {tr(
@@ -220,7 +225,7 @@ export function LightningSetting() {
           data-lightning="toggle"
           onClick={() => change({ on: !on })}
         >
-          {tr(`⚡ Alerte foudre : ${on ? 'OUI' : 'NON'}`)}
+          {tr(`⚡ Alerte orage : ${on ? 'OUI' : 'NON'}`)}
         </Button>
       </ButtonRow>
       <ButtonRow className="row">

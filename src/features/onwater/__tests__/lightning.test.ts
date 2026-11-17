@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 
 import type { LightningSpots } from '../lightning.ts';
 import {
+  chosenStorm,
   durationText,
   imageDrift,
   lightningBox,
@@ -298,4 +299,70 @@ test('the drift of the storms: the newest image laid on the oldest', () => {
   expect((drift?.east ?? 0) * 5 * MIN).toBeCloseTo(2 * kmEast, 3);
   expect((drift?.north ?? 0) * 5 * MIN).toBeCloseTo(kmNorth, 3);
   expect(imageDrift([spotOf(blob(50, 50), 0)])).toBeNull();
+});
+
+test('several storms: the one first on the boat is said, and no alert for one going away or already here', () => {
+  // A square of 120 km around the place, 1.2 km a pixel.
+  const size = 100;
+  const place = { lat: 46.5, lon: 6.5 };
+  const half = 60;
+  const dLat = half / 111.32;
+  const dLon = half / (111.32 * Math.cos((46.5 * Math.PI) / 180));
+  const box: [number, number, number, number] = [
+    6.5 - dLon,
+    46.5 - dLat,
+    6.5 + dLon,
+    46.5 + dLat,
+  ];
+  // A near cell to the north going north, a farther one to the west coming
+  // east fast: two pixels a step each.
+  const frame = (back: number): LightningSpots => {
+    const mask = new Uint8Array(size * size);
+    const square = (row0: number, col0: number) => {
+      for (let row = row0; row < row0 + 4; row++) {
+        for (let col = col0; col < col0 + 4; col++) {
+          mask[row * size + col] = 1;
+        }
+      }
+    };
+    square(34 + 2 * back, 48);
+    square(48, 12 - 3 * back);
+    return {
+      nearestKm: 15,
+      bearing: 0,
+      cells: 32,
+      strong: false,
+      mask,
+      size,
+      box,
+      t: (35 - 5 * back) * MIN,
+    };
+  };
+  const images = [0, 1, 2, 3, 4, 5, 6, 7].map((back) => frame(back));
+  const chosen = chosenStorm(images, { ...place, km: 100 });
+  expect(chosen?.storms).toBe(2);
+  expect(chosen?.cell.bearing).toBeGreaterThan(260);
+  expect(chosen?.motion?.closingKn).toBeGreaterThan(15);
+  const report = lightningReport(images, 35 * MIN, 36 * MIN, {
+    ...place,
+    km: 100,
+  });
+  expect(report.storms).toBe(2);
+  expect(report.bearing).toBeGreaterThan(260);
+  expect(lightningDue(report, null, 36 * MIN, 100)).toBe('first');
+  // Going away: no alert.
+  const away = {
+    ...report,
+    motion: { towardDeg: 90, speedKn: 30, closingKn: -30, kmAt: 40 },
+  };
+  expect(lightningDue(away, null, 36 * MIN, 100)).toBeNull();
+  // On the boat already: no alert.
+  const here = {
+    ...report,
+    nearestKm: 2,
+    motion: { towardDeg: 90, speedKn: 30, closingKn: 30, kmAt: 2 },
+  };
+  expect(lightningDue(here, null, 36 * MIN, 100)).toBeNull();
+  // Out of the circle: no alert.
+  expect(lightningDue(report, null, 36 * MIN, 10)).toBeNull();
 });

@@ -194,7 +194,7 @@ function TestsSection() {
           {tr('▶ Test des alertes de vent')}
         </Button>
       </ButtonRow>
-      <h3>{tr('⚡ Test de l’alerte foudre')}</h3>
+      <h3>{tr('⚡ Test de l’alerte orage')}</h3>
       <p className="keep-help nav-hint">
         {tr(
           'Trois bips courts, l’écran qui flashe et la bulle, comme pour un orage à 12 NM qui se rapproche.',
@@ -209,7 +209,7 @@ function TestsSection() {
             lightningTest();
           }}
         >
-          {tr('▶ Test de l’alerte foudre')}
+          {tr('▶ Test de l’alerte orage')}
         </Button>
       </ButtonRow>
       <h3>{tr('🚨 Test des feux d’avis des lacs')}</h3>
@@ -243,7 +243,7 @@ function TestsSection() {
       <h3>{tr('🔔 Test de plusieurs alertes à la suite')}</h3>
       <p className="keep-help nav-hint">
         {tr(
-          'Vent, foudre et feux d’avis en même temps : les bulles viennent l’une après l’autre, chacune au toucher de la précédente.',
+          'Vent, orages et feux d’avis en même temps : les bulles viennent l’une après l’autre, chacune au toucher de la précédente.',
         )}
       </p>
       <ButtonRow>
@@ -367,7 +367,7 @@ export function SettingsPage({ from, arg }: PageProps) {
           </SettingsSection>
           <SettingsSection
             section="lightning"
-            title="⚡ Paramétrage des alertes foudre"
+            title="⚡ Paramétrage des alertes orage"
           >
             <LightningSetting />
           </SettingsSection>

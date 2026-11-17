@@ -75,7 +75,7 @@ export function LightningPopup() {
   const hour = new Date(report.at).toISOString().slice(11, 16);
   const motion = clear ? [] : (lines ?? []);
   const title = clear
-    ? 'FIN DE L’ALERTE FOUDRE'
+    ? 'FIN DE L’ALERTE ORAGE'
     : `${reason === 'half' ? '2e ALERTE · ' : ''}ORAGE à ${nm} NM`;
   return createPortal(
     <>

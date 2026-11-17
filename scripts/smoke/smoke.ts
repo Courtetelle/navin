@@ -1019,7 +1019,7 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(400);
   check(
     theme,
-    'Météo › Alerte foudre: the map, a look now and the way to its settings',
+    'Météo › Alerte orage: the map, a look now and the way to its settings',
     (await page.locator('[data-lightning="map"]').count()) === 1 &&
       (await page.locator('[data-lightning="settings"]').count()) === 1 &&
       (await page.locator('[data-lightning-radius]').count()) === 0,
@@ -1029,20 +1029,20 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(150);
   check(
     theme,
-    'Météo › Alerte foudre: « Actualiser maintenant » touched shows the refresh running',
+    'Météo › Alerte orage: « Actualiser maintenant » touched shows the refresh running',
     (await page.locator('[data-lightning="look"].refreshing').count()) === 1,
   );
   const lightningTight = await tightButtons(page);
   check(
     theme,
-    `Météo › Alerte foudre: the buttons one above the other never touch${lightningTight.length > 0 ? ` (${lightningTight.join(', ')})` : ''}`,
+    `Météo › Alerte orage: the buttons one above the other never touch${lightningTight.length > 0 ? ` (${lightningTight.join(', ')})` : ''}`,
     lightningTight.length === 0,
   );
   await page.locator('[data-lightning="settings"]').click();
   await page.waitForTimeout(500);
   check(
     theme,
-    'Paramétrage des alertes foudre: its switch and its four distances',
+    'Paramétrage des alertes orage: its switch and its four distances',
     (await page.locator('[data-lightning="toggle"]').count()) === 1 &&
       (await page.locator('[data-lightning-radius]').count()) === 4,
   );

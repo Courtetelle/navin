@@ -133,6 +133,7 @@ export async function readLightning(
   return lightningReport(spots, times[0] ?? now, now, {
     lat: area.lat,
     lon: area.lon,
+    km: area.km,
   });
 }
 
@@ -206,7 +207,7 @@ export function lightningCheck(quiet = false): Promise<void> {
             playLightning();
             showPop({ report, radiusNm, place, clear: true });
             logLightning(
-              'Fin d’alerte foudre',
+              'Fin d’alerte orage',
               `Plus d’éclairs à moins de ${radiusNm} NM depuis 30 min.`,
             );
             return;
@@ -224,7 +225,7 @@ export function lightningCheck(quiet = false): Promise<void> {
           playLightning();
           showPop({ report, radiusNm, place, reason });
           logLightning(
-            reason === 'half' ? 'Alerte foudre (2e)' : 'Alerte foudre',
+            reason === 'half' ? 'Alerte orage (2e)' : 'Alerte orage',
             [
               lightningText(report, radiusNm),
               ...lightningMotionLines(report, now),
@@ -296,7 +297,7 @@ export function lightningTest(): void {
 /** Farther and farther, the nearest flashes are looked for this far, km. */
 const NEAREST_KM = [60, 150, 400] as const;
 
-/** The nearest storm found, wherever it is (Météo › Alerte foudre). */
+/** The nearest storm found, wherever it is (Météo › Alerte orage). */
 export interface NearestStorm {
   place: { lat: number; lon: number };
   /** The nearest flashes, null when none within 400 km. */

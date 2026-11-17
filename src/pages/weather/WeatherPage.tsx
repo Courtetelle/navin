@@ -154,7 +154,7 @@ function LightningPage() {
         {tr('◀ Météo')}
       </PageBack>
       <TitleInNav>
-        <h1>{tr('⚡ Alerte foudre')}</h1>
+        <h1>{tr('⚡ Alerte orage')}</h1>
       </TitleInNav>
       <LightningAlert />
     </>
@@ -232,7 +232,7 @@ function WeatherMenu() {
         >
           <span className="wx-entry-ico">⚡</span>
           <span>
-            <b>{tr('Alerte foudre')}</b>
+            <b>{tr('Alerte orage')}</b>
             <small>
               {tr('les éclairs vus par satellite dans le rayon choisi')}
             </small>

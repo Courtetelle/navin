@@ -13474,7 +13474,7 @@ main#view .site-link {
 :root[data-theme='night'] .leaflet-overlay-pane path.lightning-aim-line {
   fill: none;
 }
-/* the nearest storm, above the buttons of Alerte foudre */
+/* the nearest storm, above the buttons of Alerte orage */
 .lightning-nearest {
   margin: 12px 0;
   padding: 10px 12px;
