@@ -502,6 +502,9 @@ async function follow(page: Page, theme: string): Promise<void> {
     );
   await sail(46.45, 6.6, 0);
   await page.waitForTimeout(300);
+  // The GPS, the real zone, is active only once the boat arrow is touched.
+  await page.locator('.rail-boat').click();
+  await page.waitForTimeout(800);
   for (let step = 1; step <= 3; step++) {
     // eslint-disable-next-line no-await-in-loop -- one GPS point per second
     await sail(46.45 + step * 0.0001, 6.6, 0);
@@ -1289,7 +1292,7 @@ async function zones(page: Page, theme: string): Promise<void> {
   check(
     theme,
     'tablet: the boat arrow goes back to the GPS',
-    !(await zoneChosen(page)),
+    (await zoneChosen(page)) === 'auto',
   );
 }
 
@@ -1575,6 +1578,9 @@ async function offlineFiles(page: Page, theme: string): Promise<void> {
       }
     ).fakeGps(43, 6.2, 90);
   });
+  await page.waitForTimeout(500);
+  // On the GPS (the boat arrow), the map follows the boat.
+  await page.locator('.rail-boat').click();
   await page.waitForTimeout(3000);
   const ticked = await page.evaluate(() =>
     [...document.querySelectorAll('.leaflet-control-layers-overlays label')]

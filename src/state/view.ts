@@ -159,7 +159,8 @@ export function resetView(): void {
   view.sosPos.value = null;
   view.sosSim.value = null;
   view.sosLive.value = null;
-  view.zoneSimV.value = store.raw('ldb.zoneSim') || '';
+  const zone = store.raw('ldb.zoneSim');
+  view.zoneSimV.value = zone === 'auto' ? '' : zone || '';
   view.tracking.value = false;
   view.trackPaused.value = false;
   view.lastFix.value = null;

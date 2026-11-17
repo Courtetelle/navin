@@ -77,7 +77,7 @@ test('navigation zone: simulation, fresh position, open cruise, then the index',
   actions.setZoneSim('auto');
   expect([actions.zoneSimGet(), store.raw('ldb.zoneSim')]).toStrictEqual([
     'auto',
-    null,
+    'auto',
   ]);
   state.view.lastFix.value = {
     lat: 43.1,
@@ -202,4 +202,22 @@ test('SOS log text and GPX export', () => {
   expect(actions.nightOK()).toBe(true);
   state.view.settingsFrom.value = 'more';
   expect(actions.nightOK()).toBe(false);
+});
+
+test('zones: the Atlantique at the very first opening, then the zone active at the last closing, the GPS too', () => {
+  store.del('ldb.zoneSim');
+  actions.firstZone();
+  expect([state.view.zoneSimV.value, store.raw('ldb.zoneSim')]).toStrictEqual([
+    'mer',
+    'mer',
+  ]);
+  actions.setZoneSim('auto');
+  actions.firstZone();
+  expect([state.view.zoneSimV.value, store.raw('ldb.zoneSim')]).toStrictEqual([
+    '',
+    'auto',
+  ]);
+  actions.setZoneSim('lac');
+  actions.firstZone();
+  expect(state.view.zoneSimV.value).toBe('lac');
 });

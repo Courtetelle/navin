@@ -160,8 +160,19 @@ export function setZoneSim(value: string): void {
   // A zone chosen with NavIn starts again on the place of the settings.
   if (value !== 'auto') store.del(NAVIN_SPOT_KEY);
   view.zoneSimV.value = value === 'auto' ? '' : value;
-  if (value === 'auto') store.del('ldb.zoneSim');
-  else store.setRaw('ldb.zoneSim', value);
+  // Kept, the GPS too: NavIn opens again on the zone active when it closed.
+  store.setRaw('ldb.zoneSim', value);
+}
+
+/**
+ * The very first opening of NavIn, no zone ever chosen: the Atlantique (a
+ * virtual zone). The GPS, the real zone, is active only once the boat arrow
+ * has been touched; then it is kept, as any zone, from one opening to the
+ * next.
+ */
+export function firstZone(): void {
+  if (store.raw('ldb.zoneSim') != null) return;
+  setZoneSim('mer');
 }
 
 const NAVIN_SPOT_KEY = 'ldb.navinSpot';
