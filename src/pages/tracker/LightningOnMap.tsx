@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import { leaflet } from '../../features/map/leaflet.ts';
 import { tracker } from '../../features/map/trackerState.ts';
+import { contextPlace } from '../../features/onwater/externals.ts';
 import type {
   LightningReport,
   LightningSettings,
@@ -11,9 +12,11 @@ import type {
 import {
   LIGHTNING_LAYER,
   LIGHTNING_WMS,
+  degreesText,
   hourText,
   lightningClearNoData,
   lightningEta,
+  lightningEtaShown,
   lightningOnMap,
   lightningTimes,
   nmOf,
@@ -23,7 +26,10 @@ import {
 import {
   lightningLast,
   lightningNearest,
+  lightningNewPlace,
+  lookName,
 } from '../../features/onwater/lightningWatch.ts';
+import { distKm } from '../../lib/geo.ts';
 import { state } from '../../state/index.ts';
 
 /** The flashes are read again this often: a new image every 5 minutes. */
@@ -94,6 +100,10 @@ function cleanWms() {
   };
 }
 
+/** The place looked from is checked this often. */
+const CHECK_MS = 3000;
+/** Moved this far, the storm is looked for again from the new place, km. */
+const MOVED_KM = 10;
 /** A storm read longer ago than this is not shown by its arrow. */
 const AIM_FRESH_MS = 30 * 60_000;
 /** The arrow of the motion of a storm: where it is in this time. */
@@ -129,15 +139,42 @@ function headHtml(degrees: number, kind: string): string {
 }
 
 /**
- * The arrow from the boat (or the zone) to the nearest storm, its distance
- * and where it is; from the storm a red arrow to where it goes in 30
- * minutes, its speed, and when it is on the boat.
+ * A label on the map.
+ * @param layer - Where it is drawn.
+ * @param at - Where.
+ * @param html - What it says.
+ * @param kind - Its class: the place, the aim, the motion.
+ */
+function tag(
+  layer: LayerGroup,
+  at: { lat: number; lon: number },
+  html: string,
+  kind: string,
+): void {
+  const L = leaflet();
+  L.marker([at.lat, at.lon], {
+    icon: L.divIcon({
+      className: 'lightning-tag-wrap',
+      html: `<div class="lightning-tag ${kind}">${html}</div>`,
+      iconSize: [0, 0],
+    }),
+    interactive: false,
+    keyboard: false,
+    zIndexOffset: 800,
+  }).addTo(layer);
+}
+
+/**
+ * The yellow arrow from where NavIn looks from (the GPS, or the zone chosen:
+ * Atlantique, Méditerranée, Lacs), marked and named, to the nearest storm,
+ * its distance and bearing in the middle; from the storm the red vector of
+ * its motion (course, speed, 30 minutes long), and when it is on the boat.
  * @param layer - Where it is drawn.
  * @param report - The storm.
  */
 function drawAim(layer: LayerGroup, report: LightningReport): void {
   const L = leaflet();
-  const { place, nearestKm, bearing, motion } = report;
+  const { place, nearestKm, bearing, motion, placeName } = report;
   if (!place || nearestKm == null || bearing == null) return;
   const storm = pointAt(place.lat, place.lon, bearing, nearestKm);
   const line: Array<[number, number]> = [
@@ -155,6 +192,14 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
     dashArray: '10 8',
     interactive: false,
   }).addTo(layer);
+  // Where NavIn looks from: a yellow ring and its name.
+  L.circleMarker([place.lat, place.lon], {
+    className: 'lightning-origin',
+    radius: 7,
+    weight: 3,
+    interactive: false,
+  }).addTo(layer);
+  tag(layer, place, `📍 ${placeName ?? 'GPS'}`, 'origin');
   L.marker([storm.lat, storm.lon], {
     icon: L.divIcon({
       className: 'lightning-head-wrap',
@@ -164,17 +209,40 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
     interactive: false,
     keyboard: false,
   }).addTo(layer);
+  // The distance and the bearing in the middle of the yellow arrow.
+  const middle = pointAt(place.lat, place.lon, bearing, nearestKm / 2);
   const now = Date.now();
   const words = [
-    `⚡ ${nmOf(nearestKm)} NM au ${pointOf(bearing)} (${String(Math.round(bearing) % 360).padStart(3, '0')}°)`,
+    `⚡ ${nmOf(nearestKm)} NM au ${pointOf(bearing)} (${degreesText(bearing)})`,
   ];
+  if (motion && motion.closingKn >= 2) {
+    words.push(`se rapproche à ${Math.round(motion.closingKn)} nd`);
+  } else if (motion && motion.closingKn <= -2) {
+    words.push(`s’éloigne à ${Math.round(-motion.closingKn)} nd`);
+  }
+  const eta = lightningEta(report, now);
+  if (eta?.onUs) {
+    words.push('⚠️ sur vous');
+  } else if (eta?.etaAt != null) {
+    const warn = lightningEtaShown(eta, now) ? '⚠️ ' : '';
+    words.push(`${warn}sur vous vers ${hourText(eta.etaAt)}`);
+  }
+  tag(layer, middle, words.map((word) => `<div>${word}</div>`).join(''), 'aim');
+  // The red vector: where the storm goes, from the storm, 30 minutes long.
   if (motion?.towardDeg != null && motion.speedKn != null) {
     const ahead = pointAt(
       storm.lat,
       storm.lon,
       motion.towardDeg,
-      (motion.speedKn * 1.852 * MOTION_MS) / 3_600_000,
+      Math.max(3, (motion.speedKn * 1.852 * MOTION_MS) / 3_600_000),
     );
+    L.polyline(
+      [
+        [storm.lat, storm.lon],
+        [ahead.lat, ahead.lon],
+      ],
+      { className: 'lightning-move-case', weight: 8, interactive: false },
+    ).addTo(layer);
     L.polyline(
       [
         [storm.lat, storm.lon],
@@ -191,38 +259,22 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
       interactive: false,
       keyboard: false,
     }).addTo(layer);
-    // Its own label at the tip of the vector: where the storm goes.
-    const course = String(Math.round(motion.towardDeg) % 360).padStart(3, '0');
-    L.marker([ahead.lat, ahead.lon], {
-      icon: L.divIcon({
-        className: 'lightning-tag-wrap',
-        html: `<div class="lightning-tag move">déplacement ${course}° · ${Math.round(motion.speedKn)} nd</div>`,
-        iconSize: [0, 0],
-      }),
-      interactive: false,
-      keyboard: false,
-      zIndexOffset: 800,
-    }).addTo(layer);
+    tag(
+      layer,
+      ahead,
+      `déplacement ${degreesText(motion.towardDeg)} · ${Math.round(motion.speedKn)} nd`,
+      'move',
+    );
+  } else {
+    tag(
+      layer,
+      storm,
+      motion?.speedKn == null
+        ? 'déplacement pas encore connu'
+        : 'l’orage reste sur place',
+      'move',
+    );
   }
-  if (motion && motion.closingKn >= 2) {
-    words.push(`se rapproche à ${Math.round(motion.closingKn)} nd`);
-  }
-  const eta = lightningEta(report, now);
-  if (eta?.onUs) {
-    words.push('⚠️ sur vous');
-  } else if (eta?.etaAt != null) {
-    words.push(`⚠️ sur vous vers ${hourText(eta.etaAt)}`);
-  }
-  L.marker([storm.lat, storm.lon], {
-    icon: L.divIcon({
-      className: 'lightning-tag-wrap',
-      html: `<div class="lightning-tag">${words.map((word) => `<div>${word}</div>`).join('')}</div>`,
-      iconSize: [0, 0],
-    }),
-    interactive: false,
-    keyboard: false,
-    zIndexOffset: 800,
-  }).addTo(layer);
 }
 
 /**
@@ -233,6 +285,23 @@ function LightningAim() {
   useSignals();
   const last = lightningLast.value;
   const nearest = lightningNearest.value;
+  // Another place to look from (another zone, the GPS again, the map moved
+  // in a zone): the storm is looked for again from there.
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const report = aimed(Date.now());
+      if (!report?.place) return;
+      const here = contextPlace();
+      if (
+        report.placeName !== lookName() ||
+        distKm(report.place.lat, report.place.lon, here.lat, here.lon) >
+          MOVED_KM
+      ) {
+        lightningNewPlace();
+      }
+    }, CHECK_MS);
+    return () => clearInterval(timer);
+  }, []);
   useEffect(() => {
     const report = aimed(Date.now());
     if (!report) return undefined;

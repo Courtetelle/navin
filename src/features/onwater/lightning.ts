@@ -59,6 +59,12 @@ export interface LightningSpots {
   core?: { lat: number; lon: number } | null;
   /** The time of the image, epoch ms. */
   t?: number;
+  /** Every pixel with flashes, row after row (to follow the storms). */
+  mask?: Uint8Array;
+  /** Width and height of the mask. */
+  size?: number;
+  /** West, south, east, north of the image, degrees. */
+  box?: [number, number, number, number];
 }
 
 /** How the nearest storm moves, from the images of the last quarter hour. */
@@ -85,6 +91,8 @@ export interface LightningReport extends LightningSpots {
   motion?: LightningMotion | null;
   /** Where NavIn looked from: the boat or the zone. */
   place?: { lat: number; lon: number };
+  /** Its name: GPS, Atlantique, Méditerranée or Lacs. */
+  placeName?: string;
 }
 
 /**
@@ -151,11 +159,12 @@ export function lightningBox(
  * The times of the images of the last quarter of an hour, newest first: a
  * time not out yet gives the newest image (the server takes the nearest).
  * @param now - Epoch ms.
- * @returns Four times, epoch ms.
+ * @param count - How many images, four by default.
+ * @returns The times, epoch ms.
  */
-export function lightningTimes(now: number): number[] {
+export function lightningTimes(now: number, count = 4): number[] {
   const newest = Math.floor(now / STEP_MS) * STEP_MS - STEP_MS;
-  return [0, 1, 2, 3].map((back) => newest - back * STEP_MS);
+  return Array.from({ length: count }, (_, back) => newest - back * STEP_MS);
 }
 
 /**
@@ -331,11 +340,13 @@ export function lightningSpots(
   let cells = 0;
   let strong = false;
   const lit: Array<{ lat: number; lon: number; km: number }> = [];
+  const mask = new Uint8Array(size * size);
   for (let row = 0; row < size; row++) {
     const lat = north - ((row + 0.5) / size) * (north - south);
     for (let col = 0; col < size; col++) {
       const at = (row * size + col) * 4;
       if ((pixels[at + 3] ?? 0) < 40 || lightningNoData(pixels, at)) continue;
+      mask[row * size + col] = 1;
       const lon = west + ((col + 0.5) / size) * (east - west);
       const km = distanceKm(area.lat, area.lon, lat, lon);
       if (km > area.km) continue;
@@ -349,7 +360,16 @@ export function lightningSpots(
       }
     }
   }
-  return { nearestKm, bearing, cells, strong, core: coreOf(lit) };
+  return {
+    nearestKm,
+    bearing,
+    cells,
+    strong,
+    core: coreOf(lit),
+    mask,
+    size,
+    box: [west, south, east, north],
+  };
 }
 
 /** The flashes this near the nearest one are of the same storm, km. */
@@ -439,13 +459,25 @@ export function lightningMotion(
   const fit = fitLine(
     seen.map((one) => ({ t: one.t ?? 0, v: one.nearestKm ?? 0 })),
   );
-  let closingKn = -fit.slope * knPerKmMs;
-  if (Math.abs(closingKn) > MOST_KN) return null;
-  // The middle of the storm, in km east and north of the place.
-  const cores = seen.filter((one) => one.core);
+  let closingKn = Math.max(-MOST_KN, Math.min(MOST_KN, -fit.slope * knPerKmMs));
   let towardDeg: number | null = null;
   let speedKn: number | null = null;
-  if (cores.length >= 2) {
+  // The flashes of the newest image laid on those of the oldest: the shift
+  // that fits them best is how far the storms went.
+  const drift = imageDrift(images);
+  // Else the middle of the storm, in km east and north of the place.
+  const cores = seen.filter((one) => one.core);
+  if (drift) {
+    const speed = Math.hypot(drift.east, drift.north) * knPerKmMs;
+    speedKn = speed;
+    towardDeg =
+      speed < STILL_KN
+        ? null
+        : ((Math.atan2(drift.east, drift.north) * 180) / Math.PI + 360) % 360;
+    const side = ((newest.bearing ?? 0) * Math.PI) / 180;
+    closingKn =
+      -(drift.east * Math.sin(side) + drift.north * Math.cos(side)) * knPerKmMs;
+  } else if (cores.length >= 2) {
     const cos = Math.cos((area.lat * Math.PI) / 180);
     const east = fitLine(
       cores.map((one) => ({
@@ -478,8 +510,149 @@ export function lightningMotion(
     towardDeg,
     speedKn,
     closingKn,
-    kmAt: Math.max(0, fit.at),
+    kmAt: newest.nearestKm ?? Math.max(0, fit.at),
   };
+}
+
+/** The flashes are spread over this many pixels around, to be followed. */
+const BLUR_PX = 2;
+/** A storm faster than this is not followed, knots. */
+const DRIFT_MOST_KN = 80;
+/** Two pairs of images fitting less than this say nothing. */
+const LEAST_FIT = 0.35;
+
+/**
+ * The flashes of two images together, spread around (they flicker from
+ * one image to the next).
+ * @param first - One mask.
+ * @param second - The other.
+ * @param size - Width and height.
+ * @returns The spread flashes.
+ */
+function spread(
+  first: Uint8Array,
+  second: Uint8Array,
+  size: number,
+): Float32Array {
+  const out = new Float32Array(size * size);
+  for (let at = 0; at < first.length; at++) {
+    if (!first[at] && !second[at]) continue;
+    const row = Math.floor(at / size);
+    const col = at % size;
+    for (let dy = -BLUR_PX; dy <= BLUR_PX; dy++) {
+      const y = row + dy;
+      if (y < 0 || y >= size) continue;
+      for (let dx = -BLUR_PX; dx <= BLUR_PX; dx++) {
+        const x = col + dx;
+        if (x < 0 || x >= size) continue;
+        out[y * size + x] = (out[y * size + x] ?? 0) + 1;
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * The shift of the newer flashes that fits the older ones best.
+ * @param older - The older flashes, spread.
+ * @param newer - The newer, spread.
+ * @param size - Width and height.
+ * @param reach - The farthest shift, in pixels east and north.
+ * @param reach.col - Columns.
+ * @param reach.row - Rows.
+ * @returns The shift in pixels and how well it fits (0 to 1).
+ */
+function bestShift(
+  older: Float32Array,
+  newer: Float32Array,
+  size: number,
+  reach: { col: number; row: number },
+): { dx: number; dy: number; fit: number } {
+  const lit: number[] = [];
+  let aa = 0;
+  let bb = 0;
+  for (let at = 0; at < older.length; at++) {
+    const value = older[at] ?? 0;
+    if (value > 0) {
+      lit.push(at);
+      aa += value * value;
+    }
+    bb += (newer[at] ?? 0) ** 2;
+  }
+  let best = { dx: 0, dy: 0, fit: 0 };
+  if (aa === 0 || bb === 0) return best;
+  const norm = Math.sqrt(aa * bb);
+  for (let dy = -reach.row; dy <= reach.row; dy++) {
+    for (let dx = -reach.col; dx <= reach.col; dx++) {
+      if ((dx / reach.col) ** 2 + (dy / reach.row) ** 2 > 1) continue;
+      let ab = 0;
+      for (const at of lit) {
+        const y = Math.floor(at / size) + dy;
+        const x = (at % size) + dx;
+        if (y < 0 || x < 0 || y >= size || x >= size) continue;
+        ab += (older[at] ?? 0) * (newer[y * size + x] ?? 0);
+      }
+      const fit = ab / norm;
+      if (fit > best.fit) best = { dx, dy, fit };
+    }
+  }
+  return best;
+}
+
+function median(values: readonly number[]): number {
+  const sorted = values.toSorted((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2
+    ? (sorted[middle] ?? 0)
+    : ((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2;
+}
+
+/**
+ * How fast the storms go: the flashes of two images together laid on those
+ * of the two images 10 minutes before, at every step of the half hour, the
+ * middle value kept (the flashes flicker, one image alone says little).
+ * @param images - The images, each with its mask and its time.
+ * @returns The speed east and north in km per ms, or null.
+ */
+export function imageDrift(
+  images: readonly LightningSpots[],
+): { east: number; north: number } | null {
+  const masked = images
+    .filter(
+      (one) => one.mask && (one.size ?? 0) > 0 && one.box && one.t != null,
+    )
+    .toSorted((a, b) => (b.t ?? 0) - (a.t ?? 0));
+  const first = masked[0];
+  if (!first?.box || first.size == null || masked.length < 4) return null;
+  const { size, box } = first;
+  const [west, south, east, north] = box;
+  const kmEast =
+    ((east - west) *
+      KM_PER_DEG *
+      Math.cos((((north + south) / 2) * Math.PI) / 180)) /
+    size;
+  const kmNorth = ((north - south) * KM_PER_DEG) / size;
+  const easts: number[] = [];
+  const norths: number[] = [];
+  for (let index = 0; index + 3 < masked.length; index++) {
+    const [b1, b2, a1, a2] = masked.slice(index, index + 4);
+    if (!b1?.mask || !b2?.mask || !a1?.mask || !a2?.mask) continue;
+    if (b1.size !== size || a2.size !== size) continue;
+    const span = ((b1.t ?? 0) + (b2.t ?? 0) - (a1.t ?? 0) - (a2.t ?? 0)) / 2;
+    if (span <= 0) continue;
+    const most = (DRIFT_MOST_KN * KM_PER_NM * span) / 3_600_000;
+    const shift = bestShift(
+      spread(a1.mask, a2.mask, size),
+      spread(b1.mask, b2.mask, size),
+      size,
+      { col: Math.ceil(most / kmEast), row: Math.ceil(most / kmNorth) },
+    );
+    if (shift.fit < LEAST_FIT) continue;
+    easts.push((shift.dx * kmEast) / span);
+    norths.push((-shift.dy * kmNorth) / span);
+  }
+  if (easts.length === 0) return null;
+  return { east: median(easts), north: median(norths) };
 }
 
 /** When the storm is on the boat, as NavIn guesses it. */
@@ -715,7 +888,8 @@ export function lightningReport(
     }
   }
   const newest = images[0]?.nearestKm ?? images[1]?.nearestKm ?? null;
-  const oldest = images.at(-1)?.nearestKm ?? null;
+  // Against the image of 15 minutes before.
+  const oldest = (images[3] ?? images.at(-1))?.nearestKm ?? null;
   const nearer =
     newest != null &&
     (oldest == null ? images.length > 1 : newest < oldest - 5);

@@ -1,8 +1,9 @@
 import { signal } from '@preact/signals-react';
 
 import { uid } from '../../lib/format.ts';
+import { BASIN_NAMES } from '../../model/basins.ts';
 import type { Position } from '../../model/types.ts';
-import { addEntry, state } from '../../state/index.ts';
+import { addEntry, chosenSea, state } from '../../state/index.ts';
 
 import { contextPlace } from './externals.ts';
 import { lakeFix } from './lakeFix.ts';
@@ -117,7 +118,8 @@ export async function readLightning(
   now = Date.now(),
 ): Promise<LightningReport | null> {
   const size = lightningSize(area.km);
-  const times = lightningTimes(now);
+  // The last 35 minutes: the motion of the storms needs them.
+  const times = lightningTimes(now, 8);
   const images = await Promise.all(
     times.map((time) => readPixels(lightningUrl(area, size, time), size)),
   );
@@ -132,6 +134,16 @@ export async function readLightning(
     lat: area.lat,
     lon: area.lon,
   });
+}
+
+/**
+ * The name of where NavIn looks from: the zone chosen with NavIn, else GPS.
+ * @returns GPS, Atlantique, Méditerranée or Lacs.
+ */
+export function lookName(): string {
+  const zone = state.view.zoneSimV.peek();
+  if (!zone) return 'GPS';
+  return zone === 'lac' ? BASIN_NAMES.lac : BASIN_NAMES[chosenSea()];
 }
 
 /**
@@ -181,6 +193,7 @@ export function lightningCheck(quiet = false): Promise<void> {
       })
         .then((report) => {
           if (!report) return;
+          report.placeName = lookName();
           lightningLast.value = report;
           if (report.nearestKm != null) {
             lastFlashAt = Math.max(lastFlashAt, report.at);
@@ -339,7 +352,7 @@ export async function nearestStorm(fresh = false): Promise<NearestStorm> {
             report.bearing,
             report.nearestKm,
           ),
-          report,
+          report: { ...report, placeName: lookName() },
           at: Date.now(),
         };
         break;

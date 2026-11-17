@@ -3,6 +3,7 @@ import { expect, test } from 'vitest';
 import type { LightningSpots } from '../lightning.ts';
 import {
   durationText,
+  imageDrift,
   lightningBox,
   lightningClear,
   lightningClearNoData,
@@ -264,4 +265,37 @@ test('a storm passing by does not come nearer: the approach along the arrow', ()
   expect(report.motion?.towardDeg).toBeCloseTo(0, -1);
   expect(Math.abs(report.motion?.closingKn ?? 99)).toBeLessThan(2);
   expect(lightningEta(report, 70 * MIN)?.etaAt).toBeNull();
+});
+
+test('the drift of the storms: the newest image laid on the oldest', () => {
+  const size = 100;
+  const box: [number, number, number, number] = [6, 46, 7.3, 47];
+  const blob = (row0: number, col0: number) => {
+    const mask = new Uint8Array(size * size);
+    for (let row = row0; row < row0 + 6; row++) {
+      for (let col = col0; col < col0 + 6; col++) mask[row * size + col] = 1;
+    }
+    return mask;
+  };
+  const spotOf = (mask: Uint8Array, t: number): LightningSpots => ({
+    nearestKm: 20,
+    bearing: 90,
+    cells: 36,
+    strong: false,
+    mask,
+    size,
+    box,
+    t,
+  });
+  // Two pixels east and one north every 5 minutes, for 35 minutes.
+  const drift = imageDrift(
+    [0, 1, 2, 3, 4, 5, 6, 7].map((back) =>
+      spotOf(blob(40 + back, 40 - 2 * back), (35 - 5 * back) * MIN),
+    ),
+  );
+  const kmEast = (1.3 * 111.32 * Math.cos((46.5 * Math.PI) / 180)) / size;
+  const kmNorth = 111.32 / size;
+  expect((drift?.east ?? 0) * 5 * MIN).toBeCloseTo(2 * kmEast, 3);
+  expect((drift?.north ?? 0) * 5 * MIN).toBeCloseTo(kmNorth, 3);
+  expect(imageDrift([spotOf(blob(50, 50), 0)])).toBeNull();
 });

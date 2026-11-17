@@ -13509,3 +13509,33 @@ main#view .site-link {
   top: -16px;
   transform: translate(-50%, -100%);
 }
+/* the place looked from, the red vector cased, the labels of the arrows */
+.leaflet-overlay-pane path.lightning-origin {
+  stroke: #ffd400;
+  fill: #1a1a1a;
+  fill-opacity: 0.85;
+}
+.leaflet-overlay-pane path.lightning-move-case {
+  stroke: rgba(255, 255, 255, 0.85);
+  fill: none;
+}
+.lightning-tag.origin {
+  left: 12px;
+  top: -12px;
+  border-color: #1a1a1a;
+}
+.lightning-tag.aim {
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+}
+:root[data-theme='night'] .leaflet-overlay-pane path.lightning-origin {
+  stroke: #ff3b2a;
+  fill: #200;
+}
+:root[data-theme='night'] .leaflet-overlay-pane path.lightning-move-case {
+  stroke: rgba(40, 0, 0, 0.85);
+}
+:root[data-theme='night'] .lightning-tag.origin {
+  border-color: #b30000;
+}
