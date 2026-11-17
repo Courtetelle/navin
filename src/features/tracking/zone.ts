@@ -63,14 +63,24 @@ export function zoneSet(zone: string): void {
 }
 
 /**
- * A short touch on NavIn in one of the three zones (not on the GPS): the map
- * comes back on the place chosen in Zones, while NavIn unrolls its menu.
+ * A short touch on NavIn, while its menu unrolls: the map comes back on the
+ * place chosen in Zones (Morges, Portrieux, …). On the GPS, NavIn first goes
+ * back to the zone where the GPS puts the boat: NavIn and the boat arrow
+ * bring the map in turn on the place of the zone and on the boat.
  */
 export function zoneTap(): void {
-  const zone = state.view.zoneSimV.peek();
-  if (zone !== 'lac' && zone !== 'mer') return;
   if (state.view.currentView.peek() !== 'tracker') return;
-  trkZoneRecenter(zone);
+  const zone = state.view.zoneSimV.peek();
+  if (zone === 'lac' || zone === 'mer') {
+    // Where the map was moved with the fingers is forgotten: NavIn looks
+    // again from the place of the zone.
+    setZoneSim(zone);
+    trkZoneRecenter(zone);
+    return;
+  }
+  const here = currentBasin();
+  if (here !== 'lac') setSeaBasin(here);
+  zoneSet(here === 'lac' ? 'lac' : 'mer');
 }
 
 /**

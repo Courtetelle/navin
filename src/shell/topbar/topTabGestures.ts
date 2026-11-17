@@ -3,12 +3,7 @@ import { railsScreen } from '../../lib/useWide.ts';
 import { state, toast } from '../../state/index.ts';
 import { menuButtonPress } from '../menuOwner.ts';
 import { navBack } from '../navbar/navActions.ts';
-import {
-  closeNavinRow,
-  navinRowChosen,
-  navinRowOpen,
-  toggleNavinRow,
-} from '../navinRow.ts';
+import { closeNavinRow, navinRowChosen, toggleNavinRow } from '../navinRow.ts';
 import { go } from '../router.ts';
 
 import { TAB_ORDER, tabDisplays, topMenuDomainActions } from './tabDisplays.ts';
@@ -105,9 +100,9 @@ export function tabClick(key: TopTabKey, active: boolean): void {
       go('tracker');
       return;
     }
-    // In a zone of NavIn, the row unrolls and the map comes back on the
-    // place of the zone.
-    if (!navinRowOpen.peek()) topMenuDomainActions().zoneTap();
+    // Each touch brings the map back on the place of the zone (from the
+    // GPS, back to the zone where the boat is), the row rolling in or out.
+    topMenuDomainActions().zoneTap();
     toggleNavinRow();
     return;
   }
@@ -120,6 +115,9 @@ export function tabClick(key: TopTabKey, active: boolean): void {
     return;
   }
   const onItsPage = active && state.view.currentView.value !== 'settings';
+  // NavIn: its menu unrolls and the map comes back on the place of the zone
+  // (from the GPS, back to the zone where the boat is).
+  if (key === 'tracker') topMenuDomainActions().zoneTap();
   // NavIn only bringing back the map (tablet): a scale at each touch.
   if (key === 'tracker' && menuItems(key).length < 2) {
     for (const other of TAB_ORDER) if (other !== key) resetTab(other);
@@ -134,9 +132,6 @@ export function tabClick(key: TopTabKey, active: boolean): void {
     return;
   }
   for (const other of TAB_ORDER) if (other !== key) resetTab(other);
-  // In a zone of NavIn, its menu unrolls and the map comes back on the
-  // place of the zone.
-  if (key === 'tracker') topMenuDomainActions().zoneTap();
   const count = menuItems(key).length;
   if (count < 2) {
     go(key);
