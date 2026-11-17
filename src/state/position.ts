@@ -27,6 +27,30 @@ export function lastKnownPos(): TimedPosition | null {
 }
 
 /**
+ * The zone of NavIn of a place: the lakes inland, else the Mediterranean or
+ * the Atlantic.
+ * @param place - The place.
+ * @param place.lat - Latitude.
+ * @param place.lon - Longitude.
+ * @returns `lac`, `med` or `atl`.
+ */
+export function basinAt(place: { lat: number; lon: number }): Basin {
+  return inInland(place) ? 'lac' : seaAt(place.lat, place.lon);
+}
+
+/**
+ * The zone where the GPS puts the boat, unless the SOS pages show another
+ * place.
+ * @returns The zone, or null when the GPS has not given one.
+ */
+function gpsBasinNow(): Basin | null {
+  if (view.sosPos.value || (view.sosSim.value && view.sosLive.value)) {
+    return null;
+  }
+  return view.gpsBasin.value;
+}
+
+/**
  * Navigation zone, lake or sea: simulation first, then a fresh position (12 h),
  * the open cruise, any position, and finally the kind of cruises in the index (legacy `navZone`).
  * @returns `'lac'` or `'mer'`.
@@ -34,6 +58,8 @@ export function lastKnownPos(): TimedPosition | null {
 export function navZone(): 'lac' | 'mer' {
   const simulated = view.zoneSimV.value;
   if (simulated === 'lac' || simulated === 'mer') return simulated;
+  const gps = gpsBasinNow();
+  if (gps) return gps === 'lac' ? 'lac' : 'mer';
   const position = lastKnownPos();
   const fresh =
     position &&
@@ -63,6 +89,8 @@ export function currentBasin(): Basin {
   const zone = view.zoneSimV.value;
   if (zone === 'lac') return 'lac';
   if (zone === 'mer') return chosenSea();
+  const gps = gpsBasinNow();
+  if (gps) return gps;
   if (navZone() === 'lac') return 'lac';
   const place = lastKnownPos();
   return place ? seaAt(place.lat, place.lon) : chosenSea();

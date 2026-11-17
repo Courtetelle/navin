@@ -7,10 +7,11 @@ import type {
 } from 'leaflet';
 
 import { fmtTime } from '../../lib/format.ts';
-import { state } from '../../state/index.ts';
+import { basinAt, state } from '../../state/index.ts';
 
 import { glideBoat, stopGlide } from './boatFollow.ts';
 import type { LatLngPair } from './constants.ts';
+import { followGpsZone } from './gpsZone.ts';
 import { leaflet } from './leaflet.ts';
 import { mapBearing, orientMap } from './mapOrientation.ts';
 import { smoothLine } from './smoothLine.ts';
@@ -118,6 +119,7 @@ export function lastBoatSeen(): { lat: number; lon: number } | null {
  */
 export function trkFix(fix: TrackerFix): void {
   boatSeen = { lat: fix.lat, lon: fix.lon, at: Date.now() };
+  followGpsZone(basinAt(fix));
   const handle = tracker.current;
   const { map } = handle ?? {};
   if (!handle || !map || state.view.currentView.value !== 'tracker') return;

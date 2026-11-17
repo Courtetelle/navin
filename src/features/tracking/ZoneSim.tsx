@@ -104,7 +104,8 @@ export function ZoneSim() {
         Lacs, chacun sur le lieu choisi plus bas. Tout suit la zone choisie :
         heure (UTC d’abord en mer, Zone Time sur le lac), touche VHF /
         Téléphone, SOS, VHF, météo, rubriques et cartes. La flèche du bateau
-        ramène tout sur la position GPS.
+        ramène tout sur la position GPS : la zone où le GPS place le bateau
+        (Lacs, Atlantique ou Méditerranée) devient alors la zone active.
       </HelpText>
     </section>
   );

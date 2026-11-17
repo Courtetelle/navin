@@ -1,5 +1,6 @@
 import { signal } from '@preact/signals-react';
 
+import type { Basin } from '../model/basins.ts';
 import type { Fix } from '../model/types.ts';
 import { store } from '../storage/store.ts';
 
@@ -132,6 +133,11 @@ export const view = {
   simGps: signal<boolean>(false),
   /** Live position of the map menus. */
   myPos: signal<LivePosition | null>(null),
+  /**
+   * The zone of NavIn where the GPS puts the boat (the last position shown
+   * on the map, recording or not): Lacs, Atlantique or Méditerranée.
+   */
+  gpsBasin: signal<Basin | null>(null),
 };
 
 /**
@@ -169,4 +175,5 @@ export function resetView(): void {
   view.trackBuf.value = null;
   view.simGps.value = false;
   view.myPos.value = null;
+  view.gpsBasin.value = null;
 }
