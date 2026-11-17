@@ -13509,13 +13509,10 @@ main#view .site-link {
   top: -16px;
   transform: translate(-50%, -100%);
 }
-/* the place looked from, the red vector cased, the labels of the arrows */
+/* the red vector cased */
 .leaflet-overlay-pane path.lightning-move-case {
   stroke: rgba(255, 255, 255, 0.85);
   fill: none;
-}
-.lightning-tag.origin {
-  border-color: #1a1a1a;
 }
 /* my position (or the zone): a point above the flashes */
 .lightning-me {
@@ -13540,9 +13537,6 @@ main#view .site-link {
 }
 :root[data-theme='night'] .leaflet-overlay-pane path.lightning-move-case {
   stroke: rgba(40, 0, 0, 0.85);
-}
-:root[data-theme='night'] .lightning-tag.origin {
-  border-color: #b30000;
 }
 /* 2026-11-17 : la règle des boutons « Actualiser » : touchés, ils passent au
    jaune, leur flèche tourne, « Actualisation en cours… » ; puis « ✓ Actualisé » */

@@ -148,7 +148,7 @@ const TAG_GAP = 16;
  * @param layer - Where it is drawn.
  * @param at - Where.
  * @param html - What it says.
- * @param kind - Its class: the place, the aim, the motion.
+ * @param kind - Its class: the aim, the motion.
  * @param side - The bearing of the side it stands on; none: centred above.
  */
 function tag(
@@ -204,7 +204,7 @@ function aimSide(bearing: number, toward: number | null): number {
  */
 function drawAim(layer: LayerGroup, report: LightningReport): void {
   const L = leaflet();
-  const { place, nearestKm, bearing, motion, placeName } = report;
+  const { place, nearestKm, bearing, motion } = report;
   if (!place || nearestKm == null || bearing == null) return;
   const storm = pointAt(place.lat, place.lon, bearing, nearestKm);
   const line: Array<[number, number]> = [
@@ -222,8 +222,8 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
     dashArray: '10 8',
     interactive: false,
   }).addTo(layer);
-  // Where NavIn looks from (my position): a point above the flashes and
-  // everything, its name on the side away from the storm.
+  // Where NavIn looks from (my position or the zone): a point above the
+  // flashes and everything, the start of the yellow arrow; no label.
   L.marker([place.lat, place.lon], {
     icon: L.divIcon({
       className: 'lightning-me-wrap',
@@ -234,7 +234,6 @@ function drawAim(layer: LayerGroup, report: LightningReport): void {
     keyboard: false,
     zIndexOffset: 900,
   }).addTo(layer);
-  tag(layer, place, `📍 ${placeName ?? 'GPS'}`, 'origin', bearing + 180);
   L.marker([storm.lat, storm.lon], {
     icon: L.divIcon({
       className: 'lightning-head-wrap',
