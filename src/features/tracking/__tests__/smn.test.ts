@@ -134,7 +134,7 @@ test('the measure is the closest in time of the closest station, in knots', asyn
     at: Date.UTC(2026, 6, 15, 8, 10),
     station: 'Proche',
     km: expect.closeTo(0.765, 2) as number,
-    src: 'Mesure MeteoSwiss, station Proche (1 km), 10:10',
+    src: 'Mesure MeteoSwiss, station Proche (0,4 NM), 10:10',
   });
 });
 

@@ -108,7 +108,7 @@ describe('alert texts', () => {
 
   it('says a station measured the wind', () => {
     const note = windAlertNote(top, { n: 2, src: 'stations' });
-    expect(note).toContain('mesuré à Dinard (station Météo-France, 6 km)');
+    expect(note).toContain('mesuré à Dinard (station Météo-France, 3 NM)');
   });
 
   it('says loudly a forecast is not a measurement', () => {
@@ -142,7 +142,7 @@ describe('Météo-France key check', () => {
       coast: null,
     });
     expect(text).toContain(
-      '✅ Clé Météo-France valide · 1100 stations · Dinard (6 km)',
+      '✅ Clé Météo-France valide · 1100 stations · Dinard (3 NM)',
     );
   });
 

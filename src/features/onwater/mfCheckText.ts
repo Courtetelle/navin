@@ -1,4 +1,5 @@
 import { fmtTime } from '../../lib/format.ts';
+import { nmText } from '../../lib/geo.ts';
 import { windTxt } from '../../lib/wind.ts';
 
 import type { MfCheck } from './coastStations.ts';
@@ -49,6 +50,6 @@ function windText(reading: WindReading): string {
     reading.gust == null
       ? ', pas de rafales'
       : `, rafales ${windTxt(reading.gust)}`;
-  const km = reading.km == null ? '' : ` (${Math.round(reading.km)} km)`;
+  const km = reading.km == null ? '' : ` (${nmText(reading.km)})`;
   return `${reading.name}${km} : ${windTxt(reading.avg)}${gust}, mesuré à ${fmtTime(new Date(reading.t))}`;
 }

@@ -1,5 +1,5 @@
 import { fmtTime } from '../../lib/format.ts';
-import { distKm } from '../../lib/geo.ts';
+import { distKm, nmText } from '../../lib/geo.ts';
 import { store } from '../../storage/store.ts';
 
 /** A SwissMetNet station: abbreviation, name, latitude, longitude, altitude. */
@@ -221,6 +221,6 @@ function measureOf(row: SmnRow, station: string, km: number): SmnMeasure {
     at: row.t,
     station,
     km,
-    src: `Mesure MeteoSwiss, station ${station} (${Math.round(km)} km), ${fmtTime(new Date(row.t))}`,
+    src: `Mesure MeteoSwiss, station ${station} (${nmText(km)}), ${fmtTime(new Date(row.t))}`,
   };
 }

@@ -34,7 +34,7 @@ test('the published alert reads like the station card of LiveMétéo', () => {
   expect(rows['Température de l’air']).toBe('9,4 °C');
   expect(rows['Pression (niveau de la mer)']).toBe('1013 hPa');
   expect(rows.Source).toBe('MeteoSwiss');
-  expect(rows.Distance).toBe('6 km');
+  expect(rows.Distance).toBe('3 NM');
   expect(rows.Position).toBeTruthy();
 });
 

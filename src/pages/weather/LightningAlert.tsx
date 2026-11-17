@@ -56,7 +56,7 @@ async function toNearestStorm(): Promise<void> {
   toast('Recherche de l’orage le plus proche…');
   const { place, storm } = await nearestStorm(true);
   if (!storm) {
-    toast('Aucun éclair à moins de 400 km');
+    toast('Aucun éclair à moins de 216 NM');
     askMapArea({ ...place, km: 30 });
   } else {
     askMapArea(stormView(place, storm));
@@ -87,7 +87,7 @@ function NearestStormBlock() {
   if (!found) {
     lines = [busy ? 'Recherche de l’orage le plus proche…' : ''];
   } else if (!found.storm || found.report?.nearestKm == null) {
-    lines = ['Aucun éclair à moins de 400 km (216 NM).'];
+    lines = ['Aucun éclair à moins de 216 NM.'];
   } else {
     const { report, storm } = found;
     const bearing = report.bearing ?? 0;
@@ -176,7 +176,7 @@ export function LightningAlert() {
         éclair en 5 minutes, rouge foncé pour 20 et plus. Pour entendre et voir
         l’alerte : Paramétrages › Tests. « Voir sur la carte » montre l’orage le
         plus proche de la position GPS (ou de la zone choisie avec NavIn),
-        cherché jusqu’à 400 km. Au-dessus des boutons : sa distance, sa
+        cherché jusqu’à 216 NM. Au-dessus des boutons : sa distance, sa
         position, sa vitesse de rapprochement et la durée jusqu’à vous,
         calculées sur les images des 15 dernières minutes ; le retard de l’image
         est compté, la distance est estimée pour maintenant. Une seconde alerte

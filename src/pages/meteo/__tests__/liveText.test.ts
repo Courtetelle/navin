@@ -35,7 +35,7 @@ describe('mfTallyText', () => {
         { near: 0, read: 0, wind: 0, noWind: 0, refused: {}, failed: 0 },
         30,
       ),
-    ).toBe('Météo-France : aucune station à moins de 30 km');
+    ).toBe('Météo-France : aucune station à moins de 16 NM');
     const text = mfTallyText(
       {
         near: 30,

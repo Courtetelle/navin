@@ -98,7 +98,7 @@ test('on a lake the recent measure of a station wins over the model', async () =
   expect(weather.tws).toBe(10);
   expect(weather.waveDir).toBeNull();
   expect(weather.waveH).toBeNull();
-  expect(weather.src).toBe('Mesure MeteoSwiss, station Lac (0 km), 10:30');
+  expect(weather.src).toBe('Mesure MeteoSwiss, station Lac (0,0 NM), 10:30');
 });
 
 test('on a lake an entry older than 30 hours uses the model, without marine request', async () => {

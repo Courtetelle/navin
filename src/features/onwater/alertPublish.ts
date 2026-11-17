@@ -1,6 +1,6 @@
 import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { fmtDotDateTime } from '../../lib/format.ts';
-import { fmtPos } from '../../lib/geo.ts';
+import { fmtPos, nmText } from '../../lib/geo.ts';
 import { bft, compassPoint, windTxt } from '../../lib/wind.ts';
 import { inInland } from '../../model/contacts.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
@@ -94,9 +94,9 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
     forecast && reading.zoneKm
       ? [
           'Zone considérée',
-          `cercle de ${reading.zoneKm} km autour du point du modèle`,
+          `cercle de ${nmText(reading.zoneKm)} autour du point du modèle`,
         ]
-      : ['Distance', reading.km == null ? '—' : `${Math.round(reading.km)} km`],
+      : ['Distance', reading.km == null ? '—' : nmText(reading.km)],
   );
   if (reading.lat != null && reading.lon != null) {
     rows.push(['Position', fmtPos({ lat: reading.lat, lon: reading.lon })]);

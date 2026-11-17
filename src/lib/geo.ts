@@ -103,6 +103,18 @@ export function distKm(
 }
 
 /**
+ * A distance given in km, said in nautical miles: `12 NM`, `0,6 NM` under 1.
+ * @param km - Kilometres.
+ * @returns The text.
+ */
+export function nmText(km: number): string {
+  const nm = km / 1.852;
+  return nm < 1
+    ? `${nm.toFixed(1).replace('.', ',')} NM`
+    : `${Math.round(nm)} NM`;
+}
+
+/**
  * Coordinate in degrees and decimal minutes, e.g. `46°30,000' N` (legacy `fmtCoord`).
  * @param value - Latitude or longitude.
  * @param isLat - Latitude (N/S, 2 digits) or longitude (E/W, 3 digits).

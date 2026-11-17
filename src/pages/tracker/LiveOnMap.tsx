@@ -17,6 +17,7 @@ import {
 } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { nmText } from '../../lib/geo.ts';
 import { go } from '../../shell/router.ts';
 import { alertStation } from '../meteo/alertStation.ts';
 import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
@@ -58,7 +59,7 @@ function popupHtml(station: LiveStation): string {
   const gust =
     station.gust == null ? '' : `, rafales ${Math.round(station.gust)}`;
   const from = station.dir == null ? '' : ` · du ${compassPoint(station.dir)}`;
-  return `<b>${escapeText(station.name)}</b><br>${Math.round(station.avg)} nd${gust}${from}<br>${escapeText(station.net)} · ${Math.round(station.km ?? 0)} km · ${ageText(station.t, Date.now())}<br><small>Appui long sur la pastille : tout le détail</small><br><button type="button" class="btn live-pop-close">Fermer</button>`;
+  return `<b>${escapeText(station.name)}</b><br>${Math.round(station.avg)} nd${gust}${from}<br>${escapeText(station.net)} · ${nmText(station.km ?? 0)} · ${ageText(station.t, Date.now())}<br><small>Appui long sur la pastille : tout le détail</small><br><button type="button" class="btn live-pop-close">Fermer</button>`;
 }
 
 /**

@@ -6,6 +6,7 @@ import type { LiveStation } from '../../features/onwater/index.ts';
 import { metarRows, windValue } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { fmtTime } from '../../lib/format.ts';
+import { nmText } from '../../lib/geo.ts';
 import { bft, windTxt } from '../../lib/wind.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 
@@ -74,7 +75,7 @@ export function StationCard({
       'Réseau',
       station.amateur ? `${station.net} · station amateur` : station.net,
     ],
-    ['Distance', station.km == null ? '—' : `${Math.round(station.km)} km`],
+    ['Distance', station.km == null ? '—' : nmText(station.km)],
   );
   return (
     <section className="live-card" aria-live="polite">

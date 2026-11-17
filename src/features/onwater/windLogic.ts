@@ -1,4 +1,5 @@
 import { fr, pad } from '../../lib/format.ts';
+import { nmText } from '../../lib/geo.ts';
 import { bft, windTxt } from '../../lib/wind.ts';
 import { DOUGLAS } from '../../model/lists.ts';
 import type { Settings } from '../../model/settings.ts';
@@ -249,8 +250,8 @@ export function windAlertNote(top: WindReading, meta: WindMeta): string {
   const lowered = meta.bias ? `, seuils abaissés de ${meta.bias} nd` : '';
   const where =
     meta.src === 'model'
-      ? `PRÉVISION ${top.name} à la position du bateau, pas une mesure (aucune station à moins de ${meta.radius ?? 30} km${lowered})`
-      : `mesuré à ${top.name} (station ${top.net ?? 'MeteoSwiss'}${top.km == null ? '' : `, ${Math.round(top.km)} km`})`;
+      ? `PRÉVISION ${top.name} à la position du bateau, pas une mesure (aucune station à moins de ${nmText(meta.radius ?? 30)}${lowered})`
+      : `mesuré à ${top.name} (station ${top.net ?? 'MeteoSwiss'}${top.km == null ? '' : `, ${nmText(top.km)}`})`;
   const sea = meta.waveH == null ? '' : ` ; ${seaTxt(meta)}`; // never set on a lake
   return `${windTxt(top.avg)}, rafales ${gust}${direction} ${where}${sea}`;
 }

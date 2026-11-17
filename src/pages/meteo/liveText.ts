@@ -4,6 +4,7 @@ import {
   windColors,
   windValue,
 } from '../../features/onwater/index.ts';
+import { nmText } from '../../lib/geo.ts';
 import { bft } from '../../lib/wind.ts';
 
 export { compassPoint } from '../../lib/wind.ts';
@@ -60,10 +61,10 @@ export function forceText(knots: number): string {
  */
 export function mfTallyText(tally: MfTally, radius: number): string {
   if (tally.near === 0) {
-    return `Météo-France : aucune station à moins de ${radius} km`;
+    return `Météo-France : aucune station à moins de ${nmText(radius)}`;
   }
   const parts = [
-    `${tally.near} station${tally.near > 1 ? 's' : ''} à moins de ${radius} km`,
+    `${tally.near} station${tally.near > 1 ? 's' : ''} à moins de ${nmText(radius)}`,
   ];
   if (tally.read < tally.near) parts.push(`${tally.read} plus proches lues`);
   parts.push(`${tally.wind} avec vent`);

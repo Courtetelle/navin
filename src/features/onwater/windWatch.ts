@@ -1,6 +1,7 @@
 import { signal } from '@preact/signals-react';
 
 import { dayKey, uid } from '../../lib/format.ts';
+import { nmText } from '../../lib/geo.ts';
 import { bft } from '../../lib/wind.ts';
 import type { Position } from '../../model/types.ts';
 import { go } from '../../shell/router.ts';
@@ -260,7 +261,7 @@ function showAlertPopup(
     },
     ...(forecast
       ? {
-          note: `⚠️ Aucune station de mesure à moins de ${meta.radius ?? config.radius} km : vent calculé par un modèle de prévision. Le vent réel peut être plus fort ou plus faible.`,
+          note: `⚠️ Aucune station de mesure à moins de ${nmText(meta.radius ?? config.radius)} : vent calculé par un modèle de prévision. Le vent réel peut être plus fort ou plus faible.`,
         }
       : {}),
   });

@@ -6,6 +6,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { WindsockIcon } from '../../components/shared/WindsockIcon.tsx';
 import { buzz } from '../../lib/dom.ts';
 import { dayKey, fmtTime } from '../../lib/format.ts';
+import { nmText } from '../../lib/geo.ts';
 import { windTxt } from '../../lib/wind.ts';
 import { BFT_KN } from '../../model/lists.ts';
 import { ensureDay, getDay, state } from '../../state/index.ts';
@@ -100,7 +101,7 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
         Italie, Puertos del Estado et SOCIB en Espagne et aux Baléares, IPMA au
         Portugal, DMI au Danemark, SMHI en Suède, FMI en Finlande, AEMET et Met
         Office avec leur clé, aéroports (METAR) et bouées NOAA par le relais.
-        Sans station à moins de 30 km, modèle de prévision le plus fin de la
+        Sans station à moins de 16 NM, modèle de prévision le plus fin de la
         région à la position du bateau, signalé « PRÉVISION » dans l’alerte.
         Deux bips et deux flashs de couleur avec le vent exact (nœuds et
         Beaufort) à chaque nouveau degré Beaufort dès 4 Bf (11 nd), de plus en
@@ -190,7 +191,7 @@ function WatchLine({
   const time = fmtTime(new Date(watch.top.t));
   if (watch.src === 'stations') {
     const nets = (watch.nets ?? []).join(' et ');
-    const head = `Mesure, le plus fort autour (${watch.n} station${watch.n > 1 ? 's' : ''} ${nets} à moins de ${watch.radius ?? config.radius} km) : `;
+    const head = `Mesure, le plus fort autour (${watch.n} station${watch.n > 1 ? 's' : ''} ${nets} à moins de ${nmText(watch.radius ?? config.radius)}) : `;
     return (
       <BoxHelp
         keep={keep}
@@ -205,7 +206,7 @@ function WatchLine({
   if (watch.src === 'model') {
     const names = watch.names ? watch.names.join(' et ') : watch.top.name;
     const strongest = watch.n > 1 ? ', le plus fort retenu' : '';
-    const head = `PRÉVISION, pas une mesure : aucune station à moins de ${watch.radius ?? config.radius} km. Modèle à la position du bateau (${names}${strongest}) : `;
+    const head = `PRÉVISION, pas une mesure : aucune station à moins de ${nmText(watch.radius ?? config.radius)}. Modèle à la position du bateau (${names}${strongest}) : `;
     const lowered = watch.bias
       ? ` Seuils abaissés de ${watch.bias} nd (${watch.region}) : les modèles sous-estiment les accélérations entre les îles.`
       : '';
@@ -217,7 +218,7 @@ function WatchLine({
       </BoxHelp>
     );
   }
-  const head = `Le plus fort autour (${watch.n} station${watch.n > 1 ? 's' : ''} MeteoSwiss à moins de ${config.radius} km) : `;
+  const head = `Le plus fort autour (${watch.n} station${watch.n > 1 ? 's' : ''} MeteoSwiss à moins de ${nmText(config.radius)}) : `;
   return (
     <BoxHelp keep={keep} text={`${head}${wind} à ${watch.top.name}, ${time}.`}>
       {tr(head, { help: true })}
