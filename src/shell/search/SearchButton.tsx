@@ -12,6 +12,8 @@ import { lightBand } from '../lightBand.ts';
 import { go } from '../router.ts';
 import { toggleThemeFromSearch } from '../theme.ts';
 
+import type { ScreenSpot } from './screenSearch.ts';
+import { screenFound, screenSpots, showSpot } from './screenSearch.ts';
 import type { SearchHit } from './searchHits.ts';
 import { searchContext, searchHits } from './searchHits.ts';
 import type { PlaceEntry } from './searchIndex.ts';
@@ -163,11 +165,17 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
   const [context] = useState(() =>
     searchContext(state.view.currentView.peek()),
   );
+  // What the screen shows, read once as the window opens over it.
+  const [spots] = useState<ScreenSpot[]>(() =>
+    context.screen ? screenSpots() : [],
+  );
   useEffect(() => {
     input.current?.focus();
   }, []);
   const asksOnline =
-    query.trim().length >= MIN_ONLINE_LETTERS && navigator.onLine;
+    context.online &&
+    query.trim().length >= MIN_ONLINE_LETTERS &&
+    navigator.onLine;
   useEffect(() => {
     if (!asksOnline) return undefined;
     const controller = new AbortController();
@@ -183,10 +191,15 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
   }, [query, asksOnline]);
   const online = answer?.query === query ? answer.places : [];
   const waiting = asksOnline && answer?.query !== query;
+  const onScreen = screenFound(query, spots);
   const here = searchHits(query, context);
   const pick = (hit: SearchHit) => {
     onClose();
     openHit(hit);
+  };
+  const pickSpot = (spot: ScreenSpot) => {
+    onClose();
+    showSpot(spot.element);
   };
   const onlineHits = online.map((place): SearchHit => ({
     kind: 'place',
@@ -196,7 +209,10 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
     place,
   }));
   const typed = query.trim().length > 0;
-  const empty = typed && !waiting && here.length + onlineHits.length === 0;
+  const empty =
+    typed &&
+    !waiting &&
+    here.length + onlineHits.length + onScreen.length === 0;
   return createPortal(
     <div
       className="ck-ask search-modal no-print"
@@ -217,10 +233,30 @@ function SearchWindow({ onClose }: { onClose: () => void }) {
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
             if (event.key !== 'Enter') return;
+            const spot = onScreen[0]?.spot;
             const first = here[0] ?? onlineHits[0];
-            if (first) pick(first);
+            if (spot) pickSpot(spot);
+            else if (first) pick(first);
           }}
         />
+        {onScreen.length > 0 ? (
+          <>
+            <h3 className="search-group">Sur cette page</h3>
+            {onScreen.map(({ spot, label }, index) => (
+              <button
+                type="button"
+                className="search-hit"
+                // The same words may show twice on a screen.
+                // eslint-disable-next-line react/no-array-index-key
+                key={index}
+                data-hit="screen"
+                onClick={() => pickSpot(spot)}
+              >
+                {label}
+              </button>
+            ))}
+          </>
+        ) : null}
         <HitGroup
           title={context.title}
           hits={context.online ? [...here, ...onlineHits] : here}

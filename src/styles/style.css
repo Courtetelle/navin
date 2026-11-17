@@ -11851,6 +11851,16 @@ body.trk-mode .trk-full {
 :root[data-theme='night'] .swipe-row.search-found {
   outline-color: #ff4040;
 }
+/* A place of the screen found by the magnifier: lit a moment. */
+.search-spot {
+  outline: 4px solid #ffd400;
+  outline-offset: 2px;
+  border-radius: 10px;
+  transition: outline-color 0.3s;
+}
+:root[data-theme='night'] .search-spot {
+  outline-color: #ff4040;
+}
 
 /* T upright: the figures of the track fold to the left edge. One tab, at the
    top of the column: folded, against the left edge (› opens); open, against

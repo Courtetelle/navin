@@ -1,5 +1,11 @@
+import { allLakeTracks } from '../../features/map/trackStats.ts';
 import { textOf } from '../../lib/format.ts';
-import { crewSetName, memberName, state } from '../../state/index.ts';
+import {
+  crewSetName,
+  memberName,
+  sitesShown,
+  state,
+} from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 import type { RecordLine } from './recordText.ts';
@@ -26,7 +32,8 @@ type HitKind =
   | 'trace'
   | 'soslog'
   | 'cruise'
-  | 'ckbase';
+  | 'ckbase'
+  | 'site';
 
 /** One suggestion of the search. */
 export interface SearchHit {
@@ -54,6 +61,7 @@ const ICONS: Record<HitKind, string> = {
   soslog: '🆘',
   cruise: '⛵',
   ckbase: '✅',
+  site: '🌐',
 };
 
 /** What the search of a screen looks for first. */
@@ -65,6 +73,11 @@ export interface SearchContext {
   kinds: readonly HitKind[];
   /** Places are also asked to the network. */
   online: boolean;
+  /**
+   * Everything the screen shows is searched too (its bands, fields, lines).
+   * @default false
+   */
+  screen?: boolean;
 }
 
 /** The other lists: their title and what they hold. */
@@ -73,7 +86,11 @@ const LISTS: Readonly<Record<string, { title: string; kind: HitKind }>> = {
   soslogs: { title: 'les logs SOS', kind: 'soslog' },
   cruises: { title: 'Mes navigations', kind: 'cruise' },
   ckbases: { title: 'les check-lists', kind: 'ckbase' },
+  sites: { title: 'Sites Internet', kind: 'site' },
 };
+
+/** Menus: only the functions of the app are searched there. */
+const MENU_VIEWS = new Set(['more', 'prep', 'prepmenu', 'dock', 'nonav']);
 
 const MAP_VIEWS = new Set(['tracker', 'map', 'cartes', 'meteo', 'weather']);
 
@@ -133,11 +150,21 @@ export function searchContext(view: string): SearchContext {
       online: true,
     };
   }
+  if (MENU_VIEWS.has(view)) {
+    return {
+      title: 'Fonctions',
+      placeholder: 'Une fonction, un nom, un lieu…',
+      kinds: ['function'],
+      online: false,
+    };
+  }
+  // Any other screen: what it shows first, then the functions of the app.
   return {
     title: 'Fonctions',
-    placeholder: 'Une fonction, un nom, un lieu…',
+    placeholder: 'Recherche dans cette page',
     kinds: ['function'],
     online: false,
+    screen: true,
   };
 }
 
@@ -166,7 +193,39 @@ function hitsOf(kind: HitKind, query: string): SearchHit[] {
       }),
     );
   }
-  if (kind === 'trace' || kind === 'cruise') {
+  if (kind === 'site') {
+    return inRecords(
+      query,
+      sitesShown().filter((site) => !site.hidden),
+      (site) => [
+        { label: 'Adresse', value: site.url },
+        { label: '', value: site.where },
+      ],
+      (site) => site.label,
+    ).map(([site, where]) => ({
+      kind,
+      key: `w-${site.id}`,
+      label: shown(icon, site.label, where),
+      id: site.id,
+      view: 'sites',
+    }));
+  }
+  if (kind === 'trace') {
+    // A trace is found by its own name, as its band shows it.
+    return inRecords(
+      query,
+      allLakeTracks(),
+      (track) => anyLines(track.cruise),
+      (track) => track.name,
+    ).map(([track, where]) => ({
+      kind,
+      key: `trace-${track.id}`,
+      label: shown(icon, track.name, where),
+      id: track.id,
+      view: 'traces',
+    }));
+  }
+  if (kind === 'cruise') {
     return inRecords(
       query,
       state.data.index.value,
@@ -177,7 +236,7 @@ function hitsOf(kind: HitKind, query: string): SearchHit[] {
       key: `${kind}-${meta.id}`,
       label: shown(icon, textOf(meta.name) || 'Navigation', where),
       id: meta.id,
-      view: kind === 'trace' ? 'traces' : 'cruises',
+      view: 'cruises',
     }));
   }
   if (kind === 'soslog') {
