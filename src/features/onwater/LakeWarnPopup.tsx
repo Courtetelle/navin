@@ -6,6 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { go } from '../../shell/router.ts';
+import { state } from '../../state/index.ts';
 
 import { lakeWarnPop } from './lakeWarnPop.ts';
 import { lightOf, whenText } from './lakeWarnings.ts';
@@ -28,7 +29,10 @@ export function LakeWarnPopup() {
   useSignals();
   // One bubble at a time: this one waits until the wind and lightning ones
   // are closed.
-  const pop = windPopup.value || lightningPop.value ? null : lakeWarnPop.value;
+  // In a sea zone (Atlantique, Méditerranée) no warning of the lakes.
+  const atSea = state.view.zoneSimV.value === 'mer';
+  const pop =
+    windPopup.value || lightningPop.value || atSea ? null : lakeWarnPop.value;
   if (!pop) return null;
   const { warnings, test } = pop;
   const strongest = warnings[0];

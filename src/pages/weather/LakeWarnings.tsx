@@ -6,6 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { RefreshButton } from '../../components/shared/RefreshButton.tsx';
 import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
 import { askMapArea } from '../../features/map/pendingArea.ts';
 import type { LakeWarnSettings } from '../../features/onwater/lakeWarnWatch.ts';
@@ -140,17 +141,7 @@ export function LakeWarnings() {
         </>
       ) : null}
       <ButtonRow className="row">
-        <Button
-          className="btn"
-          data-lakewarn="read"
-          disabled={busy}
-          onClick={() => {
-            buzz();
-            read();
-          }}
-        >
-          {tr('↻ Actualiser maintenant')}
-        </Button>
+        <RefreshButton data-lakewarn="read" busy={busy} onRefresh={read} />
       </ButtonRow>
       {at > 0 ? (
         <p className="nav-hint">

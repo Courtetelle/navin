@@ -108,6 +108,15 @@ function showPop(pop: LakeWarnPop): void {
 }
 
 /**
+ * NavIn is in a sea zone (Atlantique, Méditerranée): the warning lights of
+ * the lakes are not for the boat, wherever the GPS is.
+ * @returns True at sea.
+ */
+export function atSea(): boolean {
+  return state.view.zoneSimV.peek() === 'mer';
+}
+
+/**
  * Read now, and sound the alert for a warning newly lit on the lake of the
  * boat (or of the zone chosen with NavIn): the beeps, the bubble, a line in
  * the logbook of an open cruise.
@@ -116,7 +125,7 @@ export async function lakeWarnCheck(): Promise<void> {
   if (!navigator.onLine) return;
   const { warnings } = await readLakeWarnings();
   const lit = litWarnings(warnings, Date.now());
-  if (lit.length === 0 || !lakeWarnOn()) return;
+  if (lit.length === 0 || !lakeWarnOn() || atSea()) return;
   // The GPS only: the part of the Léman where the boat is.
   lakeFix((position) => {
     if (!position) return;

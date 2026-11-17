@@ -152,6 +152,23 @@ async function belowSettings(page: Page): Promise<string[]> {
   });
 }
 
+/**
+ * The rule of the « Actualiser » buttons: every one is the shared button,
+ * whose look says the refresh is running once touched.
+ * @param page - The page shown.
+ * @returns The « Actualiser » buttons that are not.
+ */
+async function plainRefresh(page: Page): Promise<string[]> {
+  return page.evaluate(() =>
+    [...document.querySelectorAll('main#view button')]
+      .filter((button) =>
+        /Actualis|^↻/u.test((button.textContent ?? '').trim()),
+      )
+      .filter((button) => !button.classList.contains('refresh-btn'))
+      .map((button) => (button.textContent ?? '').trim().slice(0, 24)),
+  );
+}
+
 // data and the settings wait behind their own tab (X and T): it is touched
 // until they show.
 async function showRow(page: Page): Promise<void> {
@@ -894,6 +911,9 @@ async function layoutGaps(page: Page, theme: string): Promise<void> {
     for (const below of await belowSettings(page)) {
       tight.push(`${where}: « ${below} » below the way to Paramétrages`);
     }
+    for (const plain of await plainRefresh(page)) {
+      tight.push(`${where}: « ${plain} » without the look of a refresh`);
+    }
   };
   /* eslint-disable no-await-in-loop -- one page after the other */
   for (const entry of ['', 'forecast', 'lightning', 'check']) {
@@ -1000,6 +1020,14 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
     (await page.locator('[data-lightning="map"]').count()) === 1 &&
       (await page.locator('[data-lightning="settings"]').count()) === 1 &&
       (await page.locator('[data-lightning-radius]').count()) === 0,
+  );
+  // The rule of the « Actualiser » buttons: touched, the look « en cours ».
+  await page.locator('[data-lightning="look"]').click();
+  await page.waitForTimeout(150);
+  check(
+    theme,
+    'Météo › Alerte foudre: « Actualiser maintenant » touched shows the refresh running',
+    (await page.locator('[data-lightning="look"].refreshing').count()) === 1,
   );
   const lightningTight = await tightButtons(page);
   check(

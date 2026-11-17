@@ -13539,3 +13539,37 @@ main#view .site-link {
 :root[data-theme='night'] .lightning-tag.origin {
   border-color: #b30000;
 }
+/* 2026-11-17 : la règle des boutons « Actualiser » : touchés, ils passent au
+   jaune, leur flèche tourne, « Actualisation en cours… » ; puis « ✓ Actualisé » */
+.btn.refresh-btn.refreshing,
+.btn.refresh-btn.refreshing:disabled {
+  opacity: 1;
+  background: #ffd400;
+  border-color: #c9a800;
+  color: #1a1a1a;
+}
+.btn.refresh-btn.refreshed {
+  background: #1f8a3a;
+  border-color: #166a2c;
+  color: #fff;
+}
+.refresh-spin {
+  display: inline-block;
+  animation: refresh-spin 0.9s linear infinite;
+}
+@keyframes refresh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+:root[data-theme='night'] .btn.refresh-btn.refreshing,
+:root[data-theme='night'] .btn.refresh-btn.refreshing:disabled {
+  background: #5a0000;
+  border-color: #ff3b2a;
+  color: #ff7a6a;
+}
+:root[data-theme='night'] .btn.refresh-btn.refreshed {
+  background: #2a0000;
+  border-color: #ff3b2a;
+  color: #ff3b2a;
+}

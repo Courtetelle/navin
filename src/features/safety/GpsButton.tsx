@@ -22,6 +22,10 @@ export function GpsButton({ onPosition, children, ...rest }: GpsButtonProps) {
   return (
     <Button
       {...rest}
+      // The rule of the « Actualiser » buttons: the look « en cours ».
+      className={`${rest.className ?? 'btn'} refresh-btn${searching ? ' refreshing' : ''}`}
+      data-refresh={searching ? 'running' : 'idle'}
+      aria-busy={searching}
       disabled={searching}
       onClick={() => {
         buzz();
@@ -47,7 +51,16 @@ export function GpsButton({ onPosition, children, ...rest }: GpsButtonProps) {
         );
       }}
     >
-      {searching ? '⏳ Recherche GPS…' : children}
+      {searching ? (
+        <>
+          <span className="refresh-spin" aria-hidden="true">
+            ↻
+          </span>{' '}
+          Recherche GPS en cours…
+        </>
+      ) : (
+        children
+      )}
     </Button>
   );
 }

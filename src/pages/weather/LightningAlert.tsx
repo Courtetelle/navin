@@ -5,6 +5,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { RefreshButton } from '../../components/shared/RefreshButton.tsx';
 import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { askMapArea } from '../../features/map/pendingArea.ts';
@@ -137,18 +138,11 @@ export function LightningAlert() {
         </Button>
       </ButtonRow>
       <ButtonRow className="row">
-        <Button
-          className="btn"
+        <RefreshButton
           data-lightning="look"
-          disabled={busy || nearestBusy.value}
-          onClick={() => {
-            buzz();
-            void lightningCheck(true);
-            void nearestStorm();
-          }}
-        >
-          {tr('↻ Actualiser maintenant')}
-        </Button>
+          busy={busy || nearestBusy.value}
+          onRefresh={() => Promise.all([lightningCheck(true), nearestStorm()])}
+        />
       </ButtonRow>
       <HelpText>
         NavIn regarde toutes les 5 minutes les éclairs vus par le satellite

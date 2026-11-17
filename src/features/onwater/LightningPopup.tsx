@@ -6,6 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { go } from '../../shell/router.ts';
+import { state } from '../../state/index.ts';
 import { askMapArea } from '../map/pendingArea.ts';
 
 import { lakeWarnPop } from './lakeWarnPop.ts';
@@ -138,7 +139,7 @@ export function LightningPopup() {
           <Button className="btn primary lp-map" noUiEdit>
             {translate('🗺 Voir sur la carte')}
           </Button>
-          {lakeWarnPop.value ? (
+          {lakeWarnPop.value && state.view.zoneSimV.value !== 'mer' ? (
             <div className="wp-next">
               {translate('▼ Une autre alerte suit : toucher pour la lire')}
             </div>

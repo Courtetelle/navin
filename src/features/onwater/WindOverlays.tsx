@@ -8,6 +8,7 @@ import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
+import { state } from '../../state/index.ts';
 
 import { publishAlert } from './alertPublish.ts';
 import { lakeWarnPop } from './lakeWarnPop.ts';
@@ -148,7 +149,8 @@ export function WindPopup() {
             />
           </div>
         ) : null}
-        {lightningPop.value || lakeWarnPop.value ? (
+        {lightningPop.value ||
+        (lakeWarnPop.value && state.view.zoneSimV.value !== 'mer') ? (
           <div className="wp-next">
             {translate('▼ Une autre alerte suit : toucher pour la lire')}
           </div>

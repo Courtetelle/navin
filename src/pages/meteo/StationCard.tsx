@@ -1,5 +1,5 @@
-import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { RefreshButton } from '../../components/shared/RefreshButton.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { publishAlert } from '../../features/onwater/alertPublish.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
@@ -127,9 +127,7 @@ export function StationCard({
         </table>
         <SeaBlock lat={station.lat} lon={station.lon} />
         <ButtonRow className="row">
-          <Button className="btn" onClick={onRefresh} disabled={loading}>
-            {tr(loading ? 'Actualisation…' : '↻ Actualiser maintenant')}
-          </Button>
+          <RefreshButton busy={loading} onRefresh={onRefresh} />
         </ButtonRow>
         <p className="keep-help">
           {tr('Mesures relues toutes les 2 min tant que cet écran est ouvert.')}
