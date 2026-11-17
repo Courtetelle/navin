@@ -3,7 +3,12 @@ import { railsScreen } from '../../lib/useWide.ts';
 import { state, toast } from '../../state/index.ts';
 import { menuButtonPress } from '../menuOwner.ts';
 import { navBack } from '../navbar/navActions.ts';
-import { closeNavinRow, navinRowChosen, toggleNavinRow } from '../navinRow.ts';
+import {
+  closeNavinRow,
+  navinRowChosen,
+  navinRowOpen,
+  toggleNavinRow,
+} from '../navinRow.ts';
 import { go } from '../router.ts';
 
 import { TAB_ORDER, tabDisplays, topMenuDomainActions } from './tabDisplays.ts';
@@ -100,6 +105,9 @@ export function tabClick(key: TopTabKey, active: boolean): void {
       go('tracker');
       return;
     }
+    // In a zone of NavIn, the row unrolls and the map comes back on the
+    // place of the zone.
+    if (!navinRowOpen.peek()) topMenuDomainActions().zoneTap();
     toggleNavinRow();
     return;
   }
@@ -126,6 +134,9 @@ export function tabClick(key: TopTabKey, active: boolean): void {
     return;
   }
   for (const other of TAB_ORDER) if (other !== key) resetTab(other);
+  // In a zone of NavIn, its menu unrolls and the map comes back on the
+  // place of the zone.
+  if (key === 'tracker') topMenuDomainActions().zoneTap();
   const count = menuItems(key).length;
   if (count < 2) {
     go(key);

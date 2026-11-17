@@ -12,7 +12,7 @@ import {
   stopTracking,
 } from './liveTracking.ts';
 import { afterStop } from './trackerLink.ts';
-import { cycleZone } from './zone.ts';
+import { cycleZone, zoneTap } from './zone.ts';
 
 hooks.stopTracking = stopTracking;
 registerBootHooks({ autoResumeTrip });
@@ -20,6 +20,7 @@ setTopMenuActions({
   stopTracking: () => stopTracking(true),
   afterStop,
   cycleZone,
+  zoneTap,
 });
 addNavigationListener(({ phase }) => {
   if (phase === 'before') gpxImportPlan.value = null;

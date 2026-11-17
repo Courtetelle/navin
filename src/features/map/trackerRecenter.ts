@@ -1,6 +1,5 @@
 import { isLake, state } from '../../state/index.ts';
 
-import { inSwissArea } from './constants.ts';
 import { lakeCenter, lakeZoom } from './lakeCenter.ts';
 import { isMapLive } from './mapExtras.ts';
 import { SEA_ZOOM, seaCenter } from './seaCenter.ts';
@@ -23,8 +22,10 @@ export function simLakeMode(): boolean {
 }
 
 /**
- * Recentre the open tracker after a zone change: simulated sea on the place
- * chosen in the settings (Saint-Malo by default), inland waters on the lake chosen in the settings, never following the boat
+ * Recentre the open tracker on a zone: a sea chosen with NavIn on its place
+ * chosen in Zones (Saint-Malo by default), the lakes on the lake chosen
+ * there, never following the boat (a zone of NavIn is not the GPS: only the
+ * boat arrow brings the map back on the boat); the GPS on the boat
  * (legacy `trkZoneRecenter`).
  * @param zone - `mer`, `lac`, or `auto`.
  */
@@ -32,11 +33,9 @@ export function trkZoneRecenter(zone: string): void {
   const map = tracker.current?.map;
   if (!map || !isMapLive(map)) return;
   const fix = state.view.lastFix.value;
-  const swissFix = inSwissArea(fix);
   if (zone === 'mer') {
-    setFollow(Boolean(fix && !swissFix));
-    if (swissFix || !fix) map.setView(seaCenter(), SEA_ZOOM);
-    else map.setView([fix.lat, fix.lon], 14);
+    setFollow(false);
+    map.setView(seaCenter(), SEA_ZOOM);
   } else if (zone === 'lac') {
     // The lake chosen with NavIn, even with a GPS position in Switzerland:
     // only the boat button brings the map back on the boat.

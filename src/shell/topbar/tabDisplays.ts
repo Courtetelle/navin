@@ -50,6 +50,11 @@ interface TopMenuDomainActions {
    * 3 NM, or on the map the next scale.
    */
   scaleTap: (onMap: boolean) => void;
+  /**
+   * A short touch on NavIn in a zone chosen with NavIn: the map back on the
+   * place chosen in Zones.
+   */
+  zoneTap: () => void;
 }
 
 const noop = () => {
@@ -66,6 +71,7 @@ export const domainActions: TopMenuDomainActions = {
   cycleZone: noop,
   sosTap: noop,
   scaleTap: noop,
+  zoneTap: noop,
 };
 
 export function fitted(

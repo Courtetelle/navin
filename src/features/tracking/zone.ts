@@ -63,6 +63,17 @@ export function zoneSet(zone: string): void {
 }
 
 /**
+ * A short touch on NavIn in one of the three zones (not on the GPS): the map
+ * comes back on the place chosen in Zones, while NavIn unrolls its menu.
+ */
+export function zoneTap(): void {
+  const zone = state.view.zoneSimV.peek();
+  if (zone !== 'lac' && zone !== 'mer') return;
+  if (state.view.currentView.peek() !== 'tracker') return;
+  trkZoneRecenter(zone);
+}
+
+/**
  * Next zone of the zone button of NavIn, of the top menu and of the settings
  * button: Atlantique, Méditerranée, Lacs.
  */
