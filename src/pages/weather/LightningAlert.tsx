@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -12,19 +12,25 @@ import type { LightningSettings } from '../../features/onwater/lightning.ts';
 import {
   LIGHTNING_RADII_NM,
   lightningAlertOn,
+  lightningMotionLines,
   lightningOnMap,
   lightningRadiusNm,
   lightningText,
+  nmOf,
+  pointOf,
   stormView,
 } from '../../features/onwater/lightning.ts';
 import {
   lightningBusy,
   lightningCheck,
   lightningLast,
+  lightningNearest,
+  nearestBusy,
   nearestStorm,
 } from '../../features/onwater/lightningWatch.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { fmtPos } from '../../lib/geo.ts';
 import { exitOrigin } from '../../shell/exitOrigin.ts';
 import { go } from '../../shell/router.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
@@ -48,7 +54,7 @@ function change(patch: LightningSettings): void {
 async function toNearestStorm(): Promise<void> {
   buzz();
   toast('Recherche de l’orage le plus proche…');
-  const { place, storm } = await nearestStorm();
+  const { place, storm } = await nearestStorm(true);
   if (!storm) {
     toast('Aucun éclair à moins de 400 km');
     askMapArea({ ...place, km: 30 });
@@ -56,6 +62,51 @@ async function toNearestStorm(): Promise<void> {
     askMapArea(stormView(place, storm));
   }
   go('tracker');
+}
+
+/** The guess of where the storm is now is said again this often. */
+const TICK_MS = 60_000;
+
+/**
+ * The nearest storm, wherever it is: its distance, where, its position, how
+ * fast it comes nearer and when it is on the boat (the delay of the image
+ * counted).
+ * @returns The block.
+ */
+function NearestStormBlock() {
+  useSignals();
+  const tr = useTr();
+  const found = lightningNearest.value;
+  const busy = nearestBusy.value;
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), TICK_MS);
+    return () => clearInterval(timer);
+  }, []);
+  let lines: string[];
+  if (!found) {
+    lines = [busy ? 'Recherche de l’orage le plus proche…' : ''];
+  } else if (!found.storm || found.report?.nearestKm == null) {
+    lines = ['Aucun éclair à moins de 400 km (216 NM).'];
+  } else {
+    const { report, storm } = found;
+    const bearing = report.bearing ?? 0;
+    lines = [
+      `⚡ Orage le plus proche : ${nmOf(report.nearestKm ?? 0)} NM au ${pointOf(bearing)} (${String(Math.round(bearing)).padStart(3, '0')}°)`,
+      `Position : ${fmtPos(storm)}`,
+      ...lightningMotionLines(report, now, true),
+    ];
+    if (!report.motion) {
+      lines.push('Vitesse et durée jusqu’à vous : pas encore assez d’images.');
+    }
+  }
+  return (
+    <div className="lightning-nearest" data-lightning="nearest" role="status">
+      {lines.filter(Boolean).map((line) => (
+        <p key={line}>{tr(line)}</p>
+      ))}
+    </div>
+  );
 }
 
 /**
@@ -74,6 +125,7 @@ export function LightningAlert() {
   const busy = lightningBusy.value;
   useEffect(() => {
     if (!lightningLast.peek()) void lightningCheck(true);
+    void nearestStorm(true);
   }, []);
   return (
     <div className="lightning-alert">
@@ -84,7 +136,8 @@ export function LightningAlert() {
             ? tr(lightningText(last, radiusNm))
             : tr('Pas encore d’image satellite lue.')}
       </p>
-      <ButtonRow className="row c2">
+      <NearestStormBlock />
+      <ButtonRow className="row">
         <Button
           className="btn"
           data-lightning="map"
@@ -94,16 +147,19 @@ export function LightningAlert() {
         >
           {tr('🗺 Voir sur la carte')}
         </Button>
+      </ButtonRow>
+      <ButtonRow className="row">
         <Button
           className="btn"
           data-lightning="look"
-          disabled={busy}
+          disabled={busy || nearestBusy.value}
           onClick={() => {
             buzz();
             void lightningCheck(true);
+            void nearestStorm();
           }}
         >
-          {tr('↻ Regarder maintenant')}
+          {tr('↻ Actualiser maintenant')}
         </Button>
       </ButtonRow>
       <HelpText>
@@ -120,11 +176,20 @@ export function LightningAlert() {
         éclair en 5 minutes, rouge foncé pour 20 et plus. Pour entendre et voir
         l’alerte : Paramétrages › Tests. « Voir sur la carte » montre l’orage le
         plus proche de la position GPS (ou de la zone choisie avec NavIn),
-        cherché jusqu’à 400 km.
+        cherché jusqu’à 400 km. Au-dessus des boutons : sa distance, sa
+        position, sa vitesse de rapprochement et la durée jusqu’à vous,
+        calculées sur les images des 15 dernières minutes ; le retard de l’image
+        est compté, la distance est estimée pour maintenant. Une seconde alerte
+        sonne quand l’orage passe sous la moitié de votre distance d’alerte, et
+        une fin d’alerte quand il n’y a plus d’éclairs depuis 30 minutes. Sur la
+        carte, une flèche relie le bateau à l’orage le plus proche, avec sa
+        distance et son déplacement.
       </HelpText>
+      <SiteLink id="blitzortung" />
       <Button
         className="btn big wx-entry wx-keys-link"
         data-lightning="settings"
+        data-settings-exit
         aria-label={tr(
           'Paramétrage des alertes foudre : sortir vers Paramétrages',
         )}
@@ -148,7 +213,6 @@ export function LightningAlert() {
           </small>
         </span>
       </Button>
-      <SiteLink id="blitzortung" />
     </div>
   );
 }

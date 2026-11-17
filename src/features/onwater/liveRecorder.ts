@@ -7,8 +7,10 @@ import { sendToRelay } from './relayRecord.ts';
 import type { WindReading } from './windTypes.ts';
 import { windConfig } from './windWatch.ts';
 
-/** Radius of the stations recorded around each point, in km (120 km across). */
-export const RECORD_RADIUS = 60;
+/** Radius of the stations recorded around each point, in NM. */
+export const RECORD_RADIUS_NM = 120;
+/** The same in km (the relay reads up to 250 km). */
+export const RECORD_RADIUS = Math.round(RECORD_RADIUS_NM * 1.852);
 
 /** Météo-France stations read around each point, at most. */
 const MF_MOST = 12;
@@ -80,7 +82,7 @@ function currentPoints(): RecordPoint[] {
 let current: Promise<unknown> | null = null;
 
 /**
- * Read every station within 60 km (120 km across) of the GPS position and
+ * Read every station within 120 NM (222 km) of the GPS position and
  * of the three zones of NavIn, and keep all their measurements (wind,
  * gusts, direction, air, pressure; liveStations keeps them), so that
  * LiveMétéo and the alerts have the past of the stations where the boat is

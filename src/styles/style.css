@@ -13415,3 +13415,84 @@ main#view .site-link {
   animation: menuHere 0.7s ease-in-out 3;
   opacity: 0;
 }
+/* 2026-11-17 : la flèche du bateau à l'orage le plus proche, son déplacement */
+.leaflet-overlay-pane path.lightning-aim-case {
+  stroke: rgba(40, 30, 0, 0.75);
+  fill: none;
+}
+.leaflet-overlay-pane path.lightning-aim-line {
+  stroke: #ffd400;
+  fill: none;
+}
+.leaflet-overlay-pane path.lightning-move-line {
+  stroke: #e00016;
+  fill: none;
+}
+.lightning-head {
+  position: absolute;
+  left: -11px;
+  top: -11px;
+  width: 22px;
+  height: 22px;
+  overflow: visible;
+}
+.lightning-head path {
+  stroke: rgba(40, 30, 0, 0.85);
+  stroke-width: 1.5;
+}
+.lightning-head.aim path {
+  fill: #ffd400;
+}
+.lightning-head.move path {
+  fill: #e00016;
+}
+.lightning-tag {
+  position: absolute;
+  left: 14px;
+  top: -12px;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid #ffd400;
+  color: #1a1a1a;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  pointer-events: none;
+}
+:root[data-theme='night'] .lightning-tag {
+  background: rgba(20, 0, 0, 0.88);
+  border-color: #b30000;
+  color: #ff5a4a;
+}
+:root[data-theme='night'] .leaflet-overlay-pane path.lightning-aim-line,
+:root[data-theme='night'] .lightning-head.aim path {
+  stroke: #ff3b2a;
+  fill: #ff3b2a;
+}
+:root[data-theme='night'] .leaflet-overlay-pane path.lightning-aim-line {
+  fill: none;
+}
+/* the nearest storm, above the buttons of Alerte foudre */
+.lightning-nearest {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 2px solid #ffd400;
+  background: rgba(255, 212, 0, 0.1);
+}
+.lightning-nearest p {
+  margin: 2px 0;
+}
+.lightning-nearest p:first-child {
+  font-weight: 700;
+}
+:root[data-theme='night'] .lightning-nearest {
+  border-color: #b30000;
+  background: rgba(179, 0, 0, 0.12);
+}
+.lightning-pop .lp-motion {
+  margin-top: 8px;
+  font-size: 0.95em;
+}

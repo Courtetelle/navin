@@ -15,7 +15,9 @@ import type {
 } from './lightning.ts';
 import {
   lightningAlertOn,
+  lightningClear,
   lightningDue,
+  lightningMotionLines,
   lightningRadiusNm,
   lightningReport,
   lightningSize,
@@ -42,7 +44,10 @@ export const lightningBusy = signal(false);
  */
 function showPop(pop: LightningPop): void {
   showOverlays();
-  lightningPop.value = pop;
+  lightningPop.value = {
+    ...pop,
+    lines: lightningMotionLines(pop.report, Date.now()),
+  };
 }
 
 /** The images are read this often while the alert is on. */
@@ -50,6 +55,8 @@ const EVERY_MS = 5 * 60_000;
 
 let timer: ReturnType<typeof setInterval> | undefined;
 let lastSignal: LightningSignal | null = null;
+/** The time of the last image with flashes inside the circle, epoch ms. */
+let lastFlashAt = 0;
 
 /**
  * The lightning settings.
@@ -114,11 +121,16 @@ export async function readLightning(
     times.map((time) => readPixels(lightningUrl(area, size, time), size)),
   );
   const spots: LightningSpots[] = [];
-  for (const pixels of images) {
-    if (pixels) spots.push(lightningSpots(pixels, size, area));
+  for (const [index, pixels] of images.entries()) {
+    if (pixels) {
+      spots.push({ ...lightningSpots(pixels, size, area), t: times[index] });
+    }
   }
   if (spots.length === 0) return null;
-  return lightningReport(spots, times[0] ?? now, now);
+  return lightningReport(spots, times[0] ?? now, now, {
+    lat: area.lat,
+    lon: area.lon,
+  });
 }
 
 /**
@@ -145,7 +157,7 @@ export function lookPlace(done: (position: Position | null) => void): void {
 /**
  * Look now: read the images, keep the report, and sound the alert when due
  * (a beep, a bubble, a line in the logbook of an open cruise).
- * @param quiet - Only read, no alert (the button « Regarder maintenant »).
+ * @param quiet - Only read, no alert (the button « Actualiser maintenant »).
  * @returns Resolves when done.
  */
 export function lightningCheck(quiet = false): Promise<void> {
@@ -169,28 +181,41 @@ export function lightningCheck(quiet = false): Promise<void> {
         .then((report) => {
           if (!report) return;
           lightningLast.value = report;
-          if (report.nearestKm == null) {
-            lastSignal = null;
-            return;
+          if (report.nearestKm != null) {
+            lastFlashAt = Math.max(lastFlashAt, report.at);
           }
           if (quiet || !lightningAlertOn(lightningSettings())) return;
-          const now = Date.now();
-          if (!lightningDue(report, lastSignal, now)) return;
-          lastSignal = { km: report.nearestKm, at: now };
-          const text = lightningText(report, radiusNm);
-          playLightning();
-          showPop({
-            report,
-            radiusNm,
-            place: { lat: position.lat, lon: position.lon },
-          });
-          if (state.data.cruise.peek()) {
-            addEntry({
-              id: uid(),
-              t: new Date().toISOString(),
-              v: { evt: ['Alerte foudre'], note: text },
-            });
+          const place = { lat: position.lat, lon: position.lon };
+          // No flash for 30 minutes after an alert: it is over.
+          if (lightningClear(report, lastSignal, lastFlashAt)) {
+            lastSignal = null;
+            playLightning();
+            showPop({ report, radiusNm, place, clear: true });
+            logLightning(
+              'Fin d’alerte foudre',
+              `Plus d’éclairs à moins de ${radiusNm} NM depuis 30 min.`,
+            );
+            return;
           }
+          if (report.nearestKm == null) return;
+          const now = Date.now();
+          const radiusKm = nmToKm(radiusNm);
+          const reason = lightningDue(report, lastSignal, now, radiusKm);
+          if (!reason) return;
+          lastSignal = {
+            km: report.nearestKm,
+            at: now,
+            half: report.nearestKm < radiusKm / 2,
+          };
+          playLightning();
+          showPop({ report, radiusNm, place, reason });
+          logLightning(
+            reason === 'half' ? 'Alerte foudre (2e)' : 'Alerte foudre',
+            [
+              lightningText(report, radiusNm),
+              ...lightningMotionLines(report, now),
+            ].join(' '),
+          );
         })
         .catch(() => undefined)
         .finally(() => {
@@ -201,11 +226,26 @@ export function lightningCheck(quiet = false): Promise<void> {
   });
 }
 
+/**
+ * A line in the logbook of the open cruise.
+ * @param event - The event.
+ * @param note - What it says.
+ */
+function logLightning(event: string, note: string): void {
+  if (!state.data.cruise.peek()) return;
+  addEntry({
+    id: uid(),
+    t: new Date().toISOString(),
+    v: { evt: [event], note },
+  });
+}
+
 /** (Re)start the look every five minutes, or stop it when the alert is off. */
 export function lightningWatchStart(): void {
   clearInterval(timer);
   timer = undefined;
   lastSignal = null;
+  lastFlashAt = 0;
   if (!lightningAlertOn(lightningSettings())) return;
   void lightningCheck();
   timer = setInterval(() => void lightningCheck(), EVERY_MS);
@@ -229,41 +269,84 @@ export function lightningTest(): void {
       nearer: true,
       at: now - 10 * 60_000,
       readAt: now,
+      motion: { towardDeg: 45, speedKn: 22, closingKn: 20, kmAt: 22 },
+      place: { lat, lon },
     },
     radiusNm: lightningRadiusNm(lightningSettings()),
     place: { lat, lon },
     test: true,
+    reason: 'first',
   });
 }
 
 /** Farther and farther, the nearest flashes are looked for this far, km. */
 const NEAREST_KM = [60, 150, 400] as const;
 
+/** The nearest storm found, wherever it is (Météo › Alerte foudre). */
+export interface NearestStorm {
+  place: { lat: number; lon: number };
+  /** The nearest flashes, null when none within 400 km. */
+  storm: { lat: number; lon: number } | null;
+  /** What the images show around it, null without storm. */
+  report: LightningReport | null;
+  /** When it was looked for, epoch ms. */
+  at: number;
+}
+
+/** The last nearest storm looked for. */
+export const lightningNearest = signal<NearestStorm | null>(null);
+/** A nearest storm looked for now. */
+export const nearestBusy = signal(false);
+/** A nearest storm looked for this recently is not looked for again. */
+const NEAREST_FRESH_MS = 4 * 60_000;
+
 /**
  * The nearest flashes of the last quarter of an hour from the GPS, or from
- * the zone chosen with NavIn: looked for farther and farther.
- * @returns The place looked from and the nearest flashes (null when none
- *   within 400 km, or the images could not be read).
+ * the zone chosen with NavIn: looked for farther and farther, from the
+ * distance of the alert to 400 km.
+ * @param fresh - A look of the last 4 minutes is kept.
+ * @returns The place looked from, the nearest flashes and their report.
  */
-export async function nearestStorm(): Promise<{
-  place: { lat: number; lon: number };
-  storm: { lat: number; lon: number } | null;
-}> {
-  const place = await new Promise<{ lat: number; lon: number }>((resolve) => {
-    lookPlace((position) => {
-      const { lat, lon } = position ?? contextPlace();
-      resolve({ lat, lon });
+export async function nearestStorm(fresh = false): Promise<NearestStorm> {
+  const kept = lightningNearest.peek();
+  if (fresh && kept && Date.now() - kept.at < NEAREST_FRESH_MS) return kept;
+  nearestBusy.value = true;
+  try {
+    const place = await new Promise<{ lat: number; lon: number }>((resolve) => {
+      lookPlace((position) => {
+        const { lat, lon } = position ?? contextPlace();
+        resolve({ lat, lon });
+      });
     });
-  });
-  for (const km of NEAREST_KM) {
-    // eslint-disable-next-line no-await-in-loop -- farther only when nothing nearer
-    const report = await readLightning({ ...place, km });
-    if (report?.nearestKm != null && report.bearing != null) {
-      return {
-        place,
-        storm: pointAt(place.lat, place.lon, report.bearing, report.nearestKm),
-      };
+    const alertKm = nmToKm(lightningRadiusNm(lightningSettings()));
+    const radii = [alertKm, ...NEAREST_KM.filter((km) => km > alertKm * 1.2)];
+    let found: NearestStorm = {
+      place,
+      storm: null,
+      report: null,
+      at: Date.now(),
+    };
+    for (const km of radii) {
+      // eslint-disable-next-line no-await-in-loop -- farther only when nothing nearer
+      const report = await readLightning({ ...place, km });
+      if (report?.nearestKm != null && report.bearing != null) {
+        found = {
+          place,
+          storm: pointAt(
+            place.lat,
+            place.lon,
+            report.bearing,
+            report.nearestKm,
+          ),
+          report,
+          at: Date.now(),
+        };
+        break;
+      }
     }
+    lightningNearest.value = found;
+    return found;
+  } finally {
+    nearestBusy.value = false;
   }
-  return { place, storm: null };
 }

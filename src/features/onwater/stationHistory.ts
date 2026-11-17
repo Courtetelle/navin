@@ -58,8 +58,8 @@ const FLAT_KN = 3;
 const KMH_TO_KN = 1 / 1.852;
 const MS_TO_KN = 3600 / 1852;
 const OWM_ARCHIVE = 'https://api.pioupiou.fr/v1/archive/';
-/** Stations kept at most: every station within 60 km, with room to move. */
-const SEEN_STATIONS = 400;
+/** Stations kept at most: every station within 120 NM, with room to move. */
+const SEEN_STATIONS = 2000;
 const SEEN_POINTS = Math.ceil(KEEP_MS / KEEP_STEP_MS) + 10;
 
 /** A station whose past is asked. */

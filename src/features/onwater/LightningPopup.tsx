@@ -9,12 +9,11 @@ import { go } from '../../shell/router.ts';
 import { askMapArea } from '../map/pendingArea.ts';
 
 import { lakeWarnPop } from './lakeWarnPop.ts';
-import { nmToKm, pointAt, stormView } from './lightning.ts';
+import { nmOf, nmToKm, pointAt, pointOf, stormView } from './lightning.ts';
 import type { LightningPop } from './lightningPop.ts';
 import { lightningPop } from './lightningPop.ts';
 import { windPopup } from './windOverlayState.ts';
 
-const POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
 /** The screen flashes three times, as lightning. */
 const FLASHES = 3;
 const FLASH_MS = 160;
@@ -70,11 +69,14 @@ export function LightningPopup() {
     };
   }, [pop]);
   if (!pop) return null;
-  const { report, test, radiusNm } = pop;
-  const nm = Math.max(1, Math.round((report.nearestKm ?? 0) / 1.852));
-  const point =
-    report.bearing == null ? '' : POINTS[Math.round(report.bearing / 45) % 8];
+  const { report, test, radiusNm, reason, clear, lines } = pop;
+  const nm = nmOf(report.nearestKm ?? 0);
+  const point = report.bearing == null ? '' : pointOf(report.bearing);
   const hour = new Date(report.at).toISOString().slice(11, 16);
+  const motion = clear ? [] : (lines ?? []);
+  const title = clear
+    ? 'FIN DE L’ALERTE FOUDRE'
+    : `${reason === 'half' ? '2e ALERTE · ' : ''}ORAGE à ${nm} NM`;
   return createPortal(
     <>
       <div
@@ -94,23 +96,44 @@ export function LightningPopup() {
       >
         <div className="wp-box">
           {test ? <div className="lp-test">{translate('TEST')}</div> : null}
-          <div className="wp-big">⚡ {translate(`ORAGE à ${nm} NM`)}</div>
-          {point ? (
-            <div className="wp-name">{translate(`direction ${point}`)}</div>
-          ) : null}
-          <div className="wp-other">
-            {translate(
-              [
-                report.strong ? 'orage actif' : 'éclairs isolés',
-                report.nearer ? 'SE RAPPROCHE' : '',
-              ]
-                .filter(Boolean)
-                .join(' · '),
-            )}
-          </div>
-          <div className="wp-sea">
-            {translate(`dans le rayon de ${radiusNm} NM autour de vous`)}
-          </div>
+          <div className="wp-big">⚡ {translate(title)}</div>
+          {clear ? (
+            <div className="wp-sea">
+              {translate(
+                `Plus d’éclairs à moins de ${radiusNm} NM depuis 30 min.`,
+              )}
+            </div>
+          ) : (
+            <>
+              {point ? (
+                <div className="wp-name">{translate(`direction ${point}`)}</div>
+              ) : null}
+              <div className="wp-other">
+                {translate(
+                  [
+                    report.strong ? 'orage actif' : 'éclairs isolés',
+                    report.nearer ? 'SE RAPPROCHE' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' · '),
+                )}
+              </div>
+              <div className="wp-sea">
+                {translate(
+                  reason === 'half'
+                    ? `sous la moitié de votre distance d’alerte (${radiusNm / 2} NM)`
+                    : `dans le rayon de ${radiusNm} NM autour de vous`,
+                )}
+              </div>
+              {motion.length > 0 ? (
+                <div className="lp-motion" data-lightning="motion">
+                  {motion.map((line) => (
+                    <div key={line}>{translate(line)}</div>
+                  ))}
+                </div>
+              ) : null}
+            </>
+          )}
           <div className="wp-note">
             {translate(
               `Satellite EUMETSAT MTG, image de ${hour} UTC (environ 10 min de retard). Aide indicative, pas une alerte officielle.`,

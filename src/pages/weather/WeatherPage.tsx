@@ -267,6 +267,7 @@ function WeatherMenu() {
         <Button
           className="btn big wx-entry wx-keys-link"
           data-wx="settings"
+          data-settings-exit
           aria-label={tr('Paramétrages : sortir du menu Météo')}
           onClick={openSettings}
         >

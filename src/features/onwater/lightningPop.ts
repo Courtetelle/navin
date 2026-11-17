@@ -1,6 +1,6 @@
 import { signal } from '@preact/signals-react';
 
-import type { LightningReport } from './lightning.ts';
+import type { LightningReason, LightningReport } from './lightning.ts';
 
 /** What the big bubble of the lightning alert shows. */
 export interface LightningPop {
@@ -11,6 +11,12 @@ export interface LightningPop {
   place: { lat: number; lon: number };
   /** A test: said so on the bubble. */
   test?: boolean;
+  /** Why it sounds: the second alert says it is under half the distance. */
+  reason?: LightningReason;
+  /** The end of the alert: no flash for 30 minutes. */
+  clear?: boolean;
+  /** How the storm moves and when it is on the boat, at the alert. */
+  lines?: string[];
 }
 
 /** The bubble of the lightning alert, shown until touched. */

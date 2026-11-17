@@ -2,15 +2,20 @@ import { expect, test } from 'vitest';
 
 import type { LightningSpots } from '../lightning.ts';
 import {
+  durationText,
   lightningBox,
+  lightningClear,
   lightningClearNoData,
   lightningDue,
+  lightningEta,
+  lightningMotionLines,
   lightningRadiusNm,
   lightningReport,
   lightningSpots,
   lightningText,
   lightningTimes,
   lightningUrl,
+  nmToKm,
   pointAt,
   stormView,
 } from '../lightning.ts';
@@ -105,15 +110,113 @@ test('a storm coming nearer is said so', () => {
   );
 });
 
+const RADIUS_KM = nmToKm(30);
+
 test('the alert sounds when the storm enters, comes much nearer, or stays', () => {
   const report = lightningReport([spot(30)], 0, 0);
-  expect(lightningDue(report, null, 0)).toBe(true);
-  expect(lightningDue(report, { km: 40, at: 0 }, 60_000)).toBe(false);
-  expect(lightningDue(report, { km: 60, at: 0 }, 60_000)).toBe(true);
-  expect(lightningDue(report, { km: 30, at: 0 }, 15 * 60_000)).toBe(true);
-  expect(lightningDue(lightningReport([spot(null)], 0, 0), null, 0)).toBe(
-    false,
+  expect(lightningDue(report, null, 0, RADIUS_KM)).toBe('first');
+  expect(lightningDue(report, { km: 40, at: 0 }, 60_000, RADIUS_KM)).toBe(null);
+  expect(lightningDue(report, { km: 60, at: 0 }, 60_000, RADIUS_KM)).toBe(
+    'nearer',
   );
+  expect(lightningDue(report, { km: 30, at: 0 }, 15 * 60_000, RADIUS_KM)).toBe(
+    'again',
+  );
+  expect(
+    lightningDue(lightningReport([spot(null)], 0, 0), null, 0, RADIUS_KM),
+  ).toBe(null);
+});
+
+test('a second alert under half the distance, once', () => {
+  const near = lightningReport([spot(25)], 0, 0);
+  expect(lightningDue(near, { km: 35, at: 0 }, 60_000, RADIUS_KM)).toBe('half');
+  expect(
+    lightningDue(near, { km: 26, at: 0, half: true }, 60_000, RADIUS_KM),
+  ).toBe(null);
+});
+
+test('the end of the alert after 30 minutes without flashes', () => {
+  const calm = lightningReport([spot(null)], 40 * 60_000, 0);
+  const last = { km: 20, at: 0 };
+  expect(lightningClear(calm, last, 5 * 60_000)).toBe(true);
+  expect(lightningClear(calm, last, 20 * 60_000)).toBe(false);
+  expect(lightningClear(calm, null, 0)).toBe(false);
+  expect(
+    lightningClear(lightningReport([spot(10)], 40 * 60_000, 0), last, 0),
+  ).toBe(false);
+});
+
+const MIN = 60_000;
+const HERE = { lat: 46.5, lon: 6.5 };
+
+/** A storm due east, coming west at 20 km in 15 minutes. */
+function coming(): LightningSpots[] {
+  return [0, 1, 2, 3].map((back) => {
+    const km = 30 + back * (20 / 3);
+    return {
+      nearestKm: km,
+      bearing: 90,
+      cells: 5,
+      strong: false,
+      core: pointAt(HERE.lat, HERE.lon, 90, km + 5),
+      t: 60 * MIN - back * 5 * MIN,
+    };
+  });
+}
+
+test('the motion of a storm: where it goes, how fast it comes nearer', () => {
+  const report = lightningReport(coming(), 60 * MIN, 70 * MIN, HERE);
+  const { motion } = report;
+  expect(motion).not.toBeNull();
+  // 20 km in 15 minutes: 80 km/h, 43 kn.
+  expect(motion?.closingKn).toBeCloseTo(43.2, 0);
+  expect(motion?.speedKn).toBeCloseTo(43.2, 0);
+  expect(motion?.towardDeg).toBeCloseTo(270, -1);
+  expect(motion?.kmAt).toBeCloseTo(30, 3);
+});
+
+test('when it is on the boat: the delay of the image counted', () => {
+  const report = lightningReport(coming(), 60 * MIN, 70 * MIN, HERE);
+  // Ten minutes after the image: 13.3 km nearer.
+  const eta = lightningEta(report, 70 * MIN);
+  expect(eta?.delayMin).toBe(10);
+  expect(eta?.kmNow).toBeCloseTo(16.7, 0);
+  expect(((eta?.etaAt ?? 0) - 70 * MIN) / MIN).toBeCloseTo(10, 0);
+  expect(eta?.onUs).toBe(false);
+  const lines = lightningMotionLines(report, 70 * MIN);
+  expect(lines[0]).toBe('L’orage se déplace vers le O à 43 nd.');
+  expect(lines[1]).toBe('Vitesse de rapprochement : 43 nd.');
+  expect(lines[2]).toBe(
+    'Estimé maintenant à 9 NM (retard de l’image de 10 min compté).',
+  );
+  expect(lines[3]).toContain('⚠️ Sur vous vers');
+  const later = lightningEta(report, 85 * MIN);
+  expect(later?.onUs).toBe(true);
+});
+
+test('a storm going away has no time of arrival', () => {
+  const away = coming()
+    .map((one, index, all) => ({ ...one, t: all[3 - index]?.t }))
+    .toReversed();
+  const report = lightningReport(
+    away.toSorted((a, b) => (b.t ?? 0) - (a.t ?? 0)),
+    60 * MIN,
+    70 * MIN,
+    HERE,
+  );
+  expect(report.motion?.closingKn).toBeLessThan(-40);
+  expect(lightningEta(report, 70 * MIN)?.etaAt).toBeNull();
+  expect(durationText(85 * MIN)).toBe('1 h 25');
+  expect(durationText(25 * MIN)).toBe('25 min');
+});
+
+test('the newest image twice (not out yet) is read once', () => {
+  const twice = coming();
+  const first = twice[1];
+  if (!first) throw new Error('no image');
+  twice[0] = { ...first, t: 60 * MIN };
+  const report = lightningReport(twice, 60 * MIN, 70 * MIN, HERE);
+  expect(report.at).toBe(55 * MIN);
 });
 
 test('the black of no data is cleared, the flashes kept', () => {

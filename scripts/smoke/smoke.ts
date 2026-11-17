@@ -126,6 +126,32 @@ async function tightButtons(page: Page): Promise<string[]> {
   }, LEAST_GAP_PX);
 }
 
+/**
+ * The rule of the ways to Paramétrages: in a page, the button to
+ * Paramétrages is always the last one, at the bottom.
+ * @param page - The page shown.
+ * @returns The buttons found below it.
+ */
+async function belowSettings(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const exit = document.querySelector('main#view [data-settings-exit]');
+    if (!exit) return [];
+    const bottom = exit.getBoundingClientRect().bottom;
+    return [
+      ...document.querySelectorAll(
+        'main#view .btn, main#view button, main#view a, main#view .site-link-pill',
+      ),
+    ]
+      .filter((element) => {
+        if (element === exit || exit.contains(element)) return false;
+        if (element.closest('.help-i, .swipe-row, .sw-menu')) return false;
+        const box = element.getBoundingClientRect();
+        return box.width > 0 && box.height > 0 && box.top >= bottom - 2;
+      })
+      .map((element) => (element.textContent ?? '').trim().slice(0, 24));
+  });
+}
+
 // data and the settings wait behind their own tab (X and T): it is touched
 // until they show.
 async function showRow(page: Page): Promise<void> {
@@ -865,6 +891,9 @@ async function layoutGaps(page: Page, theme: string): Promise<void> {
     for (const pair of await tightButtons(page)) {
       tight.push(`${where}: ${pair}`);
     }
+    for (const below of await belowSettings(page)) {
+      tight.push(`${where}: « ${below} » below the way to Paramétrages`);
+    }
   };
   /* eslint-disable no-await-in-loop -- one page after the other */
   for (const entry of ['', 'forecast', 'lightning', 'check']) {
@@ -901,7 +930,7 @@ async function layoutGaps(page: Page, theme: string): Promise<void> {
   /* eslint-enable no-await-in-loop */
   check(
     theme,
-    `layouts: buttons one above the other never touch${tight.length > 0 ? ` (${tight.join(' · ')})` : ''}`,
+    `layouts: buttons one above the other never touch, the way to Paramétrages last${tight.length > 0 ? ` (${tight.join(' · ')})` : ''}`,
     tight.length === 0,
   );
 }

@@ -152,9 +152,25 @@ export function LakeWarnings() {
           {tr('↻ Actualiser maintenant')}
         </Button>
       </ButtonRow>
+      {at > 0 ? (
+        <p className="nav-hint">
+          {tr(`Lu à ${time(at)} · relu toutes les 5 minutes`)}
+        </p>
+      ) : null}
+      <HelpText>
+        NavIn lit toutes les 5 minutes par le relais les avis de MétéoSuisse
+        pour les lacs suisses. Sur la carte, une lampe clignote au rythme des
+        feux au milieu de chaque lac en alerte. L’alarme et la bulle ne
+        concernent que la partie du Léman où vous êtes, d’après le GPS.
+        MétéoSuisse publie ces avis sur son site sans les documenter comme
+        données ouvertes : la lecture peut cesser si le site change. L’alerte
+        oui ou non et le sens des feux sont dans Paramétrages › Paramétrage des
+        feux d’avis des lacs ; le test dans Paramétrages › Tests.
+      </HelpText>
       <Button
         className="btn big wx-entry wx-keys-link"
         data-lakewarn="settings"
+        data-settings-exit
         aria-label={tr(
           'Paramétrage des feux d’avis des lacs : sortir vers Paramétrages',
         )}
@@ -174,21 +190,6 @@ export function LakeWarnings() {
           <small>{tr('l’alerte oui ou non, le sens des feux')}</small>
         </span>
       </Button>
-      {at > 0 ? (
-        <p className="nav-hint">
-          {tr(`Lu à ${time(at)} · relu toutes les 5 minutes`)}
-        </p>
-      ) : null}
-      <HelpText>
-        NavIn lit toutes les 5 minutes par le relais les avis de MétéoSuisse
-        pour les lacs suisses. Sur la carte, une lampe clignote au rythme des
-        feux au milieu de chaque lac en alerte. L’alarme et la bulle ne
-        concernent que la partie du Léman où vous êtes, d’après le GPS.
-        MétéoSuisse publie ces avis sur son site sans les documenter comme
-        données ouvertes : la lecture peut cesser si le site change. L’alerte
-        oui ou non et le sens des feux sont dans Paramétrages › Paramétrage des
-        feux d’avis des lacs ; le test dans Paramétrages › Tests.
-      </HelpText>
     </div>
   );
 }
