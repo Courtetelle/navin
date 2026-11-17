@@ -62,7 +62,13 @@ export { drawTrkButtons, trkChooseStart } from './trackerButtons.ts';
 export { updateTrkDash } from './trackerDash.ts';
 export { trkPointNow } from './trackerPoint.ts';
 export { trkZoneRecenter } from './trackerRecenter.ts';
-export { tracker, trackerTick, trkFix, trkReset } from './trackerState.ts';
+export {
+  lastBoatSeen,
+  tracker,
+  trackerTick,
+  trkFix,
+  trkReset,
+} from './trackerState.ts';
 export type { TrackerFix, TrackerHandle } from './trackerState.ts';
 export { allLakeTracks, trackStats } from './trackStats.ts';
 export type { LakeTrack, TrackStatsResult } from './trackStats.ts';

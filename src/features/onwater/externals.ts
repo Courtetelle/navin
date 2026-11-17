@@ -6,6 +6,7 @@ export {
   entryColor,
   inSwissArea,
   lakePlace,
+  lastBoatSeen,
   mapData,
   seaPlace,
   segments,

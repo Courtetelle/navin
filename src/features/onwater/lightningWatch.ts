@@ -5,7 +5,12 @@ import { BASIN_NAMES } from '../../model/basins.ts';
 import type { Position } from '../../model/types.ts';
 import { addEntry, chosenSea, state } from '../../state/index.ts';
 
-import { contextPlace } from './externals.ts';
+import {
+  contextPlace,
+  lakePlace,
+  lastBoatSeen,
+  seaPlace,
+} from './externals.ts';
 import { lakeFix } from './lakeFix.ts';
 import type {
   LightningArea,
@@ -224,23 +229,35 @@ export function lookName(): string {
 }
 
 /**
- * Where to look: the zone chosen with NavIn, else the GPS, else the map.
+ * The point the storm alert always starts from, known at once: in a zone of
+ * NavIn its place set in Zones (Portrieux, …), never where the map was moved
+ * to; on the GPS (the boat arrow) the last position of the boat, else where
+ * the map looks.
+ * @returns The place.
+ */
+export function alertPlace(): { lat: number; lon: number } {
+  const zone = state.view.zoneSimV.peek();
+  const place =
+    zone === 'mer'
+      ? seaPlace()
+      : zone === 'lac'
+        ? lakePlace()
+        : (lastBoatSeen() ?? contextPlace());
+  return { lat: place.lat, lon: place.lon };
+}
+
+/**
+ * Where to look: the place of the zone chosen with NavIn, else the GPS read
+ * now, else {@link alertPlace}.
  * @param done - Receives the place, or null.
  */
 export function lookPlace(done: (position: Position | null) => void): void {
   if (state.view.zoneSimV.peek()) {
-    const { lat, lon } = contextPlace();
-    done({ lat, lon });
+    done(alertPlace());
     return;
   }
-  // Without GPS, where the map looks.
   lakeFix((position) => {
-    if (position) {
-      done(position);
-      return;
-    }
-    const { lat, lon } = contextPlace();
-    done({ lat, lon });
+    done(position ?? alertPlace());
   });
 }
 
@@ -348,8 +365,8 @@ export function lightningWatchStart(): void {
  */
 export function lightningTest(): void {
   const now = Date.now();
-  // At once, where the map looks: no wait for the GPS.
-  const { lat, lon } = contextPlace();
+  // At once, from the point of the alert: no wait for the GPS.
+  const { lat, lon } = alertPlace();
   playLightning();
   showPop({
     report: {
@@ -405,7 +422,7 @@ export async function nearestStorm(fresh = false): Promise<NearestStorm> {
   try {
     const place = await new Promise<{ lat: number; lon: number }>((resolve) => {
       lookPlace((position) => {
-        const { lat, lon } = position ?? contextPlace();
+        const { lat, lon } = position ?? alertPlace();
         resolve({ lat, lon });
       });
     });

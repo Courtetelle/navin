@@ -4,7 +4,6 @@ import { useEffect } from 'react';
 
 import { leaflet } from '../../features/map/leaflet.ts';
 import { tracker } from '../../features/map/trackerState.ts';
-import { contextPlace } from '../../features/onwater/externals.ts';
 import type {
   LightningReport,
   LightningSettings,
@@ -24,6 +23,7 @@ import {
   pointOf,
 } from '../../features/onwater/lightning.ts';
 import {
+  alertPlace,
   lightningLast,
   lightningNearest,
   lightningNewPlace,
@@ -325,13 +325,13 @@ function LightningAim() {
   useSignals();
   const last = lightningLast.value;
   const nearest = lightningNearest.value;
-  // Another place to look from (another zone, the GPS again, the map moved
-  // in a zone): the storm is looked for again from there.
+  // Another place to look from (another zone, the GPS again, the boat gone
+  // on): the storm is looked for again from there; moving the map does not.
   useEffect(() => {
     const timer = setInterval(() => {
       const report = aimed(Date.now());
       if (!report?.place) return;
-      const here = contextPlace();
+      const here = alertPlace();
       if (
         report.placeName !== lookName() ||
         distKm(report.place.lat, report.place.lon, here.lat, here.lon) >
