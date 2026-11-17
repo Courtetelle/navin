@@ -35,6 +35,22 @@ export const RADIO_ID_FIELDS: readonly FieldDefinition[] = [
   },
 ];
 
+/**
+ * The same MMSI and call sign on a cruise sheet: taken from the boat sheet,
+ * never typed in the cruise.
+ */
+export const CRUISE_RADIO_FIELDS: readonly FieldDefinition[] =
+  RADIO_ID_FIELDS.map(({ note, ...field }) => ({
+    ...field,
+    lock: false,
+    fromBoat: true,
+    placeholder: '',
+    note: (value: string) =>
+      value
+        ? `${note?.(value) ?? ''} · fiche du bateau`
+        : 'À saisir sur la fiche du bateau (Mes bateaux)',
+  }));
+
 /** Sections of the "Bateau et croisière" sheet (legacy `INFO_SECTIONS`). */
 export const INFO_SECTIONS: readonly SectionDefinition[] = [
   {
@@ -98,7 +114,7 @@ export const INFO_SECTIONS: readonly SectionDefinition[] = [
   {
     title: 'Radio et identification',
     fields: [
-      ...RADIO_ID_FIELDS,
+      ...CRUISE_RADIO_FIELDS,
       {
         key: 'sailColor',
         label: 'Couleur des voiles',

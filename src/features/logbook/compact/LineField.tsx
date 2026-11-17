@@ -38,7 +38,8 @@ export function LineField({ field }: { field: FieldDefinition }) {
   const lock = useFieldLock(field, cell.text, cell.focused, input);
   useMarquee(input);
   useDependentPicker(field, input);
-  const { key, type, prefix, expiry, wind, minFrom, clean, note } = field;
+  const { key, type, prefix, expiry, wind, minFrom, clean, note, fromBoat } =
+    field;
   const { inputmode, placeholder = '' } = field;
   const formStore = form.store;
   useEffect(() => {
@@ -72,7 +73,7 @@ export function LineField({ field }: { field: FieldDefinition }) {
       inputMode={inputMode as 'text' | undefined}
       placeholder={tr.placeholder(placeholder)}
       value={cell.text}
-      readOnly={lock.readOnly || form.filledOnly}
+      readOnly={lock.readOnly || form.filledOnly || fromBoat}
       onChange={onChange}
       onFocus={cell.onFocus}
       onBlur={() => {

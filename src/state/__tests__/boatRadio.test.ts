@@ -65,13 +65,22 @@ test('the boat sheet changed or emptied: the cruise follows it', () => {
   expect(state.data.cruise.value?.info.callsign).toBeUndefined();
 });
 
-test('the VHF corrected in the sea cruise goes back to the boat sheet', () => {
+test('a VHF changed in a cruise never goes to the boat sheet', () => {
   openSea({ boat: 'Bise Noire' });
   actions.updateCruise((draft) => {
     draft.info.mmsi = '269 555 444';
   });
   actions.syncBoatFromCruise('mmsi');
-  expect(actions.boatById('exb2')?.info.mmsi).toBe('269 555 444');
+  expect(actions.boatById('exb2')?.info.mmsi).toBe('269 123 456');
+});
+
+test('the cruise sheets show the VHF of the boat, not typed there', () => {
+  const radio = actions
+    .infoSections()
+    .flatMap((section) => section.fields)
+    .filter((field) => ['mmsi', 'callsign'].includes(field.key));
+  expect(radio.length).toBeGreaterThan(0);
+  expect(radio.every((field) => field.fromBoat)).toBe(true);
 });
 
 test('a cruise of an unknown boat keeps its own VHF', () => {

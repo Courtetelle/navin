@@ -124,6 +124,11 @@ export interface FieldDefinition extends FieldLayout {
    */
   note?: (value: string) => string;
   /**
+   * Taken from the boat sheet: shown, never typed here.
+   * @default false
+   */
+  fromBoat?: boolean;
+  /**
    * Critical value: protected against accidental edits.
    * @default false
    */

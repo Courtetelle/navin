@@ -10,7 +10,7 @@ import {
 } from '../model/boatSheet.ts';
 import { LAKE_CONTACTS } from '../model/contacts.ts';
 import type { SectionDefinition } from '../model/field.ts';
-import { INFO_SECTIONS } from '../model/infoSections.ts';
+import { CRUISE_RADIO_FIELDS, INFO_SECTIONS } from '../model/infoSections.ts';
 import type { Boat, Cruise } from '../model/types.ts';
 import { store } from '../storage/store.ts';
 
@@ -137,15 +137,8 @@ export function followBoatRadio(): () => void {
  */
 export function syncBoatFromCruise(key: string): void {
   const cruise = data.cruise.value;
-  const seaBoat = RADIO_KEYS.includes(key) ? seaCruiseBoat(cruise) : undefined;
-  if (cruise && seaBoat) {
-    updateBoat(seaBoat.id, (draft) => {
-      const value = cruise.info[key];
-      if (value != null && value !== '') draft.info[key] = value;
-      else Reflect.deleteProperty(draft.info, key);
-    });
-    return;
-  }
+  // The VHF comes from the boat sheet only: never written back from a cruise.
+  if (RADIO_KEYS.includes(key)) return;
   const boat = cruise?.boatId ? boatById(cruise.boatId) : undefined;
   if (!cruise || !boat || !key || !boatKeys(boat).includes(key)) return;
   updateBoat(boat.id, (draft) => {
@@ -237,7 +230,14 @@ export function infoSections(): SectionDefinition[] {
   return boat
     ? activeSections([
         INFO_SECTIONS[0] as SectionDefinition,
-        ...boatSections(boat),
+        ...boatSections(boat).map((section) => ({
+          ...section,
+          fields: section.fields.map(
+            (field) =>
+              CRUISE_RADIO_FIELDS.find((item) => item.key === field.key) ??
+              field,
+          ),
+        })),
       ])
     : activeSections(INFO_SECTIONS);
 }
