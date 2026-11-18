@@ -13,10 +13,14 @@ export const LIGHTNING_WMS = 'https://view.eumetsat.int/geoserver/ows';
 export const LIGHTNING_LAYER = 'mtg_fd:li_afa';
 /** One image every 5 minutes. */
 const STEP_MS = 5 * 60_000;
-/** The radii offered for the alert, in nautical miles. */
+/** The radii offered for the alert at sea, in nautical miles. */
 export const LIGHTNING_RADII_NM = [15, 30, 45, 60] as const;
-/** The radius by default, in nautical miles. */
+/** The radius by default at sea, in nautical miles. */
 export const LIGHTNING_RADIUS_NM = 30;
+/** The radii offered for the alert on a lake, nearer, in nautical miles. */
+export const LIGHTNING_LAKE_RADII_NM = [10, 15, 20, 30] as const;
+/** The radius by default on a lake, in nautical miles. */
+export const LIGHTNING_LAKE_RADIUS_NM = 15;
 /** Kilometres in a nautical mile. */
 const KM_PER_NM = 1.852;
 /** Kilometres in a degree of latitude. */
@@ -28,8 +32,10 @@ const POINTS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
 export interface LightningSettings {
   /** The alert is on; yes unless false. */
   on?: boolean;
-  /** Its radius, in nautical miles. */
+  /** Its radius at sea, in nautical miles. */
   radiusNm?: number;
+  /** Its radius on a lake, in nautical miles. */
+  radiusLakeNm?: number;
   /** The flashes on the map; yes unless false. */
   map?: boolean;
 }
@@ -98,17 +104,27 @@ export interface LightningReport extends LightningSpots {
 }
 
 /**
- * The radius chosen, in NM.
+ * The radii offered for the alert, nearer on a lake.
+ * @param lake - On a lake (the zone Lacs, or a lake outing).
+ * @returns Nautical miles.
+ */
+export function lightningRadii(lake = false): readonly number[] {
+  return lake ? LIGHTNING_LAKE_RADII_NM : LIGHTNING_RADII_NM;
+}
+
+/**
+ * The radius chosen, in NM: a lake and the sea each keep their own.
  * @param settings - The lightning settings.
+ * @param lake - On a lake (the zone Lacs, or a lake outing).
  * @returns Nautical miles.
  */
 export function lightningRadiusNm(
   settings: LightningSettings | undefined,
+  lake = false,
 ): number {
-  const chosen = Number(settings?.radiusNm);
-  return (LIGHTNING_RADII_NM as readonly number[]).includes(chosen)
-    ? chosen
-    : LIGHTNING_RADIUS_NM;
+  const chosen = Number(lake ? settings?.radiusLakeNm : settings?.radiusNm);
+  if (lightningRadii(lake).includes(chosen)) return chosen;
+  return lake ? LIGHTNING_LAKE_RADIUS_NM : LIGHTNING_RADIUS_NM;
 }
 
 /**

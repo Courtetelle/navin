@@ -43,6 +43,15 @@ test('the radius of the alert is one of those offered, 30 NM by default', () => 
   expect(lightningRadiusNm({ radiusNm: 50 })).toBe(30);
 });
 
+test('a lake has its own radius, nearer: 10 to 30 NM, 15 NM by default', () => {
+  expect(lightningRadiusNm(undefined, true)).toBe(15);
+  expect(lightningRadiusNm({ radiusNm: 60 }, true)).toBe(15);
+  expect(lightningRadiusNm({ radiusLakeNm: 10 }, true)).toBe(10);
+  expect(lightningRadiusNm({ radiusLakeNm: 30 }, true)).toBe(30);
+  expect(lightningRadiusNm({ radiusLakeNm: 45 }, true)).toBe(15);
+  expect(lightningRadiusNm({ radiusLakeNm: 10 })).toBe(30);
+});
+
 test('the images of the last quarter of an hour, on the 5-minute steps', () => {
   const now = Date.UTC(2026, 10, 15, 18, 37, 12);
   expect(lightningTimes(now).map((t) => new Date(t).toISOString())).toEqual([

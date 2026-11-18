@@ -37,6 +37,7 @@ import {
 } from './lightning.ts';
 import type { LightningPop } from './lightningPop.ts';
 import { lightningPop } from './lightningPop.ts';
+import { onLake } from './onLake.ts';
 import { showOverlays } from './overlayRoot.ts';
 import { playLightning } from './windAudio.ts';
 
@@ -278,7 +279,7 @@ export function lightningCheck(quiet = false): Promise<void> {
         resolve();
         return;
       }
-      const radiusNm = lightningRadiusNm(lightningSettings());
+      const radiusNm = lightningRadiusNm(lightningSettings(), onLake());
       lightningBusy.value = true;
       readLightning({
         lat: position.lat,
@@ -380,7 +381,7 @@ export function lightningTest(): void {
       motion: { towardDeg: 45, speedKn: 22, closingKn: 20, kmAt: 22 },
       place: { lat, lon },
     },
-    radiusNm: lightningRadiusNm(lightningSettings()),
+    radiusNm: lightningRadiusNm(lightningSettings(), onLake()),
     place: { lat, lon },
     test: true,
     reason: 'first',
@@ -426,7 +427,7 @@ export async function nearestStorm(fresh = false): Promise<NearestStorm> {
         resolve({ lat, lon });
       });
     });
-    const alertKm = nmToKm(lightningRadiusNm(lightningSettings()));
+    const alertKm = nmToKm(lightningRadiusNm(lightningSettings(), onLake()));
     const radii = [alertKm, ...NEAREST_KM.filter((km) => km > alertKm * 1.2)];
     let found: NearestStorm = {
       place,

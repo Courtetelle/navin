@@ -11,9 +11,9 @@ import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { askMapArea } from '../../features/map/pendingArea.ts';
 import type { LightningSettings } from '../../features/onwater/lightning.ts';
 import {
-  LIGHTNING_RADII_NM,
   lightningAlertOn,
   lightningOnMap,
+  lightningRadii,
   lightningRadiusNm,
   lightningText,
   stormLines,
@@ -28,6 +28,7 @@ import {
   nearestBusy,
   nearestStorm,
 } from '../../features/onwater/lightningWatch.ts';
+import { onLake } from '../../features/onwater/onLake.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { exitOrigin } from '../../shell/exitOrigin.ts';
@@ -110,7 +111,7 @@ export function LightningAlert() {
   const tr = useTr();
   const settings = (state.preferences.settings.value.lightning ??
     {}) as LightningSettings;
-  const radiusNm = lightningRadiusNm(settings);
+  const radiusNm = lightningRadiusNm(settings, onLake());
   const last = lightningLast.value;
   const busy = lightningBusy.value;
   useEffect(() => {
@@ -220,7 +221,8 @@ export function LightningSetting() {
   const settings = (state.preferences.settings.value.lightning ??
     {}) as LightningSettings;
   const on = lightningAlertOn(settings);
-  const radiusNm = lightningRadiusNm(settings);
+  const lake = onLake();
+  const radiusNm = lightningRadiusNm(settings, lake);
   const onMap = lightningOnMap(settings);
   return (
     <div className="lightning-alert">
@@ -242,14 +244,22 @@ export function LightningSetting() {
           {tr(`🗺 Éclairs toujours sur la carte : ${onMap ? 'OUI' : 'NON'}`)}
         </Button>
       </ButtonRow>
-      <h3>{tr('L’alerte se donne à partir de')}</h3>
+      <h3>
+        {tr(
+          lake
+            ? 'Sur un lac, l’alerte se donne à partir de'
+            : 'En mer, l’alerte se donne à partir de',
+        )}
+      </h3>
       <ButtonRow className="row c4">
-        {LIGHTNING_RADII_NM.map((value) => (
+        {lightningRadii(lake).map((value) => (
           <Button
             key={value}
             className={value === radiusNm ? 'btn on' : 'btn'}
             data-lightning-radius={value}
-            onClick={() => change({ radiusNm: value })}
+            onClick={() =>
+              change(lake ? { radiusLakeNm: value } : { radiusNm: value })
+            }
           >
             {tr(`${value} NM`)}
           </Button>
@@ -257,7 +267,7 @@ export function LightningSetting() {
       </ButtonRow>
       <p className="nav-hint">
         {tr(
-          'Autour de la position GPS, ou de la zone choisie avec NavIn (Atlantique, Méditerranée, Lacs).',
+          'Autour de la position GPS, ou de la zone choisie avec NavIn (Atlantique, Méditerranée, Lacs). Les lacs ont leurs propres distances, plus courtes (15 NM par défaut) ; la mer garde les siennes (30 NM par défaut).',
         )}
       </p>
     </div>
