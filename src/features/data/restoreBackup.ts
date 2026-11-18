@@ -11,6 +11,7 @@ import type {
 import {
   crewSig,
   hooks,
+  mergeAlerts,
   mergeBoats,
   mergeCkLib,
   mergeKeyBook,
@@ -68,6 +69,11 @@ export interface BackupFile {
   marks?: unknown;
   /** @default undefined */
   sosLogs?: unknown;
+  /**
+   * The journal of the alerts.
+   * @default undefined
+   */
+  alerts?: unknown;
   /** @default undefined */
   /** The old password of the SOS logs: no longer used, ignored. */
   sosPwd?: string;
@@ -266,6 +272,7 @@ function restoreRecords(file: BackupFile): void {
   if (file.uiEdits) mergeUiEdits(file.uiEdits);
   if (file.marks) mergeMarks(file.marks);
   if (Array.isArray(file.sosLogs)) restoreSosLogs(file);
+  mergeAlerts(file.alerts);
   if (Array.isArray(file.crewSets)) restoreCrewSets(file.crewSets as CrewSet[]);
   restoreMob(file);
   const { taskTpl } = file;

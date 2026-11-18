@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 
 import { MasterCheck } from '../../components/shared/MasterCheck.tsx';
 
+import { AlertFilters } from './AlertFilters.tsx';
 import { CheckButton } from './CheckButton.tsx';
 import {
   toggleAllItems,
@@ -91,6 +92,8 @@ export function ItemChecks({
   const checked = items.filter((item) => !off.has(item.id)).length;
   return (
     <>
+      {/* The alerts are first chosen by kind and period, then one by one. */}
+      {kind === 'alerts' ? <AlertFilters /> : null}
       <p className="help lx-sec-h">
         {`${ITEM_LABELS[kind]} à imprimer (${checked} / ${items.length})`}
       </p>

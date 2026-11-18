@@ -1,5 +1,11 @@
 import { checklistSub } from '../../features/checklists/index.ts';
-import { hasAboard, isLake, sosLogsCount, state } from '../../state/index.ts';
+import {
+  alertLog,
+  hasAboard,
+  isLake,
+  sosLogsCount,
+  state,
+} from '../../state/index.ts';
 
 /** One tile of the data menu. */
 interface MoreTile {
@@ -85,6 +91,7 @@ export function tilesWithoutCruise(): MoreTile[] {
       sub: 'procédures cas réel et entraînement',
     },
     sosLogsTile(),
+    alertsTile(),
     RULES,
     {
       key: 'docs',
@@ -118,6 +125,7 @@ export function tilesWithCruise(): MoreTile[] {
       sub: lake ? 'fiche de la sortie' : 'fiche du jour, météo, route prévue',
     },
     sosLogsTile(),
+    alertsTile(),
     TRACES,
     METEO,
   ];
@@ -181,6 +189,17 @@ export function tilesWithCruise(): MoreTile[] {
 
 function hasLakeCruise(): boolean {
   return state.data.index.value.some((meta) => meta.type === 'lac');
+}
+
+function alertsTile(): MoreTile {
+  const count = alertLog.value.length;
+  return {
+    key: 'alerts',
+    title: '🔔 Journal des alertes',
+    sub: count
+      ? `${count} alerte${count > 1 ? 's' : ''} : vent, orage, feux d’avis, profondeur`
+      : 'vent, orage, feux d’avis, profondeur',
+  };
 }
 
 function sosLogsTile(): MoreTile {

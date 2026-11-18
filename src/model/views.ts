@@ -13,6 +13,7 @@ export const VIEW_LABELS: Readonly<Record<string, string>> = {
   vhf: 'VHF',
   mob: 'Homme à la mer',
   soslogs: 'SOS · logs',
+  alerts: 'Journal des alertes',
   more: 'data',
   marks: 'Mes marques',
   checklist: 'Check-lists',

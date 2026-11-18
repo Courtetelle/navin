@@ -8,6 +8,7 @@ import { go } from '../../shell/router.ts';
 import {
   addEntry,
   isLake,
+  recordAlert,
   state,
   toast,
   updateDay,
@@ -198,6 +199,14 @@ function fireWind(
 }
 
 function noteAlert(values: { note: string; mer?: string }): void {
+  // In the journal of the alerts, with or without an open cruise.
+  recordAlert(
+    'vent',
+    'Alerte vent',
+    [values.note, values.mer ? `Mer : ${values.mer}` : '']
+      .filter(Boolean)
+      .join(' · '),
+  );
   addEntry({
     id: uid(),
     t: new Date().toISOString(),

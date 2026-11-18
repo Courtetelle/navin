@@ -11,6 +11,7 @@ const DATA_VIEWS: ReadonlySet<string> = new Set([
   'lists',
   'cruises',
   'soslogs',
+  'alerts',
   'tasktpl',
   'sites',
   'dossier',

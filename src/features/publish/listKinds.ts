@@ -1,5 +1,6 @@
 import type { Boat } from '../../model/types.ts';
 import {
+  alertLog,
   crewSetDate,
   crewSetName,
   memberFieldsX,
@@ -7,6 +8,7 @@ import {
   state,
 } from '../../state/index.ts';
 
+import { alertItems } from './alertItems.ts';
 import {
   allLakeTracks,
   boatDocs,
@@ -32,6 +34,7 @@ export const LIST_TITLES: Readonly<Record<ListKind, string>> = {
   marks: 'Mes marques',
   ckbases: 'Bases de check-list',
   soslogs: 'Logs SOS',
+  alerts: 'Journal des alertes',
 };
 
 /** What the elements of each list are called. */
@@ -43,6 +46,7 @@ export const ITEM_LABELS: Readonly<Record<ListKind, string>> = {
   marks: 'Marques',
   ckbases: 'Bases',
   soslogs: 'Logs',
+  alerts: 'Alertes',
 };
 
 const { boats, ckLib, crewSets, marks, members, sosLogs } = state.data;
@@ -60,6 +64,7 @@ const ITEM_BUILDERS: Readonly<Record<ListKind, () => PublishItem[]>> = {
   marks: () => markItems(marks.value),
   ckbases: () => checklistBaseItems(ckLib.value),
   soslogs: () => sosLogItems(sosLogs.value),
+  alerts: () => alertItems(alertLog.value),
 };
 
 const WITH_EXTRA_SENDS: ReadonlySet<ListKind> = new Set([

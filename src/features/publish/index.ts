@@ -93,3 +93,4 @@ export type {
   ListKind,
   LxTheme,
 } from './types.ts';
+export { alertWhen } from './alertItems.ts';

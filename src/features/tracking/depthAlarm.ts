@@ -1,7 +1,7 @@
 import { signal } from '@preact/signals-react';
 
 import { frN } from '../../lib/format.ts';
-import { navZone, state, toast } from '../../state/index.ts';
+import { navZone, recordAlert, state, toast } from '../../state/index.ts';
 import { lemanDepthAt } from '../map/lemanDepth.ts';
 
 import {
@@ -115,6 +115,9 @@ export function depthAlarmSet(
     intensity > 0 && depth != null && minimum != null && depth < minimum;
   if (!danger || Date.now() < muteUntil) sirenOff();
   const previous = depthOverlayState.peek();
+  if (danger && !test && !previous.danger) {
+    noteDepthAlert(depth, minimum, origin);
+  }
   if (intensity <= 0 || depth == null || minimum == null) {
     depthOverlayState.value = { ...previous, on: false, danger };
     return;
@@ -319,5 +322,26 @@ function alarmLoop(danger: boolean): void {
   beepTimer = setTimeout(
     () => alarmLoop(danger),
     danger ? 1100 : Math.round(1100 - 950 * level),
+  );
+}
+
+/** A depth alert is written again at most this often. */
+const DEPTH_NOTE_MS = 5 * 60_000;
+let depthNotedAt = 0;
+
+/**
+ * The boat under the minimum sounding: in the journal of the alerts.
+ * @param depth - Water under the boat (m).
+ * @param minimum - Minimum sounding (m).
+ * @param origin - Where the depth comes from.
+ */
+function noteDepthAlert(depth: number, minimum: number, origin: string): void {
+  const now = Date.now();
+  if (now - depthNotedAt < DEPTH_NOTE_MS) return;
+  depthNotedAt = now;
+  recordAlert(
+    'profondeur',
+    'Alerte de profondeur',
+    `Fond ≈ ${depth.toFixed(1)} m, sous le minimum de ${minimum.toFixed(1)} m${origin ? ` (${origin})` : ''}.`,
   );
 }

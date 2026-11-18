@@ -13,8 +13,9 @@ import {
 const sea = { cruiseOpen: true, alphaBack: 'more' };
 
 test('there is one legacy view per page folder', () => {
-  // 41 legacy views, the PréP menu and the sites of the internet.
-  expect(VIEW_NAMES).toHaveLength(43);
+  // 41 legacy views, the PréP menu, the sites of the internet and the
+  // journal of the alerts.
+  expect(VIEW_NAMES).toHaveLength(44);
 });
 
 test('the tab of a screen follows app.js:662', () => {

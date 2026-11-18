@@ -2,6 +2,7 @@ import { pad } from '../../lib/format.ts';
 import type { Cruise } from '../../model/types.ts';
 import type { TrackPoint } from '../../state/index.ts';
 import {
+  alertLog,
   keyBook,
   loadTrack,
   siteLinkEdits,
@@ -103,6 +104,9 @@ export function backupAll(): BackupPack {
     mob: store.get('ldb.mob2', null),
     mobMer: store.get('ldb.mob2mer', null),
     sosLogs: data.sosLogs.value,
+    // The journal of the alerts, only when it holds some: an empty one
+    // keeps the file the one of the first app.
+    ...(alertLog.value.length > 0 ? { alerts: alertLog.value } : {}),
     // Kept for the format shared with the first app; no longer used.
     sosPwd: store.get('ldb.sosPwd', ''),
     errLog: store.get('ldb.errLog', []),

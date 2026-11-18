@@ -152,6 +152,10 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/sos/SosPage.tsx').then((module) => ({
       default: module.SosPage,
     })),
+  alerts: () =>
+    import('../pages/alerts/AlertsPage.tsx').then((module) => ({
+      default: module.AlertsPage,
+    })),
   soslogs: () =>
     import('../pages/soslogs/SoslogsPage.tsx').then((module) => ({
       default: module.SoslogsPage,

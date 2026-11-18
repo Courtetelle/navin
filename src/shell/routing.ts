@@ -40,6 +40,7 @@ const COMMON_TABS: Record<string, string> = {
   people: 'more',
   crews: 'more',
   soslogs: 'more',
+  alerts: 'more',
   marks: 'more',
   zones: 'more',
   cartes: 'more',

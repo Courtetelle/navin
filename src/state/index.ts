@@ -16,3 +16,10 @@ if ('document' in globalThis) {
   // No zone ever chosen: the Atlantique, until the boat arrow is touched.
   firstZone();
 }
+export {
+  alertLog,
+  eraseAlerts,
+  eraseAlertsBetween,
+  mergeAlerts,
+  recordAlert,
+} from './alertLog.ts';

@@ -1,7 +1,7 @@
 import { signal } from '@preact/signals-react';
 
 import { uid } from '../../lib/format.ts';
-import { addEntry, state } from '../../state/index.ts';
+import { addEntry, recordAlert, state } from '../../state/index.ts';
 
 import { relayed } from './euStations.ts';
 import { lakeFix } from './lakeFix.ts';
@@ -136,6 +136,8 @@ export async function lakeWarnCheck(): Promise<void> {
     for (const warning of fresh) said.add(warningKey(warning));
     playLakeLight(Math.max(...fresh.map((warning) => warning.level)));
     showPop({ warnings: fresh });
+    // In the journal of the alerts, with or without an open cruise.
+    recordAlert('feux', 'Feux d’avis', fresh.map(lakeWarningText).join(' '));
     if (state.data.cruise.peek()) {
       addEntry({
         id: uid(),

@@ -3,7 +3,7 @@ import { signal } from '@preact/signals-react';
 import { uid } from '../../lib/format.ts';
 import { BASIN_NAMES } from '../../model/basins.ts';
 import type { Position } from '../../model/types.ts';
-import { addEntry, chosenSea, state } from '../../state/index.ts';
+import { addEntry, chosenSea, recordAlert, state } from '../../state/index.ts';
 
 import {
   contextPlace,
@@ -341,6 +341,8 @@ export function lightningCheck(quiet = false): Promise<void> {
  * @param note - What it says.
  */
 function logLightning(event: string, note: string): void {
+  // In the journal of the alerts, with or without an open cruise.
+  recordAlert('orage', event, note);
   if (!state.data.cruise.peek()) return;
   addEntry({
     id: uid(),

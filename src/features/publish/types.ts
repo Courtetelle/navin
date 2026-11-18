@@ -1,6 +1,13 @@
 /** Data lists that can be published through the « 📤 Partager » window. */
 export type ListKind =
-  'people' | 'crews' | 'boats' | 'traces' | 'marks' | 'ckbases' | 'soslogs';
+  | 'people'
+  | 'crews'
+  | 'boats'
+  | 'traces'
+  | 'marks'
+  | 'ckbases'
+  | 'soslogs'
+  | 'alerts';
 
 /** Layout of the printed or image output. */
 export type LxTheme = 'cards' | 'carnet' | 'mini';

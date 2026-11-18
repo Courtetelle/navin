@@ -1,5 +1,6 @@
 /** Every screen of the app (legacy `VIEWS` keys). */
 export const VIEW_NAMES = [
+  'alerts',
   'aboard',
   'alpha',
   'beaufort',
@@ -62,6 +63,7 @@ export const ROOTS: readonly string[] = [
 
 /** Screens usable without an open cruise (checklists, cards and procedures are prepared ahead). */
 export const NO_CRUISE_VIEWS: readonly string[] = [
+  'alerts',
   'tracker',
   'nmea',
   'traces',

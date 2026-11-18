@@ -13631,3 +13631,17 @@ h1.menu-title {
   font-size: 17px;
   border-radius: 12px;
 }
+/* The journal of the alerts */
+.alert-list .alert-text {
+  padding: 0 14px 12px;
+  font-weight: 600;
+  white-space: pre-wrap;
+}
+.alert-erase,
+.alert-filters {
+  margin-top: 8px;
+}
+.alert-erase .cf input.text,
+.alert-filters .cf input.text {
+  width: 100%;
+}
