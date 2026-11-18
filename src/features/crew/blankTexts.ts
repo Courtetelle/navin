@@ -2,8 +2,7 @@
 export type BlankForeignLanguage = 'en' | 'it' | 'es';
 
 /** The parts of a blank sheet, each under its title. */
-export type BlankPart =
-  'identity' | 'document' | 'sea' | 'lake' | 'vhf' | 'contact';
+export type BlankPart = 'identity' | 'document' | 'licence' | 'contact';
 
 /** Texts of a blank sheet in one foreign language. */
 interface BlankTexts {
