@@ -24,6 +24,7 @@ import {
 import { toast } from '../../state/index.ts';
 
 import { sendCvBlank } from './blankSheet.ts';
+import { cvWithNavIn } from './cvNavIn.ts';
 import { nmShown } from './cvParts.ts';
 import { shareCv } from './cvShare.ts';
 import type { FicheRecord } from './useFicheRecord.ts';
@@ -49,7 +50,9 @@ const WATERS_TITLE: Record<CvWaters, string> = {
 export function FicheCv({ record, reading }: FicheCvProps) {
   const tr = useTr();
   const cv = (record.data.cv ?? {}) as MemberCv;
-  const filled = cvFilled(cv);
+  // The outings saved in NavIn are added to what was typed.
+  const shown = cvWithNavIn(record.recordId, cv);
+  const filled = cvFilled(shown);
   if (reading && !filled) return null;
   const save = (next: MemberCv) => {
     record.change({ ...record.latest(), cv: next });
@@ -62,7 +65,7 @@ export function FicheCv({ record, reading }: FicheCvProps) {
     <details className="section cv-sec" open={reading || filled}>
       <summary>{tr('⛵ CV nautique')}</summary>
       {reading ? (
-        <CvReading cv={cv} />
+        <CvReading cv={shown} />
       ) : (
         <CvEditor cv={cv} save={save} record={record} />
       )}
@@ -213,9 +216,11 @@ function CvEditor({ cv, save, record }: EditProps & { record: FicheRecord }) {
         Pour les loueurs de bateaux. Tout est libre : une année ou une période
         (« 1996 – 1998 », « Dès 2015 »), une phrase seule ou un bateau avec son
         rôle et ses milles. Les navigations se rangent de la plus récente à la
-        plus ancienne. Le CV peut aussi être rempli par la personne : « Envoyer
-        le CV à remplir », puis sa réponse collée dans Les coéquipiers ›
-        Partager › « Collez ici le message complété ».
+        plus ancienne. Les croisières en mer enregistrées dans NavIn s’ajoutent
+        seules (sauf celles déjà écrites ici, même année et même bateau), et les
+        sorties sur le lac en nombre de jours. Le CV peut aussi être rempli par
+        la personne : « Envoyer le CV à remplir », puis sa réponse collée dans
+        Les coéquipiers › Partager › « Collez ici le message complété ».
       </HelpText>
       <ButtonRow>
         <Button

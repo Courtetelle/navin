@@ -9,6 +9,7 @@ import { sheetPng } from '../boats/index.ts';
 import { printInHolder } from '../publish/index.ts';
 
 import { CvPage } from './CvPrintPage.tsx';
+import { cvWithNavIn } from './cvNavIn.ts';
 import { WATERS_TITLE, footLine, identity, nmShown, tiles } from './cvParts.ts';
 
 /** The A4 page of the CV, its colours kept in print. */
@@ -56,7 +57,8 @@ export async function shareCv(
   member: Member,
   format: ShareFormat,
 ): Promise<void> {
-  const cv = member.cv as MemberCv | undefined;
+  // The outings saved in NavIn are added to what was typed.
+  const cv = cvWithNavIn(member.id, member.cv ?? {});
   const name = memberName(member);
   const file = `CV-nautique-${name}`
     .normalize('NFD')
@@ -68,7 +70,7 @@ export async function shareCv(
       title: file,
       delay: 150,
       css: CV_CSS,
-      content: createElement(CvPage, { member, cv: cv ?? {} }),
+      content: createElement(CvPage, { member, cv }),
     });
     return;
   }
@@ -77,7 +79,7 @@ export async function shareCv(
       title: `CV nautique · ${name}`,
       checks: [],
       showObs: false,
-      sections: cvSections(member, cv ?? {}),
+      sections: cvSections(member, cv),
     });
     await deliver(blob, `${file}.png`, 'image/png');
   } catch {
