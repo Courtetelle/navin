@@ -5,8 +5,15 @@ import { state, toast, updateMembers } from '../../state/index.ts';
 
 import type { ParsedSheet } from './blankParse.ts';
 import { memberClones, parseBlank } from './blankParse.ts';
-import type { BlankForeignLanguage } from './blankTexts.ts';
-import { BLANK_FIELDS, BLANK_HEAD, BLANK_I18N } from './blankTexts.ts';
+import type { BlankForeignLanguage, BlankPart } from './blankTexts.ts';
+import {
+  BLANK_END,
+  BLANK_FIELDS,
+  BLANK_HEAD,
+  BLANK_I18N,
+  BLANK_PARTS,
+  BLANK_RULES,
+} from './blankTexts.ts';
 import { showArbitration, showFicheList } from './screen.ts';
 
 /** Language of a blank sheet. */
@@ -42,16 +49,14 @@ export function blankLabel(key: string, shown: BlankLanguage): string {
 export function blankText(shown: BlankLanguage = blankLanguage()): string {
   const texts = shown === 'fr' ? null : BLANK_I18N[shown];
   const line = (key: string) => `${blankLabel(key, shown)} : `;
+  const part = (name: BlankPart) =>
+    `— ${(texts?.parts ?? BLANK_PARTS)[name]} —`;
   return [
     texts ? texts.head : BLANK_HEAD,
     '',
-    texts
-      ? texts.fillIn
-      : 'Merci de compléter après chaque « : » puis de me renvoyer ce message tel quel sans rien modifier de mon texte.',
-    texts
-      ? texts.leaveBlank
-      : 'Ne remplis rien si tu n’es pas en mesure de le faire (exemple pour Licence VHF n°).',
+    ...(texts?.rules ?? BLANK_RULES),
     '',
+    part('identity'),
     ...[
       'prenom',
       'nom',
@@ -62,24 +67,29 @@ export function blankText(shown: BlankLanguage = blankLanguage()): string {
       'tel',
       'email',
     ].map(line),
+    '',
+    part('document'),
     texts
       ? texts.choice
       : '(Ici tu remplis à choix soit ta carte d’identité soit ton passeport, mais pas les deux)',
     line('pieceCI'),
     texts ? texts.or : 'Ou',
     line('piecePP'),
-    ...[
-      'piece',
-      'expiration',
-      'permis',
-      'emisPar',
-      'vhf',
-      'adresse',
-      'sante',
-      'procheNom',
-      'procheTel',
-    ].map(line),
+    ...['piece', 'expiration'].map(line),
     '',
+    part('sea'),
+    ...['permis', 'permisDate', 'emisPar'].map(line),
+    '',
+    part('lake'),
+    ...['permisLac', 'permisLacDate', 'permisLacPar'].map(line),
+    '',
+    part('vhf'),
+    ...['vhf', 'vhfDate'].map(line),
+    '',
+    part('contact'),
+    ...['adresse', 'sante', 'procheNom', 'procheTel'].map(line),
+    '',
+    `— ${texts ? texts.end : BLANK_END} —`,
   ].join('\n');
 }
 

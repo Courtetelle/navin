@@ -28,6 +28,17 @@ function relativeName(
   return { key, label, type: 'line', grow: true, wide: true, frame };
 }
 
+/**
+ * The date a permit or licence was issued (« date of issue » in English).
+ * @param key - Field key.
+ * @param label - Its title.
+ * @param frame - The frame of its permit.
+ * @returns The field.
+ */
+function issueDate(key: string, label: string, frame: string): FieldDefinition {
+  return { key, label, type: 'line', placeholder: 'JJ.MM.AAAA', frame };
+}
+
 /** Fields of a crew line of a cruise (legacy `CREW_FIELDS`). */
 export const CREW_FIELDS: readonly FieldDefinition[] = [
   {
@@ -94,25 +105,42 @@ export const CREW_FIELDS: readonly FieldDefinition[] = [
   },
   {
     key: 'permis',
-    label: 'Permis n°',
+    label: 'Permis mer n°',
     type: 'line',
     lock: true,
     frame: 'permis',
+  },
+  issueDate('permisDate', 'Permis mer délivré le', 'permis'),
+  {
+    key: 'emisPar',
+    label: 'Permis mer établi par',
+    type: 'line',
+    wide: true,
+    frame: 'permis',
+  },
+  {
+    key: 'permisLac',
+    label: 'Permis lac n°',
+    type: 'line',
+    lock: true,
+    frame: 'permisLac',
+  },
+  issueDate('permisLacDate', 'Permis lac délivré le', 'permisLac'),
+  {
+    key: 'permisLacPar',
+    label: 'Permis lac établi par',
+    type: 'line',
+    wide: true,
+    frame: 'permisLac',
   },
   {
     key: 'vhf',
     label: 'Licence VHF n°',
     type: 'line',
     lock: true,
-    frame: 'permis',
+    frame: 'vhf',
   },
-  {
-    key: 'emisPar',
-    label: 'Permis établi par',
-    type: 'line',
-    wide: true,
-    frame: 'permis',
-  },
+  issueDate('vhfDate', 'Licence VHF délivrée le', 'vhf'),
   { key: 'adresse', label: 'Adresse postale', type: 'line', wide: true },
   { key: 'sante', label: 'Santé, allergies à connaître', type: 'area' },
   relativeName('procheNom', 'Proche à contacter : prénom et nom', 'p1'),
@@ -128,12 +156,26 @@ export const MEMBER_FIELDS: readonly FieldDefinition[] = CREW_FIELDS.filter(
   (field) => !['fonction', 'nom'].includes(field.key),
 );
 
+/** The keys added since the legacy app: issue dates and the lake permit. */
+const ISSUE_KEYS: ReadonlySet<string> = new Set([
+  'permisDate',
+  'permisLac',
+  'permisLacDate',
+  'permisLacPar',
+  'vhfDate',
+]);
+
 /** Keys saved on a member card (legacy `MEMBER_KEYS`). */
 export const MEMBER_KEYS: readonly string[] = [
-  ...MEMBER_FIELDS.map((field) => field.key),
+  // The keys of the legacy app first, in its order (« vhf » before
+  // « emisPar »): a card saved again stays as it was.
+  ...MEMBER_FIELDS.map((field) => field.key).filter(
+    (key) => !ISSUE_KEYS.has(key) && key !== 'emisPar',
+  ),
   'pieceType',
   'lieuType',
-];
+  ...ISSUE_KEYS,
+].flatMap((key) => (key === 'vhf' ? ['vhf', 'emisPar'] : [key]));
 
 /** Roles of a lake outing: `[stored value, label]`. */
 export const LAKE_ROLES: ReadonlyArray<readonly [string, string]> = [

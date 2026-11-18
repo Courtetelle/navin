@@ -117,6 +117,11 @@ function readSheets(text: string): RawSheet[] {
   let last: string | null = null;
   for (const raw of text.replaceAll('\r', '').split('\n')) {
     const line = raw.replaceAll(/^[\s*_~>-]+|[\s*_~]+$/g, '');
+    // A title of a part (« — Permis lac — ») or the end of the sheet.
+    if (/^[—–]/.test(line.trim())) {
+      last = null;
+      continue;
+    }
     const normalized = normLabel(line);
     const head = HEADS.findIndex((item) => normalized.startsWith(item));
     if (head !== -1) {

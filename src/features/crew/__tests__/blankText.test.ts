@@ -2,34 +2,30 @@ import { expect, test } from 'vitest';
 
 import { blankLabel, blankText } from '../blankSheet.ts';
 
-test('the French sheet lists the labels in the order of the model', () => {
+test('the French sheet starts with clear rules, then its parts', () => {
   const lines = blankText('fr').split('\n');
 
-  expect(lines.slice(0, 6)).toStrictEqual([
+  expect(lines.slice(0, 4)).toStrictEqual([
     'NavIn · Fiche coéquipier·ère',
     '',
-    'Merci de compléter après chaque « : » puis de me renvoyer ce message tel quel sans rien modifier de mon texte.',
-    'Ne remplis rien si tu n’es pas en mesure de le faire (exemple pour Licence VHF n°).',
-    '',
-    'Prénom : ',
+    '📌 À LIRE AVANT DE REMPLIR',
+    '1️⃣ Appuie longuement sur ce message, « Copier », colle-le dans ta réponse, puis complète-le.',
   ]);
-  expect(lines.slice(13, 18)).toStrictEqual([
-    '(Ici tu remplis à choix soit ta carte d’identité soit ton passeport, mais pas les deux)',
-    'Carte d’identité : ',
-    'Ou',
-    'Passeport : ',
-    'N° de la pièce d’identité : ',
-  ]);
-  expect(lines).toHaveLength(27);
-  expect(lines.at(-2)).toBe('Téléphone du proche : ');
+  expect(lines).toContain('— Permis lac —');
+  expect(lines).toContain('Licence VHF délivrée le (JJ.MM.AAAA) : ');
+  expect(lines.indexOf('— Identité —') + 1).toBe(lines.indexOf('Prénom : '));
+  expect(lines.at(-1)).toBe('— Fin de la fiche, merci ! —');
 });
 
 test('the other languages have their own text', () => {
   expect(blankText('en').split('\n').slice(0, 1)).toStrictEqual([
     'NavIn · Crew member sheet',
   ]);
-  expect(blankText('it').split('\n', 6)[5]).toBe('Nome : ');
-  expect(blankText('es').split('\n', 16)[15]).toBe('O');
+  expect(blankText('en')).toContain(
+    'VHF licence date of issue (DD.MM.YYYY) : ',
+  );
+  expect(blankText('it')).toContain('Nome : ');
+  expect(blankText('es').split('\n')).toContain('O');
 });
 
 test('a label falls back on French', () => {

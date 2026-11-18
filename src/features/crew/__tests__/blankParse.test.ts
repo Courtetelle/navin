@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 
 import { memberClones, normLabel, parseBlank } from '../blankParse.ts';
+import { blankText } from '../blankSheet.ts';
 
 const FILLED_FRENCH = [
   'NavIn · Fiche coéquipier·ère',
@@ -132,4 +133,40 @@ test('similar cards share the name, the phone, the email or the document', () =>
   expect(ids({ email: 'EVA@example.org' })).toStrictEqual(['c']);
   expect(ids({ piece: 'x1' })).toStrictEqual(['d']);
   expect(ids({ tel: '123' })).toStrictEqual([]);
+});
+
+test('a new sheet sent back filled in is read whole, its rules and titles left out', () => {
+  for (const shown of ['fr', 'en', 'it', 'es'] as const) {
+    const filled = blankText(shown)
+      .split('\n')
+      .map((line, index, all) => {
+        if (index === all.findIndex((one) => one.endsWith(' : '))) {
+          return `${line}Zoé`;
+        }
+        if (/VHF.*\(/.test(line)) {
+          return `${line}03.04.2019`;
+        }
+        if (
+          /^(?:Permis lac n°|Lake licence no\.|Patente lago n\.|Permiso de lago n\.º) : $/.test(
+            line,
+          )
+        ) {
+          return `${line}VD 12345`;
+        }
+        return line;
+      })
+      .join('\n');
+
+    expect(parseBlank(filled)).toStrictEqual([
+      { prenom: 'Zoé', permisLac: 'VD 12345', vhfDate: '03.04.2019' },
+    ]);
+  }
+});
+
+test('an older sheet keeps its boat licence', () => {
+  expect(
+    parseBlank(
+      'NavIn · Fiche coéquipier·ère\nPrénom : Léa\nPermis bateau n° : 123\nPermis établi par : VD',
+    ),
+  ).toStrictEqual([{ prenom: 'Léa', permis: '123', emisPar: 'VD' }]);
 });
