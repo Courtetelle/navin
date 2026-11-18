@@ -154,6 +154,11 @@ test('a new sheet sent back filled in is read whole, its rules and titles left o
   }
 });
 
+test('a sheet in the language shown only: no other language in it', () => {
+  expect(blankText('fr')).not.toMatch(/Sea licence|Patente|Titulación|READ/);
+  expect(blankText('en')).not.toMatch(/Permis|Patente|Titulación|LIRE/);
+});
+
 test('an older sheet keeps its boat licence', () => {
   expect(
     parseBlank(

@@ -11,8 +11,10 @@ test('the French sheet starts with clear rules, then its parts', () => {
     '📌 À LIRE AVANT DE REMPLIR',
     '1️⃣ Appuie longuement sur ce message, « Copier », colle-le dans ta réponse, puis complète-le.',
   ]);
-  expect(lines).toContain('— Permis bateau et licence VHF —');
+  expect(lines).toContain('— Permis mer et licence VHF —');
   expect(lines).toContain('Licence VHF n° : ');
+  expect(lines).toContain('Permis mer n° : ');
+  expect(blankText('fr')).not.toContain('Permis bateau');
   // The lake permit and the dates of issue stay on the card only.
   expect(blankText('fr')).not.toMatch(/Permis lac|délivr/);
   expect(lines.indexOf('— Identité —') + 1).toBe(lines.indexOf('Prénom : '));

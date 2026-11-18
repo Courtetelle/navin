@@ -45,7 +45,7 @@ export const BLANK_FIELDS: ReadonlyArray<readonly [string, string]> = [
   ['piecePP', 'Passeport'],
   ['piece', 'N° de la pièce d’identité'],
   ['expiration', 'Date d’expiration de la pièce (JJ.MM.AAAA)'],
-  ['permis', 'Permis bateau n°'],
+  ['permis', 'Permis mer n°'],
   ['emisPar', 'Permis établi par'],
   ['vhf', 'Licence VHF n°'],
   ['adresse', 'Adresse postale'],
@@ -54,6 +54,11 @@ export const BLANK_FIELDS: ReadonlyArray<readonly [string, string]> = [
   ['procheTel', 'Téléphone du proche'],
 ];
 export const BLANK_OLD: ReadonlyArray<readonly [string, string]> = [
+  // The boat licence, before it was called the sea licence.
+  ['permis', 'Permis bateau n°'],
+  ['permis', 'Boat licence no.'],
+  ['permis', 'Patente nautica n.'],
+  ['permis', 'Titulación náutica n.º'],
   ['sexe', 'Homme ou femme'],
   ['pieceType', 'Pièce d’identité (passeport ou carte d’identité)'],
   ['proche2Nom', '2ᵉᵐᵉ proche, prénom et nom'],
@@ -73,7 +78,7 @@ export const BLANK_RULES: readonly string[] = [
 export const BLANK_PARTS: Readonly<Record<BlankPart, string>> = {
   identity: 'Identité',
   document: 'Pièce d’identité',
-  licence: 'Permis bateau et licence VHF',
+  licence: 'Permis mer et licence VHF',
   contact: 'Adresse, santé, proche',
 };
 /** Last line of the French sheet. */
@@ -94,7 +99,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
     parts: {
       identity: 'Identity',
       document: 'Identity document',
-      licence: 'Boat licence and VHF licence',
+      licence: 'Sea licence and VHF licence',
       contact: 'Address, health, emergency contact',
     },
     end: 'End of the sheet, thank you!',
@@ -121,7 +126,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       piecePP: 'Passport',
       piece: 'Identity document no.',
       expiration: 'Document expiry date (DD.MM.YYYY)',
-      permis: 'Boat licence no.',
+      permis: 'Sea licence no.',
       emisPar: 'Licence issued by',
       vhf: 'VHF licence no.',
       adresse: 'Postal address',
@@ -144,7 +149,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
     parts: {
       identity: 'Identità',
       document: 'Documento d’identità',
-      licence: 'Patente nautica e licenza VHF',
+      licence: 'Patente mare e licenza VHF',
       contact: 'Indirizzo, salute, persona da contattare',
     },
     end: 'Fine della scheda, grazie!',
@@ -171,7 +176,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       piecePP: 'Passaporto',
       piece: 'N. del documento d’identità',
       expiration: 'Data di scadenza del documento (GG.MM.AAAA)',
-      permis: 'Patente nautica n.',
+      permis: 'Patente mare n.',
       emisPar: 'Patente rilasciata da',
       vhf: 'Licenza VHF n.',
       adresse: 'Indirizzo postale',
@@ -194,7 +199,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
     parts: {
       identity: 'Identidad',
       document: 'Documento de identidad',
-      licence: 'Titulación náutica y licencia VHF',
+      licence: 'Titulación de mar y licencia VHF',
       contact: 'Dirección, salud, contacto de emergencia',
     },
     end: 'Fin de la ficha, ¡gracias!',
@@ -221,7 +226,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       piecePP: 'Pasaporte',
       piece: 'N.º del documento de identidad',
       expiration: 'Fecha de caducidad del documento (DD.MM.AAAA)',
-      permis: 'Titulación náutica n.º',
+      permis: 'Titulación de mar n.º',
       emisPar: 'Titulación expedida por',
       vhf: 'Licencia VHF n.º',
       adresse: 'Dirección postal',
