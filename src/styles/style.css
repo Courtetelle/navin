@@ -13629,3 +13629,62 @@ main#view .site-link {
   border-color: #ff3b2a;
   color: #ff3b2a;
 }
+/* The sailing CV of a member card */
+.cv-sec .cv-read {
+  padding: 0 14px 12px;
+}
+.cv-sec .cv-totals {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+.cv-sec .cv-intro,
+.cv-sec .cv-owner {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+.cv-sec .cv-list {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  font-weight: 600;
+  font-size: 17px;
+}
+.cv-sec .cv-list li + li {
+  margin-top: 4px;
+}
+.cv-sec .cv-list b {
+  font-weight: 800;
+}
+.cv-sec .cv-edit {
+  padding: 0 0 12px;
+}
+.cv-sec .cv-edit > .help,
+.cv-sec .cv-edit > .lx-sec-h {
+  padding: 0 14px;
+}
+.cv-sec .cv-trip {
+  margin: 10px 14px;
+  padding: 10px 0 4px;
+  border: 2px solid color-mix(in srgb, var(--line) 25%, transparent);
+  border-radius: 14px;
+  background: var(--card);
+}
+.cv-sec .cv-trip .row {
+  padding: 0 10px;
+}
+.cv-sec .cv-trip .cgrid {
+  padding: 8px 10px;
+}
+.cv-sec textarea.text {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 12px;
+  font: inherit;
+}
+.cv-sec .cv-question {
+  margin: 10px 14px 4px;
+  font-size: 17px;
+}
+.cv-sec .cv-read-title {
+  margin: 0 0 6px;
+  font-size: 22px;
+}

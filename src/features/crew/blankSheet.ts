@@ -1,10 +1,11 @@
 import { language } from '../../i18n/langState.ts';
 import { uid } from '../../lib/format.ts';
+import type { MemberCv } from '../../model/memberCv.ts';
 import type { Member } from '../../model/types.ts';
 import { state, toast, updateMembers } from '../../state/index.ts';
 
 import type { ParsedSheet } from './blankParse.ts';
-import { memberClones, parseBlank } from './blankParse.ts';
+import { memberClones, normLabel, parseBlank } from './blankParse.ts';
 import type { BlankForeignLanguage, BlankPart } from './blankTexts.ts';
 import {
   BLANK_END,
@@ -14,7 +15,9 @@ import {
   BLANK_PARTS,
   BLANK_RULES,
 } from './blankTexts.ts';
-import { showArbitration, showFicheList } from './screen.ts';
+import type { ReceivedCv } from './cvBlank.ts';
+import { cvBlankText, isCvBlank, mergeCv, parseCvBlank } from './cvBlank.ts';
+import { showArbitration, showFiche, showFicheList } from './screen.ts';
 
 /** Language of a blank sheet. */
 type BlankLanguage = 'fr' | BlankForeignLanguage;
@@ -91,8 +94,7 @@ export function blankText(shown: BlankLanguage = blankLanguage()): string {
  * Send the blank sheet as a text message, by the share sheet of the phone or
  * else by the clipboard (legacy `blankSend`, lake.js:2110).
  */
-export async function blankSend(): Promise<void> {
-  const text = blankText();
+export async function blankSend(text = blankText()): Promise<void> {
   try {
     if ('share' in navigator) {
       await navigator.share({ text });
@@ -115,6 +117,10 @@ export async function blankSend(): Promise<void> {
  * @param text - Pasted text.
  */
 export function blankImport(text: string): void {
+  if (isCvBlank(text)) {
+    importCvs(text);
+    return;
+  }
   const sheets = parseBlank(text);
   if (sheets.length === 0) {
     toast(
@@ -124,6 +130,72 @@ export function blankImport(text: string): void {
   }
   queue = sheets;
   nextSheet();
+}
+
+/**
+ * Send the CV to fill in: a mail to the person when the card has an
+ * address, else the share sheet of the phone (or the clipboard).
+ * @param who - The person.
+ * @param who.prenom - First name.
+ * @param who.nom - Last name.
+ * @param who.email - Mail address, empty when unknown.
+ */
+export function sendCvBlank(who: {
+  prenom?: string;
+  nom?: string;
+  email?: string;
+}): void {
+  const text = cvBlankText(who);
+  if (who.email) {
+    const subject = encodeURIComponent('CV nautique à remplir');
+    globalThis.location.href = `mailto:${encodeURIComponent(who.email)}?subject=${subject}&body=${encodeURIComponent(text)}`;
+    return;
+  }
+  void blankSend(text);
+}
+
+/**
+ * Whether a card is the one a CV was filled for: same first and last name.
+ * @param one - The card.
+ * @param cv - The CV received.
+ * @returns True for the same person.
+ */
+function same(one: Member, cv: ReceivedCv): boolean {
+  return (
+    normLabel(one.prenom) === normLabel(cv.prenom) &&
+    normLabel(one.nom) === normLabel(cv.nom)
+  );
+}
+
+/**
+ * Put the CVs of a pasted mail on their cards: a card of the same first and
+ * last name gets the navigations and licences added, else a card is made.
+ * @param text - Pasted text.
+ */
+export function importCvs(text: string): void {
+  const received = parseCvBlank(text);
+  if (received.length === 0) {
+    toast('Aucun CV reconnu · collez le mail complet, avec son titre');
+    return;
+  }
+  updateMembers((members) => {
+    for (const cv of received) {
+      const card = members.find((one) => same(one, cv));
+      if (card) {
+        card.cv = mergeCv(card.cv as MemberCv | undefined, cv.cv);
+      } else {
+        members.push({ id: uid(), prenom: cv.prenom, nom: cv.nom, cv: cv.cv });
+      }
+    }
+  });
+  const names = received.map((cv) => `${cv.prenom} ${cv.nom}`.trim());
+  toast(`CV enregistré : ${names.join(', ')}`);
+  const first = received[0];
+  const card = first
+    ? state.data.members.peek().find((one) => same(one, first))
+    : undefined;
+  if (card && received.length === 1) showFiche(card.id);
+  else showFicheList();
 }
 
 /**

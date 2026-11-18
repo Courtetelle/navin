@@ -15,6 +15,7 @@ import {
   blankPdf,
   blankSend,
   boatDocs,
+  cvBlankText,
   printBoatDossier,
 } from './crossDomain.ts';
 import { blankSheet } from './listDocument.ts';
@@ -80,12 +81,25 @@ function PeopleSends(): ReactElement {
           📄 Fiche vide<small>PDF à imprimer</small>
         </Button>
       </div>
+      <div className="row">
+        <Button
+          type="button"
+          className="btn big"
+          data-lxx="cvSend"
+          onClick={() => {
+            void blankSend(cvBlankText());
+          }}
+        >
+          ⛵ CV nautique à remplir
+          <small>texte pour un mail, relu ici au retour</small>
+        </Button>
+      </div>
       <textarea
         ref={received}
         className="text"
         id="lxBlIn"
         rows={4}
-        placeholder="Collez ici le message complété (une ou plusieurs fiches)"
+        placeholder="Collez ici le message complété (fiches ou CV nautique)"
       />
       <div className="row">
         <Button
@@ -98,7 +112,7 @@ function PeopleSends(): ReactElement {
             blankImport(text);
           }}
         >
-          📥 Charger la fiche reçue
+          📥 Charger la fiche ou le CV reçu
         </Button>
       </div>
     </>

@@ -28,6 +28,7 @@ import { isFilled } from '../logbook/compact/fieldChange.ts';
 import { openListPublish } from '../publish/index.ts';
 
 import { FicheAvatar } from './FicheAvatar.tsx';
+import { FicheCv } from './FicheCv.tsx';
 import { FicheForm } from './FicheForm.tsx';
 import { FicheIdentity } from './FicheIdentity.tsx';
 import { FichePhotos } from './FichePhotos.tsx';
@@ -166,6 +167,7 @@ export function Fiche({ id }: FicheProps) {
             <FicheForm record={record} reading={reading} />
           </details>
         )}
+        <FicheCv record={record} reading={reading} />
         <FichePhotos record={record} />
         {record.isNew && cruise && !reading ? (
           <ButtonRow>

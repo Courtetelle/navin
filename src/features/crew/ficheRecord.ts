@@ -37,6 +37,8 @@ export function cardFromForm(
   for (const key of keys) if (data[key]) card[key] = data[key];
   const photos = photosOf(data);
   if (photos.length > 0) card.photos = data.photos;
+  // The sailing CV, kept on the card only (never on a crew line).
+  if (data.cv) card.cv = data.cv;
   const face = data.face as FaceFraming | undefined;
   if (face && photos.some((photo) => photo.id === face.id)) card.face = face;
   return normMemberPhones(card);

@@ -9,6 +9,7 @@ export {
   blankImport,
   blankPdf,
   blankSend,
+  cvBlankText,
   memberAvatar,
 } from '../crew/index.ts';
 export { allLakeTracks, trackStats } from '../map/index.ts';

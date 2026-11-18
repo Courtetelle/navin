@@ -31,3 +31,4 @@ export { openCrewSet } from './crewsEdit.ts';
 export { Fiche } from './Fiche.tsx';
 export type { FicheProps } from './Fiche.tsx';
 export { FicheList } from './FicheList.tsx';
+export { cvBlankText } from './cvBlank.ts';

@@ -639,7 +639,7 @@ async function crewCard(page: Page, theme: string): Promise<void> {
   check(theme, 'a new crew card has the green tick', (await shown()) === '✔');
   check(theme, 'it can be typed in', !(await name.getAttribute('readonly')));
   await name.fill('Marie');
-  await page.locator('#view details.section > summary').click();
+  await page.locator('#view details.section:not(.cv-sec) > summary').click();
   await page.locator('[data-k="nationalite"]').fill('Suisse');
   await button.click();
   await page.waitForTimeout(300);
