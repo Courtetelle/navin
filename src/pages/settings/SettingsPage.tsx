@@ -33,7 +33,6 @@ import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
 import { toggleTheme } from '../../shell/theme.ts';
-import { UiEditSection } from '../../shell/uiEdit/UiEditSection.tsx';
 import { nightOK, state, toast } from '../../state/index.ts';
 import { LakeWarnSetting } from '../weather/LakeWarnings.tsx';
 import { LightningSetting } from '../weather/LightningAlert.tsx';
@@ -414,9 +413,6 @@ export function SettingsPage({ from, arg }: PageProps) {
           >
             <InstallGuide />
             <OfflineSection />
-          </SettingsSection>
-          <SettingsSection section="dev" title="🛠 Mode développeur">
-            <UiEditSection />
           </SettingsSection>
         </div>
       </ShownSection.Provider>
