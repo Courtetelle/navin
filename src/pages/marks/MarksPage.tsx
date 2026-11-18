@@ -3,6 +3,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { inMenuOrder } from '../../features/data/dataOrder.ts';
 import { gotoTarget, setGoto } from '../../features/map/goto.ts';
 import { ListPublishRow } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -22,7 +23,12 @@ export function MarksPage() {
   const tr = useTr();
   const inCruise = Boolean(state.data.cruise.value);
   const target = gotoTarget.value;
-  const marks = state.data.marks.value.toSorted((a, b) => b.n - a.n);
+  const marks = inMenuOrder(
+    'marks',
+    state.data.marks.value.toSorted((a, b) => b.n - a.n),
+    (mark) => mark.id,
+    (mark) => mark.name,
+  );
   const backTo = inCruise ? 'more' : 'tracker';
   const backLabel = inCruise ? '◀ Plus' : '◀ Traceur';
   return (
@@ -38,6 +44,7 @@ export function MarksPage() {
         {tr(backLabel)}
       </PageBack>
       <PageTitle
+        sort="marks"
         helps={[
           'Appui long d’un doigt sur la carte (traceur ou carte du journal) › « Enregistrer une marque ». Numérotées dans l’ordre, avec date, heure et position.',
         ]}

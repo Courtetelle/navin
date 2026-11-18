@@ -3,10 +3,12 @@ import type { ReactNode } from 'react';
 import { Fragment } from 'react';
 import { createPortal } from 'react-dom';
 
+import type { SortedMenu } from '../../features/data/dataOrder.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { state } from '../../state/index.ts';
 
 import { HelpPill } from './HelpText.tsx';
+import { MenuSortButton } from './MenuSortButton.tsx';
 import type { HelpContext } from './helpRules.ts';
 import { helpBubbleText, keepHelp, splitEmptyHelp } from './helpRules.ts';
 import { useIntroLead } from './introLead.ts';
@@ -38,6 +40,11 @@ interface PageTitleProps {
    * @default true
    */
   atTop?: boolean;
+  /**
+   * The list or menu under the title can be sorted: its button at the right.
+   * @default undefined
+   */
+  sort?: SortedMenu;
 }
 
 /**
@@ -53,6 +60,7 @@ export function PageTitle({
   titleText,
   helps = [],
   atTop = true,
+  sort,
 }: PageTitleProps) {
   useSignals();
   const tr = useTr();
@@ -66,11 +74,12 @@ export function PageTitle({
     if (popped) bubble.push(tr(text, { help: true }).trim());
   }
   const title = (
-    <h1>
+    <h1 className={sort ? 'menu-title' : undefined}>
       {typeof children === 'string' ? tr(children) : children}
       {bubble.length > 0 ? (
         <HelpPill text={helpBubbleText(bubble.join(' · '))} inTitle />
       ) : null}
+      {sort ? <MenuSortButton menu={sort} /> : null}
     </h1>
   );
   // The fixed title line of the nav bar holds it, when it is there.

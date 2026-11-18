@@ -1,5 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -9,10 +9,13 @@ import { BoatCard } from '../../features/boats/BoatCard.tsx';
 import { BoatVersions } from '../../features/boats/BoatVersions.tsx';
 import { addBoat } from '../../features/boats/boatActions.ts';
 import { boatsByNav } from '../../features/boats/navOrder.ts';
+import { sortOf } from '../../features/data/dataOrder.ts';
 import { BoatFieldsEditor } from '../../features/onwater/index.ts';
 import { ListPublishRow } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
+import { byAlpha } from '../../lib/alpha.ts';
 import { buzz } from '../../lib/dom.ts';
+import { textOf } from '../../lib/format.ts';
 import { PageValidate } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { useNavEdit } from '../../shell/navbar/useNavEdit.ts';
@@ -94,7 +97,19 @@ function BoatList({
   const [opened, setOpened] = useState<ReadonlySet<string>>(
     () => new Set(openId ? [openId] : []),
   );
-  const [order] = useState(() => boatsByNav().map((boat) => boat.id));
+  const sort = sortOf('boats');
+  // A→Z, or the most often taken first; kept while names are typed.
+  const order = useMemo(
+    () =>
+      sort === 'alpha'
+        ? boatsByNav()
+            .toSorted((first, second) =>
+              byAlpha(textOf(first.info.boat), textOf(second.info.boat)),
+            )
+            .map((boat) => boat.id)
+        : boatsByNav().map((boat) => boat.id),
+    [sort],
+  );
   const boats = order.flatMap((id) => boatById(id) ?? []);
   useNavFields(boats.some((boat) => opened.has(boat.id)));
   useNavEdit(reading, () => onEditing(true));
@@ -116,6 +131,7 @@ function BoatList({
       )}
       <PageTitle
         atTop={fresh}
+        sort="boats"
         helps={[
           'Les données d’un bateau sont reprises à chaque sortie lacustre. Enregistrement automatique. 🗑 : le supprimer (avec confirmation).',
         ]}

@@ -15,6 +15,7 @@ import {
   state,
   updateCrewSets,
 } from '../../state/index.ts';
+import { inMenuOrder } from '../data/dataOrder.ts';
 import { SwipeRow } from '../prep/index.ts';
 import { ListPublishRow, openListPublish } from '../publish/index.ts';
 
@@ -30,8 +31,11 @@ export function CrewsList() {
   useSignals();
   const tr = useTr();
   const cruise = state.data.cruise.value;
-  const sets = state.data.crewSets.value.toSorted((first, second) =>
-    crewSetName(first).localeCompare(crewSetName(second), 'fr'),
+  const sets = inMenuOrder(
+    'crews',
+    state.data.crewSets.value,
+    (set) => set.id,
+    (set) => crewSetName(set),
   );
   const crewCount = cruise?.crew.length ?? 0;
   const names = (cruise?.crew ?? [])
@@ -40,7 +44,7 @@ export function CrewsList() {
     .join(', ');
   return (
     <>
-      <PageTitle>Équipages</PageTitle>
+      <PageTitle sort="crews">Équipages</PageTitle>
       {cruise ? (
         <>
           <h2 className="sub-h">{tr('À bord maintenant')}</h2>

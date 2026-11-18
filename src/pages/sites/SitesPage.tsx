@@ -5,6 +5,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { SiteLogo } from '../../components/shared/SiteLogo.tsx';
+import { bumpIn, inMenuOrder } from '../../features/data/dataOrder.ts';
 import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz, openLink } from '../../lib/dom.ts';
@@ -33,7 +34,12 @@ export function SitesPage() {
   const tr = useTr();
   const [editing, setEditing] = useState<string | null>(null);
   const sites = siteLinksVersion.value >= 0 ? sitesShown() : [];
-  const shown = sites.filter((site) => !site.hidden);
+  const shown = inMenuOrder(
+    'sites',
+    sites.filter((site) => !site.hidden),
+    (site) => site.id,
+    (site) => site.label,
+  );
   const gone = sites.length - shown.length;
   return (
     <>
@@ -48,6 +54,7 @@ export function SitesPage() {
         {tr('◀ data')}
       </PageBack>
       <PageTitle
+        sort="sites"
         helps={[
           'Glisser une bande vers la gauche : ✏️ Modifier le texte du bouton ou l’adresse, 🗑 Effacer (appui long). Toucher une bande ouvre le site.',
         ]}
@@ -85,6 +92,11 @@ export function SitesPage() {
                 aria-label={tr(`${site.label} : ouvrir le site`)}
                 onClick={() => {
                   buzz();
+                  bumpIn(
+                    'sites',
+                    shown.map((one) => one.id),
+                    site.id,
+                  );
                   openLink(site.url);
                 }}
               >

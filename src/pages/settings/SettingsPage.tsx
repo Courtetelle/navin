@@ -1,7 +1,9 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import {
+  Children,
   createContext,
+  isValidElement,
   useContext,
   useLayoutEffect,
   useRef,
@@ -10,8 +12,10 @@ import {
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
+import { MenuSortButton } from '../../components/shared/MenuSortButton.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { WindsockIcon } from '../../components/shared/WindsockIcon.tsx';
+import { bumpIn, inMenuOrder } from '../../features/data/dataOrder.ts';
 import { installPrompt } from '../../features/data/install.ts';
 import {
   WindAlert,
@@ -76,6 +80,36 @@ interface SettingsSectionProps {
 /** The section shown, empty on the menu of the settings. */
 const ShownSection = createContext('');
 
+/** Keys of the sections in the menu, in the order shown. */
+const ShownOrder = createContext<readonly string[]>([]);
+
+/**
+ * The sections of the menu in the order chosen at the right of the title:
+ * alphabetical, or by their use.
+ * @param props - The sections.
+ * @param props.children - The `SettingsSection` elements.
+ * @returns The sections sorted.
+ */
+function SortedSections({ children }: { children: ReactNode }) {
+  useSignals();
+  const tr = useTr();
+  const sections = Children.toArray(children).filter(
+    (child): child is ReactElement<SettingsSectionProps> =>
+      isValidElement<SettingsSectionProps>(child),
+  );
+  const sorted = inMenuOrder(
+    'settings',
+    sections,
+    (section) => section.props.section,
+    (section) => tr(section.props.title),
+  );
+  return (
+    <ShownOrder.Provider value={sorted.map((section) => section.props.section)}>
+      {sorted}
+    </ShownOrder.Provider>
+  );
+}
+
 /**
  * A section of the settings, as the wind alerts of the Météo menu: on the
  * menu a band that opens it; opened, its content alone on the page (its
@@ -91,6 +125,7 @@ function SettingsSection({
 }: SettingsSectionProps) {
   const tr = useTr();
   const shown = useContext(ShownSection);
+  const order = useContext(ShownOrder);
   if (!shown) {
     return (
       <Button
@@ -99,6 +134,7 @@ function SettingsSection({
         data-sec={section}
         onClick={() => {
           buzz();
+          bumpIn('settings', order, section);
           go('settings', section);
         }}
       >
@@ -301,7 +337,10 @@ export function SettingsPage({ from, arg }: PageProps) {
     <>
       {section ? null : (
         <TitleInNav>
-          <h1>{tr('Paramétrages')}</h1>
+          <h1 className="menu-title">
+            {tr('Paramétrages')}
+            <MenuSortButton menu="settings" />
+          </h1>
         </TitleInNav>
       )}
       {origin && (!section || elsewhere) ? (
@@ -338,82 +377,84 @@ export function SettingsPage({ from, arg }: PageProps) {
       ) : null}
       <ShownSection.Provider value={section}>
         <div className={section ? 'set-one' : 'set-secs set-menu'}>
-          <SettingsSection section="zone" title="🧭 Zone et écran">
-            {nightOK() ? <ThemeRow /> : null}
-            <ZoneSim />
-            <SeaCenterRow basin="atl" />
-            <SeaCenterRow basin="med" />
-            <LakeCenterRow />
-            <LangRow />
-            <WakeRow />
-            <HelpBubblesRow />
-          </SettingsSection>
-          <SettingsSection section="trace" title="🛰 Traceur et journal">
-            <AutoLogRows />
-            <GotoArrivalRows />
-            <PrefillRow />
-            <WeatherRow />
-          </SettingsSection>
-          <SettingsSection section="live" title="🌬 Paramétrages LiveMétéo">
-            <LiveRow />
-          </SettingsSection>
-          <SettingsSection
-            section="wind"
-            title="Paramétrage des alertes vent"
-            icon={<WindsockIcon />}
-          >
-            <WindAlert noTest />
-          </SettingsSection>
-          <SettingsSection
-            section="lightning"
-            title="⚡ Paramétrage des alertes orage"
-          >
-            <LightningSetting />
-          </SettingsSection>
-          <SettingsSection
-            section="lakes"
-            title="🚨 Paramétrage des feux d’avis des lacs"
-          >
-            <LakeWarnSetting />
-          </SettingsSection>
-          <SettingsSection
-            section="keys"
-            title="🔑 Enregistrement des clés météo et du compte relais Cloudflare"
-          >
-            <WindKeys />
-          </SettingsSection>
-          <SettingsSection section="alert" title="⚠️ Alerte de profondeur">
-            <DepthSet />
-          </SettingsSection>
-          <SettingsSection section="share" title="📤 Partages">
-            <h3>{tr('Mise en page')}</h3>
-            <ShareThemePicker />
-          </SettingsSection>
-          <SettingsSection section="simu" title="🆘 Simulation SOS">
-            <SimulationSection />
-          </SettingsSection>
-          <SettingsSection section="tests" title="🧪 Tests">
-            <TestsSection />
-          </SettingsSection>
-          <SettingsSection
-            section="boats"
-            title="🚤 Marges de sécurité et rapports de longueurs"
-          >
-            <MarginRows />
-          </SettingsSection>
-          <SettingsSection
-            section="data"
-            title="🔄 Sauvegarde et synchronisation"
-          >
-            <BackupSections />
-          </SettingsSection>
-          <SettingsSection
-            section="install"
-            title="📲 Installation et hors ligne"
-          >
-            <InstallGuide />
-            <OfflineSection />
-          </SettingsSection>
+          <SortedSections>
+            <SettingsSection section="zone" title="🧭 Zone et écran">
+              {nightOK() ? <ThemeRow /> : null}
+              <ZoneSim />
+              <SeaCenterRow basin="atl" />
+              <SeaCenterRow basin="med" />
+              <LakeCenterRow />
+              <LangRow />
+              <WakeRow />
+              <HelpBubblesRow />
+            </SettingsSection>
+            <SettingsSection section="trace" title="🛰 Traceur et journal">
+              <AutoLogRows />
+              <GotoArrivalRows />
+              <PrefillRow />
+              <WeatherRow />
+            </SettingsSection>
+            <SettingsSection section="live" title="🌬 Paramétrages LiveMétéo">
+              <LiveRow />
+            </SettingsSection>
+            <SettingsSection
+              section="wind"
+              title="Paramétrage des alertes vent"
+              icon={<WindsockIcon />}
+            >
+              <WindAlert noTest />
+            </SettingsSection>
+            <SettingsSection
+              section="lightning"
+              title="⚡ Paramétrage des alertes orage"
+            >
+              <LightningSetting />
+            </SettingsSection>
+            <SettingsSection
+              section="lakes"
+              title="🚨 Paramétrage des feux d’avis des lacs"
+            >
+              <LakeWarnSetting />
+            </SettingsSection>
+            <SettingsSection
+              section="keys"
+              title="🔑 Enregistrement des clés météo et du compte relais Cloudflare"
+            >
+              <WindKeys />
+            </SettingsSection>
+            <SettingsSection section="alert" title="⚠️ Alerte de profondeur">
+              <DepthSet />
+            </SettingsSection>
+            <SettingsSection section="share" title="📤 Partages">
+              <h3>{tr('Mise en page')}</h3>
+              <ShareThemePicker />
+            </SettingsSection>
+            <SettingsSection section="simu" title="🆘 Simulation SOS">
+              <SimulationSection />
+            </SettingsSection>
+            <SettingsSection section="tests" title="🧪 Tests">
+              <TestsSection />
+            </SettingsSection>
+            <SettingsSection
+              section="boats"
+              title="🚤 Marges de sécurité et rapports de longueurs"
+            >
+              <MarginRows />
+            </SettingsSection>
+            <SettingsSection
+              section="data"
+              title="🔄 Sauvegarde et synchronisation"
+            >
+              <BackupSections />
+            </SettingsSection>
+            <SettingsSection
+              section="install"
+              title="📲 Installation et hors ligne"
+            >
+              <InstallGuide />
+              <OfflineSection />
+            </SettingsSection>
+          </SortedSections>
         </div>
       </ShownSection.Provider>
       {section ? null : (

@@ -11,6 +11,7 @@ import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
 import { memberLockMsg, memberName, state } from '../../state/index.ts';
 import { membersByNav } from '../boats/index.ts';
+import { inMenuOrder } from '../data/dataOrder.ts';
 import { SwipeRow } from '../prep/index.ts';
 import { ListPublishRow, openListPublish } from '../publish/index.ts';
 
@@ -32,7 +33,13 @@ interface FicheListScreenProps {
 export function FicheListScreen({ lead }: FicheListScreenProps) {
   useSignals();
   const tr = useTr();
-  const sorted = membersByNav();
+  // A→Z, or the most often aboard first: the button at the right of the title.
+  const sorted = inMenuOrder(
+    'people',
+    membersByNav(),
+    (member) => member.id,
+    (member) => memberName(member),
+  );
   const toData = !state.data.cruise.value || state.view.ficheFromData.value;
   const backLabel = `◀ ${toData ? 'data' : 'Équipage'}`;
   return (
@@ -50,6 +57,7 @@ export function FicheListScreen({ lead }: FicheListScreenProps) {
       </PageBack>
       <PageTitle
         atTop={lead}
+        sort="people"
         helps={[
           'Touchez une fiche pour la compléter ou la modifier. 🗑 : la supprimer (avec confirmation).',
         ]}

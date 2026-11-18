@@ -13688,3 +13688,18 @@ main#view .site-link {
   margin: 0 0 6px;
   font-size: 22px;
 }
+/* A menu title with its sort button at the right */
+h1.menu-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.btn.menu-sort {
+  margin-left: auto;
+  flex: none;
+  width: auto;
+  min-height: 0;
+  padding: 6px 12px;
+  font-size: 17px;
+  border-radius: 12px;
+}

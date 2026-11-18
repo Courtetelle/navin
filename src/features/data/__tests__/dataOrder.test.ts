@@ -33,3 +33,28 @@ test('the first tile and an unknown tile change nothing', () => {
   expect(bumpedOrder(['a', 'b'], 'a', [])).toBeNull();
   expect(bumpedOrder(['a', 'b'], 'z', [])).toBeNull();
 });
+
+test('a menu is alphabetical until turned to the order of its use', async () => {
+  const { inMenuOrder, menuSort, toggleMenuSort, bumpIn } =
+    await import('../dataOrder.ts');
+  menuSort.value = {};
+  const entries = [
+    { key: 'z', title: '🧭 Zone' },
+    { key: 'a', title: '⚡ Alertes' },
+    { key: 'e', title: '👥 Équipages' },
+  ];
+  const keys = () =>
+    inMenuOrder(
+      'settings',
+      entries,
+      (entry) => entry.key,
+      (entry) => entry.title,
+    ).map((entry) => entry.key);
+  expect(keys()).toStrictEqual(['a', 'e', 'z']);
+  toggleMenuSort('settings');
+  expect(keys()).toStrictEqual(['z', 'a', 'e']);
+  bumpIn('settings', ['z', 'a', 'e'], 'e');
+  expect(keys()).toStrictEqual(['z', 'e', 'a']);
+  toggleMenuSort('settings');
+  expect(keys()).toStrictEqual(['a', 'e', 'z']);
+});
