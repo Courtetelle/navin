@@ -54,11 +54,6 @@ export const BLANK_FIELDS: ReadonlyArray<readonly [string, string]> = [
   ['procheTel', 'Téléphone du proche'],
 ];
 export const BLANK_OLD: ReadonlyArray<readonly [string, string]> = [
-  // The boat licence, before it was called the sea licence.
-  ['permis', 'Permis bateau n°'],
-  ['permis', 'Boat licence no.'],
-  ['permis', 'Patente nautica n.'],
-  ['permis', 'Titulación náutica n.º'],
   ['sexe', 'Homme ou femme'],
   ['pieceType', 'Pièce d’identité (passeport ou carte d’identité)'],
   ['proche2Nom', '2ᵉᵐᵉ proche, prénom et nom'],
