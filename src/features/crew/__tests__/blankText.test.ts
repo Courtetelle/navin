@@ -11,8 +11,10 @@ test('the French sheet starts with clear rules, then its parts', () => {
     '📌 À LIRE AVANT DE REMPLIR',
     '1️⃣ Appuie longuement sur ce message, « Copier », colle-le dans ta réponse, puis complète-le.',
   ]);
-  expect(lines).toContain('— Permis lac —');
-  expect(lines).toContain('Licence VHF délivrée le (JJ.MM.AAAA) : ');
+  expect(lines).toContain('— Permis bateau et licence VHF —');
+  expect(lines).toContain('Licence VHF n° : ');
+  // The lake permit and the dates of issue stay on the card only.
+  expect(blankText('fr')).not.toMatch(/Permis lac|délivr/);
   expect(lines.indexOf('— Identité —') + 1).toBe(lines.indexOf('Prénom : '));
   expect(lines.at(-1)).toBe('— Fin de la fiche, merci ! —');
 });
@@ -21,9 +23,7 @@ test('the other languages have their own text', () => {
   expect(blankText('en').split('\n').slice(0, 1)).toStrictEqual([
     'NavIn · Crew member sheet',
   ]);
-  expect(blankText('en')).toContain(
-    'VHF licence date of issue (DD.MM.YYYY) : ',
-  );
+  expect(blankText('en')).toContain('VHF licence no. : ');
   expect(blankText('it')).toContain('Nome : ');
   expect(blankText('es').split('\n')).toContain('O');
 });

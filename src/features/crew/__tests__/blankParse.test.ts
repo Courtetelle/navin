@@ -143,22 +143,13 @@ test('a new sheet sent back filled in is read whole, its rules and titles left o
         if (index === all.findIndex((one) => one.endsWith(' : '))) {
           return `${line}Zoé`;
         }
-        if (/VHF.*\(/.test(line)) {
-          return `${line}03.04.2019`;
-        }
-        if (
-          /^(?:Permis lac n°|Lake licence no\.|Patente lago n\.|Permiso de lago n\.º) : $/.test(
-            line,
-          )
-        ) {
-          return `${line}VD 12345`;
-        }
+        if (/VHF.* : $/.test(line)) return `${line}CRR 88`;
         return line;
       })
       .join('\n');
 
     expect(parseBlank(filled)).toStrictEqual([
-      { prenom: 'Zoé', permisLac: 'VD 12345', vhfDate: '03.04.2019' },
+      { prenom: 'Zoé', vhf: 'CRR 88' },
     ]);
   }
 });
