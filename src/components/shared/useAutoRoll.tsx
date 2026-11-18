@@ -5,7 +5,6 @@ import type { ReactNode, RefObject } from 'react';
 import { useLayoutEffect } from 'react';
 
 import { rollText } from '../../shell/uiEdit/roll.ts';
-import { uiEditMode } from '../../shell/uiEdit/uiEditState.ts';
 
 /** What an element cut by the stylesheet renders. */
 interface AutoRoll {
@@ -45,7 +44,7 @@ export function useAutoRoll(
     write(overflowing, over);
     if (!over) return undefined;
     write(rolled, true);
-    const timer = setTimeout(() => rollText(element, uiEditMode.peek()), 400);
+    const timer = setTimeout(() => rollText(element), 400);
     return () => clearTimeout(timer);
   }, [reference, text, measuredText, widthKey, overflowing, rolled]);
   return {

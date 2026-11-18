@@ -2,7 +2,6 @@ import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 
 import { rollText } from './roll.ts';
-import { uiEditMode } from './uiEditState.ts';
 
 /**
  * The scrolling ribbon of a « déroulant » button (`span.ue-track`): it rolls
@@ -14,8 +13,7 @@ export function RollTrack({ children }: { children: ReactNode }) {
   const reference = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const timer = setTimeout(
-      () =>
-        rollText(reference.current?.parentElement ?? null, uiEditMode.peek()),
+      () => rollText(reference.current?.parentElement ?? null),
       400,
     );
     return () => clearTimeout(timer);

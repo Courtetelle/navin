@@ -14,7 +14,7 @@ import { editClasses, editedChildren } from '../uiEdit/applyUiEdit.tsx';
 
 import type { TabDisplay } from './tabDisplays.ts';
 import { TAB_ORDER, tabDisplays } from './tabDisplays.ts';
-import { faceIsEdited, tabEdit, tabEditKey } from './tabEdits.ts';
+import { faceIsEdited, tabEdit } from './tabEdits.ts';
 import type { TopTabKey } from './topMenuModel.ts';
 import { leaveMenusOnTap, refreshBase } from './topMenuState.ts';
 import { sosSimulation } from './topState.ts';
@@ -24,12 +24,6 @@ import {
   tabKeyDown,
   tabPointerDown,
 } from './topTabGestures.ts';
-
-const TAB_ORIGINALS: Record<TopTabKey, string> = {
-  tracker: 'NavIn',
-  more: 'data',
-  sos: '',
-};
 
 /** Menus that blink on their own button (pin, gear, VHF), not on data. */
 const OWN_BUTTON = new Set(['marks', 'settings', 'vhf']);
@@ -131,8 +125,6 @@ function TopTab({ tab, active }: TopTabProps) {
       noUiEdit
       data-view={tab}
       data-base={base ?? undefined}
-      data-ue-key={tabEditKey(tab)}
-      data-ue-orig={TAB_ORIGINALS[tab]}
       className={classes.filter(Boolean).join(' ')}
       onPointerDown={() => tabPointerDown(tab)}
       onClick={() => tabClick(tab, active)}

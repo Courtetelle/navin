@@ -14,8 +14,6 @@ interface UiEditResult {
   classes: string[];
   /** Children to render. */
   children: ReactNode;
-  /** `data-ue-*` attributes for the editor. */
-  attributes: Record<string, string | undefined>;
 }
 
 /**
@@ -23,7 +21,7 @@ interface UiEditResult {
  * from the screen, the id or the `data-*` attributes or the text; new label,
  * small text, size and long-text mode. The caller must call `useSignals()`.
  * @param props - Button props (id, className, data attributes, children).
- * @returns Classes, children and editor attributes.
+ * @returns Classes and children.
  */
 export function useUiEdit(
   props: Record<string, unknown> & { children?: ReactNode },
@@ -32,7 +30,7 @@ export function useUiEdit(
   const className = typeof props.className === 'string' ? props.className : '';
   const editable = /(?:^|\s)(?:btn|tab)(?:\s|$)/.test(className);
   if (!editable) {
-    return { classes: [], children: props.children, attributes: {} };
+    return { classes: [], children: props.children };
   }
   const texts = buttonTexts(props.children);
   const data: Array<[string, string]> = [];
@@ -56,10 +54,5 @@ export function useUiEdit(
   return {
     classes: editClasses(edit),
     children,
-    attributes: {
-      'data-ue-key': key,
-      'data-ue-orig': texts.text,
-      'data-ue-orig-sub': texts.sub,
-    },
   };
 }

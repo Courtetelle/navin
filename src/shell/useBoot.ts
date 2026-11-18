@@ -32,7 +32,6 @@ import { followTabEdits } from './topbar/tabEdits.ts';
 import { refreshBase, resetTab } from './topbar/topMenuState.ts';
 import { followTopState } from './topbar/topState.ts';
 import { installRollListeners } from './uiEdit/rollListeners.ts';
-import { installUiEditCatch } from './uiEdit/uiEditState.ts';
 import { followWake } from './wake.ts';
 
 let booted = false;
@@ -51,7 +50,6 @@ function boot(): void {
   installParityHook();
   installToastListeners();
   installDecimalComma();
-  installUiEditCatch();
   installRollListeners();
   installFrameLinks();
   // Links to other sites open in Chrome, NavIn stays beside them.

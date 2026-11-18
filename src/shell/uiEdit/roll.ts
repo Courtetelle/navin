@@ -7,10 +7,9 @@ const rollEnds = new WeakMap<Element, number>();
  * `rolling` class. The track is a `span.ue-track` the component renders with a
  * constant class, so these writes never conflict with React.
  * @param container - The button or text element holding `.ue-track`.
- * @param editing - The label edit mode is on (no rolling then).
  */
-export function rollText(container: Element | null, editing = false): void {
-  if (!container?.isConnected || editing) return;
+export function rollText(container: Element | null): void {
+  if (!container?.isConnected) return;
   const track = container.querySelector<HTMLElement>('.ue-track');
   if (!track) return;
   const over = track.scrollWidth - container.clientWidth + 24;

@@ -3,7 +3,6 @@ import { state } from '../../state/index.ts';
 import { editClasses } from './applyUiEdit.tsx';
 import { rollText } from './roll.ts';
 import { identityOf, uiEditKey } from './uiEditKey.ts';
-import { uiEditMode } from './uiEditState.ts';
 
 const FIRST_ROLL_MS = 400;
 
@@ -25,9 +24,6 @@ function applyToButton(button: HTMLElement): void {
   const { scope, identity } = identityOf(button);
   const key = uiEditKey(scope, state.view.currentView.peek(), identity);
   const small = button.querySelector<HTMLElement>(':scope > small');
-  button.dataset.ueKey = key;
-  button.dataset.ueOrig = identity.text;
-  if (small?.textContent) button.dataset.ueOrigSub = small.textContent;
   const edit = state.data.uiEdits.peek()[key];
   if (!edit) return;
   if (edit.label) writeLabel(button, edit.label, Boolean(small));
@@ -36,7 +32,7 @@ function applyToButton(button: HTMLElement): void {
   if (edit.wrap === 'roll') {
     wrapInTrack(button);
     setTimeout(() => {
-      rollText(button, uiEditMode.peek());
+      rollText(button);
     }, FIRST_ROLL_MS);
   }
 }

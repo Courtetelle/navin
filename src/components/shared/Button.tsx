@@ -50,12 +50,7 @@ export function Button({
   });
   const classes = [typed, ...edit.classes].filter(Boolean).join(' ');
   return (
-    <Tag
-      {...rest}
-      {...edit.attributes}
-      className={classes || undefined}
-      ref={ref}
-    >
+    <Tag {...rest} className={classes || undefined} ref={ref}>
       {edit.children}
     </Tag>
   );

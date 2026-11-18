@@ -7,7 +7,6 @@ import { RemarkPill } from './shell/remark/RemarkPill.tsx';
 import { SearchButton } from './shell/search/SearchButton.tsx';
 import { Toast } from './shell/toast/Toast.tsx';
 import { Topbar } from './shell/topbar/Topbar.tsx';
-import { UiEditor } from './shell/uiEdit/UiEditor.tsx';
 import { useBoot } from './shell/useBoot.ts';
 
 /**
@@ -31,7 +30,6 @@ export function App() {
       <SearchButton />
       <SideRails />
       <RemarkPill />
-      <UiEditor />
     </>
   );
 }

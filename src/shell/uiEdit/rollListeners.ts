@@ -1,5 +1,4 @@
 import { rollText } from './roll.ts';
-import { uiEditMode } from './uiEditState.ts';
 
 const ROLLING = '.ue-roll, .ue-roll-auto';
 
@@ -26,12 +25,12 @@ function removeRollListeners(): void {
 
 function rollFromEvent(event: Event): void {
   if (!(event.target instanceof Element)) return;
-  rollText(event.target.closest(ROLLING), uiEditMode.peek());
+  rollText(event.target.closest(ROLLING));
 }
 
 function rollUnderFinger(event: TouchEvent): void {
   const touch = event.touches[0];
   if (!touch) return;
   const element = document.elementFromPoint(touch.clientX, touch.clientY);
-  rollText(element?.closest(ROLLING) ?? null, uiEditMode.peek());
+  rollText(element?.closest(ROLLING) ?? null);
 }

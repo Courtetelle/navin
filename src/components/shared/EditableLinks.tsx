@@ -17,11 +17,7 @@ export function LinkButton({
   useSignals();
   const edit = useUiEdit({ ...rest, className, children });
   return (
-    <a
-      {...rest}
-      {...edit.attributes}
-      className={[className, ...edit.classes].join(' ')}
-    >
+    <a {...rest} className={[className, ...edit.classes].join(' ')}>
       {edit.children}
     </a>
   );
@@ -41,11 +37,7 @@ export function LabelButton({
   useSignals();
   const edit = useUiEdit({ ...rest, className, children });
   return (
-    <label
-      {...rest}
-      {...edit.attributes}
-      className={[className, ...edit.classes].join(' ')}
-    >
+    <label {...rest} className={[className, ...edit.classes].join(' ')}>
       {edit.children}
     </label>
   );
