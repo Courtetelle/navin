@@ -48,7 +48,6 @@ test('a lake outing shows its sheet, its rules and the lake totals', () => {
 
   expect(keys(tiles)).toStrictEqual([
     'day',
-    'log',
     'soslogs',
     'traces',
     'meteo',
@@ -67,11 +66,10 @@ test('a lake outing shows its sheet, its rules and the lake totals', () => {
     'cartes',
     'nmea',
     'sites',
-    'print',
     'export',
   ]);
   expect(tiles[0]?.sub).toBe('fiche de la sortie');
-  expect(tiles[14]?.sub).toBe('3 à bord · 4 groupes enregistrés');
+  expect(tiles[13]?.sub).toBe('3 à bord · 4 groupes enregistrés');
 });
 
 test('a sea cruise has its task rotation and the GPX exchange', () => {

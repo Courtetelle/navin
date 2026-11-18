@@ -117,7 +117,6 @@ export function tilesWithCruise(): MoreTile[] {
       title: '📅 Journée',
       sub: lake ? 'fiche de la sortie' : 'fiche du jour, météo, route prévue',
     },
-    { key: 'log', title: '📜 Journal', sub: 'toutes les entrées' },
     sosLogsTile(),
     TRACES,
     METEO,
@@ -171,11 +170,6 @@ export function tilesWithCruise(): MoreTile[] {
     chartsTile(),
     NMEA,
     SITES,
-    {
-      key: 'print',
-      title: '📤 Partager le livre de bord',
-      sub: 'PDF A4, choisir les pages',
-    },
     {
       key: 'export',
       title: '⇪ Échanges de fichiers',
