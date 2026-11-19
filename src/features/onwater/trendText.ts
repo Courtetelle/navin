@@ -47,28 +47,64 @@ export function chartPaths(points: readonly WindPoint[]): ChartPaths {
   const top = Math.max(10, Math.ceil(high / 5) * 5);
   const x = (t: number) => (((t - first) / span) * WIDTH).toFixed(1);
   const y = (knots: number) => (HEIGHT - (knots / top) * HEIGHT).toFixed(1);
-  const avg = points
-    .map((point, index) => `${index ? 'L' : 'M'}${x(point.t)} ${y(point.avg)}`)
+  // A gap of the record (NavIn closed): the line stops and starts again.
+  const runs = splitAtGaps(points);
+  const avg = runs
+    .map((run) =>
+      run.length === 1 && run[0]
+        ? `M${x(run[0].t)} ${y(run[0].avg)}l0.1 0`
+        : run
+            .map(
+              (point, index) =>
+                `${index ? 'L' : 'M'}${x(point.t)} ${y(point.avg)}`,
+            )
+            .join(''),
+    )
     .join('');
-  const withGust = points.filter((point) => point.gust != null);
-  const gust =
-    withGust.length < 2
-      ? ''
-      : `${withGust
-          .map(
-            (point, index) =>
-              `${index ? 'L' : 'M'}${x(point.t)} ${y(point.gust ?? point.avg)}`,
-          )
-          .join('')}${withGust
-          .toReversed()
-          .map((point) => `L${x(point.t)} ${y(point.avg)}`)
-          .join('')}Z`;
+  const gust = runs
+    .map((run) => {
+      const withGust = run.filter((point) => point.gust != null);
+      if (withGust.length < 2) return '';
+      return `${withGust
+        .map(
+          (point, index) =>
+            `${index ? 'L' : 'M'}${x(point.t)} ${y(point.gust ?? point.avg)}`,
+        )
+        .join('')}${withGust
+        .toReversed()
+        .map((point) => `L${x(point.t)} ${y(point.avg)}`)
+        .join('')}Z`;
+    })
+    .join('');
   const minutes = Math.round(span / 60_000);
   const since =
     minutes >= 90
       ? `il y a ${Math.round(span / 3_600_000)} h`
       : `il y a ${minutes} min`;
   return { width: WIDTH, height: HEIGHT, avg, gust, top, since };
+}
+
+/** Longer than this without a measurement, the curve is cut. */
+const GAP_MS = 45 * 60_000;
+
+/**
+ * The points in runs without a gap of the record.
+ * @param points - Points, oldest first.
+ * @returns The runs.
+ */
+function splitAtGaps(points: readonly WindPoint[]): WindPoint[][] {
+  const runs: WindPoint[][] = [];
+  let run: WindPoint[] = [];
+  for (const point of points) {
+    const last = run.at(-1);
+    if (last && point.t - last.t > GAP_MS) {
+      runs.push(run);
+      run = [];
+    }
+    run.push(point);
+  }
+  if (run.length > 0) runs.push(run);
+  return runs;
 }
 
 function duration(minutes: number): string {
