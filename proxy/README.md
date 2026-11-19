@@ -18,23 +18,27 @@ Le relais ne sert que le site de NavIn, ne lit que ces deux serveurs, et garde
 chaque réponse 5 minutes. L’offre gratuite de Cloudflare permet 100 000
 requêtes par jour, très au-delà de l’usage de NavIn.
 
-## Enregistrer les stations à clé NavIn fermé (facultatif)
+## Enregistrer toutes les stations NavIn fermé
 
 Avec l’enregistrement installé (KV « NAVIN » et déclencheur toutes les 10
-minutes), le relais peut lire lui-même les stations Météo-France autour des
-points de NavIn (le GPS et les trois zones), même quand NavIn est fermé.
+minutes), le relais lit lui-même, autour des points de NavIn (le GPS et les
+trois zones), les stations de tous les réseaux de NavIn : MeteoSwiss, balises
+OpenWindMap, aéroports (METAR), bouées NOAA, ItaliaMeteo, Puertos del Estado,
+SOCIB, IPMA, Rijkswaterstaat, DMI, SMHI, FMI et DHMZ. Il les lit à tour de
+rôle (chaque réseau toutes les 20 à 30 minutes environ), dans la limite de 50
+requêtes par passage de l’offre gratuite.
 
-1. Workers & Pages › navin-relay › Paramètres › Variables et secrets ›
-   Ajouter › type « Secret », nom `MF_KEY`, valeur : la clé Météo-France
-   copiée depuis le portail de Météo-France › Déployer.
-2. Pour l’Espagne : de même `AEMET_KEY` avec la clé AEMET OpenData.
-3. Recopier le code du relais (NavIn › « 📋 Copier le code du relais ») et
-   Déployer.
+Les réseaux à clé s’y ajoutent avec un secret chacun : Workers & Pages ›
+navin-relay › Paramètres › Variables et secrets › Ajouter › type « Secret » :
 
-Les clés restent chez Cloudflare comme secrets : le relais ne les renvoie
-jamais. Il lit à chaque passage les stations les plus proches de chaque point
-et, à tour de rôle, les suivantes (environ toutes les 30 minutes), dans la
-limite de 50 requêtes par passage de l’offre gratuite.
+- `MF_KEY` : la clé Météo-France ;
+- `AEMET_KEY` : la clé AEMET OpenData (Espagne) ;
+- `METOFFICE_KEY` : la clé Met Office (Royaume-Uni) ;
+- `FROST_KEY` : l’identifiant client Frost (Norvège).
+
+Puis recopier le code du relais (NavIn › « 📋 Copier le code du relais ») et
+Déployer. Les clés restent chez Cloudflare comme secrets : le relais ne les
+renvoie jamais.
 
 ## Synchroniser les appareils (facultatif)
 

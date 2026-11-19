@@ -12,7 +12,7 @@ import { KeyAccount } from './KeyAccount.tsx';
 import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
 import { metarReadings } from './euStations.ts';
-import { relayRecords } from './relayRecord.ts';
+import { keyedMissing, relayRecords } from './relayRecord.ts';
 
 /** A place with airports around, to try the relay. */
 const SAMPLE = { lat: 50.8, lon: -1.3 };
@@ -55,8 +55,8 @@ export function RelayRow() {
               ? `Enregistrement actif : 24 h des stations gardées, NavIn fermé, pour tous les appareils. ${
                   recording.reads.length > 0
                     ? `Le relais lit lui-même : ${recording.reads.join(', ')}.`
-                    : 'Météo-France NavIn fermé : étape 12 du guide.'
-                }`
+                    : 'Le relais doit être mis à jour (étapes 4 et 5 du guide).'
+                }${keyedMissing(recording.reads)}`
               : 'Enregistrement pas encore installé (étapes 8 à 11 du guide).'
           }`
         : 'Le relais ne répond pas : vérifiez son adresse.',
