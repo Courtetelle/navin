@@ -27,7 +27,7 @@ type BoatScreen =
   | { kind: 'fields' | 'versions'; id: string };
 
 /**
- * Screen `boats` (legacy `VIEWS.boats`): Mes bateaux, their label editor and
+ * Screen `boats` (legacy `VIEWS.boats`): Bateaux, their label editor and
  * their previous versions, swapped inside the same screen.
  * @param props - Page props; `arg` is the id of the boat to open, or `{ fields: id }`.
  * @returns The screen content, rendered inside `<main id="view">`.
@@ -136,7 +136,7 @@ function BoatList({
           'Les données d’un bateau sont reprises à chaque sortie lacustre. Enregistrement automatique. 🗑 : le supprimer (avec confirmation).',
         ]}
       >
-        Mes bateaux
+        Bateaux
       </PageTitle>
       <div
         ref={sheet}

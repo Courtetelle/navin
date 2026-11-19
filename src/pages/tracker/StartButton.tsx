@@ -10,7 +10,7 @@ import { START_SVG } from '../../shell/topbar/tabIcons.ts';
 import { ListSign } from './ListSign.tsx';
 
 /**
- * START: a touch starts the track; a long press opens Mes traces.
+ * START: a touch starts the track; a long press opens Traces.
  * @returns The button.
  */
 export function StartButton() {
@@ -21,7 +21,7 @@ export function StartButton() {
       type="button"
       noUiEdit
       className={`rail-btn rail-start${press.hit ? ' lp-hit' : ''}`}
-      aria-label={tr('START : démarrer la trace · appui long : Mes traces')}
+      aria-label={tr('START : démarrer la trace · appui long : Traces')}
       onClick={() => {
         buzz();
         domainActions.quickStart();
@@ -29,7 +29,7 @@ export function StartButton() {
       {...press.handlers}
     >
       <span className="rail-icon">{markupToReact(START_SVG)}</span>
-      {/* Its long press opens Mes traces */}
+      {/* Its long press opens Traces */}
       <ListSign />
     </Button>
   );

@@ -42,7 +42,7 @@ interface BoatCardProps {
 }
 
 /**
- * One boat of Mes bateaux (`details[data-b]`): sheet, photos, publishing,
+ * One boat of Bateaux (`details[data-b]`): sheet, photos, publishing,
  * deletion by long press or 🗑.
  * @param props - Boat and actions.
  * @returns The card.

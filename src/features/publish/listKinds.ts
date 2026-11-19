@@ -27,13 +27,13 @@ import type { ListKind, PublishItem } from './types.ts';
 
 /** Title of each list. */
 export const LIST_TITLES: Readonly<Record<ListKind, string>> = {
-  people: 'Les coéquipiers·ères',
+  people: 'Équipiers·ères',
   crews: 'Équipages',
-  boats: 'Mes bateaux',
-  traces: 'Mes traces',
-  marks: 'Mes marques',
+  boats: 'Bateaux',
+  traces: 'Traces',
+  marks: 'Marques',
   ckbases: 'Bases de check-list',
-  soslogs: 'Logs SOS',
+  soslogs: 'Journal SOS',
   alerts: 'Journal des alertes',
 };
 

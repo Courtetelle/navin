@@ -167,7 +167,7 @@ export function sosExEnd(): void {
   });
   go('settings', 'simu');
   toast(
-    '✓ Exercice SOS terminé · log gardé dans data › Logs SOS (🧪 Exercice)',
+    '✓ Exercice SOS terminé · log gardé dans data › Journal SOS (🧪 Exercice)',
   );
 }
 

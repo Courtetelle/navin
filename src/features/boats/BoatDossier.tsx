@@ -114,14 +114,14 @@ function DossierSheet({
   return (
     <>
       <PageBack
-        label="◀ Mes bateaux"
+        label="◀ Bateaux"
         id="dosBack"
         onClick={() => {
           buzz();
           go('boats', boat.id);
         }}
       >
-        {tr('◀ Mes bateaux')}
+        {tr('◀ Bateaux')}
       </PageBack>
       {reading ? null : (
         <PageValidate

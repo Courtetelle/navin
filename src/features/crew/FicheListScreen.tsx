@@ -62,7 +62,7 @@ export function FicheListScreen({ lead }: FicheListScreenProps) {
           'Touchez une fiche pour la compléter ou la modifier. 🗑 : la supprimer (avec confirmation).',
         ]}
       >
-        Les coéquipiers·ères
+        Équipiers·ères
       </PageTitle>
       <div className="checks">
         {sorted.length > 0 ? (

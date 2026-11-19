@@ -55,7 +55,7 @@ export function StatsPage() {
           'Toutes les sorties lacustres de ce téléphone. Milles de la fiche du jour, sinon de la trace GPS. Heures de navigation entre départ et arrivée.',
         ]}
       >
-        Cumul sur le lac
+        NM effectués sur les lacs
       </PageTitle>
       <h2 className="sub-h">{tr('Bateaux')}</h2>
       <div className="chips stats-boats">

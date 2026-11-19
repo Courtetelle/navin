@@ -433,7 +433,7 @@ async function myMaps(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(500);
   const title =
     (await page.locator('#navTitle h1, main h1').first().textContent()) ?? '';
-  check(theme, 'data leads to my maps', title.includes('Mes cartes'));
+  check(theme, 'data leads to my maps', title.includes('Fonds de cartes'));
   check(
     theme,
     'my maps list the background and layers of the map',
@@ -1622,8 +1622,8 @@ async function trackButton(page: Page, theme: string): Promise<void> {
   const title = await page.locator('h1, .page-title').first().textContent();
   check(
     theme,
-    'tablet: a long press on START opens Mes traces',
-    title?.includes('Mes traces') === true && !(await has('.rail-run')),
+    'tablet: a long press on START opens Traces',
+    title?.includes('Traces') === true && !(await has('.rail-run')),
   );
   await page.locator(NAVIN).click();
   await page.waitForTimeout(1200);

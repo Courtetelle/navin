@@ -1,6 +1,6 @@
 /**
  * A small list in the corner of a button: its long press opens a list
- * (Mes marques on the pin, Mes traces on START).
+ * (Marques on the pin, Traces on START).
  * @returns The sign.
  */
 export function ListSign() {

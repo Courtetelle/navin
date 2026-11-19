@@ -11,7 +11,7 @@ import { SiteLogo } from './SiteLogo.tsx';
  * and its text. Its address, and the text, are changed in data › Sites
  * Internet only; a site taken away there shows no button.
  * @param props - The link.
- * @param props.id - The site, in the list of data › Sites Internet.
+ * @param props.id - The site, in the list of data › Sites internet.
  * @returns The button, or nothing.
  */
 export function SiteLink({ id }: { id: string }) {

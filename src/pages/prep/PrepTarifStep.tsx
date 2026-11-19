@@ -100,7 +100,7 @@ function NoTarif({ name }: { name: string }) {
   return (
     <>
       <HelpText nextIsRow>
-        {`Aucun tarif dans la fiche de ${name}. On peut les ajouter dans Mes bateaux, rubrique « Tarifs ».`}
+        {`Aucun tarif dans la fiche de ${name}. On peut les ajouter dans Bateaux, rubrique « Tarifs ».`}
       </HelpText>
       <div className="row">
         <Button

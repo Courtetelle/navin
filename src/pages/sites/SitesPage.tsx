@@ -22,7 +22,7 @@ import {
 } from '../../state/index.ts';
 
 /**
- * Screen `sites` (data › Sites Internet): every site NavIn links to, one
+ * Screen `sites` (data › Sites internet): every site NavIn links to, one
  * band each with the text of its button, its full address and where it
  * stands. Swiped to the left: ✏️ Modifier (the text and the address) or
  * 🗑 Effacer (its button goes; « Rétablir » brings it back). The only place
@@ -59,7 +59,7 @@ export function SitesPage() {
           'Glisser une bande vers la gauche : ✏️ Modifier le texte du bouton ou l’adresse, 🗑 Effacer (appui long). Toucher une bande ouvre le site.',
         ]}
       >
-        🌐 Sites Internet
+        🌐 Sites internet
       </PageTitle>
       <div className="sites-list">
         {shown.map((site) => (

@@ -390,7 +390,7 @@ function PinButton() {
   useSignals();
   const tr = useTr();
   const [pressed, setPressed] = useState(0);
-  // A long press opens « Mes marques ».
+  // A long press opens « Marques ».
   const press = useLongPress(() => {
     buzz();
     go('marks');
@@ -398,7 +398,7 @@ function PinButton() {
   const view = state.view.currentView.value;
   const here = view === 'marks';
   // A mark is saved only from a map: elsewhere the pin is pale and a touch
-  // does nothing (its long press still opens « Mes marques »).
+  // does nothing (its long press still opens « Marques »).
   const onMap = view === 'tracker' || Boolean(shownMap());
   const idle = !here && !onMap;
   useEffect(() => {
@@ -430,7 +430,7 @@ function PinButton() {
       )}
       aria-pressed={pressed > 0}
       onClick={() => {
-        // In « Mes marques », a touch saves nothing: back to the map, on the
+        // In « Marques », a touch saves nothing: back to the map, on the
         // boat at its usual zoom during a track.
         if (here) {
           buzz();

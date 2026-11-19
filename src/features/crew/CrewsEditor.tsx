@@ -162,7 +162,7 @@ export function CrewsEditor() {
               </div>
             );
           })}
-          <h2 className="sub-h">{tr('Les coéquipiers·ères')}</h2>
+          <h2 className="sub-h">{tr('Équipiers·ères')}</h2>
           {sorted.length > 0 ? (
             <ButtonRow className="row c2 crew-pick">
               {sorted.map((member) => {

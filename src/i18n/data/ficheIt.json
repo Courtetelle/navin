@@ -1545,5 +1545,22 @@
   "Elles peuvent ne pas contenir de vraie carte : supprimez-les.": "Potrebbero non contenere una vera mappa: eliminale.",
   "Importez un fichier de carte (.pmtiles) depuis Fichiers, kDrive ou Google Drive : il reste sur cet appareil et s’affiche sans réseau. Quand la carte en ligne ne charge plus, elle prend le relais toute seule.": "Importa un file di mappa (.pmtiles) da File, kDrive o Google Drive: resta su questo dispositivo e si vede senza rete. Quando la mappa online non si carica più, subentra da sola.",
   "Le bouton ci-dessous ouvre le choix de fichier du téléphone. Sur iPhone, touchez Parcourir puis Google Drive ou kDrive. S’ils n’apparaissent pas : ouvrez l’app Fichiers, Parcourir, le bouton ⋯, Modifier, et activez-les (leurs apps doivent être installées). Sur Android, ils sont dans le menu ☰ du choix de fichier.": "Il pulsante qui sotto apre la scelta dei file del telefono. Su iPhone, tocca Sfoglia e poi Google Drive o kDrive. Se non compaiono: apri l’app File, Sfoglia, il pulsante ⋯, Modifica, e attivali (le loro app devono essere installate). Su Android, sono nel menu ☰ della scelta dei file.",
-  "cartes gardées sur l’appareil": "mappe conservate sul dispositivo"
+  "cartes gardées sur l’appareil": "mappe conservate sul dispositivo",
+  "Équipiers·ères": "Membri dell’equipaggio",
+  "🛰 Traces": "🛰 Tracce",
+  "🚤 Bateaux": "🚤 Barche",
+  "🧭 Équipiers·ères": "🧭 Membri dell’equipaggio",
+  "📌 Marques": "📌 Segnaposti",
+  "Marques": "Segnaposti",
+  "🧭 Équipiers·ères (fiches des personnes)": "🧭 I membri dell’equipaggio (schede delle persone)",
+  "NM effectués sur les lacs": "NM navigate sui laghi",
+  "Fonds de cartes": "Mappe di base",
+  "🗺 Fonds de cartes": "🗺 Mappe di base",
+  "🆘 Journal SOS": "🆘 Registro SOS",
+  "Journal SOS": "Registro SOS",
+  "Check-list d’arrivée à bord à chaque sortie. Les données du bateau sont reprises de « Bateaux ».": "Check-list di arrivo a bordo a ogni uscita. I dati della barca vengono da « Le mie barche ».",
+  "📊 NM effectués sur les lacs": "📊 NM navigate sui laghi",
+  "Sites internet": "Siti web",
+  "Traces": "Tracce",
+  "Données": "Dati"
 }

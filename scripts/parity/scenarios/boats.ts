@@ -19,7 +19,7 @@ import {
   versionBoat,
 } from './boatsSteps.ts';
 
-/** Mes bateaux. */
+/** Bateaux. */
 const listScenarios: Scenario[] = [
   {
     name: 'boats-list-empty',
@@ -238,7 +238,7 @@ function comparable(scenario: Scenario): Scenario {
   };
 }
 
-/** Boats domain: Mes bateaux, the lake day sheet and the boats collection. */
+/** Boats domain: Bateaux, the lake day sheet and the boats collection. */
 export const scenarios: Scenario[] = [
   ...listScenarios,
   ...sheetScenarios,

@@ -82,11 +82,11 @@ export interface SearchContext {
 
 /** The other lists: their title and what they hold. */
 const LISTS: Readonly<Record<string, { title: string; kind: HitKind }>> = {
-  traces: { title: 'Mes traces', kind: 'trace' },
+  traces: { title: 'Traces', kind: 'trace' },
   soslogs: { title: 'les logs SOS', kind: 'soslog' },
   cruises: { title: 'Mes navigations', kind: 'cruise' },
   ckbases: { title: 'les check-lists', kind: 'ckbase' },
-  sites: { title: 'Sites Internet', kind: 'site' },
+  sites: { title: 'Sites internet', kind: 'site' },
 };
 
 /** Menus: only the functions of the app are searched there. */
@@ -104,7 +104,7 @@ export function searchContext(view: string): SearchContext {
   if (view === 'boats') {
     return {
       title: 'Bateaux',
-      placeholder: 'Recherche dans Mes bateaux',
+      placeholder: 'Recherche dans Bateaux',
       kinds: ['boat'],
       online: false,
     };
@@ -128,7 +128,7 @@ export function searchContext(view: string): SearchContext {
   if (view === 'marks') {
     return {
       title: 'Marques',
-      placeholder: 'Recherche dans Mes marques',
+      placeholder: 'Recherche dans Marques',
       kinds: ['mark'],
       online: false,
     };

@@ -36,7 +36,7 @@ const NAME_HELP =
   'Nom automatique : n° de la sortie dans l’année, plan d’eau, bateau, port et date. Vous pouvez le changer ici ou plus tard dans « Bateau et croisière ».';
 const MODE_HELP: Readonly<Record<ModeKey, string>> = {
   mer: 'Check-list de prise du bateau en début de location, puis de restitution. Chaque croisière a son journal, ses fiches du jour, son équipage et sa trace.',
-  lacj: 'Check-list d’arrivée à bord à chaque sortie. Les données du bateau sont reprises de « Mes bateaux ».',
+  lacj: 'Check-list d’arrivée à bord à chaque sortie. Les données du bateau sont reprises de « Bateaux ».',
   lacc: 'Check-list d’arrivée à bord en début de croisière, et de fin de croisière. Une fiche par jour.',
 };
 const WORDS: Readonly<Record<ModeKey, string>> = {

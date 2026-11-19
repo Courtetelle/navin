@@ -86,7 +86,7 @@ export async function addOfflineMaps(
     })),
   );
   if (!isMapLive(map)) return;
-  // Shown by default; « Mes cartes » can hide one (the menu applies it).
+  // Shown by default; « Fonds de cartes » can hide one (the menu applies it).
   for (const { item, layer } of layers) {
     layer.addTo(map);
     control.addOverlay(layer, entryName(item));

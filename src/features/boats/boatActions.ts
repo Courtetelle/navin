@@ -112,7 +112,7 @@ export function setBoatDocCaption(documentId: string, value: string): void {
 }
 
 /**
- * Text of `data-cap` for a document of Mes bateaux.
+ * Text of `data-cap` for a document of Bateaux.
  * @param document - Document.
  * @returns Its caption, else the name of its kind.
  */

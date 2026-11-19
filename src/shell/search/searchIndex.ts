@@ -36,7 +36,7 @@ const OTHER_FUNCTIONS: readonly FunctionEntry[] = [
   { key: 'vhf', title: '📻 Appels VHF', sub: 'radio canal' },
   {
     key: 'cartes',
-    title: '🗺 Mes cartes',
+    title: '🗺 Fonds de cartes',
     sub: 'zones hors ligne offline supprimer',
   },
   {

@@ -102,7 +102,7 @@ export function buildJournalMap(
   osm.addTo(map);
   seamark.addTo(map);
   // Fixed order, not the menu's: background, map files, overlays. The menu
-  // stays out of sight: the layers are chosen in « Mes cartes ».
+  // stays out of sight: the layers are chosen in « Fonds de cartes ».
   const layers = L.control
     .layers({}, {}, { position: 'topright', autoZIndex: false })
     .addTo(map);

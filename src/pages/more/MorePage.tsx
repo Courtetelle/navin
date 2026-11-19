@@ -36,7 +36,7 @@ export function MorePage() {
     <>
       <TitleInNav>
         <h1 className="menu-title">
-          {tr('data')}
+          {tr('Données')}
           <MenuSortButton menu="data" />
         </h1>
       </TitleInNav>

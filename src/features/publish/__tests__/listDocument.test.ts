@@ -47,7 +47,7 @@ function tall(id: string, rows: number): PublishItem {
 }
 
 test('documentOf titles a single element by its name', () => {
-  expect(documentOf([MISTRAL], 'Mes bateaux', 'boats')).toStrictEqual({
+  expect(documentOf([MISTRAL], 'Bateaux', 'boats')).toStrictEqual({
     title: 'Mistral',
     kicker: 'Fiche bateau',
     sub: 'Fiche bateau · 15/07/2026',
@@ -59,8 +59,8 @@ test('documentOf titles a single element by its name', () => {
 });
 
 test('documentOf counts several elements and keeps their names', () => {
-  const sheet = documentOf([MISTRAL, ALIZE], 'Mes bateaux', 'boats');
-  expect(sheet.title).toBe('Mes bateaux');
+  const sheet = documentOf([MISTRAL, ALIZE], 'Bateaux', 'boats');
+  expect(sheet.title).toBe('Bateaux');
   expect(sheet.sub).toBe('2 éléments · 15/07/2026');
   expect(sheet.sections?.[0]?.title).toBe('Mistral · Identité');
   expect(sheet.sections?.[2]?.title).toBe('Alizé');
@@ -93,8 +93,8 @@ test('imagePages counts the extra lines of a multi-line value', () => {
 });
 
 test('slug gives the file-name form of a list title', () => {
-  expect(slug('Les coéquipiers·ères')).toBe('les-coequipiers-eres');
-  expect(slug('Mes bateaux')).toBe('mes-bateaux');
+  expect(slug('Équipiers·ères')).toBe('equipiers-eres');
+  expect(slug('Bateaux')).toBe('bateaux');
   expect(slug('  Équipages ! ')).toBe('equipages');
 });
 
@@ -103,7 +103,7 @@ test('dateStamp is today as YYYYMMDD', () => {
 });
 
 test('blankSheet empties the values of the first element', () => {
-  expect(blankSheet('boats', 'Mes bateaux', MISTRAL)).toStrictEqual({
+  expect(blankSheet('boats', 'Bateaux', MISTRAL)).toStrictEqual({
     id: 'blank',
     name: 'Fiche bateau à remplir',
     sections: [

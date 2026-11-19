@@ -19,7 +19,7 @@ export function TracesPage() {
           'Toutes les traces enregistrées. Toucher : l’afficher en violet sur la carte. Appui long : changer son texte. Glisser vers la gauche : 📤 Partager (texte ou GPX), 🗑 Effacer.',
         ]}
       >
-        🛰 Mes traces
+        🛰 Traces
       </PageTitle>
       <section className="field">
         <TraceList key={traceListVersion.value} />

@@ -4915,7 +4915,7 @@ small.en-tr:empty {
 .crew-photo-sec h3 {
   margin-top: 0;
 }
-/* v225 (Corban) : photos et papiers officiels dans Mes bateaux, libellé sous chaque photo */
+/* v225 (Corban) : photos et papiers officiels dans Bateaux, libellé sous chaque photo */
 .boat-pics {
   padding: 0 14px;
 }
@@ -4953,7 +4953,7 @@ small.en-tr:empty {
   border-radius: 50%;
   font-size: 16px;
 }
-/* v226 : scans PDF dans Mes bateaux */
+/* v226 : scans PDF dans Bateaux */
 .bp-item .bp-pdf {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -7402,7 +7402,7 @@ html {
   color: #fff;
   border-color: #c62828;
 }
-/* v379 (Corban) : Mes bateaux : plus de flèche à droite (le bateau s'ouvre par appui long, appui simple = sélection). */
+/* v379 (Corban) : Bateaux : plus de flèche à droite (le bateau s'ouvre par appui long, appui simple = sélection). */
 #boatList details[data-b].section > summary::after {
   content: none !important;
   display: none !important;
@@ -7823,7 +7823,7 @@ figure.photo img {
   color: #e07000;
   font-weight: 700;
 }
-/* v396 (Corban) : ✎ à droite du nom du bateau (Mes bateaux, fiche ouverte) et mode ✎ des libellés. */
+/* v396 (Corban) : ✎ à droite du nom du bateau (Bateaux, fiche ouverte) et mode ✎ des libellés. */
 #boatList summary .b-editbtn,
 details[data-b] > summary .b-editbtn {
   float: right;
@@ -10859,11 +10859,11 @@ html:root body .rail-btn.rail-fin.rail-fin-armed {
 }
 
 /* The layer menu stays on the map out of sight: the layers are chosen in
-   « Mes cartes », which drives it. */
+   « Fonds de cartes », which drives it. */
 html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
   display: none !important;
 }
-/* « Mes cartes »: the background and layers, big rows to touch */
+/* « Fonds de cartes »: the background and layers, big rows to touch */
 .map-layers .map-layer {
   display: flex;
   align-items: center;
@@ -12745,7 +12745,7 @@ html body .lx-modal .ck-ask-box {
 }
 
 /* A link to another site, the same everywhere: a button, the sign of a
-   site at its left (the address shows in data › Sites Internet only) */
+   site at its left (the address shows in data › Sites internet only) */
 .site-link {
   display: flex;
 }
@@ -12992,7 +12992,7 @@ html body .wx-page.wx-one {
 }
 
 /* The pin away from a map: pale, a touch does nothing; a small list in its
-   corner says its long press (Mes marques) */
+   corner says its long press (Marques) */
 html body .rail-btn.rail-pin,
 html body .rail-btn.rail-start {
   position: relative;
@@ -13152,7 +13152,7 @@ html body.menus-fading header.topbar #gearBtn.theme-btn {
   height: 1.4em;
 }
 
-/* data › Sites Internet: one band per site */
+/* data › Sites internet: one band per site */
 .sites-list {
   display: grid;
   gap: 8px;

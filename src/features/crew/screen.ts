@@ -63,7 +63,7 @@ export function showCrewPick(): void {
 
 /** The card list (legacy `renderFicheList`). */
 export function showFicheList(): void {
-  draw({ kind: 'list' }, 'Les coéquipiers·ères');
+  draw({ kind: 'list' }, 'Équipiers·ères');
   // Legacy saw the title again once the publish row was added, with its help
   // pill this time, so the next draw of the list never compared equal.
   const published =
@@ -92,7 +92,7 @@ export function ficheBackLabel(): string {
   const backTo = state.view.crewFicheBack.value;
   if (backTo === 'crews') return '◀ Équipages';
   if (backTo === 'list' || !state.data.cruise.value) {
-    return '◀ Les coéquipiers·ères';
+    return '◀ Équipiers·ères';
   }
   return '◀ Équipage';
 }

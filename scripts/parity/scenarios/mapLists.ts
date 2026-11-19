@@ -21,7 +21,7 @@ const fixedTooltipIds = `(() => {
   }
 })()`;
 
-/** Offline zones, « Mes cartes », marks, and these screens in English. */
+/** Offline zones, « Fonds de cartes », marks, and these screens in English. */
 export const listScenarios: Scenario[] = [
   {
     name: 'map-zones-empty',

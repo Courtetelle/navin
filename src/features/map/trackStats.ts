@@ -20,7 +20,7 @@ export interface TrackStatsResult {
   end: number | null;
 }
 
-/** One track of a cruise, as listed in « Mes traces ». */
+/** One track of a cruise, as listed in « Traces ». */
 export interface LakeTrack {
   /** Cruise id, followed by `#<rank>` when the cruise holds several tracks. */
   id: string;
@@ -207,7 +207,7 @@ export function allLakeTracks(): LakeTrack[] {
 
 /**
  * Points of the recording in progress: the tracker shows only that one, older
- * tracks stay in « Mes traces » (legacy `currentTrack`).
+ * tracks stay in « Traces » (legacy `currentTrack`).
  * @returns The points, empty when nothing is recording.
  */
 export function currentTrack(): readonly TrackPoint[] {

@@ -49,7 +49,7 @@ export function MarksPage() {
           'Appui long d’un doigt sur la carte (traceur ou carte du journal) › « Enregistrer une marque ». Numérotées dans l’ordre, avec date, heure et position.',
         ]}
       >
-        Mes marques
+        Marques
       </PageTitle>
       {target ? (
         <ButtonRow>

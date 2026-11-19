@@ -12,7 +12,7 @@ export interface SiteDef {
 
 /**
  * Every site NavIn links to, the one place their buttons and addresses are
- * listed (data › Sites Internet changes them).
+ * listed (data › Sites internet changes them).
  */
 export const SITES: readonly SiteDef[] = [
   {
@@ -49,7 +49,7 @@ export const SITES: readonly SiteDef[] = [
     id: 'moncvnautique',
     label: 'Mon CV Nautique (expérience en mer)',
     url: 'https://moncvnautique.com/',
-    where: 'data › Sites Internet',
+    where: 'data › Sites internet',
   },
 ];
 

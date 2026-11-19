@@ -45,13 +45,13 @@ function CartesContent({ onChange }: { onChange: () => void }) {
   useSignals();
   const tr = useTr();
   const [zones] = useState(zoneList);
-  const fresh = useIntroLead(state.view.currentView.value, 'Mes cartes');
+  const fresh = useIntroLead(state.view.currentView.value, 'Fonds de cartes');
   const help = tr(HELP, { help: true });
   return (
     <>
       <TitleInNav>
         <h1>
-          {tr('Mes cartes')}
+          {tr('Fonds de cartes')}
           <HelpPill inTitle text={helpBubbleText(help)} />
         </h1>
       </TitleInNav>

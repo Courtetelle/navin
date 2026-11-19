@@ -48,7 +48,7 @@ export const CRUISE_RADIO_FIELDS: readonly FieldDefinition[] =
     note: (value: string) =>
       value
         ? `${note?.(value) ?? ''} · fiche du bateau`
-        : 'À saisir sur la fiche du bateau (Mes bateaux)',
+        : 'À saisir sur la fiche du bateau (Bateaux)',
   }));
 
 /** Sections of the "Bateau et croisière" sheet (legacy `INFO_SECTIONS`). */

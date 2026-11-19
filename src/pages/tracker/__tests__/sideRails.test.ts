@@ -40,9 +40,9 @@ describe('side rails', () => {
 
   it('splits the icon from the words', () => {
     expect(splitTitle('🌤 Météo')).toEqual({ icon: '🌤', label: 'Météo' });
-    expect(splitTitle('Mes cartes')).toEqual({
+    expect(splitTitle('Fonds de cartes')).toEqual({
       icon: '',
-      label: 'Mes cartes',
+      label: 'Fonds de cartes',
     });
   });
 });

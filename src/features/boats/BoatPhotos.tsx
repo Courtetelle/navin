@@ -33,7 +33,7 @@ interface BoatPhotosProps {
 }
 
 /**
- * Photos and official papers of a boat in Mes bateaux: caption, thumbnail,
+ * Photos and official papers of a boat in Bateaux: caption, thumbnail,
  * PDF scans, deletion by long press.
  * @param props - Boat and refresh.
  * @returns The section.

@@ -19,7 +19,7 @@ interface MoreTile {
 
 const TRACES: MoreTile = {
   key: 'traces',
-  title: '🛰 Mes traces',
+  title: '🛰 Traces',
   sub: 'traces enregistrées, carte, GPX',
 };
 const CHECKLIST_BASES: MoreTile = {
@@ -49,12 +49,12 @@ const NMEA: MoreTile = {
 };
 const SITES: MoreTile = {
   key: 'sites',
-  title: '🌐 Sites Internet',
+  title: '🌐 Sites internet',
   sub: 'les sites liés dans NavIn : texte des boutons et adresses',
 };
 const STATS: MoreTile = {
   key: 'stats',
-  title: '📊 Cumul sur le lac',
+  title: '📊 NM effectués sur les lacs',
   sub: 'milles et heures par semaine, mois, année',
 };
 
@@ -71,7 +71,7 @@ export function tilesWithoutCruise(): MoreTile[] {
     CHECKLIST_BASES,
     {
       key: 'boats',
-      title: '🚤 Mes bateaux',
+      title: '🚤 Bateaux',
       sub: `${boatCount} bateau${boatCount > 1 ? 'x' : ''}, données et check-lists du lac`,
     },
     peopleTile(members.value.length),
@@ -159,7 +159,7 @@ export function tilesWithCruise(): MoreTile[] {
   tiles.push(
     {
       key: 'boats',
-      title: '🚤 Mes bateaux',
+      title: '🚤 Bateaux',
       sub: `${boatCount} bateau${boatCount > 1 ? 'x' : ''}, données et check-lists`,
     },
     {
@@ -203,13 +203,13 @@ function alertsTile(): MoreTile {
 }
 
 function sosLogsTile(): MoreTile {
-  return { key: 'soslogs', title: '🆘 Logs SOS', sub: sosLogsCount() };
+  return { key: 'soslogs', title: '🆘 Journal SOS', sub: sosLogsCount() };
 }
 
 function peopleTile(count: number): MoreTile {
   return {
     key: 'people',
-    title: '🧭 Les coéquipiers·ères',
+    title: '🧭 Équipiers·ères',
     sub: `${count} fiche${count > 1 ? 's' : ''} : les personnes et leurs caractéristiques`,
   };
 }
@@ -217,7 +217,7 @@ function peopleTile(count: number): MoreTile {
 function marksTile(count: number): MoreTile {
   return {
     key: 'marks',
-    title: '📌 Mes marques',
+    title: '📌 Marques',
     sub: `${count} marque(s), Go to`,
   };
 }
@@ -225,7 +225,7 @@ function marksTile(count: number): MoreTile {
 function chartsTile(): MoreTile {
   return {
     key: 'cartes',
-    title: '🗺 Mes cartes',
+    title: '🗺 Fonds de cartes',
     sub: 'cartes gardées sur l’appareil',
   };
 }

@@ -93,7 +93,7 @@ function markPopup(mark: Mark): HTMLElement {
   const note = mark.note ? ` · ${escapeHtml(mark.note)}` : '';
   const when = `${escapeHtml(fmtShortDate(moment))} ${escapeHtml(fmtUtc(moment))}`;
   const depth = mark.depth ? `<div>🌊 ${escapeHtml(mark.depth)}</div>` : '';
-  box.innerHTML = `<b>📌 ${escapeHtml(mark.name)}</b>${note}<br><small>${when}</small><div>📍 ${escapeHtml(fmtPos(mark))}</div>${depth}<div>🧭 ${relativeHtml(mark)}</div><div class="lp-btns"><button class="btn primary">🎯 Go to</button><button class="btn">📒 Mes marques</button></div>`;
+  box.innerHTML = `<b>📌 ${escapeHtml(mark.name)}</b>${note}<br><small>${when}</small><div>📍 ${escapeHtml(fmtPos(mark))}</div>${depth}<div>🧭 ${relativeHtml(mark)}</div><div class="lp-btns"><button class="btn primary">🎯 Go to</button><button class="btn">📒 Marques</button></div>`;
   const [gotoButton, marksButton] = box.querySelectorAll('button');
   gotoButton?.addEventListener('click', () => {
     setGoto({ lat: mark.lat, lon: mark.lon, name: mark.name });

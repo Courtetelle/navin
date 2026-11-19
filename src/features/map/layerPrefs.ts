@@ -5,7 +5,7 @@ import { store } from '../../storage/store.ts';
 
 import { isMapLive } from './mapExtras.ts';
 
-/** A background or a layer of the maps, as « Mes cartes » lists it. */
+/** A background or a layer of the maps, as « Fonds de cartes » lists it. */
 export interface MapLayerName {
   name: string;
   kind: 'base' | 'overlay';
@@ -13,7 +13,7 @@ export interface MapLayerName {
   on: boolean;
 }
 
-/** The choices of « Mes cartes »: the background, and each layer on or off. */
+/** The choices of « Fonds de cartes »: the background, and each layer on or off. */
 interface LayerPrefs {
   base: string | null;
   on: Record<string, boolean>;
@@ -22,7 +22,7 @@ interface LayerPrefs {
 const PREFS_KEY = 'ldb.mapLayers';
 const NAMES_KEY = 'ldb.mapLayerNames';
 
-/** What the sailor chose in « Mes cartes ». */
+/** What the sailor chose in « Fonds de cartes ». */
 export const layerPrefs = signal<LayerPrefs>(
   store.get<LayerPrefs>(PREFS_KEY, { base: null, on: {} }),
 );
@@ -65,7 +65,7 @@ export function chooseOverlay(name: string, on: boolean): void {
 
 /**
  * The layer menu of a map, out of sight: its entries follow the choices of
- * « Mes cartes », and what the map offers is written there for the page.
+ * « Fonds de cartes », and what the map offers is written there for the page.
  * Wrap the control before any layer is added to it.
  * @param map - The map.
  * @param control - Its layer menu.
@@ -155,7 +155,7 @@ export function followLayerPrefs(
   map.on('layeradd layerremove', () => {
     if (!applying) record();
   });
-  // Read here so that a choice made in « Mes cartes » reaches a live map.
+  // Read here so that a choice made in « Fonds de cartes » reaches a live map.
   const stop = effect(() => {
     if (!layerPrefs.value.on || !isMapLive(map)) return;
     for (const name of named.keys()) apply(name);

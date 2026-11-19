@@ -15,7 +15,7 @@ const KIND_SUBTITLES: Readonly<Record<ListKind, string>> = {
   traces: 'Traces',
   marks: 'Marques',
   ckbases: 'Check-lists',
-  soslogs: 'Logs SOS',
+  soslogs: 'Journal SOS',
   alerts: 'Journal des alertes',
 };
 
