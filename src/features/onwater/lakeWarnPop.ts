@@ -7,6 +7,11 @@ export interface LakeWarnPop {
   warnings: LakeWarning[];
   /** A test: said so. */
   test?: boolean;
+  /**
+   * The alert in the journal, shared by its 📤.
+   * @default undefined
+   */
+  alertId?: string;
 }
 
 /** The bubble of the warning lights. */

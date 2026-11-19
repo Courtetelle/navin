@@ -8,12 +8,14 @@ import { translateMessage } from '../../i18n/translate.ts';
 import { go } from '../../shell/router.ts';
 import { state } from '../../state/index.ts';
 import { askMapArea } from '../map/pendingArea.ts';
+import { openListPublish } from '../publish/index.ts';
 
+import { BubbleActions } from './BubbleActions.tsx';
 import { lakeWarnPop } from './lakeWarnPop.ts';
 import { nmOf, nmToKm, pointAt, stormView } from './lightning.ts';
 import type { LightningPop } from './lightningPop.ts';
 import { lightningPop } from './lightningPop.ts';
-import { windPopup } from './windOverlayState.ts';
+import { leaveBubble, windPopup } from './windOverlayState.ts';
 
 /** The screen flashes three times, as lightning. */
 const FLASHES = 3;
@@ -46,7 +48,8 @@ function showOnMap(pop: LightningPop): void {
 /**
  * The lightning alert: the screen flashes three times, then a big bubble
  * says how far the storm is, where, whether it comes nearer; it stays until
- * touched. « Voir sur la carte » shows the flashes around the boat.
+ * touched. 👁 the Alerte orage screen, 🗺 the flashes around the boat on the
+ * map, 📤 Partager.
  * @returns The portal, or nothing.
  */
 export function LightningPopup() {
@@ -55,7 +58,8 @@ export function LightningPopup() {
   const pop = windPopup.value ? null : lightningPop.value;
   const [lit, setLit] = useState(false);
   useEffect(() => {
-    if (!pop) return undefined;
+    // Shown again, back from a screen: no flashes.
+    if (!pop || pop.again) return undefined;
     const timers: Array<ReturnType<typeof setTimeout>> = [];
     for (let index = 0; index < FLASHES; index++) {
       const start = index * (FLASH_MS + DARK_MS);
@@ -70,7 +74,7 @@ export function LightningPopup() {
     };
   }, [pop]);
   if (!pop) return null;
-  const { report, test, radiusNm, reason, clear, lines } = pop;
+  const { report, test, radiusNm, reason, clear, lines, alertId } = pop;
   const nm = nmOf(report.nearestKm ?? 0);
   const hour = new Date(report.at).toISOString().slice(11, 16);
   const late = Math.max(0, Math.round((report.readAt - report.at) / 60_000));
@@ -137,9 +141,37 @@ export function LightningPopup() {
               `Satellite EUMETSAT MTG, image de ${hour} UTC (${late} min de retard). Aide indicative, pas une alerte officielle.`,
             )}
           </div>
-          <Button className="btn primary lp-map" noUiEdit>
-            {translate('🗺 Voir sur la carte')}
-          </Button>
+          <BubbleActions
+            detailLabel="Voir l’alerte orage"
+            onDetail={() => {
+              lightningPop.value = null;
+              leaveBubble(
+                () => {
+                  lightningPop.value = { ...pop, again: true };
+                },
+                'weather',
+                'lightning',
+              );
+            }}
+            onShare={
+              alertId
+                ? (format) => {
+                    lightningPop.value = null;
+                    openListPublish('alerts', alertId, format);
+                  }
+                : undefined
+            }
+            translate={translate}
+          >
+            <Button
+              className="btn primary lp-map"
+              noUiEdit
+              aria-label={translate('Voir sur la carte')}
+              title={translate('Voir sur la carte')}
+            >
+              🗺
+            </Button>
+          </BubbleActions>
           {lakeWarnPop.value && state.view.zoneSimV.value !== 'mer' ? (
             <div className="wp-next">
               {translate('▼ Une autre alerte suit : toucher pour la lire')}

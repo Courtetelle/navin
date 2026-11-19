@@ -135,9 +135,13 @@ export async function lakeWarnCheck(): Promise<void> {
     if (fresh.length === 0) return;
     for (const warning of fresh) said.add(warningKey(warning));
     playLakeLight(Math.max(...fresh.map((warning) => warning.level)));
-    showPop({ warnings: fresh });
     // In the journal of the alerts, with or without an open cruise.
-    recordAlert('feux', 'Feux d’avis', fresh.map(lakeWarningText).join(' '));
+    const alert = recordAlert(
+      'feux',
+      'Feux d’avis',
+      fresh.map(lakeWarningText).join(' '),
+    );
+    showPop({ warnings: fresh, alertId: alert.id });
     if (state.data.cruise.peek()) {
       addEntry({
         id: uid(),

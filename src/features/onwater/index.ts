@@ -100,7 +100,9 @@ export { playAlarm } from './windAudio.ts';
 export { windMuteEnd } from './windWatch.ts';
 export { METEO_SWISS, liveStations, stationKey } from './liveStations.ts';
 export {
+  alertDetail,
   askLiveFromAlert,
+  bubbleBack,
   liveAlertAsk,
   liveAlertSpot,
   replayWindAlert,

@@ -7,11 +7,13 @@ import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { go } from '../../shell/router.ts';
 import { state } from '../../state/index.ts';
+import { openListPublish } from '../publish/index.ts';
 
+import { BubbleActions } from './BubbleActions.tsx';
 import { lakeWarnPop } from './lakeWarnPop.ts';
 import { lightOf, whenText } from './lakeWarnings.ts';
 import { lightningPop } from './lightningPop.ts';
-import { windPopup } from './windOverlayState.ts';
+import { leaveBubble, windPopup } from './windOverlayState.ts';
 
 function translate(text: string): string {
   return translateMessage(text, screenLanguage.value);
@@ -22,7 +24,8 @@ const time = (t: number) => whenText(t, Date.now());
 /**
  * The warning lights of a lake switched on: a big bubble with a lamp that
  * flashes as those on the shore (40 a minute for strong wind, 90 for a
- * storm), the lake, until when, and what MeteoSwiss says.
+ * storm), the lake, until when, and what MeteoSwiss says; 👁 the screen of
+ * the warning lights, 🗺 the map, 📤 Partager.
  * @returns The portal, or nothing.
  */
 export function LakeWarnPopup() {
@@ -34,7 +37,7 @@ export function LakeWarnPopup() {
   const pop =
     windPopup.value || lightningPop.value || atSea ? null : lakeWarnPop.value;
   if (!pop) return null;
-  const { warnings, test } = pop;
+  const { warnings, test, alertId } = pop;
   const strongest = warnings[0];
   if (!strongest) return null;
   const light = lightOf(strongest.level);
@@ -81,9 +84,37 @@ export function LakeWarnPopup() {
             </div>
           );
         })}
-        <Button className="btn primary lw-map" noUiEdit>
-          {translate('🗺 Voir sur la carte')}
-        </Button>
+        <BubbleActions
+          detailLabel="Voir les feux d’avis des lacs"
+          onDetail={() => {
+            lakeWarnPop.value = null;
+            leaveBubble(
+              () => {
+                lakeWarnPop.value = pop;
+              },
+              'weather',
+              'lakelights',
+            );
+          }}
+          onShare={
+            alertId
+              ? (format) => {
+                  lakeWarnPop.value = null;
+                  openListPublish('alerts', alertId, format);
+                }
+              : undefined
+          }
+          translate={translate}
+        >
+          <Button
+            className="btn primary lw-map"
+            noUiEdit
+            aria-label={translate('Voir sur la carte')}
+            title={translate('Voir sur la carte')}
+          >
+            🗺
+          </Button>
+        </BubbleActions>
         <div className="wp-close">{translate('Toucher pour fermer')}</div>
       </div>
     </div>,

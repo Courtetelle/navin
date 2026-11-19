@@ -4,19 +4,25 @@ import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { Button } from '../../components/shared/Button.tsx';
-import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 import { state } from '../../state/index.ts';
 
-import { publishAlert, reportRows } from './alertPublish.ts';
+import { BubbleActions } from './BubbleActions.tsx';
+import { publishAlert } from './alertPublish.ts';
 import { lakeWarnPop } from './lakeWarnPop.ts';
 import { lightningPop } from './lightningPop.ts';
 import { beaufortSea } from './onLake.ts';
 import { flashColor } from './windLogic.ts';
 import type { WindFlash } from './windOverlayState.ts';
-import { removeWindFlash, windFlashes, windPopup } from './windOverlayState.ts';
+import {
+  alertStation,
+  openAlertDetail,
+  removeWindFlash,
+  windFlashes,
+  windPopup,
+} from './windOverlayState.ts';
 
 const SIGNAL_MS = 1200;
 const PAUSE_MS = 400;
@@ -82,21 +88,17 @@ function OneFlash({ flash }: { flash: WindFlash }) {
 /**
  * The wind bubble: large text on a red glass background, edged with the colour
  * of the level; it stays until touched (legacy `windPopShow`). Under it,
- * three buttons with an icon only: 👁 the details of the reading, 🌬
+ * three buttons with an icon only: 👁 the card of the station, 🌬
  * LiveMétéo, 📤 Partager.
  * @returns The `#windPop` portal, or nothing.
  */
 export function WindPopup() {
   useSignals();
   const content = windPopup.value;
-  const [details, setDetails] = useState(false);
-  const [shown, setShown] = useState(content);
-  if (shown !== content) {
-    // Another alert: its details folded.
-    setShown(content);
-    setDetails(false);
-  }
   if (!content) return null;
+  const station = content.report
+    ? alertStation(content.report.reading, content.report.forecast)
+    : null;
   const row = BEAUFORT_TBL[Math.max(0, Math.min(12, content.bf))];
   // The sea the scale describes: none on a lake.
   const sea = beaufortSea(content.bf);
@@ -143,34 +145,24 @@ export function WindPopup() {
           <div className="wp-note">{translate(content.note)}</div>
         ) : null}
         {sea ? <div className="wp-desc">{translate(sea)}</div> : null}
-        {details && content.report ? (
-          <dl className="wp-details">
-            {reportRows(content.report).map(([label, value]) => (
-              <div key={label}>
-                <dt>{translate(label)}</dt>
-                <dd>{translate(value)}</dd>
-              </div>
-            ))}
-          </dl>
-        ) : null}
         {content.onLive || content.report ? (
-          <div className="wp-actions">
-            {content.report ? (
-              <Button
-                className={details ? 'btn wp-more on' : 'btn wp-more'}
-                noUiEdit
-                aria-label={translate(
-                  details ? 'Masquer les détails' : 'Voir les détails',
-                )}
-                title={translate('Détails')}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setDetails(!details);
-                }}
-              >
-                👁
-              </Button>
-            ) : null}
+          <BubbleActions
+            detailLabel="Voir le détail de la station"
+            onDetail={
+              station ? () => openAlertDetail(content, station) : undefined
+            }
+            onShare={
+              content.report
+                ? (format) => {
+                    windPopup.value = null;
+                    if (content.report) {
+                      void publishAlert(content.report, format);
+                    }
+                  }
+                : undefined
+            }
+            translate={translate}
+          >
             {content.onLive ? (
               <Button
                 className="btn primary wp-live"
@@ -181,22 +173,7 @@ export function WindPopup() {
                 🌬
               </Button>
             ) : null}
-            {content.report ? (
-              <span className="wp-publish">
-                <ShareButton
-                  label="📤"
-                  aria-label={translate('Partager')}
-                  title={translate('Partager')}
-                  onShare={(format) => {
-                    windPopup.value = null;
-                    if (content.report) {
-                      void publishAlert(content.report, format);
-                    }
-                  }}
-                />
-              </span>
-            ) : null}
-          </div>
+          </BubbleActions>
         ) : null}
         {lightningPop.value ||
         (lakeWarnPop.value && state.view.zoneSimV.value !== 'mer') ? (

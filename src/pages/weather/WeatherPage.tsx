@@ -10,6 +10,7 @@ import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { inSwissArea } from '../../features/map/index.ts';
 import { lastBoatSeen } from '../../features/map/trackerState.ts';
+import { bubbleBack } from '../../features/onwater/index.ts';
 import type { Forecast } from '../../features/tracking/index.ts';
 import { wxNext } from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -93,6 +94,54 @@ function openSettings() {
   go('settings');
 }
 
+/**
+ * Back to the alert bubble this screen was opened from, taken once.
+ * @returns The way back, or null.
+ */
+function useBubbleBack(): (() => void) | null {
+  const [back] = useState(() => bubbleBack.peek());
+  useEffect(() => {
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- the way back is taken once, when the screen opens
+    if (back) bubbleBack.value = null;
+  }, [back]);
+  return back;
+}
+
+/**
+ * ◀ Météo, or ◀ Alerte back to the bubble the screen was opened from.
+ * @param props - The way back.
+ * @param props.back - Back to the bubble, or null.
+ * @returns The button.
+ */
+function MeteoBack({ back }: { back: (() => void) | null }) {
+  const tr = useTr();
+  if (back) {
+    return (
+      <PageBack
+        label="◀ Alerte"
+        onClick={() => {
+          buzz();
+          back();
+        }}
+      >
+        {tr('◀ Alerte')}
+      </PageBack>
+    );
+  }
+  return (
+    <PageBack
+      label="◀ Météo"
+      data-go="weather"
+      onClick={() => {
+        buzz();
+        go('weather');
+      }}
+    >
+      {tr('◀ Météo')}
+    </PageBack>
+  );
+}
+
 /** Argument of the screen for the warning lights of the lakes. */
 const LAKE_LIGHTS = 'lakelights';
 
@@ -107,18 +156,10 @@ function openLakeLights() {
  */
 function LakeLightsPage() {
   const tr = useTr();
+  const back = useBubbleBack();
   return (
     <>
-      <PageBack
-        label="◀ Météo"
-        data-go="weather"
-        onClick={() => {
-          buzz();
-          go('weather');
-        }}
-      >
-        {tr('◀ Météo')}
-      </PageBack>
+      <MeteoBack back={back} />
       <TitleInNav>
         <h1>{tr('🚨 Feux d’avis des lacs')}</h1>
       </TitleInNav>
@@ -141,18 +182,10 @@ function openLightning() {
  */
 function LightningPage() {
   const tr = useTr();
+  const back = useBubbleBack();
   return (
     <>
-      <PageBack
-        label="◀ Météo"
-        data-go="weather"
-        onClick={() => {
-          buzz();
-          go('weather');
-        }}
-      >
-        {tr('◀ Météo')}
-      </PageBack>
+      <MeteoBack back={back} />
       <TitleInNav>
         <h1>{tr('⚡ Alerte orage')}</h1>
       </TitleInNav>

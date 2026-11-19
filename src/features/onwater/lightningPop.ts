@@ -17,6 +17,16 @@ export interface LightningPop {
   clear?: boolean;
   /** How the storm moves and when it is on the boat, at the alert. */
   lines?: string[];
+  /**
+   * The alert in the journal, shared by its 📤.
+   * @default undefined
+   */
+  alertId?: string;
+  /**
+   * Shown again (back from a screen): the screen does not flash.
+   * @default false
+   */
+  again?: boolean;
 }
 
 /** The bubble of the lightning alert, shown until touched. */

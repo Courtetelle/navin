@@ -9337,35 +9337,6 @@ body.has-navtop #view > h1.live-title,
   width: 34px;
   height: 34px;
 }
-.wind-pop .wp-more.on {
-  background: #fff;
-  color: #111;
-}
-.wind-pop .wp-details {
-  margin: 14px 0 0;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.28);
-  text-align: left;
-  font-size: 15px;
-}
-.wind-pop .wp-details > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 3px 0;
-}
-.wind-pop .wp-details > div + div {
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-}
-.wind-pop .wp-details dt {
-  opacity: 0.85;
-}
-.wind-pop .wp-details dd {
-  margin: 0;
-  font-weight: 700;
-  text-align: right;
-}
 .live-sea h2 {
   margin: 16px 0 4px;
   font-size: 20px;

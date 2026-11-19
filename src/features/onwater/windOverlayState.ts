@@ -1,11 +1,15 @@
 import { signal } from '@preact/signals-react';
 
+import { go } from '../../shell/router.ts';
+import { state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 import type { AlertReport } from './alertPublish.ts';
 import { LAST_ALERT_KEY } from './lastWindAlert.ts';
+import type { LiveStation } from './liveStations.ts';
 import { onLake } from './onLake.ts';
 import { showOverlays } from './overlayRoot.ts';
+import type { WindReading } from './windTypes.ts';
 
 /** Where a wind alert came from, for LiveMétéo opened from its bubble. */
 export interface AlertSpot {
@@ -43,6 +47,75 @@ export function askLiveFromAlert(spot: AlertSpot | null): void {
   liveAlertAsk.value = Date.now();
 }
 
+/**
+ * Back to the alert bubble a screen was opened from (its 👁): the screen
+ * takes it once and its ◀ Alerte runs it.
+ */
+export const bubbleBack = signal<(() => void) | null>(null);
+
+/**
+ * Leave an alert bubble for a screen; ◀ Alerte on that screen comes back
+ * to where it was and shows the bubble again.
+ * @param restore - Shows the bubble again.
+ * @param view - The screen.
+ * @param arg - Its argument.
+ */
+export function leaveBubble(
+  restore: () => void,
+  view: string,
+  arg: unknown = null,
+): void {
+  const from = state.view.currentView.peek();
+  bubbleBack.value = () => {
+    go(from === view ? 'tracker' : from);
+    restore();
+  };
+  go(view, arg);
+}
+
+/**
+ * The station card opened from the 👁 of a wind bubble. Taken by the
+ * `meteo` screen once.
+ */
+export const alertDetail = signal<LiveStation | null>(null);
+
+/**
+ * Open the whole card of the station of an alert, as a long press on its
+ * badge in LiveMétéo does, without LiveMétéo; its ◀ shows the bubble again.
+ * @param content - The bubble.
+ * @param station - Its station.
+ */
+export function openAlertDetail(
+  content: WindPopupContent,
+  station: LiveStation,
+): void {
+  windPopup.value = null;
+  alertDetail.value = station;
+  leaveBubble(() => {
+    windPopup.value = content;
+  }, 'meteo');
+}
+
+/**
+ * The station of an alert, as LiveMétéo reads it; none for a forecast.
+ * @param reading - The reading of the alert.
+ * @param forecast - A forecast of a model.
+ * @returns The station, or null.
+ */
+export function alertStation(
+  reading: WindReading,
+  forecast: boolean,
+): LiveStation | null {
+  if (forecast || reading.lat == null || reading.lon == null) return null;
+  return {
+    ...reading,
+    id: reading.id ?? reading.name,
+    lat: reading.lat,
+    lon: reading.lon,
+    net: reading.net ?? 'MeteoSwiss',
+  };
+}
+
 /** One colour flash of the screen (legacy `.wind-flash`). */
 export interface WindFlash {
   /** Unique key. */
@@ -62,7 +135,7 @@ export interface WindFlash {
 }
 
 /** Content of the wind bubble (legacy `windPopShow`). */
-interface WindPopupContent {
+export interface WindPopupContent {
   /** Beaufort force. */
   bf: number;
   /** Wind text, e.g. `18 nd en rafales`. */

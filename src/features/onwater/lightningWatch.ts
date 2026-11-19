@@ -299,11 +299,11 @@ export function lightningCheck(quiet = false): Promise<void> {
           if (lightningClear(report, lastSignal, lastFlashAt)) {
             lastSignal = null;
             playLightning();
-            showPop({ report, radiusNm, place, clear: true });
-            logLightning(
+            const alertId = logLightning(
               'Fin d’alerte orage',
               `Plus d’éclairs à moins de ${radiusNm} NM depuis 30 min.`,
             );
+            showPop({ report, radiusNm, place, clear: true, alertId });
             return;
           }
           if (report.nearestKm == null) return;
@@ -317,14 +317,14 @@ export function lightningCheck(quiet = false): Promise<void> {
             half: report.nearestKm < radiusKm / 2,
           };
           playLightning();
-          showPop({ report, radiusNm, place, reason });
-          logLightning(
+          const alertId = logLightning(
             reason === 'half' ? 'Alerte orage (2e)' : 'Alerte orage',
             [
               lightningText(report, radiusNm),
               ...lightningMotionLines(report, now),
             ].join(' '),
           );
+          showPop({ report, radiusNm, place, reason, alertId });
         })
         .catch(() => undefined)
         .finally(() => {
@@ -339,16 +339,18 @@ export function lightningCheck(quiet = false): Promise<void> {
  * A line in the logbook of the open cruise.
  * @param event - The event.
  * @param note - What it says.
+ * @returns The id of the alert in the journal.
  */
-function logLightning(event: string, note: string): void {
+function logLightning(event: string, note: string): string {
   // In the journal of the alerts, with or without an open cruise.
-  recordAlert('orage', event, note);
-  if (!state.data.cruise.peek()) return;
+  const { id } = recordAlert('orage', event, note);
+  if (!state.data.cruise.peek()) return id;
   addEntry({
     id: uid(),
     t: new Date().toISOString(),
     v: { evt: [event], note },
   });
+  return id;
 }
 
 /** (Re)start the look every five minutes, or stop it when the alert is off. */

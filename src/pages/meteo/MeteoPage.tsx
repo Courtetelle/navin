@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import type { LiveStation } from '../../features/onwater/index.ts';
 import {
+  alertDetail,
+  bubbleBack,
   liveStations,
   stationKey,
   windConfig,
@@ -23,23 +25,31 @@ import { blinkKey, liveBlink, liveDetail } from './liveDetail.ts';
  * @returns The screen content.
  */
 export function MeteoPage() {
-  const [detail] = useState(() => liveDetail.peek());
+  const [fromAlert] = useState(() =>
+    alertDetail.peek() ? bubbleBack.peek() : null,
+  );
+  const [detail] = useState(() => liveDetail.peek() ?? alertDetail.peek());
   useEffect(() => {
     liveDetail.value = null;
+    alertDetail.value = null;
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- the way back is taken once, when the screen opens
+    if (fromAlert) bubbleBack.value = null;
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- opened without a station (the data tile): LiveMétéo on the map
     if (detail) return;
     // The LiveMétéo tile of data: the stations of the zone on the map.
     layLiveAround();
     go('tracker');
-  }, [detail]);
-  return detail ? <LiveDetail station={detail} /> : null;
+  }, [detail, fromAlert]);
+  return detail ? <LiveDetail station={detail} back={fromAlert} /> : null;
 }
 
 /**
  * The whole card of one station, opened from its badge on the NavIn map:
- * its past, all its measurements; ◀ back to the map and its badges.
+ * its past, all its measurements; ◀ back to the map and its badges, or to
+ * the wind bubble it was opened from.
  * @param props - The station.
  * @param props.station - The station.
+ * @param props.back - Back to the wind bubble, or null.
  * @returns The screen content.
  */
 function backToMap(): void {
@@ -47,7 +57,13 @@ function backToMap(): void {
   go('tracker');
 }
 
-function LiveDetail({ station }: { station: LiveStation }) {
+function LiveDetail({
+  station,
+  back,
+}: {
+  station: LiveStation;
+  back: (() => void) | null;
+}) {
   const tr = useTr();
   const config = windConfig();
   const [current, setCurrent] = useState(station);
@@ -55,18 +71,30 @@ function LiveDetail({ station }: { station: LiveStation }) {
   const [now] = useState(Date.now);
   return (
     <>
-      <PageBack
-        label="◀ Carte"
-        data-go="livemap"
-        data-instant="1"
-        onClick={() => {
-          // Back on the badge of this station, zoomed in and crowned.
-          liveBlink.value = blinkKey(current);
-          backToMap();
-        }}
-      >
-        {tr('◀ Carte')}
-      </PageBack>
+      {back ? (
+        <PageBack
+          label="◀ Alerte"
+          onClick={() => {
+            buzz();
+            back();
+          }}
+        >
+          {tr('◀ Alerte')}
+        </PageBack>
+      ) : (
+        <PageBack
+          label="◀ Carte"
+          data-go="livemap"
+          data-instant="1"
+          onClick={() => {
+            // Back on the badge of this station, zoomed in and crowned.
+            liveBlink.value = blinkKey(current);
+            backToMap();
+          }}
+        >
+          {tr('◀ Carte')}
+        </PageBack>
+      )}
       <TitleInNav>
         <h1 className="live-title">{tr('🌬 LiveMétéo')}</h1>
       </TitleInNav>
