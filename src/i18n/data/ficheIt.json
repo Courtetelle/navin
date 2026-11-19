@@ -1572,7 +1572,6 @@
   "l’alerte oui ou non, quand elle se rallume, le sens des feux": "allerta sì o no, quando si riaccende, il significato delle luci",
   "🌬 LiveMétéo · rayon des stations sur la carte": "🌬 LiveMétéo · raggio delle stazioni sulla carta",
   "🧪 Tests des alertes": "🧪 Prove delle allerte",
-  "📤 Types de mises en page": "📤 Tipi di impaginazione",
   "◀ Alertes": "◀ Allerte",
   "Chaque alerte": "Ogni allerta",
   "🔕 Couper toutes les alertes": "🔕 Disattiva tutte le allerte",
@@ -1593,5 +1592,6 @@
   "Certificat d’opérateur VHF n°": "Certificato di operatore VHF n.",
   "Type de certificat VHF": "Tipo di certificato VHF",
   "Certificat VHF délivré le": "Certificato VHF rilasciato il",
-  "Certificat VHF n°": "Certificato VHF n."
+  "Certificat VHF n°": "Certificato VHF n.",
+  "📤 Style des documents partagés": "📤 Stile dei documenti condivisi"
 }

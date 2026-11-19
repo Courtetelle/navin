@@ -54,7 +54,7 @@ export function ShareThemeNote() {
   return (
     <p className="help pub-h share-theme-note">
       {tr(
-        `Mise en page : ${label} (se change dans Paramétrages › Types de mises en page)`,
+        `Mise en page : ${label} (se change dans Paramétrages › Style des documents partagés)`,
       )}
     </p>
   );

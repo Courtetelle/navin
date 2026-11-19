@@ -533,7 +533,10 @@ export function SettingsPage({ from, arg }: PageProps) {
             >
               <WindKeys />
             </SettingsSection>
-            <SettingsSection section="share" title="📤 Types de mises en page">
+            <SettingsSection
+              section="share"
+              title="📤 Style des documents partagés"
+            >
               <ShareThemePicker />
             </SettingsSection>
             <SettingsSection section="simu" title="🆘 Simulation SOS">

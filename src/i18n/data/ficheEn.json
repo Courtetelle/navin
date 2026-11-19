@@ -1572,7 +1572,6 @@
   "l’alerte oui ou non, quand elle se rallume, le sens des feux": "alert on or off, when it comes back on, what the lights mean",
   "🌬 LiveMétéo · rayon des stations sur la carte": "🌬 LiveMétéo · radius of the stations on the map",
   "🧪 Tests des alertes": "🧪 Alert tests",
-  "📤 Types de mises en page": "📤 Layout types",
   "◀ Alertes": "◀ Alerts",
   "Chaque alerte": "Each alert",
   "🔕 Couper toutes les alertes": "🔕 Switch off all alerts",
@@ -1593,5 +1592,6 @@
   "Certificat d’opérateur VHF n°": "VHF operator certificate no.",
   "Type de certificat VHF": "VHF certificate type",
   "Certificat VHF délivré le": "VHF certificate issued on",
-  "Certificat VHF n°": "VHF certificate no."
+  "Certificat VHF n°": "VHF certificate no.",
+  "📤 Style des documents partagés": "📤 Shared documents style"
 }
