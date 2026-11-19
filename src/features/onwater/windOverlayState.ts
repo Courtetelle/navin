@@ -49,12 +49,12 @@ export function askLiveFromAlert(spot: AlertSpot | null): void {
 
 /**
  * Back to the alert bubble a screen was opened from (its 👁): the screen
- * takes it once and its ◀ Alerte runs it.
+ * takes it once and its « Revenir » runs it.
  */
 export const bubbleBack = signal<(() => void) | null>(null);
 
 /**
- * Leave an alert bubble for a screen; ◀ Alerte on that screen comes back
+ * Leave an alert bubble for a screen; « Revenir » on that screen comes back
  * to where it was and shows the bubble again.
  * @param restore - Shows the bubble again.
  * @param view - The screen.

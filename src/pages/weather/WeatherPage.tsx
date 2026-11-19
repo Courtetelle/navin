@@ -108,7 +108,7 @@ function useBubbleBack(): (() => void) | null {
 }
 
 /**
- * ◀ Météo, or ◀ Alerte back to the bubble the screen was opened from.
+ * ◀ Météo, or « Revenir » back to the bubble the screen was opened from.
  * @param props - The way back.
  * @param props.back - Back to the bubble, or null.
  * @returns The button.
@@ -118,13 +118,14 @@ function MeteoBack({ back }: { back: (() => void) | null }) {
   if (back) {
     return (
       <PageBack
-        label="◀ Alerte"
+        label="◀ Revenir"
+        data-revenir="1"
         onClick={() => {
           buzz();
           back();
         }}
       >
-        {tr('◀ Alerte')}
+        {tr('◀ Revenir')}
       </PageBack>
     );
   }

@@ -73,13 +73,14 @@ function LiveDetail({
     <>
       {back ? (
         <PageBack
-          label="◀ Alerte"
+          label="◀ Revenir"
+          data-revenir="1"
           onClick={() => {
             buzz();
             back();
           }}
         >
-          {tr('◀ Alerte')}
+          {tr('◀ Revenir')}
         </PageBack>
       ) : (
         <PageBack
