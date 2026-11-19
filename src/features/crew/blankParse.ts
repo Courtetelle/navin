@@ -199,7 +199,35 @@ function finishSheet({ language, values }: RawSheet): ParsedSheet {
     if (type) sheet.pieceType = type;
     else delete sheet.pieceType;
   }
+  joinAddress(sheet, values);
+  if (values.vhfType) {
+    const type = /lrc/i.test(values.vhfType) ? 'LRC' : '';
+    sheet.vhfType = /src/i.test(values.vhfType) ? 'SRC' : type;
+    if (!sheet.vhfType) sheet.vhfType = values.vhfType.trim();
+  }
   return normMemberPhones(sheet);
+}
+
+/**
+ * The address written in four lines (street, postcode, place, country) as
+ * the one line of the card: « Rue A 1, 1000 Lausanne, Suisse ».
+ * @param sheet - The card being made.
+ * @param values - What was written.
+ */
+function joinAddress(
+  sheet: Record<string, unknown>,
+  values: Record<string, string>,
+): void {
+  const parts = ['adresseRue', 'adresseNpa', 'adresseLieu', 'adressePays'];
+  for (const key of parts) Reflect.deleteProperty(sheet, key);
+  const town = [values.adresseNpa, values.adresseLieu]
+    .map((part) => part?.trim())
+    .filter(Boolean)
+    .join(' ');
+  const line = [values.adresseRue?.trim(), town, values.adressePays?.trim()]
+    .filter(Boolean)
+    .join(', ');
+  if (line) sheet.adresse = line;
 }
 
 function sexOf(text: string, spanish: boolean): string | undefined {

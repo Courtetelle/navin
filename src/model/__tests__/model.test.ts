@@ -126,6 +126,7 @@ test('section definitions keep the legacy keys', () => {
     'permisLacDate',
     'permisLacPar',
     'vhfDate',
+    'vhfType',
   ]);
   expect(BOAT_KEYS).toStrictEqual([
     'boat',

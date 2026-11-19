@@ -1589,5 +1589,9 @@
   "Coupées, les alertes se rallument seules à la fin de la prochaine trace.": "Desactivadas, las alertas se reactivan solas al final de la próxima traza.",
   "Coupées, les alertes se rallument seules à minuit.": "Desactivadas, las alertas se reactivan solas a medianoche.",
   "Coupées, les alertes se rallument seules au prochain lancement de NavIn.": "Desactivadas, las alertas se reactivan solas al próximo inicio de NavIn.",
-  "Coupées, les alertes restent coupées jusqu’à ce que vous les rallumiez.": "Desactivadas, las alertas siguen desactivadas hasta que las reactive."
+  "Coupées, les alertes restent coupées jusqu’à ce que vous les rallumiez.": "Desactivadas, las alertas siguen desactivadas hasta que las reactive.",
+  "Certificat d’opérateur VHF n°": "Certificado de operador VHF n.º",
+  "Type de certificat VHF": "Tipo de certificado VHF",
+  "Certificat VHF délivré le": "Certificado VHF expedido el",
+  "Certificat VHF n°": "Certificado VHF n.º"
 }

@@ -144,13 +144,14 @@ test('a new sheet sent back filled in is read whole, its rules and titles left o
         if (index === all.findIndex((one) => one.endsWith(' : '))) {
           return `${line}Zoé`;
         }
+        if (/SRC.* : $/.test(line)) return `${line}LRC`;
         if (/VHF.* : $/.test(line)) return `${line}CRR 88`;
         return line;
       })
       .join('\n');
 
     expect(parseBlank(filled)).toStrictEqual([
-      { prenom: 'Zoé', vhf: 'CRR 88' },
+      { prenom: 'Zoé', vhf: 'CRR 88', vhfType: 'LRC' },
     ]);
   }
 });
@@ -176,4 +177,26 @@ test('a new sheet with the phone format is read back', () => {
   expect(parseBlank(filled)).toMatchObject([
     { prenom: 'Zoé', tel: '+41 79 123 45 67', procheTel: '+33 6 12 34 56 78' },
   ]);
+});
+
+test('the address in four lines makes one line, the VHF type is SRC or LRC', () => {
+  const filled = blankText('fr')
+    .replace('Prénom : ', 'Prénom : Léa')
+    .replace('Rue et n° : ', 'Rue et n° : Rue A 1')
+    .replace('NPA : ', 'NPA : 1000')
+    .replace('Lieu : ', 'Lieu : Lausanne')
+    .replace('Pays : ', 'Pays : Suisse')
+    .replace(
+      'Type de certificat VHF (remplis SRC ou LRC) : ',
+      'Type de certificat VHF (remplis SRC ou LRC) : src',
+    );
+
+  expect(parseBlank(filled)).toMatchObject([
+    {
+      prenom: 'Léa',
+      adresse: 'Rue A 1, 1000 Lausanne, Suisse',
+      vhfType: 'SRC',
+    },
+  ]);
+  expect(Object.keys(parseBlank(filled)[0] ?? {})).not.toContain('adresseNpa');
 });

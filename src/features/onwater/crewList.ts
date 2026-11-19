@@ -30,7 +30,7 @@ export const CREW_LIST_COLS: ReadonlyArray<readonly [string, string]> = [
   ['lieu', 'Lieu de naissance / d’origine'],
   ['adresse', 'Adresse postale'],
   ['nationalite', 'Nationalité'],
-  ['vhf', 'Licence VHF n°'],
+  ['vhf', 'Certificat VHF n°'],
   ['proche', 'Proche à contacter'],
   ['sante', 'Santé, allergies'],
 ];

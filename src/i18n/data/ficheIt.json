@@ -1589,5 +1589,9 @@
   "Coupées, les alertes se rallument seules à la fin de la prochaine trace.": "Disattivate, le allerte si riaccendono da sole alla fine della prossima traccia.",
   "Coupées, les alertes se rallument seules à minuit.": "Disattivate, le allerte si riaccendono da sole a mezzanotte.",
   "Coupées, les alertes se rallument seules au prochain lancement de NavIn.": "Disattivate, le allerte si riaccendono da sole al prossimo avvio di NavIn.",
-  "Coupées, les alertes restent coupées jusqu’à ce que vous les rallumiez.": "Disattivate, le allerte restano disattivate finché non le riattivi."
+  "Coupées, les alertes restent coupées jusqu’à ce que vous les rallumiez.": "Disattivate, le allerte restano disattivate finché non le riattivi.",
+  "Certificat d’opérateur VHF n°": "Certificato di operatore VHF n.",
+  "Type de certificat VHF": "Tipo di certificato VHF",
+  "Certificat VHF délivré le": "Certificato VHF rilasciato il",
+  "Certificat VHF n°": "Certificato VHF n."
 }

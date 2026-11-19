@@ -135,12 +135,20 @@ export const CREW_FIELDS: readonly FieldDefinition[] = [
   },
   {
     key: 'vhf',
-    label: 'Licence VHF n°',
+    label: 'Certificat d’opérateur VHF n°',
     type: 'line',
     lock: true,
     frame: 'vhf',
   },
-  issueDate('vhfDate', 'Licence VHF délivrée le', 'vhf'),
+  {
+    key: 'vhfType',
+    label: 'Type de certificat VHF',
+    type: 'choice',
+    options: [['SRC'], ['LRC']],
+    cycle: true,
+    frame: 'vhf',
+  },
+  issueDate('vhfDate', 'Certificat VHF délivré le', 'vhf'),
   { key: 'adresse', label: 'Adresse postale', type: 'line', wide: true },
   { key: 'sante', label: 'Santé, allergies à connaître', type: 'area' },
   relativeName('procheNom', 'Proche à contacter : prénom et nom', 'p1'),
@@ -156,13 +164,14 @@ export const MEMBER_FIELDS: readonly FieldDefinition[] = CREW_FIELDS.filter(
   (field) => !['fonction', 'nom'].includes(field.key),
 );
 
-/** The keys added since the legacy app: issue dates and the lake permit. */
+/** The keys added since the legacy app: issue dates, the lake permit, the VHF type. */
 const ISSUE_KEYS: ReadonlySet<string> = new Set([
   'permisDate',
   'permisLac',
   'permisLacDate',
   'permisLacPar',
   'vhfDate',
+  'vhfType',
 ]);
 
 /** Keys saved on a member card (legacy `MEMBER_KEYS`). */

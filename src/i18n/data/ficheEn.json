@@ -1589,5 +1589,9 @@
   "Coupées, les alertes se rallument seules à la fin de la prochaine trace.": "Switched off, the alerts come back on by themselves at the end of the next track.",
   "Coupées, les alertes se rallument seules à minuit.": "Switched off, the alerts come back on by themselves at midnight.",
   "Coupées, les alertes se rallument seules au prochain lancement de NavIn.": "Switched off, the alerts come back on by themselves the next time NavIn starts.",
-  "Coupées, les alertes restent coupées jusqu’à ce que vous les rallumiez.": "Switched off, the alerts stay off until you switch them back on."
+  "Coupées, les alertes restent coupées jusqu’à ce que vous les rallumiez.": "Switched off, the alerts stay off until you switch them back on.",
+  "Certificat d’opérateur VHF n°": "VHF operator certificate no.",
+  "Type de certificat VHF": "VHF certificate type",
+  "Certificat VHF délivré le": "VHF certificate issued on",
+  "Certificat VHF n°": "VHF certificate no."
 }
