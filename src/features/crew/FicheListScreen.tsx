@@ -11,7 +11,7 @@ import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
 import { memberLockMsg, memberName, state } from '../../state/index.ts';
 import { membersByNav } from '../boats/index.ts';
-import { inMenuOrder } from '../data/dataOrder.ts';
+import { inMenuOrder, sortOf } from '../data/dataOrder.ts';
 import { SwipeRow } from '../prep/index.ts';
 import { ListPublishRow, openListPublish } from '../publish/index.ts';
 
@@ -35,11 +35,13 @@ export function FicheListScreen({ lead }: FicheListScreenProps) {
   useSignals();
   const tr = useTr();
   // A→Z, or the most often aboard first: the button at the right of the title.
+  // By last name: the last name first, in the list too.
+  const family = sortOf('people') === 'family';
   const sorted = inMenuOrder(
     'people',
     membersByNav(),
     (member) => member.id,
-    (member) => memberName(member),
+    (member) => (family ? familyName(member) : memberName(member)),
   );
   const toData = !state.data.cruise.value || state.view.ficheFromData.value;
   const backLabel = `◀ ${toData ? 'data' : 'Équipage'}`;
@@ -67,7 +69,9 @@ export function FicheListScreen({ lead }: FicheListScreenProps) {
       </PageTitle>
       <div className="checks">
         {sorted.length > 0 ? (
-          sorted.map((member) => <CardButton key={member.id} member={member} />)
+          sorted.map((member) => (
+            <CardButton key={member.id} member={member} family={family} />
+          ))
         ) : (
           <HelpText>Aucune fiche.</HelpText>
         )}
@@ -94,8 +98,17 @@ export function FicheListScreen({ lead }: FicheListScreenProps) {
   );
 }
 
-function CardButton({ member }: { member: Member }) {
-  const name = memberName(member) || '…';
+/**
+ * A name with the last name first.
+ * @param member - The card.
+ * @returns « Nom Prénom ».
+ */
+function familyName(member: Pick<Member, 'prenom' | 'nom'>): string {
+  return [member.nom, member.prenom].filter(Boolean).join(' ');
+}
+
+function CardButton({ member, family }: { member: Member; family: boolean }) {
+  const name = (family ? familyName(member) : memberName(member)) || '…';
   const contacts = [member.tel, member.email].filter(Boolean).join(' · ');
   return (
     <SwipeRow

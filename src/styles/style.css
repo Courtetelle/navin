@@ -13772,3 +13772,15 @@ h1.menu-title {
     white-space: nowrap;
   }
 }
+
+/* The letter of the order of the people: P (first names), N (last names),
+   in the colour of the button on the colour of the text. */
+.menu-sort-icon.wide {
+  width: 38px;
+}
+.menu-sort-icon .menu-sort-badge {
+  fill: var(--surface, #fff);
+}
+:root[data-theme='night'] .menu-sort-icon .menu-sort-badge {
+  fill: #200000;
+}

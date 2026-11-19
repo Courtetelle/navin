@@ -65,7 +65,8 @@ export function bumpTile(shown: readonly string[], key: string): void {
 }
 
 /** How a menu or a list is sorted: alphabetical, or by the use of its entries. */
-export type MenuSort = 'alpha' | 'use';
+/** `alpha` A→Z (first names for the people), `family` A→Z of the last names (people only), `use` the order of the list. */
+export type MenuSort = 'alpha' | 'family' | 'use';
 /** The menus and lists that can be sorted. */
 export type SortedMenu =
   'data' | 'settings' | 'boats' | 'people' | 'crews' | 'sites' | 'marks';
@@ -85,14 +86,17 @@ export function sortOf(menu: SortedMenu): MenuSort {
 }
 
 /**
- * Turn a menu to the other order, kept until the next change.
+ * Turn a menu to the next order, kept until the next change.
  * @param menu - The menu.
  */
 export function toggleMenuSort(menu: SortedMenu): void {
-  const next = {
-    ...menuSort.value,
-    [menu]: sortOf(menu) === 'alpha' ? 'use' : 'alpha',
-  };
+  const now = sortOf(menu);
+  // The people: first names, last names, then the outings.
+  let order: MenuSort = now === 'alpha' ? 'use' : 'alpha';
+  if (menu === 'people') {
+    order = now === 'alpha' ? 'family' : now === 'family' ? 'use' : 'alpha';
+  }
+  const next = { ...menuSort.value, [menu]: order };
   menuSort.value = next;
   store.set('ldb.menuSort', next);
 }
@@ -147,7 +151,7 @@ export function inMenuOrder<Entry>(
   keyOf: (entry: Entry) => string,
   titleOf: (entry: Entry) => string,
 ): Entry[] {
-  if (sortOf(menu) === 'alpha') {
+  if (sortOf(menu) !== 'use') {
     return entries.toSorted((first, second) =>
       byAlpha(titleOf(first), titleOf(second)),
     );

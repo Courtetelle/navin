@@ -58,3 +58,19 @@ test('a menu is alphabetical until turned to the order of its use', async () => 
   toggleMenuSort('settings');
   expect(keys()).toStrictEqual(['a', 'e', 'z']);
 });
+
+test('the people turn from first names to last names to the outings', async () => {
+  const { menuSort, sortOf, toggleMenuSort } = await import('../dataOrder.ts');
+  menuSort.value = {};
+  expect(sortOf('people')).toBe('alpha');
+  toggleMenuSort('people');
+  expect(sortOf('people')).toBe('family');
+  toggleMenuSort('people');
+  expect(sortOf('people')).toBe('use');
+  toggleMenuSort('people');
+  expect(sortOf('people')).toBe('alpha');
+  // Other lists keep two orders.
+  toggleMenuSort('boats');
+  toggleMenuSort('boats');
+  expect(sortOf('boats')).toBe('alpha');
+});

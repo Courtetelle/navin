@@ -63,27 +63,62 @@ const OTHER_ORDER: Partial<Record<SortedMenu, OtherOrder>> = {
 export function MenuSortButton({ menu }: { menu: SortedMenu }) {
   useSignals();
   const tr = useTr();
-  const alpha = sortOf(menu) === 'alpha';
+  const order = sortOf(menu);
   const other = OTHER_ORDER[menu] ?? USE_ORDER;
+  const people = menu === 'people';
   return (
     <button
       type="button"
       className="btn menu-sort no-navact"
       data-menu-sort={menu}
-      aria-label={tr(
-        alpha
-          ? `Ordre alphabétique : toucher pour ${other.name}`
-          : `${other.said} : toucher pour l’ordre alphabétique`,
-      )}
+      data-order={order}
+      aria-label={tr(sortSaid(order, other, people))}
       onClick={() => {
         buzz();
         toggleMenuSort(menu);
-        toast(alpha ? other.toast : 'Ordre alphabétique');
+        toast(sortToast(sortOf(menu), other, people));
       }}
     >
-      <SortIcon icon={alpha ? 'alpha' : other.icon} />
+      <SortIcon icon={iconOf(order, other, people)} />
     </button>
   );
+}
+
+type Icon = 'alpha' | 'first' | 'family' | 'bars' | 'clock';
+
+function iconOf(order: string, other: OtherOrder, people: boolean): Icon {
+  if (order === 'family') return 'family';
+  if (order === 'alpha') return people ? 'first' : 'alpha';
+  return other.icon;
+}
+
+function nameOf(order: string, other: OtherOrder, people: boolean): string {
+  if (order === 'family') return 'l’ordre alphabétique des noms';
+  if (order === 'alpha') {
+    return people ? 'l’ordre alphabétique des prénoms' : 'l’ordre alphabétique';
+  }
+  return other.name;
+}
+
+function nextOf(order: string, people: boolean): string {
+  if (people) {
+    return order === 'alpha' ? 'family' : order === 'family' ? 'use' : 'alpha';
+  }
+  return order === 'alpha' ? 'use' : 'alpha';
+}
+
+function sortSaid(order: string, other: OtherOrder, people: boolean): string {
+  const now = nameOf(order, other, people);
+  const next = nameOf(nextOf(order, people), other, people);
+  return `${now.charAt(2).toUpperCase()}${now.slice(3)} : toucher pour ${next}`;
+}
+
+function sortToast(order: string, other: OtherOrder, people: boolean): string {
+  if (order === 'family') return 'Ordre alphabétique des noms';
+  if (order === 'alpha') {
+    return people ? 'Ordre alphabétique des prénoms' : 'Ordre alphabétique';
+  }
+  return other.toast;
 }
 
 /**
@@ -94,12 +129,15 @@ export function MenuSortButton({ menu }: { menu: SortedMenu }) {
  * @param props.icon - Which drawing.
  * @returns The icon.
  */
-function SortIcon({ icon }: { icon: 'alpha' | 'bars' | 'clock' }) {
+function SortIcon({ icon }: { icon: Icon }) {
+  // First names (P) or last names (N): the A→Z drawing with its letter.
+  const badge = icon === 'first' ? 'P' : icon === 'family' ? 'N' : null;
+  const wide = badge !== null;
   return (
     <svg
-      className="menu-sort-icon"
-      viewBox="0 0 24 24"
-      width="24"
+      className={wide ? 'menu-sort-icon wide' : 'menu-sort-icon'}
+      viewBox={wide ? '0 0 36 24' : '0 0 24 24'}
+      width={wide ? 36 : 24}
       height="24"
       aria-hidden="true"
       fill="none"
@@ -116,14 +154,39 @@ function SortIcon({ icon }: { icon: 'alpha' | 'bars' | 'clock' }) {
       ) : (
         <>
           <path d="M5 3v17M1.8 16.8 5 20.2l3.2-3.4" />
-          {icon === 'alpha' ? (
+          {icon === 'bars' ? (
+            <path d="M12 4h10M12 10h7.5M12 16h5M12 21.5h2.5" />
+          ) : (
             <>
               <path d="M12.5 10.5 16.5 2l4 8.5M14 7.4h5" strokeWidth="2.2" />
               <path d="M12.8 13.5h7.4l-7.4 8h7.4" strokeWidth="2.2" />
             </>
-          ) : (
-            <path d="M12 4h10M12 10h7.5M12 16h5M12 21.5h2.5" />
           )}
+          {badge ? (
+            <>
+              <rect
+                x="24"
+                y="5"
+                width="11"
+                height="14"
+                rx="3"
+                fill="currentColor"
+                stroke="none"
+              />
+              <text
+                x="29.5"
+                y="15.8"
+                textAnchor="middle"
+                fontSize="11"
+                fontWeight="900"
+                fontFamily="system-ui, sans-serif"
+                className="menu-sort-badge"
+                stroke="none"
+              >
+                {badge}
+              </text>
+            </>
+          ) : null}
         </>
       )}
     </svg>
