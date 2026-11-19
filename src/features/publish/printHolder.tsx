@@ -13,6 +13,9 @@ import { PrintDrawn } from './PrintDrawn.tsx';
 export const PDF_RULES = `@media print {
   @page { margin: 0 !important }
   body > *:not(.print-only) { display: none !important }
+  html::before, html::after, body::before, body::after {
+    content: none !important; display: none !important
+  }
   table.pdf-sheet { width: 100%; border: 0; border-collapse: collapse }
   table.pdf-sheet > thead > tr > td, table.pdf-sheet > tfoot > tr > td,
   table.pdf-sheet > tbody > tr > td { border: 0; padding: 0; background: none }
