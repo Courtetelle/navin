@@ -6,7 +6,7 @@ test('the French sheet starts with clear rules, then its parts', () => {
   const lines = blankText('fr').split('\n');
 
   expect(lines.slice(0, 4)).toStrictEqual([
-    'NavIn · Fiche coéquipier·ère',
+    'NavIn · Fiche équipier·ère',
     '',
     '📌 À LIRE AVANT DE REMPLIR',
     '1️⃣ Appuie longuement sur ce message, « Copier », colle-le dans ta réponse, puis complète-le.',
@@ -31,7 +31,7 @@ test('the other languages have their own text', () => {
 });
 
 test('a label falls back on French', () => {
-  expect(blankLabel('tel', 'en')).toBe('Phone (with country code, e.g. +41)');
-  expect(blankLabel('tel', 'fr')).toBe('Téléphone (avec indicatif, ex. +41)');
+  expect(blankLabel('tel', 'en')).toBe('Phone (format +41 79 123 45 67)');
+  expect(blankLabel('tel', 'fr')).toBe('Téléphone (format +41 79 123 45 67)');
   expect(blankLabel('inconnu', 'en')).toBe('');
 });

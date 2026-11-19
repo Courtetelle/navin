@@ -51,7 +51,7 @@ export const CREW_FIELDS: readonly FieldDefinition[] = [
   { key: 'nom', label: 'Prénom nom', type: 'line', wide: true },
   {
     key: 'sexe',
-    label: 'Coéquipier ou coéquipière',
+    label: 'Équipier ou équipière',
     type: 'choice',
     options: [['Homme'], ['Femme'], ['Non genré']],
     cycle: true,

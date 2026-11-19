@@ -9,7 +9,7 @@ import type {
 
 /** Subtitle of each list: what one element is. */
 const KIND_SUBTITLES: Readonly<Record<ListKind, string>> = {
-  people: 'Fiche coéquipier·ère',
+  people: 'Fiche équipier·ère',
   crews: 'Équipage',
   boats: 'Fiche bateau',
   traces: 'Traces',

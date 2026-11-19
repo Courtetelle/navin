@@ -39,7 +39,7 @@ export const BLANK_FIELDS: ReadonlyArray<readonly [string, string]> = [
   ['naissance', 'Date de naissance (JJ.MM.AAAA)'],
   ['lieu', 'Lieu de naissance ou d’origine'],
   ['nationalite', 'Nationalité'],
-  ['tel', 'Téléphone (avec indicatif, ex. +41)'],
+  ['tel', 'Téléphone (format +41 79 123 45 67)'],
   ['email', 'Courriel'],
   ['pieceCI', 'Carte d’identité'],
   ['piecePP', 'Passeport'],
@@ -51,23 +51,36 @@ export const BLANK_FIELDS: ReadonlyArray<readonly [string, string]> = [
   ['adresse', 'Adresse postale'],
   ['sante', 'Santé, allergies à connaître'],
   ['procheNom', 'Proche à contacter, prénom et nom'],
-  ['procheTel', 'Téléphone du proche'],
+  ['procheTel', 'Téléphone du proche (format +41 79 123 45 67)'],
 ];
 export const BLANK_OLD: ReadonlyArray<readonly [string, string]> = [
   ['sexe', 'Homme ou femme'],
   ['pieceType', 'Pièce d’identité (passeport ou carte d’identité)'],
   ['proche2Nom', '2ᵉᵐᵉ proche, prénom et nom'],
   ['proche2Tel', 'Téléphone du 2ᵉᵐᵉ proche'],
+  ['tel', 'Téléphone (avec indicatif, ex. +41)'],
+  ['procheTel', 'Téléphone du proche'],
+  ['tel', 'Phone (with country code, e.g. +41)'],
+  ['procheTel', 'Emergency contact phone'],
+  ['tel', 'Telefono (con prefisso, es. +41)'],
+  ['procheTel', 'Telefono della persona da contattare'],
+  ['tel', 'Teléfono (con prefijo, p. ej. +41)'],
+  ['procheTel', 'Teléfono del contacto de emergencia'],
+];
+/** First lines of older sheets, still recognised when they come back. */
+export const BLANK_OLD_HEADS: readonly string[] = [
+  'NavIn · Fiche coéquipier·ère',
 ];
 /** The rules of the French sheet, read before filling it in. */
 export const BLANK_RULES: readonly string[] = [
   '📌 À LIRE AVANT DE REMPLIR',
   '1️⃣ Appuie longuement sur ce message, « Copier », colle-le dans ta réponse, puis complète-le.',
   '2️⃣ Écris chaque réponse juste APRÈS les deux-points « : », sur la même ligne.',
-  '3️⃣ Ne change RIEN avant les « : » et n’efface AUCUNE ligne : ni le titre « NavIn · Fiche coéquipier·ère », ni les intitulés, ni les lignes « — … — ». C’est grâce à eux que NavIn reprend ta fiche telle quelle et l’enregistre.',
+  '3️⃣ Ne change RIEN avant les « : » et n’efface AUCUNE ligne : ni le titre « NavIn · Fiche équipier·ère », ni les intitulés, ni les lignes « — … — ». C’est grâce à eux que NavIn reprend ta fiche telle quelle et l’enregistre.',
   '4️⃣ Ce que tu n’as pas (par exemple pas de licence VHF) : laisse vide après les « : », sans effacer la ligne.',
   '5️⃣ Les dates s’écrivent JJ.MM.AAAA, par exemple 14.11.1985.',
-  '6️⃣ Renvoie-moi le message en entier, du titre jusqu’à « Fin de la fiche ».',
+  '6️⃣ Les téléphones s’écrivent avec l’indicatif du pays, par exemple +41 79 123 45 67 (Suisse) ou +33 6 12 34 56 78 (France).',
+  '7️⃣ Renvoie-moi le message en entier, du titre jusqu’à « Fin de la fiche ».',
 ];
 /** The titles of the parts of the French sheet. */
 export const BLANK_PARTS: Readonly<Record<BlankPart, string>> = {
@@ -78,7 +91,7 @@ export const BLANK_PARTS: Readonly<Record<BlankPart, string>> = {
 };
 /** Last line of the French sheet. */
 export const BLANK_END = 'Fin de la fiche, merci !';
-export const BLANK_HEAD = 'NavIn · Fiche coéquipier·ère';
+export const BLANK_HEAD = 'NavIn · Fiche équipier·ère';
 export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
   en: {
     head: 'NavIn · Crew member sheet',
@@ -89,7 +102,8 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       '3️⃣ Change NOTHING before the « : » and delete NO line: not the title « NavIn · Crew member sheet », not the labels, not the « — … — » lines. They let NavIn take your sheet back as it is and save it.',
       '4️⃣ Anything you do not have (for example no VHF licence): leave it blank after the « : », without deleting the line.',
       '5️⃣ Dates are written DD.MM.YYYY, for example 14.11.1985.',
-      '6️⃣ Send me back the whole message, from the title down to « End of the sheet ».',
+      '6️⃣ Phone numbers are written with the country code, for example +41 79 123 45 67 (Switzerland) or +44 7700 900123 (UK).',
+      '7️⃣ Send me back the whole message, from the title down to « End of the sheet ».',
     ],
     parts: {
       identity: 'Identity',
@@ -115,7 +129,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       naissance: 'Date of birth (DD.MM.YYYY)',
       lieu: 'Place of birth or origin',
       nationalite: 'Nationality',
-      tel: 'Phone (with country code, e.g. +41)',
+      tel: 'Phone (format +41 79 123 45 67)',
       email: 'Email',
       pieceCI: 'Identity card',
       piecePP: 'Passport',
@@ -127,7 +141,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       adresse: 'Postal address',
       sante: 'Health, allergies to know about',
       procheNom: 'Emergency contact, first and last name',
-      procheTel: 'Emergency contact phone',
+      procheTel: 'Emergency contact phone (format +41 79 123 45 67)',
     },
   },
   it: {
@@ -139,7 +153,8 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       '3️⃣ Non cambiare NIENTE prima dei « : » e non cancellare NESSUNA riga: né il titolo « NavIn · Scheda membro dell’equipaggio », né le voci, né le righe « — … — ». Grazie a loro NavIn riprende la tua scheda così com’è e la salva.',
       '4️⃣ Ciò che non hai (per esempio niente licenza VHF): lascia vuoto dopo i « : », senza cancellare la riga.',
       '5️⃣ Le date si scrivono GG.MM.AAAA, per esempio 14.11.1985.',
-      '6️⃣ Rimandami il messaggio intero, dal titolo fino a « Fine della scheda ».',
+      '6️⃣ I numeri di telefono si scrivono con il prefisso del paese, per esempio +41 79 123 45 67 (Svizzera) o +39 312 345 6789 (Italia).',
+      '7️⃣ Rimandami il messaggio intero, dal titolo fino a « Fine della scheda ».',
     ],
     parts: {
       identity: 'Identità',
@@ -165,7 +180,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       naissance: 'Data di nascita (GG.MM.AAAA)',
       lieu: 'Luogo di nascita o di origine',
       nationalite: 'Nazionalità',
-      tel: 'Telefono (con prefisso, es. +41)',
+      tel: 'Telefono (formato +41 79 123 45 67)',
       email: 'E-mail',
       pieceCI: 'Carta d’identità',
       piecePP: 'Passaporto',
@@ -177,7 +192,8 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       adresse: 'Indirizzo postale',
       sante: 'Salute, allergie da conoscere',
       procheNom: 'Persona da contattare, nome e cognome',
-      procheTel: 'Telefono della persona da contattare',
+      procheTel:
+        'Telefono della persona da contattare (formato +41 79 123 45 67)',
     },
   },
   es: {
@@ -189,7 +205,8 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       '3️⃣ No cambies NADA antes de los « : » y no borres NINGUNA línea: ni el título « NavIn · Ficha de tripulante », ni los encabezados, ni las líneas « — … — ». Gracias a ellos NavIn recupera tu ficha tal cual y la guarda.',
       '4️⃣ Lo que no tengas (por ejemplo, sin licencia VHF): déjalo vacío después de los « : », sin borrar la línea.',
       '5️⃣ Las fechas se escriben DD.MM.AAAA, por ejemplo 14.11.1985.',
-      '6️⃣ Devuélveme el mensaje entero, desde el título hasta « Fin de la ficha ».',
+      '6️⃣ Los teléfonos se escriben con el prefijo del país, por ejemplo +41 79 123 45 67 (Suiza) o +34 612 34 56 78 (España).',
+      '7️⃣ Devuélveme el mensaje entero, desde el título hasta « Fin de la ficha ».',
     ],
     parts: {
       identity: 'Identidad',
@@ -215,7 +232,7 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       naissance: 'Fecha de nacimiento (DD.MM.AAAA)',
       lieu: 'Lugar de nacimiento o de origen',
       nationalite: 'Nacionalidad',
-      tel: 'Teléfono (con prefijo, p. ej. +41)',
+      tel: 'Teléfono (formato +41 79 123 45 67)',
       email: 'Correo electrónico',
       pieceCI: 'Documento de identidad',
       piecePP: 'Pasaporte',
@@ -227,7 +244,8 @@ export const BLANK_I18N: Readonly<Record<BlankForeignLanguage, BlankTexts>> = {
       adresse: 'Dirección postal',
       sante: 'Salud, alergias a tener en cuenta',
       procheNom: 'Contacto de emergencia, nombre y apellido',
-      procheTel: 'Teléfono del contacto de emergencia',
+      procheTel:
+        'Teléfono del contacto de emergencia (formato +41 79 123 45 67)',
     },
   },
 };

@@ -9,7 +9,7 @@ import { showCrews, showCrewsEdit } from './screen.ts';
 export function pickCrewPhoto(): void {
   const id = state.view.crewsEdit.value?.id ?? null;
   if (!crewSetById(id)) {
-    toast('Choisissez d’abord les coéquipiers·ères de cet équipage');
+    toast('Choisissez d’abord les équipiers·ères de cet équipage');
     return;
   }
   const input = document.createElement('input');

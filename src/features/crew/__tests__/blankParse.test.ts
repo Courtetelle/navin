@@ -3,6 +3,7 @@ import { expect, test } from 'vitest';
 import { memberClones, normLabel, parseBlank } from '../blankParse.ts';
 import { blankText } from '../blankSheet.ts';
 
+// An older sheet, still read: its title and labels of before.
 const FILLED_FRENCH = [
   'NavIn · Fiche coéquipier·ère',
   '',
@@ -157,4 +158,22 @@ test('a new sheet sent back filled in is read whole, its rules and titles left o
 test('a sheet in the language shown only: no other language in it', () => {
   expect(blankText('fr')).not.toMatch(/Sea licence|Patente|Titulación|READ/);
   expect(blankText('en')).not.toMatch(/Permis|Patente|Titulación|LIRE/);
+});
+
+test('a new sheet with the phone format is read back', () => {
+  const filled = blankText('fr')
+    .replace('Prénom : ', 'Prénom : Zoé')
+    .replace(
+      'Téléphone (format +41 79 123 45 67) : ',
+      'Téléphone (format +41 79 123 45 67) : +41 79 123 45 67',
+    )
+    .replace(
+      'Téléphone du proche (format +41 79 123 45 67) : ',
+      'Téléphone du proche (format +41 79 123 45 67) : +33 6 12 34 56 78',
+    );
+
+  expect(blankText('fr').split('\n', 1)[0]).toBe('NavIn · Fiche équipier·ère');
+  expect(parseBlank(filled)).toMatchObject([
+    { prenom: 'Zoé', tel: '+41 79 123 45 67', procheTel: '+33 6 12 34 56 78' },
+  ]);
 });

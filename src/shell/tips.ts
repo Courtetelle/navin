@@ -14,7 +14,7 @@ const TIPS: ReadonlyArray<readonly [string | null, string]> = [
   ],
   [
     'more',
-    'data : toutes vos fiches · bateaux, coéquipiers·ères, équipages, check-lists, traces, cartes et documents',
+    'data : toutes vos fiches · bateaux, équipiers·ères, équipages, check-lists, traces, cartes et documents',
   ],
   [
     'sos',

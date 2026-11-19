@@ -75,12 +75,12 @@ export function MemberLabels({ back, lead }: MemberLabelsProps) {
     <>
       <PageTitle
         atTop={lead && !redrawn}
-        titleText="Fiches coéquipier·ère"
+        titleText="Fiches équipier·ère"
         helps={[
           'Mode ✎ : les libellés valent pour toutes les fiches. Touchez un libellé pour le renommer (vide = libellé d’origine). Vos libellés : ▲ ▼ pour l’ordre, 🗑 appui long pour supprimer. Tout est enregistré tout seul.',
         ]}
       >
-        {tr('Fiches coéquipier·ère')}
+        {tr('Fiches équipier·ère')}
         <Button
           type="button"
           className="btn ck-editbtn on no-navact"

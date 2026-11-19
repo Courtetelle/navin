@@ -21,12 +21,12 @@ export function blankPdf(): void {
   }
   printInHolder({
     className: 'print-only book lx-print',
-    title: 'NavIn-fiche-coequipier-vide',
+    title: 'NavIn-fiche-equipier-vide',
     delay: 150,
     css: PRINT_CSS,
     content: (
       <section className="pg">
-        <h1>{texts?.pdfTitle ?? 'Fiche coéquipier·ère'}</h1>
+        <h1>{texts?.pdfTitle ?? 'Fiche équipier·ère'}</h1>
         <p className="lx-date">
           {texts?.pdfSubtitle ?? 'NavIn · à compléter et à renvoyer'}
         </p>

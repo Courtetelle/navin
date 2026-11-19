@@ -77,7 +77,7 @@ export function PhoneBook() {
       {shown.length === 0 ? (
         <HelpText>
           {all.length === 0
-            ? 'Aucun numéro pour l’instant : ajoutez les ports et vos contacts ci-dessous ; les téléphones et courriels des fiches co-équipiers et de leurs proches viennent d’eux-mêmes.'
+            ? 'Aucun numéro pour l’instant : ajoutez les ports et vos contacts ci-dessous ; les téléphones et courriels des fiches équipiers·ères et de leurs proches viennent d’eux-mêmes.'
             : 'Aucun numéro ne correspond à la recherche.'}
         </HelpText>
       ) : null}

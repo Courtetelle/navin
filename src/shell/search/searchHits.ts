@@ -111,8 +111,8 @@ export function searchContext(view: string): SearchContext {
   }
   if (view === 'people' || view === 'crew') {
     return {
-      title: 'Co-équipiers',
-      placeholder: 'Recherche dans Mes co-équipiers',
+      title: 'Équipiers·ères',
+      placeholder: 'Recherche dans Mes équipiers·ères',
       kinds: ['member'],
       online: false,
     };

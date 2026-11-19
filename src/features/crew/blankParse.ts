@@ -8,6 +8,7 @@ import {
   BLANK_HEAD,
   BLANK_I18N,
   BLANK_OLD,
+  BLANK_OLD_HEADS,
 } from './blankTexts.ts';
 
 /** A sheet read from a message: member values, without an id yet. */
@@ -32,6 +33,8 @@ const LABELS: ReadonlyArray<readonly [string, string]> = [
 const HEADS = [BLANK_HEAD, ...FOREIGN_TEXTS.map((texts) => texts.head)].map(
   (head) => normLabel(head).slice(0, 18),
 );
+/** Older French sheets: their own first line. */
+const OLD_HEADS = BLANK_OLD_HEADS.map((head) => normLabel(head).slice(0, 18));
 
 const INSTRUCTIONS = [
   'ou',
@@ -124,7 +127,7 @@ function readSheets(text: string): RawSheet[] {
     }
     const normalized = normLabel(line);
     const head = HEADS.findIndex((item) => normalized.startsWith(item));
-    if (head !== -1) {
+    if (head !== -1 || OLD_HEADS.some((item) => normalized.startsWith(item))) {
       current = { values: {}, language: FOREIGN[head - 1] };
       sheets.push(current);
       last = null;

@@ -28,7 +28,7 @@ export function toggleAboard(member: Member): void {
     }
   });
   if (!state.view.tracking.value && (cruise.entries ?? []).length === 0) return;
-  const who = memberName(member) || 'Coéquipier.ère';
+  const who = memberName(member) || 'Équipier·ère';
   const note =
     index === -1 ? `${who} rejoint le bord` : `${who} quitte le bord`;
   lakeFix((position) => {

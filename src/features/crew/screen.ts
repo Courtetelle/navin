@@ -114,7 +114,7 @@ export function leaveFiche(): void {
  */
 export function showLabels(back: () => void): void {
   ensureCustomLabels();
-  draw({ kind: 'labels', back }, 'Fiches coéquipier·ère');
+  draw({ kind: 'labels', back }, 'Fiches équipier·ère');
 }
 
 /**

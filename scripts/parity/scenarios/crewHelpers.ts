@@ -131,7 +131,7 @@ export function scenario(
 }
 
 export const received = [
-  'NavIn · Fiche coéquipier·ère',
+  'NavIn · Fiche équipier·ère',
   '',
   'Prénom : Camille',
   'Nom : Rochat',
