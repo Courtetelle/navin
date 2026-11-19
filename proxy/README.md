@@ -17,3 +17,21 @@ place de NavIn et les lui rend avec la permission.
 Le relais ne sert que le site de NavIn, ne lit que ces deux serveurs, et garde
 chaque réponse 5 minutes. L’offre gratuite de Cloudflare permet 100 000
 requêtes par jour, très au-delà de l’usage de NavIn.
+
+## Enregistrer les stations à clé NavIn fermé (facultatif)
+
+Avec l’enregistrement installé (KV « NAVIN » et déclencheur toutes les 10
+minutes), le relais peut lire lui-même les stations Météo-France autour des
+points de NavIn (le GPS et les trois zones), même quand NavIn est fermé.
+
+1. Workers & Pages › navin-relay › Paramètres › Variables et secrets ›
+   Ajouter › type « Secret », nom `MF_KEY`, valeur : la clé Météo-France
+   copiée depuis le portail de Météo-France › Déployer.
+2. Pour l’Espagne : de même `AEMET_KEY` avec la clé AEMET OpenData.
+3. Recopier le code du relais (NavIn › « 📋 Copier le code du relais ») et
+   Déployer.
+
+Les clés restent chez Cloudflare comme secrets : le relais ne les renvoie
+jamais. Il lit à chaque passage les stations les plus proches de chaque point
+et, à tour de rôle, les suivantes (environ toutes les 30 minutes), dans la
+limite de 50 requêtes par passage de l’offre gratuite.

@@ -51,8 +51,12 @@ export function RelayRow() {
     setResult(
       readings.length > 0
         ? `Relais en service : ${readings.length} aéroport(s) lu(s) à l’essai. ${
-            recording
-              ? 'Enregistrement actif : 24 h des stations gardées, NavIn fermé, pour tous les appareils.'
+            recording?.recording
+              ? `Enregistrement actif : 24 h des stations gardées, NavIn fermé, pour tous les appareils. ${
+                  recording.reads.length > 0
+                    ? `Le relais lit lui-même : ${recording.reads.join(', ')}.`
+                    : 'Météo-France NavIn fermé : étape 12 du guide.'
+                }`
               : 'Enregistrement pas encore installé (étapes 8 à 11 du guide).'
           }`
         : 'Le relais ne répond pas : vérifiez son adresse.',

@@ -82,19 +82,36 @@ export async function relayPoints(key: string): Promise<WindPoint[]> {
   }
 }
 
+/** What the relay says of its recording. */
+export interface RelayRecording {
+  /** Its KV and its cron are set. */
+  recording: boolean;
+  /** The keyed networks it reads itself, NavIn closed (`Météo-France`…). */
+  reads: string[];
+}
+
 /**
- * Whether the relay records (its KV and its cron set).
- * @returns True, false, or null without a relay or an answer.
+ * Whether the relay records (its KV and its cron set), and the networks it
+ * reads itself with the keys kept as its secrets.
+ * @returns The answer, null without a relay or an answer.
  */
-export async function relayRecords(): Promise<boolean | null> {
+export async function relayRecords(): Promise<RelayRecording | null> {
   const relay = relayAddress();
   if (!relay) return null;
   try {
     const response = await fetch(`${relay}/record`, {
       signal: AbortSignal.timeout(10_000),
     });
-    const body = (await response.json()) as { recording?: boolean };
-    return body.recording === true;
+    const body = (await response.json()) as {
+      recording?: boolean;
+      reads?: unknown;
+    };
+    return {
+      recording: body.recording === true,
+      reads: Array.isArray(body.reads)
+        ? body.reads.filter((one): one is string => typeof one === 'string')
+        : [],
+    };
   } catch {
     return null;
   }
