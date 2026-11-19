@@ -6,8 +6,8 @@ import { buzz } from '../../lib/dom.ts';
 import { reportLines, restoreReport } from './restoreReport.ts';
 
 /**
- * After a restoration: what came from the file, at the top of « Mes
- * navigations », until « OK ».
+ * After a restoration: what came from the file, under the button that chose
+ * it (Paramétrages › Sauvegarde, Exporter), until « OK ».
  * @returns The card, or nothing.
  */
 export function RestoreReportCard() {

@@ -4,7 +4,6 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
-import { RestoreReportCard } from '../../features/data/RestoreReportCard.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import type { ModeKey } from '../../model/modes.ts';
@@ -117,7 +116,6 @@ export function CruisesPage({ from }: PageProps) {
       <PageTitle helps={cruise ? [] : [WELCOME]} atTop={redraws === 0}>
         Mes navigations
       </PageTitle>
-      <RestoreReportCard />
       {cruise ? null : (
         <ButtonRow style={{ marginBottom: '16px' }}>
           <Button

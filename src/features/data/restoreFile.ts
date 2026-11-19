@@ -1,4 +1,3 @@
-import { go } from '../../shell/router.ts';
 import { toast } from '../../state/index.ts';
 
 import { applyIcon } from './appIcon.ts';
@@ -9,7 +8,7 @@ import { restoredMessage } from './restoredMessage.ts';
 
 /**
  * Read a backup or sync file chosen by the user and merge it, then show the
- * result (legacy `restoreFile`).
+ * result where it was chosen (legacy `restoreFile`).
  * @param file - File picked.
  */
 export async function restoreFile(file: Blob): Promise<void> {
@@ -20,11 +19,10 @@ export async function restoreFile(file: Blob): Promise<void> {
     restoreReport.value = result.report;
     if (result.count === 0) {
       toast('🔄 Fiches récupérées : bateaux, équipage, check-lists');
-      go('cruises');
       return;
     }
+    // The report shows where the file was chosen: the screen stays.
     toast(restoredMessage(backup, result));
-    go('cruises');
   } catch {
     toast('Fichier de sauvegarde invalide');
   }

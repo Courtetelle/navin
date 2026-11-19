@@ -6,6 +6,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { boatDocPhotos } from '../../features/boats/index.ts';
+import { RestoreReportCard } from '../../features/data/RestoreReportCard.tsx';
 import { syncPack } from '../../features/data/backup.ts';
 import { sendMenus } from '../../features/data/menusExport.ts';
 import { restoreFile } from '../../features/data/restoreFile.ts';
@@ -140,6 +141,7 @@ export function BackupSections() {
             {tr('⬆ Récupérer des données')}
           </Button>
         </ButtonRow>
+        <RestoreReportCard />
         <input
           type="file"
           id="allFile"

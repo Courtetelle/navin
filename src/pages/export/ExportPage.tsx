@@ -6,6 +6,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { RestoreReportCard } from '../../features/data/RestoreReportCard.tsx';
 import { cruiseBackupJson } from '../../features/data/backup.ts';
 import { csvDays, csvEntries } from '../../features/data/csv.ts';
 import { restoreFile } from '../../features/data/restoreFile.ts';
@@ -175,6 +176,7 @@ function BackupRow() {
           {tr('Restaurer une sauvegarde')}
         </Button>
       </ButtonRow>
+      <RestoreReportCard />
       <input
         type="file"
         id="importFile"

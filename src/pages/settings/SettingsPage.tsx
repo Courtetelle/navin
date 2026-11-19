@@ -418,7 +418,7 @@ export function SettingsPage({ from, arg }: PageProps) {
             </SettingsSection>
             <SettingsSection
               section="keys"
-              title="🔑 Enregistrement des clés météo et du compte relais Cloudflare"
+              title="🔑 Clés météos et compte relais (Cloudflare)"
             >
               <WindKeys />
             </SettingsSection>
