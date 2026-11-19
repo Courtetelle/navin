@@ -13784,3 +13784,8 @@ h1.menu-title {
 :root[data-theme='night'] .menu-sort-icon .menu-sort-badge {
   fill: #200000;
 }
+
+/* A cut text scrolling (textMarquee): whole, without its « … ». */
+[data-mq] {
+  text-overflow: clip !important;
+}

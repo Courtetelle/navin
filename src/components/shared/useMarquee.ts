@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 
 import { createTimerGroup } from '../../lib/timers.ts';
 
-const running = new WeakSet<HTMLInputElement | HTMLTextAreaElement>();
+const running = new WeakSet<HTMLElement>();
 
 /**
  * Text longer than its field scrolls once, then at every touch (legacy
@@ -40,21 +40,22 @@ export function useMarquee(
 }
 
 /**
- * Scroll an overflowing input once with an ease in-out (nav.js:1008-1018).
- * @param input - The input.
+ * Scroll an overflowing input, button or text once with an ease in-out
+ * (nav.js:1008-1018); a cut text shows no « … » while it scrolls.
+ * @param input - The element whose text is longer than it.
  */
-export function runMarquee(
-  input: HTMLInputElement | HTMLTextAreaElement,
-): void {
+export function runMarquee(input: HTMLElement): void {
   if (running.has(input) || !input.isConnected) return;
   const max = input.scrollWidth - input.clientWidth;
   if (max <= 4) return;
   const duration = Math.min(6000, Math.max(1500, max * 12));
   const start = performance.now();
   running.add(input);
+  input.dataset.mq = '1';
   const step = (now: number) => {
     if (!input.isConnected) {
       running.delete(input);
+      delete input.dataset.mq;
       return;
     }
     const progress = Math.min(1, (now - start) / duration);
@@ -65,6 +66,7 @@ export function runMarquee(
     }
     setTimeout(() => {
       if (document.activeElement !== input) input.scrollLeft = 0;
+      delete input.dataset.mq;
       running.delete(input);
     }, 1400);
   };

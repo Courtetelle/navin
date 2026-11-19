@@ -24,6 +24,7 @@ import { installPressFeedback } from './pressFeedback.ts';
 import { addNavigationListener, go } from './router.ts';
 import { followScreenGap } from './screenGap.ts';
 import { installTapScrollHold } from './scrollAnchor.ts';
+import { installTextMarquee } from './textMarquee.ts';
 import { followTheme } from './theme.ts';
 import { scheduleBootTip } from './tips.ts';
 import { installToastListeners } from './toast/toastTouch.ts';
@@ -56,6 +57,8 @@ function boot(): void {
   installChromeLinks();
   installTapScrollHold();
   installPressFeedback();
+  // A text longer than its button or field scrolls once, then at each touch.
+  installTextMarquee();
   effect(() => {
     document.documentElement.classList.toggle(
       'no-help-i',
