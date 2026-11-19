@@ -13630,6 +13630,12 @@ h1.menu-title {
   padding: 6px 12px;
   font-size: 17px;
   border-radius: 12px;
+  line-height: 0;
+}
+.menu-sort-icon {
+  display: block;
+  width: 26px;
+  height: 26px;
 }
 /* The journal of the alerts */
 .alert-list .alert-text {
