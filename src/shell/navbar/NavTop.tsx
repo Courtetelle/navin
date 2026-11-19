@@ -123,9 +123,10 @@ export function NavTop() {
   };
   const nav = shown ? live : previous;
   // The screens with the buttons around the map: a fixed title line, ◀ (only
-  // back to a menu of choices, never to the map) and the title of the page.
+  // back to a menu of choices, never to the map), the title of the page and,
+  // on a page being filled in, ✔ alone (no exit to data).
   const rails = useRails();
-  const plain = rails && shown && !nav.hasSteps && !okShown && !nav.nextShown;
+  const plain = rails && shown && !nav.hasSteps && !nav.nextShown;
   const pageGo = pageBackTarget()?.element()?.dataset.go;
   const before = previousView();
   const pageStep = pageBackTarget() !== null && pageGo !== 'tracker';
@@ -205,7 +206,14 @@ export function NavTop() {
         ) : null}
         {plain ? null : backRoll.content}
       </Button>
-      {plain ? <div id="navTitle" ref={setSlot} /> : null}
+      {plain ? (
+        <div
+          id="navTitle"
+          ref={setSlot}
+          // A page that sends no title: the name of its screen.
+          data-fallback={tr(VIEW_LABELS[view] ?? '')}
+        />
+      ) : null}
       <div
         id="navMid"
         className="prep-steps"

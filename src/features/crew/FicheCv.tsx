@@ -5,7 +5,7 @@ import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { textOf, uid } from '../../lib/format.ts';
+import { uid } from '../../lib/format.ts';
 import type {
   CvCert,
   CvTrip,
@@ -23,7 +23,6 @@ import {
 } from '../../model/memberCv.ts';
 import { toast } from '../../state/index.ts';
 
-import { sendCvBlank } from './blankSheet.ts';
 import { cvWithNavIn } from './cvNavIn.ts';
 import { nmShown } from './cvParts.ts';
 import { shareCv } from './cvShare.ts';
@@ -64,11 +63,7 @@ export function FicheCv({ record, reading }: FicheCvProps) {
   return (
     <details className="section cv-sec" open={reading || filled}>
       <summary>{tr('⛵ CV nautique')}</summary>
-      {reading ? (
-        <CvReading cv={shown} />
-      ) : (
-        <CvEditor cv={cv} save={save} record={record} />
-      )}
+      {reading ? <CvReading cv={shown} /> : <CvEditor cv={cv} save={save} />}
       {filled && record.recordId ? (
         <ButtonRow className="row ck-pub-row">
           <ShareButton
@@ -186,7 +181,7 @@ interface EditProps {
  * @param props - The CV and its saving.
  * @returns The block.
  */
-function CvEditor({ cv, save, record }: EditProps & { record: FicheRecord }) {
+function CvEditor({ cv, save }: EditProps) {
   const tr = useTr();
   const trips = cv.trips ?? [];
   const certs = cv.certs ?? [];
@@ -219,25 +214,9 @@ function CvEditor({ cv, save, record }: EditProps & { record: FicheRecord }) {
         plus ancienne. Les croisières en mer enregistrées dans NavIn s’ajoutent
         seules (sauf celles déjà écrites ici, même année et même bateau), et les
         sorties sur le lac en nombre de jours. Le CV peut aussi être rempli par
-        la personne : « Envoyer le CV à remplir », puis sa réponse collée dans
-        Les coéquipiers › Partager › « Collez ici le message complété ».
+        la personne : Équipiers·ères › « ✉️ CV nautique à remplir », puis sa
+        réponse collée dans « 📥 Coller une fiche ou un CV reçu ».
       </HelpText>
-      <ButtonRow>
-        <Button
-          className="btn"
-          data-cv="send-blank"
-          onClick={() => {
-            buzz();
-            sendCvBlank({
-              prenom: record.prenomInput.current?.value.trim(),
-              nom: record.nomInput.current?.value.trim(),
-              email: textOf(record.latest().email),
-            });
-          }}
-        >
-          {tr('✉️ Envoyer le CV à remplir')}
-        </Button>
-      </ButtonRow>
       <div className="cgrid">
         <CvText
           wide

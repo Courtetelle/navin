@@ -15,6 +15,7 @@ import { inMenuOrder } from '../data/dataOrder.ts';
 import { SwipeRow } from '../prep/index.ts';
 import { ListPublishRow, openListPublish } from '../publish/index.ts';
 
+import { CrewSends } from './CrewSends.tsx';
 import { deleteMemberCard, openFiche } from './ficheNavigation.ts';
 import { showCrewPick, showFiche } from './screen.ts';
 
@@ -85,6 +86,7 @@ export function FicheListScreen({ lead }: FicheListScreenProps) {
           {tr('＋ Nouvelle fiche')}
         </Button>
       </ButtonRow>
+      {state.view.currentView.value === 'people' ? <CrewSends /> : null}
       {state.view.currentView.value === 'people' && sorted.length > 0 ? (
         <ListPublishRow kind="people" />
       ) : null}

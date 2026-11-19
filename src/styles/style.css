@@ -13744,3 +13744,31 @@ h1.menu-title {
     border-color: #ff4040;
   }
 }
+
+/* A page being filled in, with the buttons around the map: ◀, its title,
+   ✔ at the right of the line. */
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) {
+  html body.nav-plain #navtop #navOk:not([hidden]) {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+}
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) {
+  html body.nav-plain #navtop.has-ok #navBack {
+    flex: 0 0 auto;
+    width: var(--rb-h, 52px);
+    max-width: var(--rb-h, 52px);
+  }
+  html body.nav-plain #navTitle:empty::before {
+    content: attr(data-fallback);
+    margin: 0;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

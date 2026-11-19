@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react';
-import { useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import {
@@ -10,14 +9,7 @@ import {
   toast,
 } from '../../state/index.ts';
 
-import {
-  blankImport,
-  blankPdf,
-  blankSend,
-  boatDocs,
-  cvBlankText,
-  printBoatDossier,
-} from './crossDomain.ts';
+import { boatDocs, printBoatDossier } from './crossDomain.ts';
 import { blankSheet } from './listDocument.ts';
 import { LIST_TITLES, listItems } from './listKinds.ts';
 import { listChoice } from './listPublishState.ts';
@@ -38,7 +30,6 @@ interface ExtraSendsProps {
  * @returns The buttons of the « Autres envois » part.
  */
 export function ExtraSends({ kind }: ExtraSendsProps): ReactElement | null {
-  if (kind === 'people') return <PeopleSends />;
   if (kind === 'soslogs') return <SosLogSends />;
   if (kind === 'crews') {
     return (
@@ -52,71 +43,6 @@ export function ExtraSends({ kind }: ExtraSendsProps): ReactElement | null {
   }
   if (kind === 'boats') return <BoatSends />;
   return null;
-}
-
-function PeopleSends(): ReactElement {
-  const received = useRef<HTMLTextAreaElement>(null);
-  return (
-    <>
-      <div className="row c2">
-        <Button
-          type="button"
-          className="btn big"
-          data-lxx="blSend"
-          onClick={() => {
-            void blankSend();
-          }}
-        >
-          💬 Fiche vide<small>texte WhatsApp, Messages…</small>
-        </Button>
-        <Button
-          type="button"
-          className="btn big"
-          data-lxx="blPdf"
-          onClick={() => {
-            closeListPublish();
-            blankPdf();
-          }}
-        >
-          📄 Fiche vide<small>PDF à imprimer</small>
-        </Button>
-      </div>
-      <div className="row">
-        <Button
-          type="button"
-          className="btn big"
-          data-lxx="cvSend"
-          onClick={() => {
-            void blankSend(cvBlankText());
-          }}
-        >
-          ⛵ CV nautique à remplir
-          <small>texte pour un mail, relu ici au retour</small>
-        </Button>
-      </div>
-      <textarea
-        ref={received}
-        className="text"
-        id="lxBlIn"
-        rows={4}
-        placeholder="Collez ici le message complété (fiches ou CV nautique)"
-      />
-      <div className="row">
-        <Button
-          type="button"
-          className="btn big primary"
-          data-lxx="blRead"
-          onClick={() => {
-            const text = received.current?.value ?? '';
-            closeListPublish();
-            blankImport(text);
-          }}
-        >
-          📥 Charger la fiche ou le CV reçu
-        </Button>
-      </div>
-    </>
-  );
 }
 
 function SosLogSends(): ReactElement {
