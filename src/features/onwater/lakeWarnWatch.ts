@@ -4,7 +4,6 @@ import { uid } from '../../lib/format.ts';
 import { addEntry, recordAlert, state } from '../../state/index.ts';
 
 import { relayed } from './euStations.ts';
-import { lakeFix } from './lakeFix.ts';
 import type { LakeWarnPop } from './lakeWarnPop.ts';
 import { lakeWarnPop } from './lakeWarnPop.ts';
 import type { LakeWarning } from './lakeWarnings.ts';
@@ -17,6 +16,7 @@ import {
   warningKey,
   warningsNear,
 } from './lakeWarnings.ts';
+import { lookPlace } from './lightningWatch.ts';
 import { showOverlays } from './overlayRoot.ts';
 import { playLakeLight } from './windAudio.ts';
 
@@ -126,8 +126,9 @@ export async function lakeWarnCheck(): Promise<void> {
   const { warnings } = await readLakeWarnings();
   const lit = litWarnings(warnings, Date.now());
   if (lit.length === 0 || !lakeWarnOn() || atSea()) return;
-  // The GPS only: the part of the Léman where the boat is.
-  lakeFix((position) => {
+  // The lake of the zone chosen with NavIn (its place set in Zones), else
+  // of the GPS: on the Léman, the part where the boat is.
+  lookPlace((position) => {
     if (!position) return;
     const fresh = warningsNear(lit, position).filter(
       (warning) => !said.has(warningKey(warning)),
