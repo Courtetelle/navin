@@ -2,7 +2,6 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
-import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { uid } from '../../lib/format.ts';
@@ -25,7 +24,6 @@ import { toast } from '../../state/index.ts';
 
 import { cvWithNavIn } from './cvNavIn.ts';
 import { nmShown } from './cvParts.ts';
-import { shareCv } from './cvShare.ts';
 import type { FicheRecord } from './useFicheRecord.ts';
 
 /** Props of {@link FicheCv}. */
@@ -64,20 +62,6 @@ export function FicheCv({ record, reading }: FicheCvProps) {
     <details className="section cv-sec" open={reading || filled}>
       <summary>{tr('⛵ CV nautique')}</summary>
       {reading ? <CvReading cv={shown} /> : <CvEditor cv={cv} save={save} />}
-      {filled && record.recordId ? (
-        <ButtonRow className="row ck-pub-row">
-          <ShareButton
-            big
-            className="no-navact"
-            data-cv="share"
-            label="📤 Partager le CV nautique"
-            onShare={(format) => {
-              const card = record.persist();
-              if (card) void shareCv(card, format);
-            }}
-          />
-        </ButtonRow>
-      ) : null}
     </details>
   );
 }

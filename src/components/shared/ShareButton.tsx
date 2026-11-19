@@ -80,6 +80,22 @@ export interface ShareButtonProps extends Omit<
    * @default undefined
    */
   onGpx?: () => void;
+  /**
+   * Several things can be shared (a crew card or its sailing CV): the first
+   * choice is which, then 💬 image or 🖨 PDF; each choice shares itself.
+   * @default undefined
+   */
+  choices?: readonly ShareChoice[];
+}
+
+/** One thing a {@link ShareButton} can share. */
+export interface ShareChoice {
+  /** Key of the choice, as `data-share-choice`. */
+  key: string;
+  /** Words of its button. */
+  label: string;
+  /** Share it in the format chosen. */
+  onShare: (format: ShareFormat) => void;
 }
 
 /**
@@ -95,15 +111,24 @@ export function ShareButton({
   big = false,
   label = '📤 Partager',
   onGpx,
+  choices,
   className = '',
   ...rest
 }: ShareButtonProps): ReactElement {
   // Closed, then 📝 Texte or 📍 GPX (when a GPX can be shared), then the
   // format of the text.
-  const [step, setStep] = useState<'closed' | 'kind' | 'format'>('closed');
+  const [step, setStep] = useState<'closed' | 'kind' | 'choice' | 'format'>(
+    'closed',
+  );
+  const [chosen, setChosen] = useState<ShareChoice | null>(null);
   const open = step !== 'closed';
   const setOpen = (value: boolean) => {
-    setStep(value ? (onGpx ? 'kind' : 'format') : 'closed');
+    if (!value) {
+      setStep('closed');
+      return;
+    }
+    if (choices?.length) setStep('choice');
+    else setStep(onGpx ? 'kind' : 'format');
   };
   const box = useRef<HTMLSpanElement>(null);
   useEffect(() => {
@@ -174,6 +199,31 @@ export function ShareButton({
       </span>
     );
   }
+  if (step === 'choice' && choices?.length) {
+    return (
+      <span ref={box} className={`${pick} share-kind`}>
+        {choices.map((choice) => (
+          <Button
+            key={choice.key}
+            type="button"
+            noUiEdit
+            className={`${size} share-kind-btn`}
+            data-share-choice={choice.key}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              buzz();
+              setChosen(choice);
+              setStep('format');
+            }}
+          >
+            {choice.label}
+          </Button>
+        ))}
+      </span>
+    );
+  }
+  const send = chosen?.onShare ?? onShare;
   return (
     <span ref={box} className={pick}>
       {(['image', 'pdf'] as const).map((format) => (
@@ -190,7 +240,7 @@ export function ShareButton({
             event.stopPropagation();
             buzz();
             setOpen(false);
-            onShare(format);
+            send(format);
           }}
         >
           <ShareIcon format={format} />

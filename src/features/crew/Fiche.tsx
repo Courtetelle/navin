@@ -8,9 +8,11 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { useIntroLead } from '../../components/shared/introLead.ts';
+import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { useReadingMarquee } from '../../components/shared/useReadingMarquee.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { cvFilled } from '../../model/memberCv.ts';
 import { PageBack, PageValidate } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { useNavEdit } from '../../shell/navbar/useNavEdit.ts';
@@ -32,6 +34,8 @@ import { FicheCv } from './FicheCv.tsx';
 import { FicheForm } from './FicheForm.tsx';
 import { FicheIdentity } from './FicheIdentity.tsx';
 import { FichePhotos } from './FichePhotos.tsx';
+import { cvWithNavIn } from './cvNavIn.ts';
+import { shareCv } from './cvShare.ts';
 import { deleteFiche } from './ficheActions.ts';
 import { ficheBackLabel, leaveFiche, showFiche, showLabels } from './screen.ts';
 import { useFicheRecord } from './useFicheRecord.ts';
@@ -87,6 +91,13 @@ export function Fiche({ id }: FicheProps) {
   const hasDetails = memberFieldsX().some(
     ({ key }) => key !== 'sexe' && isFilled(record.latest()[key]),
   );
+  // The CV is shared from Partager of the card, once it holds something.
+  const hasCv = cvFilled(cvWithNavIn(record.recordId, record.data.cv ?? {}));
+  const shareCard = (format: ShareFormat) => {
+    record.persist();
+    const savedId = record.latestId();
+    if (savedId) openListPublish('people', savedId, format);
+  };
   const leave = () => {
     buzz();
     const prenom = record.prenomInput.current?.value.trim() ?? '';
@@ -189,11 +200,27 @@ export function Fiche({ id }: FicheProps) {
             big
             className="no-navact"
             id="fImg"
-            onShare={(format) => {
-              record.persist();
-              const savedId = record.latestId();
-              if (savedId) openListPublish('people', savedId, format);
-            }}
+            onShare={shareCard}
+            // With a sailing CV, Partager asks first which one leaves.
+            choices={
+              hasCv
+                ? [
+                    {
+                      key: 'card',
+                      label: tr('👤 Fiche équipier·ère'),
+                      onShare: shareCard,
+                    },
+                    {
+                      key: 'cv',
+                      label: tr('⛵ CV nautique'),
+                      onShare: (format) => {
+                        const card = record.persist();
+                        if (card) void shareCv(card, format);
+                      },
+                    },
+                  ]
+                : undefined
+            }
           />
         </ButtonRow>
         {locked ? (
