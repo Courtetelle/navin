@@ -91,7 +91,7 @@ export function CrewPickScreen({ lead }: CrewPickScreenProps) {
             showCrewPick();
           }}
         >
-          {tr('＋ Nouveau équipier·ère')}
+          {tr('＋ Nouvel·le équipier·ère')}
         </Button>
       </ButtonRow>
       {cruise.crew.length > 0 ? (

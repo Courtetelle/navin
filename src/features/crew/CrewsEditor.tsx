@@ -209,7 +209,7 @@ export function CrewsEditor() {
                 showFiche('new');
               }}
             >
-              {tr('＋ Nouveau équipier·ère')}
+              {tr('＋ Nouvel·le équipier·ère')}
             </Button>
             {base ? (
               <HoldDeleteButton
