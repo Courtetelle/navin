@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { Button } from '../../components/shared/Button.tsx';
 import { screenLanguage } from '../../i18n/langState.ts';
 import { translateMessage } from '../../i18n/translate.ts';
+import { lightBand } from '../../shell/lightBand.ts';
 import { go } from '../../shell/router.ts';
 import { state } from '../../state/index.ts';
 import { openListPublish } from '../publish/index.ts';
@@ -95,6 +96,8 @@ export function LakeWarnPopup() {
               'weather',
               'lakelights',
             );
+            // The lake of the alert, brought into view, blinking.
+            lightBand(`lake:${strongest.name}`, true);
           }}
           onShare={
             alertId
