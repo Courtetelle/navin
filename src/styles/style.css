@@ -13673,3 +13673,74 @@ h1.menu-title {
 .alert-filters .cf input.text {
   width: 100%;
 }
+
+/* T upright: the five figures of the track in a row just above the five
+   buttons at the bottom, each above its button; the small arrow that folds
+   them and brings them back under the camera button. What NavIn or a
+   button unrolls goes over them. */
+@media (orientation: portrait) and (max-width: 600px) {
+  html body .trk-full .trk-dash {
+    top: auto;
+    bottom: calc(var(--rb-bottom) + var(--rb-step));
+    left: var(--rb-side);
+    right: var(--rb-side-r);
+    width: auto;
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--rb-gap);
+    z-index: 900;
+  }
+  html body .trk-full .trk-dash > div {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    margin: 0;
+  }
+  html body.bot-hidden .trk-full .trk-dash {
+    transform: translateY(calc(var(--rb-step) + var(--rb-bottom)));
+    opacity: 0;
+    pointer-events: none;
+  }
+  html body .slide-handle.sh-bot,
+  html body .trk-full .trk-dash .bar-chevron-bottom {
+    position: fixed;
+    top: auto !important;
+    bottom: max(2px, calc(var(--rb-bottom) - 26px)) !important;
+    left: calc(var(--rb-side) + 2 * var(--rb-x)) !important;
+    right: auto;
+    width: var(--rb-w) !important;
+    height: 22px !important;
+    margin: 0 !important;
+    border: 2px solid rgba(11, 18, 32, 0.8);
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--surface, #fff) 88%, transparent);
+    box-sizing: border-box;
+    z-index: 2400;
+  }
+  html body .slide-handle.sh-bot::before,
+  html body .trk-full .trk-dash .bar-chevron-bottom::before {
+    left: 50%;
+    top: 50%;
+    bottom: auto;
+    margin: -8px 0 0 -6px;
+    transform: rotate(135deg);
+  }
+  /* Folded: the arrow points up, to bring them back */
+  html body .slide-handle.sh-bot::before {
+    margin-top: -3px;
+    transform: rotate(-45deg);
+  }
+  html body .slide-handle.sh-bot::after,
+  html body .trk-full .trk-dash .bar-chevron-bottom::after {
+    inset: -8px 0 !important;
+    width: auto;
+    height: auto;
+    background: none;
+    box-shadow: none;
+  }
+  :root[data-theme='night'] body .slide-handle.sh-bot,
+  :root[data-theme='night'] body .trk-full .trk-dash .bar-chevron-bottom {
+    background: #200000;
+    border-color: #ff4040;
+  }
+}
