@@ -19,7 +19,7 @@ interface EndedLogProps {
 }
 
 /**
- * An ended SOS log, a band: its events inside; swiped left, 👁, 📤 and 🗑
+ * An ended SOS log, a band: its events inside; swiped left, 📤 and 🗑
  * (long press).
  * @param props - Log, state and redraw.
  * @returns The folded details.

@@ -16,7 +16,7 @@ export function TracesPage() {
     <>
       <PageTitle
         helps={[
-          'Toutes les traces enregistrées. Toucher : l’afficher en violet sur la carte. Appui long : changer son texte. Glisser vers la gauche : 👁 Visualiser, 📤 Partager (texte ou GPX), 🗑 Effacer.',
+          'Toutes les traces enregistrées. Toucher : l’afficher en violet sur la carte. Appui long : changer son texte. Glisser vers la gauche : 📤 Partager (texte ou GPX), 🗑 Effacer.',
         ]}
       >
         🛰 Mes traces

@@ -47,7 +47,7 @@ export function TraceList() {
 
 /**
  * One trace, a band as a mark: a touch shows it on the map, a long press
- * changes its text in place; swiped, 👁 Visualiser, Partager (Texte or GPX)
+ * changes its text in place; swiped, Partager (Texte or GPX)
  * and Effacer.
  * @param props - The trace.
  * @param props.track - The trace.
@@ -73,10 +73,6 @@ function TraceItem({ track }: { track: LakeTrack }) {
       name={track.name}
       silent
       onDelete={deleteAndRefresh}
-      onView={() => {
-        showTrace(track);
-        showZoomOnMap();
-      }}
       onShare={(format) => {
         void shareTrace(track, format);
       }}

@@ -32,7 +32,7 @@ import {
 
 /**
  * Screen `alerts` (data › Journal des alertes): every alert given, the latest
- * first; a touch shows it whole; swiped left, 👁 Visualiser, 📤 Partager and
+ * first; a touch shows it whole; swiped left, 📤 Partager and
  * 🗑 Effacer; a period erased at once; the whole journal shared by kind and
  * period.
  * @returns The screen.
@@ -56,7 +56,7 @@ export function AlertsPage() {
       </PageBack>
       <PageTitle
         helps={[
-          'Toutes les alertes données par NavIn, avec ou sans croisière ouverte : vent, orage, feux d’avis des lacs, profondeur. Toucher une alerte la montre en entier ; la glisser vers la gauche : 👁 Visualiser, 📤 Partager, 🗑 Effacer (appui long).',
+          'Toutes les alertes données par NavIn, avec ou sans croisière ouverte : vent, orage, feux d’avis des lacs, profondeur. Toucher une alerte la montre en entier ; la glisser vers la gauche : 📤 Partager, 🗑 Effacer (appui long).',
         ]}
       >
         🔔 Journal des alertes
@@ -105,7 +105,6 @@ function AlertBand({ alert, open, onOpen }: AlertBandProps) {
       id={alert.id}
       name={name}
       silent
-      onView={() => onOpen(true)}
       onShare={(format) => openListPublish('alerts', alert.id, format)}
       onDelete={(id) => {
         eraseAlerts([id]);

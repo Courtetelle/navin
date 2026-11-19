@@ -32,8 +32,9 @@ export interface SwipeRowProps {
    */
   silent?: boolean;
   /**
-   * 👁 Visualiser: show the item (a mark on the map…). Without it, the same as
-   * a touch on the band; `null` when there is nothing to show (no button).
+   * The first button, when it leads elsewhere than a touch on the band (🎯
+   * Go to a mark, ✏️ Modifier a site…). Without it, no such button: the
+   * band itself is touched to see the item.
    * @default undefined
    */
   onView?: (() => void) | null;
@@ -69,7 +70,7 @@ const SWIPE_START_PX = 10;
 
 /**
  * A band of data: swiped to the left, it opens its menu right under it,
- * 👁 Visualiser, 📤 Partager (💬 image or 🖨 PDF) and 🗑 Effacer, which deletes
+ * the first button when given, 📤 Partager (💬 image or 🖨 PDF) and 🗑 Effacer, which deletes
  * on a long press only. The menu closes after 8 s or at a touch elsewhere.
  * @param props - Item, its actions and the band.
  * @returns The band and its menu.
@@ -169,18 +170,12 @@ export function SwipeRow({
         <SwipeMenu
           name={name}
           onView={
-            onView === null
-              ? undefined
-              : () => {
+            onView
+              ? () => {
                   closeSwipeRow();
-                  if (onView) {
-                    onView();
-                    return;
-                  }
-                  slide.current
-                    ?.querySelector<HTMLElement>('button, summary, a[href]')
-                    ?.click();
+                  onView();
                 }
+              : undefined
           }
           onShare={
             onShare

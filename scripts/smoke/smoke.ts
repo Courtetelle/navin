@@ -796,9 +796,9 @@ async function swipeMenu(page: Page, theme: string): Promise<void> {
   check(theme, 'the row slides back', back?.x === box.x);
   check(
     theme,
-    'swiping left opens the menu: view, share, delete',
+    'swiping left opens the menu: share, delete (no 👁: a touch on the band shows it)',
     (await page.locator('.sw-menu').isVisible()) &&
-      (await page.locator('.sw-menu [data-swview]').count()) === 1 &&
+      (await page.locator('.sw-menu [data-swview]').count()) === 0 &&
       (await page.locator('.sw-menu .share-btn').count()) === 1 &&
       (await page.locator('.sw-menu [data-swdel]').count()) === 1,
   );
