@@ -1593,5 +1593,18 @@
   "Type de certificat VHF": "VHF certificate type",
   "Certificat VHF délivré le": "VHF certificate issued on",
   "Certificat VHF n°": "VHF certificate no.",
-  "📤 Style des documents partagés": "📤 Shared documents style"
+  "📤 Style des documents partagés": "📤 Shared documents style",
+  "🔄 Synchronisation automatique": "🔄 Automatic synchronisation",
+  "🔄 Synchroniser maintenant": "🔄 Synchronise now",
+  "Automatique : OUI": "Automatic: YES",
+  "Automatique : NON": "Automatic: NO",
+  "🔑 Créer la clé": "🔑 Create the key",
+  "sur le premier appareil seulement": "on the first device only",
+  "💾 Copie dans un fichier": "💾 Copy in a file",
+  "📋 Envoyer mes menus": "📋 Send my menus",
+  "Synchronisé": "Synchronised",
+  "Synchronisation en cours…": "Synchronising…",
+  "Synchronisation prête": "Synchronisation ready",
+  "dernière à": "last at",
+  "Il faut d’abord le relais : Paramétrages › Clés météos et compte relais (Cloudflare).": "The relay comes first: Settings › Weather keys and relay account (Cloudflare)."
 }

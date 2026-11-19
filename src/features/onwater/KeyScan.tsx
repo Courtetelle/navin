@@ -44,6 +44,7 @@ function keyOf(text: string): KeyLinkId | null {
 function label(all: boolean, only: KeyLinkId | undefined): string {
   if (all) return '📥 Importer les clés et relais disponibles';
   if (only === 'relay') return '📥 Importer l’adresse du relais';
+  if (only === 'sync') return '📥 Importer la clé de synchronisation';
   return only
     ? `📥 Importer la clé ${KEY_LINKS[only].name}`
     : '📥 Importer une clé';

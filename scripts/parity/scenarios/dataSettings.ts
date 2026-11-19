@@ -121,7 +121,7 @@ export const settingsScenarios: Scenario[] = [
     steps: [
       ...enter('settings'),
       open('data'),
-      { click: '#sync h2' },
+      { click: '#backup h2' },
       { click: '#syncPhotos' },
       SHOW_STORAGE,
       ...snap('no-photos'),

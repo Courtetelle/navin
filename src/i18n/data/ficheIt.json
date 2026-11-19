@@ -1593,5 +1593,18 @@
   "Type de certificat VHF": "Tipo di certificato VHF",
   "Certificat VHF délivré le": "Certificato VHF rilasciato il",
   "Certificat VHF n°": "Certificato VHF n.",
-  "📤 Style des documents partagés": "📤 Stile dei documenti condivisi"
+  "📤 Style des documents partagés": "📤 Stile dei documenti condivisi",
+  "🔄 Synchronisation automatique": "🔄 Sincronizzazione automatica",
+  "🔄 Synchroniser maintenant": "🔄 Sincronizza ora",
+  "Automatique : OUI": "Automatica: SÌ",
+  "Automatique : NON": "Automatica: NO",
+  "🔑 Créer la clé": "🔑 Crea la chiave",
+  "sur le premier appareil seulement": "solo sul primo dispositivo",
+  "💾 Copie dans un fichier": "💾 Copia in un file",
+  "📋 Envoyer mes menus": "📋 Invia i miei menu",
+  "Synchronisé": "Sincronizzato",
+  "Synchronisation en cours…": "Sincronizzazione in corso…",
+  "Synchronisation prête": "Sincronizzazione pronta",
+  "dernière à": "ultima alle",
+  "Il faut d’abord le relais : Paramétrages › Clés météos et compte relais (Cloudflare).": "Prima serve il relè: Impostazioni › Chiavi meteo e account relè (Cloudflare)."
 }

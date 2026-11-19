@@ -39,8 +39,26 @@ const KEYED = new Set(['frost.met.no', 'api.dataplatform.knmi.nl']);
 /** The services asked with a POST of JSON. */
 const POSTED = new Set(['ddapi20-waterwebservices.rijkswaterstaat.nl']);
 
-/** The only pages allowed to use the relay. */
-const ORIGINS = ['https://courtetelle.github.io', 'http://localhost:11106'];
+/**
+ * The only pages allowed to use the relay: the site, the test server, and
+ * NavIn packed as an app (Android APK for the tablet, iOS app).
+ */
+const ORIGINS = [
+  'https://courtetelle.github.io',
+  'http://localhost:11106',
+  'https://localhost',
+  'capacitor://localhost',
+];
+
+/**
+ * The synchronisation between devices: each device leaves its data there,
+ * encrypted on the device with a key the relay never sees. A space is the
+ * hash of that key (64 hex), a device or a photo a short name.
+ */
+const SYNC_PATH =
+  /^\/sync\/(?<space>[0-9a-f]{64})\/(?<kind>index|dev|ph)(?:\/(?<name>[0-9A-Za-z_-]{1,64}))?$/u;
+/** The free plan keeps values up to 25 MB. */
+const SYNC_MOST = 24 * 1024 * 1024;
 
 /** Seconds an answer is kept. */
 const CACHE_SECONDS = 300;
@@ -441,7 +459,7 @@ function permission(origin) {
     'Access-Control-Allow-Origin': ORIGINS.includes(origin)
       ? origin
       : ORIGINS[0],
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
     Vary: 'Origin',
   };
 }
@@ -450,6 +468,57 @@ function json(body, origin) {
   return Response.json(body, {
     headers: { ...permission(origin), 'Content-Type': 'application/json' },
   });
+}
+
+/**
+ * The synchronisation: `index` lists the devices and when each sent; `dev`
+ * and `ph` keep what a device or a photo sent, as text never read here.
+ * @param {Request} request - The request.
+ * @param {{ NAVIN?: KVNamespace }} env - The KV of the relay.
+ * @param {{ space: string, kind: string, name?: string }} where - The path.
+ * @param {string} origin - The page asking.
+ * @returns {Promise<Response>} The answer.
+ */
+async function syncAnswer(request, env, where, origin) {
+  if (!env?.NAVIN) {
+    return new Response('No storage', {
+      status: 501,
+      headers: permission(origin),
+    });
+  }
+  const { space, kind, name } = where;
+  const indexKey = `sync:${space}:index`;
+  if (kind === 'index') {
+    return json(await readJson(env, indexKey, {}), origin);
+  }
+  if (!name) return new Response('Bad name', { status: 400 });
+  const key = `sync:${space}:${kind}:${name}`;
+  if (request.method === 'GET') {
+    const text = await env.NAVIN.get(key);
+    return text == null
+      ? new Response('None', { status: 404, headers: permission(origin) })
+      : new Response(text, {
+          headers: { ...permission(origin), 'Content-Type': 'text/plain' },
+        });
+  }
+  if (request.method !== 'PUT') {
+    return new Response('Forbidden', { status: 403 });
+  }
+  const text = await request.text();
+  if (text.length > SYNC_MOST) {
+    return new Response('Too big', {
+      status: 413,
+      headers: permission(origin),
+    });
+  }
+  await env.NAVIN.put(key, text);
+  // A device says when it sent: the others read it again only then.
+  if (kind === 'dev') {
+    const index = await readJson(env, indexKey, {});
+    index[name] = { at: Date.now(), size: text.length };
+    await env.NAVIN.put(indexKey, JSON.stringify(index));
+  }
+  return json({ ok: true }, origin);
 }
 
 export default {
@@ -462,7 +531,7 @@ export default {
       return new Response(null, {
         headers: {
           ...permission(origin),
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
@@ -471,6 +540,8 @@ export default {
       return new Response('Forbidden', { status: 403 });
     }
     const url = new URL(request.url);
+    const sync = SYNC_PATH.exec(url.pathname);
+    if (sync?.groups) return syncAnswer(request, env, sync.groups, origin);
     // The recording: a device sends its points and what it read.
     if (url.pathname === '/record') {
       if (!env?.NAVIN) return json({ recording: false }, origin);

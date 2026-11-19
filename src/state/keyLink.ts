@@ -12,6 +12,7 @@ export const KEY_LINKS = {
   metoffice: { setting: 'metOfficeKey', name: 'Met Office' },
   frost: { setting: 'frostKey', name: 'MET Norway (Frost)' },
   relay: { setting: 'relayUrl', name: 'Relais des METAR' },
+  sync: { setting: 'syncKey', name: 'Synchronisation' },
 } as const;
 
 /** A key that can go in a QR code. */

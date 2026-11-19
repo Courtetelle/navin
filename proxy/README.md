@@ -35,3 +35,11 @@ Les clés restent chez Cloudflare comme secrets : le relais ne les renvoie
 jamais. Il lit à chaque passage les stations les plus proches de chaque point
 et, à tour de rôle, les suivantes (environ toutes les 30 minutes), dans la
 limite de 50 requêtes par passage de l’offre gratuite.
+
+## Synchroniser les appareils (facultatif)
+
+Avec le stockage « NAVIN » installé, le relais garde aussi les données que
+chaque appareil de NavIn y dépose pour les autres (Paramétrages › Sauvegarde
+et synchronisation). Elles sont chiffrées sur l’appareil avec une clé qui ne
+passe jamais par le relais : il ne peut pas les lire. Rien à régler ici,
+sinon recopier le code du relais une fois et Déployer.

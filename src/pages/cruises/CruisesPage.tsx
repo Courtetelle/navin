@@ -61,7 +61,7 @@ function keepBoatShown(mode: ModeKey): boolean {
 
 function openBackupSettings(): void {
   buzz();
-  go('settings');
+  go('settings', 'data');
   revealBackup(20);
 }
 

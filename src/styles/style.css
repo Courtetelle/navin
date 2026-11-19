@@ -13712,3 +13712,33 @@ h1.menu-title {
 [data-mq] {
   text-overflow: clip !important;
 }
+
+/* Paramétrages › Sauvegarde et synchronisation: the state of the automatic synchronisation */
+.sync-auto {
+  margin-bottom: 18px;
+}
+.sync-state {
+  margin: 8px 0 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 19px;
+  font-weight: 700;
+  background: var(--card, #f2f4f7);
+}
+.sync-state.sync-idle {
+  color: var(--ok, #1a7f37);
+}
+.sync-state.sync-busy {
+  color: #8a6d00;
+  background: #fff6cc;
+}
+.sync-state.sync-error {
+  color: var(--danger, #b42318);
+}
+:root[data-theme='night'] .sync-state,
+:root[data-theme='night'] .sync-state.sync-idle,
+:root[data-theme='night'] .sync-state.sync-busy,
+:root[data-theme='night'] .sync-state.sync-error {
+  color: var(--fg);
+  background: #200000;
+}

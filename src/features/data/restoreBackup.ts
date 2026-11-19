@@ -242,6 +242,28 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
   return { count: cruises.length, last, report };
 }
 
+/**
+ * Merge what another device sent by the synchronisation, quietly: no trace
+ * stopped, the open cruise stays the open one, the settings and the keys of
+ * this device are left as they are.
+ * @param file - The data of the other device.
+ * @param tracked - The cruise whose track is being recorded here: its track
+ * points wait for the end of the recording.
+ */
+export function mergeSynced(file: BackupFile, tracked?: string): void {
+  const currentId = state.data.cruise.peek()?.id;
+  for (const { cruise, track, cuts } of cruisesOf(file)) {
+    mergeCruise(cruise, cruise.id === tracked ? [] : track);
+    restoreTraceCuts(cruise.id, cuts);
+  }
+  mergeTraceNames(file.traceNames);
+  mergeSiteLinks(file.siteLinks);
+  restoreRecords(file);
+  // Saving a merged cruise marks it current: the open one stays so.
+  if (currentId) store.set('ldb.current', currentId);
+  else store.del('ldb.current');
+}
+
 function cruisesOf(
   file: BackupFile,
 ): Array<{ cruise: Cruise; track: unknown; cuts?: unknown }> {
