@@ -99,33 +99,6 @@ export const settingsScenarios: Scenario[] = [
     ],
   },
   {
-    name: 'data-settings-install',
-    fixture: 'empty',
-    overrides: QUIET,
-    steps: [
-      ...enter('settings'),
-      open('install'),
-      { click: '#installGuide h2' },
-      { click: '[data-guide="android"]' },
-      ...snap('android'),
-      { click: '[data-guide="ios"]' },
-      ...snap('ios'),
-      { click: '#copyLink' },
-      ...snap('copied'),
-      {
-        eval: `{
-          const event = new Event('beforeinstallprompt', { cancelable: true });
-          event.prompt = () => Promise.resolve();
-          event.userChoice = Promise.resolve();
-          globalThis.dispatchEvent(event);
-        }`,
-      },
-      ...snap('prompt'),
-      { click: '#installNow' },
-      ...snap('prompted'),
-    ],
-  },
-  {
     name: 'data-settings-simulation',
     fixture: 'sample',
     overrides: QUIET,

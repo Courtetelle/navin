@@ -270,7 +270,7 @@ export async function checkSocib(now = Date.now()): Promise<void> {
   socibWatch.value = watch;
   if (socibToSay(watch)) {
     toast(
-      'SOCIB (Baléares) : NavIn a mis à jour la liste de ses instruments (Paramétrages › Paramétrage des alertes vent)',
+      'SOCIB (Baléares) : NavIn a mis à jour la liste de ses instruments (Paramétrages › Alertes › Alerte vent)',
     );
   }
 }

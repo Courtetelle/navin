@@ -1,6 +1,6 @@
-import { dayKey } from '../../lib/format.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
 
+import { setAlertOn } from './alertsOff.ts';
 import { refreshLakeButtons } from './lakeRefresh.ts';
 import { unlockAudio } from './windAudio.ts';
 import { windTestToggle } from './windTest.ts';
@@ -9,7 +9,6 @@ import {
   windCheck,
   windConfig,
   windMuted,
-  windWatchStart,
 } from './windWatch.ts';
 
 /** Buttons of the wind alert block (`data-walert`). */
@@ -32,15 +31,10 @@ export function windAlertClick(action: WindAlertAction): void {
   }
   if (action === 'toggle') {
     const on = !config.on;
-    updateSettings((settings) => {
-      // The day they were switched off: « à minuit » counts from it.
-      settings.windAlert = { ...config, on, offDay: dayKey(new Date()) };
-    });
+    setAlertOn('wind', on);
     if (on && !state.preferences.settings.value.wake) {
       toast('Conseil : ⚙︎ › Garder l’écran allumé : OUI');
     }
-    resetWindSignal();
-    windWatchStart();
   } else {
     const basis = config.basis === 'gust' ? 'avg' : 'gust';
     updateSettings((settings) => {

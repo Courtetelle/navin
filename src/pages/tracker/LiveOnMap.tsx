@@ -300,7 +300,7 @@ export function LiveOnMap() {
  * The button of the radius, at the left while LiveMétéo shows the stations
  * of the zone: a dashed circle, its radius as an arrow, the centre a red
  * big red cross blinking, and the radius in NM. A touch takes the badges
- * away with the button; a long press opens Paramétrages › LiveMétéo to change
+ * away with the button; a long press opens Paramétrages › Alertes › LiveMétéo to change
  * it (its ◀ comes back to the map).
  * @returns The button.
  */

@@ -58,7 +58,7 @@ export function KeyQr({ id, value }: { id: KeyLinkId; value: string }) {
           </svg>
           <figcaption>
             {tr(
-              'Sur l’autre appareil, dans NavIn : Paramétrages › Clés météo › 📥 Importer les clés et relais disponibles, et viser ce code : la clé s’enregistre. Aucun réseau n’est utilisé.',
+              'Sur l’autre appareil, dans NavIn : Paramétrages › Clés météos et compte relais › 📥 Importer les clés et relais disponibles, et viser ce code : la clé s’enregistre. Aucun réseau n’est utilisé.',
             )}
           </figcaption>
         </figure>

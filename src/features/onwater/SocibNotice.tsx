@@ -12,7 +12,7 @@ import {
 } from './socibWatch.ts';
 
 /**
- * In Paramétrages › Paramétrage des alertes vent: SOCIB changed its instruments and NavIn made
+ * In Paramétrages › Alertes › Alerte vent: SOCIB changed its instruments and NavIn made
  * its list again by itself (once a week); « Vu » hides it until another
  * change.
  * @returns The notice, or nothing.

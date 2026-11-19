@@ -120,3 +120,12 @@ export { windConfig, windWatchPlace } from './windWatch.ts';
 export { seaPlace } from './externals.ts';
 export { metarRows } from './metarText.ts';
 export type { MetarDetails } from './metarText.ts';
+export {
+  ALERT_KINDS,
+  alertOn,
+  setAlertOn,
+  setReOnRule,
+  sharedReOnRule,
+} from './alertsOff.ts';
+export type { AlertKind } from './alertsOff.ts';
+export { ReOnChoices } from './ReOnChoices.tsx';

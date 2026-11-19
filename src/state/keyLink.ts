@@ -89,7 +89,7 @@ export function applyKeyLink(): boolean {
   const safari = (navigator as { standalone?: boolean }).standalone === false;
   toast(
     safari
-      ? `Clé ${name} reçue dans Safari. Pour NavIn de l’écran d’accueil : y ouvrir Paramétrages › Clés météo › 📥 Importer les clés et relais disponibles`
+      ? `Clé ${name} reçue dans Safari. Pour NavIn de l’écran d’accueil : y ouvrir Paramétrages › Clés météos et compte relais › 📥 Importer les clés et relais disponibles`
       : `Clé ${name} reçue par QR code et enregistrée`,
   );
   return true;

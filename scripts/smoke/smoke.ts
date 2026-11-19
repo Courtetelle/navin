@@ -940,13 +940,27 @@ async function layoutGaps(page: Page, theme: string): Promise<void> {
       items.map((item) => (item as HTMLElement).dataset.sec ?? ''),
     );
   for (const section of sections) {
-    // Back on the menu of Paramétrages by its ◀.
-    if ((await page.locator('button[data-sec]').count()) === 0) {
+    // Back on the menu of Paramétrages by its ◀ (twice from a section of Alertes).
+    while ((await page.locator('.set-menu').count()) === 0) {
       await page.locator('#navBack').click();
       await page.waitForTimeout(400);
     }
     await page.locator(`button[data-sec="${section}"]`).click();
     await look(`Paramétrages › ${section}`);
+    // Alertes holds its own sections: each one looked at too.
+    const subs = await page
+      .locator('.set-page button[data-sec]')
+      .evaluateAll((items) =>
+        items.map((item) => (item as HTMLElement).dataset.sec ?? ''),
+      );
+    for (const sub of subs) {
+      if ((await page.locator(`button[data-sec="${sub}"]`).count()) === 0) {
+        await page.locator('#navBack').click();
+        await page.waitForTimeout(400);
+      }
+      await page.locator(`button[data-sec="${sub}"]`).click();
+      await look(`Paramétrages › ${section} › ${sub}`);
+    }
   }
   await page.locator(NAVIN).click();
   await page.waitForTimeout(400);
@@ -1042,8 +1056,9 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(500);
   check(
     theme,
-    'Paramétrage des alertes orage: its switch and its four distances',
+    'Alerte orage: its switch, its four comebacks and its four distances',
     (await page.locator('[data-lightning="toggle"]').count()) === 1 &&
+      (await page.locator('[data-reon]').count()) === 4 &&
       (await page.locator('[data-lightning-radius]').count()) === 4,
   );
   // Back to the map, Paramétrages left.
@@ -1060,6 +1075,8 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
 async function alertsInTurn(page: Page, theme: string): Promise<void> {
   await openGear(page);
   await page.waitForTimeout(500);
+  await page.locator('.set-entry[data-sec="alerts"]').click();
+  await page.waitForTimeout(400);
   await page.locator('.set-entry[data-sec="tests"]').click();
   await page.waitForTimeout(400);
   await page.locator('[data-alerts="in-turn"]').click();

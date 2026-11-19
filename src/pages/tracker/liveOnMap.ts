@@ -57,7 +57,7 @@ export const LIVE_RADII_NM = [15, 30, 60, 120, 180] as const;
 
 /**
  * The radius of LiveMétéo around the zone or the GPS, in nautical miles
- * (Paramétrages › LiveMétéo), 30 NM by default.
+ * (Paramétrages › Alertes › LiveMétéo), 30 NM by default.
  * @returns Nautical miles.
  */
 export function liveRadiusNm(): number {

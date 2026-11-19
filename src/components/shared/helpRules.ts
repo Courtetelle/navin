@@ -6,7 +6,7 @@ const EMPTY_SPLIT =
 /** Facts about a help element that legacy `helpToPopup` read from the DOM. */
 export interface HelpContext {
   /**
-   * The element has an `id`, is inside `#offState`, `.keep-help`, `.toast` or
+   * The element has an `id`, is inside `.keep-help`, `.toast` or
    * `.nav-pop`, or contains an input, button, select, textarea, link, image or canvas.
    * @default false
    */

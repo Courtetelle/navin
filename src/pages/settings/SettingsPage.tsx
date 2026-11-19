@@ -16,10 +16,13 @@ import { MenuSortButton } from '../../components/shared/MenuSortButton.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { WindsockIcon } from '../../components/shared/WindsockIcon.tsx';
 import { bumpIn, inMenuOrder } from '../../features/data/dataOrder.ts';
-import { installPrompt } from '../../features/data/install.ts';
 import {
+  ALERT_KINDS,
+  ReOnChoices,
   WindAlert,
   WindKeys,
+  alertOn,
+  setAlertOn,
   windAlertClick,
 } from '../../features/onwater/index.ts';
 import {
@@ -28,7 +31,12 @@ import {
 } from '../../features/onwater/lakeWarnWatch.ts';
 import { lightningTest } from '../../features/onwater/lightningWatch.ts';
 import { ShareThemePicker } from '../../features/publish/index.ts';
-import { DepthDev, DepthSet, ZoneSim } from '../../features/tracking/index.ts';
+import {
+  DepthDev,
+  DepthSet,
+  ZoneSim,
+  depthAlarmSet,
+} from '../../features/tracking/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { BUILD_ID } from '../../model/buildId.ts';
@@ -42,12 +50,10 @@ import { LakeWarnSetting } from '../weather/LakeWarnings.tsx';
 import { LightningSetting } from '../weather/LightningAlert.tsx';
 
 import { BackupSections } from './BackupSections.tsx';
-import { InstallGuide } from './InstallGuide.tsx';
 import { LakeCenterRow } from './LakeCenterRow.tsx';
 import { LangRow } from './LangRow.tsx';
 import { LiveRow } from './LiveRow.tsx';
 import { MarginRows } from './MarginRows.tsx';
-import { OfflineSection } from './OfflineSection.tsx';
 import { SeaCenterRow } from './SeaCenterRow.tsx';
 import { SimulationSection } from './SimulationSection.tsx';
 import {
@@ -74,6 +80,17 @@ interface SettingsSectionProps {
    * @default undefined
    */
   icon?: ReactNode;
+  /**
+   * Its own menu (Alertes): the keys of the sections it holds, each a band
+   * on its page and opened alone.
+   * @default undefined
+   */
+  subs?: readonly string[];
+  /**
+   * What its page shows above the bands of its sections.
+   * @default undefined
+   */
+  lead?: ReactNode;
   children: ReactNode;
 }
 
@@ -82,6 +99,28 @@ const ShownSection = createContext('');
 
 /** Keys of the sections in the menu, in the order shown. */
 const ShownOrder = createContext<readonly string[]>([]);
+
+/** The menu a section is a band of: '' the menu of Paramétrages. */
+const MenuOf = createContext('');
+
+/** The sections of the Alertes menu, in their order (the tests last). */
+const ALERT_SECTIONS = [
+  'wind',
+  'lightning',
+  'lakes',
+  'alert',
+  'live',
+  'tests',
+] as const;
+
+/**
+ * The section is one of the Alertes menu.
+ * @param section - Its key.
+ * @returns Whether it is.
+ */
+function inAlerts(section: string): boolean {
+  return (ALERT_SECTIONS as readonly string[]).includes(section);
+}
 
 /**
  * The sections of the menu in the order chosen at the right of the title:
@@ -121,12 +160,19 @@ function SettingsSection({
   section,
   title,
   icon,
+  subs,
+  lead,
   children,
 }: SettingsSectionProps) {
   const tr = useTr();
   const shown = useContext(ShownSection);
   const order = useContext(ShownOrder);
-  if (!shown) {
+  const menu = useContext(MenuOf);
+  // A section of its own menu is open: it draws alone.
+  if (shown && subs?.includes(shown)) {
+    return <MenuOf.Provider value={section}>{children}</MenuOf.Provider>;
+  }
+  if (shown === menu) {
     return (
       <Button
         type="button"
@@ -134,7 +180,8 @@ function SettingsSection({
         data-sec={section}
         onClick={() => {
           buzz();
-          bumpIn('settings', order, section);
+          // The Alertes menu keeps its own order.
+          if (!menu) bumpIn('settings', order, section);
           go('settings', section);
         }}
       >
@@ -153,7 +200,8 @@ function SettingsSection({
         </h1>
       </TitleInNav>
       <div className="set-page set-body" data-sec={section}>
-        {children}
+        {lead}
+        <MenuOf.Provider value={section}>{children}</MenuOf.Provider>
       </div>
     </>
   );
@@ -203,6 +251,49 @@ function HelpBubblesRow() {
         <small>{tr('pastilles « i » qui expliquent chaque écran')}</small>
       </Button>
     </ButtonRow>
+  );
+}
+
+/**
+ * At the top of Alertes: every alert switched off or on at once, and when
+ * they come back on.
+ * @returns The block.
+ */
+function AllAlerts() {
+  useSignals();
+  const tr = useTr();
+  const settings = state.preferences.settings.value;
+  const anyOn = ALERT_KINDS.some((kind) => alertOn(kind, settings));
+  return (
+    <div className="all-alerts">
+      <ButtonRow>
+        <Button
+          className={anyOn ? 'btn big' : 'btn big on danger'}
+          data-alerts="all"
+          onClick={() => {
+            buzz();
+            for (const kind of ALERT_KINDS) {
+              if (alertOn(kind) === anyOn) setAlertOn(kind, !anyOn);
+            }
+            // An alarm sounding stops at once.
+            if (anyOn) depthAlarmSet(0);
+            toast(
+              anyOn
+                ? '🔕 Toutes les alertes coupées'
+                : '🔔 Toutes les alertes actives',
+            );
+          }}
+        >
+          {tr(
+            anyOn
+              ? '🔕 Couper toutes les alertes'
+              : '🔔 Toutes coupées · toucher pour les rallumer',
+          )}
+        </Button>
+      </ButtonRow>
+      <ReOnChoices kind="all" />
+      <h3>{tr('Chaque alerte')}</h3>
+    </div>
   );
 }
 
@@ -327,12 +418,14 @@ export function SettingsPage({ from, arg }: PageProps) {
   useLayoutEffect(() => {
     enterSettings(redrawn.current);
   }, []);
+  let backLabel = '◀ Paramétrages';
+  if (elsewhere) backLabel = '◀ Retour';
+  else if (inAlerts(section)) backLabel = '◀ Alertes';
   const zone = state.view.zoneSimV.value;
   const { theme, windAlert } = state.preferences.settings.value;
-  const prompt = installPrompt.value;
   useLayoutEffect(() => {
     redrawSettings();
-  }, [zone, theme, windAlert, prompt]);
+  }, [zone, theme, windAlert]);
   return (
     <>
       {section ? null : (
@@ -362,23 +455,28 @@ export function SettingsPage({ from, arg }: PageProps) {
       {section && !(origin && elsewhere) ? (
         // At the top of the page: it joins the fixed title line.
         // Opened from elsewhere (the radius button of the map, the Météo
-        // menu): ◀ goes back there; from the menu of Paramétrages, back to it.
+        // menu): ◀ goes back there; from the menu of Paramétrages, back to
+        // it; a section of Alertes, back to Alertes.
         <PageBack
-          label={elsewhere ? '◀ Retour' : '◀ Paramétrages'}
+          label={backLabel}
           data-go={elsewhere ? 'back' : 'settings'}
           onClick={() => {
             buzz();
             if (elsewhere) go(cameFrom);
+            else if (inAlerts(section)) go('settings', 'alerts');
             else go('settings');
           }}
         >
-          {tr(elsewhere ? '◀ Retour' : '◀ Paramétrages')}
+          {tr(backLabel)}
         </PageBack>
       ) : null}
       <ShownSection.Provider value={section}>
         <div className={section ? 'set-one' : 'set-secs set-menu'}>
           <SortedSections>
-            <SettingsSection section="zone" title="🧭 Zone et écran">
+            <SettingsSection
+              section="zone"
+              title="🧭 Zone de carte, Langue, Préférences d’affichage"
+            >
               {nightOK() ? <ThemeRow /> : null}
               <ZoneSim />
               <SeaCenterRow basin="atl" />
@@ -394,27 +492,40 @@ export function SettingsPage({ from, arg }: PageProps) {
               <PrefillRow />
               <WeatherRow />
             </SettingsSection>
-            <SettingsSection section="live" title="🌬 Paramétrages LiveMétéo">
-              <LiveRow />
-            </SettingsSection>
             <SettingsSection
-              section="wind"
-              title="Paramétrage des alertes vent"
-              icon={<WindsockIcon />}
+              section="alerts"
+              title="🔔 Alertes"
+              subs={ALERT_SECTIONS}
+              lead={<AllAlerts />}
             >
-              <WindAlert noTest />
-            </SettingsSection>
-            <SettingsSection
-              section="lightning"
-              title="⚡ Paramétrage des alertes orage"
-            >
-              <LightningSetting />
-            </SettingsSection>
-            <SettingsSection
-              section="lakes"
-              title="🚨 Paramétrage des feux d’avis des lacs"
-            >
-              <LakeWarnSetting />
+              <SettingsSection
+                section="wind"
+                title="Alerte vent"
+                icon={<WindsockIcon />}
+              >
+                <WindAlert noTest />
+              </SettingsSection>
+              <SettingsSection section="lightning" title="⚡ Alerte orage">
+                <LightningSetting />
+              </SettingsSection>
+              <SettingsSection
+                section="lakes"
+                title="🚨 Alerte feux d’avis des lacs"
+              >
+                <LakeWarnSetting />
+              </SettingsSection>
+              <SettingsSection section="alert" title="⚠️ Alerte de profondeur">
+                <DepthSet reOn={<ReOnChoices kind="depth" />} />
+              </SettingsSection>
+              <SettingsSection
+                section="live"
+                title="🌬 LiveMétéo · rayon des stations sur la carte"
+              >
+                <LiveRow />
+              </SettingsSection>
+              <SettingsSection section="tests" title="🧪 Tests des alertes">
+                <TestsSection />
+              </SettingsSection>
             </SettingsSection>
             <SettingsSection
               section="keys"
@@ -422,18 +533,11 @@ export function SettingsPage({ from, arg }: PageProps) {
             >
               <WindKeys />
             </SettingsSection>
-            <SettingsSection section="alert" title="⚠️ Alerte de profondeur">
-              <DepthSet />
-            </SettingsSection>
-            <SettingsSection section="share" title="📤 Partages">
-              <h3>{tr('Mise en page')}</h3>
+            <SettingsSection section="share" title="📤 Types de mises en page">
               <ShareThemePicker />
             </SettingsSection>
             <SettingsSection section="simu" title="🆘 Simulation SOS">
               <SimulationSection />
-            </SettingsSection>
-            <SettingsSection section="tests" title="🧪 Tests">
-              <TestsSection />
             </SettingsSection>
             <SettingsSection
               section="boats"
@@ -446,13 +550,6 @@ export function SettingsPage({ from, arg }: PageProps) {
               title="🔄 Sauvegarde et synchronisation"
             >
               <BackupSections />
-            </SettingsSection>
-            <SettingsSection
-              section="install"
-              title="📲 Installation et hors ligne"
-            >
-              <InstallGuide />
-              <OfflineSection />
             </SettingsSection>
           </SortedSections>
         </div>

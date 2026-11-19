@@ -10,7 +10,7 @@ import { windAlertConfig } from './windLogic.ts';
  */
 export function startWindWatch(): void {
   // Alerts switched off come back on at the launch, if so chosen.
-  void import('./windReOn.ts').then(({ applyReOn }) => applyReOn('launch'));
+  void import('./alertsOff.ts').then(({ applyReOn }) => applyReOn('launch'));
   // Safari counts the end of a touch as the gesture that unlocks the sound.
   for (const type of ['pointerdown', 'pointerup', 'touchend'] as const) {
     document.addEventListener(
@@ -67,7 +67,7 @@ export function startWindWatch(): void {
   }, 20_000);
   setInterval(() => {
     // At midnight, alerts switched off come back on, if so chosen.
-    void import('./windReOn.ts').then(({ applyReOn }) => applyReOn('tick'));
+    void import('./alertsOff.ts').then(({ applyReOn }) => applyReOn('tick'));
     void import('./windWatch.ts').then(({ windReminderTick }) =>
       windReminderTick(),
     );

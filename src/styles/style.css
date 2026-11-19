@@ -409,30 +409,6 @@ button.value {
   font-size: 28px;
   flex: none;
 }
-ol.steps {
-  margin: 4px 0 12px;
-  padding-left: 32px;
-  font-size: 19px;
-  font-weight: 600;
-}
-ol.steps li {
-  margin-bottom: 12px;
-  line-height: 1.35;
-}
-ol.steps b {
-  font-weight: 800;
-}
-.kbd {
-  display: inline-block;
-  border: 2px solid currentColor;
-  border-radius: 6px;
-  padding: 0 6px;
-}
-.ok-line {
-  font-size: 20px;
-  color: var(--ok);
-  margin: 0 0 10px;
-}
 .map {
   height: calc(100vh - 380px);
   min-height: 340px;
@@ -2027,9 +2003,6 @@ dl.vocab dd {
   .tag {
     border-radius: 999px;
     padding: 2px 10px;
-  }
-  .kbd {
-    border-width: 1.5px;
   }
   .more-grid .btn.big {
     text-align: left;
@@ -12506,7 +12479,7 @@ html body .lx-modal .ck-ask-box {
   }
 }
 
-/* SOCIB changed its instruments: the notice in Paramétrages › Paramétrage des alertes vent */
+/* SOCIB changed its instruments: the notice in Paramétrages › Alertes › Alerte vent */
 .socib-notice {
   display: grid;
   gap: 10px;
@@ -12833,56 +12806,6 @@ html body .lx-modal .ck-ask-box {
 .scale-tbl th,
 .scale-tbl td {
   overflow-wrap: anywhere;
-}
-
-/* « Alertes de vent »: its ⓘ, and the window of when they come back on */
-.reon-i {
-  display: inline-grid;
-  place-items: center;
-  border-radius: 50%;
-  cursor: pointer;
-  margin-left: 10px;
-  width: 30px;
-  height: 30px;
-  font-size: 18px;
-  font-style: italic;
-  font-weight: 800;
-  vertical-align: middle;
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--primary, #0b3d91);
-}
-.reon-box {
-  display: grid;
-  gap: 10px;
-  margin: 10px 0;
-  padding: 14px 16px;
-  border-radius: 16px;
-  border: 2px solid var(--primary, #0b3d91);
-  background: var(--card, #f2f4f7);
-}
-.reon-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.reon-head p {
-  flex: 1;
-  margin: 0;
-}
-.btn.reon-pen {
-  width: 56px;
-  min-width: 56px;
-}
-.reon-choices {
-  display: grid;
-  gap: 8px;
-}
-:root[data-theme='night'] .reon-i {
-  background: #300000;
-  color: var(--fg);
-}
-:root[data-theme='night'] .reon-box {
-  border-color: var(--fg);
 }
 /* Prévisions and Briefing météo are two pages now: one column each */
 html body .wx-page.wx-one {

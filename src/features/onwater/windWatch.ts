@@ -38,7 +38,6 @@ import {
   clearWindOverlays,
   showWindAlert,
 } from './windOverlayState.ts';
-import { applyReOn } from './windReOn.ts';
 import { coastWind, modelWind, stationWind } from './windReadings.ts';
 import type {
   WindMeta,
@@ -75,7 +74,7 @@ export function windMuted(): boolean {
 /** End of the track: the alerts are active again (legacy `windMuteEnd`). */
 export function windMuteEnd(): void {
   // Alerts switched off come back on at the end of a track, if so chosen.
-  applyReOn('trace');
+  void import('./alertsOff.ts').then(({ applyReOn }) => applyReOn('trace'));
   if (!windMuted()) return;
   updateSettings((settings) => {
     settings.windMuteTrack = false;

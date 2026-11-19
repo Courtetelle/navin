@@ -27,7 +27,7 @@ const TIPS: ReadonlyArray<readonly [string | null, string]> = [
   ],
   [
     null,
-    'Les bulles se déplacent au doigt · un toucher les ferme · les pastilles d’aide « i » se masquent dans les réglages (Zone et écran)',
+    'Les bulles se déplacent au doigt · un toucher les ferme · les pastilles d’aide « i » se masquent dans les Paramétrages (Zone de carte, Langue, Préférences d’affichage)',
   ],
 ];
 

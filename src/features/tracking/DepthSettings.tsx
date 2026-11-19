@@ -1,4 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
+import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
@@ -7,7 +8,7 @@ import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { frN } from '../../lib/format.ts';
+import { dayKey, frN } from '../../lib/format.ts';
 import { state, updateSettings } from '../../state/index.ts';
 
 import {
@@ -112,9 +113,11 @@ export function DepthDev({ inAlerts = false }: DepthDevProps) {
 
 /**
  * Settings of the depth alarm (legacy `depthSetHtml`).
+ * @param props - What it shows.
+ * @param props.reOn - When the alarm switched off comes back on, under its switch.
  * @returns The controls.
  */
-export function DepthSet() {
+export function DepthSet({ reOn }: { reOn?: ReactNode }) {
   useSignals();
   const tr = useTr();
   const settings = state.preferences.settings.value;
@@ -142,6 +145,7 @@ export function DepthSet() {
     <>
       <h3>{tr('Alarme de profondeur (lacs suisses)')}</h3>
       <DepthToggle />
+      {reOn}
       <HelpText nextIsRow>
         Démarre quand l’eau sous le bateau passe sous la sonde min. selon
         traceur + …
@@ -211,6 +215,8 @@ function DepthToggle() {
           buzz();
           updateSettings((draft) => {
             draft.depthAlarm = draft.depthAlarm === false;
+            // The day it was switched off: « à minuit » counts from it.
+            draft.depthOffDay = dayKey(new Date());
           });
           if (state.preferences.settings.peek().depthAlarm === false) {
             depthAlarmSet(0);

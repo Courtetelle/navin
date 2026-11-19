@@ -9,6 +9,8 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { RefreshButton } from '../../components/shared/RefreshButton.tsx';
 import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
 import { askMapArea } from '../../features/map/pendingArea.ts';
+import { ReOnChoices } from '../../features/onwater/ReOnChoices.tsx';
+import { setAlertOn } from '../../features/onwater/alertsOff.ts';
 import type { LakeWarnSettings } from '../../features/onwater/lakeWarnWatch.ts';
 import {
   lakeWarnState,
@@ -24,13 +26,13 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { exitOrigin } from '../../shell/exitOrigin.ts';
 import { go } from '../../shell/router.ts';
-import { state, toast, updateSettings } from '../../state/index.ts';
+import { state, toast } from '../../state/index.ts';
 
 const TROUBLES: Readonly<Record<string, string>> = {
   'no-relay':
-    'Il faut le relais (Paramétrages › Clés météo › Relais des METAR et bouées) : MétéoSuisse ne laisse pas une appli lire ses avis directement.',
+    'Il faut le relais (Paramétrages › Clés météos et compte relais › Relais des METAR et bouées) : MétéoSuisse ne laisse pas une appli lire ses avis directement.',
   'old-relay':
-    'Le relais doit être mis à jour : Paramétrages › Clés météo › « 📋 Copier le code du relais », puis sur Cloudflare « Modifier le code », tout remplacer et « Déployer ».',
+    'Le relais doit être mis à jour : Paramétrages › Clés météos et compte relais › « 📋 Copier le code du relais », puis sur Cloudflare « Modifier le code », tout remplacer et « Déployer ».',
   network: 'MétéoSuisse n’a pas répondu : nouvel essai dans 5 minutes.',
 };
 
@@ -156,15 +158,15 @@ export function LakeWarnings() {
         (sur le Léman, la partie où vous êtes). MétéoSuisse publie ces avis sur
         son site sans les documenter comme données ouvertes : la lecture peut
         cesser si le site change. L’alerte oui ou non et le sens des feux sont
-        dans Paramétrages › Paramétrage des feux d’avis des lacs ; le test dans
-        Paramétrages › Tests.
+        dans Paramétrages › Alertes › Alerte feux d’avis des lacs ; le test dans
+        Paramétrages › Alertes › Tests des alertes.
       </HelpText>
       <Button
         className="btn big wx-entry wx-keys-link"
         data-lakewarn="settings"
         data-settings-exit
         aria-label={tr(
-          'Paramétrage des feux d’avis des lacs : sortir vers Paramétrages',
+          'Alerte feux d’avis des lacs : sortir vers Paramétrages',
         )}
         onClick={() => {
           buzz();
@@ -177,9 +179,11 @@ export function LakeWarnings() {
         <span>
           <b className="wx-settings-title">
             <SettingsIcon className="wx-settings-ico" />
-            {tr('Paramétrage des feux d’avis des lacs')}
+            {tr('Alerte feux d’avis des lacs')}
           </b>
-          <small>{tr('l’alerte oui ou non, le sens des feux')}</small>
+          <small>
+            {tr('l’alerte oui ou non, quand elle se rallume, le sens des feux')}
+          </small>
         </span>
       </Button>
     </div>
@@ -205,14 +209,13 @@ export function LakeWarnSetting() {
           data-lakewarn="toggle"
           onClick={() => {
             buzz();
-            updateSettings((next) => {
-              next.lakeWarn = { ...(next.lakeWarn as object), on: !on };
-            });
+            setAlertOn('lakeWarn', !on);
           }}
         >
           {tr(`🚨 Alerte des feux : ${on ? 'OUI' : 'NON'}`)}
         </Button>
       </ButtonRow>
+      <ReOnChoices kind="lakeWarn" />
       <h3>{tr('Le sens des feux sur les rives')}</h3>
       {LIGHT_MEANINGS.map((meaning) => (
         <div

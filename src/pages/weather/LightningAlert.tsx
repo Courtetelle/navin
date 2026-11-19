@@ -9,6 +9,8 @@ import { RefreshButton } from '../../components/shared/RefreshButton.tsx';
 import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { askMapArea } from '../../features/map/pendingArea.ts';
+import { ReOnChoices } from '../../features/onwater/ReOnChoices.tsx';
+import { setAlertOn } from '../../features/onwater/alertsOff.ts';
 import type { LightningSettings } from '../../features/onwater/lightning.ts';
 import {
   lightningAlertOn,
@@ -158,34 +160,32 @@ export function LightningAlert() {
         demander, même alerte coupée : les plus récents vifs, ceux de 10 et 20
         minutes plus pâles, pour voir où va l’orage ; jaune pour 1 éclair en 5
         minutes, rouge foncé pour 20 et plus. Pour entendre et voir l’alerte :
-        Paramétrages › Tests. « Voir sur la carte » montre l’orage le plus
-        proche de la position GPS (ou de la zone choisie avec NavIn), cherché
-        jusqu’à 216 NM. Le déplacement des orages est mesuré sur les images des
-        45 dernières minutes, à au moins 80 NM autour : les éclairs récents sont
-        posés sur ceux de 10, 15… 45 minutes avant, et la vitesse est la droite
-        qui passe par tous. Les orages d’une même région vont avec le même vent
-        d’altitude ; parmi plusieurs cellules orageuses, NavIn retient celle qui
-        sera la première sur vous (la plus proche et la plus rapide pesées
-        ensemble) : il peut donc changer d’orage d’un regard à l’autre. L’heure
-        de la dernière image est demandée au serveur (elle a de 10 à 30 minutes
-        de retard). Au-dessus des boutons : sa distance, sa position, sa vitesse
-        de rapprochement et la durée jusqu’à vous ; le retard de l’image est
-        compté, la distance est estimée pour maintenant. Une seconde alerte
-        sonne quand l’orage passe sous la moitié de votre distance d’alerte, et
-        une fin d’alerte quand il n’y a plus d’éclairs depuis 30 minutes. Plus
-        d’alerte pour un orage qui s’éloigne, ni pour un orage déjà sur vous.
-        Sur la carte, la flèche jaune relie votre position (le GPS ou la zone
-        active) à l’orage, avec sa distance ; la flèche rouge montre son
-        déplacement.
+        Paramétrages › Alertes › Tests des alertes. « Voir sur la carte » montre
+        l’orage le plus proche de la position GPS (ou de la zone choisie avec
+        NavIn), cherché jusqu’à 216 NM. Le déplacement des orages est mesuré sur
+        les images des 45 dernières minutes, à au moins 80 NM autour : les
+        éclairs récents sont posés sur ceux de 10, 15… 45 minutes avant, et la
+        vitesse est la droite qui passe par tous. Les orages d’une même région
+        vont avec le même vent d’altitude ; parmi plusieurs cellules orageuses,
+        NavIn retient celle qui sera la première sur vous (la plus proche et la
+        plus rapide pesées ensemble) : il peut donc changer d’orage d’un regard
+        à l’autre. L’heure de la dernière image est demandée au serveur (elle a
+        de 10 à 30 minutes de retard). Au-dessus des boutons : sa distance, sa
+        position, sa vitesse de rapprochement et la durée jusqu’à vous ; le
+        retard de l’image est compté, la distance est estimée pour maintenant.
+        Une seconde alerte sonne quand l’orage passe sous la moitié de votre
+        distance d’alerte, et une fin d’alerte quand il n’y a plus d’éclairs
+        depuis 30 minutes. Plus d’alerte pour un orage qui s’éloigne, ni pour un
+        orage déjà sur vous. Sur la carte, la flèche jaune relie votre position
+        (le GPS ou la zone active) à l’orage, avec sa distance ; la flèche rouge
+        montre son déplacement.
       </HelpText>
       <SiteLink id="blitzortung" />
       <Button
         className="btn big wx-entry wx-keys-link"
         data-lightning="settings"
         data-settings-exit
-        aria-label={tr(
-          'Paramétrage des alertes orage : sortir vers Paramétrages',
-        )}
+        aria-label={tr('Alerte orage : sortir vers Paramétrages')}
         onClick={() => {
           buzz();
           toast('Vous sortez de Météorologie : Paramétrages');
@@ -197,7 +197,7 @@ export function LightningAlert() {
         <span>
           <b className="wx-settings-title">
             <SettingsIcon className="wx-settings-ico" />
-            {tr('Paramétrage des alertes orage')}
+            {tr('Alerte orage')}
           </b>
           <small>
             {tr(
@@ -230,11 +230,16 @@ export function LightningSetting() {
         <Button
           className={on ? 'btn on' : 'btn'}
           data-lightning="toggle"
-          onClick={() => change({ on: !on })}
+          onClick={() => {
+            buzz();
+            setAlertOn('lightning', !on);
+            void lightningCheck(true);
+          }}
         >
           {tr(`⚡ Alerte orage : ${on ? 'OUI' : 'NON'}`)}
         </Button>
       </ButtonRow>
+      <ReOnChoices kind="lightning" />
       <ButtonRow className="row">
         <Button
           className={onMap ? 'btn on' : 'btn'}

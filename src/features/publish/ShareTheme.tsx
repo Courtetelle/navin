@@ -53,7 +53,9 @@ export function ShareThemeNote() {
   const label = LX_THEMES.find(([id]) => id === shareTheme())?.[1] ?? '';
   return (
     <p className="help pub-h share-theme-note">
-      {tr(`Mise en page : ${label} (se change dans Paramétrages › Partages)`)}
+      {tr(
+        `Mise en page : ${label} (se change dans Paramétrages › Types de mises en page)`,
+      )}
     </p>
   );
 }

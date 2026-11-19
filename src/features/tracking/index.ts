@@ -42,6 +42,7 @@ export { addAutoEntry } from './autoEntries.ts';
 export { AutoCard } from './AutoCard.tsx';
 export type { Detector, TrackEvent, TrackSample } from './detector.ts';
 export { DepthDev, DepthSet } from './DepthSettings.tsx';
+export { depthAlarmSet } from './depthAlarm.ts';
 export type { DepthDevProps } from './DepthSettings.tsx';
 export { gpxImportPlan, importGpxFile } from './gpxImport.ts';
 export { GpxImportScreen } from './GpxImportScreen.tsx';
