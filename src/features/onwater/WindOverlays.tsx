@@ -10,7 +10,7 @@ import { translateMessage } from '../../i18n/translate.ts';
 import { BEAUFORT_TBL } from '../../model/lists.ts';
 import { state } from '../../state/index.ts';
 
-import { publishAlert } from './alertPublish.ts';
+import { publishAlert, reportRows } from './alertPublish.ts';
 import { lakeWarnPop } from './lakeWarnPop.ts';
 import { lightningPop } from './lightningPop.ts';
 import { beaufortSea } from './onLake.ts';
@@ -81,12 +81,21 @@ function OneFlash({ flash }: { flash: WindFlash }) {
 
 /**
  * The wind bubble: large text on a red glass background, edged with the colour
- * of the level; it stays until touched (legacy `windPopShow`).
+ * of the level; it stays until touched (legacy `windPopShow`). Under it,
+ * three buttons with an icon only: 👁 the details of the reading, 🌬
+ * LiveMétéo, 📤 Partager.
  * @returns The `#windPop` portal, or nothing.
  */
 export function WindPopup() {
   useSignals();
   const content = windPopup.value;
+  const [details, setDetails] = useState(false);
+  const [shown, setShown] = useState(content);
+  if (shown !== content) {
+    // Another alert: its details folded.
+    setShown(content);
+    setDetails(false);
+  }
   if (!content) return null;
   const row = BEAUFORT_TBL[Math.max(0, Math.min(12, content.bf))];
   // The sea the scale describes: none on a lake.
@@ -134,19 +143,59 @@ export function WindPopup() {
           <div className="wp-note">{translate(content.note)}</div>
         ) : null}
         {sea ? <div className="wp-desc">{translate(sea)}</div> : null}
-        {content.onLive ? (
-          <Button className="btn primary wp-live" noUiEdit>
-            {translate('🌬 LiveMétéo')}
-          </Button>
+        {details && content.report ? (
+          <dl className="wp-details">
+            {reportRows(content.report).map(([label, value]) => (
+              <div key={label}>
+                <dt>{translate(label)}</dt>
+                <dd>{translate(value)}</dd>
+              </div>
+            ))}
+          </dl>
         ) : null}
-        {content.report ? (
-          <div className="wp-publish">
-            <ShareButton
-              onShare={(format) => {
-                windPopup.value = null;
-                if (content.report) void publishAlert(content.report, format);
-              }}
-            />
+        {content.onLive || content.report ? (
+          <div className="wp-actions">
+            {content.report ? (
+              <Button
+                className={details ? 'btn wp-more on' : 'btn wp-more'}
+                noUiEdit
+                aria-label={translate(
+                  details ? 'Masquer les détails' : 'Voir les détails',
+                )}
+                title={translate('Détails')}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setDetails(!details);
+                }}
+              >
+                👁
+              </Button>
+            ) : null}
+            {content.onLive ? (
+              <Button
+                className="btn primary wp-live"
+                noUiEdit
+                aria-label="LiveMétéo"
+                title="LiveMétéo"
+              >
+                🌬
+              </Button>
+            ) : null}
+            {content.report ? (
+              <span className="wp-publish">
+                <ShareButton
+                  label="📤"
+                  aria-label={translate('Partager')}
+                  title={translate('Partager')}
+                  onShare={(format) => {
+                    windPopup.value = null;
+                    if (content.report) {
+                      void publishAlert(content.report, format);
+                    }
+                  }}
+                />
+              </span>
+            ) : null}
           </div>
         ) : null}
         {lightningPop.value ||

@@ -9300,16 +9300,71 @@ body.has-navtop #view > h1.live-title,
   font-weight: 600;
   width: 48%;
 }
-.wind-pop .wp-live,
-.wind-pop .wp-publish {
-  display: block;
-  width: 100%;
-  margin-top: 12px;
+/* 👁 details, 🌬 LiveMétéo, 📤 Partager: side by side, an icon each, one
+   height. */
+.wind-pop .wp-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
 }
-/* « Partager » under LiveMétéo: the one share button of the app. */
-.wind-pop .wp-publish .btn {
-  width: 100%;
+.wind-pop .wp-actions > .btn,
+.wind-pop .wp-actions > .wp-publish {
+  flex: 1 1 0;
+  min-width: 0;
   margin: 0;
+}
+.wind-pop .wp-actions .btn {
+  width: 100%;
+  min-height: 64px;
+  margin: 0;
+  padding: 6px;
+  font-size: 34px;
+  line-height: 1;
+}
+.wind-pop .wp-publish {
+  display: flex;
+}
+.wind-pop .wp-publish .share-pick {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+}
+.wind-pop .wp-publish .share-pick .btn {
+  flex: 1;
+  min-width: 0;
+}
+.wind-pop .wp-publish .share-ic {
+  width: 34px;
+  height: 34px;
+}
+.wind-pop .wp-more.on {
+  background: #fff;
+  color: #111;
+}
+.wind-pop .wp-details {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.28);
+  text-align: left;
+  font-size: 15px;
+}
+.wind-pop .wp-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+}
+.wind-pop .wp-details > div + div {
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+}
+.wind-pop .wp-details dt {
+  opacity: 0.85;
+}
+.wind-pop .wp-details dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
 }
 .live-sea h2 {
   margin: 16px 0 4px;
@@ -11000,16 +11055,12 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
   .wind-pop .wp-box > * {
     grid-column: 1 / -1;
   }
-  .wind-pop .wp-box > .wp-live,
-  .wind-pop .wp-box > .wp-publish {
-    grid-column: auto;
+  .wind-pop .wp-actions {
     margin-top: 8px;
-    min-height: 40px;
-    font-size: 16px;
   }
-  .wind-pop .wp-publish .btn {
-    min-height: 40px;
-    font-size: 16px;
+  .wind-pop .wp-actions .btn {
+    min-height: 44px;
+    font-size: 24px;
   }
   .wind-pop .wp-publish .share-ic {
     width: 28px;
