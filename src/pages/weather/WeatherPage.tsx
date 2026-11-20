@@ -40,6 +40,7 @@ import {
 } from '../meteo/liveText.ts';
 import { showLiveAround } from '../tracker/liveOnMap.ts';
 
+import { FixedAlerts } from './FixedAlerts.tsx';
 import { LakeWarnings } from './LakeWarnings.tsx';
 import { LightningAlert } from './LightningAlert.tsx';
 import { PrepForecast } from './PrepForecast.tsx';
@@ -79,6 +80,7 @@ export function WeatherPage({ arg }: PageProps) {
   if (arg === BRIEFING) return <ForecastPage part="briefing" />;
   if (arg === LIGHTNING) return <LightningPage />;
   if (arg === LAKE_LIGHTS) return <LakeLightsPage />;
+  if (arg === FIXED) return <FixedAlertsPage />;
   return <WeatherMenu />;
 }
 
@@ -165,6 +167,32 @@ function LakeLightsPage() {
         <h1>{tr('🚨 Feux d’avis des lacs')}</h1>
       </TitleInNav>
       <LakeWarnings />
+    </>
+  );
+}
+
+/** Argument of the screen for the fixed alerts. */
+const FIXED = 'fixed';
+
+function openFixed() {
+  buzz();
+  go('weather', FIXED);
+}
+
+/**
+ * The fixed alerts: the dangers always at the same place, sea by sea.
+ * @returns The screen content.
+ */
+function FixedAlertsPage() {
+  const tr = useTr();
+  const back = useBubbleBack();
+  return (
+    <>
+      <MeteoBack back={back} />
+      <TitleInNav>
+        <h1>{tr('⚠ Alertes fixes')}</h1>
+      </TitleInNav>
+      <FixedAlerts />
     </>
   );
 }
@@ -287,6 +315,21 @@ function WeatherMenu() {
             </span>
           </Button>
         ) : null}
+        <Button
+          className="btn big wx-entry"
+          data-wx="fixed"
+          onClick={openFixed}
+        >
+          <span className="wx-entry-ico">⚠</span>
+          <span>
+            <b>{tr('Alertes fixes')}</b>
+            <small>
+              {tr(
+                'raz, courants, plateaux, passes et vents locaux : ce qui s’y passe et comment s’y conduire',
+              )}
+            </small>
+          </span>
+        </Button>
         <Button
           className="btn big wx-entry"
           data-wx="check"
@@ -444,6 +487,27 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
                 label="Beaufort et Douglas"
                 sub="le vent et la mer lus ensemble, avec l’outil de lecture combinée"
               />
+              <Button
+                type="button"
+                className="btn page-link"
+                data-page-link="fixed"
+                onClick={openFixed}
+              >
+                <span className="page-link-ico" aria-hidden="true">
+                  ⚠
+                </span>
+                <span className="page-link-txt">
+                  <b>{tr('Alertes fixes')}</b>
+                  <small>
+                    {tr(
+                      'les dangers toujours au même endroit, Manche, Atlantique, mer du Nord, Méditerranée ; la zone sur la carte',
+                    )}
+                  </small>
+                </span>
+                <span className="page-link-go" aria-hidden="true">
+                  ›
+                </span>
+              </Button>
             </div>
           </section>
         ) : null}

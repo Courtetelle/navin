@@ -1,3 +1,5 @@
+import { buzz } from '../../lib/dom.ts';
+import { lightBand } from '../../shell/lightBand.ts';
 import { go } from '../../shell/router.ts';
 import { deliver, state, toast, trackToGpx } from '../../state/index.ts';
 
@@ -62,12 +64,66 @@ export function drawTrace(track: LakeTrack): void {
   handle.others?.remove();
   const line: LatLngPair[] = [];
   for (const [, lat, lon] of track.track) line.push([lat, lon]);
+  const smooth = smoothLine(line);
   const others = leaflet()
-    .polyline(smoothLine(line), { color: '#7b2cbf', weight: 4, opacity: 0.85 })
+    .polyline(smooth, {
+      color: '#7b2cbf',
+      weight: 4,
+      opacity: 0.85,
+      bubblingMouseEvents: false,
+    })
     .addTo(map);
+  // A wider line, unseen, to be pressed with a finger; gone with the trace.
+  const hit = leaflet()
+    .polyline(smooth, {
+      color: '#7b2cbf',
+      weight: 22,
+      opacity: 0,
+      bubblingMouseEvents: false,
+    })
+    .addTo(map);
+  others.on('remove', () => hit.remove());
+  for (const path of [others.getElement(), hit.getElement()]) {
+    if (path) pressBackToList(path, track.id);
+  }
   handle.others = others;
   setFollow(false);
   map.fitBounds(others.getBounds(), { padding: [30, 30], maxZoom: 15 });
   globalThis.scrollTo(0, 0);
   toast(`Trace « ${track.name} » en violet`);
+}
+
+/** A press this long on a trace opens its band in the list of the traces. */
+const LONG_MS = 600;
+/** Moved this far, the finger drags the map. */
+const MOVE_PX = 10;
+
+/**
+ * A long press on the trace drawn on the map opens the list of the traces,
+ * its band blinking three times (as a mark in its list).
+ * @param path - The drawn line.
+ * @param id - The id of the trace.
+ */
+function pressBackToList(path: Element, id: string): void {
+  let pressing: ReturnType<typeof setTimeout> | undefined;
+  let from = { x: 0, y: 0 };
+  path.addEventListener('pointerdown', (event) => {
+    const { clientX, clientY } = event as PointerEvent;
+    from = { x: clientX, y: clientY };
+    clearTimeout(pressing);
+    pressing = setTimeout(() => {
+      buzz();
+      go('traces');
+      lightBand(id, true);
+    }, LONG_MS);
+  });
+  const release = () => clearTimeout(pressing);
+  for (const name of ['pointerup', 'pointercancel', 'pointerleave']) {
+    path.addEventListener(name, release);
+  }
+  // The map dragged from the trace: no long press.
+  path.addEventListener('pointermove', (event) => {
+    const { clientX, clientY } = event as PointerEvent;
+    if (Math.hypot(clientX - from.x, clientY - from.y) > MOVE_PX) release();
+  });
 }
