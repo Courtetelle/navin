@@ -14,6 +14,7 @@ import {
   removeBoat,
   removeCruise,
   removeMark,
+  removeRoute,
   state,
   takeTracesGone,
   tracesGone,
@@ -54,6 +55,7 @@ const KINDS = [
   'members',
   'boats',
   'marks',
+  'routes',
   'crewSets',
   'sosLogs',
 ] as const;
@@ -317,6 +319,9 @@ function deleteHere(kept: Gone, tracked: string | undefined): void {
   for (const id of ids('marks')) {
     if (idsOf('marks').includes(id)) removeMark(id);
   }
+  for (const id of ids('routes')) {
+    if (idsOf('routes').includes(id)) removeRoute(id);
+  }
   const members = ids('members');
   if (idsOf('members').some((id) => members.has(id))) {
     updateMembers((list) => {
@@ -367,6 +372,7 @@ function withoutGone(pack: SyncPack, kept: Gone): SyncPack {
     members: out('members', pack.members),
     boats: out('boats', pack.boats),
     marks: out('marks', pack.marks),
+    routes: out('routes', pack.routes),
     crewSets: out('crewSets', pack.crewSets),
     sosLogs: out('sosLogs', pack.sosLogs),
   };

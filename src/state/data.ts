@@ -1,5 +1,6 @@
 import { signal } from '@preact/signals-react';
 
+import type { NavRoute } from '../model/routes.ts';
 import type {
   Boat,
   ChecklistBase,
@@ -75,6 +76,8 @@ export const data = {
   crewSets: signal<CrewSet[]>([]),
   /** Map marks (`ldb.marks`). */
   marks: signal<Mark[]>([]),
+  /** Routes planned on the map (`ldb.routes`). */
+  routes: signal<NavRoute[]>([]),
   /** Automatic SOS logs (`ldb.sosLogs`). */
   sosLogs: signal<SosLog[]>([]),
   /** Checklist bases (`ldb.ckLib`). */

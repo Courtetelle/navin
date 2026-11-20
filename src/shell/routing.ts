@@ -159,6 +159,7 @@ const DATA_BACK_VIEWS = new Set([
   'sites',
   'dossier',
   'marks',
+  'routes',
   'cartes',
   'lists',
   'settings',

@@ -20,6 +20,7 @@ import { boatItems, crewItems, peopleItems } from './listItems.ts';
 import {
   checklistBaseItems,
   markItems,
+  routeItems,
   sosLogItems,
   traceItems,
 } from './listRecordItems.ts';
@@ -32,6 +33,7 @@ export const LIST_TITLES: Readonly<Record<ListKind, string>> = {
   boats: 'Bateaux',
   traces: 'Traces',
   marks: 'Marques',
+  routes: 'Routes',
   ckbases: 'Bases de check-list',
   soslogs: 'Journal SOS',
   alerts: 'Journal des alertes',
@@ -44,12 +46,13 @@ export const ITEM_LABELS: Readonly<Record<ListKind, string>> = {
   boats: 'Bateaux',
   traces: 'Traces',
   marks: 'Marques',
+  routes: 'Routes',
   ckbases: 'Bases',
   soslogs: 'Logs',
   alerts: 'Alertes',
 };
 
-const { boats, ckLib, crewSets, marks, members, sosLogs } = state.data;
+const { boats, ckLib, crewSets, marks, members, routes, sosLogs } = state.data;
 
 const ITEM_BUILDERS: Readonly<Record<ListKind, () => PublishItem[]>> = {
   people: () => peopleItems(members.value, memberFieldsX(), memberName),
@@ -62,6 +65,7 @@ const ITEM_BUILDERS: Readonly<Record<ListKind, () => PublishItem[]>> = {
   boats: () => boatItems(boats.value.map((boat) => publishableBoat(boat))),
   traces: () => traceItems(publishableTracks()),
   marks: () => markItems(marks.value),
+  routes: () => routeItems(routes.value),
   ckbases: () => checklistBaseItems(ckLib.value),
   soslogs: () => sosLogItems(sosLogs.value),
   alerts: () => alertItems(alertLog.value),

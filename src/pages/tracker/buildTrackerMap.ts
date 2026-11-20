@@ -34,6 +34,7 @@ import {
   addRegional,
   boxesMeet,
 } from '../../features/map/regionalLayers.ts';
+import { addRouteControl } from '../../features/map/routeEditor.ts';
 import { addRulerControl } from '../../features/map/rulerTool.ts';
 import { SEA_ZOOM, seaCenter } from '../../features/map/seaCenter.ts';
 import { smoothLine } from '../../features/map/smoothLine.ts';
@@ -136,6 +137,7 @@ export function buildTrackerMap(box: HTMLElement, handle: TrackerHandle): void {
   void addOfflineMaps(map, layers);
   addFullscreenControl(map);
   addRulerControl(map);
+  addRouteControl(map);
   startOrientation(map);
   keepBoatCentred(map, () =>
     handle.follow && handle.me ? handle.me.getLatLng() : null,

@@ -19,6 +19,7 @@ import { loadMarks } from './marks.ts';
 import { loadMembers } from './members.ts';
 import { loadSettings, preferences } from './preferences.ts';
 import { loadPrep } from './prep.ts';
+import { loadRoutes } from './routes.ts';
 import { loadTaskTpl, loadUiEdits } from './templates.ts';
 import { toast } from './toast.ts';
 import { resetView } from './view.ts';
@@ -45,6 +46,7 @@ export function initState(backend?: Storage | null): void {
   loadTaskTpl();
   loadUiEdits();
   loadMarks();
+  loadRoutes();
   loadPrep();
   loadCrewSets();
   loadSosLogs();

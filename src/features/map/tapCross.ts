@@ -19,6 +19,7 @@ import { depthAt } from './isobath.ts';
 import { leaflet } from './leaflet.ts';
 import { marksRedraw } from './marksDraw.ts';
 import { bearingText, relativeHtml } from './relativeText.ts';
+import { routeEditing } from './routeMode.ts';
 import { rulerToPoint } from './rulerTool.ts';
 import { shoreNoteAt } from './shoreBands.ts';
 import { setFollow, tracker } from './trackerState.ts';
@@ -64,6 +65,14 @@ export function longPressDone(): void {
 }
 
 /**
+ * Whether a tap is the end of a long press, and so opens nothing.
+ * @returns A long press was made just before.
+ */
+export function endsLongPress(): boolean {
+  return Date.now() - longAt < AFTER_LONG_MS;
+}
+
+/**
  * A short tap on the map lays a cross on the point: four lines of 2 cm, not
  * meeting in the middle, a logo at the end of each (mark, Go To, weather,
  * information). A logo opens its menu; a tap beside takes the cross away,
@@ -82,6 +91,8 @@ export function crossAttach(map: LeafletMap): void {
   };
   map.on('click', (event: LeafletMouseEvent) => {
     if (Date.now() - longAt < AFTER_LONG_MS) return;
+    // A route being drawn takes the taps for its points.
+    if (routeEditing.peek()) return;
     if (cross) {
       remove();
       return;
