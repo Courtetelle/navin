@@ -17,6 +17,7 @@ import {
 import { useBodyClass } from '../../shell/bodyClass.ts';
 import { state } from '../../state/index.ts';
 
+import { FixedAlertsOnMap } from './FixedAlertsOnMap.tsx';
 import { LakeWarningsOnMap } from './LakeWarningsOnMap.tsx';
 import { LightningOnMap } from './LightningOnMap.tsx';
 import { LiveOnMap } from './LiveOnMap.tsx';
@@ -78,6 +79,7 @@ export function TrackerPage() {
       <LiveOnMap />
       <LightningOnMap />
       <LakeWarningsOnMap />
+      <FixedAlertsOnMap />
     </div>
   );
 }

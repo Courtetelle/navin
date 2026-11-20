@@ -1026,6 +1026,32 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
     );
     /* eslint-enable no-await-in-loop */
   }
+  // The fixed alerts: from the forecast to the zone on the map, and from the
+  // zone back to the list, its alert blinking.
+  await page.locator('[data-page-link="fixed"]').click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'Prévisions › Alertes fixes: the seas and their alerts',
+    (await page.locator('[data-fixed-sea]').count()) === 4 &&
+      (await page.locator('[data-fixed]').count()) > 20,
+  );
+  await page.locator('[data-fixed-map="raz-blanchard"]').click();
+  await page.waitForTimeout(1500);
+  check(
+    theme,
+    'a fixed alert touched: its zone on the map',
+    (await page.locator('path.fixed-zone').count()) === 1,
+  );
+  await page.locator('path.fixed-zone').dispatchEvent('click');
+  await page.waitForTimeout(1000);
+  check(
+    theme,
+    'its zone touched: back to the list, the alert blinking, the zone off',
+    (await page
+      .locator('[data-band-id="fixed:raz-blanchard"].band-blink')
+      .count()) === 1,
+  );
   // The lightning alert: its own page in the Météo menu.
   await page.locator('.rail-weather').click();
   await page.waitForTimeout(400);
