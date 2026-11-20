@@ -175,7 +175,7 @@ export function GoNoGo() {
                   ? 'bateau de la croisière en cours'
                   : boat
                     ? 'choisi dans la liste des bateaux'
-                    : 'aucun bateau choisi : seuils de référence',
+                    : 'seuils de référence, à corriger',
               )}
             </small>
           </p>
