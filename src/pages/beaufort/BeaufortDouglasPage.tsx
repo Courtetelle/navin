@@ -377,14 +377,14 @@ function Compare({
   const rows: Array<[string, string, string, string]> = [];
   if (sea) {
     rows.push([
-      english ? 'Open-Meteo, whole sea' : 'Open-Meteo, mer totale',
+      'Open-Meteo',
       one(sea.total.height),
       sea.total.period == null ? '–' : one(sea.total.period),
       degreeOf(sea.total.height),
     ]);
     if (sea.windSea) {
       rows.push([
-        english ? '  of which wind sea' : '  dont mer du vent',
+        english ? '  wind sea' : '  mer du vent',
         one(sea.windSea.height),
         sea.windSea.period == null ? '–' : one(sea.windSea.period),
         degreeOf(sea.windSea.height),
@@ -392,7 +392,7 @@ function Compare({
     }
     if (sea.swell) {
       rows.push([
-        english ? '  of which swell' : '  dont houle',
+        english ? '  swell' : '  houle',
         one(sea.swell.height),
         sea.swell.period == null ? '–' : one(sea.swell.period),
         degreeOf(sea.swell.height),
@@ -400,7 +400,7 @@ function Compare({
     }
   } else if (!lake) {
     rows.push([
-      english ? 'Open-Meteo (no answer)' : 'Open-Meteo (pas de réponse)',
+      english ? 'Open-Meteo: none' : 'Open-Meteo : rien',
       '–',
       '–',
       '–',
@@ -408,7 +408,7 @@ function Compare({
   }
   if (raised) {
     rows.push([
-      english ? 'Computed from the fetch' : 'Calculée par le fetch',
+      english ? 'Fetch (computed)' : 'Fetch (calcul)',
       one(raised.hs),
       one(raised.period),
       degreeOf(raised.hs),
@@ -418,7 +418,7 @@ function Compare({
     const force = bft(wind.kn);
     const degree = SEA_OF_FORCE[force] as number;
     rows.push([
-      english ? 'Open-sea theory' : 'Théorie pleine mer',
+      english ? 'Open-sea theory' : 'Théorie au large',
       DOUGLAS[degree]?.[2] ?? '–',
       '–',
       String(degree),
@@ -428,8 +428,8 @@ function Compare({
     <tr>
       <th>{tr(english ? 'Source' : 'Source')}</th>
       <th>{tr('Hs (m)')}</th>
-      <th>{tr(english ? 'Period (s)' : 'Période (s)')}</th>
-      <th>{tr('Douglas')}</th>
+      <th>{tr('T (s)')}</th>
+      <th>{tr('D')}</th>
     </tr>
   );
   return (
@@ -466,7 +466,7 @@ function Compare({
         </p>
       ) : null}
       {rows.length > 0 ? (
-        <table className="scale-tbl bd-cmp-tbl">
+        <table className="bd-cmp-tbl">
           <thead>{head}</thead>
           <tbody>
             {rows.map(([label, hs, period, degree]) => (
@@ -482,6 +482,15 @@ function Compare({
           </tbody>
           <tfoot>{head}</tfoot>
         </table>
+      ) : null}
+      {rows.length > 0 ? (
+        <p className="bd-cmp-key">
+          {tr(
+            english
+              ? 'Hs: significant height · T: period · D: Douglas degree'
+              : 'Hs : hauteur significative · T : période · D : degré Douglas',
+          )}
+        </p>
       ) : null}
       <p className="keep-help">
         {tr(
