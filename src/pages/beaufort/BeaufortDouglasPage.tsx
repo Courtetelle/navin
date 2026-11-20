@@ -1,48 +1,31 @@
-<<<<<<< HEAD
 import { useEffect, useState } from 'react';
-=======
-import { useState } from 'react';
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
 
 import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
-<<<<<<< HEAD
 import { bdCrossPoint } from '../../features/map/bdPlace.ts';
 import type { PointKind, PointSea } from '../../features/onwater/pointSea.ts';
 import { readPointSea, scalePoint } from '../../features/onwater/pointSea.ts';
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
 import { steepnessOf } from '../../features/onwater/steepness.ts';
 import { ScaleLanguage } from '../../features/safety/ScaleLanguage.tsx';
 import { useScaleEnglish } from '../../features/safety/useScaleEnglish.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-<<<<<<< HEAD
 import { bft, compassPoint } from '../../lib/wind.ts';
-=======
-import { bft } from '../../lib/wind.ts';
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
 import type { Combined, ScaleGroup } from '../../model/beaufortDouglas.ts';
 import {
   SEA_OF_FORCE,
   assembledReading,
   brokenDownReading,
   combine,
-<<<<<<< HEAD
   degreeOfHeight,
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
   englishHeight,
   groupOfDegree,
   groupOfForce,
   parseTyped,
 } from '../../model/beaufortDouglas.ts';
-<<<<<<< HEAD
 import { inInland } from '../../model/contacts.ts';
 import { OPEN_FETCH_KM } from '../../model/fetchWaves.ts';
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
 import { BEAUFORT_TBL, DOUGLAS, DOUGLAS_EN } from '../../model/lists.ts';
 
 /**
@@ -182,7 +165,6 @@ function capital(text: string): string {
   return `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
 }
 
-<<<<<<< HEAD
 /** Where the point comes from, said under the title. */
 const POINT_KINDS: Readonly<Record<PointKind, readonly [string, string]>> = {
   cross: ['point de la croix', 'point of the cross'],
@@ -203,19 +185,12 @@ const one = (value: number) =>
  * the wind of the model and the sea of Open-Meteo (on a lake, the sea of the
  * fetch); each can be typed over, emptied (the open-sea theory), and they are
  * filled again each time the page opens.
-=======
-/**
- * The combining tool: a wind in knots, a sea in metres, a period; the side
- * left empty is the open-sea theory, shown in its field, and either side can
- * be corrected by hand.
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
  * @param props - Language.
  * @param props.english - In English.
  * @returns The tool.
  */
 function CombineTool({ english }: { english: boolean }) {
   const tr = useTr();
-<<<<<<< HEAD
   const [point] = useState(() => {
     const cross = bdCrossPoint.peek();
     bdCrossPoint.value = null;
@@ -248,14 +223,6 @@ function CombineTool({ english }: { english: boolean }) {
   const windKn = parseTyped(windText);
   const waveM = parseTyped(seaText);
   const periodS = parseTyped(periodText);
-=======
-  const [wind, setWind] = useState('');
-  const [sea, setSea] = useState('');
-  const [period, setPeriod] = useState('');
-  const windKn = parseTyped(wind);
-  const waveM = parseTyped(sea);
-  const periodS = parseTyped(period);
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
   const combined = combine({ windKn, waveM, periodS }, bft);
   const windHint =
     combined?.windAuto === true
@@ -265,7 +232,6 @@ function CombineTool({ english }: { english: boolean }) {
     combined?.seaAuto === true
       ? `${english ? 'theory' : 'théorique'} : ${DOUGLAS[combined.degree]?.[2] ?? ''}`
       : '';
-<<<<<<< HEAD
   const typed = wind !== null || sea !== null || period !== null;
   const [kindFr, kindEn] = POINT_KINDS[point.kind];
   const from = (own: string | null, origin: string) =>
@@ -285,44 +251,24 @@ function CombineTool({ english }: { english: boolean }) {
             : english
               ? 'Filled with the wind of the model and the sea of Open-Meteo at the point (on a lake, the sea of the fetch). Type over a field to correct it; an empty field is the open-sea theory. Opened again, the page reads the point again.'
               : 'Rempli avec le vent du modèle et la mer d’Open-Meteo au point (sur un lac, la mer calculée par le fetch). Écrivez dans une case pour la corriger ; une case vide est la théorie en pleine mer. Rouverte, la page relit le point.',
-=======
-  return (
-    <section className="bd-tool" aria-label={english ? 'Combine' : 'Combiner'}>
-      <h2>{tr(english ? 'Read wind and sea together' : 'Lecture combinée')}</h2>
-      <p className="bd-how">
-        {tr(
-          english
-            ? 'Type the wind, the sea, or both. The side left empty is the open-sea theory; type over it to correct it.'
-            : 'Saisissez le vent, la mer, ou les deux. Le côté laissé vide est la théorie en pleine mer ; écrivez dessus pour le corriger.',
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
         )}
       </p>
       <div className="bd-fields">
         <Field
           id="bd-wind"
           label={english ? '🌬 Wind (knots)' : '🌬 Vent (nœuds)'}
-<<<<<<< HEAD
           value={windText}
           hint={windHint}
           origin={windText === '' ? '' : from(wind, auto.windFrom)}
-=======
-          value={wind}
-          hint={windHint}
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
           onChange={setWind}
           clearLabel={english ? 'Back to theory' : 'Revenir à la théorie'}
         />
         <Field
           id="bd-sea"
           label={english ? '🌊 Waves Hs (m)' : '🌊 Vagues Hs (m)'}
-<<<<<<< HEAD
           value={seaText}
           hint={seaHint}
           origin={seaText === '' ? '' : from(sea, auto.seaFrom)}
-=======
-          value={sea}
-          hint={seaHint}
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
           onChange={setSea}
           clearLabel={english ? 'Back to theory' : 'Revenir à la théorie'}
         />
@@ -331,19 +277,13 @@ function CombineTool({ english }: { english: boolean }) {
           label={
             english ? '⏱ Period (s), optional' : '⏱ Période (s), facultatif'
           }
-<<<<<<< HEAD
           value={periodText}
           hint=""
           origin={periodText === '' ? '' : from(period, auto.seaFrom)}
-=======
-          value={period}
-          hint=""
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
           onChange={setPeriod}
           clearLabel={english ? 'Clear' : 'Effacer'}
         />
       </div>
-<<<<<<< HEAD
       {typed ? (
         <Button
           className="btn bd-reload"
@@ -359,8 +299,6 @@ function CombineTool({ english }: { english: boolean }) {
           {tr(english ? '↺ Data of the point' : '↺ Données du point')}
         </Button>
       ) : null}
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
       {combined ? (
         <Result
           combined={combined}
@@ -369,7 +307,6 @@ function CombineTool({ english }: { english: boolean }) {
           periodS={periodS}
         />
       ) : null}
-<<<<<<< HEAD
       {data ? <Compare data={data} english={english} lake={lake} /> : null}
       {read !== 'reading' && !data ? (
         <p className="bd-how">
@@ -380,14 +317,11 @@ function CombineTool({ english }: { english: boolean }) {
           )}
         </p>
       ) : null}
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
     </section>
   );
 }
 
 /**
-<<<<<<< HEAD
  * The values the fields are filled with, and where they come from.
  * @param data - What was read at the point.
  * @returns The texts.
@@ -561,18 +495,13 @@ function Compare({
 }
 
 /**
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
  * One field of the tool, with its ✕.
  * @param props - The field.
  * @param props.id - Element id.
  * @param props.label - Label.
  * @param props.value - Text typed.
  * @param props.hint - The theory, shown while empty.
-<<<<<<< HEAD
  * @param props.origin - Where the value comes from, under the field.
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
  * @param props.onChange - New text.
  * @param props.clearLabel - Name of the ✕ button.
  * @returns The field.
@@ -582,10 +511,7 @@ function Field({
   label,
   value,
   hint,
-<<<<<<< HEAD
   origin,
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
   onChange,
   clearLabel,
 }: {
@@ -593,10 +519,7 @@ function Field({
   label: string;
   value: string;
   hint: string;
-<<<<<<< HEAD
   origin: string;
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
   onChange: (value: string) => void;
   clearLabel: string;
 }) {
@@ -628,10 +551,7 @@ function Field({
           </Button>
         )}
       </div>
-<<<<<<< HEAD
       {origin ? <small className="bd-origin">{tr(origin)}</small> : null}
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
     </div>
   );
 }

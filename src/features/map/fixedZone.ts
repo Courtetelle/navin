@@ -5,12 +5,9 @@ import { signal } from '@preact/signals-react';
  * null: a touch on the zone goes back to the list and takes it off.
  */
 export const fixedOnMap = signal<string | null>(null);
-<<<<<<< HEAD
 
 /**
  * The fixed alert to open in its list (come back from its zone on the map),
  * taken once by the list.
  */
 export const fixedOpened = signal<string | null>(null);
-=======
->>>>>>> 0d52fb66522b114f30db0b0ea563bceba9847422
