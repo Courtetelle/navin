@@ -1,3 +1,4 @@
+import { openMeteoFetch } from '../../lib/openMeteo.ts';
 import { compassPoint } from '../../lib/wind.ts';
 
 import { currentAgainst, steepnessOf } from './steepness.ts';
@@ -54,7 +55,7 @@ export async function seaNow(place: {
   lat: number;
   lon: number;
 }): Promise<SeaNow | null> {
-  const response = await fetch(
+  const response = await openMeteoFetch(
     `https://marine-api.open-meteo.com/v1/marine?latitude=${place.lat.toFixed(3)}&longitude=${place.lon.toFixed(3)}&current=${FIELDS.join(',')}&timezone=GMT`,
     { signal: AbortSignal.timeout(15_000) },
   );

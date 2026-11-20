@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 
+import { forgetOpenMeteo } from '../../../lib/openMeteo.ts';
 import type { Cruise } from '../../../model/types.ts';
 import { blankCruise, setCruise, setZoneSim } from '../../../state/index.ts';
 import { initState } from '../../../state/init.ts';
@@ -71,6 +72,7 @@ export function openCruise(lake: boolean): Cruise {
 /** Fresh state, frozen clock, online. */
 export function setUpWeather(): void {
   initState(createMemoryStorage());
+  forgetOpenMeteo();
   vi.useFakeTimers({ now: NOW, toFake: ['Date'] });
   vi.stubGlobal('navigator', { onLine: true });
 }

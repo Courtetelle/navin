@@ -1,3 +1,4 @@
+import { openMeteoFetch } from '../../lib/openMeteo.ts';
 import { isLake } from '../../state/index.ts';
 
 const WEATHER_SOURCES = {
@@ -128,7 +129,7 @@ export async function wxNext(
   /* eslint-disable no-await-in-loop -- each source is tried only when the previous one failed */
   for (const [model, parameter] of tries) {
     try {
-      const response = await fetch(
+      const response = await openMeteoFetch(
         `https://api.open-meteo.com/v1/forecast?${query}${parameter}`,
       );
       if (!response.ok) continue;
@@ -177,7 +178,7 @@ async function swissDay(
 
 async function marineDay(query: string): Promise<HourlyWeather | null> {
   try {
-    const response = await fetch(
+    const response = await openMeteoFetch(
       `https://marine-api.open-meteo.com/v1/marine?${query}&hourly=wave_height,wave_direction`,
     );
     if (!response.ok) return null;
@@ -189,7 +190,7 @@ async function marineDay(query: string): Promise<HourlyWeather | null> {
 }
 
 async function fetchJson(url: string): Promise<OpenMeteoAnswer> {
-  const response = await fetch(url);
+  const response = await openMeteoFetch(url);
   if (!response.ok) throw new Error(String(response.status));
   return (await response.json()) as OpenMeteoAnswer;
 }

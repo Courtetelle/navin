@@ -35,6 +35,22 @@ export const BOAT_DATA_FIELDS: readonly FieldDefinition[] = [
   },
   { key: 'model', label: 'Modèle', type: 'line', grow: true, frame: 'my' },
   {
+    key: 'hullType',
+    label: 'Type',
+    type: 'choice',
+    options: [['Monocoque'], ['Multicoque'], ['Dériveur']],
+    cycle: true,
+    wide: true,
+  },
+  {
+    key: 'ceCategory',
+    label: 'Catégorie de conception CE',
+    type: 'choice',
+    options: [['A'], ['B'], ['C'], ['D']],
+    cycle: true,
+    wide: true,
+  },
+  {
     key: 'year',
     label: 'Année',
     type: 'line',

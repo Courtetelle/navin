@@ -1041,7 +1041,26 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
     (await page.locator('[data-fixed-sea]').count()) === 4 &&
       (await page.locator('[data-fixed]').count()) > 20,
   );
-  await page.locator('[data-fixed-map="raz-blanchard"]').click();
+  check(
+    theme,
+    'Alertes fixes: no 🗺 on the bands, the map is in the swipe',
+    (await page.locator('[data-fixed-map]').count()) === 0,
+  );
+  const bandRow = page.locator('[data-sw-id="fixed:raz-blanchard"]');
+  await bandRow.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(200);
+  const band = await bandRow.boundingBox();
+  if (band) {
+    const y = band.y + band.height / 2;
+    await page.mouse.move(band.x + band.width - 20, y);
+    await page.mouse.down();
+    await page.mouse.move(band.x + band.width - 60, y, { steps: 4 });
+    await page.mouse.move(band.x + band.width - 140, y, { steps: 4 });
+    await page.mouse.move(-10, y, { steps: 2 });
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+  }
+  await page.locator('.sw-menu [data-swview]').click();
   await page.waitForTimeout(1500);
   check(
     theme,
