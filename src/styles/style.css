@@ -14310,3 +14310,12 @@ body.route-on .slide-handle.sh-bot {
 .route-panel .rp-auto .btn {
   min-height: 40px;
 }
+
+/* Prévisions › Situation générale: the copy kept offline, greyed when old */
+.wx-analysis .wx-analysis-old {
+  opacity: 0.55;
+}
+.wx-analysis a.page-link {
+  text-decoration: none;
+  color: inherit;
+}

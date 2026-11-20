@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Analyse Saint-Quay-Portrieux</title>
+<style>
+/* Layout : une colonne de lecture, du plus grand au plus petit, comme on descend une carte marine à l'échelle */
+:root{
+  --bg:#f3f5f6; --paper:#ffffff; --fg:#14212b; --muted:#53636f; --line:#d5dde2;
+  --sea:#0b5d7a; --sea-soft:#e1eff4;
+  --go:#1f8a4c; --warn:#d9822b; --nogo:#c4322f;
+  --display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e171d; --paper:#15222a; --fg:#e4ecf0; --muted:#9aaab4; --line:#2a3a44;
+  --sea:#5cb8d8; --sea-soft:#163240; --go:#45c27a; --warn:#f0a24e; --nogo:#f06a63; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e171d; --paper:#15222a; --fg:#e4ecf0; --muted:#9aaab4; --line:#2a3a44;
+  --sea:#5cb8d8; --sea-soft:#163240; --go:#45c27a; --warn:#f0a24e; --nogo:#f06a63; color-scheme:dark}
+html{font-size:17px}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);line-height:1.55;font-size:1rem}
+.wrap{max-width:860px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+header{display:grid;gap:6px}
+.eyebrow{font-family:var(--mono);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--sea)}
+h1{font-family:var(--display);font-weight:700;font-size:2rem;line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:700;font-size:1.45rem;margin:0;text-wrap:balance;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+h2 .scale{font-family:var(--mono);font-size:.75rem;font-weight:500;color:var(--muted);letter-spacing:.04em}
+h3{font-size:1.02rem;margin:0;font-weight:600}
+p{margin:0;max-width:68ch}
+.meta{color:var(--muted);font-size:.88rem}
+.fontbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+section{display:grid;gap:14px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px}
+.essentiel{display:grid;gap:8px}
+.essentiel li{max-width:68ch}
+ul{margin:0;padding-left:1.2em;display:grid;gap:4px}
+.tblwrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:.95rem}
+th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+thead th,tfoot th{font-size:.78rem;color:var(--muted);font-weight:600;letter-spacing:.02em}
+tfoot th{border-bottom:0;border-top:1px solid var(--line)}
+.light{display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.dot{width:.8em;height:.8em;border-radius:50%;display:inline-block}
+.go .dot{background:var(--go)} .warn .dot{background:var(--warn)} .nogo .dot{background:var(--nogo)}
+.go{color:var(--go)} .warn{color:var(--warn)} .nogo{color:var(--nogo)}
+figure{margin:0;display:grid;gap:8px}
+.map{position:relative;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#fff;cursor:zoom-in}
+.map img{display:block;width:100%;height:auto}
+.map img.layer{position:absolute;inset:0}
+figcaption{font-size:.84rem;color:var(--muted);max-width:none}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{font:inherit;font-size:.9rem;font-weight:500;padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);cursor:pointer;min-height:40px}
+button[aria-pressed="true"]{background:var(--sea);border-color:var(--sea);color:var(--paper)}
+button:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+.note{background:var(--sea-soft);border-radius:8px;padding:12px 14px;display:grid;gap:6px}
+.note.alert{background:color-mix(in srgb,var(--warn) 16%,var(--paper))}
+a{color:var(--sea)}
+.src{font-size:.84rem;color:var(--muted);display:grid;gap:4px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.grid2>*{min-width:0}
+#zoom{position:fixed;inset:0;background:rgba(5,12,16,.94);display:flex;align-items:center;justify-content:center;z-index:50;padding:calc(env(safe-area-inset-top,0px) + 12px) max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 12px) max(12px,env(safe-area-inset-left,0px));overflow:auto;cursor:zoom-out}
+#zoom[hidden]{display:none}
+#zoom .stack{position:relative;max-width:100%;max-height:100%}
+#zoom img{display:block;max-width:100%;max-height:calc(100vh - 40px);width:auto;height:auto}
+#zoom img.layer{position:absolute;inset:0;width:100%;height:100%}
+@media (max-width:520px){html{font-size:16px} h1{font-size:1.7rem} section{padding:14px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<p class="meta" data-copie="2026-11-20T23:00" style="border:1px solid var(--line);padding:.5em .7em;border-radius:8px">Copie hors ligne gardée dans NavIn, analyse du 20/11/2026 à 23 h 00 (heure de Paris), runs ECMWF IFS 20/11 06 UTC, DWD ICON-EU et EWAM 20/11 12 UTC, Copernicus IBI 20/11. Au-delà de 24 h elle est ancienne : <a href="https://claude.ai/artifact/396CrWuSXA8FaX36D2Y7LA" target="_blank" rel="noopener">version à jour en ligne</a>.</p>
+<header>
+  <div class="eyebrow">Zone Atlantique · 48°39,126' N 002°49,838' W</div>
+  <h1>Analyse Saint-Quay-Portrieux, de l'hémisphère à la baie</h1>
+  <p class="meta">Situation du vendredi 20 novembre 2026 au soir, pour les sorties de samedi 21, dimanche 22 et lundi 23. Bateau : Dufour 445 Grand Large, seuils de référence au près. Runs : ECMWF IFS 20/11 06 UTC, DWD ICON-EU et EWAM 20/11 12 UTC, cartes DWD 20/11 00 et 12 UTC.</p>
+  <div class="fontbar"><button id="fminus" type="button" aria-label="Réduire le texte">A−</button><button id="fplus" type="button" aria-label="Agrandir le texte">A+</button><span class="meta">Touchez une carte pour l'ouvrir en plein écran.</span></div>
+</header>
+
+<section aria-labelledby="h-ess">
+  <h2 id="h-ess">L'essentiel</h2>
+  <ul class="essentiel">
+    <li><b>Samedi 21 : <span class="go">go</span>.</b> Une dorsale passe au-dessus de la Bretagne nord. En baie, vent d'est-sud-est faible à modéré (7 à 16 nd), mer belle à peu agitée.</li>
+    <li><b>Dimanche 22 : <span class="nogo">no-go</span>.</b> Un thalweg arrive de l'Atlantique avec un front occlus sur la Manche. Vent d'ouest jusqu'à 23 nd et rafales à 36 nd (ECMWF) ; ICON-EU donne jusqu'à 32 nd et 53 nd en rafales au nord-ouest de la baie. Les deux modèles ne placent pas le front à la même heure : incertitude sur le timing.</li>
+    <li><b>Lundi 23 : <span class="go">go</span>.</b> Retour d'un flux d'ouest à nord-ouest modéré (12 à 19 nd, rafales 26 nd selon ECMWF ; ICON-EU plus faible), mer qui retombe, jet de nouveau à 150 km. Courant de flot jusqu'à 1,7 nd vers 15 h, dans le sens du vent.</li>
+  </ul>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Jour</th><th>Feu</th><th>Vent moyen (nd)</th><th>Rafales (nd)</th><th>Hs (m)</th><th>Beaufort / Douglas</th></tr></thead>
+      <tbody>
+        <tr><td>ven. 20</td><td><span class="light warn"><span class="dot"></span>Prudence</span></td><td>19</td><td>26</td><td>0,9</td><td>5 / 3</td></tr>
+        <tr><td>sam. 21</td><td><span class="light go"><span class="dot"></span>Go</span></td><td>16</td><td>24</td><td>0,4</td><td>4 / 2</td></tr>
+        <tr><td>dim. 22</td><td><span class="light nogo"><span class="dot"></span>No-go</span></td><td>23</td><td>36</td><td>0,8</td><td>6 / 3</td></tr>
+        <tr><td>lun. 23</td><td><span class="light go"><span class="dot"></span>Go</span></td><td>19</td><td>26</td><td>0,5</td><td>5 / 3</td></tr>
+      </tbody>
+      <tfoot><tr><th>Jour</th><th>Feu</th><th>Vent moyen (nd)</th><th>Rafales (nd)</th><th>Hs (m)</th><th>Beaufort / Douglas</th></tr></tfoot>
+    </table>
+  </div>
+  <p class="meta">Valeurs maximales de 8 h à 18 h au port (ECMWF IFS, vagues DWD EWAM), règles go/no-go de NAVIn. Même calcul que dans NAVIn, Météo › Go / no-go.</p>
+</section>
+
+<section aria-labelledby="h-nh">
+  <h2 id="h-nh">1. Hémisphère Nord <span class="scale">≈ 10 000 km</span></h2>
+  <p>Samedi midi, une <b>dorsale</b> traverse la France du sud au nord, son axe passe au-dessus de Saint-Malo, à une centaine de kilomètres de Saint-Quay : temps calme. Derrière, un <b>thalweg</b> se creuse à 900 km à l'ouest de La Corogne et avance vers l'est ; il atteint la Manche dimanche. Au sol, la dépression principale est à 800 km au sud de Reykjavik (989 hPa), l'anticyclone à 800 km à l'ouest des Açores (1 026 hPa).</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Carte hémisphérique">
+      <button type="button" data-set="nh" data-src="fig/nh_base.webp" aria-pressed="true">Carte de base</button>
+      <button type="button" data-set="nh" data-src="fig/nh_annot.webp" aria-pressed="false">Avec annotations</button>
+    </div>
+    <div class="map" data-zoom><img id="img-nh" src="fig/nh_base.webp" alt="Géopotentiel 500 hPa, pression mer et température 850 hPa sur l'hémisphère Nord, samedi 21 novembre 12 UTC" width="993" height="808"></div>
+    <figcaption>ECMWF IFS 0,25°, run 20/11 06 UTC +30 h, samedi 21/11 12 UTC. 500 hPa (≈ 5 600 m) en noir (dam), pression mer en blanc (hPa), 850 hPa (≈ 1 500 m) en couleurs (°C).</figcaption>
+  </figure>
+  <h3>Courants-jets à 250 hPa (≈ 10 400 m)</h3>
+  <p>Samedi, le jet passe juste au-dessus de Saint-Quay : 78 nd en altitude. Dimanche, il glisse à 350 km au sud-ouest (80 nd vers Nantes) et il ne reste que 15 nd au-dessus du port. Ce jet guide le thalweg et le front de dimanche. Lundi, il remonte un peu : 51 nd au-dessus du port, le cœur (86 nd) à 100 km à l'ouest de Nantes, puis il file vers la Méditerranée.</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Courants-jets">
+      <button type="button" data-set="jet" data-src="fig/jet_nh_0_base.webp" aria-pressed="true">Samedi</button>
+      <button type="button" data-set="jet" data-src="fig/jet_nh_1_base.webp" aria-pressed="false">Dimanche</button>
+      <button type="button" data-set="jet" data-src="fig/jet_nh_2_base.webp" aria-pressed="false">Lundi</button>
+    </div>
+    <div class="map" data-zoom><img id="img-jet" src="fig/jet_nh_0_base.webp" alt="Vent à 250 hPa sur l'hémisphère Nord" width="907" height="764"></div>
+    <figcaption>ECMWF IFS, run 20/11 06 UTC, vent à 250 hPa (≈ 10 400 m) en nd.</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="h-eu">
+  <h2 id="h-eu">2. Atlantique et Europe <span class="scale">≈ 3 000 km</span></h2>
+  <p>Cartes officielles du DWD, non modifiées. Dimanche midi, le front occlus de la dépression irlandaise s'étire de la mer d'Irlande à la Manche et à la France, avec un petit minimum de 1 005 hPa sur la France. Un anticyclone (H) reste au large du Portugal.</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Cartes DWD avec fronts">
+      <button type="button" data-set="dwd" data-src="fig/dwd_ana_eu.webp" aria-pressed="true">Analyse ven. 12 UTC</button>
+      <button type="button" data-set="dwd" data-src="fig/dwd_tkb_036.webp" aria-pressed="false">Prévue sam. 12 UTC</button>
+      <button type="button" data-set="dwd" data-src="fig/dwd_tkb_060.webp" aria-pressed="false">Prévue dim. 12 UTC</button>
+      <button type="button" data-set="dwd" data-src="fig/dwd_tkb_084.webp" aria-pressed="false">Prévue lun. 12 UTC</button>
+    </div>
+    <div class="map" data-zoom><img id="img-dwd" src="fig/dwd_ana_eu.webp" alt="Carte DWD de pression et fronts" loading="lazy"></div>
+    <figcaption>DWD : analyse de surface avec fronts (20/11 12 UTC) et prévisions ICON (base 20/11 00 UTC +36 h, +60 h et +84 h). Pression en hPa. © Deutscher Wetterdienst.</figcaption>
+  </figure>
+  <h3>500 hPa et pression mer, dimanche et lundi</h3>
+  <figure>
+    <div class="btns" role="group" aria-label="Calques sur la carte DWD 500 hPa">
+      <button type="button" id="htp-ann" aria-pressed="false">Avec annotations</button>
+    </div>
+    <div class="map" data-zoom><img src="fig/dwd_htp_036072.webp" alt="Cartes DWD 500 hPa et pression mer, quatre échéances" width="1500" height="2166" loading="lazy"><img class="layer" src="fig/dwd_htp_036072_rep.webp" alt=""><img class="layer" id="htp-layer" src="fig/dwd_htp_036072_ann.webp" alt="" hidden></div>
+    <figcaption>DWD ICON, 500 hPa (≈ 5 600 m, dam) et pression mer (hPa) : 22/11 00 et 12 UTC, 23/11 00 et 12 UTC. Calques posés par-dessus : les trois zones d'essai, et en couleur les éléments détectés sur ECMWF IFS (run 20/11 06 UTC) aux mêmes heures.</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="h-reg">
+  <h2 id="h-reg">3. Manche et golfe de Gascogne <span class="scale">≈ 1 000 km</span></h2>
+  <p>Samedi après-midi, le vent reste sous 18 nd sur toute la Manche ouest ; le plus fort (28 nd) est à 200 km à l'ouest de Cork. Dimanche après-midi, la dépression (1 002 hPa) est à 100 km au sud de Cork et la Manche passe en vent d'ouest de 25 à 39 nd, au-delà du seuil rouge du Dufour au près. Lundi après-midi, il ne reste qu'un petit creux (1 018 hPa) au-dessus de Saint-Malo : vent de nord-ouest de 10 à 18 nd sur la Manche ouest, le plus fort (26 nd) à 150 km à l'ouest de Cork. Le trait orange marque 18 nd, le rouge 25 nd, le violet pointillé des rafales de 35 nd.</p>
+  <div class="btns" role="group" aria-label="Jour">
+    <button type="button" data-day="reg" data-v="2026112115" aria-pressed="true">Samedi 16 h</button>
+    <button type="button" data-day="reg" data-v="2026112215" aria-pressed="false">Dimanche 16 h</button>
+    <button type="button" data-day="reg" data-v="2026112315" aria-pressed="false">Lundi 16 h</button>
+    <button type="button" data-ann="reg" aria-pressed="false">Avec annotations</button>
+  </div>
+  <figure>
+    <div class="map" data-zoom><img id="img-reg" src="fig/reg_2026112115_base.webp" alt="Vent moyen à 10 m et pression mer sur la Manche et le golfe de Gascogne" loading="lazy"></div>
+    <figcaption>ECMWF IFS 0,25°, run 20/11 06 UTC (+33 h, +57 h et +81 h). Vent moyen à 10 m en nd (couleurs et barbules), pression mer en hPa. Seuils et maximum calculés en mer seulement.</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="h-loc">
+  <h2 id="h-loc">4. Baie de Saint-Brieuc <span class="scale">≈ 70 km</span></h2>
+  <p>Samedi 16 h, en mer dans la baie : vent de 10 à 18 nd, rafales jusqu'à 24 nd, Hs de 0,3 à 1,7 m (le plus fort au nord-ouest, vers Bréhat). Dimanche 16 h : Hs de 0,6 m près de la côte à 3,6 m au large du nord-ouest, avec plus d'un mètre déjà au point GPS de test et dans le parc éolien. Lundi 16 h : la mer retombe (Hs de 0,4 à 1,7 m, moins de 1 m au point de test) ; ICON-EU ne donne que 3 à 10 nd de nord-ouest dans la baie, rafales 17 nd, alors qu'ECMWF garde 12 à 14 nd au port.</p>
+  <div class="note alert">
+    <h3>Les modèles ne sont pas d'accord dimanche</h3>
+    <p>À 16 h, ECMWF donne un vent d'ouest de 21 nd au port. ICON-EU a déjà fait passer le front : vent de nord-nord-ouest d'environ 12 nd au point de test, mais 32 nd et des rafales à 53 nd au nord-ouest de la baie. Le timing du front décide de la journée : à revoir avec le run de samedi matin et le BMS en cours.</p>
+  </div>
+  <div class="btns" role="group" aria-label="Jour">
+    <button type="button" data-day="loc" data-v="2026112115" aria-pressed="true">Samedi 16 h</button>
+    <button type="button" data-day="loc" data-v="2026112215" aria-pressed="false">Dimanche 16 h</button>
+    <button type="button" data-day="loc" data-v="2026112315" aria-pressed="false">Lundi 16 h</button>
+    <button type="button" data-ann="loc" aria-pressed="false">Avec annotations</button>
+  </div>
+  <figure>
+    <div class="map" data-zoom><img id="img-loc" src="fig/loc_2026112115_base.webp" alt="Vagues et vent dans la baie de Saint-Brieuc" loading="lazy"></div>
+    <figcaption>Vagues DWD EWAM 0,05° (Hs en m, flèches dans le sens de propagation), run 20/11 12 UTC. Vent DWD ICON-EU 6,5 km (barbules, nd), run 20/11 12 UTC, en mer seulement. Annotations : Hs 1 m et 2 m, parc éolien (alerte fixe de NAVIn), Grand Léjon, point GPS de test.</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="h-cur">
+  <h2 id="h-cur">5. Courants en baie <span class="scale">≈ 70 km</span></h2>
+  <p>Le flot porte au sud-est vers le fond de la baie, le jusant au nord-ouest. Au point GPS de test, le courant atteint 1,2 nd samedi vers 13 h 45 et 1,5 nd dimanche vers 14 h ; il dépasse 2 nd dans le parc éolien dimanche. Lundi, il atteint 1,7 nd vers 15 h, dans le sens du vent. En fond de baie, devant Saint-Quay, il reste sous 1,5 nd.</p>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Moment</th><th>Courant au point de test (nd, vers)</th><th>Vent ECMWF (nd, du)</th><th>Effet</th></tr></thead>
+      <tbody>
+        <tr><td>sam. 21, 12 h à 15 h</td><td>0,6 à 1,2 · SSE</td><td>11 à 14 · SE</td><td>vent contre courant : mer courte, sans gravité</td></tr>
+        <tr><td>dim. 22, 8 h à 11 h</td><td>0,5 à 1,1 · NO</td><td>14 à 19 · OSO</td><td>courant de travers au vent</td></tr>
+        <tr><td>dim. 22, 13 h à 16 h</td><td>0,9 à 1,5 · SE</td><td>20 à 23 · O</td><td>courant plutôt avec le vent</td></tr>
+        <tr><td>lun. 23, 14 h à 17 h</td><td>0,8 à 1,7 · SE</td><td>12 à 14 · NNO</td><td>courant avec le vent</td></tr>
+      </tbody>
+      <tfoot><tr><th>Moment</th><th>Courant au point de test (nd, vers)</th><th>Vent ECMWF (nd, du)</th><th>Effet</th></tr></tfoot>
+    </table>
+  </div>
+  <div class="btns" role="group" aria-label="Heure">
+    <button type="button" data-day="cur" data-v="2026112113" aria-pressed="true">Samedi 13 h, flot</button>
+    <button type="button" data-day="cur" data-v="2026112209" aria-pressed="false">Dimanche 9 h, jusant</button>
+    <button type="button" data-day="cur" data-v="2026112214" aria-pressed="false">Dimanche 14 h, flot</button>
+    <button type="button" data-day="cur" data-v="2026112315" aria-pressed="false">Lundi 15 h, flot</button>
+    <button type="button" data-ann="cur" aria-pressed="false">Avec annotations</button>
+  </div>
+  <figure>
+    <div class="map" data-zoom><img id="img-cur" src="fig/cur_2026112113_base.webp" alt="Courants de surface en baie de Saint-Brieuc" loading="lazy"></div>
+    <figcaption>Copernicus Marine IBI 0,027° (marée et météo), champ instantané au quart d'heure, prévision du 20/11. Vitesse en nd, flèches dans le sens du courant. Annotations : vitesse aux points, et en rouge les zones où le vent ECMWF de l'heure souffle contre le courant (écart de plus de 135°, courant d'au moins 0,5 nd). Près de la côte, la grille du modèle ne donne pas de valeur. Les heures de pleine et basse mer restent à lire dans l'annuaire du SHOM.</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="h-sys">
+  <h2 id="h-sys">6. Vent, vagues et courants ensemble <span class="scale">≈ 70 km</span></h2>
+  <p>Les trois couches sur le même fond, à l'heure du flot de chaque jour. Le fond est seul au départ : ajoutez les couches une à une pour voir comment elles se croisent.</p>
+  <div class="tblwrap">
+    <table>
+      <thead><tr><th>Heure (Paris)</th><th>Vent ICON-EU (nd, du)</th><th>Vagues EWAM (Hs m, de)</th><th>Courant IBI (nd, vers)</th><th>Ce que ça donne</th></tr></thead>
+      <tbody>
+        <tr><td>sam. 21, 13 h</td><td>13 · SSE (150°)</td><td>0,6 · N (358°)</td><td>1,1 · SSE (151°)</td><td>vent contre courant sur presque toute la baie : mer courte et clapot, sans danger à cette force</td></tr>
+        <tr><td>dim. 22, 14 h</td><td>31 · ONO (294°)</td><td>1,3 · ONO (297°)</td><td>1,5 · SSE (147°)</td><td>vent, vagues et courant vont dans le même sens : la mer s'allonge, mais le vent seul suffit pour le no-go</td></tr>
+        <tr><td>lun. 23, 15 h</td><td>7 · OSO (247°)</td><td>0,7 · N (341°)</td><td>1,7 · SSE (151°)</td><td>peu de vent, houle résiduelle du nord, courant fort : le courant mène la route</td></tr>
+      </tbody>
+      <tfoot><tr><th>Heure (Paris)</th><th>Vent ICON-EU (nd, du)</th><th>Vagues EWAM (Hs m, de)</th><th>Courant IBI (nd, vers)</th><th>Ce que ça donne</th></tr></tfoot>
+    </table>
+  </div>
+  <p class="meta">Valeurs au point GPS de test (48° 43' N 2° 45' W).</p>
+  <div class="btns" role="group" aria-label="Heure">
+    <button type="button" data-sys-day="2026112112" aria-pressed="true">Samedi 13 h</button>
+    <button type="button" data-sys-day="2026112213" aria-pressed="false">Dimanche 14 h</button>
+    <button type="button" data-sys-day="2026112314" aria-pressed="false">Lundi 15 h</button>
+  </div>
+  <div class="btns" role="group" aria-label="Couches">
+    <button type="button" data-sys-layer="vent" aria-pressed="false">Vent (barbules noires)</button>
+    <button type="button" data-sys-layer="vagues" aria-pressed="false">Vagues (flèches bleues)</button>
+    <button type="button" data-sys-layer="courants" aria-pressed="false">Courants (flèches violettes)</button>
+    <button type="button" data-sys-layer="annot" aria-pressed="false">Avec annotations</button>
+  </div>
+  <figure>
+    <div class="map" data-zoom><img id="sys-fond" src="fig/sys_2026112112_fond.webp" alt="Fond de carte de la baie de Saint-Brieuc" loading="lazy"><img class="layer" data-sys="vagues" src="fig/sys_2026112112_vagues.webp" alt="" hidden><img class="layer" data-sys="courants" src="fig/sys_2026112112_courants.webp" alt="" hidden><img class="layer" data-sys="vent" src="fig/sys_2026112112_vent.webp" alt="" hidden><img class="layer" data-sys="annot" src="fig/sys_2026112112_annot.webp" alt="" hidden></div>
+    <figcaption>Vent DWD ICON-EU 6,5 km et vagues DWD EWAM 0,05° (runs 20/11 12 UTC), courants Copernicus Marine IBI 0,027° (champ instantané). Flèches de vagues dans le sens de propagation, plus longues quand Hs est plus grande ; flèches de courant dans le sens du courant, plus longues quand il est plus fort. Annotations : en rouge, vent contre courant (écart de plus de 135°, courant d'au moins 0,5 nd, vent d'au moins 8 nd) ; en orange, vagues contre courant (Hs d'au moins 0,5 m).</figcaption>
+  </figure>
+</section>
+
+<section aria-labelledby="h-src">
+  <h2 id="h-src">Ce qui manque encore</h2>
+  <ul>
+    <li><b>Heures et hauteurs de marée officielles</b> : <a href="https://maree.shom.fr/" target="_blank" rel="noopener">annuaire des marées du SHOM</a>.</li>
+    <li><b>Bulletin côtier et BMS</b> : je ne peux pas les lire d'ici, consultez la version en cours sur <a href="https://meteofrance.com/meteo-marine" target="_blank" rel="noopener">Météo-France marine</a>.</li>
+    <li><b>Open-Meteo</b> était à sa limite journalière ici : ce sont les fichiers bruts ECMWF et DWD qui ont servi. Sur votre appareil, NAVIn passe par Open-Meteo.</li>
+  </ul>
+  <div class="src">
+    <span>Sources : ECMWF open data (IFS 0,25°), DWD opendata (ICON-EU, EWAM, cartes officielles), Copernicus Marine Service (IBI, courants). Cartes et chiffres calculés par des scripts ; texte rédigé par une IA.</span>
+  </div>
+</section>
+</div>
+
+<div id="zoom" hidden role="dialog" aria-label="Carte en plein écran"><div class="stack"></div></div>
+
+<script>
+(function(){
+  function press(group, btn){ group.forEach(function(b){ b.setAttribute('aria-pressed', String(b===btn)); }); }
+  // Cartes à une image : chaque bouton remplace l'image
+  var sets = {};
+  document.querySelectorAll('button[data-set]').forEach(function(b){ (sets[b.dataset.set]=sets[b.dataset.set]||[]).push(b); });
+  Object.keys(sets).forEach(function(k){
+    sets[k].forEach(function(b){ b.addEventListener('click', function(){ document.getElementById('img-'+k).src=b.dataset.src; press(sets[k], b); }); });
+  });
+  // Cartes régionale et locale : jour + annotations
+  ['reg','loc','cur'].forEach(function(k){
+    var days=[].slice.call(document.querySelectorAll('button[data-day="'+k+'"]'));
+    var ann=document.querySelector('button[data-ann="'+k+'"]');
+    var state={v:days[0].dataset.v, a:false};
+    function draw(){ document.getElementById('img-'+k).src='fig/'+k+'_'+state.v+'_'+(state.a?'annot':'base')+'.webp'; }
+    days.forEach(function(b){ b.addEventListener('click', function(){ state.v=b.dataset.v; press(days,b); draw(); }); });
+    ann.addEventListener('click', function(){ state.a=!state.a; ann.setAttribute('aria-pressed', String(state.a)); draw(); });
+  });
+  // Vent, vagues, courants : une heure, des couches
+  var SYSEXT='.webp', sysDay='2026112112';
+  var sysDays=[].slice.call(document.querySelectorAll('button[data-sys-day]'));
+  function sysDraw(){ document.getElementById('sys-fond').src='fig/sys_'+sysDay+'_fond'+SYSEXT; document.querySelectorAll('img[data-sys]').forEach(function(i){ i.src='fig/sys_'+sysDay+'_'+i.dataset.sys+SYSEXT; }); }
+  sysDays.forEach(function(b){ b.addEventListener('click', function(){ sysDay=b.dataset.sysDay; press(sysDays,b); sysDraw(); }); });
+  document.querySelectorAll('button[data-sys-layer]').forEach(function(b){ b.addEventListener('click', function(){ var i=document.querySelector('img[data-sys="'+b.dataset.sysLayer+'"]'); i.hidden=!i.hidden; b.setAttribute('aria-pressed', String(!i.hidden)); }); });
+  var htp=document.getElementById('htp-ann');
+  htp.addEventListener('click', function(){ var l=document.getElementById('htp-layer'); l.hidden=!l.hidden; htp.setAttribute('aria-pressed', String(!l.hidden)); });
+  // Plein écran
+  var zoom=document.getElementById('zoom'), stack=zoom.querySelector('.stack');
+  document.querySelectorAll('[data-zoom]').forEach(function(m){
+    m.addEventListener('click', function(){
+      stack.innerHTML='';
+      m.querySelectorAll('img').forEach(function(i){ if(i.hidden) return; var c=i.cloneNode(); c.removeAttribute('id'); c.removeAttribute('loading'); stack.appendChild(c); });
+      zoom.hidden=false;
+    });
+  });
+  zoom.addEventListener('click', function(){ zoom.hidden=true; stack.innerHTML=''; });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape') zoom.hidden=true; });
+  // Taille du texte
+  var size=17;
+  try{ var s=parseInt(localStorage.getItem('asq-font'),10); if(s>=13&&s<=26) size=s; }catch(e){}
+  function apply(){ document.documentElement.style.fontSize=size+'px'; try{ localStorage.setItem('asq-font', String(size)); }catch(e){} }
+  if(size!==17) apply();
+  document.getElementById('fplus').addEventListener('click', function(){ size=Math.min(26,size+1); apply(); });
+  document.getElementById('fminus').addEventListener('click', function(){ size=Math.max(13,size-1); apply(); });
+})();
+</script>
+
+</body>
+</html>

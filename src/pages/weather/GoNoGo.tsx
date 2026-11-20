@@ -72,6 +72,66 @@ function cruiseBoat(): Boat | undefined {
   return boatById(cruise.boatId);
 }
 
+/**
+ * The thresholds of a boat (the reference one when undefined): category and
+ * kind from its sheet, crew from the settings of this page.
+ * @param boat - The boat.
+ * @param settings - Its settings here.
+ * @returns The thresholds.
+ */
+function limitsOf(boat: Boat | undefined, settings: Settings): Thresholds {
+  const sheet = boatKindOf(boat?.info);
+  const profile: BoatProfile = {
+    loa: boat ? boatLength(boat.info) : 13.6,
+    ce: sheet.ce,
+    kind: sheet.kind ?? 'monocoque',
+    smallCrew: settings.smallCrew,
+  };
+  return thresholdsOf(profile);
+}
+
+/**
+ * The days of the go / no-go as this page gives them (same boat, settings,
+ * course and point), for a summary elsewhere: 'asking' while no boat is
+ * chosen, 'reading', or null without forecast.
+ * @returns The days, or the state.
+ */
+function useGoNoGoDays(): BriefingDay[] | 'asking' | 'reading' | null {
+  useSignals();
+  const boats = state.data.boats.value;
+  const fromCruise = cruiseBoat();
+  const chosen = store.get<string>(BOAT_KEY, '');
+  const boat = fromCruise ?? (chosen === REF ? undefined : boatById(chosen));
+  const asking = !fromCruise && !boat && (chosen !== REF || boats.length > 0);
+  const [point] = useState(() => scalePoint(null));
+  const lake = point.kind === 'zone-lake' || inInland(point);
+  const [data, setData] = useState<BriefingData | null | 'reading'>('reading');
+  useEffect(() => {
+    let closed = false;
+    void readBriefing(point, lake)
+      .catch(() => null)
+      .then((found) => {
+        if (!closed) setData(found);
+      });
+    return () => {
+      closed = true;
+    };
+  }, [point, lake]);
+  if (asking) return 'asking';
+  if (data === 'reading') return 'reading';
+  if (!data) return null;
+  const settings =
+    store.get<Record<string, Settings>>(PROFILES_KEY, {})[boat?.id ?? REF] ??
+    DEFAULT_SETTINGS;
+  const course = parseTyped(store.get<string>(COURSE_KEY, ''));
+  return briefingDays(
+    data,
+    limitsOf(boat, settings),
+    course == null ? null : course % 360,
+    keptMeasure(),
+  );
+}
+
 function boatName(boat: Boat | undefined): string {
   if (!boat) return 'Dufour 445 Grand Large (bateau de référence, 13,6 m)';
   const loa = boatLength(boat.info);
@@ -101,15 +161,7 @@ export function GoNoGo() {
     store.get<Record<string, Settings>>(PROFILES_KEY, {}),
   );
   const settings = profiles[boatKey] ?? DEFAULT_SETTINGS;
-  // The category and the kind come from the boat sheet.
-  const sheet = boatKindOf(boat?.info);
-  const profile: BoatProfile = {
-    loa: boat ? boatLength(boat.info) : 13.6,
-    ce: sheet.ce,
-    kind: sheet.kind ?? 'monocoque',
-    smallCrew: settings.smallCrew,
-  };
-  const limits = thresholdsOf(profile);
+  const limits = limitsOf(boat, settings);
   const setSettings = (next: Partial<Settings>) => {
     buzz();
     const all = { ...profiles, [boatKey]: { ...settings, ...next } };
@@ -784,5 +836,69 @@ async function shareBriefing(
     },
     `NavIn-briefing-${data.name.replaceAll(/[^\w-]+/g, '-')}`,
     format,
+  );
+}
+
+/**
+ * The go / no-go in one button, for the forecast page: today's light, or the
+ * lights of the next days; touched, the go / no-go page.
+ * @param props - The part and the action.
+ * @param props.part - Today, or the next days.
+ * @param props.onOpen - Open the go / no-go page.
+ * @returns The button.
+ */
+export function GoNoGoLink({
+  part,
+  onOpen,
+}: {
+  part: 'today' | 'next';
+  onOpen: () => void;
+}) {
+  const tr = useTr();
+  const days = useGoNoGoDays();
+  const today = Array.isArray(days) ? days.find((day) => day.rank === 0) : null;
+  const next = Array.isArray(days) ? days.filter((day) => day.rank > 0) : [];
+  const words =
+    days === 'asking'
+      ? 'choisissez le bateau pour voir le feu'
+      : days === 'reading'
+        ? 'lecture de la prévision…'
+        : days === null
+          ? 'prévision indisponible pour le moment'
+          : part === 'today'
+            ? today
+              ? today.verdict.reasons.join(', ') ||
+                `rien au-dessus des seuils de ${WINDOW.from} h à ${WINDOW.to} h`
+              : `la fenêtre de ${WINDOW.from} h à ${WINDOW.to} h est passée`
+            : next
+                .map(
+                  (day) =>
+                    `${dayName(day.date)} ${LIGHTS[day.verdict.light].sign}`,
+                )
+                .join(' · ');
+  const title =
+    part === 'today'
+      ? today
+        ? `Aujourd’hui : ${LIGHTS[today.verdict.light].word}`
+        : 'Go / no-go aujourd’hui'
+      : 'Go / no-go des jours suivants';
+  return (
+    <Button
+      type="button"
+      className="btn page-link"
+      data-page-link={part === 'today' ? 'gonogo-today' : 'gonogo'}
+      onClick={onOpen}
+    >
+      <span className="page-link-ico" aria-hidden="true">
+        {part === 'today' && today ? LIGHTS[today.verdict.light].sign : '🚦'}
+      </span>
+      <span className="page-link-txt">
+        <b>{tr(title)}</b>
+        <small>{tr(words)}</small>
+      </span>
+      <span className="page-link-go" aria-hidden="true">
+        ›
+      </span>
+    </Button>
   );
 }

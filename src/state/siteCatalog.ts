@@ -28,6 +28,24 @@ export const SITES: readonly SiteDef[] = [
     where: 'Météo › Prévisions (en mer)',
   },
   {
+    id: 'wx-bms-manche',
+    label: 'BMS côte Cap de la Hague – Penmarc’h',
+    url: 'https://meteofrance.com/meteo-marine/cap-de-la-hague-penmarc-h/BMSCOTE-01-03',
+    where: 'Météo › Prévisions (Manche et Atlantique)',
+  },
+  {
+    id: 'wx-bms-provence',
+    label: 'BMS côte Port-Camargue – Saint-Raphaël',
+    url: 'https://meteofrance.com/meteo-marine/port-camargue-saint-raphael/BMSCOTE-02-02',
+    where: 'Météo › Prévisions (Méditerranée)',
+  },
+  {
+    id: 'wx-shom-marees',
+    label: 'Marées du SHOM (heures, hauteurs, coefficients)',
+    url: 'https://maree.shom.fr/',
+    where: 'Météo › Prévisions (Manche et Atlantique)',
+  },
+  {
     id: 'blitzortung',
     label: 'Carte Blitzortung (à regarder)',
     url: 'https://map.blitzortung.org/',
