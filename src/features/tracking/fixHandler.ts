@@ -16,6 +16,7 @@ import { addAutoEntry } from './autoEntries.ts';
 import type { TrackSample } from './detector.ts';
 import { detectorPush } from './detector.ts';
 import { nmeaFresh, nmeaLink, nmeaPosFresh, nmeaWind } from './nmeaLive.ts';
+import { polarPush } from './polarRecorder.ts';
 import type { LiveTrip } from './tripState.ts';
 import { liveTrip, publishTrip } from './tripState.ts';
 
@@ -68,6 +69,7 @@ export function onFix(fix: FixInput): void {
       ...(sample.sog === null ? {} : { sog: sample.sog }),
     };
     recordSample(trip, buffer, sample);
+    polarPush(sample);
     const events = detectorPush(trip.det, sample);
     for (const event of events) {
       // Only the departure is written at once: the others are chosen at the arrival.

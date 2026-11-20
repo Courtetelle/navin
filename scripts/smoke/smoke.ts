@@ -802,6 +802,18 @@ async function boatPolar(page: Page, theme: string): Promise<void> {
     'and keeps its polar, at 85 % for a cruise',
     /85 %.*près [\d,]+ nd à \d+°/.test(digest) && rows > 8,
   );
+  // The sails of the boat, and those up for the real polar.
+  await page.locator('#sailAdd').fill('Code 0');
+  await page.locator('#sailAddBtn').click();
+  await page.waitForTimeout(300);
+  await page.locator('#sailHead').selectOption('Code 0');
+  await page.waitForTimeout(200);
+  check(
+    theme,
+    'a sail of the boat is added and set up',
+    (await page.locator('#sailsExtra li').count()) === 1 &&
+      (await page.locator('#sailHead').inputValue()) === 'Code 0',
+  );
   const last = (await page.locator('#view .btn').last().textContent()) ?? '';
   check(theme, 'and Partager comes last', last.includes('Partager'));
   await page.locator('#navBack').click();
