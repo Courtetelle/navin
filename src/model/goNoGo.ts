@@ -88,6 +88,17 @@ const plus = ([orange, red]: Pair, shift: number, least: number): Pair => [
 ];
 
 /**
+ * Corban's rule (20/11/2026): even with a good boat and the full crew, the
+ * no-go on the mean wind falls below force 7 (28 knots), so at 27 knots at most.
+ */
+export const NOGO_WIND_MAX = 27;
+
+const belowForce7 = ([orange, red]: Pair): Pair => {
+  const top = Math.min(red, NOGO_WIND_MAX);
+  return [Math.min(orange, top - 1), top];
+};
+
+/**
  * The thresholds of a boat.
  * @param boat - Its profile.
  * @returns The thresholds.
@@ -101,8 +112,13 @@ export function thresholdsOf(boat: BoatProfile): Thresholds {
     travers: plus(table.travers, kn, 5),
     portant: plus(table.portant, kn, 5),
   });
+  const wind = byPoint(REFERENCE.wind);
   return {
-    wind: byPoint(REFERENCE.wind),
+    wind: {
+      pres: belowForce7(wind.pres),
+      travers: belowForce7(wind.travers),
+      portant: belowForce7(wind.portant),
+    },
     gust: byPoint(REFERENCE.gust),
     hs: plus(REFERENCE.hs, m, 0.3),
     shortHs:

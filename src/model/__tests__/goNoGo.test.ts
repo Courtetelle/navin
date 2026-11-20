@@ -48,6 +48,11 @@ test('thresholds follow the boat', () => {
   expect(small.cap).toStrictEqual({ windKn: 27, hs: 2 });
   expect(lengthShift(9)).toStrictEqual({ kn: -3, m: -0.5 });
   expect(lengthShift(15)).toStrictEqual({ kn: 3, m: 0.5 });
+  // Below force 7 whatever the boat: a long boat, full crew, downwind.
+  const big = thresholdsOf({ ...DUFOUR, loa: 16 });
+  expect(big.wind.travers).toStrictEqual([23, 27]);
+  expect(big.wind.portant).toStrictEqual([25, 27]);
+  expect(reference.wind.travers).toStrictEqual([20, 27]);
   expect(thresholdsOf({ ...DUFOUR, kind: 'multicoque' }).gustGap).toBe(0);
   expect(thresholdsOf({ ...DUFOUR, kind: 'deriveur' }).shortHs).toStrictEqual([
     0.5, 1,

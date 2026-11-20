@@ -36,7 +36,12 @@ import type {
   CeCategory,
   Thresholds,
 } from '../../model/goNoGo.ts';
-import { REFERENCE, boatLength, thresholdsOf } from '../../model/goNoGo.ts';
+import {
+  NOGO_WIND_MAX,
+  REFERENCE,
+  boatLength,
+  thresholdsOf,
+} from '../../model/goNoGo.ts';
 import type { Boat } from '../../model/recordTypes.ts';
 import { boatById, state, toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
@@ -307,7 +312,7 @@ export function GoNoGo() {
           <PacketState packets={packets} />
           <ThresholdTable limits={limits} />
           <HelpText>
-            {`Prévision ${data.src}, vagues Open-Meteo, lue le ${new Date(data.at).toLocaleString('fr-CH')}. Fenêtre de navigation ${WINDOW.from} h à ${WINDOW.to} h. Règles sans IA : un critère compte s’il est dépassé 2 heures de suite ; le feu du jour est le pire ; deux critères orange en même temps donnent rouge ; une rafale orange ne compte que 12 nœuds au-dessus du vent moyen (toujours pour un multicoque). Seuils du Dufour 445 GL décalés selon la longueur (−6 nœuds et −1 m sous 8 m, −3 et −0,5 de 8 à 11 m, +3 et +0,5 au-delà de 14 m), plafonnés par la catégorie CE ; équipage réduit : −3 nœuds et −0,5 m. Ce sont des valeurs de départ, à corriger. Toujours lire le bulletin côtier, le BMS en cours et la vigilance.`}
+            {`Prévision ${data.src}, vagues Open-Meteo, lue le ${new Date(data.at).toLocaleString('fr-CH')}. Fenêtre de navigation ${WINDOW.from} h à ${WINDOW.to} h. Règles sans IA : un critère compte s’il est dépassé 2 heures de suite ; le feu du jour est le pire ; deux critères orange en même temps donnent rouge ; une rafale orange ne compte que 12 nœuds au-dessus du vent moyen (toujours pour un multicoque). Seuils du Dufour 445 GL décalés selon la longueur (−6 nœuds et −1 m sous 8 m, −3 et −0,5 de 8 à 11 m, +3 et +0,5 au-delà de 14 m), plafonnés par la catégorie CE ; quel que soit le bateau, no-go dès ${NOGO_WIND_MAX} nœuds de vent moyen, sous force 7 ; équipage réduit : −3 nœuds et −0,5 m. Ce sont des valeurs de départ, à corriger. Toujours lire le bulletin côtier, le BMS en cours et la vigilance.`}
           </HelpText>
           <ShareButton
             data-gng="share"
