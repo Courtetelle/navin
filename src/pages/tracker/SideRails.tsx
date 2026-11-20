@@ -397,9 +397,10 @@ function PinButton() {
   });
   const view = state.view.currentView.value;
   const here = view === 'marks';
-  // A mark is saved only from a map: elsewhere the pin is pale and a touch
-  // does nothing (its long press still opens « Marques »).
-  const onMap = view === 'tracker' || Boolean(shownMap());
+  // A mark is saved only from the map of NavIn: elsewhere — the traces, the
+  // marks, LiveMétéo, whose small maps are not it — the pin is pale and a
+  // touch does nothing (its long press still opens « Marques »).
+  const onMap = view === 'tracker';
   const idle = !here && !onMap;
   useEffect(() => {
     if (!pressed) return undefined;
