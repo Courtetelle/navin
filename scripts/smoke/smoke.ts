@@ -1005,6 +1005,11 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
     /* eslint-disable no-await-in-loop -- one scale after the other */
     await page.locator(`[data-page-link="${view}"]`).click();
     await page.waitForTimeout(400);
+    check(
+      theme,
+      `${view}: the combined reading says at which point`,
+      (await page.locator('[data-bd-point]').count()) === 1,
+    );
     await page.locator('[data-slang="fr"]').click();
     await page.waitForTimeout(200);
     const french = await layout();
@@ -1047,10 +1052,11 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(1000);
   check(
     theme,
-    'its zone touched: back to the list, the alert blinking, the zone off',
+    'its zone touched: back to the list, the alert blinking, its card open',
     (await page
-      .locator('[data-band-id="fixed:raz-blanchard"].band-blink')
-      .count()) === 1,
+      .locator('[data-sw-id="fixed:raz-blanchard"].band-blink')
+      .count()) === 1 &&
+      (await page.locator('[data-fixed-card="raz-blanchard"]').count()) === 1,
   );
   // The lightning alert: its own page in the Météo menu.
   await page.locator('.rail-weather').click();

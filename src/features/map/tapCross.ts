@@ -7,9 +7,11 @@ import type {
 
 import { buzz } from '../../lib/dom.ts';
 import { fmtPos } from '../../lib/geo.ts';
+import { go } from '../../shell/router.ts';
 import { pinSvg } from '../../shell/topbar/tabIcons.ts';
 import { addMark, herePos, state, toast } from '../../state/index.ts';
 
+import { bdCrossPoint } from './bdPlace.ts';
 import { escapeHtml } from './escapeHtml.ts';
 import { lastWindAlertAt, replayWindAlert, wxNext } from './external.ts';
 import { setGoto } from './goto.ts';
@@ -189,7 +191,7 @@ function openBranch(map: LeafletMap, branch: CrossBranch, at: LatLng): void {
     const replay = alertAt
       ? `<button class="btn" data-lp="alert">🔔 Revoir la dernière alerte (${new Date(alertAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })})</button>`
       : '';
-    body = `<div class="lp-wx" id="lpWx">${navigator.onLine ? 'Prévision : recherche…' : 'Prévision : hors réseau'}</div><div class="lp-btns">${replay}${send}</div>`;
+    body = `<div class="lp-wx" id="lpWx">${navigator.onLine ? 'Prévision : recherche…' : 'Prévision : hors réseau'}</div><div class="lp-btns"><button class="btn" data-lp="bd">🌬🌊 Beaufort et Douglas ici</button>${replay}${send}</div>`;
   } else if (branch === 'goto') {
     body = `<div>🧭 Depuis le bateau : <span class="lp-rel">${relativeHtml(point)}</span></div><div class="lp-btns"><button class="btn primary" data-lp="goto">🎯 Go to ce point</button>${send}</div>`;
     rulerToPoint(map, at);
@@ -220,6 +222,11 @@ function openBranch(map: LeafletMap, branch: CrossBranch, at: LatLng): void {
     buzz();
     const action = button.dataset.lp;
     if (action === 'send') void sendPosition(point);
+    if (action === 'bd') {
+      map.closePopup(popup);
+      bdCrossPoint.value = point;
+      go('beaufort');
+    }
     if (action === 'alert') {
       map.closePopup(popup);
       void replayWindAlert();
