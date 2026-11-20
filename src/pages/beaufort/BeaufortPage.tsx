@@ -1,50 +1,9 @@
-import { HelpText } from '../../components/shared/HelpText.tsx';
-import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
-import { ScaleLanguage } from '../../features/safety/ScaleLanguage.tsx';
-import { useScaleEnglish } from '../../features/safety/useScaleEnglish.ts';
-import { useTr } from '../../i18n/useTr.ts';
-import { BEAUFORT_TBL } from '../../model/lists.ts';
+import { BeaufortDouglasPage } from './BeaufortDouglasPage.tsx';
 
 /**
- * Screen `beaufort` (legacy `VIEWS.beaufort`): the Beaufort scale, French or English.
+ * Screen `beaufort`: the Beaufort and Douglas scales read together.
  * @returns The screen content.
  */
 export function BeaufortPage() {
-  const english = useScaleEnglish();
-  const tr = useTr();
-  return (
-    <>
-      {/* No back of its own: ◀ goes back where the scale was opened from. */}
-      <TitleInNav>
-        <h1>{tr(`🌬 ${english ? 'Beaufort scale' : 'Échelle de Beaufort'}`)}</h1>
-      </TitleInNav>
-      <ScaleLanguage />
-      <table className="scale-tbl">
-        <thead>
-          <tr>
-            <th>{tr('Force')}</th>
-            <th>{tr(english ? 'Knots' : 'Nœuds')}</th>
-            <th>{tr(english ? 'Description' : 'Appellation')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {BEAUFORT_TBL.map(([force, knots, nameFr, nameEn, seaFr, seaEn]) => (
-            <tr key={force} className={`bf-${force}`}>
-              <td className="sc-n">{force}</td>
-              <td className="sc-kn">{tr(knots)}</td>
-              <td>
-                <b>{tr(english ? nameEn : nameFr)}</b>
-                <small>{tr(english ? seaEn : seaFr)}</small>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <HelpText>
-        {english
-          ? 'WMO scale. Wind rounded to the nearest knot. km/h = knots × 1.852.'
-          : 'Échelle de l’OMM. Vent arrondi au nœud entier. km/h = nœuds × 1,852.'}
-      </HelpText>
-    </>
-  );
+  return <BeaufortDouglasPage />;
 }
