@@ -41,7 +41,11 @@ export default defineConfig({
       injectRegister: false,
       manifest: false,
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,png,svg,webmanifest,bin}'],
+        globPatterns: [
+          '**/*.{js,css,html,png,svg,webmanifest,bin}',
+          // The analysis kept for offline (its maps).
+          'analyse/**/*.webp',
+        ],
         maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
       },
     }),

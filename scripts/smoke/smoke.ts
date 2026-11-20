@@ -1001,6 +1001,61 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(400);
   await page.locator('[data-wx="forecast"]').click();
   await page.waitForTimeout(600);
+  check(
+    theme,
+    'Prévisions: now, next hours, next days, general situation, sources, in that order',
+    await page.evaluate(() => {
+      const order = [
+        '.wx-now',
+        '.wx-fc',
+        '.wx-days',
+        '.wx-analysis',
+        '.wx-links',
+      ].map((selector) => document.querySelector(selector));
+      for (let at = 1; at < order.length; at += 1) {
+        const before = order[at - 1];
+        const section = order[at];
+        if (!before || !section) return false;
+        if (
+          !(
+            before.compareDocumentPosition(section) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+          )
+        ) {
+          return false;
+        }
+      }
+      return order[0] !== null;
+    }),
+  );
+  check(
+    theme,
+    'Prévisions: go / no-go of today and of the next days, the analysis kept offline and online, the BMS of the zone and the tides of the SHOM; no fixed alerts here',
+    (await page.locator('[data-page-link="gonogo-today"]').count()) === 1 &&
+      (await page.locator('[data-page-link="gonogo"]').count()) === 1 &&
+      (await page.locator('[data-page-link="analysis-offline"]').count()) ===
+        1 &&
+      (await page.locator('[data-page-link="analysis-online"]').count()) ===
+        1 &&
+      (await page
+        .locator(
+          '[data-site-link="wx-bms-manche"], [data-site-link="wx-bms-provence"], [data-site-link="wx-meteoswiss"]',
+        )
+        .count()) === 1 &&
+      (await page.locator('[data-page-link="fixed"]').count()) === 0,
+  );
+  const copyHref = await page
+    .locator('[data-page-link="analysis-offline"]')
+    .getAttribute('href');
+  const offline = await page.request.get(
+    new globalThis.URL(String(copyHref), page.url()).href,
+  );
+  const copyText = await offline.text();
+  check(
+    theme,
+    'Prévisions: the analysis kept offline is served with NavIn',
+    offline.ok() && copyText.includes('data-copie'),
+  );
   for (const view of ['beaufort']) {
     /* eslint-disable no-await-in-loop -- one scale after the other */
     await page.locator(`[data-page-link="${view}"]`).click();
@@ -1033,11 +1088,13 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   }
   // The fixed alerts: from the forecast to the zone on the map, and from the
   // zone back to the list, its alert blinking.
-  await page.locator('[data-page-link="fixed"]').click();
+  await page.locator('.rail-weather').click();
+  await page.waitForTimeout(400);
+  await page.locator('[data-wx="fixed"]').click();
   await page.waitForTimeout(400);
   check(
     theme,
-    'Prévisions › Alertes fixes: the seas and their alerts',
+    'Météo › Alertes fixes: the seas and their alerts',
     (await page.locator('[data-fixed-sea]').count()) === 4 &&
       (await page.locator('[data-fixed]').count()) > 20,
   );
