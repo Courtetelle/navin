@@ -14390,3 +14390,11 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 :root[data-theme='night'] .topbar #routesBtn .routes-ico circle[fill='#fff'] {
   fill: #200000;
 }
+/* Prévisions › Situation générale: the copy kept offline, greyed when old */
+.wx-analysis .wx-analysis-old {
+  opacity: 0.55;
+}
+.wx-analysis a.page-link {
+  text-decoration: none;
+  color: inherit;
+}

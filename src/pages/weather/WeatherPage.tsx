@@ -42,8 +42,9 @@ import {
 } from '../meteo/liveText.ts';
 import { showLiveAround } from '../tracker/liveOnMap.ts';
 
+import { AnalysisLinks } from './AnalysisLinks.tsx';
 import { FixedAlerts } from './FixedAlerts.tsx';
-import { GoNoGo } from './GoNoGo.tsx';
+import { GoNoGo, GoNoGoLink } from './GoNoGo.tsx';
 import { LakeWarnings } from './LakeWarnings.tsx';
 import { LightningAlert } from './LightningAlert.tsx';
 import { PrepForecast } from './PrepForecast.tsx';
@@ -203,6 +204,15 @@ function GoNoGoPage() {
 
 /** Argument of the screen for the fixed alerts. */
 const FIXED = 'fixed';
+
+/**
+ * The boat in the Mediterranean (the BMS of Provence, no tides).
+ * @returns Whether it is.
+ */
+function inMediterranean(): boolean {
+  const { lat, lon } = boatPlace();
+  return lat > 30 && lat < 44.5 && lon > 2.9 && lon < 37;
+}
 
 function openFixed() {
   buzz();
@@ -456,33 +466,25 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
       </TitleInNav>
       <div className="wx-page wx-one">
         {part === 'forecast' ? (
-          <Button
-            type="button"
-            className="btn page-link"
-            data-page-link="gonogo"
-            onClick={openGoNoGo}
-          >
-            <span className="page-link-ico" aria-hidden="true">
-              🚦
-            </span>
-            <span className="page-link-txt">
-              <b>{tr('Go / no-go')}</b>
-              <small>
-                {tr('le feu des 4 prochains jours pour votre bateau')}
-              </small>
-            </span>
-            <span className="page-link-go" aria-hidden="true">
-              ›
-            </span>
-          </Button>
+          <section className="wx-now">
+            <h2>{tr('Maintenant')}</h2>
+            <GoNoGoLink part="today" onOpen={openGoNoGo} />
+            <PrepForecast />
+          </section>
         ) : null}
-        {part === 'forecast' ? <PrepForecast /> : null}
         {part === 'forecast' ? (
           <section className="wx-fc">
             <h2>{tr(`Prévision des ${HOURS} prochaines heures`)}</h2>
             <ForecastStrip forecast={forecast} />
           </section>
         ) : null}
+        {part === 'forecast' ? (
+          <section className="wx-days">
+            <h2>{tr('Jours suivants')}</h2>
+            <GoNoGoLink part="next" onOpen={openGoNoGo} />
+          </section>
+        ) : null}
+        {part === 'forecast' ? <AnalysisLinks /> : null}
         {part === 'briefing' ? (
           <section className="wx-checks">
             <div className="wx-checks-head">
@@ -537,11 +539,17 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
         ) : null}
         {part === 'forecast' ? (
           <section className="wx-links">
-            <h2>{tr('Sources officielles')}</h2>
+            <h2>{tr('Sources et outils')}</h2>
             {lake ? (
               <SiteLink id="wx-meteoswiss" />
             ) : (
-              <SiteLink id="wx-mf-marine" />
+              <>
+                <SiteLink
+                  id={inMediterranean() ? 'wx-bms-provence' : 'wx-bms-manche'}
+                />
+                <SiteLink id="wx-mf-marine" />
+                {inMediterranean() ? null : <SiteLink id="wx-shom-marees" />}
+              </>
             )}
             <div className="page-links">
               <PageLink
@@ -550,27 +558,6 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
                 label="Beaufort et Douglas"
                 sub="le vent et la mer lus ensemble, avec l’outil de lecture combinée"
               />
-              <Button
-                type="button"
-                className="btn page-link"
-                data-page-link="fixed"
-                onClick={openFixed}
-              >
-                <span className="page-link-ico" aria-hidden="true">
-                  ⚠
-                </span>
-                <span className="page-link-txt">
-                  <b>{tr('Alertes fixes')}</b>
-                  <small>
-                    {tr(
-                      'les dangers toujours au même endroit, Manche, Atlantique, mer du Nord, Méditerranée ; la zone sur la carte',
-                    )}
-                  </small>
-                </span>
-                <span className="page-link-go" aria-hidden="true">
-                  ›
-                </span>
-              </Button>
             </div>
           </section>
         ) : null}
