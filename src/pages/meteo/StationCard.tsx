@@ -98,21 +98,6 @@ export function StationCard({
           </div>
         </div>
         <WindTrendChart station={station} mfKey={mfKey} />
-        <ShareButton
-          onShare={(format) => {
-            void publishAlert(
-              {
-                reading: station,
-                wind: `${Math.round(station.avg)} nd${station.gust == null ? '' : `, rafales ${Math.round(station.gust)} nd`}`,
-                forecast: false,
-                boat: null,
-                basis,
-                station: true,
-              },
-              format,
-            );
-          }}
-        />
       </div>
       <div className="live-card-b">
         <table className="live-tbl">
@@ -132,6 +117,21 @@ export function StationCard({
         <p className="keep-help">
           {tr('Mesures relues toutes les 2 min tant que cet écran est ouvert.')}
         </p>
+        <ShareButton
+          onShare={(format) => {
+            void publishAlert(
+              {
+                reading: station,
+                wind: `${Math.round(station.avg)} nd${station.gust == null ? '' : `, rafales ${Math.round(station.gust)} nd`}`,
+                forecast: false,
+                boat: null,
+                basis,
+                station: true,
+              },
+              format,
+            );
+          }}
+        />
       </div>
     </section>
   );

@@ -41,6 +41,7 @@ import {
 import { showLiveAround } from '../tracker/liveOnMap.ts';
 
 import { FixedAlerts } from './FixedAlerts.tsx';
+import { GoNoGo } from './GoNoGo.tsx';
 import { LakeWarnings } from './LakeWarnings.tsx';
 import { LightningAlert } from './LightningAlert.tsx';
 import { PrepForecast } from './PrepForecast.tsx';
@@ -81,6 +82,7 @@ export function WeatherPage({ arg }: PageProps) {
   if (arg === LIGHTNING) return <LightningPage />;
   if (arg === LAKE_LIGHTS) return <LakeLightsPage />;
   if (arg === FIXED) return <FixedAlertsPage />;
+  if (arg === GONOGO) return <GoNoGoPage />;
   return <WeatherMenu />;
 }
 
@@ -167,6 +169,32 @@ function LakeLightsPage() {
         <h1>{tr('🚨 Feux d’avis des lacs')}</h1>
       </TitleInNav>
       <LakeWarnings />
+    </>
+  );
+}
+
+/** Argument of the screen for the go / no-go. */
+const GONOGO = 'gonogo';
+
+function openGoNoGo() {
+  buzz();
+  go('weather', GONOGO);
+}
+
+/**
+ * The go / no-go of the next days, for the boat.
+ * @returns The screen content.
+ */
+function GoNoGoPage() {
+  const tr = useTr();
+  const back = useBubbleBack();
+  return (
+    <>
+      <MeteoBack back={back} />
+      <TitleInNav>
+        <h1>{tr('🚦 Go / no-go')}</h1>
+      </TitleInNav>
+      <GoNoGo />
     </>
   );
 }
@@ -268,6 +296,21 @@ function WeatherMenu() {
             <small>
               {tr(
                 'ici maintenant, dans 3 h, ce soir, demain matin ; les 12 prochaines heures, sources officielles, échelles',
+              )}
+            </small>
+          </span>
+        </Button>
+        <Button
+          className="btn big wx-entry"
+          data-wx="gonogo"
+          onClick={openGoNoGo}
+        >
+          <span className="wx-entry-ico">🚦</span>
+          <span>
+            <b>{tr('Go / no-go')}</b>
+            <small>
+              {tr(
+                'le feu des 4 prochains jours pour votre bateau, à corriger en mer ; partage, prompt pour une IA, hors ligne',
               )}
             </small>
           </span>
@@ -413,6 +456,27 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
         </h1>
       </TitleInNav>
       <div className="wx-page wx-one">
+        {part === 'forecast' ? (
+          <Button
+            type="button"
+            className="btn page-link"
+            data-page-link="gonogo"
+            onClick={openGoNoGo}
+          >
+            <span className="page-link-ico" aria-hidden="true">
+              🚦
+            </span>
+            <span className="page-link-txt">
+              <b>{tr('Go / no-go')}</b>
+              <small>
+                {tr('le feu des 4 prochains jours pour votre bateau')}
+              </small>
+            </span>
+            <span className="page-link-go" aria-hidden="true">
+              ›
+            </span>
+          </Button>
+        ) : null}
         {part === 'forecast' ? <PrepForecast /> : null}
         {part === 'forecast' ? (
           <section className="wx-fc">
