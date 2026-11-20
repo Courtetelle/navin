@@ -191,6 +191,20 @@ export function Fiche({ id }: FicheProps) {
             </Button>
           </ButtonRow>
         ) : null}
+        {locked ? (
+          <HelpText className="fiche-lock">{`🔒 ${memberLockMsg(id)}`}</HelpText>
+        ) : (
+          <ButtonRow id="fDelRow" hidden={!record.recordId}>
+            <HoldDeleteButton
+              className="btn danger"
+              id="fDel"
+              onClick={buzz}
+              onDelete={() => deleteFiche(record.latestId())}
+            >
+              {tr('Supprimer la fiche')}
+            </HoldDeleteButton>
+          </ButtonRow>
+        )}
         <ButtonRow
           className="row ck-pub-row"
           id="fImgRow"
@@ -223,20 +237,6 @@ export function Fiche({ id }: FicheProps) {
             }
           />
         </ButtonRow>
-        {locked ? (
-          <HelpText className="fiche-lock">{`🔒 ${memberLockMsg(id)}`}</HelpText>
-        ) : (
-          <ButtonRow id="fDelRow" hidden={!record.recordId}>
-            <HoldDeleteButton
-              className="btn danger"
-              id="fDel"
-              onClick={buzz}
-              onDelete={() => deleteFiche(record.latestId())}
-            >
-              {tr('Supprimer la fiche')}
-            </HoldDeleteButton>
-          </ButtonRow>
-        )}
       </div>
     </>
   );

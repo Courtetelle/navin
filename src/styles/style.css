@@ -14022,3 +14022,85 @@ h1.menu-title {
   font-size: 13px;
   color: var(--muted);
 }
+
+/* Go / no-go: the boat, the days and their lights, the actions. */
+.gng-boat,
+.gng-choose,
+.gng-sea,
+.gng-day {
+  margin: 0.8em 0;
+}
+.gng-boat small {
+  display: block;
+  color: var(--muted);
+}
+.gng-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4em;
+  margin: 0.4em 0;
+}
+.gng-course {
+  display: block;
+  margin-top: 0.4em;
+}
+.gng-course input {
+  max-width: 8em;
+  display: block;
+}
+.gng-day {
+  border-left: 6px solid var(--hair);
+  padding: 0.2em 0 0.2em 0.7em;
+}
+.gng-day.gng-go {
+  border-left-color: #2e9e44;
+}
+.gng-day.gng-prudence {
+  border-left-color: #f08c00;
+}
+.gng-day.gng-nogo {
+  border-left-color: #d6336c;
+}
+.gng-day h3 {
+  margin: 0 0 0.3em;
+  overflow-wrap: anywhere;
+}
+.gng-day li {
+  overflow-wrap: anywhere;
+}
+.gng-isolated {
+  color: var(--muted);
+}
+.gng-corrected {
+  font-weight: 600;
+  color: #9c4a00;
+}
+.gng-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin: 0.6em 0;
+}
+.gng-prompt-text {
+  width: 100%;
+  font-size: 13px;
+}
+.gng-limits summary {
+  cursor: pointer;
+  font-weight: 600;
+  margin: 0.6em 0;
+}
+.gng-settings summary {
+  cursor: pointer;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.gng-day h3 {
+  font-size: 1.05em;
+}
+.gng-why {
+  margin: 0 0 0.3em;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}

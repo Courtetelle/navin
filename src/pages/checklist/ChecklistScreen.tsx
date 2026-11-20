@@ -119,11 +119,6 @@ export function ChecklistScreen({
       {builtin && list === 'dep' ? (
         <CopyCheckIn onCopied={() => redraw()} />
       ) : null}
-      {list === 'dep' ? (
-        <ButtonRow className="row ck-pub-row">
-          <ShareButton id="prepPub" onShare={publishChecklist} />
-        </ButtonRow>
-      ) : null}
       {inPrep ? null : (
         <>
           <ButtonRow className="row c2" style={{ marginTop: '16px' }}>
@@ -175,6 +170,11 @@ export function ChecklistScreen({
           </ButtonRow>
         </>
       )}
+      {list === 'dep' ? (
+        <ButtonRow className="row ck-pub-row">
+          <ShareButton id="prepPub" onShare={publishChecklist} />
+        </ButtonRow>
+      ) : null}
     </>
   );
 }

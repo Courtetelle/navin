@@ -1058,6 +1058,19 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
       .count()) === 1 &&
       (await page.locator('[data-fixed-card="raz-blanchard"]').count()) === 1,
   );
+  // The go / no-go: its own page in the Météo menu, the boat asked for
+  // (out of a cruise) or shown.
+  await page.locator('.rail-weather').click();
+  await page.waitForTimeout(400);
+  await page.locator('[data-wx="gonogo"]').click();
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    'Météo › Go / no-go: the point, and the boat asked for or shown',
+    (await page.locator('[data-gng="page"] [data-gng-point]').count()) === 1 &&
+      (await page.locator('[data-gng="choose"], [data-gng="boat"]').count()) ===
+        1,
+  );
   // The lightning alert: its own page in the Météo menu.
   await page.locator('.rail-weather').click();
   await page.waitForTimeout(400);

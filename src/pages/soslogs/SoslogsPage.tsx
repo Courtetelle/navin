@@ -2,13 +2,8 @@ import { untracked } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
-import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
-import { ShareButton } from '../../components/shared/ShareButton.tsx';
-import {
-  ListPublishRow,
-  openListPublish,
-} from '../../features/publish/index.ts';
+import { ListPublishRow } from '../../features/publish/index.ts';
 import { SosEndButton } from '../../features/safety/SosEndButton.tsx';
 import { useRedraw } from '../../features/safety/useRedraw.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -73,14 +68,6 @@ function SosLogsContent({ openLog, onRedraw }: SosLogsContentProps) {
         <div className="mob-live">
           <ActiveHeading log={active} />
           <SosEvents log={active} />
-          <ButtonRow className="row ck-pub-row">
-            <ShareButton
-              data-share={active.id}
-              onShare={(format) =>
-                openListPublish('soslogs', active.id, format)
-              }
-            />
-          </ButtonRow>
           <SosEndButton onEnded={() => onRedraw()} />
         </div>
       ) : null}

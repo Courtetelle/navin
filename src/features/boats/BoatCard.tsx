@@ -133,14 +133,8 @@ export function BoatCard({
           />
         </div>
         <BoatPhotos boat={boat} reading={reading} onRefresh={onRefresh} />
-        <ButtonRow className="row ck-pub-row" style={{ padding: '0 14px' }}>
-          <ShareButton
-            data-bpub={boat.id}
-            onShare={(format) => openListPublish('boats', boat.id, format)}
-          />
-        </ButtonRow>
         <BoatVersionsButton boat={drawn.versions} onOpen={onVersions} />
-        <ButtonRow className="row b-delrow" style={{ padding: '0 14px 14px' }}>
+        <ButtonRow className="row b-delrow" style={{ padding: '0 14px' }}>
           <HoldDeleteButton
             className="btn danger"
             data-del={boat.id}
@@ -155,6 +149,15 @@ export function BoatCard({
           >
             {tr(drawn.deleteLabel)}
           </HoldDeleteButton>
+        </ButtonRow>
+        <ButtonRow
+          className="row ck-pub-row"
+          style={{ padding: '0 14px 14px' }}
+        >
+          <ShareButton
+            data-bpub={boat.id}
+            onShare={(format) => openListPublish('boats', boat.id, format)}
+          />
         </ButtonRow>
       </details>
     </SwipeRow>
