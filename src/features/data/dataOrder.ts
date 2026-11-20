@@ -69,7 +69,15 @@ export function bumpTile(shown: readonly string[], key: string): void {
 export type MenuSort = 'alpha' | 'family' | 'use';
 /** The menus and lists that can be sorted. */
 export type SortedMenu =
-  'data' | 'settings' | 'boats' | 'people' | 'crews' | 'sites' | 'marks';
+  | 'data'
+  | 'settings'
+  | 'boats'
+  | 'people'
+  | 'crews'
+  | 'sites'
+  | 'marks'
+  | 'weather'
+  | 'fixed';
 
 /** The order chosen for each menu, kept on the device (`ldb.menuSort`). */
 export const menuSort = signal<Readonly<Partial<Record<SortedMenu, MenuSort>>>>(

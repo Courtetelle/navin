@@ -1,4 +1,5 @@
 import { distKm } from '../../lib/geo.ts';
+import { openMeteoFetch } from '../../lib/openMeteo.ts';
 import type { Position } from '../../model/types.ts';
 
 import { mfReadings, owmReadings } from './coastStations.ts';
@@ -150,7 +151,7 @@ async function modelReadings(position: Position): Promise<WindReading[]> {
   for (const model of [...(region?.models ?? []), ...WIND_FALLBACK]) {
     try {
       const parameter = model[0] ? `&models=${model[0]}` : '';
-      const reply = await fetch(
+      const reply = await openMeteoFetch(
         `https://api.open-meteo.com/v1/forecast?${query}${parameter}`,
       );
       if (!reply.ok) continue;
@@ -170,7 +171,7 @@ async function modelReadings(position: Position): Promise<WindReading[]> {
 // The marine model does not cover the lakes.
 async function seaStateAt(position: Position): Promise<SeaState | null> {
   try {
-    const reply = await fetch(
+    const reply = await openMeteoFetch(
       `https://marine-api.open-meteo.com/v1/marine?latitude=${position.lat.toFixed(3)}&longitude=${position.lon.toFixed(3)}&hourly=wave_height&forecast_days=1&timezone=GMT`,
     );
     if (!reply.ok) return null;

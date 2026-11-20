@@ -30,15 +30,11 @@ import { buzz } from '../../lib/dom.ts';
 import { compassPoint } from '../../lib/wind.ts';
 import { parseTyped } from '../../model/beaufortDouglas.ts';
 import { inInland } from '../../model/contacts.ts';
-import type {
-  BoatKind,
-  BoatProfile,
-  CeCategory,
-  Thresholds,
-} from '../../model/goNoGo.ts';
+import type { BoatProfile, Thresholds } from '../../model/goNoGo.ts';
 import {
   NOGO_WIND_MAX,
   REFERENCE,
+  boatKindOf,
   boatLength,
   thresholdsOf,
 } from '../../model/goNoGo.ts';
@@ -52,12 +48,8 @@ const COURSE_KEY = 'navin.gngCourse';
 /** The reference boat, chosen when no boat of the list is. */
 const REF = 'ref';
 
-type Settings = Pick<BoatProfile, 'ce' | 'kind' | 'smallCrew'>;
-const DEFAULT_SETTINGS: Settings = {
-  ce: '',
-  kind: 'monocoque',
-  smallCrew: false,
-};
+type Settings = Pick<BoatProfile, 'smallCrew'>;
+const DEFAULT_SETTINGS: Settings = { smallCrew: false };
 
 const fr = (value: number, digits = 0) =>
   (Math.round(value * 10 ** digits) / 10 ** digits)
@@ -102,15 +94,20 @@ export function GoNoGo() {
   const fromCruise = cruiseBoat();
   const [chosen, setChosen] = useState(() => store.get<string>(BOAT_KEY, ''));
   const boat = fromCruise ?? (chosen === REF ? undefined : boatById(chosen));
-  const asking = !fromCruise && !boat && chosen !== REF;
+  // The reference boat only while NavIn has no boat of its own.
+  const asking = !fromCruise && !boat && (chosen !== REF || boats.length > 0);
   const boatKey = boat?.id ?? REF;
   const [profiles, setProfiles] = useState(() =>
     store.get<Record<string, Settings>>(PROFILES_KEY, {}),
   );
   const settings = profiles[boatKey] ?? DEFAULT_SETTINGS;
+  // The category and the kind come from the boat sheet.
+  const sheet = boatKindOf(boat?.info);
   const profile: BoatProfile = {
     loa: boat ? boatLength(boat.info) : 13.6,
-    ...settings,
+    ce: sheet.ce,
+    kind: sheet.kind ?? 'monocoque',
+    smallCrew: settings.smallCrew,
   };
   const limits = thresholdsOf(profile);
   const setSettings = (next: Partial<Settings>) => {
@@ -197,46 +194,8 @@ export function GoNoGo() {
               {tr('Changer de bateau')}
             </Button>
           )}
-          <details className="gng-settings">
-            <summary>
-              {tr(
-                `Réglages : catégorie CE ${settings.ce || '?'} · ${settings.kind} · équipage ${settings.smallCrew ? 'réduit' : 'normal'} · cap ${courseDeg == null ? 'non donné (au près)' : `${Math.round(courseDeg)}°`}`,
-              )}
-            </summary>
-            <div
-              className="gng-chips"
-              role="group"
-              aria-label={tr('Catégorie CE')}
-            >
-              <span>{tr('Catégorie CE')}</span>
-              {(['', 'A', 'B', 'C', 'D'] as const).map((ce: CeCategory) => (
-                <Button
-                  key={ce || 'none'}
-                  className={settings.ce === ce ? 'btn on' : 'btn'}
-                  aria-pressed={settings.ce === ce}
-                  onClick={() => setSettings({ ce })}
-                >
-                  {ce || '?'}
-                </Button>
-              ))}
-            </div>
-            <div className="gng-chips" role="group" aria-label={tr('Type')}>
-              {(
-                [
-                  ['monocoque', 'Monocoque'],
-                  ['multicoque', 'Multicoque'],
-                  ['deriveur', 'Dériveur'],
-                ] as const
-              ).map(([kind, label]: readonly [BoatKind, string]) => (
-                <Button
-                  key={kind}
-                  className={settings.kind === kind ? 'btn on' : 'btn'}
-                  aria-pressed={settings.kind === kind}
-                  onClick={() => setSettings({ kind })}
-                >
-                  {tr(label)}
-                </Button>
-              ))}
+          <div className="gng-settings">
+            <div className="gng-chips" role="group" aria-label={tr('Équipage')}>
               <Button
                 className={settings.smallCrew ? 'btn on' : 'btn'}
                 aria-pressed={settings.smallCrew}
@@ -258,7 +217,7 @@ export function GoNoGo() {
                 }}
               />
             </label>
-          </details>
+          </div>
         </section>
       )}
       {asking ? null : read === 'reading' ? (
@@ -312,7 +271,7 @@ export function GoNoGo() {
           <PacketState packets={packets} />
           <ThresholdTable limits={limits} />
           <HelpText>
-            {`Prévision ${data.src}, vagues Open-Meteo, lue le ${new Date(data.at).toLocaleString('fr-CH')}. Fenêtre de navigation ${WINDOW.from} h à ${WINDOW.to} h. Règles sans IA : un critère compte s’il est dépassé 2 heures de suite ; le feu du jour est le pire ; deux critères orange en même temps donnent rouge ; une rafale orange ne compte que 12 nœuds au-dessus du vent moyen (toujours pour un multicoque). Seuils du Dufour 445 GL décalés selon la longueur (−6 nœuds et −1 m sous 8 m, −3 et −0,5 de 8 à 11 m, +3 et +0,5 au-delà de 14 m), plafonnés par la catégorie CE ; quel que soit le bateau, no-go dès ${NOGO_WIND_MAX} nœuds de vent moyen, sous force 7 ; équipage réduit : −3 nœuds et −0,5 m. Ce sont des valeurs de départ, à corriger. Toujours lire le bulletin côtier, le BMS en cours et la vigilance.`}
+            {`Prévision ${data.src}, vagues Open-Meteo, lue le ${new Date(data.at).toLocaleString('fr-CH')}. Fenêtre de navigation ${WINDOW.from} h à ${WINDOW.to} h. Règles sans IA : un critère compte s’il est dépassé 2 heures de suite ; le feu du jour est le pire ; deux critères orange en même temps donnent rouge ; une rafale orange ne compte que 12 nœuds au-dessus du vent moyen (toujours pour un multicoque). Seuils du Dufour 445 GL décalés selon la longueur (−6 nœuds et −1 m sous 8 m, −3 et −0,5 de 8 à 11 m, +3 et +0,5 au-delà de 14 m), plafonnés par la catégorie CE ; catégorie CE et type (monocoque, multicoque, dériveur) lus dans la fiche du bateau, Données techniques ; quel que soit le bateau, no-go dès ${NOGO_WIND_MAX} nœuds de vent moyen, sous force 7 ; équipage réduit : −3 nœuds et −0,5 m. Ce sont des valeurs de départ, à corriger. Toujours lire le bulletin côtier, le BMS en cours et la vigilance.`}
           </HelpText>
           <ShareButton
             data-gng="share"
@@ -369,9 +328,16 @@ function BoatChooser({
           {tr(`⛵ ${boatName(one)}`)}
         </Button>
       ))}
-      <Button className="btn" data-gng-boat={REF} onClick={() => onChoose(REF)}>
-        {tr('Bateau de référence : Dufour 445 Grand Large')}
-      </Button>
+      {boats.length === 0 ? (
+        // No boat in NavIn yet: the reference one, until one is added.
+        <Button
+          className="btn"
+          data-gng-boat={REF}
+          onClick={() => onChoose(REF)}
+        >
+          {tr('Aucun bateau dans NavIn : seuils du Dufour 445 Grand Large')}
+        </Button>
+      ) : null}
     </section>
   );
 }

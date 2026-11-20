@@ -14,6 +14,7 @@ export type Light = 'go' | 'prudence' | 'nogo';
 export type PointOfSail = 'pres' | 'travers' | 'portant';
 /** CE design category (directive 2013/53/EU), or none known. */
 export type CeCategory = 'A' | 'B' | 'C' | 'D' | '';
+const CE_CATEGORIES = ['A', 'B', 'C', 'D'] as const;
 /** Kind of boat. */
 export type BoatKind = 'monocoque' | 'multicoque' | 'deriveur';
 
@@ -507,4 +508,28 @@ function positive(value: unknown): number | null {
         : '';
   const number = Number.parseFloat(text.replace(',', '.'));
   return Number.isFinite(number) && number > 0 ? number : null;
+}
+
+/**
+ * The CE design category and the kind of a boat, from its sheet (Type and
+ * Catégorie de conception CE).
+ * @param info - The data of the boat.
+ * @returns The category ('' when not given) and the kind (monohull when not given).
+ */
+export function boatKindOf(
+  info: Readonly<Record<string, unknown>> | undefined,
+): { ce: CeCategory; kind: BoatKind | null } {
+  const ce = info?.ceCategory;
+  const hull = info?.hullType;
+  return {
+    ce: CE_CATEGORIES.find((category) => category === ce) ?? '',
+    kind:
+      hull === 'Multicoque'
+        ? 'multicoque'
+        : hull === 'Dériveur'
+          ? 'deriveur'
+          : hull === 'Monocoque'
+            ? 'monocoque'
+            : null,
+  };
 }

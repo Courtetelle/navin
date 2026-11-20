@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 
 import type { Hour } from '../goNoGo.ts';
 import {
+  boatKindOf,
   corrected,
   dayVerdict,
   lengthShift,
@@ -109,4 +110,16 @@ test('a measure corrects the next hours, fading over 6 h', () => {
   expect(values[3]).toBeCloseTo(12.5);
   expect(values[4]).toBe(10);
   expect(values[5]).toBe(10);
+});
+
+test('the category and the kind come from the boat sheet', () => {
+  expect(boatKindOf({ ceCategory: 'B', hullType: 'Multicoque' })).toStrictEqual(
+    { ce: 'B', kind: 'multicoque' },
+  );
+  expect(boatKindOf({ hullType: 'Dériveur' })).toStrictEqual({
+    ce: '',
+    kind: 'deriveur',
+  });
+  expect(boatKindOf({ ceCategory: 'E' })).toStrictEqual({ ce: '', kind: null });
+  expect(boatKindOf(undefined)).toStrictEqual({ ce: '', kind: null });
 });

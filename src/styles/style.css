@@ -13932,12 +13932,18 @@ h1.menu-title {
   display: block;
   overflow-wrap: anywhere;
 }
+/* Closed, a band shows two lines: the name, then where; the rest opens with
+   the card. */
+.fixed-alerts .fx-row:not(.open) .fx-band .mk-text b,
+.fixed-alerts .fx-row:not(.open) .fx-band .mk-text small {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 .fixed-alerts .fx-open {
   margin-left: auto;
   opacity: 0.6;
-}
-.fixed-alerts .fx-map {
-  flex: none;
 }
 .fixed-alerts .fx-card {
   padding: 0.2em 0.6em 0.6em;
@@ -14091,10 +14097,8 @@ h1.menu-title {
   font-weight: 600;
   margin: 0.6em 0;
 }
-.gng-settings summary {
-  cursor: pointer;
-  color: var(--muted);
-  overflow-wrap: anywhere;
+.gng-settings {
+  margin: 0.5em 0;
 }
 .gng-day h3 {
   font-size: 1.05em;

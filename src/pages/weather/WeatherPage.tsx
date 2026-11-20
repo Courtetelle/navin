@@ -4,10 +4,12 @@ import { useEffect, useState } from 'react';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
+import { MenuSortButton } from '../../components/shared/MenuSortButton.tsx';
 import { PageLink } from '../../components/shared/PageLink.tsx';
 import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
+import { bumpIn, inMenuOrder } from '../../features/data/dataOrder.ts';
 import { inSwissArea } from '../../features/map/index.ts';
 import { lastBoatSeen } from '../../features/map/trackerState.ts';
 import { bubbleBack } from '../../features/onwater/index.ts';
@@ -218,7 +220,10 @@ function FixedAlertsPage() {
     <>
       <MeteoBack back={back} />
       <TitleInNav>
-        <h1>{tr('⚠ Alertes fixes')}</h1>
+        <h1 className="menu-title">
+          {tr('⚠ Alertes fixes')}
+          <MenuSortButton menu="fixed" />
+        </h1>
       </TitleInNav>
       <FixedAlerts />
     </>
@@ -259,6 +264,15 @@ function gpsHere(): { lat: number; lon: number } | null {
   return state.view.lastFix.value ?? lastBoatSeen();
 }
 
+/** One entry of the Météo menu. */
+interface WeatherEntry {
+  key: string;
+  ico: string;
+  title: string;
+  sub: string;
+  open: () => void;
+}
+
 /**
  * The menu of Météo, opened by its button straight from the map (no ◀):
  * the weather check-list, the forecast here, the LiveMétéo stations on the
@@ -279,111 +293,96 @@ function WeatherMenu() {
         isLake() ||
         navZone() === 'lac' ||
         inSwissArea(gpsHere());
+  // Alphabetical, or by use (the entries opened most move up): the button at
+  // the right of the title chooses. Paramétrages, the way out, stays last.
+  const all: WeatherEntry[] = [
+    {
+      key: 'forecast',
+      ico: '📈',
+      title: 'Prévisions',
+      sub: 'ici maintenant, dans 3 h, ce soir, demain matin ; les 12 prochaines heures, sources officielles, échelles',
+      open: openForecast,
+    },
+    {
+      key: 'gonogo',
+      ico: '🚦',
+      title: 'Go / no-go',
+      sub: 'le feu des 4 prochains jours pour votre bateau, à corriger en mer ; partage, prompt pour une IA, hors ligne',
+      open: openGoNoGo,
+    },
+    {
+      key: 'live',
+      ico: '🌬',
+      title: 'LiveMétéo',
+      sub: 'le vent mesuré par les stations de la zone, sur la carte (rayon dans Paramétrages)',
+      open: showLiveAround,
+    },
+    {
+      key: 'lightning',
+      ico: '⚡',
+      title: 'Alerte orage',
+      sub: 'les éclairs vus par satellite dans le rayon choisi',
+      open: openLightning,
+    },
+    ...(lakeLights
+      ? [
+          {
+            key: 'lakelights',
+            ico: '🚨',
+            title: 'Feux d’avis des lacs',
+            sub: 'les avis de vent fort et de tempête de MétéoSuisse',
+            open: openLakeLights,
+          },
+        ]
+      : []),
+    {
+      key: 'fixed',
+      ico: '⚠',
+      title: 'Alertes fixes',
+      sub: 'raz, courants, plateaux, passes et vents locaux : ce qui s’y passe et comment s’y conduire',
+      open: openFixed,
+    },
+    {
+      key: 'check',
+      ico: '✅',
+      title: 'Briefing météo',
+      sub: 'les points à vérifier avant le départ',
+      open: openBriefing,
+    },
+  ];
+  const entries = inMenuOrder(
+    'weather',
+    all,
+    (entry) => entry.key,
+    (entry) => tr(entry.title),
+  );
+  const shown = entries.map((entry) => entry.key);
   return (
     <>
       <TitleInNav>
-        <h1>{tr('🌤 Météorologie')}</h1>
+        <h1 className="menu-title">
+          {tr('🌤 Météorologie')}
+          <MenuSortButton menu="weather" />
+        </h1>
       </TitleInNav>
       <div className="wx-menu">
-        <Button
-          className="btn big wx-entry"
-          data-wx="forecast"
-          onClick={openForecast}
-        >
-          <span className="wx-entry-ico">📈</span>
-          <span>
-            <b>{tr('Prévisions')}</b>
-            <small>
-              {tr(
-                'ici maintenant, dans 3 h, ce soir, demain matin ; les 12 prochaines heures, sources officielles, échelles',
-              )}
-            </small>
-          </span>
-        </Button>
-        <Button
-          className="btn big wx-entry"
-          data-wx="gonogo"
-          onClick={openGoNoGo}
-        >
-          <span className="wx-entry-ico">🚦</span>
-          <span>
-            <b>{tr('Go / no-go')}</b>
-            <small>
-              {tr(
-                'le feu des 4 prochains jours pour votre bateau, à corriger en mer ; partage, prompt pour une IA, hors ligne',
-              )}
-            </small>
-          </span>
-        </Button>
-        <Button
-          className="btn big wx-entry"
-          data-wx="live"
-          onClick={showLiveAround}
-        >
-          <span className="wx-entry-ico">🌬</span>
-          <span>
-            <b>{tr('LiveMétéo')}</b>
-            <small>
-              {tr(
-                'le vent mesuré par les stations de la zone, sur la carte (rayon dans Paramétrages)',
-              )}
-            </small>
-          </span>
-        </Button>
-        <Button
-          className="btn big wx-entry"
-          data-wx="lightning"
-          onClick={openLightning}
-        >
-          <span className="wx-entry-ico">⚡</span>
-          <span>
-            <b>{tr('Alerte orage')}</b>
-            <small>
-              {tr('les éclairs vus par satellite dans le rayon choisi')}
-            </small>
-          </span>
-        </Button>
-        {lakeLights ? (
+        {entries.map((entry) => (
           <Button
+            key={entry.key}
             className="btn big wx-entry"
-            data-wx="lakelights"
-            onClick={openLakeLights}
+            data-wx={entry.key}
+            onClick={() => {
+              bumpIn('weather', shown, entry.key);
+              entry.open();
+            }}
           >
-            <span className="wx-entry-ico">🚨</span>
+            <span className="wx-entry-ico">{entry.ico}</span>
             <span>
-              <b>{tr('Feux d’avis des lacs')}</b>
-              <small>
-                {tr('les avis de vent fort et de tempête de MétéoSuisse')}
-              </small>
+              <b>{tr(entry.title)}</b>
+              <small>{tr(entry.sub)}</small>
             </span>
           </Button>
-        ) : null}
-        <Button
-          className="btn big wx-entry"
-          data-wx="fixed"
-          onClick={openFixed}
-        >
-          <span className="wx-entry-ico">⚠</span>
-          <span>
-            <b>{tr('Alertes fixes')}</b>
-            <small>
-              {tr(
-                'raz, courants, plateaux, passes et vents locaux : ce qui s’y passe et comment s’y conduire',
-              )}
-            </small>
-          </span>
-        </Button>
-        <Button
-          className="btn big wx-entry"
-          data-wx="check"
-          onClick={openBriefing}
-        >
-          <span className="wx-entry-ico">✅</span>
-          <span>
-            <b>{tr('Briefing météo')}</b>
-            <small>{tr('les points à vérifier avant le départ')}</small>
-          </span>
-        </Button>
+        ))}
         <Button
           className="btn big wx-entry wx-keys-link"
           data-wx="settings"

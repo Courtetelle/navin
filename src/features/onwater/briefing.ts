@@ -1,3 +1,4 @@
+import { openMeteoFetch } from '../../lib/openMeteo.ts';
 import { bft, compassPoint } from '../../lib/wind.ts';
 import { degreeOfHeight } from '../../model/beaufortDouglas.ts';
 import type { DayVerdict, Hour, Thresholds } from '../../model/goNoGo.ts';
@@ -79,7 +80,9 @@ function inSwissModel(lat: number, lon: number): boolean {
 }
 
 async function json(url: string): Promise<Record<string, unknown> | null> {
-  const response = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+  const response = await openMeteoFetch(url, {
+    signal: AbortSignal.timeout(20_000),
+  });
   return response.ok
     ? ((await response.json()) as Record<string, unknown>)
     : null;

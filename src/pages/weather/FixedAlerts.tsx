@@ -1,8 +1,10 @@
+import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import type { ShareFormat } from '../../components/shared/shareFormat.ts';
+import { bumpIn, inMenuOrder } from '../../features/data/dataOrder.ts';
 import { fixedOnMap, fixedOpened } from '../../features/map/fixedZone.ts';
 import { askMapArea } from '../../features/map/pendingArea.ts';
 import { SwipeRow } from '../../features/prep/index.ts';
@@ -97,6 +99,7 @@ async function shareCard(alert: FixedAlert, format: ShareFormat) {
  * @returns The list.
  */
 export function FixedAlerts() {
+  useSignals();
   const tr = useTr();
   const [hidden, setHidden] = useState(readHidden);
   const [open, setOpen] = useState<string | null>(() => {
@@ -122,7 +125,15 @@ export function FixedAlerts() {
         )}
       </p>
       {FIXED_SEAS.map(([sea, title]) => {
-        const alerts = shown.filter((alert) => alert.sea === sea);
+        // Alphabetical, or by use (the alerts opened most move up): the
+        // button at the right of the title chooses.
+        const alerts = inMenuOrder(
+          'fixed',
+          shown.filter((alert) => alert.sea === sea),
+          (alert) => alert.id,
+          (alert) => tr(alert.name),
+        );
+        const keys = alerts.map((alert) => alert.id);
         if (alerts.length === 0) return null;
         return (
           <section key={sea} className="fx-sea" data-fixed-sea={sea}>
@@ -134,6 +145,7 @@ export function FixedAlerts() {
                 open={open === alert.id}
                 onToggle={() => {
                   buzz();
+                  if (open !== alert.id) bumpIn('fixed', keys, alert.id);
                   setOpen(open === alert.id ? null : alert.id);
                 }}
                 onHide={hide}
@@ -161,11 +173,13 @@ export function FixedAlerts() {
         Les alertes fixes sont les dangers qui reviennent toujours au même
         endroit : courant de marée, plateau de roches, passe étroite, rail de
         navigation, vent local. Elles se lisent sans réseau. Toucher une bande
-        ouvre sa fiche ; 🗺 montre sa zone sur la carte, et toucher la zone
-        revient ici. Glissée vers la gauche, une bande offre 🗺 Sur la carte, 📤
-        Partager (image ou PDF) et 🗑 Masquer (réaffichable en bas de la liste).
-        Les heures et les forces du jour (marée, coefficient, courant) restent à
-        lire dans l’annuaire des marées et l’almanach.
+        ouvre sa fiche ; la bande montre ses deux premières lignes, le reste
+        s’ouvre avec la fiche. Le bouton à droite du titre trie la liste
+        (alphabétique ou selon l’usage). Glissée vers la gauche, une bande offre
+        🗺 Sur la carte (toucher la zone revient ici), 📤 Partager (image ou PDF)
+        et 🗑 Masquer (réaffichable en bas de la liste). Les heures et les forces
+        du jour (marée, coefficient, courant) restent à lire dans l’annuaire des
+        marées et l’almanach.
       </HelpText>
     </div>
   );
@@ -230,16 +244,6 @@ function FixedRow({
               {open ? '▾' : '▸'}
             </span>
           </button>
-          {zone ? (
-            <Button
-              className="btn fx-map"
-              data-fixed-map={id}
-              aria-label={tr(`${name} : voir la zone sur la carte`)}
-              onClick={() => showZone(alert)}
-            >
-              🗺
-            </Button>
-          ) : null}
         </div>
         {open ? (
           <div className="fx-card" data-fixed-card={id}>

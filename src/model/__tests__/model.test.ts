@@ -132,6 +132,8 @@ test('section definitions keep the legacy keys', () => {
     'boat',
     'waters',
     'model',
+    'hullType',
+    'ceCategory',
     'year',
     'pas',
     'loaFt',
