@@ -2,7 +2,8 @@ import { effect } from '@preact/signals-react';
 
 import { state } from '../../state/index.ts';
 
-import { syncRound } from './syncEngine.ts';
+import { installFlingSync } from './flingSync.ts';
+import { syncReady, syncRound } from './syncEngine.ts';
 
 /** While NavIn is shown, a look at the relay this often. */
 const LOOK_MS = 2 * 60 * 1000;
@@ -29,4 +30,8 @@ effect(() => {
   const tracking = state.view.tracking.value;
   if (wasTracking && !tracking) void syncRound();
   wasTracking = tracking;
+});
+// A list swiped hard up or down: a round at once, quietly in the background.
+installFlingSync(() => {
+  if (syncReady()) void syncRound(true);
 });
