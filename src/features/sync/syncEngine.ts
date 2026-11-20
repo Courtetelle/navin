@@ -15,9 +15,12 @@ import {
   removeCruise,
   removeMark,
   state,
+  takeTracesGone,
+  tracesGone,
   updateCrewSets,
   updateMembers,
   updateSosLogs,
+  withoutGonePoints,
 } from '../../state/index.ts';
 import { getPhoto, putPhoto } from '../../storage/photos.ts';
 import { store } from '../../storage/store.ts';
@@ -78,6 +81,8 @@ interface SyncPack extends BackupFile {
   photoNames: Record<string, string>;
   /** Its weather keys, each with when it changed. */
   keys?: KeysPack;
+  /** The traces it deleted (`cruise|first time|last time` → when). */
+  tracesGone?: Record<string, number>;
 }
 
 /**
@@ -291,6 +296,8 @@ async function take(
     ? state.data.cruise.peek()?.id
     : undefined;
   deleteHere(kept, tracked);
+  // A trace deleted there goes here; deleted here, it does not come back.
+  takeTracesGone(pack.tracesGone, tracked);
   const kept2 = withoutGone(pack, kept);
   mergeSynced(kept2, tracked);
   if (tracked) waiting.set(pack.from, kept2);
@@ -346,9 +353,16 @@ function withoutGone(pack: SyncPack, kept: Gone): SyncPack {
   return {
     ...pack,
     cruises: Array.isArray(pack.cruises)
-      ? (pack.cruises as Array<{ cruise?: { id?: string } }>).filter(
-          (item) => !kept.cruises?.[item?.cruise?.id ?? ''],
-        )
+      ? (pack.cruises as Array<{ cruise?: { id?: string }; track?: unknown }>)
+          .filter((item) => !kept.cruises?.[item?.cruise?.id ?? ''])
+          .map((item) =>
+            Array.isArray(item.track)
+              ? {
+                  ...item,
+                  track: withoutGonePoints(item.cruise?.id ?? '', item.track),
+                }
+              : item,
+          )
       : pack.cruises,
     members: out('members', pack.members),
     boats: out('boats', pack.boats),
@@ -415,6 +429,7 @@ export function packOfDevice(): SyncPack {
     gone: gone(),
     photoNames: {},
     keys: keysOfDevice(),
+    tracesGone: tracesGone(),
   };
 }
 

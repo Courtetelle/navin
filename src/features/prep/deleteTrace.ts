@@ -1,5 +1,11 @@
 import type { Cruise } from '../../model/types.ts';
-import { removeCruise, state, toast } from '../../state/index.ts';
+import type { TrackPoint } from '../../state/index.ts';
+import {
+  noteTraceGone,
+  removeCruise,
+  state,
+  toast,
+} from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 /**
@@ -19,7 +25,7 @@ export function deleteTrace(traceId: string): boolean {
     toast('⚠ Trace en cours : arrêtez-la d’abord');
     return false;
   }
-  const track = store.get<unknown[]>(`ldb.track.${cruiseId}`, []);
+  const track = store.get<TrackPoint[]>(`ldb.track.${cruiseId}`, []);
   const segments = [
     0,
     ...store
@@ -27,7 +33,16 @@ export function deleteTrace(traceId: string): boolean {
       .filter((start) => start > 0 && start < track.length),
   ].toSorted((first, second) => first - second);
   if (segmentKey !== undefined && segments.length > 1) {
-    const { kept, starts } = cutSegment(track, segments, Number(segmentKey));
+    const segment = Number(segmentKey);
+    // The other devices delete the same points (synchronisation).
+    noteTraceGone(
+      cruiseId ?? '',
+      track.slice(
+        segments[segment] ?? 0,
+        segments[segment + 1] ?? track.length,
+      ),
+    );
+    const { kept, starts } = cutSegment(track, segments, segment);
     store.set(`ldb.track.${cruiseId}`, kept);
     store.set(`ldb.trkSegs.${cruiseId}`, starts);
     toast('Trace supprimée');
@@ -43,6 +58,7 @@ export function deleteTrace(traceId: string): boolean {
     removeCruise(cruiseId ?? '');
     toast('Trace supprimée, avec sa navigation vide');
   } else {
+    noteTraceGone(cruiseId ?? '', track);
     store.del(`ldb.track.${cruiseId}`);
     store.del(`ldb.trkSegs.${cruiseId}`);
     toast('Trace supprimée · la navigation et son journal restent');

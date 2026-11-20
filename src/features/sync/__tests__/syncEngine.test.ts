@@ -172,3 +172,53 @@ test('a key changed on another device later comes here', async () => {
   expect(keys?.aemetKey).toBe('NEW-AEMET');
   expect(keys?.mfKey).toBe('SECRET-MF-KEY');
 });
+
+test('a trace deleted on another device goes here and does not come back', async () => {
+  const { store } = await import('../../../storage/store.ts');
+  const { saveCruiseRecord } = await import('../../../state/index.ts');
+  saveCruiseRecord(
+    { id: 'c1', entries: [], info: {}, crew: [], days: {} } as never,
+    true,
+  );
+  const points = [
+    [1000, 46.5, 6.5],
+    [2000, 46.51, 6.51],
+    [3000, 46.52, 6.52],
+    [4000, 46.53, 6.53],
+  ];
+  store.set('ldb.track.c1', points);
+  store.set('ldb.trkSegs.c1', [2]);
+  const space = await hashName(key, 'space');
+  const fromD = {
+    all: true,
+    from: 'D',
+    cruises: [
+      {
+        cruise: { id: 'c1', entries: [], info: {}, crew: [], days: {} },
+        track: points,
+      },
+    ],
+    photoNames: {},
+    tracesGone: { 'c1|1000|2000': Date.now() },
+  };
+  kv.set(
+    `sync:${space}:dev:D`,
+    await seal(await aesKey(key), JSON.stringify(fromD)),
+  );
+  kv.set(
+    `sync:${space}:index`,
+    JSON.stringify({
+      ...(JSON.parse(kv.get(`sync:${space}:index`) ?? '{}') as object),
+      D: { at: Date.now() + 9000 },
+    }),
+  );
+  await syncRound(true);
+
+  expect(
+    store.get<number[][]>('ldb.track.c1', []).map((point) => point[0]),
+  ).toEqual([3000, 4000]);
+  expect(store.get('ldb.trkSegs.c1', [])).toEqual([]);
+  const pack = await packOf();
+
+  expect(pack.tracesGone).toHaveProperty(['c1|1000|2000']);
+});
