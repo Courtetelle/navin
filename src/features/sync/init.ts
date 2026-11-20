@@ -19,7 +19,10 @@ setInterval(() => {
   if (document.visibilityState === 'visible') void syncRound();
 }, LOOK_MS);
 document.addEventListener('visibilitychange', () => {
-  void syncRound();
+  // Going away (another app, the screen off, NavIn closed): what changed
+  // here leaves at once, even if a pack left a moment ago — otherwise it
+  // would wait until NavIn is shown again on this device.
+  void syncRound(document.visibilityState === 'hidden');
 });
 let wasTracking = state.view.tracking.peek();
 effect(() => {
