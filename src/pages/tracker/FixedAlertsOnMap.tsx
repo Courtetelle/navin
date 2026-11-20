@@ -2,7 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import type { LayerGroup } from 'leaflet';
 import { useEffect } from 'react';
 
-import { fixedOnMap } from '../../features/map/fixedZone.ts';
+import { fixedOnMap, fixedOpened } from '../../features/map/fixedZone.ts';
 import { leaflet } from '../../features/map/leaflet.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -33,6 +33,7 @@ export function FixedAlertsOnMap() {
     const back = () => {
       buzz();
       fixedOnMap.value = null;
+      fixedOpened.value = alert.id;
       go('weather', 'fixed');
       lightBand(fixedBand(alert.id), true);
     };

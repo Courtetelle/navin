@@ -13915,22 +13915,44 @@ h1.menu-title {
   background: #fff4e6;
   color: #5c2b00;
 }
-.fixed-alerts .fx-row {
-  display: block;
-  text-align: left;
+.fixed-alerts .fx-sea-title {
+  font-size: 1.05em;
+  margin: 1em 0 0.4em;
 }
-.fixed-alerts .fx-row p {
+.fixed-alerts .fx-band {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+}
+.fixed-alerts .fx-band > .mark-head {
+  flex: 1;
+  min-width: 0;
+}
+.fixed-alerts .fx-band .mk-text small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.fixed-alerts .fx-open {
+  margin-left: auto;
+  opacity: 0.6;
+}
+.fixed-alerts .fx-map {
+  flex: none;
+}
+.fixed-alerts .fx-card {
+  padding: 0.2em 0.6em 0.6em;
+}
+.fixed-alerts .fx-card p {
   margin: 0.35em 0;
   overflow-wrap: anywhere;
 }
-.fixed-alerts .fx-where,
 .fixed-alerts .fx-sources {
   display: block;
   opacity: 0.8;
   overflow-wrap: anywhere;
 }
-.fixed-alerts .fx-map {
-  margin-top: 0.4em;
+.fixed-alerts .fx-unhide {
+  margin-top: 1em;
 }
 .leaflet-tooltip.fixed-zone-tip {
   max-width: 14em;
@@ -13940,4 +13962,25 @@ h1.menu-title {
   background: #fff4e6;
   border-color: #e8590c;
   color: #5c2b00;
+}
+
+/* Beaufort and Douglas at the point: where, the origin of each field, the
+   comparison of the seas. */
+.bd-point {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.bd-origin {
+  display: block;
+  opacity: 0.75;
+}
+.bd-reload {
+  margin: 0.4em 0;
+}
+.bd-compare p {
+  overflow-wrap: anywhere;
+}
+.bd-cmp-tbl td.bd-sub {
+  padding-left: 1.4em;
+  font-style: italic;
 }
