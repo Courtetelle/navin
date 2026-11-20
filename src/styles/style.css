@@ -13782,3 +13782,26 @@ h1.menu-title {
 :root[data-theme='night'] .menus-list li b {
   color: var(--fg);
 }
+
+/* Paramétrages › Alertes: the button of all the alerts says their state —
+   green while they watch, red once off; at night filled while on, dark with
+   a dashed edge once off */
+.btn.alerts-live {
+  background: #1a7f37;
+  color: #ffffff;
+}
+.btn.alerts-off {
+  background: var(--danger);
+  color: var(--danger-fg);
+}
+:root[data-theme='night'] .btn.alerts-live {
+  background: var(--on);
+  color: var(--on-fg);
+}
+:root[data-theme='night'] .btn.alerts-off {
+  background: #200000;
+  color: var(--fg);
+  box-shadow: inset 0 0 0 3px var(--fg);
+  outline: 3px dashed var(--fg);
+  outline-offset: -9px;
+}

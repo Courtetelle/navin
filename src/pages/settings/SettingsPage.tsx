@@ -263,12 +263,21 @@ function AllAlerts() {
   useSignals();
   const tr = useTr();
   const settings = state.preferences.settings.value;
-  const anyOn = ALERT_KINDS.some((kind) => alertOn(kind, settings));
+  const live = ALERT_KINDS.filter((kind) => alertOn(kind, settings)).length;
+  const anyOn = live > 0;
+  // The state first, then what a touch does: green while on, red once off.
+  let words = '🔕 Alertes désactivées · toucher pour les réactiver';
+  if (live === ALERT_KINDS.length) {
+    words = '🔔 Alertes actives · toucher pour les désactiver';
+  } else if (anyOn) {
+    words = `🔔 ${live} alertes sur ${ALERT_KINDS.length} actives · toucher pour les désactiver`;
+  }
   return (
     <div className="all-alerts">
       <ButtonRow>
         <Button
-          className={anyOn ? 'btn big' : 'btn big on danger'}
+          className={anyOn ? 'btn big alerts-live' : 'btn big alerts-off'}
+          data-alerts-state={anyOn ? 'on' : 'off'}
           data-alerts="all"
           onClick={() => {
             buzz();
@@ -284,11 +293,7 @@ function AllAlerts() {
             );
           }}
         >
-          {tr(
-            anyOn
-              ? '🔕 Couper toutes les alertes'
-              : '🔔 Toutes coupées · toucher pour les rallumer',
-          )}
+          {tr(words)}
         </Button>
       </ButtonRow>
       <ReOnChoices kind="all" />

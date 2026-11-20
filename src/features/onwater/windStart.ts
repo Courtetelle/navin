@@ -9,8 +9,12 @@ import { windAlertConfig } from './windLogic.ts';
  * loads apart so a failure in the weather code never reaches the boot.
  */
 export function startWindWatch(): void {
-  // Alerts switched off come back on at the launch, if so chosen.
-  void import('./alertsOff.ts').then(({ applyReOn }) => applyReOn('launch'));
+  // Alerts switched off come back on at the launch, if so chosen: a real
+  // opening of NavIn, not a reload (an update of NavIn, the test page of the
+  // tablet, a tab reloaded by the system), which would switch them on unasked.
+  if (firstOpening()) {
+    void import('./alertsOff.ts').then(({ applyReOn }) => applyReOn('launch'));
+  }
   // Safari counts the end of a touch as the gesture that unlocks the sound.
   for (const type of ['pointerdown', 'pointerup', 'touchend'] as const) {
     document.addEventListener(
@@ -131,4 +135,22 @@ function lightningStart(): void {
   void import('./lightningWatch.ts')
     .then(({ lightningWatchStart }) => lightningWatchStart())
     .catch(() => undefined);
+}
+
+/** Kept for the life of the tab: a reload finds it, a new opening does not. */
+const OPENED = 'navin.opened';
+
+/**
+ * NavIn is opened, not reloaded in the same tab or window.
+ * @returns Whether this is a real opening.
+ */
+export function firstOpening(): boolean {
+  try {
+    const session = globalThis.sessionStorage;
+    if (session.getItem(OPENED)) return false;
+    session.setItem(OPENED, '1');
+  } catch {
+    // No session storage: every start counts as an opening.
+  }
+  return true;
 }
