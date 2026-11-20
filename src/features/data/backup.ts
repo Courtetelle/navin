@@ -100,6 +100,9 @@ export function backupAll(): BackupPack {
     taskTpl: data.taskTpl.value,
     uiEdits: data.uiEdits.value,
     marks: data.marks.value,
+    // The routes only when there are some: an empty list keeps the file the
+    // one of the first app.
+    ...(data.routes.value.length > 0 ? { routes: data.routes.value } : {}),
     crewSets: data.crewSets.value,
     mob: store.get('ldb.mob2', null),
     mobMer: store.get('ldb.mob2mer', null),

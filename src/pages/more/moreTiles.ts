@@ -22,6 +22,11 @@ const TRACES: MoreTile = {
   title: '🛰 Traces',
   sub: 'traces enregistrées, carte, GPX',
 };
+const ROUTES: MoreTile = {
+  key: 'routes',
+  title: '🧭 Routes',
+  sub: 'routes tracées sur la carte, cap et distance, GPX',
+};
 const CHECKLIST_BASES: MoreTile = {
   key: 'ckbases',
   title: '✅ Mes check-lists',
@@ -101,6 +106,7 @@ export function tilesWithoutCruise(): MoreTile[] {
     chartsTile(),
     NMEA,
     marksTile(marks.value.length),
+    ROUTES,
     LISTS,
     SITES,
   ];
@@ -175,6 +181,7 @@ export function tilesWithCruise(): MoreTile[] {
     },
     LISTS,
     marksTile(marks.value.length),
+    ROUTES,
     chartsTile(),
     NMEA,
     SITES,

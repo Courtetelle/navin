@@ -16,6 +16,7 @@ export const VIEW_LABELS: Readonly<Record<string, string>> = {
   alerts: 'Journal des alertes',
   more: 'data',
   marks: 'Marques',
+  routes: 'Routes',
   checklist: 'Check-lists',
   crew: 'Équipage',
   info: 'Bateau et croisière',

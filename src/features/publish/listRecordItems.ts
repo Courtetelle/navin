@@ -1,5 +1,13 @@
 import { fmtDur, fmtShortDate, fmtTime, fr, pad } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
+import type { NavRoute } from '../../model/routes.ts';
+import {
+  pointName,
+  routeDuration,
+  routeLegs,
+  routeNm,
+  routeTimes,
+} from '../../model/routes.ts';
 import type { ChecklistBase, Mark, SosLog } from '../../model/types.ts';
 
 import { markPlanId, tracePlanId } from './planPhoto.ts';
@@ -140,4 +148,48 @@ function dayText(iso: string): string {
 function timeText(iso: string): string {
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? '' : fmtTime(date);
+}
+
+/**
+ * Elements of the route list: the whole route, then each point with the
+ * course and distance of the leg that reaches it and its time of passage.
+ * @param routes - Routes.
+ * @returns The elements.
+ */
+export function routeItems(routes: readonly NavRoute[]): PublishItem[] {
+  return routes.map((route) => {
+    const times = routeTimes(route);
+    const rows: PublishRowData[] = [
+      ['Points', String(route.points.length)],
+      ['Distance', `${fr(routeNm(route.points))} NM`],
+      ['Vitesse prévue', `${fr(route.speed)} nd`],
+      ['Durée', fmtDur(routeDuration(route))],
+    ];
+    if (times) {
+      const start = new Date(times[0] as number);
+      rows.push(['Départ', `${fmtShortDate(start)} ${fmtTime(start)}`]);
+    }
+    const legs = routeLegs(route.points);
+    const points: PublishRowData[] = route.points.map((point, index) => {
+      const leg = index > 0 ? legs[index - 1] : undefined;
+      const parts = [fmtPos(point)];
+      if (leg) {
+        parts.push(
+          `${pad(leg.course, 3)}° · ${fr(leg.nm, leg.nm < 10 ? 2 : 1)} NM`,
+        );
+      }
+      const time = times?.[index];
+      if (time !== undefined) parts.push(fmtTime(new Date(time)));
+      return [pointName(route.points, index), parts.join(' · ')];
+    });
+    return {
+      id: route.id,
+      name: route.name,
+      sections: [
+        { title: route.name, rows },
+        { title: 'Points', rows: points },
+      ],
+      photos: [],
+    };
+  });
 }

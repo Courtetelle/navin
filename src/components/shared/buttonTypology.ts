@@ -6,6 +6,7 @@ const DATA_VIEWS: ReadonlySet<string> = new Set([
   'boats',
   'ckbases',
   'marks',
+  'routes',
   'traces',
   'docs',
   'lists',

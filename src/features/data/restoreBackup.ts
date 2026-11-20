@@ -17,6 +17,7 @@ import {
   mergeKeyBook,
   mergeMarks,
   mergeMembers,
+  mergeRoutes,
   mergeSiteLinks,
   mergeTraceNames,
   mergeUiEdits,
@@ -67,6 +68,8 @@ export interface BackupFile {
   uiEdits?: Record<string, unknown>;
   /** @default undefined */
   marks?: unknown;
+  /** @default undefined */
+  routes?: unknown;
   /** @default undefined */
   sosLogs?: unknown;
   /**
@@ -293,6 +296,7 @@ function restoreRecords(file: BackupFile): void {
   if (Array.isArray(file.ckLib)) mergeCkLib(file.ckLib as ChecklistBase[]);
   if (file.uiEdits) mergeUiEdits(file.uiEdits);
   if (file.marks) mergeMarks(file.marks);
+  if (file.routes) mergeRoutes(file.routes);
   if (Array.isArray(file.sosLogs)) restoreSosLogs(file);
   mergeAlerts(file.alerts);
   if (Array.isArray(file.crewSets)) restoreCrewSets(file.crewSets as CrewSet[]);

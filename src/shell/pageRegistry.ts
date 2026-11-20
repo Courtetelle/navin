@@ -136,6 +136,10 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/print/PrintPage.tsx').then((module) => ({
       default: module.PrintPage,
     })),
+  routes: () =>
+    import('../pages/routes/RoutesPage.tsx').then((module) => ({
+      default: module.RoutesPage,
+    })),
   rules: () =>
     import('../pages/rules/RulesPage.tsx').then((module) => ({
       default: module.RulesPage,

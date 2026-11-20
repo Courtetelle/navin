@@ -5,6 +5,7 @@ export type ListKind =
   | 'boats'
   | 'traces'
   | 'marks'
+  | 'routes'
   | 'ckbases'
   | 'soslogs'
   | 'alerts';

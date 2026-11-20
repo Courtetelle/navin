@@ -1805,6 +1805,105 @@ async function turnPhone(browser: Browser): Promise<void> {
   await context.close();
 }
 
+/**
+ * A route drawn by hand: the route button of the map, three taps lay three
+ * points (no cross), the panel gives the length, the Routes button keeps it,
+ * and the Routes page lists it with Partager last.
+ * @param page - The page shown.
+ * @param theme - Day or night.
+ */
+async function routeByHand(page: Page, theme: string): Promise<void> {
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(900);
+  const kept = () =>
+    page.evaluate(
+      () =>
+        (JSON.parse(localStorage.getItem('ldb.routes') ?? '[]') as unknown[])
+          .length,
+    );
+  const before = await kept();
+  await page.evaluate(() => {
+    document.querySelector<HTMLElement>('.trk-map .route-btn')?.click();
+  });
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'the route button opens its panel',
+    await page.locator('.route-panel').isVisible(),
+  );
+  const map = await page.locator('.trk-map').boundingBox();
+  if (!map) {
+    check(theme, 'the map is shown for the route', false);
+    return;
+  }
+  // Bare places of the map: not a mark, a port, a button or a bar.
+  const spots = await page.evaluate(
+    (box) => {
+      const found: Array<{ x: number; y: number }> = [];
+      for (let fy = 0.25; fy <= 0.6 && found.length < 3; fy += 0.05) {
+        for (let fx = 0.25; fx <= 0.75 && found.length < 3; fx += 0.1) {
+          const x = Math.round(box.x + box.width * fx);
+          const y = Math.round(box.y + box.height * fy);
+          const element = document.elementFromPoint(x, y);
+          const far = found.every(
+            (spot) => Math.hypot(spot.x - x, spot.y - y) > 80,
+          );
+          if (
+            far &&
+            element?.closest('.trk-map') &&
+            !element.closest('.leaflet-marker-icon, .leaflet-control')
+          ) {
+            found.push({ x, y });
+          }
+        }
+      }
+      return found;
+    },
+    { x: map.x, y: map.y, width: map.width, height: map.height },
+  );
+  /* eslint-disable no-await-in-loop -- one tap after the other */
+  for (const { x, y } of spots) {
+    await page.mouse.click(x, y);
+    await page.waitForTimeout(400);
+  }
+  /* eslint-enable no-await-in-loop */
+  const laid = await page.locator('.route-pt').count();
+  check(
+    theme,
+    `three taps lay three points of the route, and no cross (${spots.length} places, ${laid} points)`,
+    laid === 3 && (await page.locator('.tap-cross').count()) === 0,
+  );
+  check(
+    theme,
+    'the panel gives the length and the time of the route',
+    /3 points · [\d,]+ NM · \d+ h \d\d à 6,5 nd/.test(
+      (await page.locator('.route-panel .rp-sum').textContent()) ?? '',
+    ),
+  );
+  await page.locator('.route-panel [data-rp="list"]').click();
+  await page.waitForTimeout(900);
+  const after = await kept();
+  check(theme, 'the route is kept', after === before + 1);
+  check(
+    theme,
+    'the route is listed, the panel gone',
+    (await page.locator('#rtList .rt-band').count()) === after &&
+      (await page.locator('.route-panel').count()) === 0,
+  );
+  const last = await page.evaluate(() => {
+    const view = document.querySelector('main#view');
+    const buttons = [...(view?.querySelectorAll('button') ?? [])].filter(
+      (button) => button.getBoundingClientRect().height > 0,
+    );
+    return buttons.at(-1)?.textContent ?? '';
+  });
+  check(
+    theme,
+    'Partager is the last button of Routes',
+    last.toLowerCase().includes('partager'),
+  );
+}
+
 const browser = await chromium.launch({ channel: 'chrome', headless: true });
 /* eslint-disable no-await-in-loop -- one theme after the other */
 for (const theme of ['day', 'night']) {
@@ -1825,6 +1924,7 @@ for (const theme of ['day', 'night']) {
     await scalesSteady(page, theme);
     await alertsInTurn(page, theme);
     await layoutGaps(page, theme);
+    await routeByHand(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }
