@@ -2,7 +2,10 @@
  * The automatic synchronisation between the devices of the skipper, through
  * their own relay: each device leaves there all its data, encrypted here,
  * and reads what the others left. What one deletes is deleted on the others.
- * The settings and the keys stay on each device; the keys travel by QR only.
+ * The weather keys travel inside the encrypted pack (newest change wins);
+ * the other settings stay on each device, the key of the synchronisation
+ * travels by QR only. The menus, without any personal data, are left in
+ * clear on the relay for the development of NavIn.
  */
 
 import { signal } from '@preact/signals-react';
@@ -19,11 +22,14 @@ import {
 import { getPhoto, putPhoto } from '../../storage/photos.ts';
 import { store } from '../../storage/store.ts';
 import { backupAll } from '../data/backup.ts';
+import { menusFile } from '../data/menusExport.ts';
 import type { BackupFile } from '../data/restoreBackup.ts';
 import { mergeSynced } from '../data/restoreBackup.ts';
 import { relayAddress } from '../onwater/relayRecord.ts';
 
 import { aesKey, hashName, isSyncKey, seal, unseal } from './syncCrypto.ts';
+import type { KeysPack } from './syncKeys.ts';
+import { keysOfDevice, stampKeys, takeKeys } from './syncKeys.ts';
 
 /** What the synchronisation is doing, for its screen. */
 export interface SyncStatus {
@@ -69,6 +75,8 @@ interface SyncPack extends BackupFile {
   gone: Gone;
   /** Its photos: id → name on the relay. */
   photoNames: Record<string, string>;
+  /** Its weather keys, each with when it changed. */
+  keys?: KeysPack;
 }
 
 /**
@@ -135,9 +143,12 @@ async function round(asked: boolean): Promise<void> {
     const aes = await aesKey(key);
     const space = `${relay}/sync/${await hashName(key, 'space')}`;
     noteDeletions();
+    await stampKeys();
     await receive(space, aes);
     noteKnown();
     const photosLeft = await send(space, aes, key, asked);
+    // A relay not yet updated has no place for them: the sync goes on.
+    await sendMenus(relay).catch(() => undefined);
     syncStatus.value = {
       kind: 'idle',
       said:
@@ -282,6 +293,7 @@ async function take(
   const kept2 = withoutGone(pack, kept);
   mergeSynced(kept2, tracked);
   if (tracked) waiting.set(pack.from, kept2);
+  await takeKeys(pack.keys);
   await fetchPhotos(space, aes, pack.photoNames ?? {});
 }
 
@@ -387,7 +399,8 @@ function photoIds(pack: SyncPack): string[] {
 }
 
 /**
- * The data of this device as it leaves: no settings, no keys, no passwords.
+ * The data of this device as it leaves: its weather keys, but no other
+ * setting, no relay, no key of the synchronisation, no password.
  * @returns The pack, before its photo names.
  */
 export function packOfDevice(): SyncPack {
@@ -400,6 +413,7 @@ export function packOfDevice(): SyncPack {
     from: syncDevice(),
     gone: gone(),
     photoNames: {},
+    keys: keysOfDevice(),
   };
 }
 
@@ -427,6 +441,24 @@ async function send(
   });
   store.set('ldb.syncSent', { sum, at: Date.now() });
   return photosLeft;
+}
+
+/**
+ * The menus, in clear (no personal data), on the relay: read from the Mac
+ * for the development of NavIn. Sent only when they changed.
+ * @param relay - The relay address.
+ * @returns When done.
+ */
+async function sendMenus(relay: string): Promise<void> {
+  const { at: _at, ...menus } = menusFile();
+  const text = JSON.stringify(menus);
+  const sum = await hashName(text, 'menus', 16);
+  if (store.get('ldb.syncMenus', '') === sum) return;
+  await ask(`${relay}/menus`, {
+    method: 'PUT',
+    body: JSON.stringify({ ...menus, at: new Date().toISOString() }),
+  });
+  store.set('ldb.syncMenus', sum);
 }
 
 async function sendPhotos(

@@ -62,6 +62,9 @@ const SYNC_PATH =
 /** The free plan keeps values up to 25 MB. */
 const SYNC_MOST = 24 * 1024 * 1024;
 
+/** The menus of the app (lists, buttons): a few hundred kB at most. */
+const MENUS_MOST = 2 * 1024 * 1024;
+
 /** Seconds an answer is kept. */
 const CACHE_SECONDS = 300;
 
@@ -1839,10 +1842,34 @@ export default {
         },
       });
     }
+    const url = new URL(request.url);
+    // The menus, without any personal data, read from the Mac as well.
+    if (url.pathname === '/menus' && request.method === 'GET') {
+      const text = env?.NAVIN ? await env.NAVIN.get('menus') : null;
+      return text == null
+        ? new Response('None', { status: 404, headers: permission(origin) })
+        : new Response(text, {
+            headers: {
+              ...permission(origin),
+              'Content-Type': 'application/json',
+            },
+          });
+    }
     if (!ORIGINS.includes(origin)) {
       return new Response('Forbidden', { status: 403 });
     }
-    const url = new URL(request.url);
+    if (url.pathname === '/menus' && request.method === 'PUT') {
+      if (!env?.NAVIN) return new Response('No storage', { status: 501 });
+      const text = await request.text();
+      if (text.length > MENUS_MOST) {
+        return new Response('Too big', {
+          status: 413,
+          headers: permission(origin),
+        });
+      }
+      await env.NAVIN.put('menus', text);
+      return json({ ok: true }, origin);
+    }
     const sync = SYNC_PATH.exec(url.pathname);
     if (sync?.groups) return syncAnswer(request, env, sync.groups, origin);
     // The recording: a device sends its points and what it read.

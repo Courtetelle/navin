@@ -113,7 +113,7 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
       '11. Dans NavIn, toucher Enregistrer sous le relais : l’essai dit « Enregistrement actif ».',
       '12. Les réseaux à clé enregistrés NavIn fermé (facultatif) : même Worker › « Paramètres » › « Variables et secrets » (« Variables and Secrets ») › « Ajouter » › type « Secret », un par clé, nom en majuscules : MF_KEY (Météo-France), AEMET_KEY (Espagne), METOFFICE_KEY (Royaume-Uni), FROST_KEY (identifiant Frost, Norvège) ; valeur : la clé copiée depuis le site du réseau (NavIn ne montre jamais ses clés) › « Déployer ». Les clés restent chez Cloudflare comme secrets : le relais ne les renvoie jamais.',
       '13. Recopier le code (étapes 4 et 5), puis toucher Enregistrer sous le relais : l’essai dit « Le relais lit lui-même : … » avec tous les réseaux (MeteoSwiss, balises, aéroports, bouées, Italie, Espagne, Portugal, Pays-Bas, Norvège, Danemark, Suède, Finlande, Croatie, et ceux des clés).',
-      '14. Synchronisation des appareils : rien à régler ici. Dans NavIn › Paramétrages › Sauvegarde et synchronisation : « 🔑 Créer la clé » sur un appareil, puis « 📥 Importer la clé de synchronisation » sur les autres, en visant le QR code de « 📤 Partager la clé ».',
+      '14. Synchronisation des appareils : rien à régler ici. Dans NavIn › Paramétrages › Sauvegarde et synchronisation : « 🔑 Créer la clé » sur un appareil, puis « 📥 Importer la clé de synchronisation » sur les autres, en visant le QR code de « 📤 Partager la clé ». Les clés météo suivent ensuite seules, chiffrées.',
     ].join('\n'),
     again: [
       '1. Ouvrir dash.cloudflare.com et « Log in » avec l’adresse mail et le mot de passe.',

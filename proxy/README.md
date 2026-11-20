@@ -46,4 +46,7 @@ Avec le stockage « NAVIN » installé, le relais garde aussi les données que
 chaque appareil de NavIn y dépose pour les autres (Paramétrages › Sauvegarde
 et synchronisation). Elles sont chiffrées sur l’appareil avec une clé qui ne
 passe jamais par le relais : il ne peut pas les lire. Rien à régler ici,
-sinon recopier le code du relais une fois et Déployer.
+sinon recopier le code du relais une fois et Déployer. Les clés météo de
+NavIn voyagent dans ces données chiffrées. Les menus (listes, boutons), sans
+aucune donnée personnelle, sont gardés en clair à l’adresse `/menus` du
+relais, pour le développement de NavIn.

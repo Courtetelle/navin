@@ -8,7 +8,6 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { boatDocPhotos } from '../../features/boats/index.ts';
 import { RestoreReportCard } from '../../features/data/RestoreReportCard.tsx';
 import { syncPack } from '../../features/data/backup.ts';
-import { sendMenus } from '../../features/data/menusExport.ts';
 import { restoreFile } from '../../features/data/restoreFile.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -17,37 +16,17 @@ import { deliver, state, updateSettings } from '../../state/index.ts';
 import { SyncSection } from './SyncSection.tsx';
 
 /**
- * Paramétrages › Sauvegarde et synchronisation, in three parts whose reach
+ * Paramétrages › Sauvegarde et synchronisation, in two parts whose reach
  * is said: the automatic synchronisation of the devices (and its copy kept
- * on the relay), a copy in a file (without Internet too), the menus sent to
- * the Mac.
- * @returns The three parts.
+ * on the relay, the menus for the development of NavIn too), and a copy in
+ * a file (without Internet too).
+ * @returns The two parts.
  */
 export function BackupSections() {
-  const tr = useTr();
   return (
     <>
       <SyncSection />
       <FileCopy />
-      <FoldSection title="📋 Envoyer mes menus">
-        <HelpText>
-          Pour le développement de NavIn seulement : les check-in, listes,
-          bases, boutons et météo que vous avez modifiés, sans aucune donnée
-          personnelle, à envoyer par AirDrop vers le Mac.
-        </HelpText>
-        <ButtonRow>
-          <Button
-            className="btn big"
-            id="menusOut"
-            onClick={() => {
-              buzz();
-              void sendMenus();
-            }}
-          >
-            {tr('📋 Envoyer mes menus')}
-          </Button>
-        </ButtonRow>
-      </FoldSection>
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { CK_DEFS } from '../../model/modes.ts';
-import { deliver, state } from '../../state/index.ts';
+import { state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 /** Properties of a boat that hold its lists, never its data. */
@@ -57,14 +57,4 @@ export function menusFile(): MenusFile {
     buttons: state.data.uiEdits.value,
     weatherChecks: store.get('ldb.wx.list', null),
   };
-}
-
-/** Make the file of the menus and hand it over (share sheet: AirDrop to the Mac). */
-export async function sendMenus(): Promise<void> {
-  const date = new Date().toISOString().slice(0, 10);
-  await deliver(
-    JSON.stringify(menusFile(), null, 2),
-    `NavIn-menus-${date}.json`,
-    'application/json',
-  );
 }

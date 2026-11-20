@@ -4,7 +4,7 @@ import { updateBoats } from './boats.ts';
 import { data } from './data.ts';
 
 /**
- * The menus as the skipper shaped them and sent them (« Envoyer mes menus »),
+ * The menus as the skipper shaped them and sent them (left on the relay),
  * made the menus of the app, once on each device, after the boot (the boot
  * itself stays the one of the first app).
  *

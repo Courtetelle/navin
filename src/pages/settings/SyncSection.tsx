@@ -36,11 +36,13 @@ export function SyncSection() {
       <HelpText keep>
         Vos appareils (téléphone, tablette, iPad) gardent les mêmes données,
         seuls : navigations, journal, traces, fiches, bateaux, marques,
-        équipages, journal SOS et photos. Ce qui est effacé sur l’un l’est sur
-        les autres. Les données passent par votre relais Cloudflare, chiffrées
-        sur l’appareil (AES-256) : personne d’autre ne peut les lire. Le relais
-        en garde la dernière version : c’est aussi votre sauvegarde. Les
-        Paramétrages et les clés restent propres à chaque appareil.
+        équipages, journal SOS, photos et clés météo. Ce qui est effacé sur l’un
+        l’est sur les autres. Les données passent par votre relais Cloudflare,
+        chiffrées sur l’appareil (AES-256) : personne d’autre ne peut les lire.
+        Le relais en garde la dernière version : c’est aussi votre sauvegarde.
+        Les autres Paramétrages restent propres à chaque appareil. Vos menus
+        (listes, boutons), sans aucune donnée personnelle, y sont aussi laissés
+        en clair pour le développement de NavIn.
       </HelpText>
       {relay ? null : (
         <p className="sync-state sync-error">

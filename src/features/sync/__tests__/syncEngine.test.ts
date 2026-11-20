@@ -61,7 +61,7 @@ async function packOf(): Promise<Record<string, unknown>> {
   >;
 }
 
-test('a device leaves its data encrypted, without its keys', async () => {
+test('a device leaves its data encrypted, its keys only inside', async () => {
   await syncRound(true);
 
   expect(syncStatus.peek().kind).toBe('idle');
@@ -72,6 +72,8 @@ test('a device leaves its data encrypted, without its keys', async () => {
   const pack = await packOf();
 
   expect(pack.settings).toBeUndefined();
+  expect((pack.keys as { mfKey: { v: string } }).mfKey.v).toBe('SECRET-MF-KEY');
+  expect(JSON.stringify(pack)).not.toContain(key);
   expect((pack.members as Array<{ id: string }>).map((m) => m.id)).toEqual([
     'm1',
     'm2',
@@ -124,4 +126,49 @@ test('what is deleted here is told to the others', async () => {
   expect((pack.members as Array<{ id: string }>).map((m) => m.id)).toEqual([
     'm3',
   ]);
+});
+
+test('the menus are left in clear, without personal data', async () => {
+  const menus = JSON.parse(kv.get('menus') ?? '{}') as { kind?: string };
+
+  expect(menus.kind).toBe('navin-menus');
+  expect(kv.get('menus')).not.toContain('Rochat');
+  const read = await relay.fetch(new Request(`${RELAY}/menus`), {
+    NAVIN: {
+      get: async (name: string) => kv.get(name) ?? null,
+      put: async () => undefined,
+    },
+  });
+
+  expect(read.status).toBe(200);
+});
+
+test('a key changed on another device later comes here', async () => {
+  const space = await hashName(key, 'space');
+  const fromC = {
+    all: true,
+    from: 'C',
+    cruises: [],
+    photoNames: {},
+    keys: {
+      aemetKey: { v: 'NEW-AEMET', at: Date.now() + 1000 },
+      mfKey: { v: 'OLD-MF', at: 1 },
+    },
+  };
+  kv.set(
+    `sync:${space}:dev:C`,
+    await seal(await aesKey(key), JSON.stringify(fromC)),
+  );
+  kv.set(
+    `sync:${space}:index`,
+    JSON.stringify({
+      ...(JSON.parse(kv.get(`sync:${space}:index`) ?? '{}') as object),
+      C: { at: Date.now() + 5000 },
+    }),
+  );
+  await syncRound(true);
+  const keys = state.preferences.settings.peek().windAlert;
+
+  expect(keys?.aemetKey).toBe('NEW-AEMET');
+  expect(keys?.mfKey).toBe('SECRET-MF-KEY');
 });
