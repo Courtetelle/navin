@@ -9817,6 +9817,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
     display: none !important;
   }
   html body header.topbar.topbar #gearBtn.theme-btn,
+  html body header.topbar.topbar #routesBtn.theme-btn,
   html body #searchBtn.no-print {
     display: flex !important;
     align-items: center;
@@ -10086,6 +10087,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   html body header.topbar.topbar #clock,
   html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data,
   html body header.topbar.topbar #gearBtn.theme-btn,
+  html body header.topbar.topbar #routesBtn.theme-btn,
   html body #searchBtn.no-print,
   html body .rail-btn.rail-btn {
     background: color-mix(
@@ -10161,6 +10163,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   (orientation: portrait) {
   html:root body .rail-btn.rail-btn,
   html:root body header.topbar.topbar #gearBtn.theme-btn,
+  html:root body header.topbar.topbar #routesBtn.theme-btn,
   html:root body #searchBtn.no-print,
   html:root
     body
@@ -10192,6 +10195,7 @@ body.nav-search:not(.trk-mode) #searchBtn {
   }
   :root[data-theme='night'] body .rail-btn.rail-btn,
   :root[data-theme='night'] body header.topbar.topbar #gearBtn.theme-btn,
+  :root[data-theme='night'] body header.topbar.topbar #routesBtn.theme-btn,
   :root[data-theme='night'] body #searchBtn.no-print,
   :root[data-theme='night']
     body
@@ -10563,6 +10567,10 @@ html:root:not([data-theme='night'])
   body
   header.topbar.topbar
   #gearBtn.theme-btn.menu-here.menu-here,
+html:root:not([data-theme='night'])
+  body
+  header.topbar.topbar
+  #routesBtn.theme-btn.menu-here.menu-here,
 html:root:not([data-theme='night'])
   body
   header.topbar
@@ -10967,6 +10975,7 @@ html body .leaflet-container .leaflet-control-layers.leaflet-control-layers {
     max-height: 100%;
   }
   html body header.topbar.topbar #gearBtn.theme-btn,
+  html body header.topbar.topbar #routesBtn.theme-btn,
   html body #searchBtn.no-print,
   html body .rail-btn.rail-btn {
     min-height: 0 !important;
@@ -11500,8 +11509,8 @@ html:root body header.topbar nav.topnav .top-tab.tab-sos.active .tb-sos text {
   /* The note of a map without network in the middle, clear of what NavIn
      unrolls above it */
   html body .map-missing {
-    top: 40%;
-    bottom: auto;
+    top: auto;
+    bottom: calc(50% + 1.5 * var(--rb-h) + var(--rb-gap) + 12px);
   }
 }
 @media (orientation: portrait) {
@@ -14309,4 +14318,75 @@ body.route-on .slide-handle.sh-bot {
 .route-panel .rp-btns .btn,
 .route-panel .rp-auto .btn {
   min-height: 40px;
+}
+
+/* Routes: its own button between data and the settings, unrolled with them */
+.topbar #routesBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.topbar #routesBtn .routes-ico svg {
+  display: block;
+  width: 34px;
+  height: 34px;
+}
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) {
+  html body header.topbar #routesBtn {
+    position: fixed !important;
+    width: var(--rb-w) !important;
+    height: var(--rb-h) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: none !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+  }
+  html body:not(.menus-open) header.topbar.topbar #routesBtn.theme-btn {
+    display: none !important;
+  }
+}
+html body.menus-fading header.topbar #routesBtn.theme-btn {
+  opacity: 0 !important;
+  transition: opacity 3s linear !important;
+}
+/* Sideways: data, Routes, settings side by side at the top in the middle */
+@media (orientation: landscape) and (min-width: 560px) {
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    left: calc(50% - 1.5 * var(--rb-w) - var(--rb-gap)) !important;
+  }
+  html body header.topbar #routesBtn {
+    top: calc(34px + env(safe-area-inset-top)) !important;
+    bottom: auto !important;
+    left: calc(50% - var(--rb-w) / 2) !important;
+    right: auto !important;
+  }
+  html body header.topbar #gearBtn {
+    left: calc(50% + var(--rb-w) / 2 + var(--rb-gap)) !important;
+  }
+}
+/* Upright: one above the other at the right edge in the middle */
+@media (orientation: portrait) {
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    top: calc(50% - 1.5 * var(--rb-h) - var(--rb-gap)) !important;
+  }
+  html body header.topbar #routesBtn {
+    top: calc(50% - var(--rb-h) / 2) !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: calc(34px + env(safe-area-inset-right)) !important;
+  }
+  html body header.topbar #gearBtn {
+    top: calc(50% + var(--rb-h) / 2 + var(--rb-gap)) !important;
+  }
+}
+:root[data-theme='night'] .topbar #routesBtn {
+  color: #ff4040;
+}
+:root[data-theme='night'] .topbar #routesBtn .routes-ico circle[fill='#fff'] {
+  fill: #200000;
 }

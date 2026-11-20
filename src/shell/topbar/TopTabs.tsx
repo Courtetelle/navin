@@ -25,8 +25,8 @@ import {
   tabPointerDown,
 } from './topTabGestures.ts';
 
-/** Menus that blink on their own button (pin, gear, VHF), not on data. */
-const OWN_BUTTON = new Set(['marks', 'settings', 'vhf']);
+/** Menus that blink on their own button (pin, routes, gear, VHF), not on data. */
+const OWN_BUTTON = new Set(['marks', 'routes', 'settings', 'vhf']);
 
 const TAB_CLASS: Record<TopTabKey, string> = {
   tracker: 'tab top-tab',

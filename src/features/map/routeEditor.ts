@@ -34,7 +34,7 @@ import { aroundLand, autoOptions, saveAutoOptions } from './autoRoute.ts';
 import { escapeHtml } from './escapeHtml.ts';
 import { setGoto } from './goto.ts';
 import { leaflet } from './leaflet.ts';
-import { routeEditing } from './routeMode.ts';
+import { ROUTE_ICON, routeEditing } from './routeMode.ts';
 import { readNumber } from './rulerEditor.ts';
 import { endsLongPress } from './tapCross.ts';
 import { setFollow, tracker } from './trackerState.ts';
@@ -49,10 +49,6 @@ const LABEL_PX = 110;
 const MID_PX = 56;
 /** Changes that can be undone. */
 const UNDO_STEPS = 50;
-
-/** The route icon: a broken line between three points. */
-export const ROUTE_ICON =
-  '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5 10 8.5l5.5 7L19.5 4.5" stroke-width="2.2"/><circle cx="4.5" cy="19.5" r="2.4" fill="currentColor" stroke="none"/><circle cx="10" cy="8.5" r="2.4" fill="#fff" stroke-width="1.6"/><circle cx="15.5" cy="15.5" r="2.4" fill="#fff" stroke-width="1.6"/><circle cx="19.5" cy="4.5" r="2.4" fill="currentColor" stroke="none"/></svg>';
 
 /** The route to open on the map once it is shown: an id, or a new one. */
 let pending: string | 'new' | null = null;

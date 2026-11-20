@@ -36,7 +36,6 @@ test('without a cruise, the menu lists the records of the phone', () => {
     'cartes',
     'nmea',
     'marks',
-    'routes',
     'lists',
     'sites',
   ]);
@@ -66,7 +65,6 @@ test('a lake outing shows its sheet, its rules and the lake totals', () => {
     'crews',
     'lists',
     'marks',
-    'routes',
     'cartes',
     'nmea',
     'sites',
