@@ -2,6 +2,7 @@ import { uid } from '../../lib/format.ts';
 import { BOAT_KEYS } from '../../model/boatSheet.ts';
 import { LAKE_CONTACTS } from '../../model/contacts.ts';
 import type { FieldData } from '../../model/field.ts';
+import type { BoatPolar } from '../../model/polars.ts';
 import type { Boat, Cruise, CruiseInfo } from '../../model/types.ts';
 import {
   boatById,
@@ -164,4 +165,16 @@ function docOwner(documentId: string): Boat | undefined {
   return state.data.boats.value.find((boat) =>
     boatDocs(boat).some((document) => document.id === documentId),
   );
+}
+
+/**
+ * Set or take away the polar of a boat (`boat.polar`).
+ * @param id - Boat id.
+ * @param polar - The polar, or `null` to take it away.
+ */
+export function setBoatPolar(id: string, polar: BoatPolar | null): void {
+  updateBoat(id, (boat) => {
+    if (polar) boat.polar = polar;
+    else delete boat.polar;
+  });
 }

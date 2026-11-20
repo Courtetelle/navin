@@ -771,6 +771,45 @@ async function crewAndBoat(page: Page, theme: string): Promise<void> {
   );
 }
 
+async function boatPolar(page: Page, theme: string): Promise<void> {
+  // The polar of a boat, found in the ORC certificates kept with the site.
+  await openData(page);
+  await page.locator('[data-tile="boats"]').click();
+  await page.waitForTimeout(300);
+  const polar = page.locator('[data-polar]').first();
+  if (!(await polar.isVisible())) {
+    await page.locator('#boatList summary').first().click();
+    await page.waitForTimeout(300);
+  }
+  await polar.click();
+  await page.waitForTimeout(300);
+  await page.locator('#polSearch').fill('Hanse 325 2011');
+  await page.locator('#polSearchBtn').click();
+  const first = page.locator('#polFound li').first();
+  await first.waitFor({ timeout: 10_000 });
+  const found = (await first.textContent()) ?? '';
+  check(
+    theme,
+    'Bateaux › polaire: the ORC certificates find the Hanse 325',
+    found.startsWith('Hanse 325'),
+  );
+  await page.locator('.pol-take').first().click();
+  await page.waitForTimeout(300);
+  const digest = (await page.locator('.pol-digest').textContent()) ?? '';
+  const rows = await page.locator('#polTable tbody tr').count();
+  check(
+    theme,
+    'and keeps its polar, at 85 % for a cruise',
+    /85 %.*près [\d,]+ nd à \d+°/.test(digest) && rows > 8,
+  );
+  const last = (await page.locator('#view .btn').last().textContent()) ?? '';
+  check(theme, 'and Partager comes last', last.includes('Partager'));
+  await page.locator('#navBack').click();
+  await page.waitForTimeout(300);
+  const button = (await polar.textContent()) ?? '';
+  check(theme, 'the boat shows its polar', button.includes('Hanse 325'));
+}
+
 async function swipeMenu(page: Page, theme: string): Promise<void> {
   await openData(page);
   await page.locator('[data-tile="people"]').click();
@@ -2056,6 +2095,7 @@ for (const theme of ['day', 'night']) {
     await crewCard(page, theme);
     await swipeMenu(page, theme);
     await crewAndBoat(page, theme);
+    await boatPolar(page, theme);
     await marksShare(page, theme);
     await scalesSteady(page, theme);
     await alertsInTurn(page, theme);
