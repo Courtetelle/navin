@@ -1708,11 +1708,14 @@ async function routeAround(page: Page, theme: string): Promise<void> {
   await page.reload({ waitUntil: 'load' });
   await page.locator('.map-locate-btn').waitFor({ state: 'attached' });
   await page.waitForTimeout(800);
-  await openGear(page);
-  await page.waitForTimeout(300);
-  await openData(page);
-  await page.waitForTimeout(300);
-  await page.locator('[data-tile="routes"]').click();
+  // Routes has its own button, between data and the settings.
+  await showRow(page);
+  check(
+    theme,
+    'Routes is not a tile of data',
+    (await page.locator('[data-tile="routes"]').count()) === 0,
+  );
+  await page.locator('#routesBtn').click();
   await page.waitForTimeout(500);
   await page.locator('#rtList .mark-head').first().click();
   await page.waitForTimeout(1500);

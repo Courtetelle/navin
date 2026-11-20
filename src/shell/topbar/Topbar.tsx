@@ -3,6 +3,8 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
+import { markupToReact } from '../../components/shared/markupToReact.ts';
+import { ROUTE_ICON } from '../../features/map/routeMode.ts';
 import { buzz } from '../../lib/dom.ts';
 import { railsScreen } from '../../lib/useWide.ts';
 import { state } from '../../state/index.ts';
@@ -57,6 +59,7 @@ export function Topbar() {
       <nav className="topnav">
         <TopTabs />
       </nav>
+      <RoutesButton />
       <GearButton focused={tipFocus.value === 'gear'} />
       <Button
         className="theme-btn"
@@ -135,6 +138,33 @@ function GearButton({ focused }: { focused: boolean }) {
       }}
     >
       <SettingsIcon />
+    </Button>
+  );
+}
+
+/**
+ * Routes, between data and the settings: the routes drawn on the map. Its
+ * own button, out of data; it blinks while its page shows.
+ * @returns The button.
+ */
+function RoutesButton() {
+  useSignals();
+  const here = state.view.currentView.value === 'routes' || inMenu('routes');
+  return (
+    <Button
+      className={['theme-btn', 'routes-top', here && 'menu-here']
+        .filter(Boolean)
+        .join(' ')}
+      id="routesBtn"
+      aria-label="Routes"
+      title="Routes"
+      onClick={() => {
+        buzz();
+        navinRowChosen();
+        menuButtonPress('routes', navBack);
+      }}
+    >
+      <span className="routes-ico">{markupToReact(ROUTE_ICON)}</span>
     </Button>
   );
 }
