@@ -11,7 +11,7 @@ place de NavIn et les lui rend avec la permission.
 2. Workers & Pages › Create › Create Worker › nommer « navin-relay » › Deploy.
 3. Edit code : remplacer tout le contenu par celui de `navin-relay.js`, Deploy.
 4. Copier l’adresse du Worker (https://navin-relay.<compte>.workers.dev).
-5. Dans NavIn : Réglages › Clés météo › « Relais des METAR et bouées », coller
+5. Dans NavIn : Paramétrages › Clés météos et compte relais › « Relais NavIn (Cloudflare) », coller
    l’adresse, Enregistrer.
 
 Le relais ne sert que le site de NavIn, ne lit que ces deux serveurs, et garde

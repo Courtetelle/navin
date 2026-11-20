@@ -30,7 +30,7 @@ import { state, toast } from '../../state/index.ts';
 
 const TROUBLES: Readonly<Record<string, string>> = {
   'no-relay':
-    'Il faut le relais (Paramétrages › Clés météos et compte relais › Relais des METAR et bouées) : MétéoSuisse ne laisse pas une appli lire ses avis directement.',
+    'Il faut le relais (Paramétrages › Clés météos et compte relais › Relais NavIn (Cloudflare)) : MétéoSuisse ne laisse pas une appli lire ses avis directement.',
   'old-relay':
     'Le relais doit être mis à jour : Paramétrages › Clés météos et compte relais › « 📋 Copier le code du relais », puis sur Cloudflare « Modifier le code », tout remplacer et « Déployer ».',
   network: 'MétéoSuisse n’a pas répondu : nouvel essai dans 5 minutes.',

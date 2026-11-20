@@ -6,7 +6,7 @@
  *
  * Install: dash.cloudflare.com › Workers & Pages › Create › Worker, paste
  * this file, Deploy; then copy its address (https://….workers.dev) into
- * NavIn › Réglages › Clés météo › Relais des METAR et bouées.
+ * NavIn › Paramétrages › Clés météos et compte relais › Relais NavIn (Cloudflare).
  *
  * Recording (optional): with a KV namespace bound as « NAVIN » and a Cron
  * trigger « *\/10 * * * * », the relay keeps 24 hours of the stations around

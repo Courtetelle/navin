@@ -72,7 +72,7 @@ export function RelayRow() {
         }}
       >
         <div className="cf">
-          <label htmlFor="relayUrl">{tr('🛰 Relais des METAR et bouées')}</label>
+          <label htmlFor="relayUrl">{tr('🛰 Relais NavIn (Cloudflare)')}</label>
           <div className="sea-center-row">
             <input
               className="text"
