@@ -13742,3 +13742,43 @@ h1.menu-title {
   color: var(--fg);
   background: #200000;
 }
+/* Mes menus pour NavIn: what changed in the menus since they were taken in */
+.menus-changes {
+  margin: 8px 0 12px;
+}
+.menus-list h4 {
+  margin: 12px 0 4px;
+  font-size: 18px;
+}
+.menus-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.menus-list li {
+  padding: 6px 10px;
+  border-radius: 10px;
+  font-size: 18px;
+  background: var(--card, #f2f4f7);
+  margin-bottom: 4px;
+}
+.menus-list li b {
+  display: inline-block;
+  width: 1.4em;
+}
+.menus-added b {
+  color: var(--ok, #1a7f37);
+}
+.menus-removed b {
+  color: var(--danger, #b42318);
+}
+.menus-renamed b {
+  color: #8a6d00;
+}
+:root[data-theme='night'] .menus-list li {
+  color: var(--fg);
+  background: #200000;
+}
+:root[data-theme='night'] .menus-list li b {
+  color: var(--fg);
+}

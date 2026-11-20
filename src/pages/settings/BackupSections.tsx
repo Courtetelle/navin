@@ -13,19 +13,21 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { deliver, state, updateSettings } from '../../state/index.ts';
 
+import { MenusForNavIn } from './MenusForNavIn.tsx';
 import { SyncSection } from './SyncSection.tsx';
 
 /**
- * Paramétrages › Sauvegarde et synchronisation, in two parts whose reach
+ * Paramétrages › Sauvegarde et synchronisation, in three parts whose reach
  * is said: the automatic synchronisation of the devices (and its copy kept
- * on the relay, the menus for the development of NavIn too), and a copy in
+ * on the relay), the menus for NavIn (how, and what changed), and a copy in
  * a file (without Internet too).
- * @returns The two parts.
+ * @returns The three parts.
  */
 export function BackupSections() {
   return (
     <>
       <SyncSection />
+      <MenusForNavIn />
       <FileCopy />
     </>
   );

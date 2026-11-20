@@ -22,6 +22,7 @@ import {
 import { getPhoto, putPhoto } from '../../storage/photos.ts';
 import { store } from '../../storage/store.ts';
 import { backupAll } from '../data/backup.ts';
+import { menusChanges } from '../data/menusChanges.ts';
 import { menusFile } from '../data/menusExport.ts';
 import type { BackupFile } from '../data/restoreBackup.ts';
 import { mergeSynced } from '../data/restoreBackup.ts';
@@ -450,7 +451,10 @@ async function send(
  * @returns When done.
  */
 async function sendMenus(relay: string): Promise<void> {
-  const { at: _at, ...menus } = menusFile();
+  const file = menusFile();
+  const { at: _at, ...kept } = file;
+  // With what changed since the last time they were taken into NavIn.
+  const menus = { ...kept, changes: menusChanges(file) };
   const text = JSON.stringify(menus);
   const sum = await hashName(text, 'menus', 16);
   if (store.get('ldb.syncMenus', '') === sum) return;
