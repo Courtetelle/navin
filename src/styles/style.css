@@ -13805,3 +13805,105 @@ h1.menu-title {
   outline: 3px dashed var(--fg);
   outline-offset: -9px;
 }
+
+/* Beaufort et Douglas read together: « B / D » chips, a colour per kind of
+   conditions, and the combining tool above the table */
+.bd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.bd-chip > span:not(.bd-slash, .bd-tail) {
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 1px 4px;
+  border-radius: 6px;
+  text-align: center;
+  border: 1px solid rgb(0 0 0 / 0.25);
+}
+.bd-slash {
+  opacity: 0.7;
+}
+.bd-tail {
+  margin-left: 6px;
+  font-weight: 700;
+}
+.bd-tbl .bd-cell {
+  text-align: left;
+}
+.bd-tbl .bd-cell .bd-chip {
+  font-size: 15px;
+}
+.scale-tbl.bd-tbl th:nth-child(1),
+.scale-tbl.bd-tbl td:nth-child(1) {
+  width: 6em;
+}
+.bd-tbl .bd-group {
+  margin-top: 4px;
+  font-size: 12px;
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+.bd-tbl tfoot th {
+  border-top: 1px solid var(--hair);
+}
+.bd-tool {
+  background: var(--card, #fff);
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin: 0 0 14px;
+}
+.bd-tool h2 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+.bd-tool h3 {
+  margin: 10px 0 2px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.bd-how {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+.bd-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+.bd-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.bd-input {
+  display: flex;
+  gap: 4px;
+}
+.bd-input input {
+  flex: 1;
+  min-width: 0;
+  font-size: 20px;
+}
+.bd-clear {
+  flex: none;
+  min-width: 44px;
+}
+.bd-result p {
+  margin: 4px 0;
+}
+.bd-result ul {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.bd-big {
+  margin-top: 10px;
+  font-size: 28px;
+}

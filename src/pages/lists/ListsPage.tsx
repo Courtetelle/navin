@@ -26,16 +26,10 @@ export function ListsPage() {
           data-go="beaufort"
           onClick={() => openView('beaufort')}
         >
-          {tr('🌬 Échelle de Beaufort')}
-          <small>{tr('force du vent en nœuds, aspect de la mer')}</small>
-        </Button>
-        <Button
-          className="btn big"
-          data-go="douglas"
-          onClick={() => openView('douglas')}
-        >
-          {tr('🌊 Échelle de Douglas')}
-          <small>{tr('état de la mer, hauteur des vagues')}</small>
+          {tr('🌬🌊 Beaufort et Douglas')}
+          <small>
+            {tr('vent et mer lus ensemble, outil de lecture combinée')}
+          </small>
         </Button>
         <Button
           className="btn big"

@@ -440,15 +440,9 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
             <div className="page-links">
               <PageLink
                 view="beaufort"
-                icon="💨"
-                label="Échelle de Beaufort"
-                sub="la force du vent, de 0 à 12"
-              />
-              <PageLink
-                view="douglas"
-                icon="🌊"
-                label="Échelle de Douglas"
-                sub="l’état de la mer, de 0 à 9"
+                icon="🌬🌊"
+                label="Beaufort et Douglas"
+                sub="le vent et la mer lus ensemble, avec l’outil de lecture combinée"
               />
             </div>
           </section>

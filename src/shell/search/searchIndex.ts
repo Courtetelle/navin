@@ -55,8 +55,16 @@ const OTHER_FUNCTIONS: readonly FunctionEntry[] = [
     title: '🌬 LiveMétéo',
     sub: 'vent stations mesures rafales',
   },
-  { key: 'beaufort', title: '💨 Échelle de Beaufort', sub: 'vent' },
-  { key: 'douglas', title: '🌊 Échelle de Douglas', sub: 'mer vagues' },
+  {
+    key: 'beaufort',
+    title: '🌬🌊 Beaufort et Douglas',
+    sub: 'vent mer vagues lecture combinée',
+  },
+  {
+    key: 'douglas',
+    title: '🌊 Échelle de Douglas (avec Beaufort)',
+    sub: 'mer vagues',
+  },
   { key: 'alpha', title: '🔤 Alphabet phonétique', sub: 'épeler radio' },
 ];
 
