@@ -14463,3 +14463,31 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 .pol-where li + li {
   margin-top: 6px;
 }
+/* Bateaux › polaire réelle: the sails up and those of the boat */
+.rp-sails {
+  padding: 10px 14px;
+}
+.rp-sails p {
+  margin: 6px 0;
+}
+.rp-sails select {
+  font-size: 16px;
+}
+.rp-extra {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 4px 0 8px;
+  padding: 0;
+}
+.rp-extra .rp-x {
+  min-height: 0;
+  padding: 0 8px;
+}
+.rp-sails .pol-search {
+  padding: 0;
+}
+.rp-real {
+  padding: 8px 14px;
+}

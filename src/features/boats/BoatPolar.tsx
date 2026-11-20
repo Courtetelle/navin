@@ -29,6 +29,7 @@ import type { Boat } from '../../model/types.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { boatById, deliver, toast } from '../../state/index.ts';
 
+import { RealPolars } from './RealPolars.tsx';
 import { setBoatPolar } from './boatActions.ts';
 import { boatPolarOf, polarDigest } from './polarDigest.ts';
 
@@ -201,6 +202,7 @@ export function BoatPolarScreen({ boatId, onBack }: BoatPolarScreenProps) {
           });
         }}
       />
+      <RealPolars boat={boat} />
       <WhereToFind />
       {kept ? (
         <>
@@ -507,7 +509,7 @@ function WhereToFind() {
         </li>
         <li>
           {tr(
-            'Vos navigations : NavIn pourra bientôt construire la polaire réelle du bateau, voile par voile, à partir de vos traces.',
+            'Vos navigations : NavIn construit la polaire réelle du bateau, voilure par voilure (section « Polaire réelle » ci-dessus).',
           )}
         </li>
       </ul>
