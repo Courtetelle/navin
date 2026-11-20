@@ -18,11 +18,13 @@
     "test-only": "vitest run --coverage"
   },
   "dependencies": {
+    "@mapbox/vector-tile": "^2.0.5",
     "@preact/signals-react": "^3.12.0",
     "immer": "^11.2.9",
     "jsqr": "1.4.0",
     "leaflet": "^1.9.4",
     "leaflet-rotate": "^0.5.3",
+    "pbf": "^4.0.2",
     "pmtiles": "^4.5.0",
     "protomaps-leaflet": "^5.1.0",
     "react": "^19.3.1",

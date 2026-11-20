@@ -1603,6 +1603,63 @@ const offlineDrawn = (page: Page) =>
     );
   });
 
+/**
+ * A route across Porquerolles, the map file of the island on the device:
+ * « Contourner la terre » bends it round the island, at the margin.
+ * @param page - The page shown, the map files imported.
+ * @param theme - Day or night.
+ */
+async function routeAround(page: Page, theme: string): Promise<void> {
+  await page.evaluate(() => {
+    const now = new Date().toISOString();
+    localStorage.setItem(
+      'ldb.routes',
+      JSON.stringify([
+        {
+          id: 'smoke-porquerolles',
+          name: 'Travers de Porquerolles',
+          at: now,
+          mod: now,
+          points: [
+            { lat: 43.03, lon: 6.2 },
+            { lat: 42.975, lon: 6.2 },
+          ],
+          speed: 6.5,
+        },
+      ]),
+    );
+  });
+  await page.reload({ waitUntil: 'load' });
+  await page.locator('.map-locate-btn').waitFor({ state: 'attached' });
+  await page.waitForTimeout(800);
+  await openGear(page);
+  await page.waitForTimeout(300);
+  await openData(page);
+  await page.waitForTimeout(300);
+  await page.locator('[data-tile="routes"]').click();
+  await page.waitForTimeout(500);
+  await page.locator('#rtList .mark-head').first().click();
+  await page.waitForTimeout(1500);
+  await page.locator('.route-panel [data-rp="auto"]').click();
+  await page.waitForFunction(
+    () => !document.querySelector<HTMLElement>('.rp-msg')?.hidden,
+    null,
+    { timeout: 30_000 },
+  );
+  const said = (await page.locator('.rp-msg').textContent()) ?? '';
+  const laid = await page.locator('.route-pt').count();
+  check(
+    theme,
+    `a route across Porquerolles goes round the island (${laid} points)`,
+    said.includes('contourné') && laid > 2,
+  );
+  check(
+    theme,
+    'the way round says rocks and shallows are not avoided',
+    said.includes('hauts-fonds'),
+  );
+}
+
 // Two map files side by side, network gone: both show where the boat sails.
 async function offlineFiles(page: Page, theme: string): Promise<void> {
   await openGear(page);
@@ -1935,6 +1992,7 @@ for (const theme of ['day', 'night']) {
   const { context, page, errors } = await open(browser, theme);
   try {
     await offlineFiles(page, theme);
+    await routeAround(page, theme);
   } catch (error) {
     check(
       theme,

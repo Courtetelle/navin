@@ -29,6 +29,8 @@ import {
   toast,
 } from '../../state/index.ts';
 
+import type { AutoAnswer } from './autoRoute.ts';
+import { aroundLand, autoOptions, saveAutoOptions } from './autoRoute.ts';
 import { escapeHtml } from './escapeHtml.ts';
 import { setGoto } from './goto.ts';
 import { leaflet } from './leaflet.ts';
@@ -140,6 +142,8 @@ export function addRouteControl(map: LeafletMap): void {
   let history: RoutePoint[][] = [];
   let speed = DEFAULT_ROUTE_SPEED;
   let depart: string | null = null;
+  let how: NavRoute['how'] = 'manual';
+  let busy = false;
   let selected: number | null = null;
   let line: Polyline | null = null;
   let dots: Marker[] = [];
@@ -156,7 +160,7 @@ export function addRouteControl(map: LeafletMap): void {
       points,
       speed,
       depart,
-      how: route?.how ?? 'manual',
+      how,
     });
   };
 
@@ -384,7 +388,7 @@ export function addRouteControl(map: LeafletMap): void {
       hint.textContent =
         points.length < 2
           ? 'Touchez la carte pour poser les points de la route, dans l’ordre.'
-          : 'Touchez la carte : un point au bout · doigt sur un point : le déplacer · ＋ : plier un segment · appui long sur un point : le supprimer.';
+          : 'Toucher la carte : un point au bout · glisser un point : le déplacer · ＋ : plier · appui long : supprimer.';
     }
     const undo = panel.querySelector<HTMLButtonElement>('[data-rp="undo"]');
     if (undo) undo.disabled = history.length === 0;
@@ -396,6 +400,81 @@ export function addRouteControl(map: LeafletMap): void {
     }
     const goto = panel.querySelector<HTMLButtonElement>('[data-rp="goto"]');
     if (goto) goto.disabled = points.length < 2;
+    const auto = panel.querySelector<HTMLButtonElement>('[data-rp="auto"]');
+    if (auto) {
+      auto.disabled = busy || points.length < 2;
+      auto.textContent = busy ? '⏳ Calcul…' : '⛵ Contourner la terre';
+    }
+  };
+
+  /** A line of the panel under the buttons: what the way round gave. */
+  const say = (text: string, withCharts = false) => {
+    const line = panel?.querySelector<HTMLElement>('.rp-msg');
+    if (!line) return;
+    line.hidden = text === '';
+    line.innerHTML =
+      escapeHtml(text) +
+      (withCharts
+        ? ' <button type="button" class="btn" data-rp="cartes">🗺 Fonds de cartes</button>'
+        : '');
+  };
+
+  const sayAnswer = (answer: AutoAnswer, before: number, margin: number) => {
+    if (answer.kind === 'no-map') {
+      say(
+        'Aucune carte hors ligne ne couvre toute la route : importez dans Fonds de cartes une carte (.pmtiles) de la zone, elle sert aussi sans réseau.',
+        true,
+      );
+    } else if (answer.kind === 'no-water') {
+      say('La carte hors ligne de la zone ne contient pas d’eau ici.', true);
+    } else if (answer.kind === 'clear') {
+      say(
+        `Aucun segment ne coupe la terre ni la marge de ${margin} m. Roches et hauts-fonds ne sont pas vérifiés : regardez la carte marine.`,
+      );
+    } else if (answer.kind === 'done') {
+      const after = routeNm(points);
+      const parts = [
+        `${answer.bent} segment${answer.bent > 1 ? 's' : ''} contourné${answer.bent > 1 ? 's' : ''} à ${margin} m de la côte au moins · ${fr(after, 1)} NM (+${fr(Math.max(0, after - before), 1)})`,
+      ];
+      for (const leg of answer.failed) {
+        parts.push(
+          `pas de passage trouvé entre ${pointName(points, leg)} et le point suivant`,
+        );
+      }
+      parts.push(
+        'Roches et hauts-fonds ne sont pas évités : vérifiez sur la carte marine.',
+      );
+      say(parts.join(' · '));
+    }
+  };
+
+  const goAround = () => {
+    if (busy || points.length < 2) return;
+    busy = true;
+    say('');
+    drawPanel();
+    const options = autoOptions();
+    const before = routeNm(points);
+    const shown = route?.id ?? null;
+    const done = (answer: AutoAnswer | null) => {
+      busy = false;
+      // Closed, or another route opened, meanwhile: nothing to change.
+      if (!isOpen() || (route?.id ?? null) !== shown) return;
+      if (answer?.kind === 'done') {
+        how = 'auto';
+        change(answer.points);
+      }
+      drawAll();
+      if (answer) {
+        sayAnswer(answer, before, options.marginM);
+      } else {
+        say(
+          'Le calcul n’a pas abouti : la carte hors ligne n’a pas pu être lue.',
+        );
+      }
+      if (answer?.kind === 'done') fitRoute();
+    };
+    aroundLand(points, options).then(done, () => done(null));
   };
 
   const panelHtml = () => `
@@ -411,7 +490,13 @@ export function addRouteControl(map: LeafletMap): void {
       <button type="button" class="btn" data-rp="goto">🎯 Go to</button>
       <button type="button" class="btn" data-rp="list">🧭 Routes</button>
       <button type="button" class="btn primary" data-rp="done">✓ Terminer</button>
-    </div>`;
+    </div>
+    <div class="rp-auto">
+      <button type="button" class="btn" data-rp="auto">⛵ Contourner la terre</button>
+      <label>Marge <input data-rp="margin" class="text" inputmode="numeric" enterkeyhint="done" value="${autoOptions().marginM}" aria-label="Distance à la côte, mètres"> m</label>
+      <label><input data-rp="farms" type="checkbox"${autoOptions().avoidFarms ? ' checked' : ''}> Éviter le parc éolien</label>
+    </div>
+    <div class="rp-msg" hidden></div>`;
 
   const onPanel = (action: string) => {
     buzz();
@@ -438,6 +523,11 @@ export function addRouteControl(map: LeafletMap): void {
       go('routes');
     } else if (action === 'done') {
       close();
+    } else if (action === 'auto') {
+      goAround();
+    } else if (action === 'cartes') {
+      close();
+      go('cartes');
     }
   };
 
@@ -467,6 +557,26 @@ export function addRouteControl(map: LeafletMap): void {
         drawAll();
       });
     element
+      .querySelector<HTMLInputElement>('[data-rp="margin"]')
+      ?.addEventListener('change', (event) => {
+        const input = event.target as HTMLInputElement;
+        const typed = readNumber(input.value);
+        if (typed === null || typed < 0 || typed > 5000) {
+          toast('Marge entre 0 et 5000 m.');
+          input.value = String(autoOptions().marginM);
+          return;
+        }
+        saveAutoOptions({ ...autoOptions(), marginM: Math.round(typed) });
+      });
+    element
+      .querySelector<HTMLInputElement>('[data-rp="farms"]')
+      ?.addEventListener('change', (event) => {
+        saveAutoOptions({
+          ...autoOptions(),
+          avoidFarms: (event.target as HTMLInputElement).checked,
+        });
+      });
+    element
       .querySelector<HTMLInputElement>('[data-rp="depart"]')
       ?.addEventListener('change', (event) => {
         const typed = (event.target as HTMLInputElement).value;
@@ -494,6 +604,20 @@ export function addRouteControl(map: LeafletMap): void {
 
   const redrawLegs = () => drawLegs();
 
+  /** The whole route on screen, above the panel and below the buttons. */
+  const fitRoute = () => {
+    if (points.length < 2) return;
+    const covered = panel?.getBoundingClientRect().height ?? 0;
+    map.fitBounds(
+      L.latLngBounds(points.map((point) => [point.lat, point.lon])),
+      {
+        paddingTopLeft: [40, 110],
+        paddingBottomRight: [40, covered + 30],
+        animate: false,
+      },
+    );
+  };
+
   const open = (id: string | null) => {
     close();
     route = id
@@ -502,6 +626,8 @@ export function addRouteControl(map: LeafletMap): void {
     points = route ? route.points.map((point) => ({ ...point })) : [];
     speed = route?.speed ?? DEFAULT_ROUTE_SPEED;
     depart = route?.depart ?? null;
+    how = route?.how ?? 'manual';
+    busy = false;
     history = [];
     selected = null;
     routeEditing.value = true;
@@ -519,10 +645,7 @@ export function addRouteControl(map: LeafletMap): void {
     map.on('click', onMapTap);
     map.on('zoomend rotate', redrawLegs);
     if (points.length > 1) {
-      map.fitBounds(
-        L.latLngBounds(points.map((point) => [point.lat, point.lon])),
-        { padding: [60, 60], animate: false },
-      );
+      fitRoute();
     } else if (points.length === 1) {
       const [only] = points as [RoutePoint];
       map.panTo([only.lat, only.lon]);
