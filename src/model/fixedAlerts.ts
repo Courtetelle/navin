@@ -63,6 +63,31 @@ export const FIXED_ALERTS: readonly FixedAlert[] = [
     checked: false,
   },
   {
+    id: 'eolien-st-brieuc',
+    sea: 'manche',
+    name: 'Parc éolien en mer de la baie de Saint-Brieuc',
+    where:
+      'nord-est de la baie, au large d’Erquy et du cap Fréhel ; sous-station électrique 48°50,973’ N 002°31,972’ W',
+    zone: { lat: 48.86, lon: -2.52, km: 8 },
+    what: 'Zone réglementée de 62 éoliennes et une sous-station électrique, en exploitation : obstacles fixes, sillage et mer hachée entre les mâts, réception radar brouillée ; ce n’est pas un abri.',
+    when: 'De nuit, par visibilité réduite, par vent établi de force 4 et plus, et à la rencontre des navires de maintenance.',
+    conduct:
+      'Navigation de plaisance autorisée (navires de 25 m au plus), à 12 nœuds au plus. Rester à plus de 50 m de chaque éolienne et à plus de 200 m de la sous-station, sauf urgence. Mouillage interdit (sauf urgence ou autorisation), plongée de loisir interdite, engins tractés ou aérotractés interdits, manifestations nautiques interdites. VHF ASN allumée et veille du canal 16 obligatoires ; AIS (classe A ou B) en émission obligatoire de nuit, par visibilité inférieure à 5 km ou par vent établi de force 4 et plus. Ne pas compter sur le parc pour s’abriter.',
+    check:
+      'L’arrêté en vigueur et les avis urgents aux navigateurs de la préfecture maritime de l’Atlantique, le bulletin côtier (force du vent), la visibilité et l’AIS du bord avant d’entrer.',
+    sources: [
+      [
+        'Préfecture maritime de l’Atlantique, arrêté n° 2024/138 du 21 juin 2024',
+        'https://www.premar-atlantique.gouv.fr/uploads/atlantique/arretes/8bf7e4ba11aa40f29652d2fd9bf8cd49.pdf',
+      ],
+      [
+        'Communiqué de réouverture du parc',
+        'https://www.premar-atlantique.gouv.fr/communiques-presse/reouverture-du-parc-eolien-en-mer-de-saint-brieuc-aux-activites-maritimes',
+      ],
+    ],
+    checked: true,
+  },
+  {
     id: 'brehat',
     sea: 'manche',
     name: 'Bréhat, Trieux et chenaux de Kerpont et du Ferlas',
