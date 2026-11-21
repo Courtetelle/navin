@@ -14491,3 +14491,43 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 .rp-real {
   padding: 8px 14px;
 }
+/* Routes: two parts, draw or a weather routing */
+.rt-parts {
+  display: flex;
+  gap: 8px;
+  padding: 0 14px 8px;
+}
+.rt-part {
+  flex: 1;
+}
+.rt-part.rt-part-on {
+  outline: 3px solid currentColor;
+  font-weight: 700;
+}
+.rtg-form {
+  display: grid;
+  gap: 8px;
+  padding: 10px 14px;
+}
+.rtg-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.rtg-form select,
+.rtg-form input {
+  font-size: 16px;
+}
+.rtg-result {
+  padding: 10px 14px;
+}
+.rtg-result p {
+  margin: 4px 0;
+}
+.rtg-table td,
+.rtg-table th {
+  padding: 2px 6px;
+}
+.rtg-motor {
+  font-style: italic;
+}
