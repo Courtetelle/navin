@@ -138,20 +138,30 @@ def prune(store):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--store', required=True); ap.add_argument('--check', action='store_true'); ap.add_argument('--auto', action='store_true')
-    ap.add_argument('--zone'); ap.add_argument('--lat', type=float); ap.add_argument('--lon', type=float)
+    ap.add_argument('--zone'); ap.add_argument('--lat', type=float); ap.add_argument('--lon', type=float); ap.add_argument('--nom', default='')
     a = ap.parse_args(); os.makedirs(a.store, exist_ok=True)
     L = R.latest(); print('derniers runs', L, flush=True)
     if not all(L.values()): raise SystemExit(f'runs introuvables : {L}')
     state = jload(os.path.join(a.store, 'state.json'), {})
     sig = f"{L['ifs']}|{L['icon']}"   # EWAM suit ICON ; IBI est quotidien
     todo = []
+    suivis = state.setdefault('suivis', {})   # points demandés par NAVIn : refaits seuls pendant 7 jours
+    now = dt.datetime.now(UTC)
+    for k in [k for k, v in suivis.items() if now - dt.datetime.fromisoformat(v['demande']) > dt.timedelta(days=7)]: del suivis[k]
     if a.lat is not None and a.lon is not None:
-        todo = [(zones.slug_gps(a.lat, a.lon), zones.gps(a.lat, a.lon), False)]
+        near = zones.proche(a.lat, a.lon)
+        if near:
+            todo = [(near, zones.ZONES[near], False)]
+        else:
+            zid = zones.slug_gps(a.lat, a.lon)
+            todo = [(zid, zones.gps(a.lat, a.lon, a.nom), False)]
+        suivis[todo[0][0]] = dict(lat=a.lat, lon=a.lon, nom=a.nom, demande=now.isoformat(timespec='minutes'))
     elif a.zone and a.zone != 'auto':
         names = list(zones.ZONES) if a.zone == 'toutes' else [a.zone]
         todo = [(n, zones.ZONES[n], False) for n in names]
     else:
-        todo = [(n, z, True) for n, z in zones.ZONES.items() if z['auto'] and state.get(n) != sig]
+        todo = [(n, z, True) for n, z in zones.ZONES.items() if (z['auto'] or n in suivis) and state.get(n) != sig]
+        todo += [(n, zones.gps(v['lat'], v['lon'], v.get('nom', '')), True) for n, v in suivis.items() if n not in zones.ZONES and state.get(n) != sig]
     if a.check:
         print('zones à refaire :', [t[0] for t in todo])
         if os.environ.get('GITHUB_OUTPUT'):
@@ -159,7 +169,7 @@ def main():
         return
     for zid, Z, auto in todo:
         build(a.store, zid, Z, L, auto)
-        if zid in zones.ZONES: state[zid] = sig
+        state[zid] = sig
     jsave(os.path.join(a.store, 'state.json'), state)
     prune(a.store)
 

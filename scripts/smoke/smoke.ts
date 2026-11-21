@@ -1081,15 +1081,16 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   );
   check(
     theme,
-    'Prévisions: go / no-go of today and of the next days, the analysis (versions by date, refresh, rerun for a zone or the GPS position), the BMS of the zone and the tides of the SHOM; no fixed alerts here',
+    'Prévisions: go / no-go of today and of the next days, the analysis of the place of the zone or of the GPS (no list of zones; versions by date, refresh, rerun), the BMS of the zone and the tides of the SHOM; no fixed alerts here',
     (await page.locator('[data-page-link="gonogo-today"]').count()) === 1 &&
       (await page.locator('[data-page-link="gonogo"]').count()) === 1 &&
-      (await page.locator('[data-page-link="analysis-offline"]').count()) ===
-        1 &&
+      (await page.locator('[data-analysis-point]').count()) === 1 &&
       (await page.locator('[data-analysis="refresh"]').count()) === 1 &&
       (await page.locator('[data-analysis="rerun"]').count()) === 1 &&
-      (await page.locator('[data-analysis="rerun-gps"]').count()) === 1 &&
-      (await page.locator('[data-analysis-version] option').count()) >= 1 &&
+      (await page.locator('[data-analysis-zone]').count()) === 0 &&
+      (await page.locator('[data-page-link="analysis-offline"]').count()) +
+        (await page.locator('[data-analysis-none]').count()) ===
+        1 &&
       (await page
         .locator(
           '[data-site-link="wx-bms-manche"], [data-site-link="wx-bms-provence"], [data-site-link="wx-meteoswiss"]',
@@ -1097,11 +1098,8 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
         .count()) === 1 &&
       (await page.locator('[data-page-link="fixed"]').count()) === 0,
   );
-  const copyHref = await page
-    .locator('[data-page-link="analysis-offline"]')
-    .getAttribute('href');
   const offline = await page.request.get(
-    new globalThis.URL(String(copyHref), page.url()).href,
+    new globalThis.URL('analyse/saint-quay/index.html', page.url()).href,
   );
   const copyText = await offline.text();
   check(

@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react';
 
 import { RefreshButton } from '../../components/shared/RefreshButton.tsx';
+import type { ScalePoint } from '../../features/onwater/pointSea.ts';
+import { scalePoint } from '../../features/onwater/pointSea.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import type { AnalysisIndex } from '../../model/analysis.ts';
 import {
   ANALYSIS_WORKFLOW_PAGE,
   FALLBACK_INDEX,
   VERSIONS_DIR,
-  ZONE_NAMES,
   dispatchAnalysis,
   dispatchInputs,
   formatPosition,
   isOld,
   readIndex,
-  zoneIds,
+  shouldAsk,
+  zoneForPoint,
 } from '../../model/analysis.ts';
 
-const ZONE_KEY = 'navin-analyse-zone';
+const ASKED_KEY = 'navin-analyse-asked';
 const TOKEN_KEY = 'navin-gh-token';
 const KEPT_KEY = 'navin-analyse-kept';
 
@@ -60,35 +62,105 @@ async function keepOffline(path: string): Promise<void> {
   writeKey(KEPT_KEY, kept.slice(0, 6).join('|'));
 }
 
+/** When NavIn last asked for a point, keyed by the point to 0,01°. */
+function askedAt(point: ScalePoint): number {
+  try {
+    const all = JSON.parse(readKey(ASKED_KEY) || '{}') as Record<
+      string,
+      number
+    >;
+    return all[`${point.lat.toFixed(2)},${point.lon.toFixed(2)}`] ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+function markAsked(point: ScalePoint, at: number): void {
+  let all: Record<string, number> = {};
+  try {
+    all = JSON.parse(readKey(ASKED_KEY) || '{}') as Record<string, number>;
+  } catch {
+    all = {};
+  }
+  all[`${point.lat.toFixed(2)},${point.lon.toFixed(2)}`] = at;
+  writeKey(ASKED_KEY, JSON.stringify(all));
+}
+
+const KIND_TEXT: Readonly<Record<ScalePoint['kind'], string>> = {
+  'zone-sea': 'lieu de la zone mer choisie dans Paramètres',
+  'zone-lake': 'lieu de la zone lac choisie dans Paramètres',
+  gps: 'position GPS',
+  map: 'lieu de la carte',
+  cross: 'point de la croix',
+};
+
 /**
- * The analysis from the hemisphere down to the bay. NavIn's workflow makes
- * a new version by itself each time ECMWF or DWD publish a new run; every
- * version stays available, chosen by date and time. « Actualiser » reads the
- * newest list, « Relancer » asks for a new version now (a test zone or the
- * current GPS position).
+ * The analysis from the hemisphere down to the local scale, for the point
+ * the forecasts use: the place of the zone chosen in the settings (sea or
+ * lake), else the GPS position (Corban, 21/11/2026: no list of fixed zones).
+ * NavIn's workflow makes a new version at each new ECMWF or DWD run; every
+ * version stays available, chosen by date and time. When the point has no
+ * recent version (zone moved, new place), NavIn asks for one by itself if a
+ * GitHub key is kept, else « Relancer » opens the workflow page.
  * @returns The section.
  */
 export function AnalysisLinks() {
   const tr = useTr();
+  const [point, setPoint] = useState<ScalePoint>(() => scalePoint(null));
   const [index, setIndex] = useState<AnalysisIndex>(FALLBACK_INDEX);
-  const [zone, setZone] = useState(() => readKey(ZONE_KEY) || 'saint-quay');
   const [versionId, setVersionId] = useState('');
   const [status, setStatus] = useState('');
   const [token, setToken] = useState(() => readKey(TOKEN_KEY));
   const [now, setNow] = useState(() => Date.now());
 
-  function show(found: AnalysisIndex) {
+  async function ask(here: ScalePoint, key: string, auto: boolean) {
+    const inputs = dispatchInputs({
+      lat: here.lat,
+      lon: here.lon,
+      nom: here.name,
+    });
+    if (!key) {
+      if (auto) return;
+      globalThis.open(ANALYSIS_WORKFLOW_PAGE, '_blank', 'noopener');
+      setStatus(
+        `Sur GitHub : « Run workflow », latitude ${inputs.lat}, longitude ${inputs.lon}, nom « ${here.name} », puis « Run workflow ». Nouvelle version dans 15 à 25 min ; touchez ensuite Actualiser.`,
+      );
+      return;
+    }
+    setStatus(
+      auto
+        ? `Nouvelle analyse demandée pour ${here.name}…`
+        : 'Demande envoyée à GitHub…',
+    );
+    const error = await dispatchAnalysis(key, inputs);
+    if (!error) markAsked(here, Date.now());
+    setStatus(
+      error
+        ? `Relance impossible : ${error}.`
+        : `Analyse demandée pour ${here.name} : prête dans 15 à 25 min, touchez alors Actualiser. Elle sera ensuite refaite seule à chaque nouveau run pendant 7 jours.`,
+    );
+  }
+
+  function show(found: AnalysisIndex, here: ScalePoint) {
     setIndex(found);
     setVersionId('');
-    setNow(Date.now());
-    const zoneNow = found.zones[readKey(ZONE_KEY) || 'saint-quay'];
-    const latest = zoneNow?.versions[0];
+    const at = Date.now();
+    setNow(at);
+    const id = zoneForPoint(found, here.lat, here.lon);
+    const latest = id ? found.zones[id]?.versions[0] : undefined;
     if (latest && !latest.claude) {
       void keepOffline(latest.path).catch(() => null);
+    }
+    if (
+      shouldAsk(latest && !latest.claude ? latest.at : null, askedAt(here), at)
+    ) {
+      void ask(here, readKey(TOKEN_KEY), true);
     }
   }
 
   async function refresh() {
+    const here = scalePoint(null);
+    setPoint(here);
     setStatus('Lecture de la liste des versions…');
     const found = await readIndex(base());
     if (!found) {
@@ -99,140 +171,96 @@ export function AnalysisLinks() {
       );
       return;
     }
-    show(found);
+    show(found, here);
     setStatus(`Liste à jour (${found.updated ?? 'heure inconnue'}).`);
   }
 
   useEffect(() => {
     let closed = false;
+    const here = scalePoint(null);
     void readIndex(base()).then((found) => {
-      if (!closed && found) show(found);
+      if (!closed && found) show(found, here);
     });
     return () => {
       closed = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, when the section opens
   }, []);
 
-  const ids = zoneIds(index);
-  const zoneId = index.zones[zone] ? zone : (ids[0] ?? 'saint-quay');
-  const current = index.zones[zoneId] ?? FALLBACK_INDEX.zones['saint-quay'];
-  const versions = current?.versions ?? [];
+  const zoneId = zoneForPoint(index, point.lat, point.lon);
+  const versions = (zoneId ? index.zones[zoneId]?.versions : undefined) ?? [];
   const version =
     versions.find((item) => item.id === versionId) ?? versions[0] ?? null;
-
   const old = version ? isOld(version, now) : true;
-  const href = version
-    ? `${base()}${VERSIONS_DIR}${version.path}`
-    : `${base()}analyse/saint-quay/index.html`;
-
-  async function rerun(target: string | { lat: number; lon: number }) {
-    const inputs = dispatchInputs(target);
-    if (!token) {
-      globalThis.open(ANALYSIS_WORKFLOW_PAGE, '_blank', 'noopener');
-      setStatus(
-        typeof target === 'string'
-          ? `Sur GitHub : « Run workflow », zone « ${target} », puis « Run workflow ». Nouvelle version dans 15 à 25 min ; touchez ensuite Actualiser.`
-          : `Sur GitHub : « Run workflow », latitude ${inputs.lat}, longitude ${inputs.lon}, puis « Run workflow ». Nouvelle version dans 15 à 25 min ; touchez ensuite Actualiser.`,
-      );
-      return;
-    }
-    setStatus('Demande envoyée à GitHub…');
-    const error = await dispatchAnalysis(token, inputs);
-    setStatus(
-      error
-        ? `Relance impossible : ${error}.`
-        : 'Relance demandée : nouvelle version dans 15 à 25 min, touchez alors Actualiser.',
-    );
-  }
-
-  function rerunHere() {
-    if (!('geolocation' in navigator)) {
-      setStatus('Pas de GPS sur cet appareil.');
-      return;
-    }
-    setStatus('Lecture de la position…');
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        setStatus(`Position ${formatPosition(lat, lon)}.`);
-        void rerun({ lat, lon });
-      },
-      () => setStatus('Position non disponible.'),
-      { enableHighAccuracy: true, timeout: 20_000, maximumAge: 300_000 },
-    );
-  }
 
   return (
     <section className="wx-analysis" data-analysis={old ? 'old' : 'fresh'}>
       <h2>{tr('Situation générale')}</h2>
       <p className="keep-help">
         {tr(
-          'De l’hémisphère au local : jets, fronts, échelle régionale, zone, vent, vagues et courants toutes les 3 h, cartes avec annotations par boutons. NAVIn la refait seul à chaque nouveau run ECMWF ou DWD ; cartes, chiffres et texte sont produits par des scripts, sans IA.',
+          'De l’hémisphère au local : jets, fronts, échelle régionale, vent, vagues et courants toutes les 3 h, cartes avec annotations par boutons. NAVIn la refait seul à chaque nouveau run ECMWF ou DWD ; cartes, chiffres et texte sont produits par des scripts, sans IA.',
         )}
       </p>
-      <div className="wx-analysis-pick">
-        <label>
-          {tr('Zone')}{' '}
-          <select
-            data-analysis-zone
-            value={zoneId}
-            onChange={(event) => {
-              setZone(event.target.value);
-              writeKey(ZONE_KEY, event.target.value);
-              setVersionId('');
-            }}
+      <p className="keep-help" data-analysis-point={point.kind}>
+        <b>{tr(`Pour : ${point.name}`)}</b>{' '}
+        {tr(
+          `(${KIND_TEXT[point.kind]}, ${formatPosition(point.lat, point.lon)})`,
+        )}
+      </p>
+      {versions.length > 0 ? (
+        <div className="wx-analysis-pick">
+          <label>
+            {tr('Version')}{' '}
+            <select
+              data-analysis-version
+              value={version?.id ?? ''}
+              onChange={(event) => setVersionId(event.target.value)}
+            >
+              {versions.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : (
+        <p className="keep-help" data-analysis-none>
+          {tr(
+            token
+              ? 'Pas encore d’analyse pour ce lieu : NAVIn la demande, elle arrive dans 15 à 25 min.'
+              : 'Pas encore d’analyse pour ce lieu : touchez « Faire l’analyse de ce lieu ».',
+          )}
+        </p>
+      )}
+      {version ? (
+        <div className="page-links">
+          <a
+            className={old ? 'btn page-link wx-analysis-old' : 'btn page-link'}
+            data-page-link="analysis-offline"
+            href={`${base()}${VERSIONS_DIR}${version.path}`}
+            target="_blank"
+            rel="noopener"
           >
-            {ids.map((id) => (
-              <option key={id} value={id}>
-                {index.zones[id]?.nom ?? ZONE_NAMES[id] ?? id}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {tr('Version')}{' '}
-          <select
-            data-analysis-version
-            value={version?.id ?? ''}
-            onChange={(event) => setVersionId(event.target.value)}
-          >
-            {versions.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="page-links">
-        <a
-          className={old ? 'btn page-link wx-analysis-old' : 'btn page-link'}
-          data-page-link="analysis-offline"
-          href={href}
-          target="_blank"
-          rel="noopener"
-        >
-          <span className="page-link-ico" aria-hidden="true">
-            🗺
-          </span>
-          <span className="page-link-txt">
-            <b>{tr(`Ouvrir l’analyse, ${current?.nom ?? ''}`)}</b>
-            <small>
-              {version
-                ? tr(
-                    old
-                      ? `version du ${version.label}, ancienne : actualisez ou relancez`
-                      : `version du ${version.label}, gardée sur l’appareil`,
-                  )
-                : ''}
-            </small>
-          </span>
-          <span className="page-link-go" aria-hidden="true">
-            ›
-          </span>
-        </a>
-      </div>
+            <span className="page-link-ico" aria-hidden="true">
+              🗺
+            </span>
+            <span className="page-link-txt">
+              <b>{tr('Ouvrir l’analyse')}</b>
+              <small>
+                {tr(
+                  old
+                    ? `version du ${version.label}, ancienne : actualisez ou relancez`
+                    : `version du ${version.label}, gardée sur l’appareil`,
+                )}
+              </small>
+            </span>
+            <span className="page-link-go" aria-hidden="true">
+              ›
+            </span>
+          </a>
+        </div>
+      ) : null}
       <div className="wx-analysis-actions">
         <RefreshButton
           data-analysis="refresh"
@@ -243,19 +271,14 @@ export function AnalysisLinks() {
           type="button"
           className="btn"
           data-analysis="rerun"
-          onClick={() =>
-            void rerun(zoneId.startsWith('gps-') ? 'saint-quay' : zoneId)
-          }
+          onClick={() => {
+            const here = scalePoint(null);
+            setPoint(here);
+            void ask(here, token, false);
+          }}
         >
-          ▶ {tr('Relancer cette zone')}
-        </button>
-        <button
-          type="button"
-          className="btn"
-          data-analysis="rerun-gps"
-          onClick={rerunHere}
-        >
-          ⌖ {tr('Relancer à ma position')}
+          ▶{' '}
+          {tr(version ? 'Relancer pour ce lieu' : 'Faire l’analyse de ce lieu')}
         </button>
       </div>
       {status ? (
@@ -269,7 +292,7 @@ export function AnalysisLinks() {
         </summary>
         <p className="keep-help">
           {tr(
-            'Sans clé, « Relancer » ouvre la page GitHub de l’analyse (bouton « Run workflow »). Avec une clé GitHub à droits fins limitée au dépôt navin (Actions : lecture et écriture), NAVIn la lance lui-même. La clé reste sur cet appareil.',
+            'Avec une clé GitHub à droits fins limitée au dépôt navin (Actions : lecture et écriture), NAVIn demande seul l’analyse quand la zone change ou quand la dernière a plus de 6 h. Sans clé, « Relancer » ouvre la page GitHub de l’analyse (bouton « Run workflow »). La clé reste sur cet appareil.',
           )}
         </p>
         <input

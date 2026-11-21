@@ -170,14 +170,70 @@ export function isOld(version: AnalysisVersion, now: number): boolean {
  * @returns The workflow_dispatch inputs.
  */
 export function dispatchInputs(
-  target: string | { lat: number; lon: number },
+  target: string | { lat: number; lon: number; nom?: string },
 ): Record<string, string> {
-  if (typeof target === 'string') return { zone: target, lat: '', lon: '' };
+  if (typeof target === 'string') {
+    return { zone: target, lat: '', lon: '', nom: '' };
+  }
   return {
     zone: '',
     lat: target.lat.toFixed(4),
     lon: target.lon.toFixed(4),
+    nom: (target.nom ?? '').slice(0, 60),
   };
+}
+
+/** A zone of the list serves a point closer than this (km). */
+export const SAME_PLACE_KM = 5;
+/** Without a version this recent, NavIn asks for a new one by itself. */
+export const STALE_MS = 6 * 3_600_000;
+/** NavIn asks at most this often for the same point. */
+export const ASK_EVERY_MS = 3 * 3_600_000;
+
+function km(aLat: number, aLon: number, bLat: number, bLon: number): number {
+  const radians = Math.PI / 180;
+  const x = (bLon - aLon) * radians * Math.cos(((aLat + bLat) / 2) * radians);
+  return Math.hypot(x, (bLat - aLat) * radians) * 6371;
+}
+
+/**
+ * The zone of the list that serves a point: the nearest one closer than
+ * {@link SAME_PLACE_KM}.
+ * @param index - The list of the versions.
+ * @param lat - Latitude of the point (zone of NavIn or GPS).
+ * @param lon - Longitude.
+ * @returns Its id, or null when no analysis was made there yet.
+ */
+export function zoneForPoint(
+  index: AnalysisIndex,
+  lat: number,
+  lon: number,
+): string | null {
+  let best: { id: string; d: number } | null = null;
+  for (const [id, zone] of Object.entries(index.zones)) {
+    if (!Number.isFinite(zone.lat) || !Number.isFinite(zone.lon)) continue;
+    const d = km(lat, lon, zone.lat, zone.lon);
+    if (d <= SAME_PLACE_KM && (!best || d < best.d)) best = { id, d };
+  }
+  return best?.id ?? null;
+}
+
+/**
+ * Whether NavIn should ask for a new analysis of the point by itself.
+ * @param newestAt - Time of the newest version there (ISO), or null.
+ * @param askedAt - When it was last asked for that point (ms), or 0.
+ * @param now - Now (ms).
+ * @returns True when there is none, or it is old, and it was not just asked.
+ */
+export function shouldAsk(
+  newestAt: string | null,
+  askedAt: number,
+  now: number,
+): boolean {
+  if (now - askedAt < ASK_EVERY_MS) return false;
+  if (!newestAt) return true;
+  const at = Date.parse(newestAt);
+  return !Number.isFinite(at) || now - at > STALE_MS;
 }
 
 /**
