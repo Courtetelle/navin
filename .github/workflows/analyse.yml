@@ -1,7 +1,8 @@
 # Analyse météo « de l'hémisphère au local », sans Claude (demande de Corban du 21/11/2026).
 # Toutes les 30 minutes : regarde si ECMWF IFS ou DWD ICON-EU ont publié un nouveau run ; si oui, refait l'analyse
 # des zones automatiques (analyse/zones.py, auto=True), garde la version dans la branche « analyses » et republie NAVIn.
-# Bouton « Run workflow » (ou bouton Relancer de NAVIn) : une zone d'essai, toutes, ou un point GPS.
+# Bouton « Run workflow » (ou NAVIn) : une zone d'essai, toutes, ou un point (lieu de la zone de NAVIn ou GPS).
+# Un point demandé par NAVIn est ensuite refait seul à chaque nouveau run pendant 7 jours.
 name: Analyse météo
 
 on:
@@ -19,6 +20,10 @@ on:
         default: ''
       lon:
         description: 'Longitude du point GPS (degrés décimaux, ouest négatif)'
+        required: false
+        default: ''
+      nom:
+        description: 'Nom du lieu (zone choisie dans NAVIn), facultatif'
         required: false
         default: ''
 
@@ -67,9 +72,10 @@ jobs:
           ZONE: ${{ inputs.zone }}
           LAT: ${{ inputs.lat }}
           LON: ${{ inputs.lon }}
+          NOM: ${{ inputs.nom }}
         run: |
           if [ -n "$LAT" ] && [ -n "$LON" ]; then
-            python3 -I analyse/run.py --store store --lat "$LAT" --lon "$LON"
+            python3 -I analyse/run.py --store store --lat "$LAT" --lon "$LON" --nom "$NOM"
           elif [ -n "$ZONE" ] && [ "$ZONE" != "auto" ]; then
             python3 -I analyse/run.py --store store --zone "$ZONE"
           else

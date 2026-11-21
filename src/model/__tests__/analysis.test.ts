@@ -6,6 +6,8 @@ import {
   formatPosition,
   isOld,
   parseIndex,
+  shouldAsk,
+  zoneForPoint,
   zoneIds,
 } from '../analysis.ts';
 
@@ -60,11 +62,15 @@ describe('analysis versions', () => {
       zone: 'rolle',
       lat: '',
       lon: '',
+      nom: '',
     });
-    expect(dispatchInputs({ lat: 48.71667, lon: -2.75 })).toStrictEqual({
+    expect(
+      dispatchInputs({ lat: 48.71667, lon: -2.75, nom: 'Saint-Quay' }),
+    ).toStrictEqual({
       zone: '',
       lat: '48.7167',
       lon: '-2.7500',
+      nom: 'Saint-Quay',
     });
     const calls: string[] = [];
     const ok = (async (url: string, init: RequestInit) => {
@@ -81,5 +87,31 @@ describe('analysis versions', () => {
 
   it('writes a position the way charts do', () => {
     expect(formatPosition(48.6521, -2.83063)).toBe("48°39,1' N 002°49,8' W");
+  });
+});
+
+describe('analysis of the place of the zone or of the GPS', () => {
+  const index = {
+    zones: {
+      'saint-quay': {
+        nom: 'Saint-Quay-Portrieux',
+        court: 'Saint-Quay',
+        lat: 48.6521,
+        lon: -2.83063,
+        versions: [version('1', '2026-11-21T17:00+01:00')],
+      },
+    },
+  };
+  it('serves a point only from an analysis made within 5 km', () => {
+    expect(zoneForPoint(index, 48.66, -2.8)).toBe('saint-quay');
+    // The zone moved to Saint-Malo: no analysis there yet.
+    expect(zoneForPoint(index, 48.6493, -2.0257)).toBeNull();
+  });
+  it('asks by itself when there is none or it is older than 6 h, not twice in 3 h', () => {
+    const now = Date.parse('2026-11-21T20:00+01:00');
+    expect(shouldAsk(null, 0, now)).toBe(true);
+    expect(shouldAsk('2026-11-21T17:00+01:00', 0, now)).toBe(false);
+    expect(shouldAsk('2026-11-21T13:00+01:00', 0, now)).toBe(true);
+    expect(shouldAsk(null, now - 3_600_000, now)).toBe(false);
   });
 });

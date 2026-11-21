@@ -36,12 +36,22 @@ def dms(lat, lon):
     return f"{one(lat, 2)} {'N' if lat >= 0 else 'S'} {one(lon, 3)} {'E' if lon >= 0 else 'W'}"
 
 
-def gps(lat, lon):
-    """Zone construite autour d'un point GPS (bouton « Relancer à ma position »)."""
+def proche(lat, lon, km=5):
+    """La zone d'essai à moins de km du point, sinon None (NAVIn envoie le lieu de sa zone ou le GPS)."""
+    import math
+    for zid, z in ZONES.items():
+        d = math.hypot((z['lat'] - lat) * 111.2, (z['lon'] - lon) * 111.2 * math.cos(math.radians(lat)))
+        if d <= km: return zid
+    return None
+
+
+def gps(lat, lon, nom=''):
+    """Zone construite autour d'un point : lieu de la zone choisie dans NAVIn, ou position GPS (Corban, 21/11/2026)."""
     lat, lon = round(float(lat), 4), round(float(lon), 4)
     if not (30 <= lat <= 66 and -10.5 <= lon <= 30):
         raise SystemExit(f'point {lat} {lon} hors du domaine couvert (30–66° N, 10,5° W–30° E : ICON-EU et EWAM)')
-    return dict(nom=f'Point GPS {dms(lat, lon)}', court='Point GPS', bassin='autour du point', eyebrow='Position GPS',
+    nom = (nom or '').strip()[:60]
+    return dict(nom=nom or f'Point GPS {dms(lat, lon)}', court='Point GPS', bassin='autour du point', eyebrow='Position GPS',
                 lat=lat, lon=lon, type='auto', auto=False,
                 reg=(lon - 8, lon + 8, lat - 5, lat + 5), reg_nom='région', loc=(lon - 0.55, lon + 0.55, lat - 0.33, lat + 0.33),
                 ref=('Point GPS', lat, lon), points=[('Point GPS', lat, lon, 'gps')], parc=None)
