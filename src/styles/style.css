@@ -14398,6 +14398,29 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
   text-decoration: none;
   color: inherit;
 }
+.wx-analysis-pick,
+.wx-analysis-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 8px 0;
+}
+.wx-analysis-pick select {
+  font-size: 16px;
+  max-width: 100%;
+}
+.wx-analysis-pick label {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  max-width: 100%;
+}
+.wx-analysis-key input {
+  font-size: 16px;
+  width: 100%;
+  max-width: 28em;
+}
 
 /* Bateaux › polaire: the polar of a boat, its table scrolls sideways */
 .pol-kept {

@@ -26,6 +26,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Add the weather analyses (analyses branch)
+        run: |
+          if git ls-remote --exit-code --heads origin analyses >/dev/null; then
+            git fetch --depth 1 origin analyses
+            mkdir -p dist/analyse/v
+            git --work-tree=dist/analyse/v checkout FETCH_HEAD -- .
+            git reset -q
+          fi
       - name: Add the audience measurement snippet
         if: ${{ vars.TRACKING_SCRIPT != '' }}
         env:

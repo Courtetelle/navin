@@ -6,3 +6,5 @@ export const APP_CACHE = `livre-de-bord-${APP_VERSION}`;
 export const TILE_CACHE = 'livre-de-bord-tuiles';
 /** Map areas downloaded by hand, never trimmed (written by the map domain). */
 export const ZONE_CACHE = 'livre-de-bord-zones';
+/** Versions of the weather analysis already opened or kept, from one app version to the next. */
+export const ANALYSIS_CACHE = 'livre-de-bord-analyses';

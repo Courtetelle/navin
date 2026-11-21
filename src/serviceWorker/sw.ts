@@ -1,6 +1,11 @@
 /// <reference lib="webworker" />
 /* Service worker: everything works offline once the app was opened (legacy sw.js). */
-import { APP_CACHE, TILE_CACHE, ZONE_CACHE } from './cacheNames.ts';
+import {
+  ANALYSIS_CACHE,
+  APP_CACHE,
+  TILE_CACHE,
+  ZONE_CACHE,
+} from './cacheNames.ts';
 import { staleFiles } from './staleFiles.ts';
 import { tileKey } from './tileKey.ts';
 
@@ -40,7 +45,10 @@ self.addEventListener('activate', (event) => {
           keys
             .filter(
               (key) =>
-                key !== APP_CACHE && key !== TILE_CACHE && key !== ZONE_CACHE,
+                key !== APP_CACHE &&
+                key !== TILE_CACHE &&
+                key !== ZONE_CACHE &&
+                key !== ANALYSIS_CACHE,
             )
             .map((key) => self.caches.delete(key)),
         ),
@@ -60,6 +68,10 @@ self.addEventListener('fetch', (event) => {
   }
   // Weather and other services: network only, the app copes without them.
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.includes('/analyse/v/')) {
+    event.respondWith(analysisResponse(request));
+    return;
+  }
   event.respondWith(appFileResponse(request));
 });
 
@@ -98,6 +110,29 @@ async function trimTiles(): Promise<void> {
   const keys = await cache.keys();
   const extra = keys.slice(0, Math.max(0, keys.length - MAX_TILES));
   await Promise.all(extra.map((key) => cache.delete(key)));
+}
+
+/**
+ * Versions of the weather analysis: network first, kept apart from the app
+ * files (a new deployment does not drop them), the phone when at sea.
+ */
+async function analysisResponse(request: Request): Promise<Response> {
+  const cache = await self.caches.open(ANALYSIS_CACHE);
+  try {
+    const response = await Promise.race([
+      fetch(request),
+      new Promise<never>((_resolve, reject) => {
+        setTimeout(() => reject(new Error('timeout')), 6000);
+      }),
+    ]);
+    if (response.ok) void cache.put(request, response.clone());
+    return response;
+  } catch {
+    return (
+      (await cache.match(request, { ignoreSearch: true, ignoreVary: true })) ??
+      Response.error()
+    );
+  }
 }
 
 /** App files: network first (updates in port), else the phone; 4 s at most at sea. */

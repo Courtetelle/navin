@@ -1,0 +1,11 @@
+numpy
+scipy
+matplotlib
+cartopy
+eccodes
+xarray
+netCDF4
+pillow
+blosc
+shapely
+copernicusmarine
