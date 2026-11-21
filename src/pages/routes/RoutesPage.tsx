@@ -1,3 +1,4 @@
+import { signal } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
@@ -18,13 +19,20 @@ import type { NavRoute } from '../../model/routes.ts';
 import { routeTimes, routeToGpx } from '../../model/routes.ts';
 import { deliver, removeRoute, renameRoute, state } from '../../state/index.ts';
 
+import { RoutingPanel } from './RoutingPanel.tsx';
+
+/** The part of Routes shown: draw routes, or a weather routing. */
+const routesPart = signal<'draw' | 'routing'>('draw');
+
 /**
- * Screen `routes`: the routes drawn on the map, a new one, and Partager.
+ * Screen `routes`, in two parts: « Dessiner » (the routes drawn on the map,
+ * a new one, and Partager) and « Routage météo » (a routing along a route).
  * @returns The screen content, rendered inside `<main id="view">`.
  */
 export function RoutesPage() {
   useSignals();
   const tr = useTr();
+  const part = routesPart.value;
   const routes = state.data.routes.value.toSorted((a, b) =>
     (b.mod || '').localeCompare(a.mod || ''),
   );
@@ -38,30 +46,66 @@ export function RoutesPage() {
       >
         🧭 Routes
       </PageTitle>
-      <ButtonRow>
-        <Button
-          className="btn primary"
-          data-rt="new"
+      <div className="rt-parts" role="tablist" id="rtParts">
+        <button
+          type="button"
+          role="tab"
+          className={`btn rt-part${part === 'draw' ? ' rt-part-on' : ''}`}
+          aria-selected={part === 'draw'}
+          data-part="draw"
           onClick={() => {
             buzz();
-            editRoute(null);
+            routesPart.value = 'draw';
           }}
         >
-          {tr('＋ Nouvelle route sur la carte')}
-        </Button>
-      </ButtonRow>
-      <section className="field">
-        <div id="rtList">
-          {routes.length > 0 ? (
-            routes.map((route) => <RouteItem key={route.id} route={route} />)
-          ) : (
-            <p className="help">
-              {tr('Aucune route pour l’instant.', { help: true })}
-            </p>
-          )}
-        </div>
-      </section>
-      <ListPublishRow kind="routes" />
+          {tr('✏️ Dessiner')}
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className={`btn rt-part${part === 'routing' ? ' rt-part-on' : ''}`}
+          aria-selected={part === 'routing'}
+          data-part="routing"
+          onClick={() => {
+            buzz();
+            routesPart.value = 'routing';
+          }}
+        >
+          {tr('⛵ Routage météo')}
+        </button>
+      </div>
+      {part === 'routing' ? (
+        <RoutingPanel />
+      ) : (
+        <>
+          <ButtonRow>
+            <Button
+              className="btn primary"
+              data-rt="new"
+              onClick={() => {
+                buzz();
+                editRoute(null);
+              }}
+            >
+              {tr('＋ Nouvelle route sur la carte')}
+            </Button>
+          </ButtonRow>
+          <section className="field">
+            <div id="rtList">
+              {routes.length > 0 ? (
+                routes.map((route) => (
+                  <RouteItem key={route.id} route={route} />
+                ))
+              ) : (
+                <p className="help">
+                  {tr('Aucune route pour l’instant.', { help: true })}
+                </p>
+              )}
+            </div>
+          </section>
+          <ListPublishRow kind="routes" />
+        </>
+      )}
     </>
   );
 }

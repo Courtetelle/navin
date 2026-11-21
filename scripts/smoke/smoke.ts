@@ -1999,6 +1999,56 @@ async function turnPhone(browser: Browser): Promise<void> {
  * @param page - The page shown.
  * @param theme - Day or night.
  */
+// Routes › Routage météo: the route drawn, the boat and its polar, a wind
+// of the west (Open-Meteo answered here), then the times of the routing.
+async function routingWeather(page: Page, theme: string): Promise<void> {
+  await page.route(/api\.open-meteo\.com\/v1\/forecast/, async (route) => {
+    const url = new globalThis.URL(route.request().url());
+    const places = (url.searchParams.get('latitude') ?? '').split(',').length;
+    const start = Math.floor(Date.now() / 3_600_000) * 3600 - 3600;
+    const time = Array.from({ length: 72 }, (_, hour) => start + hour * 3600);
+    const one = {
+      hourly: {
+        time,
+        // eslint-disable-next-line camelcase -- name in the API
+        wind_speed_10m: time.map(() => 12),
+        // eslint-disable-next-line camelcase -- name in the API
+        wind_direction_10m: time.map(() => 270),
+      },
+    };
+    await route.fulfill({
+      json: places > 1 ? Array.from({ length: places }, () => one) : one,
+    });
+  });
+  await showRow(page);
+  await page.locator('#routesBtn').click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'Routes has two parts, Dessiner and Routage',
+    (await page.locator('#rtParts [data-part]').count()) === 2,
+  );
+  await page.locator('[data-part="routing"]').click();
+  await page.waitForTimeout(300);
+  await page.locator('#rtgRun').click();
+  await page
+    .locator('#rtgResult, #rtgMsg')
+    .first()
+    .waitFor({ timeout: 15_000 });
+  const said =
+    (await page.locator('#rtgResult, #rtgMsg').first().textContent()) ?? '';
+  check(
+    theme,
+    `Routage: the arrival and the hours of the routing (${said.slice(0, 80)})`,
+    said.includes('Arrivée') &&
+      (await page.locator('#rtgSteps tbody tr').count()) > 0,
+  );
+  const last = (await page.locator('#view .btn').last().textContent()) ?? '';
+  check(theme, 'and Partager comes last', last.includes('Partager'));
+  await page.locator('[data-part="draw"]').click();
+  await page.unroute(/api\.open-meteo\.com\/v1\/forecast/);
+}
+
 async function routeByHand(page: Page, theme: string): Promise<void> {
   await page.locator(NAVIN).click();
   await page.waitForTimeout(900);
@@ -2113,6 +2163,7 @@ for (const theme of ['day', 'night']) {
     await alertsInTurn(page, theme);
     await layoutGaps(page, theme);
     await routeByHand(page, theme);
+    await routingWeather(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }
