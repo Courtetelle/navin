@@ -1,0 +1,36 @@
+{
+ "id": "202611211650",
+ "zone": "porquerolles",
+ "at": "2026-11-21T17:53+01:00",
+ "label": "21/11 17 h 53",
+ "runs": {
+  "ifs": "2026112106",
+  "icon": "2026112112",
+  "ewam": "2026112112"
+ },
+ "jours": [
+  {
+   "date": "2026-11-22",
+   "feu": "nogo",
+   "vent_kn": 31,
+   "rafales_kn": 44,
+   "hs_m": 3.2
+  },
+  {
+   "date": "2026-11-23",
+   "feu": "nogo",
+   "vent_kn": 31,
+   "rafales_kn": 47,
+   "hs_m": 3.4
+  },
+  {
+   "date": "2026-11-24",
+   "feu": "go",
+   "vent_kn": 6,
+   "rafales_kn": 10,
+   "hs_m": 0.8
+  }
+ ],
+ "type": "mer",
+ "nom": "Porquerolles, Hyères et Toulon"
+}

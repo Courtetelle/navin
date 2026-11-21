@@ -1,0 +1,181 @@
+{
+ "zones": {
+  "saint-quay": {
+   "nom": "Saint-Quay-Portrieux",
+   "court": "Saint-Quay",
+   "lat": 48.6521,
+   "lon": -2.83063,
+   "versions": [
+    {
+     "id": "202611211657",
+     "label": "sam. 21/11 17 h 57 · IFS 21/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-21T17:57+01:00",
+     "path": "saint-quay/202611211657/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112106",
+      "icon": "2026112112",
+      "ewam": "2026112112"
+     },
+     "jours": [
+      {
+       "date": "2026-11-22",
+       "feu": "nogo",
+       "vent_kn": 26,
+       "rafales_kn": 39,
+       "hs_m": 1.7
+      },
+      {
+       "date": "2026-11-23",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 13,
+       "hs_m": 1.1
+      },
+      {
+       "date": "2026-11-24",
+       "feu": "prudence",
+       "vent_kn": 21,
+       "rafales_kn": 29,
+       "hs_m": 0.9
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611211647",
+     "label": "sam. 21/11 17 h 47 · IFS 21/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-21T17:47+01:00",
+     "path": "saint-quay/202611211647/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112106",
+      "icon": "2026112112",
+      "ewam": "2026112112"
+     },
+     "jours": [
+      {
+       "date": "2026-11-22",
+       "feu": "nogo",
+       "vent_kn": 26,
+       "rafales_kn": 39,
+       "hs_m": 1.6
+      },
+      {
+       "date": "2026-11-23",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 13,
+       "hs_m": 1.1
+      },
+      {
+       "date": "2026-11-24",
+       "feu": "prudence",
+       "vent_kn": 21,
+       "rafales_kn": 29,
+       "hs_m": 0.9
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "claude-2026112023",
+     "label": "20/11 23 h 00 · rédigée par Claude",
+     "at": "2026-11-20T23:00+01:00",
+     "path": "../saint-quay/index.html",
+     "auto": false,
+     "claude": true
+    }
+   ]
+  },
+  "porquerolles": {
+   "nom": "Porquerolles, Hyères et Toulon",
+   "court": "Porquerolles",
+   "lat": 43.00025,
+   "lon": 6.2023,
+   "versions": [
+    {
+     "id": "202611211650",
+     "label": "sam. 21/11 17 h 50 · IFS 21/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-21T17:50+01:00",
+     "path": "porquerolles/202611211650/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112106",
+      "icon": "2026112112",
+      "ewam": "2026112112"
+     },
+     "jours": [
+      {
+       "date": "2026-11-22",
+       "feu": "nogo",
+       "vent_kn": 31,
+       "rafales_kn": 44,
+       "hs_m": 3.2
+      },
+      {
+       "date": "2026-11-23",
+       "feu": "nogo",
+       "vent_kn": 31,
+       "rafales_kn": 47,
+       "hs_m": 3.4
+      },
+      {
+       "date": "2026-11-24",
+       "feu": "go",
+       "vent_kn": 6,
+       "rafales_kn": 10,
+       "hs_m": 0.8
+      }
+     ],
+     "type": "mer"
+    }
+   ]
+  },
+  "rolle": {
+   "nom": "Rolle, Léman",
+   "court": "Rolle",
+   "lat": 46.46015,
+   "lon": 6.33805,
+   "versions": [
+    {
+     "id": "202611211653",
+     "label": "sam. 21/11 17 h 53 · IFS 21/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-21T17:53+01:00",
+     "path": "rolle/202611211653/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112106",
+      "icon": "2026112112",
+      "ewam": "2026112112"
+     },
+     "jours": [
+      {
+       "date": "2026-11-22",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 31,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-23",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 30,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-24",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 14,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    }
+   ]
+  }
+ },
+ "updated": "2026-11-21T17:57+01:00"
+}
