@@ -4,7 +4,14 @@ import ts from 'eslint-config-zakodium/ts';
 import unicorn from 'eslint-config-zakodium/unicorn';
 
 export default defineConfig(
-  globalIgnores(['android', 'coverage', 'dist', 'legacy', 'parity-out']),
+  globalIgnores([
+    'analyse',
+    'android',
+    'coverage',
+    'dist',
+    'legacy',
+    'parity-out',
+  ]),
   ts,
   unicorn,
   react,

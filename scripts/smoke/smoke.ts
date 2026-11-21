@@ -1081,13 +1081,15 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   );
   check(
     theme,
-    'Prévisions: go / no-go of today and of the next days, the analysis kept offline and online, the BMS of the zone and the tides of the SHOM; no fixed alerts here',
+    'Prévisions: go / no-go of today and of the next days, the analysis (versions by date, refresh, rerun for a zone or the GPS position), the BMS of the zone and the tides of the SHOM; no fixed alerts here',
     (await page.locator('[data-page-link="gonogo-today"]').count()) === 1 &&
       (await page.locator('[data-page-link="gonogo"]').count()) === 1 &&
       (await page.locator('[data-page-link="analysis-offline"]').count()) ===
         1 &&
-      (await page.locator('[data-page-link="analysis-online"]').count()) ===
-        1 &&
+      (await page.locator('[data-analysis="refresh"]').count()) === 1 &&
+      (await page.locator('[data-analysis="rerun"]').count()) === 1 &&
+      (await page.locator('[data-analysis="rerun-gps"]').count()) === 1 &&
+      (await page.locator('[data-analysis-version] option').count()) >= 1 &&
       (await page
         .locator(
           '[data-site-link="wx-bms-manche"], [data-site-link="wx-bms-provence"], [data-site-link="wx-meteoswiss"]',

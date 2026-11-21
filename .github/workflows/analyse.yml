@@ -1,0 +1,92 @@
+# Analyse météo « de l'hémisphère au local », sans Claude (demande de Corban du 21/11/2026).
+# Toutes les 30 minutes : regarde si ECMWF IFS ou DWD ICON-EU ont publié un nouveau run ; si oui, refait l'analyse
+# des zones automatiques (analyse/zones.py, auto=True), garde la version dans la branche « analyses » et republie NAVIn.
+# Bouton « Run workflow » (ou bouton Relancer de NAVIn) : une zone d'essai, toutes, ou un point GPS.
+name: Analyse météo
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+    inputs:
+      zone:
+        description: 'Zone : saint-quay, porquerolles, rolle, toutes, ou auto (si nouveau run)'
+        required: false
+        default: 'saint-quay'
+      lat:
+        description: 'Latitude du point GPS (degrés décimaux, laisser vide pour une zone)'
+        required: false
+        default: ''
+      lon:
+        description: 'Longitude du point GPS (degrés décimaux, ouest négatif)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: analyse
+  cancel-in-progress: false
+
+jobs:
+  analyse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: analyse/requirements.txt
+      - name: Versions déjà publiées (branche analyses)
+        run: |
+          if git ls-remote --exit-code --heads origin analyses >/dev/null; then
+            git fetch --depth 1 origin analyses
+            mkdir store && git --work-tree=store checkout FETCH_HEAD -- .
+            git reset -q
+          else
+            mkdir store
+          fi
+      - name: Nouveau run publié ?
+        id: check
+        if: github.event_name == 'schedule'
+        run: |
+          pip install -q -r analyse/requirements.txt
+          python3 -I analyse/run.py --store store --check
+      - name: Dépendances
+        if: github.event_name != 'schedule' || steps.check.outputs.build == 'true'
+        run: pip install -q -r analyse/requirements.txt
+      - name: Analyse
+        if: github.event_name != 'schedule' || steps.check.outputs.build == 'true'
+        env:
+          COPERNICUSMARINE_SERVICE_USERNAME: ${{ secrets.COPERNICUSMARINE_SERVICE_USERNAME }}
+          COPERNICUSMARINE_SERVICE_PASSWORD: ${{ secrets.COPERNICUSMARINE_SERVICE_PASSWORD }}
+          ZONE: ${{ inputs.zone }}
+          LAT: ${{ inputs.lat }}
+          LON: ${{ inputs.lon }}
+        run: |
+          if [ -n "$LAT" ] && [ -n "$LON" ]; then
+            python3 -I analyse/run.py --store store --lat "$LAT" --lon "$LON"
+          elif [ -n "$ZONE" ] && [ "$ZONE" != "auto" ]; then
+            python3 -I analyse/run.py --store store --zone "$ZONE"
+          else
+            python3 -I analyse/run.py --store store --auto
+          fi
+      - name: Garder les versions (branche analyses, un seul commit)
+        if: github.event_name != 'schedule' || steps.check.outputs.build == 'true'
+        run: |
+          cd store
+          git init -q -b analyses
+          git config user.name 'navin-analyse'
+          git config user.email 'navin-analyse@users.noreply.github.com'
+          git add -A
+          git commit -q -m "Analyses météo $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" analyses
+      - name: Republier NAVIn
+        if: github.event_name != 'schedule' || steps.check.outputs.build == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main --repo ${{ github.repository }}
