@@ -12,7 +12,6 @@ import {
 } from '../state/index.ts';
 import { attachErrorLog } from '../storage/errLog.ts';
 
-import { followAutoNight } from './autoNight.ts';
 import { runBootHook } from './bootHooks.ts';
 import { installChromeLinks } from './chromeLinks.ts';
 import { loadDomains } from './domainInit.ts';
@@ -77,7 +76,6 @@ function boot(): void {
   // Opened by the camera on the QR code of a key: the key is saved.
   const keyCame = applyKeyLink();
   followScreenGap();
-  followAutoNight();
   followTopState();
   tickClock();
   setInterval(tickClock, 10_000);

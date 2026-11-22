@@ -11,6 +11,7 @@ import { SwipeRow } from '../../features/prep/index.ts';
 import { shareCards } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { nmText } from '../../lib/geo.ts';
 import type { FixedAlert } from '../../model/fixedAlerts.ts';
 import {
   FIXED_ALERTS,
@@ -20,6 +21,8 @@ import {
 import { go } from '../../shell/router.ts';
 import { toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
+
+import { byDistance, fixedDistance, fixedNear } from './fixedSort.ts';
 
 /** The alerts hidden by the sailor (swiped, 🗑). */
 const HIDDEN_KEY = 'navin.fixedHidden';
@@ -117,6 +120,12 @@ export function FixedAlerts() {
   const shown = FIXED_ALERTS.filter(
     (alert) => !hidden.includes(alert.id) || alert.id === open,
   );
+  const near = fixedNear.value;
+  const toggle = (alert: FixedAlert, keys: string[]) => {
+    buzz();
+    if (open !== alert.id) bumpIn('fixed', keys, alert.id);
+    setOpen(open === alert.id ? null : alert.id);
+  };
   return (
     <div className="fixed-alerts">
       <p className="fx-draft" role="note">
@@ -124,7 +133,29 @@ export function FixedAlerts() {
           '⚠ Textes de travail, à vérifier avec les Instructions nautiques du SHOM, un almanach et les cartes.',
         )}
       </p>
-      {FIXED_SEAS.map(([sea, title]) => {
+      {near ? (
+        <section className="fx-sea" data-fixed-sea="gps">
+          <h2 className="fx-sea-title">
+            {tr('Du plus proche au plus éloigné de votre position')}
+          </h2>
+          {byDistance(shown, near).map((alert, _index, all) => (
+            <FixedRow
+              key={alert.id}
+              alert={alert}
+              open={open === alert.id}
+              distance={fixedDistance(alert, near)}
+              onToggle={() =>
+                toggle(
+                  alert,
+                  all.map((one) => one.id),
+                )
+              }
+              onHide={hide}
+            />
+          ))}
+        </section>
+      ) : null}
+      {(near ? [] : FIXED_SEAS).map(([sea, title]) => {
         // Alphabetical, or by use (the alerts opened most move up): the
         // button at the right of the title chooses.
         const alerts = inMenuOrder(
@@ -143,11 +174,7 @@ export function FixedAlerts() {
                 key={alert.id}
                 alert={alert}
                 open={open === alert.id}
-                onToggle={() => {
-                  buzz();
-                  if (open !== alert.id) bumpIn('fixed', keys, alert.id);
-                  setOpen(open === alert.id ? null : alert.id);
-                }}
+                onToggle={() => toggle(alert, keys)}
                 onHide={hide}
               />
             ))}
@@ -173,13 +200,14 @@ export function FixedAlerts() {
         Les alertes fixes sont les dangers qui reviennent toujours au même
         endroit : courant de marée, plateau de roches, passe étroite, rail de
         navigation, vent local. Elles se lisent sans réseau. Toucher une bande
-        ouvre sa fiche ; la bande montre ses deux premières lignes, le reste
-        s’ouvre avec la fiche. Le bouton à droite du titre trie la liste
-        (alphabétique ou selon l’usage). Glissée vers la gauche, une bande offre
-        🗺 Sur la carte (toucher la zone revient ici), 📤 Partager (image ou PDF)
-        et 🗑 Masquer (réaffichable en bas de la liste). Les heures et les forces
-        du jour (marée, coefficient, courant) restent à lire dans l’annuaire des
-        marées et l’almanach.
+        ouvre sa fiche, qui commence par l’endroit. Le bouton à droite du titre
+        trie la liste (alphabétique ou selon l’usage) ; le bouton GPS la trie
+        toute entière, de la zone la plus proche de votre position à la plus
+        éloignée. Glissée vers la gauche, une bande offre 🗺 Sur la carte
+        (toucher la zone revient ici), 📤 Partager (image ou PDF) et 🗑 Masquer
+        (réaffichable en bas de la liste). Les heures et les forces du jour
+        (marée, coefficient, courant) restent à lire dans l’annuaire des marées
+        et l’almanach.
       </HelpText>
     </div>
   );
@@ -190,6 +218,7 @@ export function FixedAlerts() {
  * @param props - The alert.
  * @param props.alert - The alert.
  * @param props.open - Its card is open.
+ * @param props.distance - Its distance to the GPS position (km), when sorted by it.
  * @param props.onToggle - Open or close its card.
  * @param props.onHide - Hide it.
  * @returns The band.
@@ -197,16 +226,18 @@ export function FixedAlerts() {
 function FixedRow({
   alert,
   open,
+  distance,
   onToggle,
   onHide,
 }: {
   alert: FixedAlert;
   open: boolean;
+  distance?: number;
   onToggle: () => void;
   onHide: (id: string) => boolean;
 }) {
   const tr = useTr();
-  const { id, name, where, zone, sources } = alert;
+  const { id, name, zone, sources } = alert;
   return (
     <SwipeRow
       id={fixedBand(id)}
@@ -233,13 +264,14 @@ function FixedRow({
             aria-label={tr(`${name} · toucher : la fiche`)}
             onClick={onToggle}
           >
-            <span className="mk-pin" aria-hidden="true">
-              ⚠
-            </span>
             <span className="mk-text">
               <b className="b-nm">{tr(name)}</b>
-              <small>{tr(where)}</small>
             </span>
+            {distance !== undefined && Number.isFinite(distance) ? (
+              <span className="fx-dist">
+                {distance === 0 ? tr('ici') : nmText(distance)}
+              </span>
+            ) : null}
             <span className="fx-open" aria-hidden="true">
               {open ? '▾' : '▸'}
             </span>
@@ -247,14 +279,12 @@ function FixedRow({
         </div>
         {open ? (
           <div className="fx-card" data-fixed-card={id}>
-            {cardRows(alert)
-              .slice(1)
-              .map(([label, text]) => (
-                <p key={label}>
-                  <b>{tr(`${label} : `)}</b>
-                  {tr(text)}
-                </p>
-              ))}
+            {cardRows(alert).map(([label, text]) => (
+              <p key={label}>
+                <b>{tr(`${label} : `)}</b>
+                {tr(text)}
+              </p>
+            ))}
             {sources?.length ? (
               <small className="fx-sources">
                 {tr('Sources : ')}

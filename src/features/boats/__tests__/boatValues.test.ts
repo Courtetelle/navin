@@ -25,7 +25,6 @@ import {
 } from '../boatDocs.ts';
 import { boatInfoRows } from '../boatInfoRows.ts';
 import { dayLine } from '../dayLine.ts';
-import { versionValueText } from '../versionText.ts';
 import { withKeys } from '../withKeys.ts';
 
 const LAKE_ID = 'mrltkr40tkny6';
@@ -143,16 +142,6 @@ test('info rows: units, labels, no SOS numbers', () => {
     ['Modèle', 'Hanse 325'],
   ]);
   expect(first.find(([label]) => label === 'Tirant d’eau')?.[1]).toBe('1,53 m');
-});
-
-test('a version value is cut on its HTML form', () => {
-  expect(versionValueText('')).toBe('—');
-  expect(versionValueText(null)).toBe('—');
-  expect(versionValueText(12)).toBe('12');
-  expect(versionValueText({ a: 1 })).toBe('{"a":1}');
-  expect(versionValueText('x'.repeat(90))).toBe('x'.repeat(80));
-  expect(versionValueText('a & b')).toBe('a & b');
-  expect(versionValueText(`${'x'.repeat(78)}&b`)).toBe(`${'x'.repeat(78)}&a`);
 });
 
 test('repeated keys get a suffix', () => {

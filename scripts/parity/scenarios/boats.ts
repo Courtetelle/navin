@@ -3,7 +3,6 @@ import type { Scenario, Step } from '../types.ts';
 import { dossierScenarios } from './boatsDossier.ts';
 import { sheetScenarios } from './boatsSheet.ts';
 import {
-  ARMED_GONE,
   BOOT,
   FIRST_LOAD,
   LAKE_ID,
@@ -16,7 +15,6 @@ import {
   seedPhotos,
   swipe,
   swipeAndHold,
-  versionBoat,
 } from './boatsSteps.ts';
 
 /** Bateaux. */
@@ -150,30 +148,6 @@ const listScenarios: Scenario[] = [
       TOAST_GONE,
       dump('ldb.boats'),
       { snapshot: 'deleted' },
-    ],
-  },
-  {
-    name: 'boats-versions',
-    fixture: 'sample-lake',
-    overrides: {
-      ...QUIET,
-      'ldb.boats': boatsWith('sample-lake', { savannah: versionBoat }),
-    },
-    steps: [
-      BOOT,
-      { go: 'boats', arg: 'savannah' },
-      FIRST_LOAD,
-      { snapshot: 'button' },
-      { click: '[data-vers="savannah"]' },
-      { snapshot: 'versions' },
-      { click: '[data-vput="0"]' },
-      { snapshot: 'armed' },
-      ARMED_GONE,
-      { click: '[data-vput="0"]' },
-      { click: '[data-vput="0"]' },
-      TOAST_GONE,
-      dump('ldb.boats', `ldb.cruise.${LAKE_ID}`),
-      { snapshot: 'restored' },
     ],
   },
   {

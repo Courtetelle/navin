@@ -1155,7 +1155,7 @@ async function shareBriefing(
     : [];
   await shareCards(
     {
-      title: `Go / no-go · ${onRoute ? onRoute.name : data.name}`,
+      title: `GoNoGo · ${onRoute ? onRoute.name : data.name}`,
       kicker: 'Briefing météo',
       sub: boat,
       sections: [
@@ -1226,9 +1226,9 @@ export function GoNoGoLink({
   const title =
     part === 'today'
       ? today
-        ? `Aujourd’hui : ${LIGHTS[today.verdict.light].word}`
-        : 'Go / no-go aujourd’hui'
-      : 'Go / no-go des jours suivants';
+        ? `GoNoGo aujourd’hui : ${LIGHTS[today.verdict.light].word}`
+        : 'GoNoGo aujourd’hui'
+      : 'GoNoGo des jours suivants';
   return (
     <Button
       type="button"

@@ -5,7 +5,6 @@ import {
   boatInfoOf,
   boatKeys,
   boatSections,
-  boatSnap,
   infoDiffKeys,
 } from '../model/boatSheet.ts';
 import { LAKE_CONTACTS } from '../model/contacts.ts';
@@ -196,27 +195,6 @@ export function syncCruiseFromBoat(boat: Boat): void {
       else draft.info[key] = boat.info[key];
     }
   });
-}
-
-/**
- * Put back a previous version of a boat sheet, keeping the current one as a version.
- * @param id - Boat id.
- * @param position - Index in `boat.hist`.
- * @returns `false` when the boat or version is unknown.
- */
-export function restoreBoatVersion(id: string, position: number): boolean {
-  const version = boatById(id)?.hist?.[position];
-  if (!version) return false;
-  updateBoat(id, (boat) => {
-    boatSnap(boat, boatInfoOf(boat, boat.info), 'Avant retour en arrière');
-    for (const key of Object.keys(boatInfoOf(boat, boat.info))) {
-      Reflect.deleteProperty(boat.info, key);
-    }
-    Object.assign(boat.info, structuredClone(version.info));
-  });
-  const boat = boatById(id);
-  if (boat) syncCruiseFromBoat(boat);
-  return true;
 }
 
 /**

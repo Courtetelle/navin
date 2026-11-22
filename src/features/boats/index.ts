@@ -24,7 +24,6 @@
  * | `window._prepHtml` (printBook) | `<CachedPrepReportPage />`: page `prep` of the log book        |
  * | `prepPublishDialog()`          | {@link prepPublishDialog}: opens the window on `<body>`        |
  * | `prepReportShare`, `prepReportPrint` | {@link prepReportShare}, {@link prepReportPrint}         |
- * | `boatVersBtn`, `renderBoatVersions` | `<BoatVersionsButton />`, `<BoatVersions />`              |
  * | `LAKE_DAY_SECTIONS`            | `src/model/lakeDaySections.ts`                                 |
  *
  * Printing a lake day from `printBook`: render `<LakeSheet sheet={pickSheet(sheetData(key), key)} />`
@@ -41,7 +40,6 @@ export type { BoatDocument } from './boatDocs.ts';
 export { boatInfoRows } from './boatInfoRows.ts';
 export type { BoatInfoRow, BoatInfoSection } from './boatInfoRows.ts';
 export { boatThumb, loadImage } from './boatThumb.ts';
-export { BoatVersions, BoatVersionsButton } from './BoatVersions.tsx';
 export {
   boatDocPhotos,
   printBoatDossier,

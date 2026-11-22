@@ -1,54 +1,24 @@
 import { produce } from 'immer';
 
-import { boatInfoOf, boatSnap } from '../model/boatSheet.ts';
-import type { Boat, CruiseInfo } from '../model/types.ts';
+import type { Boat } from '../model/types.ts';
 import { store } from '../storage/store.ts';
 
 import { readBoats } from './boatsLoad.ts';
 import { data } from './data.ts';
 
-/** Boat values as serialized at the last save, to keep a version before a series of changes. */
-let boatPrevious: Record<string, string> | null = null;
-
 /** Load the boats, run their one-shot migrations and save them (legacy boot, lake.js 301-415). */
 export function loadBoats(): void {
-  boatPrevious = null;
   data.boats.value = readBoats();
   saveBoats(true);
 }
 
 /**
- * Persist the boats; a boat whose values changed since the last save first
- * keeps its previous values as a version, at most every 20 minutes (legacy `saveBoats`).
+ * Persist the boats (legacy `saveBoats`).
  * @param keepStamp - `true` keeps `ldb.boats.at` (merge of received data).
  * @returns `true` when written.
  */
 export function saveBoats(keepStamp?: boolean): boolean {
-  const previous = boatPrevious;
-  if (previous) {
-    data.boats.value = produce(data.boats.value, (boats) => {
-      for (const boat of boats) {
-        const before = previous[boat.id];
-        const current = JSON.stringify(boatInfoOf(boat, boat.info));
-        if (!before || before === current) continue;
-        const last = (boat.hist || [])[0];
-        if (
-          last?.from !== 'Avant modification' ||
-          Date.now() - Date.parse(last.at) > 20 * 60e3
-        ) {
-          boatSnap(
-            boat,
-            JSON.parse(before) as CruiseInfo,
-            'Avant modification',
-          );
-        }
-      }
-    });
-  }
   const boats = data.boats.value;
-  boatPrevious = Object.fromEntries(
-    boats.map((boat) => [boat.id, JSON.stringify(boatInfoOf(boat, boat.info))]),
-  );
   if (keepStamp !== true) store.set('ldb.boats.at', new Date().toISOString());
   return store.set('ldb.boats', boats);
 }

@@ -13,8 +13,26 @@ import {
   useHarnessWorld,
 } from './parityHelpers.ts';
 
-function expectStorageToBe(name: string): void {
+/**
+ * The legacy data without the previous versions of the boat sheets, which
+ * NavIn no longer keeps.
+ * @param name - Fixture.
+ * @returns The stored values.
+ */
+function legacyWithoutVersions(name: string): Record<string, string> {
   const legacy = readFixture(name);
+  const boats = legacy['ldb.boats'];
+  if (boats === undefined) return legacy;
+  const list = JSON.parse(boats) as Array<Record<string, unknown>>;
+  if (!list.some((boat) => 'hist' in boat)) return legacy;
+  return {
+    ...legacy,
+    'ldb.boats': JSON.stringify(list.map(({ hist: _hist, ...boat }) => boat)),
+  };
+}
+
+function expectStorageToBe(name: string): void {
+  const legacy = legacyWithoutVersions(name);
   const ours = rawStorage();
   expect(Object.keys(ours).toSorted()).toStrictEqual(
     Object.keys(legacy).toSorted(),

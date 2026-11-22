@@ -38,13 +38,6 @@ export interface ChecklistDefinition {
   [key: string]: unknown;
 }
 
-/** A saved previous version of a boat sheet (`boat.hist[]`). */
-export interface BoatVersion {
-  at: string;
-  from: string;
-  info: CruiseInfo;
-}
-
 /** A boat (`ldb.boats[]`). */
 export interface Boat {
   id: string;
@@ -59,8 +52,8 @@ export interface Boat {
   checklistDepX?: ChecklistItem[];
   /** @default undefined */
   ckLists?: ChecklistDefinition[];
-  /** @default undefined */
-  hist?: BoatVersion[];
+  /** Old previous versions of the sheet, no longer kept: dropped on load. */
+  hist?: unknown;
   /**
    * Custom fields `{ id, label, after }`, values in `info['x_' + id]`.
    * @default undefined
