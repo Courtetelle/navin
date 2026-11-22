@@ -37,6 +37,7 @@ import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
 import { blinkKey, liveBlink, liveDetail } from '../meteo/liveDetail.ts';
 import { ageText, compassPoint, stationBadgeHtml } from '../meteo/liveText.ts';
 
+import { ZonePicker } from './ZonePicker.tsx';
 import {
   hideLiveOnMap,
   layLiveAround,
@@ -46,7 +47,6 @@ import {
   liveZoneIds,
   zonePickOpen,
 } from './liveOnMap.ts';
-import { ZonePicker } from './ZonePicker.tsx';
 
 /** The stations read before the map of NavIn is built, in km. */
 const RADIUS = 60;

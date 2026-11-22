@@ -184,8 +184,9 @@ export async function nearSea500<T extends { lat?: number; lon?: number }>(
   const [grid, wide] = await Promise.all([seaGrid500(), shoreGrid()]);
   return places.filter(({ lat, lon }) => {
     if (lat == null || lon == null) return true;
-    if (grid && insideGrid(grid, lat, lon))
+    if (grid && insideGrid(grid, lat, lon)) {
       return !farFromShore(grid, lat, lon);
+    }
     return !wide || !farFromShore(wide, lat, lon);
   });
 }

@@ -1,8 +1,8 @@
 import { signal } from '@preact/signals-react';
 
+import type { ZoneBox } from '../../features/zones/meteoZones.ts';
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
-import type { ZoneBox } from '../../features/zones/meteoZones.ts';
 import { state, updateSettings } from '../../state/index.ts';
 
 /**

@@ -19,9 +19,9 @@ export interface MeteoZone {
   basin: ZoneBasin;
   kind: ZoneKind;
   /** Polygons, each a list of rings of `[lon, lat]`, the first the outline. */
-  polys: [number, number][][][];
+  polys: Array<Array<Array<[number, number]>>>;
   /** Circles of its coast where the stations are read: `[lat, lon, km]`. */
-  reads: [number, number, number][];
+  reads: Array<[number, number, number]>;
 }
 
 /** A circle where stations are read. */
