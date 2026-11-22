@@ -14554,3 +14554,192 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 .rtg-motor {
   font-style: italic;
 }
+
+/* LiveMétéo : vent prévu (barbules), vagues, courants et pluie du radar
+   par-dessus la carte ; la barre sous le bandeau de LiveMétéo les allume ou
+   les éteint et choisit l’heure de la prévision. */
+.wx-mk {
+  background: none;
+  border: 0;
+  overflow: visible;
+}
+.wx-mk svg {
+  display: block;
+  overflow: visible;
+}
+.wx-lbl {
+  display: block;
+  width: max-content;
+  margin: 0 auto;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+}
+.wx-lbl small {
+  margin-left: 2px;
+  font-size: 10px;
+}
+.wx-lbl small::before {
+  content: 'G';
+}
+.wx-wave,
+.wx-cur {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+}
+.wx-wave {
+  color: #0a4c8c;
+}
+.wx-cur {
+  color: #a1006b;
+}
+.wx-bar {
+  position: fixed;
+  z-index: 1390;
+  top: calc(
+    var(--rb-top, 10px) + var(--rb-step, 56px) + 52px + env(safe-area-inset-top)
+  );
+  right: calc(var(--rb-side-r, 8px) + var(--rb-x, 72px));
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: min(
+    420px,
+    calc(100vw - 2 * var(--rb-side-r, 8px) - 2 * var(--rb-x, 72px))
+  );
+  padding: 6px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface, #fff);
+  color: var(--fg, inherit);
+  font-size: 15px;
+}
+@media (orientation: landscape) and (min-width: 560px) {
+  html body .wx-bar {
+    top: calc(var(--rb-top) + var(--rb-h) + 8px + env(safe-area-inset-top));
+    right: calc(var(--rb-side-r) + var(--rb-x));
+  }
+}
+@media (orientation: portrait) {
+  html body .wx-bar {
+    top: calc(
+      var(--rb-top, 10px) + 2 * var(--rb-step, 56px) + 6px +
+        env(safe-area-inset-top)
+    );
+    right: var(--rb-side-r, 8px);
+    left: auto;
+    max-width: calc(100vw - 2 * var(--rb-side-r, 8px) - var(--rb-x, 72px));
+  }
+}
+.wx-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.btn.wx-layer,
+.wx-layer {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 0 8px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--btn, #eee);
+  color: inherit;
+  font: inherit;
+  font-weight: 800;
+  opacity: 0.55;
+}
+.wx-layer.on {
+  border-color: var(--accent, #1e5aa8);
+  background: var(--accent, #1e5aa8);
+  color: #fff;
+  opacity: 1;
+}
+.wx-layer-txt {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.wx-time {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+  min-width: 150px;
+}
+.btn.wx-step,
+.wx-step {
+  min-width: 44px;
+  min-height: 40px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  background: var(--btn, #eee);
+  color: inherit;
+  font: inherit;
+}
+.wx-step:disabled {
+  opacity: 0.35;
+}
+.wx-when {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 900;
+}
+.wx-src,
+.wx-note {
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.wx-note {
+  color: var(--danger, #c00);
+}
+.wx-rain-key {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-left: 4px;
+}
+.wx-rain-scale {
+  display: inline-block;
+  width: 64px;
+  height: 10px;
+  border-radius: 3px;
+  background: linear-gradient(
+    to right,
+    #88ddee,
+    #0099cc,
+    #0077aa,
+    #ffee00,
+    #ff4400,
+    #c10000,
+    #ff00ff
+  );
+}
+:root[data-theme='night'] .wx-lbl {
+  background: rgba(0, 0, 0, 0.75);
+}
+:root[data-theme='night'] .leaflet-wxMarks-pane,
+:root[data-theme='night'] .leaflet-wxRain-pane {
+  filter: grayscale(1) sepia(1) hue-rotate(-50deg) saturate(6) brightness(0.8);
+}
+:root[data-theme='night'] .wx-layer.on {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: #000;
+}

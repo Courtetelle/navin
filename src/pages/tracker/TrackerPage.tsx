@@ -24,6 +24,7 @@ import { LiveOnMap } from './LiveOnMap.tsx';
 import { PhoneTrackButton } from './PhoneTrackButton.tsx';
 import { TrackerDash } from './TrackerDash.tsx';
 import { TrackerOverlay } from './TrackerOverlay.tsx';
+import { WeatherOnMap } from './WeatherOnMap.tsx';
 import { buildTrackerMap } from './buildTrackerMap.ts';
 
 /**
@@ -77,6 +78,7 @@ export function TrackerPage() {
       <PhoneTrackButton />
       <TrackerOverlay />
       <LiveOnMap />
+      <WeatherOnMap />
       <LightningOnMap />
       <LakeWarningsOnMap />
       <FixedAlertsOnMap />
