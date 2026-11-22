@@ -40,7 +40,7 @@ to4326 = Transformer.from_crs(3035, 4326, always_xy=True)
 
 NM = 1852
 COAST_NM = 20
-COAST_SIMPLIFY_M = 250
+COAST_SIMPLIFY_M = 400
 LARGE_SIMPLIFY_M = 900
 # Circles read for the stations: this radius, this far apart along the coast.
 READ_KM = 45
@@ -195,21 +195,26 @@ def rings(geom):
         if poly.is_empty or poly.geom_type != 'Polygon':
             continue
         parts = [poly.exterior, *poly.interiors]
-        out.append([[[round(x, 4), round(y, 4)] for x, y in ring.coords]
+        out.append([[[round(x, 3), round(y, 3)] for x, y in ring.coords]
                     for ring in parts])
     return out
 
 
-def read_circles(coast_line):
-    """Points along the coast, READ_STEP_KM apart: circles of READ_KM."""
+def read_circles(geom, land):
+    """Points of the outline of the zone along its coast, READ_STEP_KM
+    apart: circles of READ_KM where the stations are read."""
+    near_land = shapely.buffer(land, 2000)
+    shapely.prepare(near_land)
     kept = []
-    lines = getattr(coast_line, 'geoms', [coast_line])
+    lines = getattr(geom.boundary, 'geoms', [geom.boundary])
     for line in lines:
         if line.is_empty or line.length == 0:
             continue
-        steps = max(1, int(line.length // (READ_STEP_KM * 1000)))
+        steps = max(1, int(line.length // 5000))
         for k in range(steps + 1):
             p = line.interpolate(k / steps, normalized=True)
+            if not near_land.contains(p):
+                continue
             if all(p.distance(q) > READ_STEP_KM * 1000 for q in kept):
                 kept.append(p)
     out = []
@@ -222,7 +227,9 @@ def read_circles(coast_line):
 def zone(sea, tree, ident, name, basin, kind, outline):
     area = shapely.make_valid(proj(Polygon(outline)))
     water = sea_in(sea, tree, area)
+    # The land, without the slivers left between the pieces of the sea.
     land = area.difference(water)
+    land = shapely.make_valid(shapely.buffer(shapely.buffer(land, -300), 300))
     if kind == 'cote':
         land_s = shapely.simplify(land, 200)
         band = shapely.buffer(land_s, COAST_NM * NM, quad_segs=4)
@@ -231,10 +238,7 @@ def zone(sea, tree, ident, name, basin, kind, outline):
     else:
         geom = shapely.simplify(water, LARGE_SIMPLIFY_M)
     geom = shapely.make_valid(geom)
-    # The coast of the zone: its outline that lies within 1 km of the land.
-    near_land = shapely.buffer(shapely.simplify(land, 200), 1000)
-    coast = geom.boundary.intersection(near_land)
-    circles = read_circles(coast)
+    circles = read_circles(geom, shapely.simplify(land, 200))
     out = unproj(geom)
     print(ident, 'area km2', round(geom.area / 1e6), 'circles',
           len(circles), flush=True)
