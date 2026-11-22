@@ -26,7 +26,7 @@ test('every screen but the map, the lists and the menus searches what it shows',
 test('the sites are searched by their text, address and place', () => {
   const context = searchContext('sites');
   expect(context.kinds).toStrictEqual(['site']);
-  const hits = searchHits('meteosuisse dangers', context);
+  const hits = searchHits('meteoswiss hazard', context);
   expect(hits.length).toBeGreaterThan(0);
   expect(hits.every((hit) => hit.view === 'sites')).toBe(true);
 });

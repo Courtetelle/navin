@@ -73,3 +73,10 @@ test('a failed reply is not kept', async () => {
   expect(await statusOf(FORECAST)).toBe(200);
   expect(calls).toHaveLength(2);
 });
+
+test('two pages asking the same forecast at once make one request', async () => {
+  const [one, two] = await Promise.all([bodyOf(FORECAST), bodyOf(FORECAST)]);
+  expect(one).toStrictEqual({ n: 1 });
+  expect(two).toStrictEqual({ n: 1 });
+  expect(calls).toHaveLength(1);
+});
