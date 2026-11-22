@@ -72,7 +72,7 @@ export const ZONE_SETS: readonly ZoneSet[] = [
   },
   {
     id: 'lacs',
-    label: 'Léman',
+    label: 'Léman (tout le lac)',
     ids: (zones) => zones.filter((z) => z.kind === 'lac').map((z) => z.id),
   },
 ];

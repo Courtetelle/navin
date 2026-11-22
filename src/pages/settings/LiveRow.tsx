@@ -65,7 +65,7 @@ export function LiveRow() {
         LiveMétéo montre sur la carte les stations de mesure des zones des
         bulletins de Météo-France : bandes côtières de 20 NM et zones du large,
         une ou plusieurs (appui long sur le bouton de la zone). Seules les
-        stations à moins de 500 m de la côte sont gardées (1 km pour le Léman).
+        stations à moins de 500 m de la rive (mer ou Léman) sont gardées.
         L’appui long sur Météo montre celles de la carte affichée.
       </HelpText>
     </>

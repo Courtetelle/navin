@@ -17,7 +17,7 @@ import {
   windConfig,
 } from '../../features/onwater/index.ts';
 import { onLake } from '../../features/onwater/onLake.ts';
-import { nearSea500, nearWater } from '../../features/onwater/shoreFar.ts';
+import { nearSea500 } from '../../features/onwater/shoreFar.ts';
 import type { MeteoZone } from '../../features/zones/meteoZones.ts';
 import {
   meteoZones,
@@ -228,8 +228,8 @@ export function LiveOnMap() {
         return;
       }
       // The zones: their coast read circle by circle, the stations kept
-      // when they stand in a zone, at most 500 m inland of the sea (1 km of
-      // a lake).
+      // when they stand in a zone, at most 500 m inland of the sea or of
+      // the Léman.
       const most = { open: PER_CIRCLE, mf: PER_CIRCLE };
       Promise.all(
         readCircles(zones, center).map((circle) =>
@@ -246,16 +246,7 @@ export function LiveOnMap() {
             taken.add(key);
             return stationInZones(zones, station.lat, station.lon);
           });
-          const lakes = zones.filter((z) => z.kind === 'lac');
-          const onLakes = inZones.filter((s) =>
-            stationInZones(lakes, s.lat, s.lon),
-          );
-          const atSea = inZones.filter((s) => !onLakes.includes(s));
-          const [sea, lake] = await Promise.all([
-            nearSea500(atSea),
-            nearWater(onLakes),
-          ]);
-          const kept = new Set([...sea, ...lake]);
+          const kept = new Set(await nearSea500(inZones));
           draw(inZones.filter((s) => kept.has(s)));
         })
         .catch(() => setCount(0));

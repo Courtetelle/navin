@@ -157,8 +157,8 @@ export async function nearWater<T extends { lat?: number; lon?: number }>(
 let loadingSea: Promise<ShoreGrid | null> | null = null;
 
 /**
- * The land farther than 500 m from the sea, on a grid of 0.004° over the
- * French coasts (`scripts/shore/build_zones.py`), read once; `null` when it
+ * The land farther than 500 m from the sea or the Léman, on a grid of
+ * 0.004° over the French coasts and the Léman (`scripts/shore/build_zones.py`), read once; `null` when it
  * cannot be read (tried again next time).
  * @returns The grid or `null`.
  */
@@ -172,7 +172,7 @@ export function seaGrid500(): Promise<ShoreGrid | null> {
 }
 
 /**
- * The places within 500 m of the sea (or at sea): a station farther inland
+ * The places within 500 m of the sea or the Léman (or on the water): a station farther inland
  * says little of the wind on the water. Outside the grid, or without it, the
  * rule of 1 km ({@link nearWater}) is kept.
  * @param places - Stations or readings.

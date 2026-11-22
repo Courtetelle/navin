@@ -131,7 +131,7 @@ export function ZonePicker() {
       </div>
       <p className="zone-pick-help">
         {tr(
-          'Toucher une zone, sur la carte ou ci-dessous, pour l’ajouter ou la retirer. Côte : bande de 20 NM des bulletins côte ; large : zones des bulletins large (tracé approché de la carte Météo-France). Stations à 500 m de la côte au plus.',
+          'Toucher une zone, sur la carte ou ci-dessous, pour l’ajouter ou la retirer. Côte : bande de 20 NM des bulletins côte ; large : zones des bulletins large (tracé approché de la carte Météo-France). Stations à 500 m de la rive au plus (mer ou Léman).',
         )}
       </p>
       {zones.length === 0 ? (

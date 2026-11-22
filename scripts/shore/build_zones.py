@@ -22,6 +22,8 @@ map of the guide, approximately (no official geometry is published).
 """
 
 import json
+import urllib.parse
+import urllib.request
 import math
 import struct
 import sys
@@ -33,7 +35,7 @@ import shapely
 import shapely.errors
 from pyproj import Transformer
 from shapely.geometry import Point, Polygon, box, shape
-from shapely.ops import unary_union
+from shapely.ops import polygonize, unary_union
 
 to3035 = Transformer.from_crs(4326, 3035, always_xy=True)
 to4326 = Transformer.from_crs(3035, 4326, always_xy=True)
@@ -140,7 +142,8 @@ LARGE = [
      [(3.6, 37.5), (3.0, 39.5), (5.8, 39.5), (5.8, 37.5)]),
 ]
 
-# Lake: the Léman, coarse; no sea, the stations within 1 km of its shore.
+# Lake: the whole Léman, one zone (OSM outline, this coarse one if Overpass
+# fails); the stations within 500 m of its shore (in the grid too).
 LAKES = [
     ('leman', 'Léman', 'lac',
      [(6.14, 46.20), (6.24, 46.38), (6.34, 46.46), (6.50, 46.52),
@@ -316,11 +319,58 @@ def grid(sea, tree, path):
     print('grid bytes', len(head) + len(kinds) + len(blobs))
 
 
-def lake(ident, name, basin, outline):
+LEMAN_QUERY = '''[out:json][timeout:120];
+rel["natural"="water"]["name"~"L[ée]man|Lake Geneva|Genfersee"](46.15,6.1,46.55,6.95);
+out geom;'''
+OVERPASS = ['https://overpass-api.de/api/interpreter',
+            'https://overpass.kumi.systems/api/interpreter']
+
+
+def leman_water():
+    """The whole Léman from OpenStreetMap (one zone), projected; None when
+    Overpass does not answer (the coarse outline is kept then)."""
+    body = urllib.parse.urlencode({'data': LEMAN_QUERY}).encode()
+    for url in OVERPASS:
+        try:
+            req = urllib.request.Request(url, data=body, headers={
+                'User-Agent': 'navin-zones (GitHub Actions)'})
+            with urllib.request.urlopen(req, timeout=180) as reply:
+                data = json.load(reply)
+        except Exception as error:  # noqa: BLE001 - next server
+            print('overpass', url, error, flush=True)
+            continue
+        lines = []
+        for element in data.get('elements', []):
+            for member in element.get('members', []):
+                geom = member.get('geometry') or []
+                if len(geom) > 1:
+                    lines.append(shapely.LineString(
+                        [(node['lon'], node['lat']) for node in geom]))
+        merged = shapely.line_merge(unary_union(lines))
+        polys = list(polygonize(merged))
+        if not polys:
+            continue
+        # Even-odd: the islands are holes.
+        lake = polys[0]
+        for poly in polys[1:]:
+            lake = lake.symmetric_difference(poly)
+        lake = shapely.make_valid(proj(lake))
+        print('leman km2', round(lake.area / 1e6), flush=True)
+        if lake.area > 400e6:
+            return lake
+    return None
+
+
+def lake(ident, name, basin, outline, water):
+    if water is not None:
+        geom = unproj(shapely.make_valid(shapely.simplify(water, 60)))
+        polys = rings(geom)
+    else:
+        polys = [[[[x, y] for x, y in outline]]]
     return {
         'id': ident, 'name': name, 'basin': basin, 'kind': 'lac',
-        'polys': [[[[x, y] for x, y in outline]]],
-        'reads': [[46.43, 6.53, 45]],
+        'polys': polys,
+        'reads': [[46.25, 6.2, 25], [46.43, 6.45, 25], [46.43, 6.8, 25]],
     }
 
 
@@ -332,8 +382,13 @@ def main(out_dir):
         zones.append(zone(sea, tree, ident, name, basin, 'cote', outline))
     for ident, name, basin, outline in LARGE:
         zones.append(zone(sea, tree, ident, name, basin, 'large', outline))
+    leman = leman_water()
     for ident, name, basin, outline in LAKES:
-        zones.append(lake(ident, name, basin, outline))
+        zones.append(lake(ident, name, basin, outline, leman))
+    # The grid counts the Léman as water too: 500 m from its shore.
+    if leman is not None:
+        sea = np.concatenate([sea, np.array([leman], dtype=object)])
+        tree = shapely.STRtree(sea)
     with open(f'{out_dir}/meteo-zones.json', 'w') as out:
         json.dump({'v': 1, 'zones': zones}, out, ensure_ascii=False,
                   separators=(',', ':'))
