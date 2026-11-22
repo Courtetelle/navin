@@ -14905,3 +14905,6 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 .zb-tbl td {
   white-space: nowrap;
 }
+.rp-traces {
+  padding: 8px 14px;
+}

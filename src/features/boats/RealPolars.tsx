@@ -12,13 +12,15 @@ import { FIELDS } from '../../model/fields.ts';
 import type { RealPolar } from '../../model/realPolar.ts';
 import { realMinutes, realToPolar } from '../../model/realPolar.ts';
 import type { Boat } from '../../model/types.ts';
-import { toast, updateBoat } from '../../state/index.ts';
+import { seaCruiseBoat, toast, updateBoat } from '../../state/index.ts';
+import { allLakeTracks } from '../map/trackStats.ts';
 import {
   currentSails,
   realPolarsOf,
   sailsNow,
   setSailsNow,
 } from '../tracking/polarRecorder.ts';
+import { addTraceToPolar, tracesInPolar } from '../tracking/tracePolar.ts';
 
 /**
  * The choices of a logbook field (main sail, head sail).
@@ -68,8 +70,10 @@ export function RealPolars({ boat }: RealPolarsProps) {
       <HelpText>
         Pendant une navigation enregistrée, NavIn compte chaque minute où le cap
         et le vent restent stables, avec le vent réel des instruments (NMEA),
-        pour la voilure en place. Chaque voilure a sa polaire. Le calcul depuis
-        vos traces avec le vent du modèle viendra ensuite.
+        pour la voilure en place. Chaque voilure a sa polaire. Sans instruments,
+        une trace du bateau s’ajoute avec le vent du modèle à l’heure et au lieu
+        de chaque minute (polaire marquée « vent modèle », moins précise), la
+        voilure étant celle du journal de bord.
       </HelpText>
       <div className="section rp-sails" id="sailsNow" data-at={set.at}>
         <p>
@@ -157,6 +161,7 @@ export function RealPolars({ boat }: RealPolarsProps) {
           </Button>
         </form>
       </div>
+      <TracesToPolar boat={boat} />
       {reals.length === 0 ? (
         <HelpText>{tr('Aucune minute enregistrée pour ce bateau.')}</HelpText>
       ) : (
@@ -239,6 +244,69 @@ function RealCard({ boatId, real }: RealCardProps) {
           {tr('🗑 Effacer cette polaire réelle')}
         </ArmedButton>
       </ButtonRow>
+    </details>
+  );
+}
+
+/**
+ * The traces of a boat, each one to add to its real polars with the wind of
+ * the model.
+ * @param props - The boat.
+ * @returns The list.
+ */
+function TracesToPolar({ boat }: RealPolarsProps) {
+  const tr = useTr();
+  const [busy, setBusy] = useState<string | null>(null);
+  const done = new Set(tracesInPolar(boat));
+  const traces = allLakeTracks().filter(({ cruise }) =>
+    cruise
+      ? cruise.boatId === boat.id || seaCruiseBoat(cruise)?.id === boat.id
+      : false,
+  );
+  if (traces.length === 0) return null;
+  return (
+    <details className="section rp-traces" id="rpTraces">
+      <summary>{tr('📈 Ajouter une trace (vent du modèle)')}</summary>
+      <ul className="pol-found">
+        {traces.map((trace) => (
+          <li key={trace.id}>
+            <button
+              type="button"
+              className="btn pol-take"
+              data-trace-polar={trace.id}
+              disabled={busy !== null || done.has(trace.id)}
+              onClick={() => {
+                buzz();
+                setBusy(trace.id);
+                void addTraceToPolar(
+                  boat.id,
+                  trace.id,
+                  trace.track,
+                  trace.cruise,
+                ).then((answer) => {
+                  setBusy(null);
+                  if ('error' in answer) {
+                    toast(answer.error);
+                    return;
+                  }
+                  toast(
+                    `${answer.counted} minute${answer.counted > 1 ? 's' : ''} ajoutée${answer.counted > 1 ? 's' : ''} à la polaire réelle`,
+                  );
+                });
+              }}
+            >
+              <b>{trace.name}</b>
+              <small>
+                {busy === trace.id
+                  ? tr('Calcul…')
+                  : done.has(trace.id)
+                    ? tr('Ajoutée')
+                    : tr('Toucher pour l’ajouter')}
+              </small>
+            </button>
+          </li>
+        ))}
+      </ul>
     </details>
   );
 }

@@ -93,6 +93,19 @@ describe('routeSail', () => {
     expect(lower.motorMin).toBe(0);
   });
 
+  it('tacks before the land when it knows the water', () => {
+    const to = destination(START, 0, 8);
+    // Land east of 0.6 NM from the route.
+    const shore = destination(START, 90, 0.6).lon;
+    const navigable = (_: unknown, b: { lon: number }) => b.lon < shore;
+    const result = routeSail(ask(to, { twd: 0, tws: 12 }, { navigable }));
+    if (result.kind !== 'done') throw new Error(result.kind);
+    expect(result.steps.every((step) => step.lon < shore)).toBe(true);
+    const free = routeSail(ask(to, { twd: 0, tws: 12 }));
+    if (free.kind !== 'done') throw new Error(free.kind);
+    expect(result.tacks).toBeGreaterThanOrEqual(free.tacks);
+  });
+
   it('says where and when the forecast ends', () => {
     const to = destination(START, 0, 6);
     expect(routeSail(ask(to, null)).kind).toBe('no-wind');
