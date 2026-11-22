@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  checkGithubKey,
   dispatchAnalysis,
   dispatchInputs,
   formatPosition,
@@ -113,5 +114,34 @@ describe('analysis of the place of the zone or of the GPS', () => {
     expect(shouldAsk('2026-11-21T17:00+01:00', 0, now)).toBe(false);
     expect(shouldAsk('2026-11-21T13:00+01:00', 0, now)).toBe(true);
     expect(shouldAsk(null, now - 3_600_000, now)).toBe(false);
+  });
+});
+
+const answer = (status: number, headers: Record<string, string> = {}) =>
+  (async () =>
+    new Response(null, { status, headers })) as unknown as typeof fetch;
+
+describe('checkGithubKey', () => {
+  it('accepts a key GitHub reads with, and gives its end', async () => {
+    const check = await checkGithubKey(
+      'k',
+      answer(200, {
+        'github-authentication-token-expiration': '2027-11-30 00:00:00 UTC',
+      }),
+    );
+    expect(check).toEqual({ ok: true, end: Date.UTC(2027, 10, 30) });
+  });
+  it('refuses on 401, 403 or 404', async () => {
+    for (const status of [401, 403, 404]) {
+      // eslint-disable-next-line no-await-in-loop -- three short answers
+      const check = await checkGithubKey('k', answer(status));
+      expect(check.ok).toBe(false);
+    }
+  });
+  it('says nothing without network', async () => {
+    const down = (async () => {
+      throw new Error('offline');
+    }) as unknown as typeof fetch;
+    expect(await checkGithubKey('k', down)).toEqual({ ok: null, end: null });
   });
 });

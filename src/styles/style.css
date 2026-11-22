@@ -14470,10 +14470,9 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
   align-items: center;
   max-width: 100%;
 }
-.wx-analysis-key input {
-  font-size: 16px;
-  width: 100%;
-  max-width: 28em;
+.wx-analysis-key .btn {
+  margin-top: 6px;
+  white-space: normal;
 }
 
 /* Bateaux › polaire: the polar of a boat, its table scrolls sideways */
@@ -14904,6 +14903,9 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 .zb-tbl th,
 .zb-tbl td {
   white-space: nowrap;
+}
+.rp-traces {
+  padding: 8px 14px;
 }
 
 /* LiveMétéo : degré Douglas des vagues sur la couleur de son groupe, étale
