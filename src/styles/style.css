@@ -14910,7 +14910,7 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
    button of the zone): a panel at the bottom, the map and its zones above. */
 .zone-pick {
   position: fixed;
-  z-index: 1300;
+  z-index: 2100;
   left: max(8px, env(safe-area-inset-left));
   right: max(8px, env(safe-area-inset-right));
   bottom: max(8px, env(safe-area-inset-bottom));
