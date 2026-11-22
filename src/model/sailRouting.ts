@@ -42,6 +42,12 @@ export interface RoutingAsk {
   motorBelow: number;
   /** Speed under motor (knots). */
   motorKn: number;
+  /**
+   * Whether the boat can sail from one place to another without touching the
+   * land (the water of the map file); without it, the land is not seen.
+   * @default undefined
+   */
+  navigable?: (from: LatLon, to: LatLon) => boolean;
   /** Step of the computation, minutes. @default 10 */
   stepMin?: number;
 }
@@ -168,12 +174,43 @@ export function routeSail(ask: RoutingAsk): RoutingResult {
         mode = null;
         side = null;
       }
-      const straight = angDiff(course, toTarget) < 3;
+      let straight = angDiff(course, toTarget) < 3;
       // Straight, up to the point; else in shorter steps close to it.
       const reachMs = (left / kn) * 3_600_000;
-      const runMs = straight
+      let runMs = straight
         ? Math.min(stepMs, reachMs)
         : Math.min(stepMs, Math.max(60_000, reachMs / 2));
+      // A board that runs into the land: the other board, a shorter one, or
+      // the motor along the route.
+      if (!motor && !straight && ask.navigable) {
+        const from = here;
+        const speed = kn;
+        const check = ask.navigable;
+        const free = (heading: number, spanMs: number) =>
+          check(from, destination(from, heading, (speed * spanMs) / 3_600_000));
+        const other = norm(2 * wind.twd - course);
+        if (!free(course, runMs)) {
+          if (free(other, runMs) || free(other, 60_000)) {
+            if (mode === 'beat') leg.tacks++;
+            else leg.gybes++;
+            ms += MANOEUVRE_MIN * 60_000;
+            course = other;
+            side = side === 'tribord' ? 'bâbord' : 'tribord';
+            if (!free(other, runMs)) runMs = 60_000;
+          } else if (free(course, 60_000)) {
+            runMs = 60_000;
+          } else {
+            motor = true;
+            course = toTarget;
+            kn = ask.motorKn;
+            sails = 'Moteur';
+            mode = null;
+            side = null;
+            straight = true;
+            runMs = Math.min(stepMs, (left / kn) * 3_600_000);
+          }
+        }
+      }
       const twa = foldAngle(wind.twd - course);
       steps.push({
         ms,

@@ -1,3 +1,4 @@
+import type { LatLon } from '../../lib/geo.ts';
 import type { BoatPolar } from '../../model/polars.ts';
 import { isBoatPolar, polarSpeed } from '../../model/polars.ts';
 import type { RealPolar } from '../../model/realPolar.ts';
@@ -8,8 +9,11 @@ import { routeSail } from '../../model/sailRouting.ts';
 import type { Boat } from '../../model/types.ts';
 import { store } from '../../storage/store.ts';
 
+import { autoOptions, avoidZones, routeBox } from './autoRoute.ts';
 import type { RouteWind } from './routingWeather.ts';
 import { fetchRouteWind, windAt } from './routingWeather.ts';
+import { buildWaterGrid } from './waterGrid.ts';
+import { cellOf, clearLine } from './waterRoute.ts';
 
 const PREFS_KEY = 'ldb.routingPrefs';
 
@@ -90,7 +94,13 @@ export function boatSailSpeed(
 
 /** A routing done, or why not. */
 export type RoutingRun =
-  | { kind: 'result'; result: RoutingResult; wind: RouteWind }
+  | {
+      kind: 'result';
+      result: RoutingResult;
+      wind: RouteWind;
+      /** The land was seen (a map file of the device covers the route). */
+      landSeen: boolean;
+    }
   | { kind: 'error'; error: string };
 
 /**
@@ -126,6 +136,7 @@ export async function runRouting(
     : [];
   const wind = await fetchRouteWind(route.points, prefs.model);
   if ('error' in wind) return { kind: 'error', error: wind.error };
+  const navigable = await landCheck(route);
   const result = routeSail({
     points: route.points,
     departMs,
@@ -134,6 +145,45 @@ export async function runRouting(
     polar: polar.polar,
     motorBelow: prefs.motorBelow,
     motorKn: prefs.motorKn,
+    ...(navigable ? { navigable } : {}),
   });
-  return { kind: 'result', result, wind };
+  return { kind: 'result', result, wind, landSeen: Boolean(navigable) };
+}
+
+/**
+ * Whether a board stays in the water: the water of the map file of the
+ * device around the route, at half the margin to the shore of « Contourner
+ * la terre », out of the wind farms if asked.
+ * @param route - The route.
+ * @returns The check, or `undefined` without a map file covering the route.
+ */
+async function landCheck(
+  route: NavRoute,
+): Promise<((from: LatLon, to: LatLon) => boolean) | undefined> {
+  const lats = route.points.map((point) => point.lat);
+  const lons = route.points.map((point) => point.lon);
+  const options = autoOptions();
+  try {
+    const answer = await buildWaterGrid({
+      ...routeBox(route.points),
+      inner: {
+        s: Math.min(...lats),
+        n: Math.max(...lats),
+        w: Math.min(...lons),
+        e: Math.max(...lons),
+      },
+      marginM: options.marginM,
+      avoid: avoidZones(options),
+    });
+    if (answer.kind !== 'grid') return undefined;
+    const { loose } = answer;
+    return (from, to) =>
+      clearLine(
+        loose,
+        cellOf(loose, from.lat, from.lon),
+        cellOf(loose, to.lat, to.lon),
+      );
+  } catch {
+    return undefined;
+  }
 }

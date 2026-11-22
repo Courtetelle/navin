@@ -89,8 +89,9 @@ export function RoutingPanel() {
         là où le bateau sera, à l’heure où il y sera, et la polaire du bateau
         (ou mieux, sa polaire réelle). Au près il tire des bords, au vent
         arrière il empanne ; sous le seuil, il passe au moteur en ligne droite
-        et l’heure d’arrivée suit. Courants et vagues ne sont pas encore pris en
-        compte, ni la terre pendant les bords.
+        et l’heure d’arrivée suit. Avec une carte hors ligne (Fonds de cartes)
+        qui couvre la route, les bords s’arrêtent avant la terre. Courants et
+        vagues ne sont pas encore pris en compte.
       </HelpText>
       <div className="section rtg-form" id="rtgForm">
         <label>
@@ -216,7 +217,7 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
       </p>
     );
   }
-  const { result } = run;
+  const { result, landSeen } = run;
   if (result.kind === 'no-wind') {
     return (
       <p className="help rtg-msg" id="rtgMsg">
@@ -239,6 +240,13 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
         <b>{`Arrivée ${when(result.arriveMs)}`}</b>
       </p>
       <p>{summary}</p>
+      <p className="help" id="rtgLand">
+        {tr(
+          landSeen
+            ? 'Terre évitée pendant les bords (carte hors ligne du téléphone ; roches et hauts-fonds non vus).'
+            : 'Terre non vue pendant les bords : aucune carte hors ligne ne couvre la route (Fonds de cartes).',
+        )}
+      </p>
       <h3 className="sub-h">{tr('Par segment')}</h3>
       <LegTable result={result} route={route} />
       <h3 className="sub-h">{tr('Heure par heure')}</h3>

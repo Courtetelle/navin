@@ -2124,6 +2124,11 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
     said.includes('Arrivée') &&
       (await page.locator('#rtgSteps tbody tr').count()) > 0,
   );
+  check(
+    theme,
+    'and it says whether the land was seen during the boards',
+    ((await page.locator('#rtgLand').textContent()) ?? '').includes('Terre'),
+  );
   const last = (await page.locator('#view .btn').last().textContent()) ?? '';
   check(theme, 'and Partager comes last', last.includes('Partager'));
   await page.locator('[data-part="draw"]').click();
