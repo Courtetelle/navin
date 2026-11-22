@@ -287,3 +287,52 @@ function degMin(value: number, width: number): string {
 export function formatPosition(lat: number, lon: number): string {
   return `${degMin(lat, 2)} ${lat >= 0 ? 'N' : 'S'} ${degMin(lon, 3)} ${lon >= 0 ? 'E' : 'W'}`;
 }
+
+/** Where NavIn keeps the GitHub key, in `settings.windAlert`. */
+export const GITHUB_KEY_SETTING = 'githubKey';
+
+/** What GitHub says of a key. */
+export interface GithubKeyCheck {
+  /** True accepted, false refused, null no answer (network). */
+  ok: boolean | null;
+  /** Its end date (epoch ms), when GitHub tells it. */
+  end: number | null;
+}
+
+/**
+ * Try a GitHub key on the workflow of the analysis: read it, as running it
+ * would start an analysis.
+ * @param token - The key.
+ * @param fetcher - fetch (tests pass their own).
+ * @returns Whether GitHub accepts it, and until when.
+ */
+export async function checkGithubKey(
+  token: string,
+  fetcher: typeof fetch = fetch,
+): Promise<GithubKeyCheck> {
+  try {
+    const response = await fetcher(
+      `https://api.github.com/repos/${ANALYSIS_REPO}/actions/workflows/${ANALYSIS_WORKFLOW}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${token}`,
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      },
+    );
+    const said = response.headers.get('github-authentication-token-expiration');
+    const end = said
+      ? Date.parse(said.replace(' UTC', 'Z').replace(' ', 'T'))
+      : Number.NaN;
+    if (response.ok) {
+      return { ok: true, end: Number.isFinite(end) ? end : null };
+    }
+    if ([401, 403, 404].includes(response.status)) {
+      return { ok: false, end: null };
+    }
+    return { ok: null, end: null };
+  } catch {
+    return { ok: null, end: null };
+  }
+}

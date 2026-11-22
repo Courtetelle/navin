@@ -16,6 +16,7 @@ export const SYNC_KEYS = [
   'aemetKey',
   'metOfficeKey',
   'frostKey',
+  'githubKey',
 ] as const;
 type SyncedKey = (typeof SYNC_KEYS)[number];
 

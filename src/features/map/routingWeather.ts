@@ -77,11 +77,58 @@ export async function fetchRouteWind(
   points: readonly RoutePoint[],
   model: string,
 ): Promise<RouteWind | { error: string }> {
-  const places = windPlaces(points);
+  return askWind(
+    windPlaces(points),
+    'https://api.open-meteo.com/v1/forecast',
+    `forecast_days=10&models=${model}`,
+    model,
+  );
+}
+
+/** Open-Meteo keeps its forecasts this many days back. */
+const PAST_DAYS = 90;
+
+/**
+ * The wind of the models over a past navigation: the forecast kept by
+ * Open-Meteo within 90 days, else its archive (ERA5, coarser).
+ * @param points - Places of the navigation.
+ * @param startMs - Its start.
+ * @param endMs - Its end.
+ * @returns The wind, or why there is none.
+ */
+export async function fetchPastWind(
+  points: readonly RoutePoint[],
+  startMs: number,
+  endMs: number,
+): Promise<RouteWind | { error: string }> {
+  const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+  const dates = `start_date=${day(startMs)}&end_date=${day(endMs)}`;
+  const recent = Date.now() - startMs < PAST_DAYS * 86_400_000;
+  return recent
+    ? askWind(
+        windPlaces(points),
+        'https://api.open-meteo.com/v1/forecast',
+        dates,
+        'best_match',
+      )
+    : askWind(
+        windPlaces(points),
+        'https://archive-api.open-meteo.com/v1/archive',
+        dates,
+        'era5',
+      );
+}
+
+async function askWind(
+  places: LatLon[],
+  base: string,
+  extra: string,
+  model: string,
+): Promise<RouteWind | { error: string }> {
   if (places.length === 0) return { error: 'La route n’a pas de point.' };
   const lat = places.map((place) => place.lat.toFixed(3)).join(',');
   const lon = places.map((place) => place.lon.toFixed(3)).join(',');
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=wind_speed_10m,wind_direction_10m&wind_speed_unit=kn&timeformat=unixtime&forecast_days=10&models=${model}`;
+  const url = `${base}?latitude=${lat}&longitude=${lon}&hourly=wind_speed_10m,wind_direction_10m&wind_speed_unit=kn&timeformat=unixtime&${extra}`;
   let reply: Response;
   try {
     reply = await openMeteoFetch(url);
