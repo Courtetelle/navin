@@ -20,7 +20,6 @@ import { boatById, state, toast } from '../../state/index.ts';
 import { CompactForm } from '../logbook/index.ts';
 import { BoatFieldsEditor } from '../onwater/index.ts';
 
-import { BoatVersions, BoatVersionsButton } from './BoatVersions.tsx';
 import { DocumentKind } from './DocumentKind.tsx';
 import { saveBoatInfo } from './boatActions.ts';
 import { BOAT_DOC_KINDS, boatDocs } from './boatDocs.ts';
@@ -40,9 +39,7 @@ interface BoatDossierProps {
  */
 export function BoatDossier({ boatId }: BoatDossierProps) {
   useSignals();
-  const [screen, setScreen] = useState<'sheet' | 'fields' | 'versions'>(
-    'sheet',
-  );
+  const [screen, setScreen] = useState<'sheet' | 'fields'>('sheet');
   const [drawn, setDrawn] = useState(() => ({
     count: 0,
     fresh: true,
@@ -72,9 +69,6 @@ export function BoatDossier({ boatId }: BoatDossierProps) {
   if (screen === 'fields') {
     return <BoatFieldsEditor boatId={boatId} onDone={showSheet} />;
   }
-  if (screen === 'versions') {
-    return <BoatVersions boatId={boatId} onBack={showSheet} />;
-  }
   return (
     <DossierSheet
       key={drawn.count}
@@ -82,7 +76,6 @@ export function BoatDossier({ boatId }: BoatDossierProps) {
       fresh={drawn.fresh}
       onRefresh={() => draw(false)}
       onFields={() => setScreen('fields')}
-      onVersions={() => setScreen('versions')}
     />
   );
 }
@@ -92,23 +85,15 @@ interface DossierSheetProps {
   fresh: boolean;
   onRefresh: () => void;
   onFields: () => void;
-  onVersions: () => void;
 }
 
-function DossierSheet({
-  boat,
-  fresh,
-  onRefresh,
-  onFields,
-  onVersions,
-}: DossierSheetProps) {
+function DossierSheet({ boat, fresh, onRefresh, onFields }: DossierSheetProps) {
   const tr = useTr();
   useNavFields();
   const [reading, setReading] = useState(true);
   useNavEdit(reading, () => setReading(false));
   const sheet = useRef<HTMLDivElement>(null);
   useReadingMarquee(reading, sheet);
-  const [versioned] = useState(() => boat);
   const name = boat.info.boat || 'Bateau sans nom';
   const hasDocs = boatDocs(boat).length > 0;
   return (
@@ -170,7 +155,6 @@ function DossierSheet({
           onChange={(next) => saveBoatInfo(boat.id, next)}
         />
       </div>
-      <BoatVersionsButton boat={versioned} onOpen={onVersions} />
       {reading && !hasDocs ? null : (
         <FoldSection title="Documents (photos)">
           <div className={reading ? 'fiche-reading' : undefined}>

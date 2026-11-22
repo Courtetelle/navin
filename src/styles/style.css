@@ -13586,6 +13586,14 @@ h1.menu-title {
   border-radius: 12px;
   line-height: 0;
 }
+.btn.menu-sort + .btn.menu-sort {
+  margin-left: 6px;
+}
+.btn.menu-sort.fx-gps.on {
+  background: var(--on);
+  border-color: var(--on);
+  color: var(--on-fg);
+}
 .menu-sort-icon {
   display: block;
   width: 26px;
@@ -13936,19 +13944,37 @@ h1.menu-title {
 .fixed-alerts .fx-band > .mark-head {
   flex: 1;
   min-width: 0;
+  max-width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+.fixed-alerts .fx-band .mk-text {
+  flex: 1;
+  min-width: 0;
+}
+.fixed-alerts .fx-row {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 .fixed-alerts .fx-band .mk-text small {
   display: block;
   overflow-wrap: anywhere;
 }
-/* Closed, a band shows two lines: the name, then where; the rest opens with
-   the card. */
-.fixed-alerts .fx-row:not(.open) .fx-band .mk-text b,
-.fixed-alerts .fx-row:not(.open) .fx-band .mk-text small {
+/* A band is its name only, whole on as many lines as it takes; where it is
+   opens first with the card. */
+.fixed-alerts .fx-band .mk-text b {
   display: block;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.fixed-alerts .fx-dist {
+  flex: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
 }
 .fixed-alerts .fx-open {
   margin-left: auto;
@@ -14553,4 +14579,67 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 }
 .rtg-motor {
   font-style: italic;
+}
+
+/* X in landscape (the tablet, not the phone sideways): one column on the
+   left, top to bottom the clock, the arrow, START, the mark, the dividers,
+   then the buttons of the right column in their order (the magnifier, NavIn,
+   the photo, Météo), and SOS always at the very bottom; NavIn unrolls its
+   menus to its right. */
+@media (orientation: landscape) and (min-width: 560px) and (min-height: 640px) {
+  html body {
+    --rb-row: calc(var(--rb-top) + env(safe-area-inset-top));
+  }
+  html body #searchBtn {
+    top: calc(var(--rb-row) + 5 * var(--rb-step)) !important;
+    bottom: auto !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
+    top: calc(var(--rb-row) + 6 * var(--rb-step)) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+  }
+  html body .side-rail-left .rail-btn.rail-photo {
+    position: fixed;
+    top: calc(var(--rb-row) + 7 * var(--rb-step));
+    left: var(--rb-side);
+    right: auto;
+  }
+  html body .side-rail-left .rail-btn.rail-weather {
+    position: fixed;
+    top: calc(var(--rb-row) + 8 * var(--rb-step));
+    left: var(--rb-side);
+    right: auto;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-sos {
+    top: auto !important;
+    bottom: calc(var(--rb-top) + env(safe-area-inset-bottom)) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+  }
+  html body .navin-row {
+    top: calc(var(--rb-row) + 6 * var(--rb-step));
+    left: calc(var(--rb-side) + var(--rb-x));
+    right: auto;
+    flex-direction: row;
+  }
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
+  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
+    top: calc(var(--rb-row) + 6 * var(--rb-step)) !important;
+    left: calc(var(--rb-side) + 2 * var(--rb-x)) !important;
+    right: auto !important;
+  }
+  html body header.topbar #gearBtn {
+    top: calc(var(--rb-row) + 6 * var(--rb-step)) !important;
+    left: calc(var(--rb-side) + 3 * var(--rb-x)) !important;
+    right: auto !important;
+  }
+  html body .live-chip {
+    right: var(--rb-side-r);
+  }
+  html body .trk-full .trk-dash {
+    right: var(--rb-side-r) !important;
+  }
 }

@@ -7,7 +7,6 @@ import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { useReadingMarquee } from '../../components/shared/useReadingMarquee.ts';
 import { BoatCard } from '../../features/boats/BoatCard.tsx';
 import { BoatPolarScreen } from '../../features/boats/BoatPolar.tsx';
-import { BoatVersions } from '../../features/boats/BoatVersions.tsx';
 import { addBoat } from '../../features/boats/boatActions.ts';
 import { boatsByNav } from '../../features/boats/navOrder.ts';
 import { sortOf } from '../../features/data/dataOrder.ts';
@@ -25,7 +24,7 @@ import { boatById, toast } from '../../state/index.ts';
 
 type BoatScreen =
   | { kind: 'list'; openId: string | null; version: number }
-  | { kind: 'fields' | 'versions' | 'polar'; id: string };
+  | { kind: 'fields' | 'polar'; id: string };
 
 /**
  * Screen `boats` (legacy `VIEWS.boats`): Bateaux, their label editor and
@@ -57,11 +56,7 @@ export function BoatsPage({ arg }: PageProps) {
     if (screen.kind === 'polar') {
       return <BoatPolarScreen boatId={screen.id} onBack={close} />;
     }
-    return screen.kind === 'fields' ? (
-      <BoatFieldsEditor boatId={screen.id} onDone={close} />
-    ) : (
-      <BoatVersions boatId={screen.id} onBack={close} />
-    );
+    return <BoatFieldsEditor boatId={screen.id} onDone={close} />;
   }
   return (
     <BoatList
@@ -72,7 +67,6 @@ export function BoatsPage({ arg }: PageProps) {
       onEditing={setEditing}
       onShow={showList}
       onFields={(id) => setScreen({ kind: 'fields', id })}
-      onVersions={(id) => setScreen({ kind: 'versions', id })}
       onPolar={(id) => setScreen({ kind: 'polar', id })}
     />
   );
@@ -85,7 +79,6 @@ interface BoatListProps {
   onEditing: (editing: boolean) => void;
   onShow: (openId: string | null) => void;
   onFields: (id: string) => void;
-  onVersions: (id: string) => void;
   onPolar: (id: string) => void;
 }
 
@@ -96,7 +89,6 @@ function BoatList({
   onEditing,
   onShow,
   onFields,
-  onVersions,
   onPolar,
 }: BoatListProps) {
   useSignals();
@@ -167,7 +159,6 @@ function BoatList({
             onRefresh={() => onShow(boat.id)}
             onRemoved={() => onShow(null)}
             onFields={() => onFields(boat.id)}
-            onVersions={() => onVersions(boat.id)}
             onPolar={() => onPolar(boat.id)}
           />
         ))}

@@ -1,11 +1,9 @@
 import { textOf, uid } from '../lib/format.ts';
-import { indexById } from '../lib/indexById.ts';
 import {
   EXAMPLE_BOATS,
   INSPIRATION_INFO,
   SAVANNAH_INFO,
 } from '../model/boatSeeds.ts';
-import { boatInfoOf, boatSnap, infoDiffKeys } from '../model/boatSheet.ts';
 import {
   DEP_CHECK,
   DEP_CHECK_X,
@@ -16,7 +14,7 @@ import {
   seedList,
 } from '../model/checklistSeeds.ts';
 import { LAKE_CONTACTS } from '../model/contacts.ts';
-import type { Boat, Cruise, CruiseMeta } from '../model/types.ts';
+import type { Boat } from '../model/types.ts';
 import { store } from '../storage/store.ts';
 
 import {
@@ -115,7 +113,7 @@ export function readBoats(): Boat[] {
   migrateSheets('ldb.displKg', boats, displacementWithoutKg);
   migrateSheets('ldb.flagSplit', boats, splitFlagPort);
   for (const boat of boats) migrateBoatChecklists(boat, boats);
-  keepCruiseCopiesAsVersions(boats);
+  dropOldVersions(boats);
   return boats;
 }
 
@@ -213,31 +211,15 @@ function migrateBoatChecklists(boat: Boat, boats: Boat[]): void {
   }
 }
 
-function keepCruiseCopiesAsVersions(boats: Boat[]): void {
-  if (store.get('ldb.boatVers1', false)) return;
-  try {
-    const byId = indexById(boats);
-    for (const meta of store.get<CruiseMeta[]>('ldb.index', [])) {
-      const cruise = store.get<Cruise | null>(`ldb.cruise.${meta.id}`, null);
-      const boat = cruise?.boatId ? byId.get(cruise.boatId) : undefined;
-      if (!cruise || !boat) continue;
-      const info = boatInfoOf(boat, cruise.info);
-      if (infoDiffKeys(info, boatInfoOf(boat, boat.info)).length > 0) {
-        const at =
-          textOf(cruise.saved) ||
-          cruise.updated ||
-          meta.created ||
-          new Date().toISOString();
-        boatSnap(
-          boat,
-          info,
-          `Copie gardée dans la navigation « ${cruise.info.name || meta.name || 'sans nom'} »`,
-          at,
-        );
-      }
-    }
-  } catch {
-    // A damaged index: no version is kept.
+/**
+ * Previous versions of the sheets are no longer kept: drop the old ones.
+ * @param boats - Boats, mutated.
+ */
+function dropOldVersions(boats: Boat[]): void {
+  for (const boat of boats) {
+    if ('hist' in boat) Reflect.deleteProperty(boat, 'hist');
   }
+  // The marker of the old copy of the outings into versions: kept, so that
+  // an older NavIn opened again does not make them anew.
   store.set('ldb.boatVers1', true);
 }

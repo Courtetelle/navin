@@ -44,6 +44,7 @@ import { showLiveAround } from '../tracker/liveOnMap.ts';
 
 import { AnalysisLinks } from './AnalysisLinks.tsx';
 import { FixedAlerts } from './FixedAlerts.tsx';
+import { FixedGpsSort } from './FixedGpsSort.tsx';
 import { GoNoGo, GoNoGoLink } from './GoNoGo.tsx';
 import { LakeWarnings } from './LakeWarnings.tsx';
 import { LightningAlert } from './LightningAlert.tsx';
@@ -176,7 +177,7 @@ function LakeLightsPage() {
   );
 }
 
-/** Argument of the screen for the go / no-go. */
+/** Argument of the screen for the GoNoGo. */
 const GONOGO = 'gonogo';
 
 function openGoNoGo() {
@@ -185,7 +186,7 @@ function openGoNoGo() {
 }
 
 /**
- * The go / no-go of the next days, for the boat.
+ * The GoNoGo of the next days, for the boat.
  * @returns The screen content.
  */
 function GoNoGoPage() {
@@ -193,9 +194,19 @@ function GoNoGoPage() {
   const back = useBubbleBack();
   return (
     <>
-      <MeteoBack back={back} />
+      {back ? (
+        <MeteoBack back={back} />
+      ) : (
+        <PageBack
+          label="◀ Prévisions"
+          data-go="forecast"
+          onClick={openForecast}
+        >
+          {tr('◀ Prévisions')}
+        </PageBack>
+      )}
       <TitleInNav>
-        <h1>{tr('🚦 Go / no-go')}</h1>
+        <h1>{tr('🚦 GoNoGo')}</h1>
       </TitleInNav>
       <GoNoGo />
     </>
@@ -232,6 +243,7 @@ function FixedAlertsPage() {
       <TitleInNav>
         <h1 className="menu-title">
           {tr('⚠ Alertes fixes')}
+          <FixedGpsSort />
           <MenuSortButton menu="fixed" />
         </h1>
       </TitleInNav>
@@ -312,13 +324,6 @@ function WeatherMenu() {
       title: 'Prévisions',
       sub: 'ici maintenant, dans 3 h, ce soir, demain matin ; les 12 prochaines heures, sources officielles, échelles',
       open: openForecast,
-    },
-    {
-      key: 'gonogo',
-      ico: '🚦',
-      title: 'Go / no-go',
-      sub: 'le feu des 4 prochains jours pour votre bateau, à corriger en mer ; partage, prompt pour une IA, hors ligne',
-      open: openGoNoGo,
     },
     {
       key: 'live',

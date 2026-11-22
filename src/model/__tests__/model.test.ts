@@ -3,7 +3,6 @@ import { expect, test } from 'vitest';
 import {
   BOAT_KEYS,
   boatSections,
-  boatSnap,
   boatSub,
   infoDiffKeys,
 } from '../boatSheet.ts';
@@ -202,7 +201,7 @@ test('section definitions keep the legacy keys', () => {
   ]);
 });
 
-test('boat sheet: custom fields, aliases, sub-label and versions', () => {
+test('boat sheet: custom fields, aliases and sub-label', () => {
   const boat: Boat = {
     id: 'b1',
     info: { model: 'Hanse 325', year: 'construit en 2013' },
@@ -227,14 +226,5 @@ test('boat sheet: custom fields, aliases, sub-label and versions', () => {
   expect(infoDiffKeys({ a: '1', b: '' }, { a: '1', c: '2' })).toStrictEqual([
     'b',
     'c',
-  ]);
-  expect(
-    boatSnap(boat, { model: 'Old' }, 'Test', '2026-01-01T00:00:00.000Z'),
-  ).toBe(true);
-  expect(
-    boatSnap(boat, { model: 'Old' }, 'Again', '2026-02-01T00:00:00.000Z'),
-  ).toBe(false);
-  expect(boat.hist).toStrictEqual([
-    { at: '2026-01-01T00:00:00.000Z', from: 'Test', info: { model: 'Old' } },
   ]);
 });

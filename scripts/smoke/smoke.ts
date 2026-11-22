@@ -1154,6 +1154,35 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
     'Alertes fixes: no 🗺 on the bands, the map is in the swipe',
     (await page.locator('[data-fixed-map]').count()) === 0,
   );
+  check(
+    theme,
+    'Alertes fixes: no ⚠ on the bands, the name alone, where opens first',
+    (await page
+      .locator('[data-fixed] .mk-pin, [data-fixed] .mk-text small')
+      .count()) === 0,
+  );
+  // The GPS sort: the whole list from the nearest zone (Saint-Quay here).
+  await page.evaluate(() => {
+    navigator.geolocation.getCurrentPosition = (success) => {
+      success({
+        timestamp: Date.now(),
+        coords: { latitude: 48.65, longitude: -2.83, accuracy: 5 },
+      } as GeolocationPosition);
+    };
+  });
+  await page.locator('[data-fixed-gps]').click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'Alertes fixes › GPS: one list, the bay of Saint-Brieuc first',
+    (await page.locator('[data-fixed-sea]').count()) === 1 &&
+      (await page
+        .locator('[data-fixed-sea="gps"] [data-fixed]')
+        .first()
+        .getAttribute('data-fixed')) === 'st-brieuc',
+  );
+  await page.locator('[data-fixed-gps]').click();
+  await page.waitForTimeout(400);
   const bandRow = page.locator('[data-sw-id="fixed:raz-blanchard"]');
   await bandRow.scrollIntoViewIfNeeded();
   await page.waitForTimeout(200);
@@ -1185,15 +1214,22 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
       .count()) === 1 &&
       (await page.locator('[data-fixed-card="raz-blanchard"]').count()) === 1,
   );
-  // The go / no-go: its own page in the Météo menu, the boat asked for
-  // (out of a cruise) or shown.
+  // The GoNoGo: in Prévisions only (no more in the Météo menu), its own page,
+  // the boat asked for (out of a cruise) or shown.
   await page.locator('.rail-weather').click();
   await page.waitForTimeout(400);
-  await page.locator('[data-wx="gonogo"]').click();
+  check(
+    theme,
+    'Météo: no GoNoGo in the menu, it is in Prévisions',
+    (await page.locator('[data-wx="gonogo"]').count()) === 0,
+  );
+  await page.locator('[data-wx="forecast"]').click();
+  await page.waitForTimeout(600);
+  await page.locator('[data-page-link="gonogo"]').click();
   await page.waitForTimeout(800);
   check(
     theme,
-    'Météo › Go / no-go: the point, and the boat asked for or shown',
+    'Prévisions › GoNoGo: the point, and the boat asked for or shown',
     (await page.locator('[data-gng="page"] [data-gng-point]').count()) === 1 &&
       (await page.locator('[data-gng="choose"], [data-gng="boat"]').count()) ===
         1,
@@ -1488,6 +1524,38 @@ async function zones(page: Page, theme: string): Promise<void> {
 async function tablet(page: Page, theme: string): Promise<void> {
   const home = await tabletPlaces(page);
   check(theme, 'tablet: every side button is shown', !home.includes('absent'));
+  // One column on the left: the buttons of the right one under the others,
+  // in their order, and SOS alone at the very bottom.
+  const column = await page.evaluate(() =>
+    [
+      '#clock',
+      '.rail-boat',
+      '.rail-start',
+      '.rail-pin',
+      '.rail-ruler',
+      '#searchBtn',
+      '.top-tab[data-view="tracker"]',
+      '.rail-photo',
+      '.rail-weather',
+      '.top-tab.tab-sos',
+    ].map((selector) => {
+      const box = document.querySelector(selector)?.getBoundingClientRect();
+      return box ? { x: box.x, y: box.y, bottom: box.bottom } : null;
+    }),
+  );
+  const sos = column.at(-1);
+  check(
+    theme,
+    'X landscape: one column on the left, in order, SOS at the very bottom',
+    column.every((box) => box !== null && box.x < 40) &&
+      column.every(
+        (box, index) =>
+          index === 0 || (box?.y ?? 0) > (column[index - 1]?.y ?? 0),
+      ) &&
+      sos !== null &&
+      sos !== undefined &&
+      sos.bottom > (page.viewportSize()?.height ?? 0) - 30,
+  );
   check(
     theme,
     'tablet: data and the settings wait behind their tab',

@@ -3,7 +3,7 @@ import { textOf } from '../lib/format.ts';
 import type { FieldDefinition, SectionDefinition } from './field.ts';
 import { flatFields } from './field.ts';
 import { INFO_SECTIONS, RADIO_ID_FIELDS } from './infoSections.ts';
-import type { Boat, BoatVersion, CruiseInfo } from './types.ts';
+import type { Boat, CruiseInfo } from './types.ts';
 
 /** "Bateau et croisière" sections that belong to the boat (taken over on each outing). */
 const BOAT_SECTIONS_ALL: readonly SectionDefinition[] = INFO_SECTIONS.filter(
@@ -163,35 +163,6 @@ export function infoDiffKeys(a: CruiseInfo, z: CruiseInfo): string[] {
   return keys.filter(
     (key) => JSON.stringify(a[key] ?? null) !== JSON.stringify(z[key] ?? null),
   );
-}
-
-/**
- * Keep a previous version of a boat sheet, 12 at most, newest first (legacy `boatSnap`).
- * Mutates `boat`: call it inside an immer recipe.
- * @param boat - Boat draft.
- * @param info - Values to keep.
- * @param from - Origin label.
- * @param at - ISO time (now by default).
- * @returns `true` when a version was added.
- */
-export function boatSnap(
-  boat: Boat,
-  info: CruiseInfo,
-  from: string,
-  at?: string,
-): boolean {
-  boat.hist = boat.hist || [];
-  if (
-    Object.keys(info).length === 0 ||
-    boat.hist.some((version) => infoDiffKeys(version.info, info).length === 0)
-  ) {
-    return false;
-  }
-  boat.hist.unshift({ at: at || new Date().toISOString(), from, info });
-  boat.hist = boat.hist
-    .toSorted((x: BoatVersion, z: BoatVersion) => z.at.localeCompare(x.at))
-    .slice(0, 12);
-  return true;
 }
 
 /**

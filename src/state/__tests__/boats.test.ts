@@ -20,33 +20,15 @@ beforeEach(() => {
 });
 afterEach(leaveHarnessWorld);
 
-test('a changed boat keeps its previous values as a version, once per 20 minutes', () => {
-  const beams = () =>
-    (actions.boatById('exb2')?.hist ?? []).map((version) => [
-      version.at,
-      version.from,
-      version.info.beam,
-    ]);
+test('a changed boat keeps no previous version, old ones are dropped', () => {
   actions.updateBoat('exb2', (boat) => {
     boat.info.beam = '2,60';
   });
-  expect(beams()).toStrictEqual([
-    ['2026-07-15T08:30:00.000Z', 'Avant modification', '2,50'],
-  ]);
-  vi.setSystemTime(new Date('2026-07-15T08:40:00.000Z'));
-  actions.updateBoat('exb2', (boat) => {
-    boat.info.beam = '2,70';
-  });
-  expect(beams()).toHaveLength(1);
-  vi.setSystemTime(new Date('2026-07-15T08:55:00.000Z'));
-  actions.updateBoat('exb2', (boat) => {
-    boat.info.beam = '2,80';
-  });
-  expect(beams()).toStrictEqual([
-    ['2026-07-15T08:55:00.000Z', 'Avant modification', '2,70'],
-    ['2026-07-15T08:30:00.000Z', 'Avant modification', '2,50'],
-  ]);
-  expect(store.get('ldb.boats.at', '')).toBe('2026-07-15T08:55:00.000Z');
+  expect(actions.boatById('exb2')?.hist).toBeUndefined();
+  expect(store.get('ldb.boats.at', '')).toBe('2026-07-15T08:30:00.000Z');
+  store.set('ldb.boats', [{ id: 'old', info: {}, hist: [{ at: 'x' }] }]);
+  actions.loadBoats();
+  expect(actions.boatById('old')).not.toHaveProperty('hist');
 });
 
 test('mergeBoats adds unknown boats and replaces only with a newer list', () => {
@@ -82,10 +64,6 @@ test('an outing sheet and its boat exchange their values', () => {
   });
   actions.pullBoatIntoCruise();
   expect(state.data.cruise.value?.info.draft).toBe('1,60');
-  actions.restoreBoatVersion('savannah', 0);
-  expect(actions.boatById('savannah')?.hist?.[0]?.from).toBe(
-    'Avant retour en arrière',
-  );
 });
 
 test('blankOuting copies the boat and continues its engine counter', () => {

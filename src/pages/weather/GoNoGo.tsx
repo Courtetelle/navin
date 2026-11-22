@@ -811,7 +811,7 @@ async function shareBriefing(
 ): Promise<void> {
   await shareCards(
     {
-      title: `Go / no-go · ${data.name}`,
+      title: `GoNoGo · ${data.name}`,
       kicker: 'Briefing météo',
       sub: boat,
       sections: days.map((day) => ({
@@ -879,9 +879,9 @@ export function GoNoGoLink({
   const title =
     part === 'today'
       ? today
-        ? `Aujourd’hui : ${LIGHTS[today.verdict.light].word}`
-        : 'Go / no-go aujourd’hui'
-      : 'Go / no-go des jours suivants';
+        ? `GoNoGo aujourd’hui : ${LIGHTS[today.verdict.light].word}`
+        : 'GoNoGo aujourd’hui'
+      : 'GoNoGo des jours suivants';
   return (
     <Button
       type="button"

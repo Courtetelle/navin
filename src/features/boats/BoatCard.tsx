@@ -18,7 +18,6 @@ import { openListPublish } from '../publish/index.ts';
 
 import { BoatPhotos } from './BoatPhotos.tsx';
 import { BoatPolarButton } from './BoatPolar.tsx';
-import { BoatVersionsButton } from './BoatVersions.tsx';
 import { saveBoatInfo } from './boatActions.ts';
 import { boatThumbId } from './boatDocs.ts';
 
@@ -38,8 +37,6 @@ interface BoatCardProps {
   onRemoved: () => void;
   /** Opens the label editor. */
   onFields: () => void;
-  /** Opens the previous versions. */
-  onVersions: () => void;
   /** Opens the polar of the boat. */
   onPolar: () => void;
 }
@@ -58,7 +55,6 @@ export function BoatCard({
   onRefresh,
   onRemoved,
   onFields,
-  onVersions,
   onPolar,
 }: BoatCardProps) {
   useSignals();
@@ -68,7 +64,6 @@ export function BoatCard({
   // Legacy wrote these once; only the boat name followed the typing.
   const [drawn] = useState(() => ({
     sub: boatSub(boat.info),
-    versions: boat,
     deleteLabel: `Supprimer ce bateau${
       state.data.boats.value.length > 1
         ? ` : ${boat.info.boat || 'sans nom'}`
@@ -138,7 +133,6 @@ export function BoatCard({
         </div>
         <BoatPhotos boat={boat} reading={reading} onRefresh={onRefresh} />
         <BoatPolarButton boat={boat} onOpen={onPolar} />
-        <BoatVersionsButton boat={drawn.versions} onOpen={onVersions} />
         <ButtonRow className="row b-delrow" style={{ padding: '0 14px' }}>
           <HoldDeleteButton
             className="btn danger"
