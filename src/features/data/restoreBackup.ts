@@ -379,6 +379,7 @@ export function restoreMfKey(received: Partial<Settings> | undefined): void {
     'aemetKey',
     'metOfficeKey',
     'frostKey',
+    'githubKey',
   ] as const) {
     const key = received?.windAlert?.[name];
     if (typeof key !== 'string' || !key) continue;
