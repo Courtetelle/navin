@@ -1234,7 +1234,17 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
       (await page.locator('[data-gng="choose"], [data-gng="boat"]').count()) ===
         1,
   );
-  // The lightning alert: its own page in the Météo menu.
+  // The lightning alert: its own page in the Météo menu (the button of
+  // Météo climbs one level at a time: GoNoGo, Prévisions, the menu).
+  check(
+    theme,
+    'GoNoGo: the Météo button comes back to Prévisions first',
+    await (async () => {
+      await page.locator('.rail-weather').click();
+      await page.waitForTimeout(400);
+      return (await page.locator('[data-page-link="gonogo"]').count()) === 1;
+    })(),
+  );
   await page.locator('.rail-weather').click();
   await page.waitForTimeout(400);
   await page.locator('[data-wx="lightning"]').click();
@@ -1544,17 +1554,19 @@ async function tablet(page: Page, theme: string): Promise<void> {
     }),
   );
   const sos = column.at(-1);
+  const tall = (page.viewportSize()?.height ?? 0) >= 640;
   check(
     theme,
-    'X landscape: one column on the left, in order, SOS at the very bottom',
-    column.every((box) => box !== null && box.x < 40) &&
-      column.every(
-        (box, index) =>
-          index === 0 || (box?.y ?? 0) > (column[index - 1]?.y ?? 0),
-      ) &&
-      sos !== null &&
-      sos !== undefined &&
-      sos.bottom > (page.viewportSize()?.height ?? 0) - 30,
+    `X landscape: ${tall ? 'one column on the left, in order, SOS at the very bottom' : 'the phone sideways keeps its two columns'}`,
+    !tall ||
+      (column.every((box) => box !== null && box.x < 40) &&
+        column.every(
+          (box, index) =>
+            index === 0 || (box?.y ?? 0) > (column[index - 1]?.y ?? 0),
+        ) &&
+        sos !== null &&
+        sos !== undefined &&
+        sos.bottom > (page.viewportSize()?.height ?? 0) - 30),
   );
   check(
     theme,

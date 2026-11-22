@@ -14625,17 +14625,6 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
     right: auto;
     flex-direction: row;
   }
-  html body header.topbar nav.topnav .top-tab.top-tab.tab-data,
-  html body header.topbar nav.topnav .top-tab.top-tab.tab-data.tab-data {
-    top: calc(var(--rb-row) + 6 * var(--rb-step)) !important;
-    left: calc(var(--rb-side) + 2 * var(--rb-x)) !important;
-    right: auto !important;
-  }
-  html body header.topbar #gearBtn {
-    top: calc(var(--rb-row) + 6 * var(--rb-step)) !important;
-    left: calc(var(--rb-side) + 3 * var(--rb-x)) !important;
-    right: auto !important;
-  }
   html body .live-chip {
     right: var(--rb-side-r);
   }
