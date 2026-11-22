@@ -1,3 +1,4 @@
+import { GithubKeyRow } from './GithubKeyRow.tsx';
 import { KeyHealthNotice } from './KeyHealthNotice.tsx';
 import { KeyQrAll } from './KeyQrAll.tsx';
 import { KeyScan } from './KeyScan.tsx';
@@ -24,6 +25,7 @@ export function WindKeys() {
       <StationKeyRow station={AEMET_KEY} />
       <StationKeyRow station={MET_OFFICE_KEY} />
       <StationKeyRow station={FROST_KEY} />
+      <GithubKeyRow />
       <RelayRow />
     </div>
   );

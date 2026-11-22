@@ -1,6 +1,8 @@
+import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 
 import { RefreshButton } from '../../components/shared/RefreshButton.tsx';
+import { githubKey } from '../../features/onwater/githubKey.ts';
 import type { ScalePoint } from '../../features/onwater/pointSea.ts';
 import { scalePoint } from '../../features/onwater/pointSea.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -8,6 +10,7 @@ import type { AnalysisIndex } from '../../model/analysis.ts';
 import {
   ANALYSIS_WORKFLOW_PAGE,
   FALLBACK_INDEX,
+  GITHUB_KEY_SETTING,
   VERSIONS_DIR,
   dispatchAnalysis,
   dispatchInputs,
@@ -17,9 +20,10 @@ import {
   shouldAsk,
   zoneForPoint,
 } from '../../model/analysis.ts';
+import { go } from '../../shell/router.ts';
+import { state } from '../../state/index.ts';
 
 const ASKED_KEY = 'navin-analyse-asked';
-const TOKEN_KEY = 'navin-gh-token';
 const KEPT_KEY = 'navin-analyse-kept';
 
 function readKey(key: string): string {
@@ -105,12 +109,14 @@ const KIND_TEXT: Readonly<Record<ScalePoint['kind'], string>> = {
  * @returns The section.
  */
 export function AnalysisLinks() {
+  useSignals();
   const tr = useTr();
   const [point, setPoint] = useState<ScalePoint>(() => scalePoint(null));
   const [index, setIndex] = useState<AnalysisIndex>(FALLBACK_INDEX);
   const [versionId, setVersionId] = useState('');
   const [status, setStatus] = useState('');
-  const [token, setToken] = useState(() => readKey(TOKEN_KEY));
+  const kept = state.preferences.settings.value.windAlert?.[GITHUB_KEY_SETTING];
+  const token = typeof kept === 'string' ? kept : '';
   const [now, setNow] = useState(() => Date.now());
 
   async function ask(here: ScalePoint, key: string, auto: boolean) {
@@ -154,7 +160,7 @@ export function AnalysisLinks() {
     if (
       shouldAsk(latest && !latest.claude ? latest.at : null, askedAt(here), at)
     ) {
-      void ask(here, readKey(TOKEN_KEY), true);
+      void ask(here, githubKey(), true);
     }
   }
 
@@ -177,6 +183,8 @@ export function AnalysisLinks() {
 
   useEffect(() => {
     let closed = false;
+    // A key pasted here before moves to the weather keys of Paramétrages.
+    githubKey();
     const here = scalePoint(null);
     void readIndex(base()).then((found) => {
       if (!closed && found) show(found, here);
@@ -286,27 +294,21 @@ export function AnalysisLinks() {
           {tr(status)}
         </p>
       ) : null}
-      <details className="wx-analysis-key">
-        <summary>
-          {tr('Relancer directement depuis NAVIn (clé GitHub)')}
-        </summary>
-        <p className="keep-help">
-          {tr(
-            'Avec une clé GitHub à droits fins limitée au dépôt navin (Actions : lecture et écriture), NAVIn demande seul l’analyse quand la zone change ou quand la dernière a plus de 6 h. Sans clé, « Relancer » ouvre la page GitHub de l’analyse (bouton « Run workflow »). La clé reste sur cet appareil.',
-          )}
-        </p>
-        <input
-          type="password"
-          autoComplete="off"
-          data-analysis-token
-          placeholder={tr.placeholder('github_pat_…')}
-          value={token}
-          onChange={(event) => {
-            setToken(event.target.value.trim());
-            writeKey(TOKEN_KEY, event.target.value.trim());
-          }}
-        />
-      </details>
+      <p className="keep-help wx-analysis-key">
+        {tr(
+          token
+            ? 'Clé GitHub enregistrée : NAVIn demande seul l’analyse quand la zone change ou quand la dernière a plus de 6 h.'
+            : 'Sans clé GitHub, « Faire l’analyse de ce lieu » ouvre la page GitHub de l’analyse. Avec une clé, NAVIn la demande seul.',
+        )}{' '}
+        <button
+          type="button"
+          className="btn"
+          data-analysis="keys"
+          onClick={() => go('settings', 'keys')}
+        >
+          🔑 {tr('Clé GitHub : Clés météos et compte relais')}
+        </button>
+      </p>
     </section>
   );
 }
