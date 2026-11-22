@@ -19,9 +19,12 @@ import {
   fetchWindGrid,
   gridPoints,
   hourRank,
+  isSlack,
   localModel,
   rainTileUrl,
+  slackSvg,
   straitPoints,
+  waveLabelHtml,
   windColor,
 } from '../../features/onwater/mapWeather.ts';
 import { onLake } from '../../features/onwater/onLake.ts';
@@ -53,8 +56,6 @@ const WAIT_MS = 300;
 const WAVE_FULL_M = 4;
 /** The currents drawn full size at this speed, knots. */
 const CURRENT_FULL_KN = 3;
-/** Under this, no arrow: too weak to matter. */
-const CURRENT_LEAST_KN = 0.1;
 const WAVE_COLOR = '#0a4c8c';
 const CURRENT_COLOR = '#a1006b';
 
@@ -222,7 +223,7 @@ function drawGrids(
             layer,
             point.lat,
             point.lon,
-            `${arrowSvg(from + 180 + turn, height / WAVE_FULL_M, WAVE_COLOR, true)}<span class="wx-lbl wx-wave">${decimal(height)} m</span>`,
+            `${arrowSvg(from + 180 + turn, height / WAVE_FULL_M, WAVE_COLOR, true)}${waveLabelHtml(height)}`,
             60,
             -18,
             0,
@@ -231,12 +232,24 @@ function drawGrids(
         const speed = point.current[rank] ?? Number.NaN;
         const toward = point.toward[rank] ?? Number.NaN;
         if (
-          layers.currents &&
-          Number.isFinite(speed) &&
-          Number.isFinite(toward) &&
-          speed >= CURRENT_LEAST_KN &&
-          currentShown(point)
+          !layers.currents ||
+          !Number.isFinite(speed) ||
+          !currentShown(point)
         ) {
+          continue;
+        }
+        if (isSlack(point.current, rank)) {
+          // Slack water: a dashed ring, no arrow, the word in full.
+          addMark(
+            layer,
+            point.lat,
+            point.lon,
+            `${slackSvg(CURRENT_COLOR)}<span class="wx-lbl wx-cur wx-slack">étale</span>`,
+            60,
+            18,
+            0,
+          );
+        } else if (Number.isFinite(toward)) {
           addMark(
             layer,
             point.lat,
@@ -480,7 +493,7 @@ export function WeatherOnMap() {
       <div className="wx-src">
         {layers.wind && model ? `🌬 ${model} · ${tr('nd, G rafales')}` : null}
         {!lake && (layers.waves || layers.currents)
-          ? ` · 🌊 ${tr('Open-Meteo Marine (m, nd)')}`
+          ? ` · 🌊 ${tr('Open-Meteo Marine (Hs en m et degré Douglas, courants en nd)')}`
           : null}
         {layers.rain && rainAt != null ? (
           <span className="wx-rain-key">

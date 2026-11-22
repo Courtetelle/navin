@@ -13,11 +13,14 @@ import {
   gridPoints,
   hourRank,
   inMediterranean,
+  isSlack,
   localModel,
   rainFramesOf,
   rainTileUrl,
   seaGridOf,
+  slackSvg,
   straitPoints,
+  waveLabelHtml,
   windColor,
   windGridOf,
 } from '../mapWeather.ts';
@@ -303,5 +306,26 @@ describe('rain radar', () => {
     );
     const down = await fetchRainFrames();
     expect('error' in down && down.error).toContain('503');
+  });
+});
+
+describe('waves and slack water', () => {
+  it('labels the waves with Hs and the Douglas degree on its colour', () => {
+    const html = waveLabelHtml(1.2);
+    expect(html).toContain('Hs 1,2 m');
+    expect(html).toContain('1,2 m<b');
+    expect(html).toContain('>3</b>');
+    expect(html).toContain('background:#1e66f5');
+    expect(waveLabelHtml(0)).toContain('>0</b>');
+  });
+
+  it('finds slack water: very weak, or weakest while the tide turns', () => {
+    expect(isSlack([1.5, 0.2, 1.2], 1)).toBe(true);
+    expect(isSlack([1.5, 0.5, 1.2], 1)).toBe(true);
+    expect(isSlack([0.4, 0.5, 0.7], 1)).toBe(false);
+    expect(isSlack([2, 1.4, 2], 1)).toBe(false);
+    expect(isSlack([0.5], 0)).toBe(false);
+    expect(isSlack([Number.NaN], 0)).toBe(false);
+    expect(slackSvg('#a1006b')).toContain('stroke-dasharray');
   });
 });
