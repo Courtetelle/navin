@@ -329,7 +329,7 @@ function WeatherMenu() {
       key: 'live',
       ico: '🌬',
       title: 'LiveMétéo',
-      sub: 'le vent mesuré par les stations de la zone, sur la carte (rayon dans Paramétrages)',
+      sub: 'le vent mesuré par les stations de la zone, et par-dessus la carte le vent prévu, les vagues, les courants et la pluie du radar (rayon dans Paramétrages)',
       open: showLiveAround,
     },
     {
