@@ -14771,3 +14771,59 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
   border-color: var(--fg);
   color: #000;
 }
+
+/* Météo › Prévisions › Bulletin de la zone: five levels, tables scrolled
+   sideways inside their box only, never the page. */
+.wx-bulletin h2 {
+  margin: 18px 0 6px;
+  font-size: 20px;
+}
+.wx-bulletin h3 {
+  margin: 14px 0 4px;
+  font-size: 18px;
+}
+.zb-level {
+  margin: 10px 0 14px;
+  padding: 8px 10px;
+  border-left: 4px solid var(--accent, #1e88e5);
+  border-radius: 6px;
+  background: var(--card, rgba(127, 127, 127, 0.08));
+}
+.zb-level[data-zb-level='1'] {
+  border-left-color: #e53935;
+}
+.zb-lines {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+.zb-lines li {
+  margin: 3px 0;
+  overflow-wrap: anywhere;
+}
+.zb-missing {
+  margin: 6px 0;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.zb-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0;
+}
+.zb-more h3 {
+  flex-basis: 100%;
+}
+.zb-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.zb-tbl {
+  min-width: 100%;
+  font-size: 14px;
+}
+.zb-tbl th,
+.zb-tbl td {
+  white-space: nowrap;
+}

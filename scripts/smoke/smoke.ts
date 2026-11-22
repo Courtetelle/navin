@@ -1054,13 +1054,14 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(600);
   check(
     theme,
-    'Prévisions: now, next hours, next days, general situation, sources, in that order',
+    'Prévisions: now, next hours, next days, general situation, bulletin of the zone, sources, in that order',
     await page.evaluate(() => {
       const order = [
         '.wx-now',
         '.wx-fc',
         '.wx-days',
         '.wx-analysis',
+        '.wx-bulletin',
         '.wx-links',
       ].map((selector) => document.querySelector(selector));
       for (let at = 1; at < order.length; at += 1) {
@@ -1093,7 +1094,7 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
         1 &&
       (await page
         .locator(
-          '[data-site-link="wx-bms-manche"], [data-site-link="wx-bms-provence"], [data-site-link="wx-meteoswiss"]',
+          '.wx-links [data-site-link="wx-bms-manche"], .wx-links [data-site-link="wx-bms-provence"], .wx-links [data-site-link="wx-meteoswiss"]',
         )
         .count()) === 1 &&
       (await page.locator('[data-page-link="fixed"]').count()) === 0,
@@ -2049,6 +2050,118 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
   await page.unroute(/api\.open-meteo\.com\/v1\/forecast/);
 }
 
+/**
+ * What Open-Meteo answers in the smoke test of the bulletin of the zone.
+ * @param marine - The marine model.
+ * @returns The answer.
+ */
+function bulletinAnswer(marine: boolean) {
+  const start = Math.floor(Date.now() / 3_600_000) * 3_600_000 - 3_600_000;
+  const time = Array.from({ length: 96 }, (_, hour) =>
+    new Date(start + hour * 3_600_000).toISOString().slice(0, 16),
+  );
+  const series = (value: (hour: number) => number) =>
+    time.map((_, hour) => value(hour));
+  /* eslint-disable camelcase -- names in the API */
+  const hourly = marine
+    ? {
+        time,
+        wave_height: series(() => 1.2),
+        wave_period: series(() => 8),
+        wind_wave_height: series(() => 0.5),
+        wind_wave_period: series(() => 3),
+        wind_wave_direction: series(() => 250),
+        swell_wave_height: series(() => 1),
+        swell_wave_period: series(() => 11),
+        swell_wave_direction: series(() => 280),
+        wave_direction: series(() => 270),
+      }
+    : {
+        time,
+        wind_speed_10m: series((hour) => 10 + (hour % 12)),
+        wind_direction_10m: series(() => 240),
+        wind_gusts_10m: series((hour) => 16 + (hour % 12)),
+        cape: series(() => 50),
+        convective_inhibition: series(() => 0),
+        pressure_msl: series((hour) => 1015 - hour / 10),
+        precipitation: series((hour) => (hour % 10 === 0 ? 0.5 : 0)),
+        temperature_2m: series(() => 11),
+        dew_point_2m: series(() => 7),
+      };
+
+  return { utc_offset_seconds: 0, hourly };
+  /* eslint-enable camelcase */
+}
+
+// Prévisions › Bulletin de la zone: Open-Meteo answered here, the five
+// levels in order, every table with its units at the head and the foot,
+// the official links of level 1, and no page wider than the screen.
+async function zoneBulletinSmoke(page: Page, theme: string): Promise<void> {
+  await page.route(
+    /open-meteo\.com\/v1\/(?:forecast|marine)/,
+    async (route) => {
+      const url = new globalThis.URL(route.request().url());
+      const places = (url.searchParams.get('latitude') ?? '').split(',').length;
+      const one = bulletinAnswer(url.pathname.includes('marine'));
+      await route.fulfill({
+        json: places > 1 ? Array.from({ length: places }, () => one) : one,
+      });
+    },
+  );
+  await page.locator('.rail-weather').click();
+  await page.waitForTimeout(400);
+  await page.locator('[data-wx="forecast"]').click();
+  await page
+    .locator('[data-zb-level="5"]')
+    .waitFor({ timeout: 15_000 })
+    .catch(() => null);
+  check(
+    theme,
+    'Bulletin de la zone: alerts, situation, wind, sea, weather, in that order',
+    await page.evaluate(
+      () =>
+        [...document.querySelectorAll('.wx-bulletin [data-zb-level]')]
+          .map((level) => (level as HTMLElement).dataset.zbLevel)
+          .join('') === '12345',
+    ),
+  );
+  check(
+    theme,
+    'Bulletin de la zone: every table has its units at the head and at the foot',
+    await page.evaluate(() => {
+      const tables = [...document.querySelectorAll('.wx-bulletin table')];
+      return (
+        tables.length >= 3 &&
+        tables.every(
+          (table) =>
+            table.querySelector('thead')?.textContent ===
+              table.querySelector('tfoot')?.textContent &&
+            (table.querySelector('thead')?.textContent ?? '').includes('('),
+        )
+      );
+    }),
+  );
+  check(
+    theme,
+    'Bulletin de la zone: the official bulletin is one tap away at level 1',
+    (await page
+      .locator(
+        '[data-zb-level="1"] [data-site-link^="wx-bms"], [data-zb-level="1"] [data-site-link="wx-meteoswiss"]',
+      )
+      .count()) === 1,
+  );
+  check(
+    theme,
+    'Bulletin de la zone: the page is no wider than the screen',
+    await page.evaluate(
+      () =>
+        (document.scrollingElement?.scrollWidth ?? 0) <=
+        globalThis.innerWidth + 1,
+    ),
+  );
+  await page.unroute(/open-meteo\.com\/v1\/(?:forecast|marine)/);
+}
+
 async function routeByHand(page: Page, theme: string): Promise<void> {
   await page.locator(NAVIN).click();
   await page.waitForTimeout(900);
@@ -2164,6 +2277,7 @@ for (const theme of ['day', 'night']) {
     await layoutGaps(page, theme);
     await routeByHand(page, theme);
     await routingWeather(page, theme);
+    await zoneBulletinSmoke(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
   }

@@ -47,6 +47,8 @@ const WEATHER_VARS = [
   'convective_inhibition',
   'pressure_msl',
   'precipitation',
+  'temperature_2m',
+  'dew_point_2m',
 ];
 const SEA_VARS = [
   'wave_height',

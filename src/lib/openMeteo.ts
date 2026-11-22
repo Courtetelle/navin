@@ -14,6 +14,8 @@ export const OPEN_METEO_PAUSE_MS = 10 * 60_000;
 const MAX_KEPT = 200;
 
 const kept = new Map<string, { at: number; body: string }>();
+/** Requests on their way: a second one for the same address waits for it. */
+const asking = new Map<string, Promise<{ status: number; body: string }>>();
 let pausedUntil = 0;
 
 function pauseAfterRefusal(): void {
@@ -50,24 +52,45 @@ export async function openMeteoFetch(
       429,
     );
   }
+  const waiting = asking.get(url);
+  if (waiting) {
+    const { status, body } = await waiting;
+    return replyOf(body, status);
+  }
+  const going = ask(url, now, init);
+  asking.set(url, going);
+  try {
+    const { status, body } = await going;
+    return replyOf(body, status);
+  } finally {
+    asking.delete(url);
+  }
+}
+
+async function ask(
+  url: string,
+  now: number,
+  init?: RequestInit,
+): Promise<{ status: number; body: string }> {
   const reply = await fetch(url, init);
+  const body = await reply.text();
   if (reply.status === 429) {
     pauseAfterRefusal();
-    return reply;
+    return { status: 429, body };
   }
-  if (!reply.ok) return reply;
-  const body = await reply.text();
+  if (!reply.ok) return { status: reply.status, body };
   kept.delete(url);
   kept.set(url, { at: now, body });
   if (kept.size > MAX_KEPT) {
     const oldest = kept.keys().next().value;
     if (oldest !== undefined) kept.delete(oldest);
   }
-  return replyOf(body);
+  return { status: reply.status, body };
 }
 
 /** Forget the kept replies and the pause (tests). */
 export function forgetOpenMeteo(): void {
   kept.clear();
+  asking.clear();
   pausedUntil = 0;
 }

@@ -48,6 +48,7 @@ import { GoNoGo, GoNoGoLink } from './GoNoGo.tsx';
 import { LakeWarnings } from './LakeWarnings.tsx';
 import { LightningAlert } from './LightningAlert.tsx';
 import { PrepForecast } from './PrepForecast.tsx';
+import { ZoneBulletin } from './ZoneBulletin.tsx';
 
 function toggle(id: string): void {
   buzz();
@@ -485,6 +486,7 @@ function ForecastPage({ part }: { part: 'forecast' | 'briefing' }) {
           </section>
         ) : null}
         {part === 'forecast' ? <AnalysisLinks /> : null}
+        {part === 'forecast' ? <ZoneBulletin /> : null}
         {part === 'briefing' ? (
           <section className="wx-checks">
             <div className="wx-checks-head">

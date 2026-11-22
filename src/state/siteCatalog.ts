@@ -18,8 +18,32 @@ export const SITES: readonly SiteDef[] = [
   {
     id: 'wx-meteoswiss',
     label: 'Alertes MeteoSwiss',
-    url: 'https://www.meteosuisse.admin.ch/meteo/dangers.html',
+    url: 'https://www.meteoswiss.admin.ch/weather/hazards/hazard-map.html',
     where: 'Météo › Prévisions (sur un lac)',
+  },
+  {
+    id: 'wx-meteoswiss-mesures',
+    label: 'Vent mesuré aux stations MétéoSuisse',
+    url: 'https://www.meteoswiss.admin.ch/weather/measurement-values-and-satellite-images/measurement-values-at-meteorological-stations.html',
+    where: 'Météo › Prévisions › Bulletin de la zone (lac)',
+  },
+  {
+    id: 'wx-vigilance',
+    label: 'Vigilance Météo-France (orages, vagues-submersion)',
+    url: 'https://vigilance.meteofrance.fr/fr',
+    where: 'Météo › Prévisions › Bulletin de la zone (en mer)',
+  },
+  {
+    id: 'wx-windfinder',
+    label: 'Windfinder (vent prévu et mesuré)',
+    url: 'https://www.windfinder.com/',
+    where: 'Météo › Prévisions › Bulletin de la zone (lac)',
+  },
+  {
+    id: 'wx-meteoconsult',
+    label: 'METEO CONSULT Marine (cartes et bulletins)',
+    url: 'https://www.meteoconsult-marine.com/',
+    where: 'Météo › Prévisions › Bulletin de la zone (en mer)',
   },
   {
     id: 'wx-mf-marine',
