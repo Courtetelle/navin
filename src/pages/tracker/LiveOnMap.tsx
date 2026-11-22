@@ -13,8 +13,21 @@ import {
   liveAlertAsk,
   liveAlertSpot,
   liveStations,
+  stationKey,
   windConfig,
 } from '../../features/onwater/index.ts';
+import { onLake } from '../../features/onwater/onLake.ts';
+import { nearSea500, nearWater } from '../../features/onwater/shoreFar.ts';
+import type { MeteoZone } from '../../features/zones/meteoZones.ts';
+import {
+  meteoZones,
+  readCircles,
+  shownZones,
+  stationInZones,
+  zonesBox,
+  zonesButtonText,
+  zonesText,
+} from '../../features/zones/meteoZones.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { nmText } from '../../lib/geo.ts';
@@ -29,12 +42,18 @@ import {
   layLiveAround,
   liveOnMap,
   liveOnMapAround,
-  liveRadius,
-  liveRadiusNm,
+  liveZoneArea,
+  liveZoneIds,
+  zonePickOpen,
 } from './liveOnMap.ts';
+import { ZonePicker } from './ZonePicker.tsx';
 
 /** The stations read before the map of NavIn is built, in km. */
 const RADIUS = 60;
+/** Without the file of the zones, the stations within 30 NM, in km. */
+const FALLBACK_KM = 56;
+/** Stations read per network on each circle of a zone. */
+const PER_CIRCLE = 10;
 /** The circle read around the map shown stays within these, in km. */
 const LEAST_KM = 5;
 const MOST_KM = 150;
@@ -140,9 +159,10 @@ export function LiveOnMap() {
   const tr = useTr();
   const asked = liveOnMap.value;
   const around = liveOnMapAround.value;
-  const radiusSet = liveRadius();
+  const zoneKey = liveZoneIds().join(',');
   const on = asked > 0;
   const [count, setCount] = useState<number | null>(null);
+  const [zonesShown, setZonesShown] = useState<MeteoZone[]>([]);
   // The map opened on a storm or a warning light: the winds of LiveMétéo
   // and their circle leave it.
   useEffect(() => {
@@ -163,8 +183,9 @@ export function LiveOnMap() {
     if (!on) return undefined;
     let closed = false;
     let layer: LayerGroup | null = null;
-    let ring: Circle | null = null;
+    let ring: LayerGroup | null = null;
     let zone: Circle | null = null;
+    let zones: MeteoZone[] = [];
     let wait: ReturnType<typeof setTimeout> | undefined;
     // The wind alert this was opened from, and the station whose card was
     // just seen (◀ of its card): crowned; the map opens on it (see
@@ -174,7 +195,7 @@ export function LiveOnMap() {
     const seen = liveBlink.peek();
     let drawn = false;
     let center = around ? (alert?.boat ?? boatPlace()) : mapPlace();
-    let radius = around ? radiusSet : RADIUS;
+    let radius = around ? FALLBACK_KM : RADIUS;
     const config = windConfig();
     const draw = (stations: LiveStation[]) => {
       const map = tracker.current?.map;
@@ -199,8 +220,44 @@ export function LiveOnMap() {
       setCount(stations.length);
     };
     const read = () => {
-      liveStations(center, radius, config.mfKey)
-        .then(draw)
+      if (!around || zones.length === 0) {
+        // Without the file of the zones: 30 NM around the boat.
+        liveStations(center, radius, config.mfKey)
+          .then(draw)
+          .catch(() => setCount(0));
+        return;
+      }
+      // The zones: their coast read circle by circle, the stations kept
+      // when they stand in a zone, at most 500 m inland of the sea (1 km of
+      // a lake).
+      const most = { open: PER_CIRCLE, mf: PER_CIRCLE };
+      Promise.all(
+        readCircles(zones, center).map((circle) =>
+          liveStations(circle, circle.km, config.mfKey, null, most).catch(
+            () => [],
+          ),
+        ),
+      )
+        .then(async (lists) => {
+          const taken = new Set<string>();
+          const inZones = lists.flat().filter((station) => {
+            const key = stationKey(station);
+            if (taken.has(key)) return false;
+            taken.add(key);
+            return stationInZones(zones, station.lat, station.lon);
+          });
+          const lakes = zones.filter((z) => z.kind === 'lac');
+          const onLakes = inZones.filter((s) =>
+            stationInZones(lakes, s.lat, s.lon),
+          );
+          const atSea = inZones.filter((s) => !onLakes.includes(s));
+          const [sea, lake] = await Promise.all([
+            nearSea500(atSea),
+            nearWater(onLakes),
+          ]);
+          const kept = new Set([...sea, ...lake]);
+          draw(inZones.filter((s) => kept.has(s)));
+        })
         .catch(() => setCount(0));
     };
     const start = () => {
@@ -211,25 +268,48 @@ export function LiveOnMap() {
         return;
       }
       if (around) {
-        // The circle of the zone drawn, the map zoomed on it.
-        const L = leaflet();
-        const middle = L.latLng(center.lat, center.lon);
-        ring?.remove();
-        ring = L.circle(middle, {
-          radius: radius * 1000,
-          color: '#1e5aa8',
-          weight: 2,
-          fill: false,
-          dashArray: '6 6',
-          interactive: false,
-        }).addTo(map);
-        // Back from a station card the map is already on its badge.
-        if (!seen) {
-          map.fitBounds(middle.toBounds(2 * radius * 1000), {
-            padding: [16, 16],
-          });
-        }
+        // The zones chosen (or that of the boat) drawn, the map zoomed on
+        // them.
+        void meteoZones().then((all) => {
+          if (closed) return;
+          zones = shownZones(all, liveZoneIds(), center, onLake());
+          setZonesShown(zones);
+          const box = zonesBox(zones);
+          liveZoneArea.value = box;
+          const L = leaflet();
+          ring?.remove();
+          ring = L.layerGroup().addTo(map);
+          for (const shown of zones) {
+            L.polygon(
+              shown.polys.map((poly) =>
+                poly.map((part) =>
+                  part.map(([lon, lat]) => [lat, lon] as [number, number]),
+                ),
+              ),
+              {
+                color: '#1e5aa8',
+                weight: 2,
+                dashArray: '6 6',
+                fillColor: '#1e5aa8',
+                fillOpacity: 0.05,
+                interactive: false,
+              },
+            ).addTo(ring);
+          }
+          // Back from a station card the map is already on its badge.
+          if (box && !seen) {
+            map.fitBounds(
+              [
+                [box.south, box.west],
+                [box.north, box.east],
+              ],
+              { padding: [16, 16] },
+            );
+          }
+          read();
+        });
         if (alert?.zone) {
+          const L = leaflet();
           // A forecast alert: the zone its value stands for, in the colour
           // of a badge of the same wind.
           zone = L.circle([alert.lat, alert.lon], {
@@ -247,13 +327,13 @@ export function LiveOnMap() {
             })
             .addTo(map);
         }
-      } else {
-        // The map shown: from its middle to its corners.
-        const middle = map.getCenter();
-        center = { lat: middle.lat, lon: middle.lng };
-        const corner = middle.distanceTo(map.getBounds().getNorthEast()) / 1000;
-        radius = Math.min(MOST_KM, Math.max(LEAST_KM, Math.round(corner)));
+        return;
       }
+      // The map shown: from its middle to its corners.
+      const middle = map.getCenter();
+      center = { lat: middle.lat, lon: middle.lng };
+      const corner = middle.distanceTo(map.getBounds().getNorthEast()) / 1000;
+      radius = Math.min(MOST_KM, Math.max(LEAST_KM, Math.round(corner)));
       read();
     };
     start();
@@ -265,19 +345,21 @@ export function LiveOnMap() {
       layer?.remove();
       ring?.remove();
       zone?.remove();
+      liveZoneArea.value = null;
       setCount(null);
     };
-  }, [on, asked, around, radiusSet]);
+  }, [on, asked, around, zoneKey]);
   if (!on) return null;
   return (
     <>
-      {around ? <RadiusButton /> : null}
+      {around ? <ZoneButton zones={zonesShown} /> : null}
+      {around ? <ZonePicker /> : null}
       <div className="live-chip" role="status">
         <span className="live-chip-txt">
           {tr(
             count == null
               ? '🌬 Lecture des stations…'
-              : `🌬 ${count} station${count > 1 ? 's' : ''} ${around ? `à moins de ${liveRadiusNm()} NM` : 'sur la carte'}`,
+              : `🌬 ${count} station${count > 1 ? 's' : ''} ${around ? `· ${zonesText(zonesShown)}` : 'sur la carte'}`,
           )}
         </span>
         {around ? null : (
@@ -297,28 +379,28 @@ export function LiveOnMap() {
 }
 
 /**
- * The button of the radius, at the left while LiveMétéo shows the stations
- * of the zone: a dashed circle, its radius as an arrow, the centre a red
- * big red cross blinking, and the radius in NM. A touch takes the badges
- * away with the button; a long press opens Paramétrages › Alertes › LiveMétéo to change
- * it (its ◀ comes back to the map).
+ * The button of the zone, at the left while LiveMétéo shows the stations of
+ * the zones: a dashed outline of a sea zone, the zone in short (or how many)
+ * and « zone? » small, a big red cross blinking. A touch takes the badges
+ * away with the button; a long press opens the chooser of the Météo-France
+ * zones over the map (one or several, or groups of them).
+ * @param props - The zones shown.
  * @returns The button.
  */
-function RadiusButton() {
+function ZoneButton({ zones }: { zones: readonly MeteoZone[] }) {
   useSignals();
   const tr = useTr();
-  const nm = liveRadiusNm();
   const press = useLongPress(() => {
     buzz();
-    go('settings', 'live');
+    zonePickOpen.value = true;
   });
   return (
     <Button
       type="button"
       noUiEdit
-      className={`rail-btn live-radius-btn${press.hit ? ' lp-hit' : ''}`}
+      className={`rail-btn live-radius-btn live-zone-btn${press.hit ? ' lp-hit' : ''}`}
       aria-label={tr(
-        `Rayon LiveMétéo ${nm} NM · toucher : retirer les stations · appui long : changer le rayon`,
+        `Zones LiveMétéo : ${zonesText(zones)} · toucher : retirer les stations · appui long : choisir les zones Météo-France`,
       )}
       onClick={hideLiveOnMap}
       {...press.handlers}
@@ -329,21 +411,12 @@ function RadiusButton() {
         preserveAspectRatio="xMidYMid meet"
         aria-hidden="true"
       >
-        <circle
-          cx="20"
-          cy="20"
-          r="16"
+        <path
+          d="M6 9 L19 5 L34 10 L35 27 L24 35 L8 31 Z"
           fill="none"
           stroke="currentColor"
           strokeWidth="2.2"
           strokeDasharray="4 3"
-        />
-        <path
-          d="M20 20h14m-4-3.5 4 3.5-4 3.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.4"
-          strokeLinecap="round"
           strokeLinejoin="round"
         />
       </svg>
@@ -363,9 +436,9 @@ function RadiusButton() {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      <span className="live-radius-nb">{nm}</span>
+      <span className="live-radius-nb">{zonesButtonText(zones)}</span>
       <span className="live-radius-more" aria-hidden="true">
-        nm?
+        zone?
       </span>
     </Button>
   );

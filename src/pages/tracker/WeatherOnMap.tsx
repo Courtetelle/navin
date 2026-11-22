@@ -30,7 +30,7 @@ import { buzz } from '../../lib/dom.ts';
 import { destination } from '../../lib/geo.ts';
 import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
 
-import { liveOnMap, liveOnMapAround, liveRadiusNm } from './liveOnMap.ts';
+import { liveOnMap, liveOnMapAround, liveZoneArea } from './liveOnMap.ts';
 import type { WeatherLayers, WeatherRead } from './weatherLayers.ts';
 import {
   forecastStep,
@@ -271,7 +271,7 @@ export function WeatherOnMap() {
   const tr = useTr();
   const asked = liveOnMap.value;
   const around = liveOnMapAround.value;
-  const nm = liveRadiusNm();
+  const zoneArea = liveZoneArea.value;
   const layers = weatherLayers.value;
   const step = forecastStep.value;
   const on = asked > 0;
@@ -321,8 +321,10 @@ export function WeatherOnMap() {
     let readArea: Area | null = null;
     const areaNow = (): Area => {
       if (around) {
+        // The Météo-France zones shown, else 30 NM around the boat.
+        if (zoneArea) return zoneArea;
         const middle = boatPlace();
-        return areaAround(middle.lat, middle.lon, nm);
+        return areaAround(middle.lat, middle.lon, 30);
       }
       return areaOfMap(map);
     };
@@ -359,7 +361,7 @@ export function WeatherOnMap() {
       clearInterval(timer);
       weatherRead.value = { wind: null, sea: null };
     };
-  }, [on, mapReady, around, nm, lake]);
+  }, [on, mapReady, around, zoneArea, lake]);
 
   // The marks of the hour asked, drawn again when the map turns.
   useEffect(() => {

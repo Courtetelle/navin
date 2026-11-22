@@ -30,6 +30,7 @@ import time
 import numpy as np
 import shapefile
 import shapely
+import shapely.errors
 from pyproj import Transformer
 from shapely.geometry import Point, Polygon, box, shape
 from shapely.ops import unary_union
@@ -79,7 +80,7 @@ COAST = [
     ('straphael-menton', 'Saint-Raphaël – Menton', 'mediterranee',
      [(6.77, 43.42), (7.0, 42.9), (7.6, 43.3), (7.53, 43.785),
       (7.5, 44.0), (6.6, 43.8)]),
-    ('corse', 'Corse (côte)', 'mediterranee',
+    ('corse', 'Corse', 'mediterranee',
      [(8.0, 41.32), (8.0, 42.6), (8.9, 43.4), (9.6, 43.35), (10.05, 42.5),
       (9.85, 41.32)]),
 ]
@@ -170,15 +171,21 @@ def load_sea():
         b = reader.shape(index).bbox
         if b[2] < -16 or b[0] > 13 or b[3] < 36 or b[1] > 54:
             continue
-        geom = shapely.make_valid(shape(reader.shape(index).__geo_interface__))
-        kept.append(proj(geom))
+        geom = shape(reader.shape(index).__geo_interface__)
+        # Valid again once projected (the projection can fold an edge).
+        kept.append(shapely.make_valid(proj(shapely.make_valid(geom)),
+                                       method='structure', keep_collapsed=False))
     print('sea pieces', len(kept), flush=True)
     return np.array(kept, dtype=object)
 
 
 def sea_in(sea, tree, area):
     pieces = sea[tree.query(area)]
-    return unary_union(shapely.intersection(pieces, area))
+    try:
+        cut = shapely.intersection(pieces, area)
+    except shapely.errors.GEOSException:
+        cut = shapely.intersection(shapely.buffer(pieces, 0), area)
+    return shapely.make_valid(unary_union(cut))
 
 
 def rings(geom):
@@ -213,7 +220,7 @@ def read_circles(coast_line):
 
 
 def zone(sea, tree, ident, name, basin, kind, outline):
-    area = proj(Polygon(outline))
+    area = shapely.make_valid(proj(Polygon(outline)))
     water = sea_in(sea, tree, area)
     land = area.difference(water)
     if kind == 'cote':
@@ -263,7 +270,11 @@ def grid(sea, tree, path):
             xs, ys = to3035.transform(lons.ravel(), lats.ravel())
             env = box(xs.min() - margin, ys.min() - margin,
                       xs.max() + margin, ys.max() + margin)
-            pieces = shapely.intersection(sea[tree.query(env)], env)
+            try:
+                pieces = shapely.intersection(sea[tree.query(env)], env)
+            except shapely.errors.GEOSException:
+                pieces = shapely.intersection(
+                    shapely.buffer(sea[tree.query(env)], 0), env)
             near = np.zeros(len(xs), dtype=bool)
             widened = shapely.buffer(
                 shapely.simplify(pieces, 25), NEAR_M, quad_segs=4)

@@ -14905,3 +14905,67 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 .zb-tbl td {
   white-space: nowrap;
 }
+
+/* The chooser of the Météo-France zones of LiveMétéo (long press on the
+   button of the zone): a panel at the bottom, the map and its zones above. */
+.zone-pick {
+  position: fixed;
+  z-index: 1300;
+  left: max(8px, env(safe-area-inset-left));
+  right: max(8px, env(safe-area-inset-right));
+  bottom: max(8px, env(safe-area-inset-bottom));
+  max-height: 52vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--card, #fff);
+  color: var(--fg, #111);
+  box-shadow: 0 4px 18px rgb(0 0 0 / 30%);
+}
+.zone-pick-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  position: sticky;
+  top: -10px;
+  padding: 4px 0;
+  background: inherit;
+}
+.zone-pick-head .btn {
+  min-width: 72px;
+}
+.zone-pick-help {
+  margin: 4px 0 8px;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+.zone-pick-sets,
+.zone-pick-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.zone-pick-sets .btn,
+.zone-pick-list .btn {
+  flex: 1 1 auto;
+  min-height: 44px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.zone-pick-basin h4 {
+  margin: 10px 0 6px;
+}
+@media (min-width: 900px) {
+  .zone-pick {
+    left: auto;
+    width: 440px;
+    max-height: 70vh;
+  }
+}
+/* The short name of a zone on its button, smaller than a radius */
+.live-zone-btn .live-radius-nb {
+  font-size: 19px;
+}

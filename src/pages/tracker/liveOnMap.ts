@@ -2,7 +2,8 @@ import { signal } from '@preact/signals-react';
 
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
-import { state } from '../../state/index.ts';
+import type { ZoneBox } from '../../features/zones/meteoZones.ts';
+import { state, updateSettings } from '../../state/index.ts';
 
 /**
  * The live weather stations stand on the NavIn map: the time they were asked
@@ -12,9 +13,9 @@ import { state } from '../../state/index.ts';
 export const liveOnMap = signal(0);
 
 /**
- * How the stations are chosen: the map shown (long press on Météo), or a
- * circle of 120 km across around the zone chosen with NavIn, else the GPS
- * (the Météo menu).
+ * How the stations are chosen: the map shown (long press on Météo), or the
+ * Météo-France zones chosen, else that of the zone chosen with NavIn or of
+ * the GPS (the Météo menu).
  */
 export const liveOnMapAround = signal(false);
 
@@ -27,8 +28,8 @@ export function showLiveOnMap(): void {
 }
 
 /**
- * Lay the live weather stations within 60 km of the zone (or the GPS), the
- * circle drawn and the map zoomed on it (the Météo menu).
+ * Lay the live weather stations of the Météo-France zones, their outline
+ * drawn and the map zoomed on them (the Météo menu).
  */
 export function showLiveAround(): void {
   buzz();
@@ -52,23 +53,31 @@ export function hideLiveOnMap(): void {
   liveOnMap.value = 0;
 }
 
-/** The radii LiveMétéo offers in Paramétrages, in nautical miles. */
-export const LIVE_RADII_NM = [15, 30, 60, 120, 180] as const;
-
 /**
- * The radius of LiveMétéo around the zone or the GPS, in nautical miles
- * (Paramétrages › Alertes › LiveMétéo), 30 NM by default.
- * @returns Nautical miles.
+ * The Météo-France zones chosen for LiveMétéo (long press on the button of
+ * the zone, or Paramétrages › Alertes › LiveMétéo): their ids, empty for
+ * « the zone where I am ».
+ * @returns The ids.
  */
-export function liveRadiusNm(): number {
-  const chosen = Number(state.preferences.settings.value.liveRadiusNm);
-  return (LIVE_RADII_NM as readonly number[]).includes(chosen) ? chosen : 30;
+export function liveZoneIds(): string[] {
+  const chosen = state.preferences.settings.value.liveZones;
+  return Array.isArray(chosen)
+    ? chosen.filter((id): id is string => typeof id === 'string')
+    : [];
 }
 
 /**
- * The same radius in km, for the networks read.
- * @returns Kilometres.
+ * Keep the zones chosen.
+ * @param ids - The ids, empty for « the zone where I am ».
  */
-export function liveRadius(): number {
-  return Math.round(liveRadiusNm() * 1.852);
+export function setLiveZones(ids: readonly string[]): void {
+  updateSettings((settings) => {
+    settings.liveZones = [...new Set(ids)];
+  });
 }
+
+/** The chooser of the zones is open over the map. */
+export const zonePickOpen = signal(false);
+
+/** The box of the zones shown, for the forecast laid over them. */
+export const liveZoneArea = signal<ZoneBox | null>(null);
