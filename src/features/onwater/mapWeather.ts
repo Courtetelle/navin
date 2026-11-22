@@ -11,6 +11,7 @@
  */
 import type { LatLon } from '../../lib/geo.ts';
 import { openMeteoFetch } from '../../lib/openMeteo.ts';
+import { degreeOfHeight, groupOfDegree } from '../../model/beaufortDouglas.ts';
 
 import { windRegion } from './windModels.ts';
 
@@ -597,3 +598,55 @@ export function rainTileUrl(rain: RainFrames, path: string): string {
 
 /** The free radar tiles of RainViewer stop at this zoom; beyond, enlarged. */
 export const RAIN_NATIVE_ZOOM = 7;
+
+/**
+ * The label of the waves: their significant height (Hs, the mean of the
+ * highest third) and their Douglas degree on the colour of its group, as in
+ * the Beaufort / Douglas table of NavIn.
+ * @param height - Hs, metres.
+ * @returns The HTML.
+ */
+export function waveLabelHtml(height: number): string {
+  const degree = degreeOfHeight(height);
+  const group = groupOfDegree(degree);
+  const metres = height.toFixed(1).replace('.', ',');
+  return `<span class="wx-lbl wx-wave" title="Hs ${metres} m, Douglas ${degree}">${metres} m<b class="wx-dg" style="background:${group.color};color:${group.ink}">${degree}</b></span>`;
+}
+
+/** Under this, the current is slack whatever the hours around. */
+export const SLACK_KN = 0.3;
+/** Under this, the current is slack when it is at its weakest of the hours around. */
+const TURNING_KN = 0.6;
+
+/**
+ * Whether the current is slack at an hour: very weak, or weak and at its
+ * weakest between the hour before and the hour after (the tide turns).
+ * @param speeds - Knots, per hour.
+ * @param rank - The hour.
+ * @returns Slack water.
+ */
+export function isSlack(speeds: readonly number[], rank: number): boolean {
+  const now = speeds[rank] ?? Number.NaN;
+  if (!Number.isFinite(now)) return false;
+  if (now < SLACK_KN) return true;
+  if (now >= TURNING_KN) return false;
+  const before = speeds[rank - 1] ?? Number.NaN;
+  const after = speeds[rank + 1] ?? Number.NaN;
+  return (
+    Number.isFinite(before) &&
+    Number.isFinite(after) &&
+    now <= before &&
+    now <= after
+  );
+}
+
+/**
+ * The mark of slack water: a ring with a wavy line, no arrow.
+ * @param color - Its colour.
+ * @returns The SVG, 60 px square, the point in the middle.
+ */
+export function slackSvg(color: string): string {
+  const ring = `<circle cx="30" cy="30" r="9" fill="none"`;
+  const wave = `<path d="M23 30q3.5-4 7 0t7 0" fill="none" stroke-linecap="round"`;
+  return `<svg width="60" height="60" viewBox="0 0 60 60">${ring} stroke="#fff" stroke-width="5"/>${ring} stroke="${color}" stroke-width="2.5" stroke-dasharray="3 2.5"/>${wave} stroke="${color}" stroke-width="2.2"/></svg>`;
+}
