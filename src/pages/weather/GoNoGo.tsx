@@ -24,6 +24,16 @@ import {
   readBriefing,
 } from '../../features/onwater/briefing.ts';
 import { scalePoint } from '../../features/onwater/pointSea.ts';
+import type {
+  RouteBriefing,
+  RouteForecast,
+} from '../../features/onwater/routeBriefing.ts';
+import {
+  legWords,
+  readRouteForecast,
+  routeBriefing,
+  routePrompt,
+} from '../../features/onwater/routeBriefing.ts';
 import { shareCards } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -39,12 +49,23 @@ import {
   thresholdsOf,
 } from '../../model/goNoGo.ts';
 import type { Boat } from '../../model/recordTypes.ts';
+import type { NavRoute } from '../../model/routes.ts';
+import { routeNm } from '../../model/routes.ts';
 import { boatById, state, toast } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 const BOAT_KEY = 'navin.gngBoat';
 const PROFILES_KEY = 'navin.gngProfiles';
 const COURSE_KEY = 'navin.gngCourse';
+/** The route planned, by its id ('' : none, the point of the zone). */
+const ROUTE_KEY = 'navin.gngRoute';
+/** Departure (local, `YYYY-MM-DDTHH:MM`) and speed planned, per route. */
+const PLANS_KEY = 'navin.gngRoutePlans';
+
+interface RoutePlan {
+  depart: string;
+  speed: number;
+}
 /** The reference boat, chosen when no boat of the list is. */
 const REF = 'ref';
 
@@ -55,6 +76,40 @@ const fr = (value: number, digits = 0) =>
   (Math.round(value * 10 ** digits) / 10 ** digits)
     .toString()
     .replace('.', ',');
+
+const two = (value: number) => String(value).padStart(2, '0');
+
+/**
+ * A time for an input `datetime-local`, in the time of the device.
+ * @param ms - Epoch ms.
+ * @returns `YYYY-MM-DDTHH:MM`.
+ */
+function localInput(ms: number): string {
+  const date = new Date(ms);
+  return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}T${two(date.getHours())}:${two(date.getMinutes())}`;
+}
+
+/**
+ * The plan of a route: the one kept here, else its own departure when to
+ * come, else tomorrow at 8 h; its own speed.
+ * @param route - The route.
+ * @param plans - The plans kept.
+ * @returns The plan.
+ */
+function planOf(route: NavRoute, plans: Record<string, RoutePlan>): RoutePlan {
+  const kept = plans[route.id];
+  if (kept) return kept;
+  const own = route.depart ? Date.parse(route.depart) : Number.NaN;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(8, 0, 0, 0);
+  return {
+    depart: localInput(
+      Number.isFinite(own) && own > Date.now() ? own : tomorrow.getTime(),
+    ),
+    speed: route.speed,
+  };
+}
 
 /**
  * The boat of the cruise in progress: a cruise open, with its boat, whose
@@ -172,6 +227,24 @@ export function GoNoGo() {
   const courseDeg = parseTyped(course);
   const [point] = useState(() => scalePoint(null));
   const lake = point.kind === 'zone-lake' || inInland(point);
+  const routes = state.data.routes.value.toSorted((a, b) =>
+    b.mod.localeCompare(a.mod),
+  );
+  const [routeId, setRouteId] = useState(() =>
+    store.get<string>(ROUTE_KEY, ''),
+  );
+  const route = routes.find((one) => one.id === routeId);
+  const [plans, setPlans] = useState(() =>
+    store.get<Record<string, RoutePlan>>(PLANS_KEY, {}),
+  );
+  const plan = route ? planOf(route, plans) : null;
+  const setPlan = (next: Partial<RoutePlan>) => {
+    if (!route || !plan) return;
+    const all = { ...plans, [route.id]: { ...plan, ...next } };
+    store.set(PLANS_KEY, all);
+    setPlans(all);
+  };
+  const routeRead = useRouteForecast(route);
   const [read, setRead] = useState<
     { data: BriefingData | null; live: boolean } | 'reading'
   >('reading');
@@ -204,6 +277,24 @@ export function GoNoGo() {
         measure,
       )
     : [];
+  const departMs = plan ? new Date(plan.depart).getTime() : Number.NaN;
+  const onRoute: RouteBriefing | { error: string } | null =
+    route && plan && routeRead !== 'reading'
+      ? routeRead
+        ? Number.isFinite(departMs)
+          ? routeBriefing(
+              { points: route.points, speed: plan.speed },
+              departMs,
+              routeRead,
+              limits,
+              measure,
+            )
+          : { error: 'Indiquez l’heure de départ.' }
+        : {
+            error:
+              'Pas de prévision le long de la route (hors réseau, ou Open-Meteo refuse pour l’instant).',
+          }
+      : null;
   const boatWords = `${boatName(boat)} · ${limitsWords(limits)}`;
   return (
     <div className="gng" data-gng="page">
@@ -257,18 +348,31 @@ export function GoNoGo() {
                 {tr('Équipage réduit')}
               </Button>
             </div>
-            <label className="gng-course">
-              {tr('Cap prévu (°), pour l’allure ; vide : au près')}
-              <input
-                className="text"
-                inputMode="numeric"
-                value={course}
-                onChange={(event) => {
-                  setCourse(event.target.value);
-                  store.set(COURSE_KEY, event.target.value);
-                }}
-              />
-            </label>
+            <RouteChooser
+              routes={routes}
+              route={route}
+              plan={plan}
+              onRoute={(id) => {
+                buzz();
+                store.set(ROUTE_KEY, id);
+                setRouteId(id);
+              }}
+              onPlan={setPlan}
+            />
+            {route ? null : (
+              <label className="gng-course">
+                {tr('Cap prévu (°), pour l’allure ; vide : au près')}
+                <input
+                  className="text"
+                  inputMode="numeric"
+                  value={course}
+                  onChange={(event) => {
+                    setCourse(event.target.value);
+                    store.set(COURSE_KEY, event.target.value);
+                  }}
+                />
+              </label>
+            )}
           </div>
         </section>
       )}
@@ -290,6 +394,18 @@ export function GoNoGo() {
               )}
             </p>
           ) : null}
+          {route ? (
+            <RouteBlock
+              name={route.name}
+              briefing={onRoute}
+              reading={routeRead === 'reading'}
+            />
+          ) : null}
+          {route ? (
+            <h3 className="gng-at-point" data-gng="at-point">
+              {tr(`Au point ${point.name}, jours suivants`)}
+            </h3>
+          ) : null}
           <Overview days={days} />
           {days.map((day) => (
             <DayCard key={day.date} day={day} />
@@ -303,7 +419,14 @@ export function GoNoGo() {
             }}
           />
           <div className="gng-actions">
-            <AiPrompt text={promptOf(data, days, boatWords)} />
+            <AiPrompt
+              text={
+                promptOf(data, days, boatWords) +
+                (route && onRoute && !('error' in onRoute)
+                  ? routePrompt(route.name, onRoute)
+                  : '')
+              }
+            />
             <Button
               className="btn"
               data-gng="packet"
@@ -328,7 +451,15 @@ export function GoNoGo() {
           <ShareButton
             data-gng="share"
             onShare={(format) => {
-              void shareBriefing(data, days, boatWords, format);
+              void shareBriefing(
+                data,
+                days,
+                boatWords,
+                format,
+                route && onRoute && !('error' in onRoute)
+                  ? { name: route.name, briefing: onRoute }
+                  : null,
+              );
             }}
           />
         </>
@@ -340,6 +471,197 @@ export function GoNoGo() {
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * The forecast along a route, read again when its points change.
+ * @param route - The route, or undefined.
+ * @returns The forecast, null without, or 'reading'.
+ */
+function useRouteForecast(
+  route: NavRoute | undefined,
+): RouteForecast | null | 'reading' {
+  const [read, setRead] = useState<{
+    key: string;
+    forecast: RouteForecast | null;
+  } | null>(null);
+  const key = route ? JSON.stringify(route.points) : '';
+  useEffect(() => {
+    if (!key) return undefined;
+    let closed = false;
+    const points = JSON.parse(key) as NavRoute['points'];
+    const first = points[0];
+    const lake = first ? inInland(first) : false;
+    void readRouteForecast(points, lake)
+      .catch(() => null)
+      .then((forecast) => {
+        if (!closed) setRead({ key, forecast });
+      });
+    return () => {
+      closed = true;
+    };
+  }, [key]);
+  if (!key) return null;
+  return read?.key === key ? read.forecast : 'reading';
+}
+
+/**
+ * The route planned: one of the routes kept in NavIn, with its departure
+ * and its speed (hence the time to sail it).
+ * @param props - The routes and the choice.
+ * @param props.routes - The routes kept.
+ * @param props.route - The route chosen, or undefined.
+ * @param props.plan - Its departure and speed.
+ * @param props.onRoute - Choose a route by its id ('' : none).
+ * @param props.onPlan - Change the departure or the speed.
+ * @returns The block.
+ */
+function RouteChooser({
+  routes,
+  route,
+  plan,
+  onRoute,
+  onPlan,
+}: {
+  routes: readonly NavRoute[];
+  route: NavRoute | undefined;
+  plan: RoutePlan | null;
+  onRoute: (id: string) => void;
+  onPlan: (plan: Partial<RoutePlan>) => void;
+}) {
+  const tr = useTr();
+  // The speed as typed (« 6, » on the way to « 6,5 »), again per route.
+  const [typed, setTyped] = useState({ id: '', text: '' });
+  const speedText =
+    typed.id !== '' && route?.id === typed.id
+      ? typed.text
+      : fr(plan?.speed ?? 0, 1);
+  const setSpeedText = (text: string) =>
+    setTyped({ id: route?.id ?? '', text });
+  return (
+    <div className="gng-route" data-gng="route">
+      <label>
+        {tr('Routage prévu')}
+        <select
+          className="text"
+          data-gng="route-select"
+          value={route?.id ?? ''}
+          onChange={(event) => onRoute(event.target.value)}
+        >
+          <option value="">{tr('Aucun : météo au point de la zone')}</option>
+          {routes.map((one) => (
+            <option key={one.id} value={one.id}>
+              {tr(`${one.name} · ${fr(routeNm(one.points), 1)} NM`)}
+            </option>
+          ))}
+        </select>
+      </label>
+      {routes.length === 0 ? (
+        <small className="bd-how">
+          {tr('Aucune route enregistrée : dessinez-en une dans Routes.')}
+        </small>
+      ) : null}
+      {route && plan ? (
+        <div className="bd-fields">
+          <div className="bd-field">
+            <label htmlFor="gng-depart">{tr('Départ prévu')}</label>
+            <input
+              className="text"
+              id="gng-depart"
+              type="datetime-local"
+              data-gng="route-depart"
+              value={plan.depart}
+              onChange={(event) => onPlan({ depart: event.target.value })}
+            />
+          </div>
+          <div className="bd-field">
+            <label htmlFor="gng-speed">{tr('Vitesse prévue (nd)')}</label>
+            <input
+              className="text"
+              id="gng-speed"
+              inputMode="decimal"
+              data-gng="route-speed"
+              value={speedText}
+              onChange={(event) => {
+                setSpeedText(event.target.value);
+                const speed = parseTyped(event.target.value);
+                if (speed != null && speed > 0) onPlan({ speed });
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * The go / no-go along the route: its light, its reasons, its sentences and
+ * its legs (units at top and bottom).
+ * @param props - The route.
+ * @param props.name - Its name.
+ * @param props.briefing - The briefing, or why there is none.
+ * @param props.reading - Still reading.
+ * @returns The block.
+ */
+function RouteBlock({
+  name,
+  briefing,
+  reading,
+}: {
+  name: string;
+  briefing: RouteBriefing | { error: string } | null;
+  reading: boolean;
+}) {
+  const tr = useTr();
+  if (reading || !briefing) {
+    return (
+      <p className="bd-how" data-gng="route-reading">
+        {tr('Lecture de la prévision le long de la route…')}
+      </p>
+    );
+  }
+  if ('error' in briefing) {
+    return (
+      <p className="fx-draft" role="status" data-gng="route-error">
+        {tr(briefing.error)}
+      </p>
+    );
+  }
+  const { light, reasons, isolated } = briefing.verdict;
+  return (
+    <section className={`gng-day gng-${light}`} data-gng="route-block">
+      <h3>
+        {tr(`${LIGHTS[light].sign} Route ${name} : ${LIGHTS[light].word}`)}
+      </h3>
+      {reasons.length > 0 ? (
+        <p className="gng-why">{tr(`Pourquoi : ${reasons.join(' ; ')}.`)}</p>
+      ) : null}
+      <ul>
+        {briefing.lines.map((line) => (
+          <li key={line}>{tr(line)}</li>
+        ))}
+        {isolated.map((line) => (
+          <li key={line} className="gng-isolated">
+            {tr(`À noter : ${line}.`)}
+          </li>
+        ))}
+      </ul>
+      <h4>{tr('Bord par bord')}</h4>
+      <ul className="gng-legs" data-gng="route-legs">
+        {briefing.legs.map((leg) => (
+          <li key={leg.leg} data-gng-leg={leg.leg}>
+            {tr(`${LIGHTS[leg.light].sign} ${legWords(leg, briefing.offset)}`)}
+          </li>
+        ))}
+      </ul>
+      <p className="bd-how">
+        {tr(
+          `Prévision ${briefing.src} et vagues Open-Meteo en plusieurs points le long de la route, lue le ${new Date(briefing.at).toLocaleString('fr-CH')}. Chaque heure, le bateau est placé sur la route à la vitesse prévue depuis le départ ; l’allure vient du cap du bord et du vent de l’heure. Mêmes règles qu’au point, sans fenêtre 8 h – 18 h : toutes les heures de la route comptent. Pas encore de courants ni de paquet hors ligne pour la route.`,
+        )}
+      </p>
+    </section>
   );
 }
 
@@ -808,29 +1130,54 @@ async function shareBriefing(
   days: readonly BriefingDay[],
   boat: string,
   format: ShareFormat,
+  onRoute: { name: string; briefing: RouteBriefing } | null,
 ): Promise<void> {
+  const routeSections = onRoute
+    ? [
+        {
+          title: `${LIGHTS[onRoute.briefing.verdict.light].sign} Route ${onRoute.name} : ${LIGHTS[onRoute.briefing.verdict.light].word}`,
+          rows: [
+            ...(onRoute.briefing.verdict.reasons.length > 0
+              ? [
+                  [
+                    'Pourquoi',
+                    onRoute.briefing.verdict.reasons.join(' ; '),
+                  ] as [string, string],
+                ]
+              : []),
+            ...onRoute.briefing.lines.map((line, index): [string, string] => [
+              index === 0 ? 'Route' : '',
+              line,
+            ]),
+          ],
+        },
+      ]
+    : [];
   await shareCards(
     {
-      title: `Go / no-go · ${data.name}`,
+      title: `Go / no-go · ${onRoute ? onRoute.name : data.name}`,
       kicker: 'Briefing météo',
       sub: boat,
-      sections: days.map((day) => ({
-        title: `${LIGHTS[day.verdict.light].sign} ${dayName(day.date)} : ${LIGHTS[day.verdict.light].word}`,
-        rows: [
-          ...(day.verdict.reasons.length > 0
-            ? [
-                ['Pourquoi', day.verdict.reasons.join(' ; ')] as [
-                  string,
-                  string,
-                ],
-              ]
-            : []),
-          ...day.lines.map((line, index): [string, string] => [
-            index === 0 ? 'Prévision' : '',
-            line,
-          ]),
-        ],
-      })),
+      sections: [
+        ...routeSections,
+        ...days.map((day) => ({
+          title: `${LIGHTS[day.verdict.light].sign} ${dayName(day.date)} : ${LIGHTS[day.verdict.light].word}`,
+          rows: [
+            ...(day.verdict.reasons.length > 0
+              ? [
+                  ['Pourquoi', day.verdict.reasons.join(' ; ')] as [
+                    string,
+                    string,
+                  ],
+                ]
+              : []),
+            ...day.lines.map((line, index): [string, string] => [
+              index === 0 ? 'Prévision' : '',
+              line,
+            ]),
+          ],
+        })),
+      ],
       photos: [],
       photosTitle: '',
     },

@@ -172,6 +172,12 @@ export interface Hour {
   rain: number | null;
 }
 
+/**
+ * The course planned: one for all the hours, none (upwind), or one per hour
+ * (along a route).
+ */
+export type Course = number | null | ((hour: Hour) => number | null);
+
 /** One criterion passed at one hour. */
 interface Hit {
   /** Which criterion. */
@@ -206,7 +212,7 @@ const rate = (
  * @param index - Its place in the day (for the fall of pressure).
  * @param hours - All the hours (3 h before, for the fall).
  * @param limits - The thresholds of the boat.
- * @param course - Planned course, degrees, or null.
+ * @param course - Planned course, degrees, or null, or one per hour.
  * @returns The hits.
  */
 function hitsAt(
@@ -214,10 +220,13 @@ function hitsAt(
   index: number,
   hours: readonly Hour[],
   limits: Thresholds,
-  course: number | null,
+  course: Course,
 ): Hit[] {
   const hits: Hit[] = [];
-  const point = pointOfSail(course, hour.windFrom);
+  const point = pointOfSail(
+    typeof course === 'function' ? course(hour) : course,
+    hour.windFrom,
+  );
   const POINT_WORDS = {
     pres: 'au près',
     travers: 'au travers',
@@ -350,6 +359,35 @@ function hitsAt(
   return hits;
 }
 
+const RANK: Readonly<Record<Light, number>> = { go: 0, prudence: 1, nogo: 2 };
+
+/**
+ * The light of one hour alone (the worst criterion passed), and the point of
+ * sail at that hour.
+ * @param hour - The hour.
+ * @param allHours - All the hours, for the fall of pressure (same objects).
+ * @param limits - The thresholds of the boat.
+ * @param course - Planned course, degrees, or null, or one per hour.
+ * @returns The light and the point of sail.
+ */
+export function hourLight(
+  hour: Hour,
+  allHours: readonly Hour[],
+  limits: Thresholds,
+  course: Course,
+): { light: Light; point: PointOfSail } {
+  const hits = hitsAt(hour, allHours.indexOf(hour), allHours, limits, course);
+  let light: Light = 'go';
+  for (const hit of hits) if (RANK[hit.level] > RANK[light]) light = hit.level;
+  return {
+    light,
+    point: pointOfSail(
+      typeof course === 'function' ? course(hour) : course,
+      hour.windFrom,
+    ),
+  };
+}
+
 /** The light of a day and its reasons. */
 export interface DayVerdict {
   light: Light;
@@ -359,21 +397,19 @@ export interface DayVerdict {
   isolated: string[];
 }
 
-const RANK: Readonly<Record<Light, number>> = { go: 0, prudence: 1, nogo: 2 };
-
 /**
  * The light of the hours of a sailing window.
  * @param hours - The hours of the window, in order.
  * @param allHours - All the hours, for the fall of pressure (same objects).
  * @param limits - The thresholds of the boat.
- * @param course - Planned course, degrees, or null.
+ * @param course - Planned course, degrees, or null, or one per hour.
  * @returns The light, its reasons, the isolated hours.
  */
 export function dayVerdict(
   hours: readonly Hour[],
   allHours: readonly Hour[],
   limits: Thresholds,
-  course: number | null,
+  course: Course,
 ): DayVerdict {
   const perHour = hours.map((hour) =>
     hitsAt(hour, allHours.indexOf(hour), allHours, limits, course),
