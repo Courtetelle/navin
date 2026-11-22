@@ -5,6 +5,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import type { ShareFormat } from '../../components/shared/shareFormat.ts';
+import { boatSailSpeed, routingPrefs } from '../../features/map/routingRun.ts';
 import type {
   BriefingData,
   BriefingDay,
@@ -27,12 +28,16 @@ import { scalePoint } from '../../features/onwater/pointSea.ts';
 import type {
   RouteBriefing,
   RouteForecast,
+  RoutingBoat,
 } from '../../features/onwater/routeBriefing.ts';
 import {
+  keepRoutePacket,
+  keptRouteForecast,
   legWords,
   readRouteForecast,
   routeBriefing,
   routePrompt,
+  routeTrack,
 } from '../../features/onwater/routeBriefing.ts';
 import { shareCards } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -44,10 +49,13 @@ import type { BoatProfile, Thresholds } from '../../model/goNoGo.ts';
 import {
   NOGO_WIND_MAX,
   REFERENCE,
+  TIDE_RULES,
   boatKindOf,
   boatLength,
   thresholdsOf,
 } from '../../model/goNoGo.ts';
+import { isBoatPolar } from '../../model/polars.ts';
+import { isRealPolar } from '../../model/realPolar.ts';
 import type { Boat } from '../../model/recordTypes.ts';
 import type { NavRoute } from '../../model/routes.ts';
 import { routeNm } from '../../model/routes.ts';
@@ -278,23 +286,35 @@ export function GoNoGo() {
       )
     : [];
   const departMs = plan ? new Date(plan.depart).getTime() : Number.NaN;
-  const onRoute: RouteBriefing | { error: string } | null =
-    route && plan && routeRead !== 'reading'
-      ? routeRead
-        ? Number.isFinite(departMs)
-          ? routeBriefing(
-              { points: route.points, speed: plan.speed },
-              departMs,
-              routeRead,
-              limits,
-              measure,
-            )
-          : { error: 'Indiquez l’heure de départ.' }
-        : {
-            error:
-              'Pas de prévision le long de la route (hors réseau, ou Open-Meteo refuse pour l’instant).',
-          }
-      : null;
+  const routingBoat = routingBoatOf(boat);
+  let trackNote: string | null = null;
+  let onRoute: RouteBriefing | { error: string } | null = null;
+  if (route && plan && routeRead !== 'reading') {
+    if (!routeRead) {
+      onRoute = {
+        error:
+          'Pas de prévision le long de la route : hors réseau et rien de gardé pour cette route, ou Open-Meteo refuse pour l’instant.',
+      };
+    } else if (Number.isFinite(departMs)) {
+      const { track, note } = routeTrack(
+        route.points,
+        departMs,
+        routeRead.forecast,
+        routingBoat,
+        plan.speed,
+      );
+      trackNote = note;
+      onRoute = routeBriefing(
+        route.points,
+        track,
+        routeRead.forecast,
+        limits,
+        measure,
+      );
+    } else {
+      onRoute = { error: 'Indiquez l’heure de départ.' };
+    }
+  }
   const boatWords = `${boatName(boat)} · ${limitsWords(limits)}`;
   return (
     <div className="gng" data-gng="page">
@@ -352,6 +372,7 @@ export function GoNoGo() {
               routes={routes}
               route={route}
               plan={plan}
+              routing={routingBoat}
               onRoute={(id) => {
                 buzz();
                 store.set(ROUTE_KEY, id);
@@ -376,6 +397,19 @@ export function GoNoGo() {
           </div>
         </section>
       )}
+      {!asking && route ? (
+        <RouteBlock
+          name={route.name}
+          briefing={onRoute}
+          reading={routeRead === 'reading'}
+          note={trackNote}
+          keptAt={
+            routeRead && routeRead !== 'reading' && !routeRead.live
+              ? (routeRead.forecast.data[0]?.at ?? null)
+              : null
+          }
+        />
+      ) : null}
       {asking ? null : read === 'reading' ? (
         <p className="bd-how">{tr('Lecture de la prévision au point…')}</p>
       ) : data ? (
@@ -393,13 +427,6 @@ export function GoNoGo() {
                 `Corrigé d’après votre saisie de ${new Date(measure.t).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' }).replace(':', ' h ')} (s’efface sur 6 h).`,
               )}
             </p>
-          ) : null}
-          {route ? (
-            <RouteBlock
-              name={route.name}
-              briefing={onRoute}
-              reading={routeRead === 'reading'}
-            />
           ) : null}
           {route ? (
             <h3 className="gng-at-point" data-gng="at-point">
@@ -474,36 +501,71 @@ export function GoNoGo() {
   );
 }
 
+/** The forecast of a route: read now, or kept for offline. */
+interface RouteRead {
+  forecast: RouteForecast;
+  live: boolean;
+}
+
 /**
- * The forecast along a route, read again when its points change.
+ * The forecast along a route, read again when its points change, kept for
+ * offline at each reading; offline, the one kept.
  * @param route - The route, or undefined.
  * @returns The forecast, null without, or 'reading'.
  */
 function useRouteForecast(
   route: NavRoute | undefined,
-): RouteForecast | null | 'reading' {
+): RouteRead | null | 'reading' {
   const [read, setRead] = useState<{
     key: string;
-    forecast: RouteForecast | null;
+    found: RouteRead | null;
   } | null>(null);
-  const key = route ? JSON.stringify(route.points) : '';
+  const key = route ? JSON.stringify([route.id, route.points]) : '';
   useEffect(() => {
     if (!key) return undefined;
     let closed = false;
-    const points = JSON.parse(key) as NavRoute['points'];
+    const [id, points] = JSON.parse(key) as [string, NavRoute['points']];
     const first = points[0];
     const lake = first ? inInland(first) : false;
     void readRouteForecast(points, lake)
       .catch(() => null)
       .then((forecast) => {
-        if (!closed) setRead({ key, forecast });
+        if (closed) return;
+        if (forecast) {
+          keepRoutePacket(id, points, forecast);
+          setRead({ key, found: { forecast, live: true } });
+          return;
+        }
+        const kept = keptRouteForecast(id, points);
+        setRead({ key, found: kept ? { forecast: kept, live: false } : null });
       });
     return () => {
       closed = true;
     };
   }, [key]);
   if (!key) return null;
-  return read?.key === key ? read.forecast : 'reading';
+  return read?.key === key ? read.found : 'reading';
+}
+
+/**
+ * The polar and the motor of a boat for the routing: its polar (better, its
+ * real polars), the motor of the routing settings; null without a polar.
+ * @param boat - The boat, or undefined (the reference one).
+ * @returns What the routing needs, or null.
+ */
+function routingBoatOf(boat: Boat | undefined): RoutingBoat | null {
+  const polar = isBoatPolar(boat?.polar) ? boat.polar : null;
+  if (!boat || !polar) return null;
+  const reals = Array.isArray(boat.realPolars)
+    ? boat.realPolars.filter(isRealPolar)
+    : [];
+  const prefs = routingPrefs();
+  return {
+    polar: polar.polar,
+    sailSpeed: boatSailSpeed(polar, reals),
+    motorBelow: prefs.motorBelow,
+    motorKn: prefs.motorKn,
+  };
 }
 
 /**
@@ -513,6 +575,7 @@ function useRouteForecast(
  * @param props.routes - The routes kept.
  * @param props.route - The route chosen, or undefined.
  * @param props.plan - Its departure and speed.
+ * @param props.routing - The polar and motor of the boat, or null.
  * @param props.onRoute - Choose a route by its id ('' : none).
  * @param props.onPlan - Change the departure or the speed.
  * @returns The block.
@@ -521,12 +584,14 @@ function RouteChooser({
   routes,
   route,
   plan,
+  routing,
   onRoute,
   onPlan,
 }: {
   routes: readonly NavRoute[];
   route: NavRoute | undefined;
   plan: RoutePlan | null;
+  routing: RoutingBoat | null;
   onRoute: (id: string) => void;
   onPlan: (plan: Partial<RoutePlan>) => void;
 }) {
@@ -575,8 +640,21 @@ function RouteChooser({
               onChange={(event) => onPlan({ depart: event.target.value })}
             />
           </div>
+          {routing ? (
+            <p className="bd-how" data-gng="route-routing">
+              {tr(
+                `Durée : routage polaire du bateau avec le vent prévu, moteur sous ${fr(routing.motorBelow, 1)} nd à ${fr(routing.motorKn, 1)} nd (réglages de Routes › Routage météo).`,
+              )}
+            </p>
+          ) : null}
           <div className="bd-field">
-            <label htmlFor="gng-speed">{tr('Vitesse prévue (nd)')}</label>
+            <label htmlFor="gng-speed">
+              {tr(
+                routing
+                  ? 'Vitesse prévue (nd), si le routage manque de vent'
+                  : 'Vitesse prévue (nd)',
+              )}
+            </label>
             <input
               className="text"
               id="gng-speed"
@@ -603,16 +681,22 @@ function RouteChooser({
  * @param props.name - Its name.
  * @param props.briefing - The briefing, or why there is none.
  * @param props.reading - Still reading.
+ * @param props.note - Why the planned speed rather than the routing, or null.
+ * @param props.keptAt - Offline: when the forecast kept was read, else null.
  * @returns The block.
  */
 function RouteBlock({
   name,
   briefing,
   reading,
+  note,
+  keptAt,
 }: {
   name: string;
   briefing: RouteBriefing | { error: string } | null;
   reading: boolean;
+  note: string | null;
+  keptAt: number | null;
 }) {
   const tr = useTr();
   if (reading || !briefing) {
@@ -635,6 +719,18 @@ function RouteBlock({
       <h3>
         {tr(`${LIGHTS[light].sign} Route ${name} : ${LIGHTS[light].word}`)}
       </h3>
+      {keptAt == null ? null : (
+        <p className="fx-draft" role="status" data-gng="route-offline">
+          {tr(
+            `Hors réseau : prévision de la route gardée du ${new Date(keptAt).toLocaleString('fr-CH', { weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}.`,
+          )}
+        </p>
+      )}
+      {note ? (
+        <p className="bd-how" data-gng="route-note">
+          {tr(note)}
+        </p>
+      ) : null}
       {reasons.length > 0 ? (
         <p className="gng-why">{tr(`Pourquoi : ${reasons.join(' ; ')}.`)}</p>
       ) : null}
@@ -658,7 +754,7 @@ function RouteBlock({
       </ul>
       <p className="bd-how">
         {tr(
-          `Prévision ${briefing.src} et vagues Open-Meteo en plusieurs points le long de la route, lue le ${new Date(briefing.at).toLocaleString('fr-CH')}. Chaque heure, le bateau est placé sur la route à la vitesse prévue depuis le départ ; l’allure vient du cap du bord et du vent de l’heure. Mêmes règles qu’au point, sans fenêtre 8 h – 18 h : toutes les heures de la route comptent. Pas encore de courants ni de paquet hors ligne pour la route.`,
+          `Prévision ${briefing.src} et vagues Open-Meteo en plusieurs points le long de la route, lue le ${new Date(briefing.at).toLocaleString('fr-CH')}. Chaque heure, le bateau est placé là où le routage polaire le met (vent prévu, virements et empannages, moteur sous le seuil), sinon à la vitesse prévue ; l’allure vient du cap tenu et du vent de l’heure. Courants du modèle de mer d’Open-Meteo, côté Atlantique et dans les détroits connus de Méditerranée ; vent contre courant : orange dès ${TIDE_RULES.against.orange[0]} nd de courant et ${TIDE_RULES.against.orange[1]} nd de vent, rouge dès ${TIDE_RULES.against.red[0]} nd et ${TIDE_RULES.against.red[1]} nd, courant seul de ${TIDE_RULES.strong} nd ou plus orange (valeurs de départ, à corriger). Mêmes règles qu’au point, sans fenêtre 8 h – 18 h : toutes les heures de la route comptent. La prévision de la route est gardée pour hors ligne à chaque lecture (4 routes au plus).`,
         )}
       </p>
     </section>
