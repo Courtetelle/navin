@@ -79,39 +79,52 @@ function inSwissModel(lat: number, lon: number): boolean {
   return lat > 45.6 && lat < 48 && lon > 5.8 && lon < 10.7;
 }
 
-async function json(url: string): Promise<Record<string, unknown> | null> {
-  const response = await openMeteoFetch(url, {
-    signal: AbortSignal.timeout(20_000),
-  });
-  return response.ok
-    ? ((await response.json()) as Record<string, unknown>)
-    : null;
+/**
+ * The requests of a briefing at one point or several (Open-Meteo takes the
+ * places comma-separated and answers a list).
+ * @param places - The places.
+ * @param lake - On a lake: no sea model.
+ * @param days - Days of forecast.
+ * @returns The weather and the sea requests (null on a lake), and the model.
+ */
+export function briefingUrls(
+  places: ReadonlyArray<{ lat: number; lon: number }>,
+  lake: boolean,
+  days = 4,
+): { weather: string; sea: string | null; swiss: boolean } {
+  const lat = places.map((place) => place.lat.toFixed(3)).join(',');
+  const lon = places.map((place) => place.lon.toFixed(3)).join(',');
+  const where = `latitude=${lat}&longitude=${lon}&forecast_days=${days}&timezone=auto`;
+  const first = places[0] ?? { lat: 0, lon: 0 };
+  const swiss = inSwissModel(first.lat, first.lon);
+  return {
+    weather: `https://api.open-meteo.com/v1/forecast?${where}&wind_speed_unit=kn&hourly=${WEATHER_VARS.join(',')}${swiss ? '&models=meteoswiss_icon_ch2' : '&models=ecmwf_ifs025'}${lake ? '' : '&cell_selection=sea'}`,
+    sea: lake
+      ? null
+      : `https://marine-api.open-meteo.com/v1/marine?${where}&hourly=${[...SEA_VARS, 'wave_direction'].join(',')}`,
+    swiss,
+  };
 }
 
 /**
- * Read 4 days of hourly weather (and sea, off the lakes) at a point.
+ * One point of a reply of Open-Meteo, as the briefing keeps it.
+ * @param weather - The weather of the point.
+ * @param sea - Its sea, or null.
  * @param point - The point.
  * @param point.lat - Latitude.
  * @param point.lon - Longitude.
  * @param point.name - Its name.
- * @param lake - On a lake: no sea model.
- * @returns The data, or null without network.
+ * @param swiss - Read with the Swiss model.
+ * @param at - When it was read.
+ * @returns The data, or null without hours.
  */
-export async function readBriefing(
+export function briefingOf(
+  weather: Record<string, unknown> | null | undefined,
+  sea: Record<string, unknown> | null | undefined,
   point: { lat: number; lon: number; name: string },
-  lake: boolean,
-): Promise<BriefingData | null> {
-  const where = `latitude=${point.lat.toFixed(3)}&longitude=${point.lon.toFixed(3)}&forecast_days=4&timezone=auto`;
-  const swiss = inSwissModel(point.lat, point.lon);
-  const weatherUrl = `https://api.open-meteo.com/v1/forecast?${where}&wind_speed_unit=kn&hourly=${WEATHER_VARS.join(',')}${swiss ? '&models=meteoswiss_icon_ch2' : '&models=ecmwf_ifs025'}${lake ? '' : '&cell_selection=sea'}`;
-  const [weather, sea] = await Promise.all([
-    json(weatherUrl).catch(() => null),
-    lake
-      ? null
-      : json(
-          `https://marine-api.open-meteo.com/v1/marine?${where}&hourly=${[...SEA_VARS, 'wave_direction'].join(',')}`,
-        ).catch(() => null),
-  ]);
+  swiss: boolean,
+  at = Date.now(),
+): BriefingData | null {
   const hourly = weather?.hourly as Record<string, unknown> | undefined;
   const times = hourly?.time as string[] | undefined;
   if (!hourly || !times) return null;
@@ -128,12 +141,12 @@ export async function readBriefing(
       (seaHourly?.[name] as Array<number | null> | undefined) ?? [];
     // Same hours as the weather, matched by their text.
     v[name] = times.map((time) => {
-      const at = seaTimes.indexOf(time);
-      return at === -1 ? null : (values[at] ?? null);
+      const index = seaTimes.indexOf(time);
+      return index === -1 ? null : (values[index] ?? null);
     });
   }
   return {
-    at: Date.now(),
+    at,
     lat: point.lat,
     lon: point.lon,
     name: point.name,
@@ -144,6 +157,44 @@ export async function readBriefing(
     t,
     v,
   };
+}
+
+/**
+ * Read a request of Open-Meteo (kept 30 minutes).
+ * @param url - The request.
+ * @returns The reply, a list for several places, or null.
+ */
+export async function readJson(url: string): Promise<unknown> {
+  const response = await openMeteoFetch(url, {
+    signal: AbortSignal.timeout(20_000),
+  });
+  return response.ok ? ((await response.json()) as unknown) : null;
+}
+
+/**
+ * Read 4 days of hourly weather (and sea, off the lakes) at a point.
+ * @param point - The point.
+ * @param point.lat - Latitude.
+ * @param point.lon - Longitude.
+ * @param point.name - Its name.
+ * @param lake - On a lake: no sea model.
+ * @returns The data, or null without network.
+ */
+export async function readBriefing(
+  point: { lat: number; lon: number; name: string },
+  lake: boolean,
+): Promise<BriefingData | null> {
+  const urls = briefingUrls([point], lake);
+  const [weather, sea] = await Promise.all([
+    readJson(urls.weather).catch(() => null),
+    urls.sea ? readJson(urls.sea).catch(() => null) : null,
+  ]);
+  return briefingOf(
+    weather as Record<string, unknown> | null,
+    sea as Record<string, unknown> | null,
+    point,
+    urls.swiss,
+  );
 }
 
 /**
@@ -460,7 +511,7 @@ function dayOf(
  * @param point - The point of the compass.
  * @returns The words.
  */
-function fromWord(point: string): string {
+export function fromWord(point: string): string {
   return /^[AEIOU]/u.test(point) ? `d’${point}` : `de ${point}`;
 }
 

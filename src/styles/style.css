@@ -14090,6 +14090,34 @@ h1.menu-title {
   max-width: 8em;
   display: block;
 }
+/* The route planned: the list, then the departure and the speed, each on
+   its own line so the date and the hour stay whole on a phone. */
+.gng-route {
+  margin-top: 0.6em;
+}
+.gng-route > label {
+  display: block;
+}
+.gng-route select,
+.gng-route input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 24em;
+  min-height: 2.6em;
+  margin-top: 0.2em;
+  font-size: 1em;
+}
+.gng-route .bd-fields {
+  display: block;
+}
+.gng-route .bd-field {
+  margin-top: 0.5em;
+}
+.gng-legs li {
+  margin: 0.3em 0;
+  overflow-wrap: anywhere;
+}
 .gng-day {
   border-left: 6px solid var(--hair);
   padding: 0.2em 0 0.2em 0.7em;
