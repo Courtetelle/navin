@@ -23,7 +23,10 @@ import {
   gotoRouting,
   showRouting,
 } from '../../features/map/routingShown.ts';
-import type { SavedRouting } from '../../features/map/routingState.ts';
+import type {
+  RoutingStats,
+  SavedRouting,
+} from '../../features/map/routingState.ts';
 import {
   removeRouting,
   renameRouting,
@@ -108,9 +111,11 @@ export function RoutingPanel() {
         Le routage suit la route dessinée de point en point, avec le vent prévu
         là où le bateau sera, à l’heure où il y sera, et la polaire du bateau
         (ou mieux, sa polaire réelle). Au près il tire des bords, au vent
-        arrière il empanne ; sous le seuil, il passe au moteur en ligne droite
-        et l’heure d’arrivée suit. Avec une carte hors ligne (Fonds de cartes)
-        qui couvre la route, les bords s’arrêtent avant la terre. Le courant
+        arrière il empanne. La vitesse du bateau vient de ses polaires, à
+        l’angle et à la force du vent prévus : quand elle passe sous le seuil
+        choisi, le moteur remplace ou appuie les voiles, en ligne droite, et
+        l’heure d’arrivée suit. Avec une carte hors ligne (Fonds de cartes) qui
+        couvre la route, les bords s’arrêtent avant la terre. Le courant
         (Copernicus, marée comprise) pousse le bateau : en ligne droite il
         remonte le courant pour tenir la route, et la vitesse fond donne l’heure
         d’arrivée. Les vagues de plus d’un mètre ralentissent, surtout au près.
@@ -169,7 +174,7 @@ export function RoutingPanel() {
           </select>
         </label>
         <label>
-          {tr('Moteur sous (nd)')}
+          {tr('Moteur quand la vitesse du bateau (polaires) passe sous (nd)')}
           <input
             type="number"
             id="rtgMotorBelow"
@@ -183,6 +188,23 @@ export function RoutingPanel() {
               if (value >= 0 && value <= 15) change({ motorBelow: value });
             }}
           />
+        </label>
+        <label>
+          {tr('Le moteur')}
+          <select
+            id="rtgMotorAssist"
+            value={prefs.motorAssist ? 'assist' : 'replace'}
+            onChange={(event) =>
+              change({ motorAssist: event.target.value === 'assist' })
+            }
+          >
+            <option value="replace">
+              {tr('remplace les voiles (en ligne droite)')}
+            </option>
+            <option value="assist">
+              {tr('appuie les voiles (voiles + moteur, en ligne droite)')}
+            </option>
+          </select>
         </label>
         <label>
           {tr('Vitesse au moteur (nd)')}
@@ -220,7 +242,7 @@ export function RoutingPanel() {
         </Button>
       </ButtonRow>
       {run && run !== 'busy' && route ? (
-        <RoutingOutcome run={run} route={route} />
+        <RoutingOutcome run={run} route={route} prefs={{ ...prefs, boatId }} />
       ) : null}
     </>
   );
@@ -229,9 +251,11 @@ export function RoutingPanel() {
 interface OutcomeProps {
   run: RoutingRun;
   route: NavRoute;
+  /** The boat, the motor and the model asked. */
+  prefs: RoutingPrefs;
 }
 
-function RoutingOutcome({ run, route }: OutcomeProps) {
+function RoutingOutcome({ run, route, prefs }: OutcomeProps) {
   const tr = useTr();
   const id = useMemo(() => (run ? uid() : ''), [run]);
   if (run.kind === 'error') {
@@ -260,9 +284,27 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
   const summary = routingSummary(result, depart);
   // Kept in « Routages » under one id, however many buttons are touched.
   const keep = () => {
+    const shape = routingShape(
+      `${route.name} · ${when(depart)}`,
+      result,
+      route.points,
+    );
     const shown = {
-      ...routingShape(`${route.name} · ${when(depart)}`, result, route.points),
+      ...shape,
       id,
+      plan: {
+        routeId: route.id,
+        boatId: prefs.boatId,
+        motorBelow: prefs.motorBelow,
+        motorKn: prefs.motorKn,
+        motorAssist: prefs.motorAssist,
+        model: prefs.model,
+        base: {
+          departMs: depart,
+          arriveMs: result.arriveMs,
+          stats: shape.stats as RoutingStats,
+        },
+      },
     };
     saveRouting({
       id,

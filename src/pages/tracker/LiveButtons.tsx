@@ -15,12 +15,7 @@ import { go } from '../../shell/router.ts';
 import { toast } from '../../state/index.ts';
 
 import type { Place } from './liveButtons.ts';
-import {
-  LIVE_FADE_MS,
-  LIVE_SOLID_MS,
-  livePlace,
-  placeBoxes,
-} from './liveButtons.ts';
+import { columnBoxes, livePlace, placeBoxes } from './liveButtons.ts';
 import {
   hideLiveOnMap,
   liveOnMap,
@@ -52,38 +47,6 @@ function hourText(ms: number): string {
 }
 
 /**
- * Shown, fading, or gone: the buttons go after a while without a touch on
- * the screen, any touch brings them back.
- * @param on - LiveMétéo on the map.
- * @returns The state.
- */
-function useFade(on: boolean): 'shown' | 'fading' | 'gone' {
-  const [stage, setStage] = useState<'shown' | 'fading' | 'gone'>('shown');
-  useEffect(() => {
-    if (!on) return undefined;
-    let fade: ReturnType<typeof setTimeout> | undefined;
-    let gone: ReturnType<typeof setTimeout> | undefined;
-    const wake = () => {
-      clearTimeout(fade);
-      clearTimeout(gone);
-      setStage('shown');
-      fade = setTimeout(() => setStage('fading'), LIVE_SOLID_MS);
-      gone = setTimeout(() => setStage('gone'), LIVE_SOLID_MS + LIVE_FADE_MS);
-    };
-    wake();
-    document.addEventListener('pointerdown', wake, true);
-    document.addEventListener('keydown', wake, true);
-    return () => {
-      clearTimeout(fade);
-      clearTimeout(gone);
-      document.removeEventListener('pointerdown', wake, true);
-      document.removeEventListener('keydown', wake, true);
-    };
-  }, [on]);
-  return stage;
-}
-
-/**
  * LiveMétéo on the map of NavIn: at the right of Météo, buttons of its size
  * with rounded corners: the zone (a touch takes LiveMétéo away, a long press
  * the Météo-France zones), the wind forecast, the waves, the currents, the rain of the
@@ -105,10 +68,12 @@ export function LiveButtons() {
   const rain = rainRead.value;
   const rainAhead = rainAheadSource.value;
   const lake = onLake();
-  const stage = useFade(on);
+  // Shown as long as LiveMétéo is on: they leave all at once with the
+  // red cross of the zone button (no fading any more, Corban 23/11).
+  const stage = 'shown';
   const forecast =
     layers.wind || layers.waves || layers.currents || layers.rain;
-  const count = (lake ? 4 : 6) + (forecast ? 3 : 0);
+  const count = (lake ? 3 : 5) + (forecast ? 3 : 0);
   const [place, setPlace] = useState<Place | null>(null);
   const said = useRef(new Set<string>());
 
@@ -116,7 +81,7 @@ export function LiveButtons() {
     if (!on) return undefined;
     let wait: ReturnType<typeof setTimeout> | undefined;
     const lay = () => {
-      const found = livePlace(count);
+      const found = livePlace(1);
       setPlace(found);
       if (!found) wait = setTimeout(lay, 300);
     };
@@ -133,13 +98,15 @@ export function LiveButtons() {
     };
   }, [on, count]);
 
-  // The badges of the stations hidden or shown on the map itself.
+  // The badges of the stations and the lightning are of the hour now: gone
+  // as soon as the forecast steps ahead, back at the hour now (Corban 23/11,
+  // no button of their own any more).
   useEffect(() => {
     if (!on) return undefined;
     const box = tracker.current?.map?.getContainer();
-    box?.classList.toggle('live-st-off', !layers.stations);
-    return () => box?.classList.remove('live-st-off');
-  }, [on, layers.stations]);
+    box?.classList.toggle('live-ahead', step > 0);
+    return () => box?.classList.remove('live-ahead');
+  }, [on, step]);
 
   const failures: Partial<Record<keyof WeatherLayers, string>> = {};
   const windFail = failText(drawn.wind);
@@ -166,17 +133,16 @@ export function LiveButtons() {
   if (!on || !place) return null;
   const rainAt =
     rain && 'frames' in rain ? (rain.frames.at(-1)?.time ?? null) : null;
-  const sources: Record<keyof WeatherLayers, string> = {
+  const sources: Record<Exclude<keyof WeatherLayers, 'stations'>, string> = {
     wind: `Vent prévu : ${model || 'modèle local'}, nœuds, G = rafales.`,
     waves:
       'Vagues : Open-Meteo Marine, hauteur significative Hs en m et degré Douglas en couleur ; flèche aux couleurs de la cambrure (hauteur sur longueur d’onde, du vert au violet), bleue sans période.',
     currents:
-      'Courants : Open-Meteo Marine, flèches noires en nœuds ; étale marquée à part.',
+      'Courants : Open-Meteo Marine, nœuds ; flèche bordée de noir, vert pomme quand le vent va avec le courant, puis jaune, orange et rouge vif vent contre courant (noire sous 6 nd de vent) ; étale marquée à part.',
     rain:
       step === 0
         ? `Pluie : radar RainViewer${rainAt == null ? '' : ` de ${hourText(rainAt)}`}, du bleu clair (faible) au violet (forte).`
         : `Pluie prévue : ${rainAhead ?? (model || 'modèle local')}, mm par heure, du bleu clair (faible) au violet (forte) ; le radar ne montre que l’heure actuelle.`,
-    stations: 'Stations et bouées LiveMétéo : vent mesuré.',
   };
   const items: ReactNode[] = [
     <ZoneButton key="zone" />,
@@ -218,13 +184,6 @@ export function LiveButtons() {
       fail={failures.rain}
       source={sources.rain}
     />,
-    <LayerButton
-      key="stations"
-      name="stations"
-      label="Stations et bouées"
-      icon={<StationIcon />}
-      source={sources.stations}
-    />,
   );
   if (forecast) {
     const last = FORECAST_HOURS - 1;
@@ -241,7 +200,7 @@ export function LiveButtons() {
           forecastStep.value = Math.max(0, step - 1);
         }}
       >
-        <span className="rail-icon">◀</span>
+        <span className="rail-icon">▲</span>
       </Button>,
       <Button
         key="hour"
@@ -275,7 +234,7 @@ export function LiveButtons() {
           forecastStep.value = Math.min(last, step + 1);
         }}
       >
-        <span className="rail-icon">▶</span>
+        <span className="rail-icon">▼</span>
       </Button>,
     );
   }
@@ -285,7 +244,10 @@ export function LiveButtons() {
       role="group"
       aria-label={tr('LiveMétéo sur la carte')}
     >
-      {placeBoxes(place, items.length).map((box, index) => {
+      {[
+        ...placeBoxes(place, 1),
+        ...columnBoxes(items.length - 1, place.width, place.height),
+      ].map((box, index) => {
         const item = items[index];
         const key = (item as { key?: string | null }).key ?? String(index);
         const style: CSSProperties = {
@@ -501,17 +463,6 @@ function RainIcon() {
     <Svg>
       <path d="M7 15h10a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.2A3.4 3.4 0 0 0 7 15z" />
       <path d="M8 18.5 7 21M12.5 18.5l-1 2.5M17 18.5l-1 2.5" />
-    </Svg>
-  );
-}
-
-/** A station: the badge of its wind on its mast. */
-function StationIcon() {
-  return (
-    <Svg>
-      <circle cx="12" cy="8.5" r="6" />
-      <path d="M12 14.5V22M8.5 22h7" />
-      <path d="M9.5 8.5h5" strokeWidth="2.6" />
     </Svg>
   );
 }

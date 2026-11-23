@@ -23,7 +23,7 @@ const TIPS: ReadonlyArray<readonly [string | null, string]> = [
   ['gear', 'Curseurs : les réglages · appui long : mode nuit ou mode jour'],
   [
     'clock',
-    'L’heure : en mer elle s’affiche en UTC · un toucher montre 5 secondes l’heure locale (Zone Time)',
+    'L’heure : en mer en UTC, sur un lac en heure légale · un toucher passe de l’une à l’autre et le choix reste · appui long : lever et coucher du soleil en heure légale',
   ],
   [
     null,

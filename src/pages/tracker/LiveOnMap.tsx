@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 
 import { leaflet } from '../../features/map/leaflet.ts';
 import { pendingMapArea } from '../../features/map/pendingArea.ts';
+import { shownRouting } from '../../features/map/routingState.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { showZoomOnMap } from '../../features/map/zoomShown.ts';
 import type { LiveStation } from '../../features/onwater/index.ts';
@@ -154,7 +155,8 @@ export function LiveOnMap() {
   const asked = liveOnMap.value;
   const around = liveOnMapAround.value;
   const zoneKey = liveZoneIds().join(',');
-  const on = asked > 0;
+  // A routing on the map: only the route and its marks are shown.
+  const on = asked > 0 && shownRouting.value === null;
 
   // The map opened on a storm or a warning light: the winds of LiveMétéo
   // and their circle leave it.

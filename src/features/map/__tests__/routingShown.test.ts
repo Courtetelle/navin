@@ -8,6 +8,7 @@ import {
   clearRouting,
   gotoRouting,
   markHtml,
+  placeMarks,
   showRouting,
 } from '../routingShown.ts';
 import {
@@ -161,5 +162,26 @@ describe('Routages', () => {
     expect(savedRoutings.value[1]?.nm).toBe(5);
     removeRouting('r2');
     expect(savedRoutings.value).toHaveLength(1);
+  });
+});
+
+describe('placeMarks', () => {
+  it('keeps as many places as fit, set off one side then the other', () => {
+    const down = Array.from({ length: 40 }, (_, rank) => ({
+      x: 100,
+      y: rank * 10,
+    }));
+    const placed = placeMarks(down);
+    // Down the screen, a box takes half its height on each side: ~56 px.
+    expect(placed.length).toBeGreaterThan(5);
+    expect(placed.length).toBeLessThan(10);
+    expect(Math.sign(placed[0]?.dx ?? 0)).toBe(-Math.sign(placed[1]?.dx ?? 0));
+    expect(Math.abs(placed[0]?.dx ?? 0)).toBeGreaterThan(98);
+    const across = Array.from({ length: 40 }, (_, rank) => ({
+      x: rank * 10,
+      y: 100,
+    }));
+    // Across the screen, the boxes are wider: fewer of them.
+    expect(placeMarks(across).length).toBeLessThan(placed.length);
   });
 });

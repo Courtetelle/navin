@@ -23,6 +23,7 @@ import { LightningOnMap } from './LightningOnMap.tsx';
 import { LiveButtons } from './LiveButtons.tsx';
 import { LiveOnMap } from './LiveOnMap.tsx';
 import { PhoneTrackButton } from './PhoneTrackButton.tsx';
+import { RoutingBar } from './RoutingBar.tsx';
 import { TrackerDash } from './TrackerDash.tsx';
 import { TrackerOverlay } from './TrackerOverlay.tsx';
 import { WeatherOnMap } from './WeatherOnMap.tsx';
@@ -80,6 +81,7 @@ export function TrackerPage() {
       <TrackerOverlay />
       <LiveOnMap />
       <WeatherOnMap />
+      <RoutingBar />
       <LiveButtons />
       <LightningOnMap />
       <LakeWarningsOnMap />

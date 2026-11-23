@@ -1,7 +1,7 @@
 import { effect } from '@preact/signals-react';
 import type { Map as LeafletMap } from 'leaflet';
 
-import { fmtTime, fr } from '../../lib/format.ts';
+import { fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
 import { herePos } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 import {
@@ -64,18 +64,18 @@ function symbol(svg: string, label: string): string {
 }
 
 /**
- * The wind, the current and the waves of a place, with the symbols and the
- * colours of LiveMétéo (wind barb by Beaufort, waves in the colour of their
- * steepness with their Douglas degree, current in black), and the angle of
- * the boat to the apparent wind.
+ * The wind, the waves and the current where and when the boat passes, with
+ * the symbols and the colours of LiveMétéo (wind barb by Beaufort, waves in
+ * the colour of their steepness with their Douglas degree, current in
+ * black), and below a short tag: the hour and the angle of the boat to the
+ * apparent wind.
  * @param mark - The place.
  * @param turn - Bearing of the map, degrees.
  * @returns The HTML.
  */
 export function markHtml(mark: RoutingMark, turn = 0): string {
   const color = windColor(mark.tws);
-  const parts = [
-    `<b class="rtm-time">${escapeHtml(fmtTime(new Date(mark.ms)))}</b>`,
+  const symbols = [
     symbol(
       barbSvg(mark.tws, mark.twd + turn, color),
       `<span class="wx-lbl" style="color:${color}">${Math.round(mark.tws)} nd</span>`,
@@ -93,10 +93,10 @@ export function markHtml(mark: RoutingMark, turn = 0): string {
             steep?.steep.color ?? WAVE_COLOR,
             true,
           );
-    parts.push(symbol(arrow, waveLabelHtml(mark.waveM)));
+    symbols.push(symbol(arrow, waveLabelHtml(mark.waveM)));
   }
   if (mark.driftKn > 0) {
-    parts.push(
+    symbols.push(
       mark.driftKn < SLACK_KN
         ? symbol(
             slackSvg(CURRENT_COLOR),
@@ -113,14 +113,105 @@ export function markHtml(mark: RoutingMark, turn = 0): string {
           ),
     );
   }
+  const tag = [`<b>${escapeHtml(fmtTime(new Date(mark.ms)))}</b>`];
   if (mark.awa !== undefined && mark.aws !== undefined) {
     const side = mark.side === 'tribord' ? 'Td' : 'Bd';
-    const motor = mark.mode === 'motor' ? ' · moteur' : '';
-    parts.push(
-      `<span class="rtm-aw" title="Angle du bateau au vent apparent">∡ ${mark.awa}° ${side} · app. ${fr(mark.aws, 0)} nd${motor}</span>`,
+    tag.push(
+      `<span class="rtm-aw" title="Angle du bateau au vent apparent">∡ ${mark.awa}° ${side} · app. ${fr(mark.aws, 0)} nd</span>`,
     );
   }
-  return parts.join('');
+  if (mark.mode === 'motor') tag.push('moteur');
+  return `<div class="rtm-syms">${symbols.join('')}</div><div class="rtm-tag">${tag.join(' · ')}</div>`;
+}
+
+/** Size of the symbols of a place on the screen, pixels. */
+const BOX_W = 196;
+const BOX_H = 96;
+/** Room between the route and the symbols, pixels. */
+const ROUTE_GAP = 12;
+
+/** A place of the routing on the screen. */
+export interface ScreenMark {
+  x: number;
+  y: number;
+}
+
+/** Where the symbols of a place go: its rank and their offset from it. */
+export interface PlacedMark {
+  rank: number;
+  dx: number;
+  dy: number;
+}
+
+/**
+ * Where to put the symbols along the route on the screen: as many places as
+ * fit without the symbols touching, on one side of the route then the
+ * other, set off from the line so that it stays seen.
+ * @param points - The places, in order along the route, pixels.
+ * @returns The places kept and their offsets.
+ */
+export function placeMarks(points: readonly ScreenMark[]): PlacedMark[] {
+  const placed: PlacedMark[] = [];
+  let last: ScreenMark | null = null;
+  let side = 1;
+  for (const [rank, point] of points.entries()) {
+    const before = points[rank - 1] ?? point;
+    const after = points[rank + 1] ?? point;
+    let ux = after.x - before.x;
+    let uy = after.y - before.y;
+    const length = Math.hypot(ux, uy) || 1;
+    ux /= length;
+    uy /= length;
+    // Along the route, the symbols take this room (half: one side then the
+    // other).
+    const along = (Math.abs(ux) * BOX_W + Math.abs(uy) * BOX_H) / 2 + 8;
+    if (last && Math.hypot(point.x - last.x, point.y - last.y) < along) {
+      continue;
+    }
+    // Across the route, far enough for the box to clear the line.
+    const nx = -uy * side;
+    const ny = ux * side;
+    const away = (Math.abs(nx) * BOX_W + Math.abs(ny) * BOX_H) / 2 + ROUTE_GAP;
+    placed.push({
+      rank,
+      dx: Math.round(nx * away),
+      dy: Math.round(ny * away),
+    });
+    last = point;
+    side = -side;
+  }
+  return placed;
+}
+
+function day(ms: number): string {
+  const date = new Date(ms);
+  return `${fmtShortDate(date)} ${fmtTime(date)}`;
+}
+
+/**
+ * The ETD on the point of departure and the ETA on the point of arrival.
+ * @param shown - The routing.
+ * @returns Where and what.
+ */
+function endTags(
+  shown: ShownRouting,
+): Array<{ at: [number, number]; html: string }> {
+  const first = shown.track[0];
+  const last = shown.track.at(-1);
+  const tags: Array<{ at: [number, number]; html: string }> = [];
+  if (first && shown.departMs !== undefined) {
+    tags.push({
+      at: first,
+      html: `<b>ETD</b> ${escapeHtml(day(shown.departMs))}`,
+    });
+  }
+  if (last && shown.arriveMs !== undefined) {
+    tags.push({
+      at: last,
+      html: `<b>ETA</b> ${escapeHtml(day(shown.arriveMs))}`,
+    });
+  }
+  return tags;
 }
 
 const layers = new WeakMap<LeafletMap, { remove: () => void }>();
@@ -154,7 +245,8 @@ export function drawRouting(
   // The symbols stay true to north when the map turns.
   if (!turning.has(map)) {
     turning.add(map);
-    map.on('rotate', () => drawRouting(map));
+    // Turned or zoomed: the symbols are set again (as many as fit).
+    map.on('rotate zoomend', () => drawRouting(map));
   }
   const turn = mapBearing(map);
   const line = L.polyline(shown.track, {
@@ -171,18 +263,45 @@ export function drawRouting(
       fillOpacity: 1,
     }).bindPopup(() => routingPopup(shown)),
   );
-  const marks = shown.marks.map((mark) =>
-    L.marker([mark.lat, mark.lon], {
+  const screen = shown.marks.map((mark) =>
+    map.latLngToContainerPoint([mark.lat, mark.lon]),
+  );
+  const marks = placeMarks(screen).flatMap(({ rank, dx, dy }) => {
+    const mark = shown.marks[rank] as RoutingMark;
+    return [
+      L.circleMarker([mark.lat, mark.lon], {
+        radius: 4,
+        color: '#1a1a1a',
+        weight: 1.5,
+        fillColor: '#fff',
+        fillOpacity: 1,
+        interactive: false,
+      }),
+      L.marker([mark.lat, mark.lon], {
+        interactive: false,
+        keyboard: false,
+        icon: L.divIcon({
+          className: 'rtm',
+          html: markHtml(mark, turn),
+          iconSize: [BOX_W, BOX_H],
+          iconAnchor: [BOX_W / 2 - dx, BOX_H / 2 - dy],
+        }),
+      }),
+    ];
+  });
+  const ends = endTags(shown).map(({ at, html }) =>
+    L.marker(at, {
       interactive: false,
+      keyboard: false,
       icon: L.divIcon({
-        className: 'rtm',
-        html: markHtml(mark, turn),
+        className: 'rtm-end',
+        html,
         iconSize: [0, 0],
         iconAnchor: [0, 0],
       }),
     }),
   );
-  const group = L.layerGroup([line, ...turns, ...marks]).addTo(map);
+  const group = L.layerGroup([line, ...turns, ...marks, ...ends]).addTo(map);
   layers.set(map, group);
 }
 

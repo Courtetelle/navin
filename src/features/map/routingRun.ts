@@ -28,6 +28,8 @@ export interface RoutingPrefs {
   motorBelow: number;
   /** Speed under motor (knots). */
   motorKn: number;
+  /** The motor helps the sails instead of taking their place. */
+  motorAssist: boolean;
   model: string;
   boatId: string;
 }
@@ -36,6 +38,7 @@ export interface RoutingPrefs {
 export const DEFAULT_ROUTING: RoutingPrefs = {
   motorBelow: 5,
   motorKn: 6,
+  motorAssist: false,
   model: 'best_match',
   boatId: '',
 };
@@ -53,6 +56,7 @@ export function routingPrefs(): RoutingPrefs {
   return {
     motorBelow: number(kept?.motorBelow, DEFAULT_ROUTING.motorBelow),
     motorKn: number(kept?.motorKn, DEFAULT_ROUTING.motorKn),
+    motorAssist: kept?.motorAssist === true,
     model: typeof kept?.model === 'string' ? kept.model : DEFAULT_ROUTING.model,
     boatId: typeof kept?.boatId === 'string' ? kept.boatId : '',
   };
@@ -156,6 +160,7 @@ export async function runRouting(
     polar: polar.polar,
     motorBelow: prefs.motorBelow,
     motorKn: prefs.motorKn,
+    motorAssist: prefs.motorAssist,
     ...(navigable ? { navigable } : {}),
     ...(seaKnown
       ? {

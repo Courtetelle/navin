@@ -5,19 +5,23 @@ import { forgetOpenMeteo } from '../../../lib/openMeteo.ts';
 import {
   MOST_ASKED,
   arrowSvg,
+  barbLabelOffset,
   barbOf,
   barbSvg,
   cellHalf,
   currentShown,
+  currentWindColor,
   fetchRainFrames,
   fetchSeaGrid,
   fetchWindGrid,
+  fittedLattice,
   gridPoints,
   hourRank,
   inMediterranean,
   isSlack,
   latticePoints,
   localModel,
+  nearestPoint,
   rainColor,
   rainFramesOf,
   rainTileUrl,
@@ -477,5 +481,70 @@ describe('the grid follows the zoom', () => {
     expect(latticePoints(area, 0.1).length).toBeGreaterThan(
       latticePoints(area, 0.25).length,
     );
+  });
+});
+
+describe('the marks cover the whole screen', () => {
+  // Zoomed in on the Gulf of Saint-Malo: more grid points than one request.
+  const area = { south: 48.5, west: -3.2, north: 49.4, east: -1.6 };
+
+  it('takes a coarser spacing instead of cutting the north', () => {
+    const { step, points } = fittedLattice(area, 0.1);
+    expect(step).toBeGreaterThan(0.1);
+    expect(points.length).toBeLessThanOrEqual(MOST_ASKED);
+    const norths = points.map((point) => point.lat);
+    expect(Math.max(...norths)).toBeGreaterThan(area.north - step - 1e-9);
+  });
+
+  it('keeps the spacing when it fits', () => {
+    expect(fittedLattice(area, 0.5).step).toBe(0.5);
+  });
+
+  it('has sea points up to the north of the screen too', () => {
+    const points = seaPoints(area, 0.1, () => false);
+    expect(points.length).toBeLessThanOrEqual(MOST_ASKED);
+    const norths = points.map((point) => point.lat);
+    expect(Math.max(...norths)).toBeGreaterThan(area.north - 0.3);
+  });
+});
+
+describe('currentWindColor', () => {
+  it('is apple green with the wind, bright red against it', () => {
+    // Current going east (90°), wind from the west (270°): with it.
+    expect(currentWindColor(90, 270, 15)).toBe('#7ed321');
+    // Wind from the east: against it.
+    expect(currentWindColor(90, 90, 15)).toBe('#ff1a1a');
+    // Across, a little with it, a little against it.
+    expect(currentWindColor(90, 0, 15)).toBe('#f5d000');
+    expect(currentWindColor(90, 30, 15)).toBe('#ff7a00');
+  });
+
+  it('stays black in light wind or without wind', () => {
+    expect(currentWindColor(90, 90, 4)).toBe('#000');
+    expect(currentWindColor(90, Number.NaN, 15)).toBe('#000');
+  });
+});
+
+describe('nearestPoint', () => {
+  const points = [
+    { lat: 48, lon: -3 },
+    { lat: 48.5, lon: -2.5 },
+  ];
+  it('takes the nearest within the distance', () => {
+    expect(nearestPoint(points, 48.4, -2.6, 1)).toBe(points[1]);
+    expect(nearestPoint(points, 50, -2.6, 1)).toBeNull();
+  });
+});
+
+describe('barbLabelOffset', () => {
+  it('puts the label where the wind blows to, clear of the staff', () => {
+    // From the north: the staff goes up, the label below.
+    const north = barbLabelOffset(0, 30, 17);
+    expect(Math.abs(north.dx)).toBe(0);
+    expect(north.dy).toBeGreaterThanOrEqual(15);
+    // From the west: the staff goes left, the label right.
+    const west = barbLabelOffset(270, 30, 17);
+    expect(west.dx).toBeGreaterThanOrEqual(22);
+    expect(Math.abs(west.dy)).toBeLessThanOrEqual(1);
   });
 });

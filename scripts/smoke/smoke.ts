@@ -411,7 +411,7 @@ async function bars(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(300);
   check(
     theme,
-    'T upright: ＋ and − one under the other under the arrow, full size',
+    'T upright: − then ＋ one under the other under the arrow, full size',
     await page.evaluate(() => {
       // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
       const box = (selector: string) =>
@@ -423,8 +423,8 @@ async function bars(page: Page, theme: string): Promise<void> {
       ].map(box);
       if (!arrow || !plus || !minus) return false;
       return (
-        plus.top >= arrow.bottom &&
-        minus.top >= plus.bottom &&
+        minus.top >= arrow.bottom &&
+        plus.top >= minus.bottom &&
         Math.abs(plus.left - minus.left) < 2 &&
         plus.height >= arrow.height - 2
       );
@@ -2155,16 +2155,24 @@ async function liveButtons(page: Page, theme: string): Promise<void> {
       return { x: box.x, y: box.y, w: box.width, h: box.height };
     }),
   );
+  const [zoneSlot, ...column] = slots;
+  const screenWidth = page.viewportSize()?.width ?? 0;
   check(
     theme,
-    `LiveMétéo: its buttons in a row at the right of Météo, of its size (${slots.length})`,
-    slots.length >= 6 &&
+    `LiveMétéo: the zone button at the right of Météo, the others in a column at the right edge, of its size (${slots.length})`,
+    slots.length >= 5 &&
+      zoneSlot !== undefined &&
+      Math.abs(zoneSlot.y - settled.y) < 1 &&
+      zoneSlot.x > settled.x &&
       slots.every(
         (slot) =>
-          Math.abs(slot.y - settled.y) < 1 &&
           Math.abs(slot.w - settled.width) < 1 &&
-          Math.abs(slot.h - settled.height) < 1 &&
-          slot.x > settled.x,
+          Math.abs(slot.h - settled.height) < 1,
+      ) &&
+      column.every(
+        (slot, index) =>
+          slot.x + slot.w > screenWidth - settled.width - 30 &&
+          (index === 0 || slot.y > (column[index - 1]?.y ?? 0)),
       ),
   );
   check(
@@ -2174,8 +2182,8 @@ async function liveButtons(page: Page, theme: string): Promise<void> {
   );
   check(
     theme,
-    'LiveMétéo: the stations and buoys have their button',
-    (await page.locator('.live-layer[data-layer="stations"]').count()) === 1,
+    'LiveMétéo: no button for the stations and buoys (the hour now only)',
+    (await page.locator('.live-layer[data-layer="stations"]').count()) === 0,
   );
   const rain = await page.evaluate(() => {
     const tiles = [
@@ -2211,27 +2219,24 @@ async function liveButtons(page: Page, theme: string): Promise<void> {
         globalThis.innerHeight + 1,
     ),
   );
-  await page.locator('.live-layer[data-layer="stations"]').click();
-  await page.waitForTimeout(200);
-  check(
-    theme,
-    'LiveMétéo: a touch hides the badges of the stations, the button pale',
-    (await page.locator('.trk-map.live-st-off').count()) === 1 &&
-      (await page.locator('.live-layer[data-layer="stations"].on').count()) ===
-        0,
-  );
-  await page.locator('.live-layer[data-layer="stations"]').click();
-  await page.waitForTimeout(9800);
-  check(
-    theme,
-    'LiveMétéo: left alone, its buttons fade and go',
-    (await page.locator('.live-btns.live-gone').count()) === 1,
-  );
-  await page.mouse.click(640, 300);
+  await page.locator('.live-step').last().click();
   await page.waitForTimeout(300);
   check(
     theme,
-    'LiveMétéo: a touch on the map brings them back',
+    'LiveMétéo: an hour ahead, the stations and the lightning are hidden',
+    (await page.locator('.trk-map.live-ahead').count()) === 1,
+  );
+  await page.locator('.live-hour').click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'LiveMétéo: back at the hour now, they are shown again',
+    (await page.locator('.trk-map.live-ahead').count()) === 0,
+  );
+  await page.waitForTimeout(9800);
+  check(
+    theme,
+    'LiveMétéo: left alone, its buttons stay (no fading)',
     (await page.locator('.live-btns.live-shown').count()) === 1,
   );
   await page.locator('.live-radius-btn').click();
@@ -2675,6 +2680,26 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
       (
         (await page.locator('.rtm .rtm-aw').first().textContent()) ?? ''
       ).includes('∡'),
+  );
+  check(
+    theme,
+    'only the route: ETD at the start, ETA at the end',
+    (await page.locator('.rtm-end').count()) === 2 &&
+      ((await page.locator('.rtm-end').last().textContent()) ?? '').includes(
+        'ETA',
+      ),
+  );
+  const etd = (await page.locator('#rtgBar .rtg-times').textContent()) ?? '';
+  await page.locator('#rtgLater').click();
+  await page.waitForTimeout(2000);
+  const later = (await page.locator('#rtgBar .rtg-times').textContent()) ?? '';
+  check(
+    theme,
+    `▶ moves the ETD an hour later, routed again (${later.slice(0, 40)})`,
+    later !== etd &&
+      ((await page.locator('#rtgChanges').textContent()) ?? '').includes(
+        '+1 h',
+      ),
   );
   await showRow(page);
   check(
