@@ -54,6 +54,10 @@ async function newLayer(
   >[0]) as unknown as GridLayer;
 }
 
+function area(item: OfflineMap): number {
+  return (item.north - item.south) * (item.east - item.west);
+}
+
 const entryName = (item: OfflineMap) => `Hors ligne · ${item.name}`;
 
 /** The backgrounds (OpenStreetMap, Swiss map) lie under the map files. */
@@ -73,7 +77,12 @@ export async function addOfflineMaps(
   map: LeafletMap,
   control: Control.Layers,
 ): Promise<void> {
-  const stored = await offlineMaps().catch(() => []);
+  const found = await offlineMaps().catch(() => []);
+  // The detailed maps over the large ones: the last added lies on top.
+  const stored = found.toSorted(
+    (first, second) =>
+      first.maxZoom - second.maxZoom || area(second) - area(first),
+  );
   if (stored.length === 0 || !isMapLive(map)) return;
   const layers = await Promise.all(
     stored.map(async (item) => ({

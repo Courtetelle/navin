@@ -217,3 +217,40 @@ export async function landTest(): Promise<
     return wide ? farFromShore(wide, lat, lon) : false;
   };
 }
+
+/**
+ * Whether a square of 1° deserves a map: it holds a shore (of the sea or of a
+ * lake), or it is open water beside such a square. Land far from any water,
+ * and the open sea far out, are left out.
+ * @param grid - The grid.
+ * @returns The test, by the south-west corner of the square.
+ */
+export function squareHasShore(
+  grid: Pick<ShoreGrid, 'lon0' | 'lat0' | 'tilesLon' | 'tilesLat' | 'kinds'>,
+): (south: number, west: number) => boolean {
+  const kind = (south: number, west: number) => {
+    const column = west - grid.lon0;
+    const row = south - grid.lat0;
+    if (
+      column < 0 ||
+      row < 0 ||
+      column >= grid.tilesLon ||
+      row >= grid.tilesLat
+    ) {
+      return null;
+    }
+    return grid.kinds[row * grid.tilesLon + column] ?? null;
+  };
+  return (south, west) => {
+    const own = kind(south, west);
+    if (own === null) return true;
+    if (own === 2) return true;
+    if (own === 1) return false;
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        if (kind(south + dy, west + dx) === 2) return true;
+      }
+    }
+    return false;
+  };
+}
