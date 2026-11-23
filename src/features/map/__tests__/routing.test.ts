@@ -5,7 +5,12 @@ import { forgetOpenMeteo } from '../../../lib/openMeteo.ts';
 import type { BoatPolar } from '../../../model/polars.ts';
 import type { NavRoute } from '../../../model/routes.ts';
 import { boatSailSpeed, runRouting } from '../routingRun.ts';
-import { fetchRouteWind, windAt, windPlaces } from '../routingWeather.ts';
+import {
+  fetchPastWind,
+  fetchRouteWind,
+  windAt,
+  windPlaces,
+} from '../routingWeather.ts';
 
 const START = { lat: 48.65, lon: -2.83 };
 const END = destination(START, 0, 12);
@@ -118,6 +123,28 @@ describe('fetchRouteWind', () => {
     vi.stubGlobal('fetch', () => Promise.reject(new Error('offline')));
     const offline = await fetchRouteWind([START, END], 'best_match');
     expect('error' in offline && offline.error).toMatch(/réseau/);
+  });
+});
+
+describe('fetchPastWind', () => {
+  it('asks the kept forecast within 90 days, else the archive', async () => {
+    const asked: string[] = [];
+    vi.stubGlobal('fetch', (url: string) => {
+      asked.push(url);
+      const count =
+        new URL(url).searchParams.get('latitude')?.split(',').length ?? 1;
+      return Promise.resolve(Response.json(reply(count, 270, 12)));
+    });
+    const now = Date.now();
+    await fetchPastWind([START, END], now - 86_400_000, now - 82_800_000);
+    await fetchPastWind(
+      [START, END],
+      now - 200 * 86_400_000,
+      now - 199 * 86_400_000,
+    );
+    expect(asked[0]).toContain('api.open-meteo.com/v1/forecast');
+    expect(asked[0]).toContain('start_date=');
+    expect(asked[1]).toContain('archive-api.open-meteo.com');
   });
 });
 

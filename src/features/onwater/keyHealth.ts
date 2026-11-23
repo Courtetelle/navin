@@ -92,12 +92,29 @@ const KEYS = [
     todo: 'Paramétrages › Clés météos et compte relais › « Où trouver l’identifiant Frost » : redemander un client ID sur frost.met.no avec son adresse mail, le coller et Enregistrer.',
   },
   {
+    id: 'github',
+    setting: 'githubKey',
+    name: 'GitHub',
+    todo: 'Paramétrages › Clés météos et compte relais › « Où trouver la clé GitHub » (2ᵉ partie) : « Regenerate token » sur github.com, coller la nouvelle clé et Enregistrer.',
+  },
+  {
     id: 'relay',
     setting: 'relayUrl',
     name: 'relais des METAR',
     todo: 'Paramétrages › Clés météos et compte relais › « Où trouver l’adresse du relais » : vérifier le Worker « navin-relay » sur dash.cloudflare.com, y recoller « 📋 Copier le code du relais » puis « Deploy », et vérifier son adresse.',
   },
 ] as const;
+
+/**
+ * The end date GitHub gives of a key, when it gives one.
+ * @param key - The key.
+ * @returns Epoch milliseconds, or null.
+ */
+async function githubEnd(key: string): Promise<number | null> {
+  const { checkGithubKey } = await import('../../model/analysis.ts');
+  const check = await checkGithubKey(key);
+  return check.end;
+}
 
 const fmtDay = (t: number) =>
   new Date(t).toLocaleDateString('fr-CH', {
@@ -138,6 +155,11 @@ async function refused(id: string, key: string): Promise<boolean | null> {
       const { frostRefused } = await import('./northStations.ts');
       return await frostRefused(key);
     }
+    if (id === 'github') {
+      const { checkGithubKey } = await import('../../model/analysis.ts');
+      const check = await checkGithubKey(key);
+      return check.ok === false;
+    }
     if (id === 'metoffice') {
       const response = await fetch(
         'https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest?lat=50.8&lon=-1.3',
@@ -172,7 +194,14 @@ export async function keyIssues(now = Date.now()): Promise<KeyProblem[]> {
     const value = alert[setting];
     if (typeof value !== 'string' || !value) continue;
     const print = keyPrint(value);
-    const end = id === 'relay' ? null : keyEnd(value);
+    // A GitHub key holds no date: GitHub tells it when the key is tried.
+    const end =
+      id === 'github'
+        ? // eslint-disable-next-line no-await-in-loop -- one service after the other
+          await githubEnd(value)
+        : id === 'relay'
+          ? null
+          : keyEnd(value);
     if (end != null && end < now) {
       problems.push({
         id,
