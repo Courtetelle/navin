@@ -43,6 +43,12 @@ to4326 = Transformer.from_crs(3035, 4326, always_xy=True)
 NM = 1852
 COAST_NM = 20
 COAST_SIMPLIFY_M = 400
+# The coast of a zone is closed over its narrow bays and estuaries, and the
+# bits of sea smaller than this are dropped.
+CLOSE_M = 2000
+CRUMB_M2 = 20e6
+# Islands larger than this stay cut out of their zone (Majorca, Corsica…).
+BIG_ISLAND_M2 = 1000e6
 LARGE_SIMPLIFY_M = 900
 # Circles read for the stations: this radius, this far apart along the coast.
 READ_KM = 45
@@ -89,18 +95,20 @@ COAST = [
 
 # Offshore zones (bulletins large), by hand from the map of the guide.
 LARGE = [
+    # Their edges towards a coast run over the land, so that the zone stops
+    # at the coast itself (no straight line across a bay).
     ('pas-de-calais', 'Pas-de-Calais', 'manche',
-     [(1.0, 50.2), (1.0, 50.75), (1.3, 51.25), (2.0, 51.5), (3.2, 51.5),
+     [(1.0, 50.2), (1.0, 51.0), (1.3, 51.2), (1.5, 51.45), (3.2, 51.45),
       (3.2, 50.9), (2.2, 50.2)]),
     ('antifer', 'Antifer', 'manche',
-     [(-1.94, 49.2), (-1.94, 50.8), (0.0, 50.85), (1.0, 50.75),
-      (1.0, 50.2), (1.9, 49.6), (0.0, 49.0)]),
+     [(-1.94, 49.2), (-1.94, 51.2), (1.0, 51.0), (1.0, 50.2), (1.9, 49.6),
+      (0.0, 49.0)]),
     ('casquets', 'Casquets', 'manche',
-     [(-3.6, 48.3), (-3.6, 50.4), (-1.94, 50.8), (-1.94, 49.2),
+     [(-3.6, 48.3), (-3.6, 50.75), (-1.94, 51.2), (-1.94, 49.2),
       (-1.0, 48.4)]),
     ('ouessant', 'Ouessant', 'manche',
-     [(-6.25, 48.45), (-6.25, 50.2), (-3.6, 50.4), (-3.6, 48.3),
-      (-4.6, 48.3)]),
+     [(-6.25, 48.45), (-6.25, 50.05), (-5.75, 50.05), (-5.2, 50.35),
+      (-3.6, 50.75), (-3.6, 48.3), (-4.6, 48.3)]),
     ('iroise', 'Iroise', 'atlantique',
      [(-8.0, 47.5), (-8.0, 48.45), (-6.25, 48.45), (-4.6, 48.3),
       (-4.0, 48.0), (-3.0, 47.5)]),
@@ -210,9 +218,11 @@ def read_circles(geom, land):
     near_land = shapely.buffer(land, 2000)
     shapely.prepare(near_land)
     kept = []
+    if geom.is_empty:
+        return []
     lines = getattr(geom.boundary, 'geoms', [geom.boundary])
     for line in lines:
-        if line.is_empty or line.length == 0:
+        if line is None or line.is_empty or line.length == 0:
             continue
         steps = max(1, int(line.length // 5000))
         for k in range(steps + 1):
@@ -228,6 +238,31 @@ def read_circles(geom, land):
     return out
 
 
+def no_holes(geom):
+    """The polygons without their small holes: the islands are not cut out
+    (the weather of a zone covers its islands); only the big ones (Corsica,
+    Sardinia, Majorca) stay out, as land."""
+    polys = getattr(geom, 'geoms', [geom])
+    return unary_union([
+        Polygon(p.exterior, [r for r in p.interiors
+                             if Polygon(r).area >= BIG_ISLAND_M2])
+        for p in polys if p.geom_type == 'Polygon' and not p.is_empty])
+
+
+def smooth(geom, area, tolerance):
+    """An outline for the weather: islands kept in the zone, the narrow
+    bays, estuaries and rocks of the coast closed (2 km), crumbs dropped,
+    then simplified; never beyond the limits of the zone."""
+    geom = no_holes(geom)
+    geom = shapely.buffer(shapely.buffer(geom, CLOSE_M, quad_segs=4),
+                          -CLOSE_M, quad_segs=4)
+    geom = shapely.make_valid(geom.intersection(area))
+    polys = [p for p in getattr(geom, 'geoms', [geom])
+             if p.geom_type == 'Polygon' and p.area >= CRUMB_M2]
+    geom = no_holes(unary_union(polys))
+    return shapely.make_valid(no_holes(shapely.simplify(geom, tolerance)))
+
+
 def zone(sea, tree, ident, name, basin, kind, outline):
     area = shapely.make_valid(proj(Polygon(outline)))
     water = sea_in(sea, tree, area)
@@ -241,7 +276,8 @@ def zone(sea, tree, ident, name, basin, kind, outline):
         geom = shapely.simplify(geom, COAST_SIMPLIFY_M)
     else:
         geom = shapely.simplify(water, LARGE_SIMPLIFY_M)
-    geom = shapely.make_valid(geom)
+    geom = smooth(shapely.make_valid(geom), area,
+                  COAST_SIMPLIFY_M if kind == 'cote' else LARGE_SIMPLIFY_M)
     circles = read_circles(geom, shapely.simplify(land, 200))
     out = unproj(geom)
     print(ident, 'area km2', round(geom.area / 1e6), 'circles',
