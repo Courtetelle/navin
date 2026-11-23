@@ -199,3 +199,21 @@ function insideGrid(grid: ShoreGrid, lat: number, lon: number): boolean {
     lat < grid.lat0 + grid.tilesLat
   );
 }
+
+/**
+ * A test of the land, from the grids read once: the grid of 500 m on the
+ * French coasts and the Léman, else the grid of 1 km over Europe. Without
+ * a grid, nothing is land.
+ * @returns Whether a place is on land, away from the water.
+ */
+export async function landTest(): Promise<
+  (lat: number, lon: number) => boolean
+> {
+  const [grid, wide] = await Promise.all([seaGrid500(), shoreGrid()]);
+  return (lat, lon) => {
+    if (grid && insideGrid(grid, lat, lon)) {
+      return farFromShore(grid, lat, lon);
+    }
+    return wide ? farFromShore(wide, lat, lon) : false;
+  };
+}

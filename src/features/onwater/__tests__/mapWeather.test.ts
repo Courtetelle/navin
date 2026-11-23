@@ -6,6 +6,7 @@ import {
   arrowSvg,
   barbOf,
   barbSvg,
+  cellHalf,
   currentShown,
   fetchRainFrames,
   fetchSeaGrid,
@@ -15,9 +16,11 @@ import {
   inMediterranean,
   isSlack,
   localModel,
+  rainColor,
   rainFramesOf,
   rainTileUrl,
   seaGridOf,
+  seaPoints,
   slackSvg,
   straitPoints,
   waveLabelHtml,
@@ -327,5 +330,74 @@ describe('waves and slack water', () => {
     expect(isSlack([0.5], 0)).toBe(false);
     expect(isSlack([Number.NaN], 0)).toBe(false);
     expect(slackSvg('#a1006b')).toContain('stroke-dasharray');
+  });
+});
+
+/**
+ * Land west of 3° W and south of 48.5° N.
+ * @param lat - Latitude.
+ * @param lon - Longitude.
+ * @returns On land.
+ */
+function isLand(lat: number, lon: number): boolean {
+  return lon < -3 || lat < 48.5;
+}
+
+describe('seaPoints', () => {
+  const bay = { south: 48.2, west: -3.6, north: 49.2, east: -2 };
+
+  it('keeps only the points of open sea', () => {
+    const points = seaPoints(bay, 12, isLand);
+    expect(points.length).toBeGreaterThan(4);
+    expect(points.length).toBeLessThanOrEqual(12);
+    for (const point of points) {
+      expect(isLand(point.lat, point.lon)).toBe(false);
+      expect(point.lon).toBeGreaterThanOrEqual(-2.95);
+    }
+  });
+
+  it('fills the sea with as many points as asked', () => {
+    const open = seaPoints(bay, 12, () => false);
+    expect(open).toHaveLength(12);
+    expect(new Set(open.map((point) => point.lat)).size).toBeGreaterThan(2);
+  });
+
+  it('gives nothing on land', () => {
+    expect(seaPoints(bay, 12, () => true)).toEqual([]);
+  });
+});
+
+describe('rain of the model', () => {
+  it('colours the rain as the radar does', () => {
+    expect(rainColor(0)).toBeNull();
+    expect(rainColor(Number.NaN)).toBeNull();
+    expect(rainColor(0.3)).toBe('#88ddee');
+    expect(rainColor(3)).toBe('#ffee00');
+    expect(rainColor(30)).toBe('#ff00ff');
+  });
+
+  it('measures the cells of the grid', () => {
+    const half = cellHalf([
+      { lat: 48, lon: -3 },
+      { lat: 48.2, lon: -3 },
+      { lat: 48, lon: -2.5 },
+    ]);
+    expect(half.lat).toBeCloseTo(0.1);
+    expect(half.lon).toBeCloseTo(0.25);
+    expect(cellHalf([{ lat: 48, lon: -3 }])).toEqual({ lat: 0.1, lon: 0.1 });
+  });
+
+  it('reads the rain with the wind', () => {
+    const grid = windGridOf(
+      {
+        hourly: {
+          time: HOURS,
+          wind_speed_10m: [5, 6],
+          precipitation: [0, 2.4],
+        },
+      },
+      [{ lat: 48, lon: -3 }],
+    );
+    expect(grid?.points[0]?.rain).toEqual([0, 2.4]);
   });
 });
