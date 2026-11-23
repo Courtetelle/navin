@@ -39,6 +39,116 @@ const FAKE_GPS = `
 
 const PHONE = { width: 390, height: 844 };
 
+/**
+ * The buttons around the map come in packets that a swipe turns (upright
+ * left and right, sideways up and down): before a touch on one of them, the
+ * swipes that bring its packet on the screen, as a finger would.
+ * @param page - The page.
+ * @param selector - What is about to be touched.
+ */
+async function bringRailOf(page: Page, selector: string): Promise<void> {
+  /* eslint-disable no-await-in-loop -- one swipe after the other */
+  for (let turn = 0; turn < 4; turn += 1) {
+    const moved = await page.evaluate((wanted) => {
+      let element: Element | null = null;
+      try {
+        element = document.querySelector(wanted);
+      } catch {
+        return false;
+      }
+      const rail = element?.closest(
+        '#clock, #searchBtn, .top-tab, .side-rail-left > *, .rail-btn',
+      );
+      if (!element || !rail) return false;
+      const box = element.getBoundingClientRect();
+      const width = globalThis.innerWidth;
+      const height = globalThis.innerHeight;
+      let dx = 0;
+      let dy = 0;
+      if (box.left >= width) dx = -120;
+      else if (box.right <= 0) dx = 120;
+      else if (box.top >= height) dy = -120;
+      else if (box.bottom <= 0) dy = 120;
+      else return false;
+      const shown = [
+        ...document.querySelectorAll('#clock, #searchBtn, .rail-btn'),
+      ].find((item) => {
+        const here = item.getBoundingClientRect();
+        return (
+          here.width > 0 &&
+          here.left >= 0 &&
+          here.right <= width &&
+          here.top >= 0 &&
+          here.bottom <= height
+        );
+      });
+      if (!shown) return false;
+      const here = shown.getBoundingClientRect();
+      const x = here.left + here.width / 2;
+      const y = here.top + here.height / 2;
+      const fire = (type: string, at: [number, number]) =>
+        shown.dispatchEvent(
+          new PointerEvent(type, {
+            bubbles: true,
+            clientX: at[0],
+            clientY: at[1],
+          }),
+        );
+      fire('pointerdown', [x, y]);
+      fire('pointermove', [x + dx / 2, y + dy / 2]);
+      fire('pointerup', [x + dx, y + dy]);
+      return true;
+    }, selector);
+    if (!moved) return;
+    // The packet slides in, and the click a swipe swallows is past.
+    await page.waitForTimeout(600);
+  }
+  /* eslint-enable no-await-in-loop */
+}
+
+/** What a finger does on a located element. */
+const TOUCHES = new Set<string | symbol>([
+  'click',
+  'dispatchEvent',
+  'boundingBox',
+  'hover',
+  'tap',
+]);
+
+/**
+ * The page, its touches on a button of the rails preceded by the swipes
+ * that show it.
+ * @param page - The page.
+ * @returns The same page.
+ */
+function railAware(page: Page): Page {
+  const locate = page.locator.bind(page);
+  page.locator = (selector: string, options?: object) => {
+    const located = locate(selector, options);
+    const wrap = (target: typeof located): typeof located =>
+      new Proxy(target, {
+        get(object, key, receiver) {
+          const value = Reflect.get(object, key, receiver) as unknown;
+          if (TOUCHES.has(key)) {
+            return async (...args: unknown[]) => {
+              await bringRailOf(page, selector);
+              return (value as (...rest: unknown[]) => unknown).apply(
+                object,
+                args,
+              );
+            };
+          }
+          if (key === 'first' || key === 'last') {
+            return () => wrap((value as () => typeof located).call(object));
+          }
+          return typeof value === 'function' ? value.bind(object) : value;
+        },
+      });
+    return wrap(located);
+  };
+  return page;
+}
+
 async function open(
   browser: Browser,
   theme: string,
@@ -56,7 +166,7 @@ async function open(
     serviceWorkers: 'block',
   });
   await context.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
-  const page = await context.newPage();
+  const page = railAware(await context.newPage());
   page.setDefaultTimeout(10_000);
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -201,55 +311,99 @@ async function openData(page: Page): Promise<void> {
   /* eslint-enable no-await-in-loop */
 }
 
-const bodyHas = (page: Page, name: string) =>
-  page.evaluate(
-    (className) => document.body.classList.contains(className),
-    name,
-  );
-
 async function bars(page: Page, theme: string): Promise<void> {
+  // Upright: the white figures always in the bottom row, five at a time.
+  const figures = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('#trkDash [data-dash]')].map(
+        (cell) => (cell as HTMLElement).dataset.dash ?? '',
+      ),
+    );
+  const dash = await page.locator('#trkDash').boundingBox();
+  const firstFive = await figures();
   check(
     theme,
-    'the figures of the track folded without a recording',
-    await bodyHas(page, 'bot-hidden'),
+    'T upright: the white figures in the bottom row, five, no handle',
+    dash !== null &&
+      dash.y + dash.height > (page.viewportSize()?.height ?? 0) - 60 &&
+      firstFive.length === 5 &&
+      firstFive.includes('depth') &&
+      !(await page.locator('#hBot').isVisible()),
   );
-  await page.locator('#hBot').click();
-  check(theme, 'their handle opens them', !(await bodyHas(page, 'bot-hidden')));
-  await page.locator('.bar-chevron-bottom').click();
-  check(theme, 'their chevron folds them', await bodyHas(page, 'bot-hidden'));
+  const swipe = async (selector: string, dx: number, dy = 0) => {
+    const box = await page.locator(selector).first().boundingBox();
+    if (!box) return;
+    const x = box.x + box.width / 2;
+    const y = box.y + box.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + dx / 2, y + dy / 2, { steps: 3 });
+    await page.mouse.move(x + dx, y + dy, { steps: 3 });
+    await page.mouse.up();
+    await page.waitForTimeout(450);
+  };
+  await swipe('#trkDash [data-dash="depth"]', -150);
+  const nextFive = await figures();
   check(
     theme,
-    'T upright: the top row, clock, arrow, START, mark, dividers',
-    await page.evaluate(() => {
-      // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
-      const top = (selector: string) =>
-        document.querySelector(selector)?.getBoundingClientRect().top ?? -1;
-      const row = [
-        '#clock',
-        '.rail-boat',
-        '.rail-start',
-        '.rail-pin',
-        '.rail-ruler',
-      ].map(top);
-      return row.every((y) => y >= 0 && y < 60);
-    }),
+    'T upright: a swipe left on the figures shows the five others',
+    nextFive.length === 5 && !nextFive.some((key) => firstFive.includes(key)),
   );
+  await swipe('#trkDash [data-dash]', 150);
+  const againFive = await figures();
   check(
     theme,
-    'T upright: the bottom row, magnifier, NavIn, photo, Météo, SOS',
-    await page.evaluate(() => {
-      // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
-      const bottom = (selector: string) =>
-        document.querySelector(selector)?.getBoundingClientRect().bottom ?? -1;
-      const row = [
-        '#searchBtn',
-        '.top-tab[data-view="tracker"]',
-        '.rail-photo',
-        '.rail-weather',
-        '.top-tab.tab-sos',
-      ].map(bottom);
-      return row.every((y) => y > globalThis.innerHeight - 60);
-    }),
+    'T upright: a swipe right on the figures brings the first five back',
+    againFive.join(' ') === firstFive.join(' '),
+  );
+  const rowOf = (selectors: string[]) =>
+    page.evaluate((wanted) => {
+      const width = globalThis.innerWidth;
+      return wanted.map((selector) => {
+        const box = document.querySelector(selector)?.getBoundingClientRect();
+        if (!box) return 'absent';
+        if (box.left >= width - 1 || box.right <= 1) return 'away';
+        return box.top < 60 ? `${Math.round(box.left)}` : 'elsewhere';
+      });
+    }, selectors);
+  const first = [
+    '#clock',
+    '.rail-boat',
+    '.rail-start',
+    '.rail-pin',
+    '.rail-ruler',
+  ];
+  const second = [
+    '#searchBtn',
+    '.top-tab[data-view="tracker"]',
+    '.rail-photo',
+    '.rail-weather',
+    '.top-tab.tab-sos',
+  ];
+  const shownFirst = await rowOf(first);
+  const awaySecond = await rowOf(second);
+  check(
+    theme,
+    'T upright: the top row, clock, arrow, START, mark, dividers; the others to their right',
+    shownFirst.every((left) => /^\d+$/.test(left)) &&
+      awaySecond.every((left) => left === 'away'),
+  );
+  await swipe('.rail-pin', -150);
+  const shownSecond = await rowOf(second);
+  const awayFirst = await rowOf(first);
+  check(
+    theme,
+    'T upright: a swipe left shows magnifier, NavIn, photo, Météo, SOS at the same places',
+    shownSecond.join(' ') === shownFirst.join(' ') &&
+      awayFirst.every((left) => left === 'away') &&
+      (await page.locator('.navin-row').count()) === 0,
+  );
+  await swipe('.rail-photo', 150);
+  const back = await rowOf(first);
+  check(
+    theme,
+    'T upright: a swipe right brings the first five back',
+    back.join(' ') === shownFirst.join(' '),
   );
   await page.locator('.rail-boat').click();
   await page.waitForTimeout(300);
@@ -278,7 +432,7 @@ async function bars(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(400);
   check(
     theme,
-    'T upright: NavIn unrolls its menus in a column above it',
+    'T upright: NavIn unrolls its menus in a column under it',
     await page.evaluate(() => {
       // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
       const box = (selector: string) =>
@@ -296,7 +450,7 @@ async function bars(page: Page, theme: string): Promise<void> {
         return (
           !below ||
           !first ||
-          (item.bottom <= below.top + 1 && Math.abs(item.left - first.left) < 6)
+          (item.top >= below.bottom - 1 && Math.abs(item.left - first.left) < 6)
         );
       });
     }),
@@ -1786,7 +1940,7 @@ async function tapCross(
     `${where}: a logo of the cross opens its menu with the position`,
     (await page.locator('.lp-pop [data-lp="send"]').count()) === 1,
   );
-  await page.touchscreen.tap(x, Math.round(map.y + map.height - 60));
+  await page.touchscreen.tap(x, Math.round(map.y + map.height - 160));
   await page.waitForTimeout(400);
   check(
     theme,
@@ -2267,7 +2421,7 @@ async function phoneTrack(page: Page, theme: string): Promise<void> {
 async function turnPhone(browser: Browser): Promise<void> {
   const context = await browser.newContext({ viewport: PHONE });
   await context.route(/^https?:\/\/(?!localhost)/, (route) => route.abort());
-  const page = await context.newPage();
+  const page = railAware(await context.newPage());
   await page.goto(URL, { waitUntil: 'load' });
   await page.waitForTimeout(1200);
   check(
