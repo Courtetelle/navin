@@ -370,10 +370,12 @@ OVERPASS = ['https://overpass-api.de/api/interpreter',
 
 
 def leman_water():
-    """The whole Léman from OpenStreetMap (one zone), projected; None when
-    Overpass does not answer (the coarse outline is kept then)."""
+    """The whole Léman from OpenStreetMap (one zone), projected. Overpass is
+    asked again (three rounds of both servers); without an answer the build
+    stops: the coarse outline would give a grid without the shore of the
+    Léman (main red on 23/11/2026, files of a run where Overpass failed)."""
     body = urllib.parse.urlencode({'data': LEMAN_QUERY}).encode()
-    for url in OVERPASS:
+    for url in OVERPASS * 3:
         try:
             req = urllib.request.Request(url, data=body, headers={
                 'User-Agent': 'navin-zones (GitHub Actions)'})
@@ -381,6 +383,7 @@ def leman_water():
                 data = json.load(reply)
         except Exception as error:  # noqa: BLE001 - next server
             print('overpass', url, error, flush=True)
+            time.sleep(30)
             continue
         lines = []
         for element in data.get('elements', []):
@@ -401,7 +404,8 @@ def leman_water():
         print('leman km2', round(lake.area / 1e6), flush=True)
         if lake.area > 400e6:
             return lake
-    return None
+        time.sleep(30)
+    raise SystemExit('Overpass sans réponse : Léman non lu, fichiers non refaits')
 
 
 def lake(ident, name, basin, outline, water):
