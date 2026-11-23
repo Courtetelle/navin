@@ -33,7 +33,6 @@ import { blinkKey, liveBlink, liveDetail } from '../meteo/liveDetail.ts';
 import { ageText, compassPoint, stationBadgeHtml } from '../meteo/liveText.ts';
 
 import { ZonePicker } from './ZonePicker.tsx';
-import { fitZones } from './zoneFit.ts';
 import {
   layLiveAround,
   liveOnMap,
@@ -42,6 +41,7 @@ import {
   liveZoneIds,
   liveZonesShown,
 } from './liveOnMap.ts';
+import { fitZones } from './zoneFit.ts';
 
 /** The stations read before the map of NavIn is built, in km. */
 const RADIUS = 60;
