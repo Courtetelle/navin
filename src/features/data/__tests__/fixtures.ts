@@ -3,6 +3,7 @@ import { join } from 'node:path';
 
 import { vi } from 'vitest';
 
+import { modernFixture } from '../../../state/__tests__/parityHelpers.ts';
 import { initState } from '../../../state/index.ts';
 import { createMemoryStorage } from '../../../storage/memoryStorage.ts';
 
@@ -19,7 +20,7 @@ export function fixture(name: string): Fixture {
     import.meta.dirname,
     `../../../../scripts/parity/fixtures/${name}.json`,
   );
-  return JSON.parse(readFileSync(path, 'utf8')) as Fixture;
+  return JSON.parse(modernFixture(readFileSync(path, 'utf8'))) as Fixture;
 }
 
 /**

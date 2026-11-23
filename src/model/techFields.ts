@@ -84,13 +84,9 @@ export const TECH_FIELDS: readonly FieldDefinition[] = [
     grow: true,
     wide: true,
   },
-  {
-    key: 'category',
-    label: 'Catégorie de conception',
-    type: 'line',
-    grow: true,
+  n('category', 'Nombre maximal de personnes à bord', 'personnes', {
     wide: true,
-  },
+  }),
   n('lhull', 'Longueur de coque (LH)', 'm', {
     frame: 'lw',
     lock: true,
