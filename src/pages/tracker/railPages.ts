@@ -39,7 +39,7 @@ const SWIPE_PX = 40;
 /** Past this the finger slides: no long press any more (px). */
 const SLIDE_PX = 10;
 /** The click that ends a swipe comes within this time (ms). */
-const CLICK_AFTER_MS = 500;
+const CLICK_AFTER_MS = 300;
 
 /** The buttons of the rails, what a swipe on them turns. */
 const RAIL_TARGETS = [

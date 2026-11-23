@@ -100,7 +100,8 @@ async function bringRailOf(page: Page, selector: string): Promise<void> {
       return true;
     }, selector);
     if (!moved) return;
-    await page.waitForTimeout(450);
+    // The packet slides in, and the click a swipe swallows is past.
+    await page.waitForTimeout(600);
   }
   /* eslint-enable no-await-in-loop */
 }
