@@ -154,9 +154,15 @@ function ArchiveBlock() {
         >
           {tr(busy ? 'Envoi…' : 'Envoyer les zones')}
         </Button>
-        <a className="btn" href={ARCHIVE_PAGE} target="_blank" rel="noopener">
+        <Button
+          className="btn"
+          onClick={() => {
+            buzz();
+            window.open(ARCHIVE_PAGE, '_blank', 'noopener');
+          }}
+        >
           {tr('Voir l’archive')}
-        </a>
+        </Button>
       </ButtonRow>
       <HelpText>
         Toutes les 30 minutes, GitHub lit toutes les pastilles de la carte
