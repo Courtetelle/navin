@@ -33,8 +33,10 @@ export const clockFace = signal<ClockFace>({
   tick: 0,
 });
 
-let localUntil = 0;
-let toggleTimer: ReturnType<typeof setTimeout> | undefined;
+/** The time chosen by a tap (`true` zone time), until the zone changes. */
+let chosen: boolean | null = null;
+/** The zone of the last tick: lake or sea. */
+let lastInland: boolean | null = null;
 let sunTimer: ReturnType<typeof setInterval> | undefined;
 
 /** Sunrise and sunset shown four times each, in turn. */
@@ -45,8 +47,9 @@ const SUN_STEP_MS = 2000;
 const GPS_FRESH_MS = 120_000;
 
 /**
- * Inland waters show the zone time and a tap shows UTC; at sea the opposite
- * (app.js:590-602). Also sets the body classes `zone-lac` and `zone-auto`.
+ * Inland waters show the zone time, the sea UTC; a tap switches and the
+ * choice stays until the zone changes (lake ↔ sea), which brings back the
+ * time of the new zone. Also sets the body classes `zone-lac` and `zone-auto`.
  * @param now - Current time (ms).
  */
 export function tickClock(now = Date.now()): void {
@@ -57,7 +60,11 @@ export function tickClock(now = Date.now()): void {
   } catch {
     inland = false;
   }
-  const local = inland !== now < localUntil;
+  if (inland !== lastInland) {
+    lastInland = inland;
+    chosen = null;
+  }
+  const local = chosen ?? inland;
   const date = new Date(now);
   const time = clockText(date, local, sunPlace(now));
   batch(() => {
@@ -68,8 +75,7 @@ export function tickClock(now = Date.now()): void {
 }
 
 /**
- * A tap on the clock switches UTC / zone time for 5 s; a second tap during
- * these 5 s switches back at once (app.js:604).
+ * A tap on the clock switches UTC / zone time, and the clock keeps it.
  */
 export function toggleClock(): void {
   // A tap during the sunrise and sunset brings the time back, nothing else.
@@ -77,13 +83,7 @@ export function toggleClock(): void {
     tickClock();
     return;
   }
-  if (Date.now() < localUntil) {
-    localUntil = 0;
-  } else {
-    localUntil = Date.now() + 5000;
-    clearTimeout(toggleTimer);
-    toggleTimer = setTimeout(() => tickClock(), 5050);
-  }
+  chosen = !clockFace.value.local;
   tickClock();
 }
 
@@ -119,8 +119,8 @@ export function sunPlace(now = Date.now()): Place {
 
 /**
  * A long press on the clock shows today's sunrise and sunset in turn, four
- * times each, 2 s at a time (16 s), in the time the clock shows (UTC or zone
- * time), then the time again.
+ * times each, 2 s at a time (16 s), always in the legal time of the place,
+ * then the time again.
  * @param now - Current time (ms).
  */
 export function showSunTimes(now = Date.now()): void {
@@ -131,7 +131,9 @@ export function showSunTimes(now = Date.now()): void {
     toast("Pas de lever ni de coucher du soleil aujourd'hui");
     return;
   }
-  const local = clockFace.value.local;
+  // Sunrise and sunset in the legal time of the place, even when the clock
+  // shows UTC.
+  const local = true;
   const text = (at: number) => clockText(new Date(at), local, place);
   let step = 0;
   const show = () => {

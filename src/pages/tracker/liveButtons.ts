@@ -133,3 +133,32 @@ export function livePlace(count: number): Place | null {
     );
   return tries.find(fits) ?? tries[2] ?? null;
 }
+
+/**
+ * The other LiveMétéo buttons in a column down the right edge, centred in
+ * the height; a second column to its left when one is not enough.
+ * @param count - How many buttons.
+ * @param width - Width of one, px.
+ * @param height - Height of one, px.
+ * @returns Their boxes, top to bottom.
+ */
+export function columnBoxes(
+  count: number,
+  width: number,
+  height: number,
+): Box[] {
+  const screenW = globalThis.innerWidth;
+  const screenH = globalThis.innerHeight;
+  const step = height + GAP;
+  const perColumn = Math.max(1, Math.floor((screenH - 2 * EDGE + GAP) / step));
+  const columns = Math.ceil(count / perColumn);
+  const rows = Math.ceil(count / columns);
+  const top = Math.max(EDGE, (screenH - (rows * step - GAP)) / 2);
+  return Array.from({ length: count }, (_, index) => {
+    const column = Math.floor(index / rows);
+    const row = index % rows;
+    const left = screenW - EDGE - (column + 1) * width - column * GAP;
+    const y = top + row * step;
+    return { left, top: y, right: left + width, bottom: y + height };
+  });
+}

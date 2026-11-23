@@ -260,20 +260,7 @@ function ZoomPair() {
   if (!map || !zoomShown.value) return null;
   return (
     <>
-      <Button
-        type="button"
-        noUiEdit
-        className={`rail-btn rail-zoom-in${zoomFading.value ? ' fading' : ''}`}
-        aria-label={tr('Zoomer')}
-        onClick={() => {
-          showZoom();
-          zoom(1);
-        }}
-      >
-        <span className="rail-icon">
-          <ZoomSign plus />
-        </span>
-      </Button>
+      {/* Dézoomer d'abord, zoomer ensuite (Corban, 23/11). */}
       <Button
         type="button"
         noUiEdit
@@ -286,6 +273,20 @@ function ZoomPair() {
       >
         <span className="rail-icon">
           <ZoomSign plus={false} />
+        </span>
+      </Button>
+      <Button
+        type="button"
+        noUiEdit
+        className={`rail-btn rail-zoom-in${zoomFading.value ? ' fading' : ''}`}
+        aria-label={tr('Zoomer')}
+        onClick={() => {
+          showZoom();
+          zoom(1);
+        }}
+      >
+        <span className="rail-icon">
+          <ZoomSign plus />
         </span>
       </Button>
     </>
