@@ -17,7 +17,13 @@ import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { boatPlace } from '../meteo/boatPlace.ts';
 
-import { liveZoneIds, setLiveZones, zonePickOpen } from './liveOnMap.ts';
+import {
+  liveZoneArea,
+  liveZoneIds,
+  setLiveZones,
+  zonePickOpen,
+} from './liveOnMap.ts';
+import { fitZones } from './zoneFit.ts';
 
 const BASINS: readonly ZoneBasin[] = [
   'manche',
@@ -116,6 +122,10 @@ export function ZonePicker() {
   const close = () => {
     buzz();
     zonePickOpen.value = false;
+    // The chooser gone: the zones chosen fill the map again.
+    const map = tracker.current?.map;
+    const box = liveZoneArea.peek();
+    if (map && box) setTimeout(() => fitZones(map, box), 0);
   };
   return (
     <div
@@ -162,7 +172,9 @@ export function ZonePicker() {
                   data-zone-set={set.id}
                   onClick={() => {
                     buzz();
-                    const start = startIds(zones);
+                    // From « Où je suis », a group replaces the zone of the
+                    // boat; else it is added to the zones chosen.
+                    const start = chosen.length > 0 ? chosen : [];
                     setLiveZones(
                       all
                         ? start.filter((id) => !ids.includes(id))

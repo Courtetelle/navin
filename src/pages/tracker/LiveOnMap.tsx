@@ -33,6 +33,7 @@ import { blinkKey, liveBlink, liveDetail } from '../meteo/liveDetail.ts';
 import { ageText, compassPoint, stationBadgeHtml } from '../meteo/liveText.ts';
 
 import { ZonePicker } from './ZonePicker.tsx';
+import { fitZones } from './zoneFit.ts';
 import {
   layLiveAround,
   liveOnMap,
@@ -279,15 +280,7 @@ export function LiveOnMap() {
             ).addTo(ring);
           }
           // Back from a station card the map is already on its badge.
-          if (box && !seen) {
-            map.fitBounds(
-              [
-                [box.south, box.west],
-                [box.north, box.east],
-              ],
-              { padding: [16, 16] },
-            );
-          }
+          if (box && !seen) fitZones(map, box);
           read();
         });
         if (alert?.zone) {
