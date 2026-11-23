@@ -223,11 +223,13 @@ export function shownZones(
  * {@link MOST_READS}, nearest to the place first.
  * @param zones - The zones shown.
  * @param place - The boat.
+ * @param most - Circles at most ({@link MOST_READS} without it).
  * @returns The circles.
  */
 export function readCircles(
   zones: readonly MeteoZone[],
   place: { lat: number; lon: number },
+  most = MOST_READS,
 ): ReadCircle[] {
   const all = zones
     .flatMap((z) => z.reads)
@@ -248,7 +250,7 @@ export function readCircles(
         ) < SAME_READ_KM,
     );
     if (!twin) kept.push(circle);
-    if (kept.length >= MOST_READS) break;
+    if (kept.length >= most) break;
   }
   return kept;
 }

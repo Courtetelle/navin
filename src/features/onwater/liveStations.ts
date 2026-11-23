@@ -32,6 +32,8 @@ export type LiveStation = WindReading & {
  * @param mfKey - Météo-France key, empty without one.
  * @param tally - Filled with what the Météo-France stations answered.
  * @param most - Stations read per network at most (25 without it).
+ * @param keys - The keys of the other networks (those of the settings
+ *   without it; the archive of GitHub passes its own).
  * @returns The stations with a recent measurement.
  */
 export async function liveStations(
@@ -40,6 +42,7 @@ export async function liveStations(
   mfKey: string,
   tally: MfTally | null = null,
   most: { open: number; mf: number } | null = null,
+  keys?: Parameters<typeof euReadings>[3],
 ): Promise<LiveStation[]> {
   const [swiss, beacons, french, europe] = await Promise.all([
     smnLive(center, radius, most?.open ?? LIVE_MOST).catch(() => []),
@@ -47,7 +50,7 @@ export async function liveStations(
     mfReadings(center, radius, mfKey, most?.mf ?? LIVE_MOST, tally).catch(
       () => [],
     ),
-    euReadings(center, radius, most?.open ?? LIVE_MOST).catch(() => []),
+    euReadings(center, radius, most?.open ?? LIVE_MOST, keys).catch(() => []),
   ]);
   const live = [...swiss, ...beacons, ...french, ...europe]
     .filter(isLive)

@@ -237,20 +237,22 @@ export function shouldAsk(
 }
 
 /**
- * Ask GitHub to run the workflow now.
+ * Ask GitHub to run a workflow of the repository now, on main.
  * @param token - A GitHub token allowed to run the workflows of the repository.
+ * @param workflow - The workflow file (`analyse.yml`).
  * @param inputs - The workflow inputs.
  * @param fetcher - fetch (tests pass their own).
  * @returns Null when asked, else what went wrong.
  */
-export async function dispatchAnalysis(
+export async function dispatchWorkflow(
   token: string,
+  workflow: string,
   inputs: Record<string, string>,
   fetcher: typeof fetch = fetch,
 ): Promise<string | null> {
   try {
     const response = await fetcher(
-      `https://api.github.com/repos/${ANALYSIS_REPO}/actions/workflows/${ANALYSIS_WORKFLOW}/dispatches`,
+      `https://api.github.com/repos/${ANALYSIS_REPO}/actions/workflows/${workflow}/dispatches`,
       {
         method: 'POST',
         headers: {
@@ -269,6 +271,21 @@ export async function dispatchAnalysis(
   } catch {
     return 'pas de réseau';
   }
+}
+
+/**
+ * Ask GitHub to run the workflow of the analysis now.
+ * @param token - A GitHub token allowed to run the workflows of the repository.
+ * @param inputs - The workflow inputs.
+ * @param fetcher - fetch (tests pass their own).
+ * @returns Null when asked, else what went wrong.
+ */
+export function dispatchAnalysis(
+  token: string,
+  inputs: Record<string, string>,
+  fetcher: typeof fetch = fetch,
+): Promise<string | null> {
+  return dispatchWorkflow(token, ANALYSIS_WORKFLOW, inputs, fetcher);
 }
 
 function degMin(value: number, width: number): string {

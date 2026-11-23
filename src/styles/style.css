@@ -15306,6 +15306,10 @@ html body.menus-fading .rail-btn.routes-sub {
     max-height: 70vh;
   }
 }
+/* Every zone of LiveMétéo in Paramétrages, the same buttons as the chooser */
+.zone-pick-settings {
+  margin: 6px 0 10px;
+}
 /* The short name of a zone on its button, smaller than a radius */
 .live-zone-btn .live-radius-nb {
   font-size: 19px;
