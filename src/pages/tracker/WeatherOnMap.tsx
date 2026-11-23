@@ -11,6 +11,7 @@ import {
   RAIN_NATIVE_ZOOM,
   arrowSvg,
   barbSvg,
+  cellHalf,
   currentShown,
   fetchRainFrames,
   fetchSeaGrid,
@@ -19,6 +20,7 @@ import {
   hourRank,
   isSlack,
   localModel,
+  rainColor,
   rainTileUrl,
   seaPoints,
   slackSvg,
@@ -162,11 +164,40 @@ function drawGrids(
   data: WeatherRead,
   layers: WeatherLayers,
   ms: number,
+  rainAhead = false,
 ): number | null {
   layer.clearLayers();
   const turn = mapBearing(map);
   let drawnAt: number | null = null;
   const wind = isGrid(data.wind) ? data.wind : null;
+  if (wind && layers.rain && rainAhead) {
+    // The radar only shows the past: the hours ahead take the rain of the
+    // model, a cell of colour around each point, in the colours of the radar.
+    const rank = hourRank(wind.hours, ms);
+    const half = cellHalf(wind.points);
+    if (rank >= 0) {
+      drawnAt = wind.hours[rank] ?? null;
+      for (const point of wind.points) {
+        const color = rainColor(point.rain[rank] ?? Number.NaN);
+        if (!color) continue;
+        leaflet()
+          .rectangle(
+            [
+              [point.lat - half.lat, point.lon - half.lon],
+              [point.lat + half.lat, point.lon + half.lon],
+            ],
+            {
+              pane: 'wxRain',
+              stroke: false,
+              fillColor: color,
+              fillOpacity: 0.45,
+              interactive: false,
+            },
+          )
+          .addTo(layer);
+      }
+    }
+  }
   if (wind && layers.wind) {
     const rank = hourRank(wind.hours, ms);
     if (rank >= 0) {
@@ -381,7 +412,7 @@ export function WeatherOnMap() {
     const ms =
       Math.round(Date.now() / 3_600_000) * 3_600_000 + step * 3_600_000;
     const draw = () => {
-      weatherShownAt.value = drawGrids(layer, map, drawn, layers, ms);
+      weatherShownAt.value = drawGrids(layer, map, drawn, layers, ms, step > 0);
     };
     draw();
     map.on('rotate', draw);
@@ -391,9 +422,12 @@ export function WeatherOnMap() {
     };
   }, [on, mapReady, drawn, layers, step]);
 
-  // The rain of the radar: the newest image, read every 10 minutes.
+  // The rain of the radar: the newest image, read every 10 minutes; only
+  // for the hour now (the radar has no future: the hours ahead take the
+  // rain of the model, drawn with the marks).
+  const radarNow = step === 0;
   useEffect(() => {
-    if (!on || !mapReady || !layers.rain) return undefined;
+    if (!on || !mapReady || !layers.rain || !radarNow) return undefined;
     const map = tracker.current?.map;
     if (!map) return undefined;
     let closed = false;
@@ -430,7 +464,7 @@ export function WeatherOnMap() {
       tiles?.remove();
       rainRead.value = null;
     };
-  }, [on, mapReady, layers.rain]);
+  }, [on, mapReady, layers.rain, radarNow]);
 
   return null;
 }

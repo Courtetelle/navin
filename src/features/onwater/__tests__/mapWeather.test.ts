@@ -6,6 +6,7 @@ import {
   arrowSvg,
   barbOf,
   barbSvg,
+  cellHalf,
   currentShown,
   fetchRainFrames,
   fetchSeaGrid,
@@ -15,6 +16,7 @@ import {
   inMediterranean,
   isSlack,
   localModel,
+  rainColor,
   rainFramesOf,
   rainTileUrl,
   seaGridOf,
@@ -362,5 +364,40 @@ describe('seaPoints', () => {
 
   it('gives nothing on land', () => {
     expect(seaPoints(bay, 12, () => true)).toEqual([]);
+  });
+});
+
+describe('rain of the model', () => {
+  it('colours the rain as the radar does', () => {
+    expect(rainColor(0)).toBeNull();
+    expect(rainColor(Number.NaN)).toBeNull();
+    expect(rainColor(0.3)).toBe('#88ddee');
+    expect(rainColor(3)).toBe('#ffee00');
+    expect(rainColor(30)).toBe('#ff00ff');
+  });
+
+  it('measures the cells of the grid', () => {
+    const half = cellHalf([
+      { lat: 48, lon: -3 },
+      { lat: 48.2, lon: -3 },
+      { lat: 48, lon: -2.5 },
+    ]);
+    expect(half.lat).toBeCloseTo(0.1);
+    expect(half.lon).toBeCloseTo(0.25);
+    expect(cellHalf([{ lat: 48, lon: -3 }])).toEqual({ lat: 0.1, lon: 0.1 });
+  });
+
+  it('reads the rain with the wind', () => {
+    const grid = windGridOf(
+      {
+        hourly: {
+          time: HOURS,
+          wind_speed_10m: [5, 6],
+          precipitation: [0, 2.4],
+        },
+      },
+      [{ lat: 48, lon: -3 }],
+    );
+    expect(grid?.points[0]?.rain).toEqual([0, 2.4]);
   });
 });

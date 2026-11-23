@@ -119,6 +119,8 @@ export interface PointWind {
   speed: number[];
   /** Gusts in knots, per hour. */
   gust: number[];
+  /** Rain in mm per hour, per hour. */
+  rain: number[];
   /** Where it comes from, degrees, per hour. */
   from: number[];
 }
@@ -190,6 +192,7 @@ export function windGridOf(
       lon: points[rank]?.lon ?? item.longitude ?? 0,
       speed: series(item, 'wind_speed_10m', hours.length),
       gust: series(item, 'wind_gusts_10m', hours.length),
+      rain: series(item, 'precipitation', hours.length),
       from: series(item, 'wind_direction_10m', hours.length),
     })),
   };
@@ -271,7 +274,7 @@ export async function fetchWindGrid(
   points: readonly LatLon[],
   model: string,
 ): Promise<Grid<PointWind> | Failure> {
-  const url = `https://api.open-meteo.com/v1/forecast?${coords(points)}&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m&wind_speed_unit=kn&timeformat=unixtime&forecast_hours=${FORECAST_HOURS}&past_hours=1&models=${model}&cell_selection=sea`;
+  const url = `https://api.open-meteo.com/v1/forecast?${coords(points)}&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation&wind_speed_unit=kn&timeformat=unixtime&forecast_hours=${FORECAST_HOURS}&past_hours=1&models=${model}&cell_selection=sea`;
   try {
     return (
       windGridOf(await ask(url), points) ?? {
@@ -683,9 +686,86 @@ export function seaPoints(
   };
   const kept = gridPoints(area, most * 4, true).filter(open);
   if (kept.length <= most) return kept;
-  const every = kept.length / most;
-  return Array.from(
-    { length: most },
-    (_, rank) => kept[Math.floor(rank * every)] as LatLon,
-  );
+  // Thinned by distance, not by rank: the marks stay apart on the screen.
+  const squash = Math.cos(((area.south + area.north) / 2) * (Math.PI / 180));
+  const surface = (area.north - area.south) * (area.east - area.west) * squash;
+  let spacing = Math.sqrt(surface / most);
+  for (;;) {
+    const chosen = spreadOut(kept, most, spacing, squash);
+    if (chosen.length >= most / 2 || spacing < 1e-3) return chosen;
+    spacing *= 0.8;
+  }
+}
+
+/**
+ * The points kept at least a spacing apart, in order, at most `most`.
+ * @param points - The candidates.
+ * @param most - At most this many.
+ * @param spacing - Least distance, degrees of latitude.
+ * @param squash - Cosine of the latitude, for the longitudes.
+ * @returns The points kept.
+ */
+function spreadOut(
+  points: readonly LatLon[],
+  most: number,
+  spacing: number,
+  squash: number,
+): LatLon[] {
+  const chosen: LatLon[] = [];
+  for (const point of points) {
+    const apart = chosen.every(
+      (other) =>
+        Math.hypot(point.lat - other.lat, (point.lon - other.lon) * squash) >=
+        spacing,
+    );
+    if (apart) chosen.push(point);
+    if (chosen.length === most) break;
+  }
+  return chosen;
+}
+
+/**
+ * The colour of a rain rate, in the colours of the radar (« Universal
+ * Blue » of RainViewer): light blue for drizzle, deep blue, yellow, red,
+ * purple for the heaviest.
+ * @param mmPerHour - The rain, mm in the hour.
+ * @returns A CSS colour, null under 0.1 mm.
+ */
+export function rainColor(mmPerHour: number): string | null {
+  if (!Number.isFinite(mmPerHour) || mmPerHour < 0.1) return null;
+  if (mmPerHour < 0.5) return '#88ddee';
+  if (mmPerHour < 1) return '#0099cc';
+  if (mmPerHour < 2) return '#0077aa';
+  if (mmPerHour < 4) return '#ffee00';
+  if (mmPerHour < 8) return '#ff4400';
+  if (mmPerHour < 16) return '#c10000';
+  return '#ff00ff';
+}
+
+function halfGap(values: readonly number[]): number {
+  const sorted = [...new Set(values)].toSorted((a, b) => a - b);
+  let least = Infinity;
+  for (let rank = 1; rank < sorted.length; rank++) {
+    least = Math.min(
+      least,
+      (sorted[rank] as number) - (sorted[rank - 1] as number),
+    );
+  }
+  return Number.isFinite(least) ? least / 2 : 0.1;
+}
+
+/**
+ * The spacing of a grid of points, degrees: the smallest gap between two
+ * latitudes and between two longitudes.
+ * @param points - The grid.
+ * @returns Half the cell on each side, degrees; 0.1 for a single point.
+ */
+export function cellHalf(points: readonly LatLon[]): {
+  lat: number;
+  lon: number;
+} {
+  return {
+    lat: halfGap(points.map((point) => point.lat)),
+    lon: halfGap(points.map((point) => point.lon)),
+  };
 }
