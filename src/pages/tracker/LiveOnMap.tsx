@@ -1,9 +1,7 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import type { Circle, LayerGroup } from 'leaflet';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
-import { Button } from '../../components/shared/Button.tsx';
-import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { leaflet } from '../../features/map/leaflet.ts';
 import { pendingMapArea } from '../../features/map/pendingArea.ts';
 import { tracker } from '../../features/map/trackerState.ts';
@@ -15,7 +13,6 @@ import {
   liveStations,
   windConfig,
 } from '../../features/onwater/index.ts';
-import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { nmText } from '../../lib/geo.ts';
 import { go } from '../../shell/router.ts';
@@ -25,12 +22,10 @@ import { blinkKey, liveBlink, liveDetail } from '../meteo/liveDetail.ts';
 import { ageText, compassPoint, stationBadgeHtml } from '../meteo/liveText.ts';
 
 import {
-  hideLiveOnMap,
   layLiveAround,
   liveOnMap,
   liveOnMapAround,
   liveRadius,
-  liveRadiusNm,
 } from './liveOnMap.ts';
 
 /** The stations read before the map of NavIn is built, in km. */
@@ -137,12 +132,10 @@ function addBadge(
  */
 export function LiveOnMap() {
   useSignals();
-  const tr = useTr();
   const asked = liveOnMap.value;
   const around = liveOnMapAround.value;
   const radiusSet = liveRadius();
   const on = asked > 0;
-  const [count, setCount] = useState<number | null>(null);
   // The map opened on a storm or a warning light: the winds of LiveMétéo
   // and their circle leave it.
   useEffect(() => {
@@ -196,12 +189,11 @@ export function LiveOnMap() {
         if (seen) liveBlink.value = null;
       }
       drawn = true;
-      setCount(stations.length);
     };
     const read = () => {
       liveStations(center, radius, config.mfKey)
         .then(draw)
-        .catch(() => setCount(0));
+        .catch(() => undefined);
     };
     const start = () => {
       if (closed) return;
@@ -265,108 +257,7 @@ export function LiveOnMap() {
       layer?.remove();
       ring?.remove();
       zone?.remove();
-      setCount(null);
     };
   }, [on, asked, around, radiusSet]);
-  if (!on) return null;
-  return (
-    <>
-      {around ? <RadiusButton /> : null}
-      <div className="live-chip" role="status">
-        <span className="live-chip-txt">
-          {tr(
-            count == null
-              ? '🌬 Lecture des stations…'
-              : `🌬 ${count} station${count > 1 ? 's' : ''} ${around ? `à moins de ${liveRadiusNm()} NM` : 'sur la carte'}`,
-          )}
-        </span>
-        {around ? null : (
-          <Button
-            type="button"
-            noUiEdit
-            className="live-chip-off"
-            aria-label={tr('Retirer les stations de la carte')}
-            onClick={hideLiveOnMap}
-          >
-            ✕
-          </Button>
-        )}
-      </div>
-    </>
-  );
-}
-
-/**
- * The button of the radius, at the left while LiveMétéo shows the stations
- * of the zone: a dashed circle, its radius as an arrow, the centre a red
- * big red cross blinking, and the radius in NM. A touch takes the badges
- * away with the button; a long press opens Paramétrages › Alertes › LiveMétéo to change
- * it (its ◀ comes back to the map).
- * @returns The button.
- */
-function RadiusButton() {
-  useSignals();
-  const tr = useTr();
-  const nm = liveRadiusNm();
-  const press = useLongPress(() => {
-    buzz();
-    go('settings', 'live');
-  });
-  return (
-    <Button
-      type="button"
-      noUiEdit
-      className={`rail-btn live-radius-btn${press.hit ? ' lp-hit' : ''}`}
-      aria-label={tr(
-        `Rayon LiveMétéo ${nm} NM · toucher : retirer les stations · appui long : changer le rayon`,
-      )}
-      onClick={hideLiveOnMap}
-      {...press.handlers}
-    >
-      <svg
-        className="live-radius-ico"
-        viewBox="0 0 40 40"
-        preserveAspectRatio="xMidYMid meet"
-        aria-hidden="true"
-      >
-        <circle
-          cx="20"
-          cy="20"
-          r="16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.2"
-          strokeDasharray="4 3"
-        />
-        <path
-          d="M20 20h14m-4-3.5 4 3.5-4 3.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      {/* The big red cross: a touch takes LiveMétéo away. */}
-      <svg
-        className="live-radius-x"
-        viewBox="0 0 40 40"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <path
-          className="live-radius-cross"
-          d="M5 5l30 30m0-30-30 30"
-          stroke="#e00016"
-          strokeWidth="6"
-          strokeLinecap="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-      <span className="live-radius-nb">{nm}</span>
-      <span className="live-radius-more" aria-hidden="true">
-        nm?
-      </span>
-    </Button>
-  );
+  return null;
 }
