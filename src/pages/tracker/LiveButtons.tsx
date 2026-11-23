@@ -73,7 +73,7 @@ export function LiveButtons() {
   const stage = 'shown';
   const forecast =
     layers.wind || layers.waves || layers.currents || layers.rain;
-  const count = (lake ? 4 : 6) + (forecast ? 3 : 0);
+  const count = (lake ? 3 : 5) + (forecast ? 3 : 0);
   const [place, setPlace] = useState<Place | null>(null);
   const said = useRef(new Set<string>());
 
@@ -98,13 +98,15 @@ export function LiveButtons() {
     };
   }, [on, count]);
 
-  // The badges of the stations hidden or shown on the map itself.
+  // The badges of the stations and the lightning are of the hour now: gone
+  // as soon as the forecast steps ahead, back at the hour now (Corban 23/11,
+  // no button of their own any more).
   useEffect(() => {
     if (!on) return undefined;
     const box = tracker.current?.map?.getContainer();
-    box?.classList.toggle('live-st-off', !layers.stations);
-    return () => box?.classList.remove('live-st-off');
-  }, [on, layers.stations]);
+    box?.classList.toggle('live-ahead', step > 0);
+    return () => box?.classList.remove('live-ahead');
+  }, [on, step]);
 
   const failures: Partial<Record<keyof WeatherLayers, string>> = {};
   const windFail = failText(drawn.wind);
@@ -131,7 +133,7 @@ export function LiveButtons() {
   if (!on || !place) return null;
   const rainAt =
     rain && 'frames' in rain ? (rain.frames.at(-1)?.time ?? null) : null;
-  const sources: Record<keyof WeatherLayers, string> = {
+  const sources: Record<Exclude<keyof WeatherLayers, 'stations'>, string> = {
     wind: `Vent prévu : ${model || 'modèle local'}, nœuds, G = rafales.`,
     waves:
       'Vagues : Open-Meteo Marine, hauteur significative Hs en m et degré Douglas en couleur ; flèche aux couleurs de la cambrure (hauteur sur longueur d’onde, du vert au violet), bleue sans période.',
@@ -141,7 +143,6 @@ export function LiveButtons() {
       step === 0
         ? `Pluie : radar RainViewer${rainAt == null ? '' : ` de ${hourText(rainAt)}`}, du bleu clair (faible) au violet (forte).`
         : `Pluie prévue : ${rainAhead ?? (model || 'modèle local')}, mm par heure, du bleu clair (faible) au violet (forte) ; le radar ne montre que l’heure actuelle.`,
-    stations: 'Stations et bouées LiveMétéo : vent mesuré.',
   };
   const items: ReactNode[] = [
     <ZoneButton key="zone" />,
@@ -182,13 +183,6 @@ export function LiveButtons() {
       icon={<RainIcon />}
       fail={failures.rain}
       source={sources.rain}
-    />,
-    <LayerButton
-      key="stations"
-      name="stations"
-      label="Stations et bouées"
-      icon={<StationIcon />}
-      source={sources.stations}
     />,
   );
   if (forecast) {
@@ -469,17 +463,6 @@ function RainIcon() {
     <Svg>
       <path d="M7 15h10a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.2A3.4 3.4 0 0 0 7 15z" />
       <path d="M8 18.5 7 21M12.5 18.5l-1 2.5M17 18.5l-1 2.5" />
-    </Svg>
-  );
-}
-
-/** A station: the badge of its wind on its mast. */
-function StationIcon() {
-  return (
-    <Svg>
-      <circle cx="12" cy="8.5" r="6" />
-      <path d="M12 14.5V22M8.5 22h7" />
-      <path d="M9.5 8.5h5" strokeWidth="2.6" />
     </Svg>
   );
 }

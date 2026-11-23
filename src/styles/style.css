@@ -15413,8 +15413,13 @@ html body .live-slot > .rail-btn.live-layer.on {
   right: 4px;
   bottom: 2px;
 }
-/* The badges of the stations hidden by their button */
-.live-st-off .live-mk-wrap {
+/* The badges of the stations and the lightning: the hour now only, gone
+   as soon as LiveMétéo steps into the forecast. */
+.live-ahead .live-mk-wrap,
+.live-ahead .map-flashes,
+.live-ahead .lightning-tag-wrap,
+.live-ahead .lightning-aim-case,
+.live-ahead .lightning-aim-line {
   display: none;
 }
 :root[data-theme='night'] .live-slot > .rail-btn.live-layer.on {
