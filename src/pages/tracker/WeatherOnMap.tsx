@@ -14,6 +14,7 @@ import type { Area, Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import {
   RAIN_NATIVE_ZOOM,
   arrowSvg,
+  barbLabelOffset,
   barbSvg,
   cellHalf,
   currentShown,
@@ -24,6 +25,7 @@ import {
   fittedLattice,
   hourRank,
   isSlack,
+  labelWidth,
   localModel,
   nearestPoint,
   rainColor,
@@ -131,7 +133,12 @@ function holds(outer: Area, inner: Area): boolean {
 }
 
 /** Marks of the wind this far apart on the screen at least, px. */
-const MARK_PX = 90;
+/** At least this far apart: no label of a point on a symbol of another. */
+const MARK_PX = 110;
+/** The wave left and the current right of their point, px. */
+const SEA_SIDE = 22;
+/** Their labels above and below, px. */
+const SEA_LABEL = 31;
 
 /**
  * The spacing of the marks for the zoom of the map: about {@link MARK_PX}
@@ -170,6 +177,32 @@ function addMark(
   leaflet()
     .marker([lat, lon], {
       icon: icon(html, size, dx, dy),
+      interactive: false,
+      keyboard: false,
+      pane: 'wxMarks',
+    })
+    .addTo(layer);
+}
+
+/**
+ * A label alone, its centre at a distance from its point (px, y down).
+ */
+function addLabel(
+  layer: LayerGroup,
+  lat: number,
+  lon: number,
+  html: string,
+  dx: number,
+  dy: number,
+): void {
+  leaflet()
+    .marker([lat, lon], {
+      icon: leaflet().divIcon({
+        className: 'wx-mk wx-tag',
+        html,
+        iconSize: [0, 0],
+        iconAnchor: [-dx, -dy],
+      }),
       interactive: false,
       keyboard: false,
       pane: 'wxMarks',
@@ -247,18 +280,21 @@ function drawGrids(
           56,
         );
         const gust = point.gust[rank] ?? Number.NaN;
-        const gustText =
-          Number.isFinite(gust) && gust >= speed + 5
-            ? `<small>${Math.round(gust)}</small>`
-            : '';
-        addMark(
+        const gusty = Number.isFinite(gust) && gust >= speed + 5;
+        const gustText = gusty ? `<small>${Math.round(gust)}</small>` : '';
+        // The label where the barb is not: on the side the wind blows to.
+        const knots = String(Math.round(speed));
+        const width =
+          labelWidth(knots.length) +
+          (gusty ? 6 * (String(Math.round(gust)).length + 1) + 2 : 0);
+        const away = barbLabelOffset(from + turn, width, 17);
+        addLabel(
           layer,
           point.lat,
           point.lon,
-          `<span class="wx-lbl" style="color:${color}">${Math.round(speed)}${gustText}</span>`,
-          40,
-          0,
-          22,
+          `<span class="wx-lbl" style="color:${color}">${knots}${gustText}</span>`,
+          away.dx,
+          away.dy,
         );
       }
     }
@@ -278,10 +314,23 @@ function drawGrids(
             layer,
             point.lat,
             point.lon,
-            `${arrowSvg(from + 180 + turn, height / WAVE_FULL_M, steep?.steep.color ?? WAVE_COLOR, true)}${waveLabelHtml(height)}`,
+            arrowSvg(
+              from + 180 + turn,
+              height / WAVE_FULL_M,
+              steep?.steep.color ?? WAVE_COLOR,
+              true,
+            ),
             60,
-            -18,
+            -SEA_SIDE,
             0,
+          );
+          addLabel(
+            layer,
+            point.lat,
+            point.lon,
+            waveLabelHtml(height),
+            0,
+            -SEA_LABEL,
           );
         }
         const speed = point.current[rank] ?? Number.NaN;
@@ -311,10 +360,18 @@ function drawGrids(
             layer,
             point.lat,
             point.lon,
-            `${slackSvg(CURRENT_COLOR)}<span class="wx-lbl wx-cur wx-slack">étale</span>`,
+            slackSvg(CURRENT_COLOR),
             60,
-            18,
+            SEA_SIDE,
             0,
+          );
+          addLabel(
+            layer,
+            point.lat,
+            point.lon,
+            '<span class="wx-lbl wx-cur wx-slack">étale</span>',
+            0,
+            SEA_LABEL,
           );
         } else if (Number.isFinite(toward)) {
           addMark(
@@ -328,10 +385,18 @@ function drawGrids(
               false,
               // A black edge: not taken for the wavy arrow of the waves.
               color === CURRENT_COLOR ? '#fff' : '#000',
-            )}<span class="wx-lbl wx-cur">${decimal(speed)} nd</span>`,
+            )}`,
             60,
-            18,
+            SEA_SIDE,
             0,
+          );
+          addLabel(
+            layer,
+            point.lat,
+            point.lon,
+            `<span class="wx-lbl wx-cur">${decimal(speed)} nd</span>`,
+            0,
+            SEA_LABEL,
           );
         }
       }

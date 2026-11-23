@@ -15452,6 +15452,16 @@ html body .live-slot > .rail-btn.live-layer.on {
   top: 2px;
   bottom: auto;
 }
+/* A label alone, centred on its place: never over a barb or an arrow. */
+.wx-tag .wx-lbl,
+.wx-tag .wx-lbl.wx-wave,
+.wx-tag .wx-lbl.wx-cur {
+  position: absolute;
+  top: 0;
+  bottom: auto;
+  left: 0;
+  transform: translate(-50%, -50%);
+}
 
 /* The routing on the map: wind, current and waves at places along it. */
 .leaflet-marker-icon.rtm {

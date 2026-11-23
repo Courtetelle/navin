@@ -5,6 +5,7 @@ import { forgetOpenMeteo } from '../../../lib/openMeteo.ts';
 import {
   MOST_ASKED,
   arrowSvg,
+  barbLabelOffset,
   barbOf,
   barbSvg,
   cellHalf,
@@ -532,5 +533,18 @@ describe('nearestPoint', () => {
   it('takes the nearest within the distance', () => {
     expect(nearestPoint(points, 48.4, -2.6, 1)).toBe(points[1]);
     expect(nearestPoint(points, 50, -2.6, 1)).toBeNull();
+  });
+});
+
+describe('barbLabelOffset', () => {
+  it('puts the label where the wind blows to, clear of the staff', () => {
+    // From the north: the staff goes up, the label below.
+    const north = barbLabelOffset(0, 30, 17);
+    expect(Math.abs(north.dx)).toBe(0);
+    expect(north.dy).toBeGreaterThanOrEqual(15);
+    // From the west: the staff goes left, the label right.
+    const west = barbLabelOffset(270, 30, 17);
+    expect(west.dx).toBeGreaterThanOrEqual(22);
+    expect(Math.abs(west.dy)).toBeLessThanOrEqual(1);
   });
 });

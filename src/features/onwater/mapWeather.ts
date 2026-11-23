@@ -536,7 +536,8 @@ export function arrowSvg(
   const size = 60;
   const mid = size / 2;
   const fit = Math.max(0, Math.min(1, scale));
-  const half = 9 + 17 * fit;
+  // At most 18 px each way: the wave and the current side by side never meet.
+  const half = 8 + 10 * fit;
   const width = 2.5 + 3 * fit;
   const tail = mid + half;
   const head = mid - half;
@@ -712,6 +713,32 @@ export function waveLabelHtml(height: number): string {
   return `<span class="wx-lbl wx-wave" title="Hs ${metres} m, Douglas ${degree}">${metres} m<b class="wx-dg" style="background:${group.color};color:${group.ink}">${degree}</b></span>`;
 }
 
+/**
+ * Where the label of a barb goes: on the side the wind blows to, where the
+ * staff and its feathers are not, just clear of them.
+ * @param from - Where the wind comes from on the screen, degrees.
+ * @param width - Width of the label, px.
+ * @param height - Height of the label, px.
+ * @returns Its centre from the point, px (y down).
+ */
+export function barbLabelOffset(
+  from: number,
+  width: number,
+  height: number,
+): { dx: number; dy: number } {
+  const rad = (from * Math.PI) / 180;
+  // Unit vector toward where the wind blows (opposite to the staff).
+  const ux = -Math.sin(rad);
+  const uy = Math.cos(rad);
+  const reach = (width / 2) * Math.abs(ux) + (height / 2) * Math.abs(uy) + 7;
+  return { dx: Math.round(ux * reach), dy: Math.round(uy * reach) };
+}
+
+/** Width of a label of so many characters, px (13 px bold figures). */
+export function labelWidth(characters: number): number {
+  return 8 * characters + 8;
+}
+
 /** Under this, the current is slack whatever the hours around. */
 export const SLACK_KN = 0.3;
 /** Under this, the current is slack when it is at its weakest of the hours around. */
@@ -855,45 +882,19 @@ export function seaPoints(
     );
     return around.length <= 1;
   };
-  // Thinned by distance: the marks stay apart on the screen. Too many for
-  // one request: a coarser spacing, over the whole area still.
+  // Halfway between the wind points, in both directions: the marks of the
+  // sea sit in the gaps of the wind's, never on them (Corban 23/11: labels
+  // over the barbs). Too many for one request: a coarser spacing, over the
+  // whole area still.
   let taken = step;
   for (;;) {
-    const kept = latticePoints(area, taken / 2, true).filter(open);
-    const spread = spreadOut(kept, Infinity, taken * 0.9, 1);
+    const kept = latticePoints(area, taken, true).filter(open);
     const coarser = coarserStep(taken);
-    if (spread.length <= MOST_ASKED || coarser === taken) {
-      return spread.slice(0, MOST_ASKED);
+    if (kept.length <= MOST_ASKED || coarser === taken) {
+      return kept.slice(0, MOST_ASKED);
     }
     taken = coarser;
   }
-}
-
-/**
- * The points kept at least a spacing apart, in order, at most `most`.
- * @param points - The candidates.
- * @param most - At most this many.
- * @param spacing - Least distance, degrees of latitude.
- * @param squash - Cosine of the latitude, for the longitudes.
- * @returns The points kept.
- */
-function spreadOut(
-  points: readonly LatLon[],
-  most: number,
-  spacing: number,
-  squash: number,
-): LatLon[] {
-  const chosen: LatLon[] = [];
-  for (const point of points) {
-    const apart = chosen.every(
-      (other) =>
-        Math.hypot(point.lat - other.lat, (point.lon - other.lon) * squash) >=
-        spacing,
-    );
-    if (apart) chosen.push(point);
-    if (chosen.length === most) break;
-  }
-  return chosen;
 }
 
 /**
