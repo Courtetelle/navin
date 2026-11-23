@@ -47,6 +47,8 @@ COAST_SIMPLIFY_M = 400
 # bits of sea smaller than this are dropped.
 CLOSE_M = 2000
 CRUMB_M2 = 20e6
+# Islands larger than this stay cut out of their zone (Majorca, Corsica…).
+BIG_ISLAND_M2 = 1000e6
 LARGE_SIMPLIFY_M = 900
 # Circles read for the stations: this radius, this far apart along the coast.
 READ_KM = 45
@@ -237,11 +239,14 @@ def read_circles(geom, land):
 
 
 def no_holes(geom):
-    """The polygons without their holes: the islands are not cut out (the
-    weather of a zone covers its islands)."""
+    """The polygons without their small holes: the islands are not cut out
+    (the weather of a zone covers its islands); only the big ones (Corsica,
+    Sardinia, Majorca) stay out, as land."""
     polys = getattr(geom, 'geoms', [geom])
-    return unary_union([Polygon(p.exterior) for p in polys
-                        if p.geom_type == 'Polygon' and not p.is_empty])
+    return unary_union([
+        Polygon(p.exterior, [r for r in p.interiors
+                             if Polygon(r).area >= BIG_ISLAND_M2])
+        for p in polys if p.geom_type == 'Polygon' and not p.is_empty])
 
 
 def smooth(geom, area, tolerance):
