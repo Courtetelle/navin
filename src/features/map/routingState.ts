@@ -1,0 +1,164 @@
+import { signal } from '@preact/signals-react';
+
+import type { LatLon } from '../../lib/geo.ts';
+import { distNM, rad } from '../../lib/geo.ts';
+import type { RoutePoint } from '../../model/routes.ts';
+import type { RoutingResult } from '../../model/sailRouting.ts';
+import { routingTurns } from '../../model/sailRouting.ts';
+import { store } from '../../storage/store.ts';
+
+export const ROUTING_KEY = 'ldb.routingShown';
+
+/** The wind, the current and the waves at one place of the routing. */
+export interface RoutingMark {
+  lat: number;
+  lon: number;
+  ms: number;
+  /** Where the wind comes from, degrees, and its speed, knots. */
+  twd: number;
+  tws: number;
+  /** Where the current flows to, degrees, and its speed, knots. */
+  setDeg: number;
+  driftKn: number;
+  /** Wave height, metres (`null` unknown). */
+  waveM: number | null;
+}
+
+/** A routing shown on the map. */
+export interface ShownRouting {
+  name: string;
+  /** The way the boat goes, `[lat, lon]`. */
+  track: Array<[number, number]>;
+  /** The turns of the routing: the Go to goes from one to the next. */
+  turns: RoutePoint[];
+  marks: RoutingMark[];
+}
+
+function kept(): ShownRouting | null {
+  const value = store.get<ShownRouting | null>(ROUTING_KEY, null);
+  return value && Array.isArray(value.track) && Array.isArray(value.turns)
+    ? value
+    : null;
+}
+
+/** The routing on the map, `null` without. */
+export const shownRouting = signal<ShownRouting | null>(kept());
+
+/** At most this many places with the wind, the current and the waves. */
+const MOST_MARKS = 14;
+/** Places at least this far apart, nautical miles. */
+const LEAST_SPACING_NM = 0.5;
+
+/**
+ * The routing as shown on the map: its way, its turns, and the wind, current
+ * and waves at places evenly spaced along it.
+ * @param name - Its name.
+ * @param result - The routing.
+ * @param points - The points of the route.
+ * @returns What the map shows.
+ */
+export function routingShape(
+  name: string,
+  result: Extract<RoutingResult, { kind: 'done' }>,
+  points: readonly RoutePoint[],
+): ShownRouting {
+  const { steps, nm } = result;
+  const track: Array<[number, number]> = steps.map((step) => [
+    step.lat,
+    step.lon,
+  ]);
+  const end = points.at(-1);
+  if (end) track.push([end.lat, end.lon]);
+  const spacing = Math.max(LEAST_SPACING_NM, nm / MOST_MARKS);
+  const marks: RoutingMark[] = [];
+  let along = 0;
+  let next = 0;
+  for (const [rank, step] of steps.entries()) {
+    const before = steps[rank - 1];
+    if (before) along += distNM(before, step);
+    if (along + 1e-9 < next) continue;
+    marks.push({
+      lat: step.lat,
+      lon: step.lon,
+      ms: step.ms,
+      twd: step.twd,
+      tws: step.tws,
+      setDeg: step.setDeg,
+      driftKn: step.driftKn,
+      waveM: Number.isFinite(step.waveM) ? step.waveM : null,
+    });
+    next = along + spacing;
+  }
+  return { name, track, turns: routingTurns(result, points), marks };
+}
+
+/** A turn is reached this close, nautical miles. */
+const TURN_REACHED_NM = 0.05;
+
+/**
+ * The turn to go to: the end of the leg the boat is nearest to, the next
+ * one once it is reached; never back.
+ * @param turns - The turns of the routing.
+ * @param here - The boat.
+ * @param from - The turn aimed at so far.
+ * @returns Rank of the turn to go to (1 at least).
+ */
+export function routingLeg(
+  turns: readonly LatLon[],
+  here: LatLon,
+  from = 1,
+): number {
+  const last = turns.length - 1;
+  if (last < 1) return 0;
+  let leg = 1;
+  let best = Infinity;
+  for (let rank = 1; rank <= last; rank++) {
+    const away = legDistance(
+      turns[rank - 1] as LatLon,
+      turns[rank] as LatLon,
+      here,
+    );
+    if (away < best - 1e-9) {
+      best = away;
+      leg = rank;
+    }
+  }
+  let aim = Math.max(from, leg);
+  while (aim < last && distNM(here, turns[aim] as LatLon) < TURN_REACHED_NM) {
+    aim++;
+  }
+  return Math.min(aim, last);
+}
+
+/** Distance from a place to a leg, nautical miles (flat over a leg). */
+function legDistance(a: LatLon, b: LatLon, here: LatLon): number {
+  const cos = Math.cos(rad((a.lat + b.lat) / 2));
+  const bx = (b.lon - a.lon) * cos;
+  const by = b.lat - a.lat;
+  const hx = (here.lon - a.lon) * cos;
+  const hy = here.lat - a.lat;
+  const length = bx * bx + by * by;
+  const share =
+    length > 0 ? Math.max(0, Math.min(1, (hx * bx + hy * by) / length)) : 0;
+  return Math.hypot(hx - share * bx, hy - share * by) * 60;
+}
+
+/**
+ * The Go to of a turn of the routing.
+ * @param shown - The routing.
+ * @param leg - Rank of the turn.
+ * @returns The target.
+ */
+export function legTarget(
+  shown: ShownRouting,
+  leg: number,
+): { lat: number; lon: number; name: string; leg: number } {
+  const turn = shown.turns[leg] as RoutePoint;
+  const last = shown.turns.length - 1;
+  return {
+    lat: turn.lat,
+    lon: turn.lon,
+    name: `${shown.name} · ${leg === last ? 'arrivée' : `segment ${leg}/${last}`}`,
+    leg,
+  };
+}

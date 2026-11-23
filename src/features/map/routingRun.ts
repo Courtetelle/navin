@@ -9,7 +9,7 @@ import { routeSail } from '../../model/sailRouting.ts';
 import type { Boat } from '../../model/types.ts';
 import { store } from '../../storage/store.ts';
 
-import { autoOptions, avoidZones, routeBox } from './autoRoute.ts';
+import { autoOptions, routeBox } from './autoRoute.ts';
 import type { RouteWind } from './routingWeather.ts';
 import {
   fetchRouteSea,
@@ -176,7 +176,7 @@ export async function runRouting(
 /**
  * Whether a board stays in the water: the water of the map file of the
  * device around the route, at half the margin to the shore of « Contourner
- * la terre », out of the wind farms if asked.
+ * la terre ».
  * @param route - The route.
  * @returns The check, or `undefined` without a map file covering the route.
  */
@@ -196,7 +196,7 @@ async function landCheck(
         e: Math.max(...lons),
       },
       marginM: options.marginM,
-      avoid: avoidZones(options),
+      avoid: [],
     });
     if (answer.kind !== 'grid') return undefined;
     const { loose } = answer;

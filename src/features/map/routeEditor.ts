@@ -490,7 +490,6 @@ export function addRouteControl(map: LeafletMap): void {
     <div class="rp-auto">
       <button type="button" class="btn" data-rp="auto">⛵ Contourner la terre</button>
       <label>Marge <input data-rp="margin" class="text" inputmode="numeric" enterkeyhint="done" value="${autoOptions().marginM}" aria-label="Distance à la côte, mètres"> m</label>
-      <label><input data-rp="farms" type="checkbox"${autoOptions().avoidFarms ? ' checked' : ''}> Éviter le parc éolien</label>
     </div>
     <div class="rp-msg" hidden></div>`;
 
@@ -563,14 +562,6 @@ export function addRouteControl(map: LeafletMap): void {
           return;
         }
         saveAutoOptions({ ...autoOptions(), marginM: Math.round(typed) });
-      });
-    element
-      .querySelector<HTMLInputElement>('[data-rp="farms"]')
-      ?.addEventListener('change', (event) => {
-        saveAutoOptions({
-          ...autoOptions(),
-          avoidFarms: (event.target as HTMLInputElement).checked,
-        });
       });
     element
       .querySelector<HTMLInputElement>('[data-rp="depart"]')

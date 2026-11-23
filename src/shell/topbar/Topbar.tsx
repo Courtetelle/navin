@@ -5,9 +5,11 @@ import { Button } from '../../components/shared/Button.tsx';
 import { SettingsIcon } from '../../components/shared/SettingsIcon.tsx';
 import { markupToReact } from '../../components/shared/markupToReact.ts';
 import { ROUTE_ICON } from '../../features/map/routeMode.ts';
+import { clearRouting } from '../../features/map/routingShown.ts';
+import { shownRouting } from '../../features/map/routingState.ts';
 import { buzz } from '../../lib/dom.ts';
 import { railsScreen } from '../../lib/useWide.ts';
-import { state } from '../../state/index.ts';
+import { state, toast } from '../../state/index.ts';
 import { BarChevron } from '../BarChevron.tsx';
 import { hasBodyClass } from '../bodyClass.ts';
 import { inMenu, menuButtonPress } from '../menuOwner.ts';
@@ -150,16 +152,28 @@ function GearButton({ focused }: { focused: boolean }) {
 function RoutesButton() {
   useSignals();
   const here = state.view.currentView.value === 'routes' || inMenu('routes');
+  // A routing on the map: the button blinks yellow, a tap erases it.
+  const routing = shownRouting.value !== null;
   return (
     <Button
-      className={['theme-btn', 'routes-top', here && 'menu-here']
+      className={[
+        'theme-btn',
+        'routes-top',
+        (here || routing) && 'menu-here',
+        routing && 'routing-on',
+      ]
         .filter(Boolean)
         .join(' ')}
       id="routesBtn"
-      aria-label="Routes"
-      title="Routes"
+      aria-label={routing ? 'Effacer le routage de la carte' : 'Routes'}
+      title={routing ? 'Effacer le routage' : 'Routes'}
       onClick={() => {
         buzz();
+        if (shownRouting.peek()) {
+          clearRouting();
+          toast('Routage effacé de la carte');
+          return;
+        }
         navinRowChosen();
         menuButtonPress('routes', navBack);
       }}
