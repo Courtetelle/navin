@@ -650,3 +650,42 @@ export function slackSvg(color: string): string {
   const wave = `<path d="M23 30q3.5-4 7 0t7 0" fill="none" stroke-linecap="round"`;
   return `<svg width="60" height="60" viewBox="0 0 60 60">${ring} stroke="#fff" stroke-width="5"/>${ring} stroke="${color}" stroke-width="2.5" stroke-dasharray="3 2.5"/>${wave} stroke="${color}" stroke-width="2.2"/></svg>`;
 }
+
+/** Distance of the four neighbours looked at around a point of sea, degrees. */
+const OFFSHORE_DEG = 0.05;
+
+/**
+ * The points where the sea is asked: a grid twice as fine as the wind's,
+ * moved by half a spacing, without the points on land or hemmed in by it
+ * (the wave model has nothing there), then thinned to at most `most`,
+ * evenly over the area.
+ * @param area - The area shown.
+ * @param most - At most this many points.
+ * @param isLand - Whether a place is on land.
+ * @returns The points of sea.
+ */
+export function seaPoints(
+  area: Area,
+  most: number,
+  isLand: (lat: number, lon: number) => boolean,
+): LatLon[] {
+  const open = (point: LatLon): boolean => {
+    if (isLand(point.lat, point.lon)) return false;
+    const around = [
+      [OFFSHORE_DEG, 0],
+      [-OFFSHORE_DEG, 0],
+      [0, OFFSHORE_DEG],
+      [0, -OFFSHORE_DEG],
+    ].filter(([dLat, dLon]) =>
+      isLand(point.lat + (dLat as number), point.lon + (dLon as number)),
+    );
+    return around.length <= 1;
+  };
+  const kept = gridPoints(area, most * 4, true).filter(open);
+  if (kept.length <= most) return kept;
+  const every = kept.length / most;
+  return Array.from(
+    { length: most },
+    (_, rank) => kept[Math.floor(rank * every)] as LatLon,
+  );
+}

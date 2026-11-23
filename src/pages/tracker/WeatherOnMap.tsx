@@ -20,12 +20,14 @@ import {
   isSlack,
   localModel,
   rainTileUrl,
+  seaPoints,
   slackSvg,
   straitPoints,
   waveLabelHtml,
   windColor,
 } from '../../features/onwater/mapWeather.ts';
 import { onLake } from '../../features/onwater/onLake.ts';
+import { landTest } from '../../features/onwater/shoreFar.ts';
 import { destination } from '../../lib/geo.ts';
 import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
 
@@ -346,12 +348,17 @@ export function WeatherOnMap() {
         weatherRead.value = { ...weatherRead.peek(), sea: null };
         return;
       }
-      void fetchSeaGrid([
-        ...gridPoints(area, most, true),
-        ...straitPoints(area),
-      ]).then((sea) => {
-        if (!closed) weatherRead.value = { ...weatherRead.peek(), sea };
-      });
+      // The sea only where there is sea: points on land have no waves.
+      void landTest()
+        .then((isLand) =>
+          fetchSeaGrid([
+            ...seaPoints(area, most, isLand),
+            ...straitPoints(area),
+          ]),
+        )
+        .then((sea) => {
+          if (!closed) weatherRead.value = { ...weatherRead.peek(), sea };
+        });
     };
     read(true);
     const moved = () => read(false);

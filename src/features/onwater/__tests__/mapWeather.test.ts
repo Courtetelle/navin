@@ -18,6 +18,7 @@ import {
   rainFramesOf,
   rainTileUrl,
   seaGridOf,
+  seaPoints,
   slackSvg,
   straitPoints,
   waveLabelHtml,
@@ -327,5 +328,39 @@ describe('waves and slack water', () => {
     expect(isSlack([0.5], 0)).toBe(false);
     expect(isSlack([Number.NaN], 0)).toBe(false);
     expect(slackSvg('#a1006b')).toContain('stroke-dasharray');
+  });
+});
+
+/**
+ * Land west of 3° W and south of 48.5° N.
+ * @param lat - Latitude.
+ * @param lon - Longitude.
+ * @returns On land.
+ */
+function isLand(lat: number, lon: number): boolean {
+  return lon < -3 || lat < 48.5;
+}
+
+describe('seaPoints', () => {
+  const bay = { south: 48.2, west: -3.6, north: 49.2, east: -2 };
+
+  it('keeps only the points of open sea', () => {
+    const points = seaPoints(bay, 12, isLand);
+    expect(points.length).toBeGreaterThan(4);
+    expect(points.length).toBeLessThanOrEqual(12);
+    for (const point of points) {
+      expect(isLand(point.lat, point.lon)).toBe(false);
+      expect(point.lon).toBeGreaterThanOrEqual(-2.95);
+    }
+  });
+
+  it('fills the sea with as many points as asked', () => {
+    const open = seaPoints(bay, 12, () => false);
+    expect(open).toHaveLength(12);
+    expect(new Set(open.map((point) => point.lat)).size).toBeGreaterThan(2);
+  });
+
+  it('gives nothing on land', () => {
+    expect(seaPoints(bay, 12, () => true)).toEqual([]);
   });
 });
