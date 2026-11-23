@@ -35,6 +35,24 @@ export function splitFlagPort(info: CruiseInfo | null | undefined): boolean {
 }
 
 /**
+ * "A · 8 personnes au maximum" turned into the number of people on board (the
+ * CE design category has its own value; one-shot `ldb.crewMax`).
+ * @param info - Sheet values, changed in place.
+ * @returns `true` when changed.
+ */
+export function crewMaxFromCategory(
+  info: CruiseInfo | null | undefined,
+): boolean {
+  if (!info || typeof info.category !== 'string') return false;
+  const groups = info.category.match(
+    /^\s*(?:[A-D]\b\W*)?(?<count>\d+)\s*pers/i,
+  )?.groups;
+  if (!groups) return false;
+  info.category = groups.count;
+  return true;
+}
+
+/**
  * Unit "kg" taken out of the light displacement value (it is in the label).
  * @param info - Sheet values, changed in place.
  * @returns `true` when changed.

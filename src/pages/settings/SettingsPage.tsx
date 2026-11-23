@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 
+import { AlertSwitch } from '../../components/shared/AlertSwitch.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { MenuSortButton } from '../../components/shared/MenuSortButton.tsx';
@@ -267,18 +268,18 @@ function AllAlerts() {
   const live = ALERT_KINDS.filter((kind) => alertOn(kind, settings)).length;
   const anyOn = live > 0;
   // The state first, then what a touch does: green while on, red once off.
-  let words = '🔕 Alertes désactivées · toucher pour les réactiver';
-  if (live === ALERT_KINDS.length) {
-    words = '🔔 Alertes actives · toucher pour les désactiver';
-  } else if (anyOn) {
-    words = `🔔 ${live} alertes sur ${ALERT_KINDS.length} actives · toucher pour les désactiver`;
+  let onText = 'Alertes actives · toucher pour les désactiver';
+  if (anyOn && live < ALERT_KINDS.length) {
+    onText = `${live} alertes sur ${ALERT_KINDS.length} actives · toucher pour les désactiver`;
   }
   return (
     <div className="all-alerts">
       <ButtonRow>
-        <Button
-          className={anyOn ? 'btn big alerts-live' : 'btn big alerts-off'}
-          data-alerts-state={anyOn ? 'on' : 'off'}
+        <AlertSwitch
+          className="big"
+          on={anyOn}
+          onText={onText}
+          offText="Alertes désactivées · toucher pour les réactiver"
           data-alerts="all"
           onClick={() => {
             buzz();
@@ -293,9 +294,7 @@ function AllAlerts() {
                 : '🔔 Toutes les alertes actives',
             );
           }}
-        >
-          {tr(words)}
-        </Button>
+        />
       </ButtonRow>
       <ReOnChoices kind="all" />
       <h3>{tr('Chaque alerte')}</h3>

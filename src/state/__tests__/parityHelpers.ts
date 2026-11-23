@@ -33,6 +33,21 @@ export function leaveHarnessWorld(): void {
 }
 
 /**
+ * A legacy fixture as NavIn keeps it today: the design category text of the
+ * seeds is the number of people on board (one-shot `ldb.crewMax`).
+ * @param raw - The fixture file text.
+ * @returns The text, brought up to date.
+ */
+export function modernFixture(raw: string): string {
+  return raw
+    .replaceAll(/A · (\d+) personnes au maximum/g, '$1')
+    .replace(
+      '"ldb.flagSplit": true,',
+      '"ldb.flagSplit": true,\n  "ldb.crewMax": true,',
+    );
+}
+
+/**
  * A fixture of scripts/parity/fixtures, without the keys of other domains,
  * as the harness seeds it (strings as-is, other values JSON-encoded).
  * @param name - Fixture name.
@@ -44,10 +59,9 @@ export function readFixture(name: string): Record<string, string> {
     '../../../scripts/parity/fixtures',
     `${name}.json`,
   );
-  const fixture = JSON.parse(readFileSync(path, 'utf8')) as Record<
-    string,
-    unknown
-  >;
+  const fixture = JSON.parse(
+    modernFixture(readFileSync(path, 'utf8')),
+  ) as Record<string, unknown>;
   const seed: Record<string, string> = {};
   for (const [key, value] of Object.entries(fixture)) {
     if (SHELL_KEYS.includes(key)) continue;

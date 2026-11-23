@@ -19,6 +19,7 @@ import { store } from '../storage/store.ts';
 
 import {
   ckColon,
+  crewMaxFromCategory,
   displacementWithoutKg,
   migrateSheets,
   powerWithoutKw,
@@ -112,6 +113,7 @@ export function readBoats(): Boat[] {
   migrateSheets('ldb.modelSplit', boats, splitModelYear);
   migrateSheets('ldb.displKg', boats, displacementWithoutKg);
   migrateSheets('ldb.flagSplit', boats, splitFlagPort);
+  migrateSheets('ldb.crewMax', boats, crewMaxFromCategory);
   for (const boat of boats) migrateBoatChecklists(boat, boats);
   dropOldVersions(boats);
   return boats;

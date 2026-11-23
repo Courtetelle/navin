@@ -1,6 +1,7 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect, useState } from 'react';
 
+import { AlertSwitch } from '../../components/shared/AlertSwitch.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
@@ -227,17 +228,18 @@ export function LightningSetting() {
   return (
     <div className="lightning-alert">
       <ButtonRow className="row">
-        <Button
-          className={on ? 'btn on' : 'btn'}
+        <AlertSwitch
+          className="big"
+          on={on}
+          onText="Alerte orage active · toucher pour la désactiver"
+          offText="Alerte orage désactivée · toucher pour la réactiver"
           data-lightning="toggle"
           onClick={() => {
             buzz();
             setAlertOn('lightning', !on);
             void lightningCheck(true);
           }}
-        >
-          {tr(`⚡ Alerte orage : ${on ? 'OUI' : 'NON'}`)}
-        </Button>
+        />
       </ButtonRow>
       <ReOnChoices kind="lightning" />
       <ButtonRow className="row">

@@ -2,6 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import type { CSSProperties } from 'react';
 import { useEffect, useState } from 'react';
 
+import { AlertSwitch } from '../../components/shared/AlertSwitch.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { ExitIcon } from '../../components/shared/ExitIcon.tsx';
@@ -204,16 +205,17 @@ export function LakeWarnSetting() {
   return (
     <div className="lake-warn-list">
       <ButtonRow className="row">
-        <Button
-          className={on ? 'btn on' : 'btn'}
+        <AlertSwitch
+          className="big"
+          on={on}
+          onText="Alerte des feux active · toucher pour la désactiver"
+          offText="Alerte des feux désactivée · toucher pour la réactiver"
           data-lakewarn="toggle"
           onClick={() => {
             buzz();
             setAlertOn('lakeWarn', !on);
           }}
-        >
-          {tr(`🚨 Alerte des feux : ${on ? 'OUI' : 'NON'}`)}
-        </Button>
+        />
       </ButtonRow>
       <ReOnChoices kind="lakeWarn" />
       <h3>{tr('Le sens des feux sur les rives')}</h3>

@@ -13791,7 +13791,8 @@ h1.menu-title {
   color: var(--fg);
 }
 
-/* Paramétrages › Alertes: the button of all the alerts says their state —
+/* The on/off button of every alert (AlertSwitch: all of them, wind, storm,
+   lake lights, depth) says its state —
    green while they watch, red once off; at night filled while on, dark with
    a dashed edge once off */
 .btn.alerts-live {

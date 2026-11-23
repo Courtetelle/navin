@@ -1,6 +1,7 @@
 import { useSignals } from '@preact/signals-react/runtime';
 import { useEffect } from 'react';
 
+import { AlertSwitch } from '../../components/shared/AlertSwitch.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { WindsockIcon } from '../../components/shared/WindsockIcon.tsx';
@@ -66,14 +67,14 @@ export function WindAlert({ noTest = false, keep = false }: WindAlertProps) {
         )}
       </p>
       <ButtonRow className="row c2">
-        <Button
-          className={config.on ? 'btn on' : 'btn'}
+        <AlertSwitch
+          on={config.on}
+          icon={<WindsockIcon />}
+          onText="Alertes de vent actives · toucher pour les désactiver"
+          offText="Alertes de vent désactivées · toucher pour les réactiver"
           data-walert="toggle"
           onClick={click('toggle')}
-        >
-          <WindsockIcon />
-          {tr(`Alertes de vent : ${config.on ? 'OUI' : 'NON'}`)}
-        </Button>
+        />
         <Button className="btn" data-walert="basis" onClick={click('basis')}>
           {tr(
             `Seuils sur : ${config.basis === 'gust' ? 'rafales' : 'vent moyen'}`,

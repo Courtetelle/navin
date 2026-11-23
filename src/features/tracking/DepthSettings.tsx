@@ -2,6 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
+import { AlertSwitch } from '../../components/shared/AlertSwitch.tsx';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
@@ -204,12 +205,14 @@ function minimumText(minimum: number | null): string {
 
 function DepthToggle() {
   useSignals();
-  const tr = useTr();
   const enabled = state.preferences.settings.value.depthAlarm !== false;
   return (
     <ButtonRow className="row">
-      <Button
-        className={`btn ${enabled ? 'on' : ''}`}
+      <AlertSwitch
+        className="big"
+        on={enabled}
+        onText="Alarme de profondeur active · toucher pour la désactiver"
+        offText="Alarme de profondeur désactivée · toucher pour la réactiver"
         data-depthon="1"
         onClick={() => {
           buzz();
@@ -222,9 +225,7 @@ function DepthToggle() {
             depthAlarmSet(0);
           }
         }}
-      >
-        {tr(`Alarme de profondeur : ${enabled ? 'OUI' : 'NON'}`)}
-      </Button>
+      />
     </ButtonRow>
   );
 }
