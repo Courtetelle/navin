@@ -112,8 +112,8 @@ export function forgetShoreGrid(): void {
   loading = null;
 }
 
-async function fetchGrid(): Promise<ShoreGrid | null> {
-  const response = await fetch(`${import.meta.env.BASE_URL}shore-far.bin`);
+async function fetchGrid(name = 'shore-far.bin'): Promise<ShoreGrid | null> {
+  const response = await fetch(`${import.meta.env.BASE_URL}${name}`);
   if (!response.ok) return null;
   const packed = new Blob([await response.arrayBuffer()]).stream();
   const stream = packed.pipeThrough(new DecompressionStream('gzip'));
@@ -151,5 +151,51 @@ export async function nearWater<T extends { lat?: number; lon?: number }>(
   return places.filter(
     ({ lat, lon }) =>
       lat == null || lon == null || !farFromShore(grid, lat, lon),
+  );
+}
+
+let loadingSea: Promise<ShoreGrid | null> | null = null;
+
+/**
+ * The land farther than 500 m from the sea or the Léman, on a grid of
+ * 0.004° over the French coasts and the Léman (`scripts/shore/build_zones.py`), read once; `null` when it
+ * cannot be read (tried again next time).
+ * @returns The grid or `null`.
+ */
+export function seaGrid500(): Promise<ShoreGrid | null> {
+  const reading = loadingSea ?? fetchGrid('shore-sea500.bin').catch(() => null);
+  loadingSea = reading;
+  void reading.then((grid) => {
+    if (!grid && loadingSea === reading) loadingSea = null;
+  });
+  return reading;
+}
+
+/**
+ * The places within 500 m of the sea or the Léman (or on the water): a station farther inland
+ * says little of the wind on the water. Outside the grid, or without it, the
+ * rule of 1 km ({@link nearWater}) is kept.
+ * @param places - Stations or readings.
+ * @returns Those kept, in the same order.
+ */
+export async function nearSea500<T extends { lat?: number; lon?: number }>(
+  places: readonly T[],
+): Promise<T[]> {
+  const [grid, wide] = await Promise.all([seaGrid500(), shoreGrid()]);
+  return places.filter(({ lat, lon }) => {
+    if (lat == null || lon == null) return true;
+    if (grid && insideGrid(grid, lat, lon)) {
+      return !farFromShore(grid, lat, lon);
+    }
+    return !wide || !farFromShore(wide, lat, lon);
+  });
+}
+
+function insideGrid(grid: ShoreGrid, lat: number, lon: number): boolean {
+  return (
+    lon >= grid.lon0 &&
+    lat >= grid.lat0 &&
+    lon < grid.lon0 + grid.tilesLon &&
+    lat < grid.lat0 + grid.tilesLat
   );
 }
