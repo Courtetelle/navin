@@ -35,11 +35,40 @@ export interface RoutingMark {
   aws?: number;
 }
 
+/** The figures of a routing. */
+export interface RoutingStats {
+  nm: number;
+  sailMin: number;
+  motorMin: number;
+  tacks: number;
+  gybes: number;
+}
+
+/** What a routing was asked with, to route it again at another ETD. */
+export interface RoutingPlan {
+  routeId: string;
+  boatId: string;
+  motorBelow: number;
+  motorKn: number;
+  /** The motor helps the sails. @default undefined */
+  motorAssist?: boolean;
+  model: string;
+  /** The first routing: its ETD, ETA and figures. */
+  base: { departMs: number; arriveMs: number; stats: RoutingStats };
+}
+
 /** A routing shown on the map. */
 export interface ShownRouting {
   /** Id in « Routages » once kept. @default undefined */
   id?: string;
   name: string;
+  /** ETD and ETA, epoch ms. @default undefined */
+  departMs?: number;
+  arriveMs?: number;
+  /** Figures of the routing, to show what an hour earlier or later changes. @default undefined */
+  stats?: RoutingStats;
+  /** How to route it again at another hour. @default undefined */
+  plan?: RoutingPlan;
   /** The way the boat goes, `[lat, lon]`. */
   track: Array<[number, number]>;
   /** The turns of the routing: the Go to goes from one to the next. */
@@ -57,10 +86,13 @@ function kept(): ShownRouting | null {
 /** The routing on the map, `null` without. */
 export const shownRouting = signal<ShownRouting | null>(kept());
 
-/** At most this many places with the wind, the current and the waves. */
-const MOST_MARKS = 14;
+/**
+ * At most this many places with the wind, the current and the waves: the
+ * map shows as many as fit at its zoom.
+ */
+const MOST_MARKS = 80;
 /** Places at least this far apart, nautical miles. */
-const LEAST_SPACING_NM = 0.5;
+const LEAST_SPACING_NM = 0.2;
 
 /**
  * The routing as shown on the map: its way, its turns, and the wind, current
@@ -75,7 +107,7 @@ export function routingShape(
   result: Extract<RoutingResult, { kind: 'done' }>,
   points: readonly RoutePoint[],
 ): ShownRouting {
-  const { steps, nm } = result;
+  const { steps, nm, arriveMs, sailMin, motorMin, tacks, gybes } = result;
   const track: Array<[number, number]> = steps.map((step) => [
     step.lat,
     step.lon,
@@ -109,7 +141,21 @@ export function routingShape(
     });
     next = along + spacing;
   }
-  return { name, track, turns: routingTurns(result, points), marks };
+  return {
+    name,
+    track,
+    turns: routingTurns(result, points),
+    marks,
+    departMs: steps[0]?.ms ?? arriveMs,
+    arriveMs,
+    stats: {
+      nm,
+      sailMin,
+      motorMin,
+      tacks,
+      gybes,
+    },
+  };
 }
 
 const SAVED_KEY = 'ldb.routings';

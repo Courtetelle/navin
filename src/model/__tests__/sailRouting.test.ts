@@ -208,3 +208,34 @@ describe('apparentWind', () => {
     expect(run).toStrictEqual({ awa: 180, aws: 6 });
   });
 });
+
+describe('motor under the threshold', () => {
+  it('goes straight, no tack nor gybe, the motor helping the sails if asked', () => {
+    const from = { lat: 48.6, lon: -2.8 };
+    const to = destination(from, 0, 6);
+    const weak = { twd: 0, tws: 4 };
+    const ask: RoutingAsk = {
+      points: [from, to],
+      departMs: 0,
+      windAt: () => weak,
+      sailSpeed: (twa) => ({ kn: twa < 50 ? 0 : 3, sails: 'Polaire' }),
+      polar: { twa: [40, 90, 180], tws: [6], kn: [[0], [3], [3]] },
+      motorBelow: 4,
+      motorKn: 6,
+    };
+    const done = routeSail(ask);
+    if (done.kind !== 'done') throw new Error('no routing');
+    expect(done.tacks + done.gybes).toBe(0);
+    expect(done.steps.every((step) => step.mode === 'motor')).toBe(true);
+    expect(done.nm).toBeCloseTo(6, 0);
+    const reach = routeSail({
+      ...ask,
+      windAt: () => ({ twd: 90, tws: 4 }),
+      motorKn: 2,
+      motorAssist: true,
+    });
+    if (reach.kind !== 'done') throw new Error('no routing');
+    expect(reach.steps[0]?.sails).toBe('Voiles + moteur');
+    expect(reach.steps[0]?.kn).toBe(3);
+  });
+});
