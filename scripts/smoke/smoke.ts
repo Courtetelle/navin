@@ -409,7 +409,7 @@ async function bars(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(300);
   check(
     theme,
-    'T upright: ＋ and − one under the other under the arrow, full size',
+    'T upright: − then ＋ one under the other under the arrow, full size',
     await page.evaluate(() => {
       // eslint-disable-next-line unicorn/consistent-function-scoping -- runs in the page
       const box = (selector: string) =>
@@ -421,8 +421,8 @@ async function bars(page: Page, theme: string): Promise<void> {
       ].map(box);
       if (!arrow || !plus || !minus) return false;
       return (
-        plus.top >= arrow.bottom &&
-        minus.top >= plus.bottom &&
+        minus.top >= arrow.bottom &&
+        plus.top >= minus.bottom &&
         Math.abs(plus.left - minus.left) < 2 &&
         plus.height >= arrow.height - 2
       );
