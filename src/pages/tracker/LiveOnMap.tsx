@@ -41,6 +41,7 @@ import {
   liveZoneIds,
   liveZonesShown,
 } from './liveOnMap.ts';
+import { fitZones } from './zoneFit.ts';
 
 /** The stations read before the map of NavIn is built, in km. */
 const RADIUS = 60;
@@ -279,15 +280,7 @@ export function LiveOnMap() {
             ).addTo(ring);
           }
           // Back from a station card the map is already on its badge.
-          if (box && !seen) {
-            map.fitBounds(
-              [
-                [box.south, box.west],
-                [box.north, box.east],
-              ],
-              { padding: [16, 16] },
-            );
-          }
+          if (box && !seen) fitZones(map, box);
           read();
         });
         if (alert?.zone) {

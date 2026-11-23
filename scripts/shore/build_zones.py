@@ -152,6 +152,7 @@ LAKES = [
       (6.14, 46.20)]),
 ]
 
+# The grid holds the sea and the Léman: 500 m from the shore everywhere.
 GRID = (-10, 12, 40, 53)
 PER_DEG = 250
 NEAR_M = 500
