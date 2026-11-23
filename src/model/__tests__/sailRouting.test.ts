@@ -5,6 +5,7 @@ import type { Polar } from '../polars.ts';
 import { polarSpeed } from '../polars.ts';
 import type { RoutingAsk, Wind } from '../sailRouting.ts';
 import {
+  apparentWind,
   crabInto,
   crossTrack,
   groundOf,
@@ -194,5 +195,16 @@ describe('helpers', () => {
     const end = destination(START, 0, 10);
     const off = destination(destination(START, 0, 5), 90, 1);
     expect(crossTrack(off, START, end)).toBeCloseTo(1, 1);
+  });
+});
+
+describe('apparentWind', () => {
+  it('comes forward and grows upwind, eases off downwind', () => {
+    expect(apparentWind(90, 10, 0)).toStrictEqual({ awa: 90, aws: 10 });
+    const close = apparentWind(45, 12, 6);
+    expect(close.awa).toBeLessThan(45);
+    expect(close.aws).toBeGreaterThan(12);
+    const run = apparentWind(180, 12, 6);
+    expect(run).toStrictEqual({ awa: 180, aws: 6 });
   });
 });

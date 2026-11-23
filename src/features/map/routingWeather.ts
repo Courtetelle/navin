@@ -221,6 +221,10 @@ export interface RouteSea {
   driftKn: number[][];
   /** `[place][hour]` direction the current flows to, degrees. */
   setDeg: number[][];
+  /** `[place][hour]` where the waves come from, degrees. */
+  waveFrom: number[][];
+  /** `[place][hour]` wave period, seconds. */
+  wavePeriod: number[][];
 }
 
 /** The sea at a place and time. */
@@ -231,6 +235,10 @@ export interface SeaHere {
   driftKn: number;
   /** Direction the current flows to, degrees. */
   setDeg: number;
+  /** Where the waves come from, degrees (`NaN` when unknown). */
+  waveFrom: number;
+  /** Wave period, seconds (`NaN` when unknown). */
+  wavePeriod: number;
 }
 
 interface MarineReply {
@@ -242,6 +250,10 @@ interface MarineReply {
     ocean_current_velocity?: Array<number | null>;
     // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
     ocean_current_direction?: Array<number | null>;
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+    wave_direction?: Array<number | null>;
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+    wave_period?: Array<number | null>;
   };
 }
 
@@ -258,7 +270,7 @@ export async function fetchRouteSea(
   if (places.length === 0) return { error: 'La route n’a pas de point.' };
   const lat = places.map((place) => place.lat.toFixed(3)).join(',');
   const lon = places.map((place) => place.lon.toFixed(3)).join(',');
-  const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,ocean_current_velocity,ocean_current_direction&timeformat=unixtime&forecast_days=8&cell_selection=sea`;
+  const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,wave_direction,wave_period,ocean_current_velocity,ocean_current_direction&timeformat=unixtime&forecast_days=8&cell_selection=sea`;
   let reply: Response;
   try {
     reply = await openMeteoFetch(url);
@@ -284,6 +296,8 @@ export async function fetchRouteSea(
       clean(item.hourly?.ocean_current_velocity, 1 / 1.852),
     ),
     setDeg: list.map((item) => clean(item.hourly?.ocean_current_direction)),
+    waveFrom: list.map((item) => clean(item.hourly?.wave_direction)),
+    wavePeriod: list.map((item) => clean(item.hourly?.wave_period)),
   };
 }
 
@@ -301,7 +315,7 @@ export function seaAt(
   lon: number,
   ms: number,
 ): SeaHere | null {
-  const { hours, places, waveM, driftKn, setDeg } = sea;
+  const { hours, places, waveM, driftKn, setDeg, waveFrom, wavePeriod } = sea;
   const first = hours[0] as number;
   const span = hours.length > 1 ? (hours[1] as number) - first : 3_600_000;
   const hour = Math.round((ms - first) / span);
@@ -322,5 +336,7 @@ export function seaAt(
     waveM: waveM[place]?.[hour] ?? Number.NaN,
     driftKn: known ? drift : 0,
     setDeg: known ? set : 0,
+    waveFrom: waveFrom[place]?.[hour] ?? Number.NaN,
+    wavePeriod: wavePeriod[place]?.[hour] ?? Number.NaN,
   };
 }

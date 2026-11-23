@@ -1,9 +1,10 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { boatsByNav } from '../../features/boats/navOrder.ts';
 import { shownMap } from '../../features/map/mapFull.ts';
 import { editRoute } from '../../features/map/routeEditor.ts';
@@ -17,16 +18,26 @@ import {
   saveRoutingPrefs,
 } from '../../features/map/routingRun.ts';
 import {
+  clearRouting,
   fitRouting,
   gotoRouting,
   showRouting,
 } from '../../features/map/routingShown.ts';
-import { routingShape } from '../../features/map/routingState.ts';
+import type { SavedRouting } from '../../features/map/routingState.ts';
+import {
+  removeRouting,
+  renameRouting,
+  routingShape,
+  saveRouting,
+  savedRoutings,
+  shownRouting,
+} from '../../features/map/routingState.ts';
 import { ROUTING_MODELS } from '../../features/map/routingWeather.ts';
 import { tracker } from '../../features/map/trackerState.ts';
+import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { fmtDur, fmtShortDate, fmtTime, pad } from '../../lib/format.ts';
+import { fmtDur, fmtShortDate, fmtTime, pad, uid } from '../../lib/format.ts';
 import { isBoatPolar } from '../../model/polars.ts';
 import type { NavRoute } from '../../model/routes.ts';
 import type { RoutingResult, RoutingStep } from '../../model/sailRouting.ts';
@@ -104,6 +115,7 @@ export function RoutingPanel() {
         remonte le courant pour tenir la route, et la vitesse fond donne l’heure
         d’arrivée. Les vagues de plus d’un mètre ralentissent, surtout au près.
       </HelpText>
+      <SavedRoutings />
       <div className="section rtg-form" id="rtgForm">
         <label>
           {tr('Route')}
@@ -221,6 +233,7 @@ interface OutcomeProps {
 
 function RoutingOutcome({ run, route }: OutcomeProps) {
   const tr = useTr();
+  const id = useMemo(() => (run ? uid() : ''), [run]);
   if (run.kind === 'error') {
     return (
       <p className="help rtg-msg" id="rtgMsg">
@@ -228,7 +241,7 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
       </p>
     );
   }
-  const { result, landSeen, seaSeen } = run;
+  const { result, landSeen, seaSeen, wind } = run;
   if (result.kind === 'no-wind') {
     return (
       <p className="help rtg-msg" id="rtgMsg">
@@ -245,6 +258,24 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
   }
   const depart = result.steps[0]?.ms ?? result.arriveMs;
   const summary = routingSummary(result, depart);
+  // Kept in « Routages » under one id, however many buttons are touched.
+  const keep = () => {
+    const shown = {
+      ...routingShape(`${route.name} · ${when(depart)}`, result, route.points),
+      id,
+    };
+    saveRouting({
+      id,
+      at: new Date().toISOString(),
+      departMs: depart,
+      arriveMs: result.arriveMs,
+      nm: result.nm,
+      summary,
+      model: wind.model,
+      shown,
+    });
+    return shown;
+  };
   return (
     <div className="section rtg-result" id="rtgResult">
       <p className="rtg-eta">
@@ -275,7 +306,7 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
           id="rtgShow"
           onClick={() => {
             buzz();
-            showRouting(routingShape(route.name, result, route.points));
+            showRouting(keep());
             go('tracker');
             // The map opens, then the whole routing is shown.
             setTimeout(() => {
@@ -293,12 +324,25 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
           id="rtgGoto"
           onClick={() => {
             buzz();
-            showRouting(routingShape(route.name, result, route.points));
+            showRouting(keep());
             go('tracker');
             gotoRouting();
           }}
         >
           {tr('🎯 Go to le long du routage, segment par segment')}
+        </Button>
+      </ButtonRow>
+      <ButtonRow>
+        <Button
+          className="btn"
+          id="rtgSave"
+          onClick={() => {
+            buzz();
+            keep();
+            toast('Routage enregistré dans Routages');
+          }}
+        >
+          {tr('💾 Enregistrer dans Routages')}
         </Button>
       </ButtonRow>
       <ButtonRow>
@@ -484,4 +528,110 @@ function routingText(result: Done, route: NavRoute, depart: number): string {
     );
   }
   return `${lines.join('\n')}\n`;
+}
+
+function openOnMap(saved: SavedRouting): void {
+  buzz();
+  showRouting(saved.shown);
+  go('tracker');
+  setTimeout(() => {
+    const map = tracker.current?.map ?? shownMap();
+    if (map) fitRouting(map);
+  }, 700);
+}
+
+/**
+ * The routings kept, as the routes of « Dessiner »: a touch shows one on the
+ * map, a long press changes its name; swiped, 🎯 Go to along it and 🗑.
+ * @returns The list.
+ */
+function SavedRoutings() {
+  useSignals();
+  const tr = useTr();
+  const list = savedRoutings.value;
+  return (
+    <section className="field" id="rtgSaved">
+      <h3 className="sub-h">{tr('📚 Routages')}</h3>
+      {list.length > 0 ? (
+        list.map((saved) => <SavedItem key={saved.id} saved={saved} />)
+      ) : (
+        <p className="help">
+          {tr(
+            'Aucun routage enregistré : calculez-en un, puis « Enregistrer » ou « Terminer ».',
+            { help: true },
+          )}
+        </p>
+      )}
+    </section>
+  );
+}
+
+function SavedItem({ saved }: { saved: SavedRouting }) {
+  const tr = useTr();
+  const [editing, setEditing] = useState<string | null>(null);
+  const press = useLongPress(() => setEditing(saved.shown.name));
+  const { name } = saved.shown;
+  return (
+    <SwipeRow
+      id={saved.id}
+      name={name}
+      onView={() => {
+        openOnMap(saved);
+        gotoRouting();
+      }}
+      viewAs={{ icon: '🎯', label: 'Go to' }}
+      onDelete={(id) => {
+        if (shownRouting.peek()?.id === id) clearRouting();
+        removeRouting(id);
+      }}
+    >
+      <div className="section mark-item rt-band" data-routing={saved.id}>
+        {editing === null ? (
+          <button
+            type="button"
+            className={`mark-head${press.hit ? ' lp-hit' : ''}`}
+            aria-label={tr(
+              `${name} · toucher : sur la carte · appui long : changer le nom`,
+            )}
+            onClick={() => openOnMap(saved)}
+            {...press.handlers}
+          >
+            <span className="mk-pin" aria-hidden="true">
+              ⛵
+            </span>
+            <span className="mk-text">
+              <b className="b-nm">{name}</b>
+              <small>
+                {tr(`Arrivée ${when(saved.arriveMs)} · ${saved.summary}`)}
+              </small>
+            </span>
+          </button>
+        ) : (
+          <form
+            className="mark-head mark-edit"
+            onSubmit={(event) => {
+              event.preventDefault();
+              setEditing(null);
+              if (editing.trim()) renameRouting(saved.id, editing);
+            }}
+          >
+            <span className="mk-pin" aria-hidden="true">
+              ⛵
+            </span>
+            <input
+              className="text"
+              // Opened by a long press, to be written in at once.
+              autoFocus
+              value={editing}
+              onChange={(event) => setEditing(event.target.value)}
+              onBlur={() => {
+                setEditing(null);
+                if (editing.trim()) renameRouting(saved.id, editing);
+              }}
+            />
+          </form>
+        )}
+      </div>
+    </SwipeRow>
+  );
 }

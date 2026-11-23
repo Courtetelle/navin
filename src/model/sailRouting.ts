@@ -28,6 +28,10 @@ export interface Sea {
   driftKn: number;
   /** Direction the current flows to, degrees. */
   setDeg: number;
+  /** Where the waves come from, degrees. @default undefined */
+  waveFrom?: number;
+  /** Wave period, seconds. @default undefined */
+  wavePeriod?: number;
 }
 
 /** The speed of the boat under sail, and with which sails. */
@@ -97,6 +101,14 @@ export interface RoutingStep {
   setDeg: number;
   /** Wave height, metres (`NaN` unknown). */
   waveM: number;
+  /** Where the waves come from, degrees (`NaN` unknown). */
+  waveFrom: number;
+  /** Wave period, seconds (`NaN` unknown). */
+  wavePeriod: number;
+  /** Angle to the apparent wind, degrees from 0 to 180. */
+  awa: number;
+  /** Apparent wind, knots. */
+  aws: number;
 }
 
 /** One leg of the routing, from a point of the route to the next. */
@@ -267,6 +279,9 @@ export function routeSail(ask: RoutingAsk): RoutingResult {
         driftKn: Math.round(sea.driftKn * 10) / 10,
         setDeg: Math.round(sea.setDeg),
         waveM: Math.round(sea.waveM * 10) / 10,
+        waveFrom: Math.round(sea.waveFrom ?? Number.NaN),
+        wavePeriod: Math.round((sea.wavePeriod ?? Number.NaN) * 10) / 10,
+        ...apparentWind(twa, wind.tws, kn),
       });
       const nm = (ground.sog * runMs) / 3_600_000;
       here =
@@ -515,4 +530,25 @@ export function routingTurns(
     (point, rank) =>
       rank === 0 || distNM(point, turns[rank - 1] as LatLon) > 0.02,
   );
+}
+
+/**
+ * The apparent wind on board: the true wind and the wind of the speed of
+ * the boat through the water.
+ * @param twa - Angle to the true wind, degrees from 0 to 180.
+ * @param tws - True wind, knots.
+ * @param kn - Speed through the water, knots.
+ * @returns The angle to the apparent wind (0 to 180°) and its speed.
+ */
+export function apparentWind(
+  twa: number,
+  tws: number,
+  kn: number,
+): { awa: number; aws: number } {
+  const along = tws * Math.cos(rad(twa)) + kn;
+  const across = tws * Math.sin(rad(twa));
+  return {
+    awa: Math.round((Math.atan2(Math.abs(across), along) * 180) / Math.PI),
+    aws: Math.round(Math.hypot(along, across) * 10) / 10,
+  };
 }
