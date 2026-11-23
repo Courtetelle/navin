@@ -171,7 +171,7 @@ export function LiveButtons() {
     waves:
       'Vagues : Open-Meteo Marine, hauteur significative Hs en m et degré Douglas en couleur ; flèche aux couleurs de la cambrure (hauteur sur longueur d’onde, du vert au violet), bleue sans période.',
     currents:
-      'Courants : Open-Meteo Marine, flèches noires en nœuds ; étale marquée à part.',
+      'Courants : Open-Meteo Marine, nœuds ; flèche bordée de noir, vert pomme quand le vent va avec le courant, puis jaune, orange et rouge vif vent contre courant (noire sous 6 nd de vent) ; étale marquée à part.',
     rain:
       step === 0
         ? `Pluie : radar RainViewer${rainAt == null ? '' : ` de ${hourText(rainAt)}`}, du bleu clair (faible) au violet (forte).`

@@ -531,6 +531,7 @@ export function arrowSvg(
   scale: number,
   color: string,
   wavy: boolean,
+  halo = '#fff',
 ): string {
   const size = 60;
   const mid = size / 2;
@@ -553,7 +554,68 @@ export function arrowSvg(
   const tip = `M${mid - 6 - fit * 3} ${head + 9 + fit * 3}L${mid} ${head}L${mid + 6 + fit * 3} ${head + 9 + fit * 3}`;
   const turn = `transform="rotate(${Math.round(toward)} ${mid} ${mid})"`;
   const line = `fill="none" stroke-linecap="round" stroke-linejoin="round"`;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><g ${turn} ${line}><path d="${staff}${tip}" stroke="#fff" stroke-width="${width + 3}"/><path d="${staff}${tip}" stroke="${color}" stroke-width="${width}"/></g></svg>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><g ${turn} ${line}><path d="${staff}${tip}" stroke="${halo}" stroke-width="${width + 3}"/><path d="${staff}${tip}" stroke="${color}" stroke-width="${width}"/></g></svg>`;
+}
+
+/** Under this wind, knots, the current keeps its plain colour. */
+export const WIND_FOR_CURRENT_KN = 6;
+/** The colour of a current without wind enough to matter. */
+export const CURRENT_PLAIN = '#000';
+
+/**
+ * The colour of a current against the wind: apple green when the wind goes
+ * with the current, then yellow, orange and bright red when it blows
+ * against it (short, steep, breaking sea). Plain black in light wind.
+ * @param currentToward - Where the current goes, degrees.
+ * @param windFrom - Where the wind comes from, degrees.
+ * @param windKn - The wind, knots.
+ * @returns A CSS colour.
+ */
+export function currentWindColor(
+  currentToward: number,
+  windFrom: number,
+  windKn: number,
+): string {
+  if (
+    !Number.isFinite(currentToward) ||
+    !Number.isFinite(windFrom) ||
+    !(windKn >= WIND_FOR_CURRENT_KN)
+  ) {
+    return CURRENT_PLAIN;
+  }
+  // Angle between where the wind goes and where the current goes, 0 to 180.
+  const gap = Math.abs(((windFrom + 180 - currentToward + 540) % 360) - 180);
+  if (gap <= 45) return '#7ed321';
+  if (gap <= 90) return '#f5d000';
+  if (gap <= 135) return '#ff7a00';
+  return '#ff1a1a';
+}
+
+/**
+ * The nearest point of a grid, within a distance.
+ * @param points - The points.
+ * @param lat - Latitude.
+ * @param lon - Longitude.
+ * @param most - At most this far, degrees.
+ * @returns The point, or null.
+ */
+export function nearestPoint<T extends LatLon>(
+  points: readonly T[],
+  lat: number,
+  lon: number,
+  most: number,
+): T | null {
+  let best: T | null = null;
+  let least = most;
+  const squash = Math.cos((lat * Math.PI) / 180);
+  for (const point of points) {
+    const away = Math.hypot(point.lat - lat, (point.lon - lon) * squash);
+    if (away <= least) {
+      least = away;
+      best = point;
+    }
+  }
+  return best;
 }
 
 /**

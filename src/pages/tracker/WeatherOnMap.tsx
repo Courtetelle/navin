@@ -17,6 +17,7 @@ import {
   barbSvg,
   cellHalf,
   currentShown,
+  currentWindColor,
   fetchRainFrames,
   fetchSeaGrid,
   fetchWindGrid,
@@ -24,6 +25,7 @@ import {
   hourRank,
   isSlack,
   localModel,
+  nearestPoint,
   rainColor,
   rainTileUrl,
   roundStep,
@@ -291,6 +293,18 @@ function drawGrids(
         ) {
           continue;
         }
+        // Wind with or against the current: from green to bright red.
+        const near = wind
+          ? nearestPoint(wind.points, point.lat, point.lon, 1.5)
+          : null;
+        const windRank = wind ? hourRank(wind.hours, ms) : -1;
+        const color = near
+          ? currentWindColor(
+              toward,
+              near.from[windRank] ?? Number.NaN,
+              near.speed[windRank] ?? Number.NaN,
+            )
+          : CURRENT_COLOR;
         if (isSlack(point.current, rank)) {
           // Slack water: a dashed ring, no arrow, the word in full.
           addMark(
@@ -307,7 +321,14 @@ function drawGrids(
             layer,
             point.lat,
             point.lon,
-            `${arrowSvg(toward + turn, speed / CURRENT_FULL_KN, CURRENT_COLOR, false)}<span class="wx-lbl wx-cur">${decimal(speed)} nd</span>`,
+            `${arrowSvg(
+              toward + turn,
+              speed / CURRENT_FULL_KN,
+              color,
+              false,
+              // A black edge: not taken for the wavy arrow of the waves.
+              color === CURRENT_COLOR ? '#fff' : '#000',
+            )}<span class="wx-lbl wx-cur">${decimal(speed)} nd</span>`,
             60,
             18,
             0,
