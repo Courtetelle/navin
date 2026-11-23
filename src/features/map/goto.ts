@@ -10,16 +10,38 @@ import { playAlarm } from './external.ts';
 import { shownMap } from './mapFull.ts';
 import { drawGotoLines, marksRedraw } from './marksDraw.ts';
 import { bearingText, distanceText } from './relativeText.ts';
+import { legTarget, routingLeg, shownRouting } from './routingState.ts';
 import { setFollow, tracker } from './trackerState.ts';
 import { showZoomOnMap } from './zoomShown.ts';
 
 /** A Go to target (`ldb.goto`). */
-interface GotoTarget {
+export interface GotoTarget {
   lat: number;
   lon: number;
   name: string;
   /** Arrival already signalled. @default undefined */
   arrived?: boolean;
+  /** The turn of the routing shown aimed at. @default undefined */
+  leg?: number;
+}
+
+/**
+ * The Go to of a routing passes from one leg to the next as the boat goes.
+ * @param target - The Go to.
+ * @param me - The boat.
+ * @returns The next target, or `null` to keep this one.
+ */
+function advance(
+  target: GotoTarget,
+  me: { lat: number; lon: number },
+): GotoTarget | null {
+  const shown = shownRouting.peek();
+  if (target.leg === undefined || !shown) return null;
+  const leg = routingLeg(shown.turns, me, target.leg);
+  if (leg === target.leg) return null;
+  const next = legTarget(shown, leg);
+  toast(`Go to ${next.name}`);
+  return next;
 }
 
 /** Texts of the Go to bar; without position, only `waiting`. */
@@ -175,12 +197,18 @@ export function gotoTexts(
 
 /** Refresh the Go to bar and the lines on the maps (legacy `gotoUpdate`). */
 export function gotoUpdate(): void {
-  const target = gotoTarget.value;
+  let target = gotoTarget.value;
   if (!target) {
     gotoBar.value = null;
     return;
   }
   const me = herePos();
+  const next = me ? advance(target, me) : null;
+  if (next) {
+    target = next;
+    gotoTarget.value = next;
+    store.set('ldb.goto', next);
+  }
   if (me) signalArrival(target, distNM(me, target));
   gotoBar.value = gotoTexts(target, me);
   drawGotoLines();
