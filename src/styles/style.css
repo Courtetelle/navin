@@ -15448,34 +15448,31 @@ html body .live-slot > .rail-btn.live-layer.on {
   bottom: auto;
 }
 
-/* The routing on the map: wind, current and waves at places along it,
-   with the symbols of LiveMétéo, and the angle to the apparent wind. */
+/* The routing on the map: at places along it, set off from the line, the
+   wind, the waves and the current where and when the boat passes, with the
+   symbols of LiveMétéo; below, the hour and the apparent wind. */
 .leaflet-marker-icon.rtm {
-  width: auto !important;
-  height: auto !important;
-}
-.rtm {
   display: flex;
-  gap: 2px;
+  flex-direction: column;
   align-items: center;
-  padding: 1px 4px;
-  font-size: 11px;
-  line-height: 1.2;
-  white-space: nowrap;
-  color: #1a1a1a;
-  background: rgb(255 248 214 / 88%);
-  border: 1px solid #b37f00;
-  border-radius: 6px;
-  transform: translate(10px, -50%);
+  justify-content: center;
   pointer-events: none;
 }
+.rtm .rtm-syms {
+  display: flex;
+  gap: 2px;
+  align-items: flex-start;
+  justify-content: center;
+}
 .rtm .rtm-sym {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
+  width: 62px;
 }
 .rtm .rtm-sym svg {
-  width: 30px;
-  height: 30px;
+  width: 52px;
+  height: 52px;
   flex: none;
 }
 .rtm .wx-lbl {
@@ -15483,17 +15480,66 @@ html body .live-slot > .rail-btn.live-layer.on {
   display: inline-block;
   margin: 0;
   transform: none;
+  font-size: 12px;
+}
+.rtm .rtm-tag {
+  margin-top: 1px;
+  padding: 0 5px;
   font-size: 11px;
+  line-height: 1.35;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #1a1a1a;
+  background: rgb(255 248 214 / 92%);
+  border: 1px solid #b37f00;
+  border-radius: 5px;
 }
 .rtm .rtm-aw {
-  font-weight: 800;
   color: #7a3d00;
 }
-:root[data-theme='night'] .rtm {
+:root[data-theme='night'] .rtm .rtm-tag {
   color: var(--fg);
   background: rgb(30 10 0 / 88%);
   border-color: #8a3a08;
 }
 :root[data-theme='night'] .rtm .rtm-aw {
   color: var(--fg);
+}
+/* ETD on the point of departure, ETA on the point of arrival. */
+.leaflet-marker-icon.rtm-end {
+  width: max-content !important;
+  height: auto !important;
+  padding: 1px 6px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #fff;
+  background: #1a1a1a;
+  border: 2px solid #f5b800;
+  border-radius: 6px;
+  transform-origin: 0 0;
+  margin: 8px 0 0 8px;
+  pointer-events: none;
+}
+.leaflet-marker-icon.rtm-end b {
+  color: #f5b800;
+}
+/* The ETD moved hour by hour on the map. */
+.rtg-bar .rtg-shift {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.rtg-bar .rtg-shift .btn {
+  min-width: 52px;
+  font-size: 20px;
+}
+.rtg-bar .rtg-times {
+  flex: 1;
+  text-align: center;
+  line-height: 1.3;
+}
+.rtg-bar .rtg-changes {
+  font-size: 13px;
+  text-align: center;
 }

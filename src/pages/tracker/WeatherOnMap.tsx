@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 
 import { leaflet } from '../../features/map/leaflet.ts';
 import { mapBearing } from '../../features/map/mapOrientation.ts';
+import { shownRouting } from '../../features/map/routingState.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { Area, Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import {
@@ -336,7 +337,8 @@ export function WeatherOnMap() {
   const zoneArea = liveZoneArea.value;
   const layers = weatherLayers.value;
   const step = forecastStep.value;
-  const on = asked > 0;
+  // A routing on the map: only the route and its marks are shown.
+  const on = asked > 0 && shownRouting.value === null;
   const lake = onLake();
   const drawn = weatherRead.value;
   const mapReady = weatherMapReady.value;

@@ -225,7 +225,13 @@ describe('runRouting', () => {
       route,
       { id: 'b', info: {}, polar },
       HOUR0 + 6 * 3_600_000,
-      { motorBelow: 5, motorKn: 6, model: 'best_match', boatId: 'b' },
+      {
+        motorBelow: 5,
+        motorKn: 6,
+        motorAssist: false,
+        model: 'best_match',
+        boatId: 'b',
+      },
     );
     if (run.kind !== 'result' || run.result.kind !== 'done') {
       throw new Error('no routing');
@@ -249,7 +255,13 @@ describe('runRouting', () => {
         route,
         { id: 'b', info: {}, polar },
         HOUR0 + 6 * 3_600_000,
-        { motorBelow: 5, motorKn: 6, model: 'best_match', boatId: 'b' },
+        {
+          motorBelow: 5,
+          motorKn: 6,
+          motorAssist: false,
+          model: 'best_match',
+          boatId: 'b',
+        },
       );
       if (run.kind !== 'result' || run.result.kind !== 'done') {
         throw new Error('no routing');
@@ -263,6 +275,7 @@ describe('runRouting', () => {
     const prefs = {
       motorBelow: 5,
       motorKn: 6,
+      motorAssist: false,
       model: 'best_match',
       boatId: '',
     };

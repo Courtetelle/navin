@@ -57,6 +57,12 @@ export interface RoutingAsk {
   /** Speed under motor (knots). */
   motorKn: number;
   /**
+   * The motor helps the sails (motor-sailing, straight to the point, at the
+   * better of the two speeds) instead of taking their place.
+   * @default false
+   */
+  motorAssist?: boolean;
+  /**
    * Whether the boat can sail from one place to another without touching the
    * land (the water of the map file); without it, the land is not seen.
    * @default undefined
@@ -211,6 +217,15 @@ export function routeSail(ask: RoutingAsk): RoutingResult {
         course = toTarget;
         kn = ask.motorKn * motorWaveShare(sea.waveM);
         sails = 'Moteur';
+        if (ask.motorAssist) {
+          // Motor-sailing: the sails straight to the point help the motor.
+          const twaDirect = foldAngle(wind.twd - toTarget);
+          const sailing =
+            ask.sailSpeed(twaDirect, wind.tws).kn *
+            waveShare(sea.waveM, twaDirect);
+          kn = Math.max(kn, sailing);
+          sails = 'Voiles + moteur';
+        }
         mode = null;
         side = null;
       }

@@ -2562,6 +2562,26 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
         (await page.locator('.rtm .rtm-aw').first().textContent()) ?? ''
       ).includes('∡'),
   );
+  check(
+    theme,
+    'only the route: ETD at the start, ETA at the end',
+    (await page.locator('.rtm-end').count()) === 2 &&
+      ((await page.locator('.rtm-end').last().textContent()) ?? '').includes(
+        'ETA',
+      ),
+  );
+  const etd = (await page.locator('#rtgBar .rtg-times').textContent()) ?? '';
+  await page.locator('#rtgLater').click();
+  await page.waitForTimeout(2000);
+  const later = (await page.locator('#rtgBar .rtg-times').textContent()) ?? '';
+  check(
+    theme,
+    `▶ moves the ETD an hour later, routed again (${later.slice(0, 40)})`,
+    later !== etd &&
+      ((await page.locator('#rtgChanges').textContent()) ?? '').includes(
+        '+1 h',
+      ),
+  );
   await showRow(page);
   check(
     theme,
