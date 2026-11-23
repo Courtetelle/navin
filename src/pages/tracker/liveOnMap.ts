@@ -1,6 +1,6 @@
 import { signal } from '@preact/signals-react';
 
-import type { ZoneBox } from '../../features/zones/meteoZones.ts';
+import type { MeteoZone, ZoneBox } from '../../features/zones/meteoZones.ts';
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
 import { state, updateSettings } from '../../state/index.ts';
@@ -81,3 +81,6 @@ export const zonePickOpen = signal(false);
 
 /** The box of the zones shown, for the forecast laid over them. */
 export const liveZoneArea = signal<ZoneBox | null>(null);
+
+/** The zones LiveMétéo shows now, for the button of the zone. */
+export const liveZonesShown = signal<MeteoZone[]>([]);

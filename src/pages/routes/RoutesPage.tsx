@@ -1,4 +1,3 @@
-import { signal } from '@preact/signals-react';
 import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
@@ -7,6 +6,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
 import { editRoute, routeSummary } from '../../features/map/routeEditor.ts';
+import { routesPart } from '../../features/map/routeMode.ts';
 import { SwipeRow } from '../../features/prep/index.ts';
 import {
   ListPublishRow,
@@ -20,9 +20,6 @@ import { routeTimes, routeToGpx } from '../../model/routes.ts';
 import { deliver, removeRoute, renameRoute, state } from '../../state/index.ts';
 
 import { RoutingPanel } from './RoutingPanel.tsx';
-
-/** The part of Routes shown: draw routes, or a weather routing. */
-const routesPart = signal<'draw' | 'routing'>('draw');
 
 /**
  * Screen `routes`, in two parts: « Dessiner » (the routes drawn on the map,

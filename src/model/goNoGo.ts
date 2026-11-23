@@ -170,7 +170,25 @@ export interface Hour {
   /** Pressure at sea level, hPa. */
   pressure: number | null;
   rain: number | null;
+  /**
+   * The current, knots, where it is known (along a route): its speed and
+   * where it goes, degrees.
+   * @default undefined
+   */
+  currentKn?: number | null;
+  /** @default undefined */
+  currentToward?: number | null;
 }
+
+/**
+ * Wind against current: the current within 45° of where the wind comes
+ * from. From 1 kn of current and 15 kn of wind, orange; from 2 kn and
+ * 20 kn, red. A current of 3 kn or more alone: orange.
+ */
+export const TIDE_RULES = {
+  against: { orange: [1, 15], red: [2, 20] },
+  strong: 3,
+} as const;
 
 /**
  * The course planned: one for all the hours, none (upwind), or one per hour
@@ -340,6 +358,7 @@ function hitsAt(
         `pression en chute de ${fr(value, 1)} hPa en 3 h ≥ ${limit}`,
     );
   }
+  tideHits(hits, hour);
   if (limits.cap) {
     if (hour.windKn != null && hour.windKn > limits.cap.windKn) {
       hits.push({
@@ -386,6 +405,28 @@ export function hourLight(
       hour.windFrom,
     ),
   };
+}
+
+function tideHits(hits: Hit[], hour: Hour): void {
+  const { currentKn, currentToward, windKn, windFrom } = hour;
+  if (currentKn == null || currentToward == null) return;
+  const against =
+    windFrom != null &&
+    windKn != null &&
+    Math.abs(((currentToward - windFrom + 540) % 360) - 180) <= 45;
+  const { orange, red } = TIDE_RULES.against;
+  const words = `vent contre courant (${fr(currentKn, 1)} nd de courant, ${fr(windKn ?? 0)} nd de vent)`;
+  if (against && currentKn >= red[0] && (windKn ?? 0) >= red[1]) {
+    hits.push({ key: 'tide', level: 'nogo', text: words });
+  } else if (against && currentKn >= orange[0] && (windKn ?? 0) >= orange[1]) {
+    hits.push({ key: 'tide', level: 'prudence', text: words });
+  } else if (currentKn >= TIDE_RULES.strong) {
+    hits.push({
+      key: 'tide',
+      level: 'prudence',
+      text: `courant fort (${fr(currentKn, 1)} nd)`,
+    });
+  }
 }
 
 /** The light of a day and its reasons. */

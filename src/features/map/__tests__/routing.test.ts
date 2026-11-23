@@ -7,7 +7,9 @@ import type { NavRoute } from '../../../model/routes.ts';
 import { boatSailSpeed, runRouting } from '../routingRun.ts';
 import {
   fetchPastWind,
+  fetchRouteSea,
   fetchRouteWind,
+  seaAt,
   windAt,
   windPlaces,
 } from '../routingWeather.ts';
@@ -148,6 +150,48 @@ describe('fetchPastWind', () => {
   });
 });
 
+function marine(places: number, kmh: number, set: number, waveM: number) {
+  const time = Array.from(
+    { length: 48 },
+    (_, hour) => HOUR0 / 1000 + hour * 3600,
+  );
+  const one = {
+    hourly: {
+      time,
+      // eslint-disable-next-line camelcase -- name in the API
+      wave_height: time.map(() => waveM),
+      // eslint-disable-next-line camelcase -- name in the API
+      ocean_current_velocity: time.map(() => kmh),
+      // eslint-disable-next-line camelcase -- name in the API
+      ocean_current_direction: time.map(() => set),
+    },
+  };
+  return places === 1 ? one : Array.from({ length: places }, () => one);
+}
+
+function places(url: string): number {
+  return new URL(url).searchParams.get('latitude')?.split(',').length ?? 1;
+}
+
+describe('fetchRouteSea', () => {
+  it('gives the current in knots and the waves, near the place and hour', async () => {
+    const fetcher = vi.fn((url: string) =>
+      Promise.resolve(Response.json(marine(places(url), 3.704, 180, 2))),
+    );
+    vi.stubGlobal('fetch', fetcher);
+    const sea = await fetchRouteSea([START, END]);
+    if ('error' in sea) throw new Error(sea.error);
+    expect(String(fetcher.mock.calls[0]?.[0])).toContain('marine-api');
+    const here = seaAt(sea, START.lat, START.lon, HOUR0 + 3_600_000);
+    expect(here?.driftKn).toBeCloseTo(2, 2);
+    expect(here?.setDeg).toBe(180);
+    expect(here?.waveM).toBe(2);
+    expect(
+      seaAt(sea, START.lat, START.lon, HOUR0 + 100 * 3_600_000),
+    ).toBeNull();
+  });
+});
+
 describe('boatSailSpeed', () => {
   it('takes the polar with its share, or a set of sails that did better', () => {
     const speed = boatSailSpeed({ ...polar, coef: 0.5 }, [
@@ -188,6 +232,32 @@ describe('runRouting', () => {
     }
     expect(run.result.nm).toBeCloseTo(12, 0);
     expect(run.result.motorMin).toBe(0);
+  });
+  it('goes faster with a fair current', async () => {
+    const ask = async (set: number) => {
+      forgetOpenMeteo();
+      vi.stubGlobal('fetch', (url: string) =>
+        Promise.resolve(
+          Response.json(
+            url.includes('marine')
+              ? marine(places(url), 3.704, set, 0.5)
+              : reply(places(url), 270, 12),
+          ),
+        ),
+      );
+      const run = await runRouting(
+        route,
+        { id: 'b', info: {}, polar },
+        HOUR0 + 6 * 3_600_000,
+        { motorBelow: 5, motorKn: 6, model: 'best_match', boatId: 'b' },
+      );
+      if (run.kind !== 'result' || run.result.kind !== 'done') {
+        throw new Error('no routing');
+      }
+      expect(run.seaSeen).toBe(true);
+      return run.result.arriveMs;
+    };
+    expect(await ask(0)).toBeLessThan(await ask(180));
   });
   it('needs two points and a polar', async () => {
     const prefs = {

@@ -1,10 +1,4 @@
-import type {
-  Control,
-  LatLng,
-  Map as LeafletMap,
-  Marker,
-  Polyline,
-} from 'leaflet';
+import type { LatLng, Map as LeafletMap, Marker, Polyline } from 'leaflet';
 
 import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtTime, fr, toLocalInput } from '../../lib/format.ts';
@@ -34,7 +28,7 @@ import { aroundLand, autoOptions, saveAutoOptions } from './autoRoute.ts';
 import { escapeHtml } from './escapeHtml.ts';
 import { setGoto } from './goto.ts';
 import { leaflet } from './leaflet.ts';
-import { ROUTE_ICON, routeEditing } from './routeMode.ts';
+import { routeEditing } from './routeMode.ts';
 import { readNumber } from './rulerEditor.ts';
 import { endsLongPress } from './tapCross.ts';
 import { setFollow, tracker } from './trackerState.ts';
@@ -124,7 +118,8 @@ interface Drag {
 }
 
 /**
- * The route editor on a map: a button opens it; a tap on the map adds a
+ * The route editor on a map, opened by « Nouvelle route » under Routes or
+ * by a route of the list (no button of its own on the map); a tap on the map adds a
  * point at the end, a finger moves a point, the ＋ in the middle of a leg
  * bends it with a new point, a long press on a point deletes it. Each
  * change is saved at once; the panel below gives the length, the time at
@@ -145,7 +140,6 @@ export function addRouteControl(map: LeafletMap): void {
   let dots: Marker[] = [];
   let extras: Marker[] = [];
   let panel: HTMLElement | null = null;
-  let button: HTMLElement | null = null;
 
   const isOpen = () => line !== null;
 
@@ -628,7 +622,6 @@ export function addRouteControl(map: LeafletMap): void {
     selected = null;
     routeEditing.value = true;
     setBodyClass('route-on', true);
-    button?.classList.add('on');
     if (tracker.current?.map === map) setFollow(false);
     line = L.polyline([], {
       className: 'route-line',
@@ -661,7 +654,6 @@ export function addRouteControl(map: LeafletMap): void {
     line = null;
     panel?.remove();
     panel = null;
-    button?.classList.remove('on');
     routeEditing.value = false;
     setBodyClass('route-on', false);
     // A route left with fewer than two points is no route.
@@ -674,24 +666,6 @@ export function addRouteControl(map: LeafletMap): void {
     route = null;
   }
 
-  const control = new L.Control({ position: 'topleft' }) as Control;
-  control.onAdd = () => {
-    const created = L.DomUtil.create('a', 'leaflet-bar map-full-btn route-btn');
-    button = created;
-    created.href = '#';
-    created.setAttribute('role', 'button');
-    created.title = 'Route : poser des points sur la carte';
-    created.innerHTML = ROUTE_ICON;
-    L.DomEvent.on(created, 'click', (event) => {
-      L.DomEvent.stop(event);
-      buzz();
-      if (isOpen()) close();
-      else open(null);
-    });
-    L.DomEvent.disableClickPropagation(created);
-    return created;
-  };
-  map.addControl(control);
   openers.set(map, open);
   map.on('unload', close);
   if (pending) {
