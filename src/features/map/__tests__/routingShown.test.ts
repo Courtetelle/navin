@@ -4,8 +4,20 @@ import { destination } from '../../../lib/geo.ts';
 import type { RoutingResult, RoutingStep } from '../../../model/sailRouting.ts';
 import { state } from '../../../state/index.ts';
 import { gotoTarget, gotoUpdate, setGoto } from '../goto.ts';
-import { clearRouting, gotoRouting, showRouting } from '../routingShown.ts';
-import { routingLeg, routingShape, shownRouting } from '../routingState.ts';
+import {
+  clearRouting,
+  gotoRouting,
+  markHtml,
+  showRouting,
+} from '../routingShown.ts';
+import {
+  removeRouting,
+  routingLeg,
+  routingShape,
+  saveRouting,
+  savedRoutings,
+  shownRouting,
+} from '../routingState.ts';
 
 const A = { lat: 48.65, lon: -2.83 };
 const B = destination(A, 0, 2);
@@ -29,7 +41,11 @@ function step(at: { lat: number; lon: number }, rank: number): RoutingStep {
     cog: rank < 6 ? 0 : 90,
     driftKn: 1.2,
     setDeg: 45,
-    waveM: rank % 2 ? 1 : Number.NaN,
+    waveM: rank > 0 ? 1 : Number.NaN,
+    waveFrom: rank > 0 ? 300 : Number.NaN,
+    wavePeriod: rank > 0 ? 6 : Number.NaN,
+    awa: 60,
+    aws: 14.5,
   };
 }
 
@@ -59,6 +75,7 @@ function at(where: { lat: number; lon: number }): void {
 }
 
 afterEach(() => {
+  for (const saved of savedRoutings.value) removeRouting(saved.id);
   clearRouting();
   setGoto(null);
   state.view.myPos.value = null;
@@ -77,6 +94,20 @@ describe('routingShape', () => {
       driftKn: 1.2,
       waveM: null,
     });
+  });
+});
+
+describe('markHtml', () => {
+  it('draws the wind barb, the waves and the current as LiveMétéo, and the apparent wind', () => {
+    const wavy = routingShape('Essai', done, [A, B, C]).marks.find(
+      (mark) => mark.waveM !== null,
+    );
+    if (!wavy) throw new Error('no mark');
+    const html = markHtml(wavy);
+    expect(html.match(/<svg/g)).toHaveLength(3);
+    expect(html).toContain('wx-dg');
+    expect(html).toContain('wx-cur');
+    expect(html).toContain('∡ 60° Bd');
   });
 });
 
@@ -104,5 +135,31 @@ describe('Go to along the routing', () => {
     expect(gotoTarget.value?.name).toContain('arrivée');
     clearRouting();
     expect(gotoTarget.value).toBeNull();
+  });
+});
+
+describe('Routages', () => {
+  it('keeps a routing once under its id, newest first, and removes it', () => {
+    const shown = { ...routingShape('Essai', done, [A, B, C]), id: 'r1' };
+    const saved = {
+      id: 'r1',
+      at: '',
+      departMs: 0,
+      arriveMs: done.arriveMs,
+      nm: 4,
+      summary: '',
+      model: 'best_match',
+      shown,
+    };
+    saveRouting(saved);
+    saveRouting({ ...saved, nm: 5 });
+    saveRouting({ ...saved, id: 'r2' });
+    expect(savedRoutings.value.map((item) => item.id)).toStrictEqual([
+      'r2',
+      'r1',
+    ]);
+    expect(savedRoutings.value[1]?.nm).toBe(5);
+    removeRouting('r2');
+    expect(savedRoutings.value).toHaveLength(1);
   });
 });

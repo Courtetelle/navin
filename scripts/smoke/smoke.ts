@@ -2495,6 +2495,10 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
         // eslint-disable-next-line camelcase -- name in the API
         wave_height: time.map(() => 1.5),
         // eslint-disable-next-line camelcase -- name in the API
+        wave_direction: time.map(() => 300),
+        // eslint-disable-next-line camelcase -- name in the API
+        wave_period: time.map(() => 6),
+        // eslint-disable-next-line camelcase -- name in the API
         ocean_current_velocity: time.map(() => 2),
         // eslint-disable-next-line camelcase -- name in the API
         ocean_current_direction: time.map(() => 90),
@@ -2547,7 +2551,16 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
     theme,
     'Terminer shows the routing on the map, wind, current and waves along it',
     (await page.locator('.rtm').count()) > 0 &&
-      (await page.locator('.rtm .rtm-current').count()) > 0,
+      (await page.locator('.rtm .wx-cur').count()) > 0 &&
+      (await page.locator('.rtm .wx-dg').count()) > 0,
+  );
+  check(
+    theme,
+    'with the barbs and arrows of LiveMétéo and the angle to the apparent wind',
+    (await page.locator('.rtm svg').count()) >= 3 &&
+      (
+        (await page.locator('.rtm .rtm-aw').first().textContent()) ?? ''
+      ).includes('∡'),
   );
   await showRow(page);
   check(
@@ -2565,6 +2578,11 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
   );
   await page.locator('#routesBtn').click();
   await page.waitForTimeout(400);
+  check(
+    theme,
+    'and the routing is kept in Routages',
+    (await page.locator('#rtgSaved [data-routing]').count()) > 0,
+  );
   await page.locator('[data-part="draw"]').click();
   await page.unroute(/api\.open-meteo\.com\/v1\/forecast/);
   await page.unroute(/marine-api\.open-meteo\.com\/v1\/marine/);

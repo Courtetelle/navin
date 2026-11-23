@@ -22,10 +22,23 @@ export interface RoutingMark {
   driftKn: number;
   /** Wave height, metres (`null` unknown). */
   waveM: number | null;
+  /** Where the waves come from, degrees, and their period, seconds (`null` unknown). @default undefined */
+  waveFrom?: number | null;
+  wavePeriod?: number | null;
+  /** Under sail or under motor. @default undefined */
+  mode?: 'sail' | 'motor';
+  /** Angle to the true wind and side. @default undefined */
+  twa?: number;
+  side?: 'tribord' | 'bâbord';
+  /** Angle to the apparent wind (0 to 180°) and its speed, knots. @default undefined */
+  awa?: number;
+  aws?: number;
 }
 
 /** A routing shown on the map. */
 export interface ShownRouting {
+  /** Id in « Routages » once kept. @default undefined */
+  id?: string;
   name: string;
   /** The way the boat goes, `[lat, lon]`. */
   track: Array<[number, number]>;
@@ -86,10 +99,88 @@ export function routingShape(
       setDeg: step.setDeg,
       driftKn: step.driftKn,
       waveM: Number.isFinite(step.waveM) ? step.waveM : null,
+      waveFrom: Number.isFinite(step.waveFrom) ? step.waveFrom : null,
+      wavePeriod: Number.isFinite(step.wavePeriod) ? step.wavePeriod : null,
+      mode: step.mode,
+      twa: step.twa,
+      side: step.side,
+      awa: step.awa,
+      aws: step.aws,
     });
     next = along + spacing;
   }
   return { name, track, turns: routingTurns(result, points), marks };
+}
+
+const SAVED_KEY = 'ldb.routings';
+
+/** A routing kept in « Routages », as the routes in « Routes ». */
+export interface SavedRouting {
+  id: string;
+  /** Kept at, ISO. */
+  at: string;
+  departMs: number;
+  arriveMs: number;
+  nm: number;
+  /** The summary line: time, sail, motor, tacks. */
+  summary: string;
+  /** Weather model. */
+  model: string;
+  shown: ShownRouting;
+}
+
+function isSaved(value: unknown): value is SavedRouting {
+  const item = value as Partial<SavedRouting> | null;
+  return (
+    typeof item?.id === 'string' &&
+    typeof item.departMs === 'number' &&
+    Array.isArray(item.shown?.track)
+  );
+}
+
+/** The routings kept, newest first. */
+export const savedRoutings = signal<SavedRouting[]>(
+  store.get<unknown[]>(SAVED_KEY, []).filter(isSaved),
+);
+
+/**
+ * Keep a routing in « Routages » (the same id replaces it).
+ * @param routing - The routing.
+ */
+export function saveRouting(routing: SavedRouting): void {
+  const list = [
+    routing,
+    ...savedRoutings.peek().filter((item) => item.id !== routing.id),
+  ];
+  savedRoutings.value = list;
+  store.set(SAVED_KEY, list);
+}
+
+/**
+ * Remove a routing from « Routages ».
+ * @param id - Its id.
+ */
+export function removeRouting(id: string): void {
+  const list = savedRoutings.peek().filter((item) => item.id !== id);
+  savedRoutings.value = list;
+  store.set(SAVED_KEY, list);
+}
+
+/**
+ * Rename a routing of « Routages ».
+ * @param id - Its id.
+ * @param name - Its new name.
+ */
+export function renameRouting(id: string, name: string): void {
+  const list = savedRoutings
+    .peek()
+    .map((item) =>
+      item.id === id
+        ? { ...item, shown: { ...item.shown, name: name.trim() } }
+        : item,
+    );
+  savedRoutings.value = list;
+  store.set(SAVED_KEY, list);
 }
 
 /** A turn is reached this close, nautical miles. */
