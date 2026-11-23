@@ -60,6 +60,7 @@ import { StartButton } from './StartButton.tsx';
 import { TrackDoneButton, TrackRailButton } from './TrackRailButton.tsx';
 import { showLiveAround } from './liveOnMap.ts';
 import { RailIcon } from './railIcons.tsx';
+import { useRailSwipe } from './railPages.ts';
 import { MAP_ACTIONS, splitTitle } from './sideRails.ts';
 import { trackDone } from './trackDone.ts';
 
@@ -134,6 +135,12 @@ function run(key: string): void {
 }
 
 /**
+ * The buttons around the map. Upright, one row of five at a time: a swipe
+ * left shows the five that follow (the magnifier, NavIn, the photo, Météo,
+ * SOS), right the first five again. On the phone sideways, one column on
+ * the left that a swipe up or down turns as many as fit at a time, SOS
+ * fixed at its foot. On X sideways, all of them in one column.
+ *
  * The column of the landscape tablet, on the left of the map, top to bottom:
  * the clock, the arrow of the boat with ＋ and − at its right (3 s after
  * the arrow), NavIn, START (and Amarrage at its right during a track), the mark,
@@ -144,6 +151,7 @@ function run(key: string): void {
  */
 export function SideRails() {
   const rails = useRails();
+  useRailSwipe();
   if (!rails) return null;
   return (
     <>
