@@ -15413,8 +15413,13 @@ html body .live-slot > .rail-btn.live-layer.on {
   right: 4px;
   bottom: 2px;
 }
-/* The badges of the stations hidden by their button */
-.live-st-off .live-mk-wrap {
+/* The badges of the stations and the lightning: the hour now only, gone
+   as soon as LiveMétéo steps into the forecast. */
+.live-ahead .live-mk-wrap,
+.live-ahead .map-flashes,
+.live-ahead .lightning-tag-wrap,
+.live-ahead .lightning-aim-case,
+.live-ahead .lightning-aim-line {
   display: none;
 }
 :root[data-theme='night'] .live-slot > .rail-btn.live-layer.on {
@@ -15446,6 +15451,16 @@ html body .live-slot > .rail-btn.live-layer.on {
 .wx-lbl.wx-wave {
   top: 2px;
   bottom: auto;
+}
+/* A label alone, centred on its place: never over a barb or an arrow. */
+.wx-tag .wx-lbl,
+.wx-tag .wx-lbl.wx-wave,
+.wx-tag .wx-lbl.wx-cur {
+  position: absolute;
+  top: 0;
+  bottom: auto;
+  left: 0;
+  transform: translate(-50%, -50%);
 }
 
 /* The routing on the map: at places along it, set off from the line, the

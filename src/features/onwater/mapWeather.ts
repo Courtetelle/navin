@@ -531,11 +531,13 @@ export function arrowSvg(
   scale: number,
   color: string,
   wavy: boolean,
+  halo = '#fff',
 ): string {
   const size = 60;
   const mid = size / 2;
   const fit = Math.max(0, Math.min(1, scale));
-  const half = 9 + 17 * fit;
+  // At most 18 px each way: the wave and the current side by side never meet.
+  const half = 8 + 10 * fit;
   const width = 2.5 + 3 * fit;
   const tail = mid + half;
   const head = mid - half;
@@ -553,7 +555,68 @@ export function arrowSvg(
   const tip = `M${mid - 6 - fit * 3} ${head + 9 + fit * 3}L${mid} ${head}L${mid + 6 + fit * 3} ${head + 9 + fit * 3}`;
   const turn = `transform="rotate(${Math.round(toward)} ${mid} ${mid})"`;
   const line = `fill="none" stroke-linecap="round" stroke-linejoin="round"`;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><g ${turn} ${line}><path d="${staff}${tip}" stroke="#fff" stroke-width="${width + 3}"/><path d="${staff}${tip}" stroke="${color}" stroke-width="${width}"/></g></svg>`;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><g ${turn} ${line}><path d="${staff}${tip}" stroke="${halo}" stroke-width="${width + 3}"/><path d="${staff}${tip}" stroke="${color}" stroke-width="${width}"/></g></svg>`;
+}
+
+/** Under this wind, knots, the current keeps its plain colour. */
+export const WIND_FOR_CURRENT_KN = 6;
+/** The colour of a current without wind enough to matter. */
+export const CURRENT_PLAIN = '#000';
+
+/**
+ * The colour of a current against the wind: apple green when the wind goes
+ * with the current, then yellow, orange and bright red when it blows
+ * against it (short, steep, breaking sea). Plain black in light wind.
+ * @param currentToward - Where the current goes, degrees.
+ * @param windFrom - Where the wind comes from, degrees.
+ * @param windKn - The wind, knots.
+ * @returns A CSS colour.
+ */
+export function currentWindColor(
+  currentToward: number,
+  windFrom: number,
+  windKn: number,
+): string {
+  if (
+    !Number.isFinite(currentToward) ||
+    !Number.isFinite(windFrom) ||
+    !(windKn >= WIND_FOR_CURRENT_KN)
+  ) {
+    return CURRENT_PLAIN;
+  }
+  // Angle between where the wind goes and where the current goes, 0 to 180.
+  const gap = Math.abs(((windFrom + 180 - currentToward + 540) % 360) - 180);
+  if (gap <= 45) return '#7ed321';
+  if (gap <= 90) return '#f5d000';
+  if (gap <= 135) return '#ff7a00';
+  return '#ff1a1a';
+}
+
+/**
+ * The nearest point of a grid, within a distance.
+ * @param points - The points.
+ * @param lat - Latitude.
+ * @param lon - Longitude.
+ * @param most - At most this far, degrees.
+ * @returns The point, or null.
+ */
+export function nearestPoint<T extends LatLon>(
+  points: readonly T[],
+  lat: number,
+  lon: number,
+  most: number,
+): T | null {
+  let best: T | null = null;
+  let least = most;
+  const squash = Math.cos((lat * Math.PI) / 180);
+  for (const point of points) {
+    const away = Math.hypot(point.lat - lat, (point.lon - lon) * squash);
+    if (away <= least) {
+      least = away;
+      best = point;
+    }
+  }
+  return best;
 }
 
 /**
@@ -650,6 +713,32 @@ export function waveLabelHtml(height: number): string {
   return `<span class="wx-lbl wx-wave" title="Hs ${metres} m, Douglas ${degree}">${metres} m<b class="wx-dg" style="background:${group.color};color:${group.ink}">${degree}</b></span>`;
 }
 
+/**
+ * Where the label of a barb goes: on the side the wind blows to, where the
+ * staff and its feathers are not, just clear of them.
+ * @param from - Where the wind comes from on the screen, degrees.
+ * @param width - Width of the label, px.
+ * @param height - Height of the label, px.
+ * @returns Its centre from the point, px (y down).
+ */
+export function barbLabelOffset(
+  from: number,
+  width: number,
+  height: number,
+): { dx: number; dy: number } {
+  const rad = (from * Math.PI) / 180;
+  // Unit vector toward where the wind blows (opposite to the staff).
+  const ux = -Math.sin(rad);
+  const uy = Math.cos(rad);
+  const reach = (width / 2) * Math.abs(ux) + (height / 2) * Math.abs(uy) + 7;
+  return { dx: Math.round(ux * reach), dy: Math.round(uy * reach) };
+}
+
+/** Width of a label of so many characters, px (13 px bold figures). */
+export function labelWidth(characters: number): number {
+  return 8 * characters + 8;
+}
+
 /** Under this, the current is slack whatever the hours around. */
 export const SLACK_KN = 0.3;
 /** Under this, the current is slack when it is at its weakest of the hours around. */
@@ -707,6 +796,41 @@ export function roundStep(wanted: number): number {
 }
 
 /**
+ * The next round spacing, coarser; the coarsest stays.
+ * @param step - Degrees.
+ * @returns Degrees.
+ */
+export function coarserStep(step: number): number {
+  return STEPS.find((one) => one > step * 1.001) ?? (STEPS.at(-1) as number);
+}
+
+/**
+ * The grid of the marks over the whole area: the spacing asked, made
+ * coarser while the points kept would be more than {@link MOST_ASKED}.
+ * Before, the grid was cut after the first points, south first, and the top
+ * of the screen stayed empty.
+ * @param area - The area shown.
+ * @param step - Spacing wanted, degrees (see {@link roundStep}).
+ * @param keep - Whether a point may be kept (in the zones chosen).
+ * @returns The spacing taken and its points.
+ */
+export function fittedLattice(
+  area: Area,
+  step: number,
+  keep: (point: LatLon) => boolean = () => true,
+): { step: number; points: LatLon[] } {
+  let taken = step;
+  for (;;) {
+    const points = latticePoints(area, taken).filter(keep);
+    const coarser = coarserStep(taken);
+    if (points.length <= MOST_ASKED || coarser === taken) {
+      return { step: taken, points: points.slice(0, MOST_ASKED) };
+    }
+    taken = coarser;
+  }
+}
+
+/**
  * The points of a round grid over an area, at a spacing.
  * @param area - The area.
  * @param step - Spacing, degrees (see {@link roundStep}).
@@ -758,36 +882,19 @@ export function seaPoints(
     );
     return around.length <= 1;
   };
-  const kept = latticePoints(area, step / 2, true).filter(open);
-  // Thinned by distance: the marks stay apart on the screen.
-  return spreadOut(kept, MOST_ASKED, step * 0.9, 1);
-}
-
-/**
- * The points kept at least a spacing apart, in order, at most `most`.
- * @param points - The candidates.
- * @param most - At most this many.
- * @param spacing - Least distance, degrees of latitude.
- * @param squash - Cosine of the latitude, for the longitudes.
- * @returns The points kept.
- */
-function spreadOut(
-  points: readonly LatLon[],
-  most: number,
-  spacing: number,
-  squash: number,
-): LatLon[] {
-  const chosen: LatLon[] = [];
-  for (const point of points) {
-    const apart = chosen.every(
-      (other) =>
-        Math.hypot(point.lat - other.lat, (point.lon - other.lon) * squash) >=
-        spacing,
-    );
-    if (apart) chosen.push(point);
-    if (chosen.length === most) break;
+  // Halfway between the wind points, in both directions: the marks of the
+  // sea sit in the gaps of the wind's, never on them (Corban 23/11: labels
+  // over the barbs). Too many for one request: a coarser spacing, over the
+  // whole area still.
+  let taken = step;
+  for (;;) {
+    const kept = latticePoints(area, taken, true).filter(open);
+    const coarser = coarserStep(taken);
+    if (kept.length <= MOST_ASKED || coarser === taken) {
+      return kept.slice(0, MOST_ASKED);
+    }
+    taken = coarser;
   }
-  return chosen;
 }
 
 /**
