@@ -162,6 +162,26 @@ function series(item: Hourly, name: string, count: number): number[] {
   });
 }
 
+/**
+ * The first of several names that has a value: a reply of two models names
+ * each variable after its model.
+ */
+function seriesOf(item: Hourly, names: readonly string[], count: number) {
+  for (const name of names) {
+    const values = series(item, name, count);
+    if (values.some(Number.isFinite)) return values;
+  }
+  return series(item, names[0] ?? '', count);
+}
+
+/**
+ * Models without rain, and the model of the same house that gives it:
+ * AROME HD gives the wind at 1.5 km but no rain, AROME 2.5 km does.
+ */
+export const RAIN_STAND_IN: ReadonlyMap<string, string> = new Map([
+  ['meteofrance_arome_france_hd', 'meteofrance_arome_france'],
+]);
+
 function replies(body: unknown): Hourly[] {
   if (Array.isArray(body)) return body as Hourly[];
   return body && typeof body === 'object' ? [body] : [];
@@ -176,13 +196,21 @@ function hoursOf(list: Hourly[]): number[] {
  * The wind grid of an Open-Meteo reply (one or many places).
  * @param body - The reply, parsed.
  * @param points - The points asked, in the same order.
+ * @param model - The model of the wind; its rain may come from
+ * {@link RAIN_STAND_IN}.
  * @returns The grid, null when empty.
  */
 export function windGridOf(
   body: unknown,
   points: readonly LatLon[],
+  model = '',
 ): Grid<PointWind> | null {
   const list = replies(body);
+  const named = (name: string) => [name, `${name}_${model}`];
+  const rainNames = [
+    ...named('precipitation'),
+    `precipitation_${RAIN_STAND_IN.get(model) ?? ''}`,
+  ];
   const hours = hoursOf(list);
   if (hours.length === 0) return null;
   return {
@@ -190,10 +218,10 @@ export function windGridOf(
     points: list.map((item, rank) => ({
       lat: points[rank]?.lat ?? item.latitude ?? 0,
       lon: points[rank]?.lon ?? item.longitude ?? 0,
-      speed: series(item, 'wind_speed_10m', hours.length),
-      gust: series(item, 'wind_gusts_10m', hours.length),
-      rain: series(item, 'precipitation', hours.length),
-      from: series(item, 'wind_direction_10m', hours.length),
+      speed: seriesOf(item, named('wind_speed_10m'), hours.length),
+      gust: seriesOf(item, named('wind_gusts_10m'), hours.length),
+      rain: seriesOf(item, rainNames, hours.length),
+      from: seriesOf(item, named('wind_direction_10m'), hours.length),
     })),
   };
 }
@@ -274,10 +302,13 @@ export async function fetchWindGrid(
   points: readonly LatLon[],
   model: string,
 ): Promise<Grid<PointWind> | Failure> {
-  const url = `https://api.open-meteo.com/v1/forecast?${coords(points)}&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation&wind_speed_unit=kn&timeformat=unixtime&forecast_hours=${FORECAST_HOURS}&past_hours=1&models=${model}&cell_selection=sea`;
+  // A model without rain asks its stand-in too, in the same request.
+  const stand = RAIN_STAND_IN.get(model);
+  const models = stand ? `${model},${stand}` : model;
+  const url = `https://api.open-meteo.com/v1/forecast?${coords(points)}&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m,precipitation&wind_speed_unit=kn&timeformat=unixtime&forecast_hours=${FORECAST_HOURS}&past_hours=1&models=${models}&cell_selection=sea`;
   try {
     return (
-      windGridOf(await ask(url), points) ?? {
+      windGridOf(await ask(url), points, model) ?? {
         error: 'Prévision du vent vide pour ce modèle.',
       }
     );
@@ -657,23 +688,63 @@ export function slackSvg(color: string): string {
 /** Distance of the four neighbours looked at around a point of sea, degrees. */
 const OFFSHORE_DEG = 0.05;
 
+/** At most this many points in one request. */
+export const MOST_ASKED = 40;
+
+/**
+ * The round spacing of the grid for a spacing wanted: the smallest round
+ * spacing not under it.
+ * @param wanted - Degrees.
+ * @returns Degrees.
+ */
+export function roundStep(wanted: number): number {
+  return (
+    STEPS.find((step) => step >= wanted * 0.999) ?? (STEPS.at(-1) as number)
+  );
+}
+
+/**
+ * The points of a round grid over an area, at a spacing.
+ * @param area - The area.
+ * @param step - Spacing, degrees (see {@link roundStep}).
+ * @param shifted - Moved by half a spacing.
+ * @returns The points, south to north then west to east.
+ */
+export function latticePoints(
+  area: Area,
+  step: number,
+  shifted = false,
+): LatLon[] {
+  const shift = shifted ? step / 2 : 0;
+  const lat0 = Math.ceil((area.south - shift) / step) * step + shift;
+  const lon0 = Math.ceil((area.west - shift) / step) * step + shift;
+  const points: LatLon[] = [];
+  for (let lat = lat0; lat <= area.north + 1e-9; lat += step) {
+    for (let lon = lon0; lon <= area.east + 1e-9; lon += step) {
+      points.push({ lat: round(lat), lon: round(lon) });
+    }
+  }
+  return points;
+}
+
 /**
  * The points where the sea is asked: a grid twice as fine as the wind's,
  * moved by half a spacing, without the points on land or hemmed in by it
- * (the wave model has nothing there), then thinned to at most `most`,
- * evenly over the area.
+ * (the wave model has nothing there), then kept a spacing apart.
  * @param area - The area shown.
- * @param most - At most this many points.
+ * @param step - Spacing of the marks, degrees.
  * @param isLand - Whether a place is on land.
- * @returns The points of sea.
+ * @param keep - Whether a point may be kept (in the zones chosen).
+ * @returns The points of sea, at most {@link MOST_ASKED}.
  */
 export function seaPoints(
   area: Area,
-  most: number,
+  step: number,
   isLand: (lat: number, lon: number) => boolean,
+  keep: (point: LatLon) => boolean = () => true,
 ): LatLon[] {
   const open = (point: LatLon): boolean => {
-    if (isLand(point.lat, point.lon)) return false;
+    if (!keep(point) || isLand(point.lat, point.lon)) return false;
     const around = [
       [OFFSHORE_DEG, 0],
       [-OFFSHORE_DEG, 0],
@@ -684,17 +755,9 @@ export function seaPoints(
     );
     return around.length <= 1;
   };
-  const kept = gridPoints(area, most * 4, true).filter(open);
-  if (kept.length <= most) return kept;
-  // Thinned by distance, not by rank: the marks stay apart on the screen.
-  const squash = Math.cos(((area.south + area.north) / 2) * (Math.PI / 180));
-  const surface = (area.north - area.south) * (area.east - area.west) * squash;
-  let spacing = Math.sqrt(surface / most);
-  for (;;) {
-    const chosen = spreadOut(kept, most, spacing, squash);
-    if (chosen.length >= most / 2 || spacing < 1e-3) return chosen;
-    spacing *= 0.8;
-  }
+  const kept = latticePoints(area, step / 2, true).filter(open);
+  // Thinned by distance: the marks stay apart on the screen.
+  return spreadOut(kept, MOST_ASKED, step * 0.9, 1);
 }
 
 /**

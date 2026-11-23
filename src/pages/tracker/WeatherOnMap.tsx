@@ -7,7 +7,7 @@ import { mapBearing } from '../../features/map/mapOrientation.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { Area, Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import {
-  MOST_POINTS,
+  MOST_ASKED,
   RAIN_NATIVE_ZOOM,
   arrowSvg,
   barbSvg,
@@ -16,12 +16,13 @@ import {
   fetchRainFrames,
   fetchSeaGrid,
   fetchWindGrid,
-  gridPoints,
   hourRank,
   isSlack,
+  latticePoints,
   localModel,
   rainColor,
   rainTileUrl,
+  roundStep,
   seaPoints,
   slackSvg,
   straitPoints,
@@ -30,10 +31,17 @@ import {
 } from '../../features/onwater/mapWeather.ts';
 import { onLake } from '../../features/onwater/onLake.ts';
 import { landTest } from '../../features/onwater/shoreFar.ts';
+import { stationInZones } from '../../features/zones/meteoZones.ts';
+import type { LatLon } from '../../lib/geo.ts';
 import { destination } from '../../lib/geo.ts';
 import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
 
-import { liveOnMap, liveOnMapAround, liveZoneArea } from './liveOnMap.ts';
+import {
+  liveOnMap,
+  liveOnMapAround,
+  liveZoneArea,
+  liveZonesShown,
+} from './liveOnMap.ts';
 import type { WeatherLayers, WeatherRead } from './weatherLayers.ts';
 import {
   forecastStep,
@@ -83,6 +91,20 @@ function areaOfMap(map: LeafletMap): Area {
   };
 }
 
+/**
+ * The part of an area inside another.
+ * @param area - The area.
+ * @param seen - The other (the map shown).
+ * @returns The common part, null when they do not meet.
+ */
+function clipArea(area: Area, seen: Area): Area | null {
+  const south = Math.max(area.south, seen.south);
+  const north = Math.min(area.north, seen.north);
+  const west = Math.max(area.west, seen.west);
+  const east = Math.min(area.east, seen.east);
+  return south < north && west < east ? { south, north, west, east } : null;
+}
+
 /** Whether an area holds another, the second shrunk a little. */
 function holds(outer: Area, inner: Area): boolean {
   const latPad = (inner.north - inner.south) * 0.1;
@@ -99,22 +121,19 @@ function holds(outer: Area, inner: Area): boolean {
 const MARK_PX = 90;
 
 /**
- * How many points the screen holds for an area without the marks
- * covering each other.
+ * The spacing of the marks for the zoom of the map: about {@link MARK_PX}
+ * on the screen, so that zooming in shows more points and zooming out
+ * fewer.
  * @param map - The map.
- * @param area - The area.
- * @param fit - Zoom to fit the area (the circle of LiveMétéo).
- * @returns The number of points, 4 to 20.
+ * @returns Degrees, a round spacing.
  */
-function pointsFor(map: LeafletMap, area: Area, fit: boolean): number {
-  const L = leaflet();
-  const box = L.latLngBounds([area.south, area.west], [area.north, area.east]);
-  const zoom = fit ? map.getBoundsZoom(box) : map.getZoom();
-  const sw = map.project(box.getSouthWest(), zoom);
-  const ne = map.project(box.getNorthEast(), zoom);
-  const cols = Math.max(2, Math.round(Math.abs(ne.x - sw.x) / MARK_PX));
-  const rows = Math.max(2, Math.round(Math.abs(sw.y - ne.y) / MARK_PX));
-  return Math.min(MOST_POINTS, cols * rows);
+function stepForZoom(map: LeafletMap): number {
+  const middle = map.getCenter();
+  const zoom = map.getZoom();
+  const here = map.project(middle, zoom);
+  const east = map.project([middle.lat, middle.lng + 1], zoom);
+  const perDegree = Math.abs(east.x - here.x) || 1;
+  return roundStep(MARK_PX / perDegree);
 }
 
 function icon(html: string, size: number, dx = 0, dy = 0) {
@@ -354,39 +373,55 @@ export function WeatherOnMap() {
     if (!map) return undefined;
     let closed = false;
     let readArea: Area | null = null;
+    let readZoom = -1;
+    // The part of the map shown, within the zones chosen: the points follow
+    // the zoom (closer in, closer together) and stay in the zones.
     const areaNow = (): Area => {
-      if (around) {
-        // The Météo-France zones shown, else 30 NM around the boat.
-        if (zoneArea) return zoneArea;
-        const middle = boatPlace();
-        return areaAround(middle.lat, middle.lon, 30);
-      }
-      return areaOfMap(map);
+      const seen = areaOfMap(map);
+      if (!around) return seen;
+      // The Météo-France zones shown, else 30 NM around the boat.
+      const middle = boatPlace();
+      const base = zoneArea ?? areaAround(middle.lat, middle.lon, 30);
+      return clipArea(base, seen) ?? base;
     };
     const read = (force: boolean) => {
       const area = areaNow();
-      if (!force && readArea && holds(readArea, area)) return;
+      const zoom = map.getZoom();
+      if (!force && readArea && zoom === readZoom && holds(readArea, area)) {
+        return;
+      }
       readArea = area;
-      const most = pointsFor(map, area, around);
-      const points = gridPoints(area, most);
+      readZoom = zoom;
+      const zones = around ? liveZonesShown.peek() : [];
+      const inside = (point: LatLon): boolean =>
+        zones.length === 0 || stationInZones(zones, point.lat, point.lon);
+      const step = stepForZoom(map);
+      const points = latticePoints(area, step)
+        .filter(inside)
+        .slice(0, MOST_ASKED);
       const middle = around ? boatPlace() : mapPlace();
       const chosen = localModel(middle);
       weatherModel.value = chosen.name;
-      void fetchWindGrid(points, chosen.id).then((wind) => {
-        if (!closed) weatherRead.value = { ...weatherRead.peek(), wind };
-      });
+      if (points.length > 0) {
+        void fetchWindGrid(points, chosen.id).then((wind) => {
+          if (!closed) weatherRead.value = { ...weatherRead.peek(), wind };
+        });
+      } else {
+        weatherRead.value = { ...weatherRead.peek(), wind: null };
+      }
       if (lake) {
         weatherRead.value = { ...weatherRead.peek(), sea: null };
         return;
       }
       // The sea only where there is sea: points on land have no waves.
       void landTest()
-        .then((isLand) =>
-          fetchSeaGrid([
-            ...seaPoints(area, most, isLand),
-            ...straitPoints(area),
-          ]),
-        )
+        .then((isLand) => {
+          const sea = [
+            ...seaPoints(area, step, isLand, inside),
+            ...straitPoints(area).filter(inside),
+          ];
+          return sea.length > 0 ? fetchSeaGrid(sea) : null;
+        })
         .then((sea) => {
           if (!closed) weatherRead.value = { ...weatherRead.peek(), sea };
         });
