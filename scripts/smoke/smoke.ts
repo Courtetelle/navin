@@ -1171,6 +1171,19 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
       } as GeolocationPosition);
     };
   });
+  // One button turns A → Z, by use, GPS.
+  check(
+    theme,
+    'Alertes fixes: one sort button at the right of the title',
+    (await page.locator('h1 .menu-sort').count()) === 1,
+  );
+  await page.locator('[data-fixed-gps]').click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'Alertes fixes: the first touch turns to the order of use',
+    (await page.locator('[data-fixed-order="use"]').count()) === 1,
+  );
   await page.locator('[data-fixed-gps]').click();
   await page.waitForTimeout(400);
   check(
@@ -1184,6 +1197,12 @@ async function scalesSteady(page: Page, theme: string): Promise<void> {
   );
   await page.locator('[data-fixed-gps]').click();
   await page.waitForTimeout(400);
+  check(
+    theme,
+    'Alertes fixes: the third touch comes back to A → Z, sea by sea',
+    (await page.locator('[data-fixed-order="alpha"]').count()) === 1 &&
+      (await page.locator('[data-fixed-sea]').count()) === 4,
+  );
   const bandRow = page.locator('[data-sw-id="fixed:raz-blanchard"]');
   await bandRow.scrollIntoViewIfNeeded();
   await page.waitForTimeout(200);
@@ -1811,6 +1830,200 @@ const offlineDrawn = (page: Page) =>
     );
   });
 
+/** A blue square, the radar tile the test answers. */
+const RAIN_TILE = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+/**
+ * LiveMétéo on the map of the tablet: buttons of the size of Météo at its
+ * right, no band, the rain of the radar on the zone, the page never
+ * scrolls (SOS stays in its place), the buttons fade when left alone.
+ * Routes unrolls Nouvelle route and Routage météo; the map has no route
+ * button of its own.
+ * @param page - The tablet page, on the map.
+ * @param theme - Day or night.
+ */
+async function liveButtons(page: Page, theme: string): Promise<void> {
+  await page.route('https://api.rainviewer.com/**', (route) =>
+    route.fulfill({
+      json: {
+        host: 'https://tilecache.rainviewer.com',
+        radar: {
+          past: [{ time: Math.floor(Date.now() / 1000), path: '/v2/radar/1' }],
+        },
+      },
+    }),
+  );
+  await page.route('https://tilecache.rainviewer.com/**', (route) =>
+    route.fulfill({ body: RAIN_TILE, contentType: 'image/png' }),
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    'map: no route button of its own on the map',
+    (await page.locator('.trk-map .route-btn').count()) === 0,
+  );
+  const weather = await page.locator('.rail-weather').boundingBox();
+  if (!weather) {
+    check(theme, 'LiveMétéo: Météo is shown', false);
+    return;
+  }
+  await page.mouse.move(
+    weather.x + weather.width / 2,
+    weather.y + weather.height / 2,
+  );
+  await page.mouse.down();
+  await page.waitForTimeout(800);
+  await page.mouse.up();
+  await page.waitForTimeout(2500);
+  const settled =
+    (await page.locator('.rail-weather').boundingBox()) ?? weather;
+  const slots = await page.evaluate(() =>
+    [...document.querySelectorAll('.live-slot')].map((slot) => {
+      const box = slot.getBoundingClientRect();
+      return { x: box.x, y: box.y, w: box.width, h: box.height };
+    }),
+  );
+  check(
+    theme,
+    `LiveMétéo: its buttons in a row at the right of Météo, of its size (${slots.length})`,
+    slots.length >= 6 &&
+      slots.every(
+        (slot) =>
+          Math.abs(slot.y - settled.y) < 1 &&
+          Math.abs(slot.w - settled.width) < 1 &&
+          Math.abs(slot.h - settled.height) < 1 &&
+          slot.x > settled.x,
+      ),
+  );
+  check(
+    theme,
+    'LiveMétéo: no band of stations nor bar of layers',
+    (await page.locator('.live-chip, .wx-bar').count()) === 0,
+  );
+  check(
+    theme,
+    'LiveMétéo: the stations and buoys have their button',
+    (await page.locator('.live-layer[data-layer="stations"]').count()) === 1,
+  );
+  const rain = await page.evaluate(() => {
+    const tiles = [
+      ...document.querySelectorAll<HTMLImageElement>(
+        '.leaflet-wxRain-pane img',
+      ),
+    ];
+    const inside = tiles.filter((tile) =>
+      tile.closest('.leaflet-rotatePane-pane, .leaflet-rotate-pane'),
+    );
+    const seen = tiles.filter((tile) => {
+      const box = tile.getBoundingClientRect();
+      return (
+        box.right > 0 &&
+        box.left < globalThis.innerWidth &&
+        box.bottom > 0 &&
+        box.top < globalThis.innerHeight
+      );
+    });
+    return { all: tiles.length, inside: inside.length, seen: seen.length };
+  });
+  check(
+    theme,
+    `LiveMétéo: the rain of the radar lies on the zone, turning with the map (${JSON.stringify(rain)})`,
+    rain.all > 0 && rain.inside === rain.all && rain.seen > 0,
+  );
+  check(
+    theme,
+    'LiveMétéo: the page does not scroll, SOS stays at the bottom',
+    await page.evaluate(
+      () =>
+        (document.scrollingElement?.scrollHeight ?? 0) <=
+        globalThis.innerHeight + 1,
+    ),
+  );
+  await page.locator('.live-layer[data-layer="stations"]').click();
+  await page.waitForTimeout(200);
+  check(
+    theme,
+    'LiveMétéo: a touch hides the badges of the stations, the button pale',
+    (await page.locator('.trk-map.live-st-off').count()) === 1 &&
+      (await page.locator('.live-layer[data-layer="stations"].on').count()) ===
+        0,
+  );
+  await page.locator('.live-layer[data-layer="stations"]').click();
+  await page.waitForTimeout(9800);
+  check(
+    theme,
+    'LiveMétéo: left alone, its buttons fade and go',
+    (await page.locator('.live-btns.live-gone').count()) === 1,
+  );
+  await page.mouse.click(640, 300);
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'LiveMétéo: a touch on the map brings them back',
+    (await page.locator('.live-btns.live-shown').count()) === 1,
+  );
+  await page.locator('.live-radius-btn').click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'LiveMétéo: the zone button takes it away',
+    (await page.locator('.live-btns').count()) === 0,
+  );
+  await page.locator('.menus-tab').click();
+  await page.waitForTimeout(400);
+  const unrolled = await page.evaluate(() => {
+    const routes = document
+      .querySelector('#routesBtn')
+      ?.getBoundingClientRect();
+    const made = document
+      .querySelector('#routeNewBtn')
+      ?.getBoundingClientRect();
+    const wx = document.querySelector('#routeWxBtn')?.getBoundingClientRect();
+    return Boolean(
+      routes &&
+      made &&
+      wx &&
+      Math.abs(made.x - routes.x) < 1 &&
+      made.y > routes.bottom &&
+      Math.abs(wx.x - routes.x) < 1 &&
+      wx.y > made.bottom,
+    );
+  });
+  check(
+    theme,
+    'Routes: Nouvelle route and Routage météo unroll under it',
+    unrolled,
+  );
+  await page.locator('#routeWxBtn').click();
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    'Routes: Routage météo opens its part',
+    (await page
+      .locator('[data-part="routing"][aria-selected="true"]')
+      .count()) === 1,
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(600);
+  await page.locator('.menus-tab').click();
+  await page.waitForTimeout(400);
+  await page.locator('#routeNewBtn').click();
+  await page.waitForTimeout(800);
+  check(
+    theme,
+    'Routes: Nouvelle route opens the route panel on the map',
+    await page.locator('.route-panel').isVisible(),
+  );
+  await page.locator('.route-panel [data-rp="done"]').click();
+  await page.waitForTimeout(300);
+  await page.unroute('https://api.rainviewer.com/**');
+  await page.unroute('https://tilecache.rainviewer.com/**');
+}
+
 /**
  * A route across Porquerolles, the map file of the island on the device:
  * « Contourner la terre » bends it round the island, at the margin.
@@ -2285,9 +2498,8 @@ async function routeByHand(page: Page, theme: string): Promise<void> {
           .length,
     );
   const before = await kept();
-  await page.evaluate(() => {
-    document.querySelector<HTMLElement>('.trk-map .route-btn')?.click();
-  });
+  await showRow(page);
+  await page.locator('#routeNewBtn').click();
   await page.waitForTimeout(400);
   check(
     theme,
@@ -2424,6 +2636,7 @@ for (const [theme, viewport] of [
     await tablet(page, theme);
     await zones(page, theme);
     await trackButton(page, theme);
+    if (viewport.width === 1280) await liveButtons(page, theme);
   } catch (error) {
     check(
       theme,

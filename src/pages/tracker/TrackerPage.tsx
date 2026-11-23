@@ -20,6 +20,7 @@ import { state } from '../../state/index.ts';
 import { FixedAlertsOnMap } from './FixedAlertsOnMap.tsx';
 import { LakeWarningsOnMap } from './LakeWarningsOnMap.tsx';
 import { LightningOnMap } from './LightningOnMap.tsx';
+import { LiveButtons } from './LiveButtons.tsx';
 import { LiveOnMap } from './LiveOnMap.tsx';
 import { PhoneTrackButton } from './PhoneTrackButton.tsx';
 import { TrackerDash } from './TrackerDash.tsx';
@@ -79,6 +80,7 @@ export function TrackerPage() {
       <TrackerOverlay />
       <LiveOnMap />
       <WeatherOnMap />
+      <LiveButtons />
       <LightningOnMap />
       <LakeWarningsOnMap />
       <FixedAlertsOnMap />
