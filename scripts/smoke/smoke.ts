@@ -2101,6 +2101,26 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
       json: places > 1 ? Array.from({ length: places }, () => one) : one,
     });
   });
+  await page.route(/marine-api\.open-meteo\.com\/v1\/marine/, async (route) => {
+    const url = new globalThis.URL(route.request().url());
+    const places = (url.searchParams.get('latitude') ?? '').split(',').length;
+    const start = Math.floor(Date.now() / 3_600_000) * 3600 - 3600;
+    const time = Array.from({ length: 72 }, (_, hour) => start + hour * 3600);
+    const one = {
+      hourly: {
+        time,
+        // eslint-disable-next-line camelcase -- name in the API
+        wave_height: time.map(() => 1.5),
+        // eslint-disable-next-line camelcase -- name in the API
+        ocean_current_velocity: time.map(() => 2),
+        // eslint-disable-next-line camelcase -- name in the API
+        ocean_current_direction: time.map(() => 90),
+      },
+    };
+    await route.fulfill({
+      json: places > 1 ? Array.from({ length: places }, () => one) : one,
+    });
+  });
   await showRow(page);
   await page.locator('#routesBtn').click();
   await page.waitForTimeout(400);
@@ -2129,10 +2149,18 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
     'and it says whether the land was seen during the boards',
     ((await page.locator('#rtgLand').textContent()) ?? '').includes('Terre'),
   );
+  check(
+    theme,
+    'and that the currents and waves were taken into account',
+    ((await page.locator('#rtgSea').textContent()) ?? '').includes(
+      'pris en compte',
+    ),
+  );
   const last = (await page.locator('#view .btn').last().textContent()) ?? '';
   check(theme, 'and Partager comes last', last.includes('Partager'));
   await page.locator('[data-part="draw"]').click();
   await page.unroute(/api\.open-meteo\.com\/v1\/forecast/);
+  await page.unroute(/marine-api\.open-meteo\.com\/v1\/marine/);
 }
 
 /**

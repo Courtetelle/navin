@@ -11,7 +11,12 @@ import { store } from '../../storage/store.ts';
 
 import { autoOptions, avoidZones, routeBox } from './autoRoute.ts';
 import type { RouteWind } from './routingWeather.ts';
-import { fetchRouteWind, windAt } from './routingWeather.ts';
+import {
+  fetchRouteSea,
+  fetchRouteWind,
+  seaAt,
+  windAt,
+} from './routingWeather.ts';
 import { buildWaterGrid } from './waterGrid.ts';
 import { cellOf, clearLine } from './waterRoute.ts';
 
@@ -100,6 +105,8 @@ export type RoutingRun =
       wind: RouteWind;
       /** The land was seen (a map file of the device covers the route). */
       landSeen: boolean;
+      /** The currents and waves were known (Open-Meteo marine). */
+      seaSeen: boolean;
     }
   | { kind: 'error'; error: string };
 
@@ -134,8 +141,12 @@ export async function runRouting(
   const reals = Array.isArray(boat.realPolars)
     ? boat.realPolars.filter(isRealPolar)
     : [];
-  const wind = await fetchRouteWind(route.points, prefs.model);
+  const [wind, sea] = await Promise.all([
+    fetchRouteWind(route.points, prefs.model),
+    fetchRouteSea(route.points),
+  ]);
   if ('error' in wind) return { kind: 'error', error: wind.error };
+  const seaKnown = 'error' in sea ? null : sea;
   const navigable = await landCheck(route);
   const result = routeSail({
     points: route.points,
@@ -146,8 +157,20 @@ export async function runRouting(
     motorBelow: prefs.motorBelow,
     motorKn: prefs.motorKn,
     ...(navigable ? { navigable } : {}),
+    ...(seaKnown
+      ? {
+          seaAt: (lat: number, lon: number, ms: number) =>
+            seaAt(seaKnown, lat, lon, ms),
+        }
+      : {}),
   });
-  return { kind: 'result', result, wind, landSeen: Boolean(navigable) };
+  return {
+    kind: 'result',
+    result,
+    wind,
+    landSeen: Boolean(navigable),
+    seaSeen: Boolean(seaKnown),
+  };
 }
 
 /**
