@@ -1,7 +1,7 @@
 /**
  * The go / no-go along a route: the forecast read at a few places along it
  * (wind, sea, currents), the track of the boat (the polar routing with that
- * wind, else the planned speed), then, hour by hour,
+ * wind, those waves and currents, else the planned speed), then, hour by hour,
  * where the boat is, the weather of the nearest place, the course it steers
  * (for the point of sail), and the same rules as at one point.
  */
@@ -23,6 +23,7 @@ import { pointName, routeLegs } from '../../model/routes.ts';
 import type {
   RoutingResult,
   SailSpeed,
+  Sea,
   Wind,
 } from '../../model/sailRouting.ts';
 import { routeSail } from '../../model/sailRouting.ts';
@@ -277,6 +278,35 @@ export function routeCurrentAt(
   };
 }
 
+/**
+ * The sea of the route forecast for the routing: the waves of the nearest
+ * place at the nearest hour, and its current where one is known.
+ * @param forecast - The forecast of the route.
+ * @returns The sea, `null` where there is neither.
+ */
+export function routeSeaAt(
+  forecast: RouteForecast,
+): (lat: number, lon: number, ms: number) => Sea | null {
+  const currentAt = routeCurrentAt(forecast);
+  return (lat, lon, ms) => {
+    const data = forecast.data[nearestPlace(forecast.places, { lat, lon })];
+    let waveM = Number.NaN;
+    if (data && data.t.length > 0) {
+      const first = data.t[0] ?? 0;
+      const rank = Math.round((ms - first) / HOUR);
+      const value = data.v.wave_height?.[rank];
+      if (value != null) waveM = value;
+    }
+    const current = currentAt(lat, lon, ms);
+    if (!current && !Number.isFinite(waveM)) return null;
+    return {
+      waveM,
+      driftKn: current?.kn ?? 0,
+      setDeg: current?.toward ?? 0,
+    };
+  };
+}
+
 /** Where the boat is at a time, on which leg and steering what course. */
 export interface TrackPoint {
   at: LatLon;
@@ -406,8 +436,8 @@ export interface RoutingBoat {
 }
 
 /**
- * The track of the boat: the polar routing with the wind of the route
- * forecast when the boat has a polar, else (or when the
+ * The track of the boat: the polar routing with the wind, the waves and
+ * the currents of the route forecast when the boat has a polar, else (or when the
  * routing finds no wind) the planned speed.
  * @param points - The route.
  * @param departMs - Departure, epoch ms.
@@ -436,6 +466,7 @@ export function routeTrack(
     points,
     departMs,
     windAt: routeWindAt(forecast),
+    seaAt: routeSeaAt(forecast),
     sailSpeed: boat.sailSpeed,
     polar: boat.polar,
     motorBelow: boat.motorBelow,

@@ -236,7 +236,7 @@ function forecastWith(current?: { kmh: number; toward: number }) {
   return forecast;
 }
 
-test('the times come from the polar routing, the currents in the light', () => {
+test('the times come from the polar routing, with its currents', () => {
   const depart = DAY + 7 * 3_600_000;
   const still = routeTrack(POINTS, depart, forecastWith(), BOAT, 5);
   expect(still.note).toBeNull();
@@ -244,13 +244,16 @@ test('the times come from the polar routing, the currents in the light', () => {
   expect(still.track.how).toMatch(/^au routage polaire/u);
   // Across then before a wind of 12 kn: faster than 5 kn.
   expect(still.track.arriveMs).toBeLessThan(depart + 8 * 3_600_000);
-  // A current of 1 kn (1,852 km/h) going north, with the first leg.
+  // A current of 1 kn (1,852 km/h) going north, helps the first leg.
   const helped = routeTrack(
     POINTS,
     depart,
     forecastWith({ kmh: 1.852, toward: 0 }),
     BOAT,
     5,
+  );
+  expect(helped.track.legTimes[0]?.endMs).toBeLessThan(
+    still.track.legTimes[0]?.endMs ?? 0,
   );
   const briefing = routeBriefing(
     POINTS,
