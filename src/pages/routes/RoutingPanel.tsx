@@ -90,8 +90,10 @@ export function RoutingPanel() {
         (ou mieux, sa polaire réelle). Au près il tire des bords, au vent
         arrière il empanne ; sous le seuil, il passe au moteur en ligne droite
         et l’heure d’arrivée suit. Avec une carte hors ligne (Fonds de cartes)
-        qui couvre la route, les bords s’arrêtent avant la terre. Courants et
-        vagues ne sont pas encore pris en compte.
+        qui couvre la route, les bords s’arrêtent avant la terre. Le courant
+        (Copernicus, marée comprise) pousse le bateau : en ligne droite il
+        remonte le courant pour tenir la route, et la vitesse fond donne l’heure
+        d’arrivée. Les vagues de plus d’un mètre ralentissent, surtout au près.
       </HelpText>
       <div className="section rtg-form" id="rtgForm">
         <label>
@@ -217,7 +219,7 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
       </p>
     );
   }
-  const { result, landSeen } = run;
+  const { result, landSeen, seaSeen } = run;
   if (result.kind === 'no-wind') {
     return (
       <p className="help rtg-msg" id="rtgMsg">
@@ -245,6 +247,13 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
           landSeen
             ? 'Terre évitée pendant les bords (carte hors ligne du téléphone ; roches et hauts-fonds non vus).'
             : 'Terre non vue pendant les bords : aucune carte hors ligne ne couvre la route (Fonds de cartes).',
+        )}
+      </p>
+      <p className="help" id="rtgSea">
+        {tr(
+          seaSeen
+            ? 'Courants et vagues pris en compte (Open-Meteo marine, Copernicus, marée comprise).'
+            : 'Courants et vagues inconnus ici : routage en mer plate, sans courant.',
         )}
       </p>
       <h3 className="sub-h">{tr('Par segment')}</h3>
@@ -370,8 +379,11 @@ function StepTable({ steps }: { steps: readonly RoutingStep[] }) {
     <tr>
       <th scope="col">{tr('Heure')}</th>
       <th scope="col">{tr('Cap (°)')}</th>
-      <th scope="col">{tr('Vitesse (nd)')}</th>
+      <th scope="col">{tr('Vitesse surface (nd)')}</th>
+      <th scope="col">{tr('Route fond (° / nd)')}</th>
       <th scope="col">{tr('Vent (° / nd)')}</th>
+      <th scope="col">{tr('Courant (vers ° / nd)')}</th>
+      <th scope="col">{tr('Vagues (m)')}</th>
       <th scope="col">{tr('Angle au vent (°)')}</th>
       <th scope="col">{tr('Voiles')}</th>
     </tr>
@@ -389,7 +401,14 @@ function StepTable({ steps }: { steps: readonly RoutingStep[] }) {
               <td>{fmtTime(new Date(step.ms))}</td>
               <td>{step.course}</td>
               <td>{kn(step.kn)}</td>
+              <td>{`${step.cog} / ${kn(step.sog)}`}</td>
               <td>{`${step.twd} / ${kn(step.tws)}`}</td>
+              <td>
+                {step.driftKn > 0
+                  ? `${step.setDeg} / ${kn(step.driftKn)}`
+                  : '·'}
+              </td>
+              <td>{Number.isFinite(step.waveM) ? kn(step.waveM) : '·'}</td>
               <td>
                 {step.mode === 'motor' ? '·' : `${step.twa} ${step.side}`}
               </td>
@@ -416,11 +435,11 @@ function routingText(result: Done, route: NavRoute, depart: number): string {
     `Départ ${when(depart)} · arrivée ${when(result.arriveMs)}`,
     routingSummary(result, depart),
     '',
-    'Heure · cap (°) · vitesse (nd) · vent (° / nd) · angle au vent · voiles',
+    'Heure · cap (°) · vitesse surface (nd) · route fond (° / nd) · vent (° / nd) · courant (vers ° / nd) · vagues (m) · angle au vent · voiles',
   ];
   for (const step of hourly(result.steps)) {
     lines.push(
-      `${fmtTime(new Date(step.ms))} · ${step.course} · ${kn(step.kn)} · ${step.twd} / ${kn(step.tws)} · ${step.mode === 'motor' ? '-' : `${step.twa}° ${step.side}`} · ${step.sails}`,
+      `${fmtTime(new Date(step.ms))} · ${step.course} · ${kn(step.kn)} · ${step.cog} / ${kn(step.sog)} · ${step.twd} / ${kn(step.tws)} · ${step.driftKn > 0 ? `${step.setDeg} / ${kn(step.driftKn)}` : '-'} · ${Number.isFinite(step.waveM) ? kn(step.waveM) : '-'} · ${step.mode === 'motor' ? '-' : `${step.twa}° ${step.side}`} · ${step.sails}`,
     );
   }
   return `${lines.join('\n')}\n`;
