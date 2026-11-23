@@ -210,3 +210,117 @@ export function windAt(
   const twd = ((((Math.atan2(y, x) * 180) / Math.PI) % 360) + 360) % 360;
   return { tws, twd };
 }
+
+/** The sea along a route, hour by hour: waves and current. */
+export interface RouteSea {
+  places: LatLon[];
+  hours: number[];
+  /** `[place][hour]` significant wave height, metres. */
+  waveM: number[][];
+  /** `[place][hour]` current speed, knots. */
+  driftKn: number[][];
+  /** `[place][hour]` direction the current flows to, degrees. */
+  setDeg: number[][];
+}
+
+/** The sea at a place and time. */
+export interface SeaHere {
+  /** Wave height, metres (`NaN` when unknown). */
+  waveM: number;
+  /** Current speed, knots (0 when unknown). */
+  driftKn: number;
+  /** Direction the current flows to, degrees. */
+  setDeg: number;
+}
+
+interface MarineReply {
+  hourly?: {
+    time?: number[];
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+    wave_height?: Array<number | null>;
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+    ocean_current_velocity?: Array<number | null>;
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+    ocean_current_direction?: Array<number | null>;
+  };
+}
+
+/**
+ * The waves and the currents (Copernicus, tides included) along a route, in
+ * one request to Open-Meteo marine (kept 30 minutes).
+ * @param points - The route.
+ * @returns The sea, or why there is none.
+ */
+export async function fetchRouteSea(
+  points: readonly RoutePoint[],
+): Promise<RouteSea | { error: string }> {
+  const places = windPlaces(points);
+  if (places.length === 0) return { error: 'La route n’a pas de point.' };
+  const lat = places.map((place) => place.lat.toFixed(3)).join(',');
+  const lon = places.map((place) => place.lon.toFixed(3)).join(',');
+  const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&hourly=wave_height,ocean_current_velocity,ocean_current_direction&timeformat=unixtime&forecast_days=8&cell_selection=sea`;
+  let reply: Response;
+  try {
+    reply = await openMeteoFetch(url);
+  } catch {
+    return { error: 'Pas de réseau pour la mer.' };
+  }
+  if (!reply.ok) return { error: `Open-Meteo marine répond ${reply.status}.` };
+  const body = (await reply.json()) as MarineReply | MarineReply[];
+  const list = Array.isArray(body) ? body : [body];
+  const hours = (list[0]?.hourly?.time ?? []).map((time) => time * 1000);
+  if (hours.length === 0) return { error: 'Mer inconnue ici.' };
+  const clean = (values: Array<number | null> | undefined, scale = 1) =>
+    hours.map((_, rank) => {
+      const value = values?.[rank];
+      return value == null ? Number.NaN : value * scale;
+    });
+  return {
+    places,
+    hours,
+    waveM: list.map((item) => clean(item.hourly?.wave_height)),
+    // Open-Meteo gives the current in km/h.
+    driftKn: list.map((item) =>
+      clean(item.hourly?.ocean_current_velocity, 1 / 1.852),
+    ),
+    setDeg: list.map((item) => clean(item.hourly?.ocean_current_direction)),
+  };
+}
+
+/**
+ * The sea at a place and time: the nearest place asked, the nearest hour.
+ * @param sea - The sea along the route.
+ * @param lat - Latitude.
+ * @param lon - Longitude.
+ * @param ms - Time, epoch ms.
+ * @returns The sea, `null` out of the forecast.
+ */
+export function seaAt(
+  sea: RouteSea,
+  lat: number,
+  lon: number,
+  ms: number,
+): SeaHere | null {
+  const { hours, places, waveM, driftKn, setDeg } = sea;
+  const first = hours[0] as number;
+  const span = hours.length > 1 ? (hours[1] as number) - first : 3_600_000;
+  const hour = Math.round((ms - first) / span);
+  if (hour < 0 || hour >= hours.length) return null;
+  let place = 0;
+  let nearest = Infinity;
+  for (const [rank, spot] of places.entries()) {
+    const away = distNM(spot, { lat, lon });
+    if (away < nearest) {
+      nearest = away;
+      place = rank;
+    }
+  }
+  const drift = driftKn[place]?.[hour] ?? Number.NaN;
+  const set = setDeg[place]?.[hour] ?? Number.NaN;
+  const known = Number.isFinite(drift) && Number.isFinite(set);
+  return {
+    waveM: waveM[place]?.[hour] ?? Number.NaN,
+    driftKn: known ? drift : 0,
+    setDeg: known ? set : 0,
+  };
+}

@@ -5,9 +5,13 @@ import type { Polar } from '../polars.ts';
 import { polarSpeed } from '../polars.ts';
 import type { RoutingAsk, Wind } from '../sailRouting.ts';
 import {
+  crabInto,
   crossTrack,
+  groundOf,
+  motorWaveShare,
   routeSail,
   routingTurns,
+  waveShare,
   windSide,
 } from '../sailRouting.ts';
 
@@ -106,9 +110,80 @@ describe('routeSail', () => {
     expect(result.tacks).toBeGreaterThanOrEqual(free.tacks);
   });
 
+  it('steers up into the current straight to the point, the time follows', () => {
+    const to = destination(START, 0, 6);
+    const still = routeSail(ask(to, { twd: 270, tws: 3 }));
+    // A current of 2 kn flowing east, then one against the boat.
+    const across = routeSail(
+      ask(
+        to,
+        { twd: 270, tws: 3 },
+        { seaAt: () => ({ waveM: 0.5, driftKn: 2, setDeg: 90 }) },
+      ),
+    );
+    const against = routeSail(
+      ask(
+        to,
+        { twd: 270, tws: 3 },
+        { seaAt: () => ({ waveM: 0.5, driftKn: 2, setDeg: 180 }) },
+      ),
+    );
+    if (
+      still.kind !== 'done' ||
+      across.kind !== 'done' ||
+      against.kind !== 'done'
+    ) {
+      throw new Error('no routing');
+    }
+    expect(across.steps[0]?.course).toBeGreaterThan(300);
+    expect(across.steps[0]?.cog).toBe(0);
+    expect(distNM(across.steps.at(-1) ?? START, to)).toBeLessThan(1.2);
+    expect(against.arriveMs - DEPART).toBeGreaterThan(
+      1.4 * (still.arriveMs - DEPART),
+    );
+    expect(against.steps[0]?.sog).toBe(4);
+  });
+
+  it('slows in the waves', () => {
+    const to = destination(START, 0, 10);
+    const flat = routeSail(ask(to, { twd: 270, tws: 10 }));
+    const rough = routeSail(
+      ask(
+        to,
+        { twd: 270, tws: 10 },
+        { seaAt: () => ({ waveM: 3, driftKn: 0, setDeg: 0 }) },
+      ),
+    );
+    if (flat.kind !== 'done' || rough.kind !== 'done') {
+      throw new Error('no routing');
+    }
+    expect(rough.arriveMs).toBeGreaterThan(flat.arriveMs);
+    expect(rough.steps[0]?.waveM).toBe(3);
+  });
+
   it('says where and when the forecast ends', () => {
     const to = destination(START, 0, 6);
     expect(routeSail(ask(to, null)).kind).toBe('no-wind');
+  });
+});
+
+describe('sea helpers', () => {
+  it('keep a share of the speed in the waves', () => {
+    expect(waveShare(Number.NaN, 40)).toBe(1);
+    expect(waveShare(0.8, 40)).toBe(1);
+    expect(waveShare(3, 40)).toBeCloseTo(0.84);
+    expect(waveShare(3, 150)).toBeCloseTo(0.96);
+    expect(waveShare(20, 40)).toBe(0.6);
+    expect(motorWaveShare(3)).toBeCloseTo(0.9);
+  });
+  it('add the current and steer up into it', () => {
+    const ground = groundOf(0, 6, { driftKn: 2, setDeg: 180 });
+    expect(ground.sog).toBeCloseTo(4);
+    expect(ground.cog).toBeCloseTo(0);
+    const crab = crabInto(0, 5, { driftKn: 3, setDeg: 90 });
+    expect(crab.steer).toBeCloseTo(323.1, 0);
+    expect(crab.sog).toBeCloseTo(4);
+    expect(crabInto(0, 2, { driftKn: 3, setDeg: 90 }).steer).toBe(0);
   });
 });
 

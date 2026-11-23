@@ -87,12 +87,14 @@ function inSwissModel(lat: number, lon: number): boolean {
  * @param places - The places.
  * @param lake - On a lake: no sea model.
  * @param days - Days of forecast.
+ * @param extraSea - More variables of the sea model (the currents).
  * @returns The weather and the sea requests (null on a lake), and the model.
  */
 export function briefingUrls(
   places: ReadonlyArray<{ lat: number; lon: number }>,
   lake: boolean,
   days = 4,
+  extraSea: readonly string[] = [],
 ): { weather: string; sea: string | null; swiss: boolean } {
   const lat = places.map((place) => place.lat.toFixed(3)).join(',');
   const lon = places.map((place) => place.lon.toFixed(3)).join(',');
@@ -103,7 +105,7 @@ export function briefingUrls(
     weather: `https://api.open-meteo.com/v1/forecast?${where}&wind_speed_unit=kn&hourly=${WEATHER_VARS.join(',')}${swiss ? '&models=meteoswiss_icon_ch2' : '&models=ecmwf_ifs025'}${lake ? '' : '&cell_selection=sea'}`,
     sea: lake
       ? null
-      : `https://marine-api.open-meteo.com/v1/marine?${where}&hourly=${[...SEA_VARS, 'wave_direction'].join(',')}`,
+      : `https://marine-api.open-meteo.com/v1/marine?${where}&hourly=${[...SEA_VARS, 'wave_direction', ...extraSea].join(',')}`,
     swiss,
   };
 }
@@ -118,6 +120,7 @@ export function briefingUrls(
  * @param point.name - Its name.
  * @param swiss - Read with the Swiss model.
  * @param at - When it was read.
+ * @param extraSea - More variables of the sea model kept.
  * @returns The data, or null without hours.
  */
 export function briefingOf(
@@ -126,6 +129,7 @@ export function briefingOf(
   point: { lat: number; lon: number; name: string },
   swiss: boolean,
   at = Date.now(),
+  extraSea: readonly string[] = [],
 ): BriefingData | null {
   const hourly = weather?.hourly as Record<string, unknown> | undefined;
   const times = hourly?.time as string[] | undefined;
@@ -138,7 +142,7 @@ export function briefingOf(
   }
   const seaHourly = sea?.hourly as Record<string, unknown> | undefined;
   const seaTimes = (seaHourly?.time as string[] | undefined) ?? [];
-  for (const name of [...SEA_VARS, 'wave_direction']) {
+  for (const name of [...SEA_VARS, 'wave_direction', ...extraSea]) {
     const values =
       (seaHourly?.[name] as Array<number | null> | undefined) ?? [];
     // Same hours as the weather, matched by their text.

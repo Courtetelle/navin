@@ -16,6 +16,8 @@ export interface WeatherLayers {
   waves: boolean;
   currents: boolean;
   rain: boolean;
+  /** The badges of the LiveMétéo stations and buoys. */
+  stations: boolean;
 }
 
 const LAYERS_KEY = 'ldb.liveLayers';
@@ -24,6 +26,7 @@ const ALL_ON: WeatherLayers = {
   waves: true,
   currents: true,
   rain: true,
+  stations: true,
 };
 
 /** The layers chosen, kept on the device; all on at first. */

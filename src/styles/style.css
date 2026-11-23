@@ -3647,6 +3647,10 @@ body.trk-mode {
   position: relative;
   height: calc(100dvh - var(--topbar-h, 72px));
   min-height: 300px;
+  /* The figures of the track wait below the map when hidden: they must not
+     make the page scroll (a white band under the map, SOS in it). */
+  overflow: hidden;
+  overflow: clip;
 }
 .trk-full .trk-map {
   position: absolute !important;
@@ -12842,8 +12846,7 @@ html body .wx-page.wx-one {
    small at its side: a long press opens its setting, as the sun and moon of
    the magnifier say its long press. Its big red cross blinks. */
 .rail-btn.live-radius-btn {
-  position: fixed;
-  z-index: 1150;
+  position: relative;
   display: grid;
   place-items: center;
   padding: 0;
@@ -12899,19 +12902,7 @@ html body .wx-page.wx-one {
   font-weight: 700;
   line-height: 1;
 }
-@media (orientation: landscape) and (min-width: 560px) {
-  html body .rail-btn.live-radius-btn {
-    top: calc(var(--rb-top) + 3 * var(--rb-step) + env(safe-area-inset-top));
-    left: auto;
-    right: calc(var(--rb-side-r) + var(--rb-x));
-  }
-}
 @media (orientation: portrait) {
-  html body .rail-btn.live-radius-btn {
-    top: auto;
-    bottom: calc(var(--rb-bottom) + var(--rb-step));
-    left: calc(var(--rb-side) + 3 * var(--rb-x));
-  }
   html body .live-radius-nb {
     font-size: 21px;
   }
@@ -14444,6 +14435,57 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
 :root[data-theme='night'] .topbar #routesBtn .routes-ico circle[fill='#fff'] {
   fill: #200000;
 }
+/* Under Routes, unrolled and faded with it: Nouvelle route, Routage météo
+   (at its left upright, where the settings stand under it) */
+html body .rail-btn.routes-sub {
+  position: fixed;
+  z-index: 1500;
+  width: var(--rb-w, 84px);
+  height: var(--rb-h, 70px);
+  margin: 0;
+  box-sizing: border-box;
+}
+.routes-sub .rail-icon svg {
+  display: block;
+  width: 34px;
+  height: 34px;
+}
+html body .rail-btn.routes-sub {
+  top: calc(
+    34px + var(--rb-h, 70px) + var(--rb-gap, 8px) + env(safe-area-inset-top)
+  );
+  left: calc(50% - var(--rb-w, 84px) / 2);
+}
+html body .rail-btn.routes-sub-wx {
+  top: calc(
+    34px + 2 * var(--rb-h, 70px) + 2 * var(--rb-gap, 8px) +
+      env(safe-area-inset-top)
+  );
+}
+@media (orientation: portrait) {
+  html body .rail-btn.routes-sub {
+    top: calc(50% - var(--rb-h) / 2);
+    left: auto;
+    right: calc(
+      34px + var(--rb-w) + var(--rb-gap) + env(safe-area-inset-right)
+    );
+  }
+  html body .rail-btn.routes-sub-wx {
+    right: calc(
+      34px + 2 * var(--rb-w) + 2 * var(--rb-gap) + env(safe-area-inset-right)
+    );
+  }
+}
+html body.menus-fading .rail-btn.routes-sub {
+  opacity: 0;
+  transition: opacity 3s linear;
+}
+:root[data-theme='night'] .routes-sub {
+  color: #ff4040;
+}
+:root[data-theme='night'] .routes-sub circle[fill='#fff'] {
+  fill: #200000;
+}
 /* Prévisions › Situation générale: the copy kept offline, greyed when old */
 .wx-analysis .wx-analysis-old {
   opacity: 0.55;
@@ -15203,6 +15245,119 @@ html body.menus-fading header.topbar #routesBtn.theme-btn {
   opacity: 0.9;
 }
 
+/* LiveMétéo on the map: at the right of Météo, buttons of its size with
+   rounded corners, coloured while their layer shows; left alone they fade
+   out, a touch anywhere brings them back. */
+.live-btns {
+  position: fixed;
+  inset: 0;
+  z-index: 1390;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.live-btns.live-fading {
+  opacity: 0;
+  transition: opacity 3s linear;
+}
+.live-btns.live-gone {
+  opacity: 0;
+  visibility: hidden;
+}
+.live-slot {
+  position: fixed;
+  pointer-events: auto;
+}
+.live-btns.live-gone .live-slot {
+  pointer-events: none;
+}
+html body .live-slot > .rail-btn.live-btn {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 2px;
+  box-sizing: border-box;
+}
+.live-svg {
+  display: block;
+  width: 30px;
+  height: 30px;
+}
+.live-layer .live-ico {
+  color: var(--fg, #222);
+  opacity: 0.5;
+}
+html body .live-slot > .rail-btn.live-layer.on {
+  border-color: var(--accent, #1e5aa8);
+  background: var(--accent, #1e5aa8) !important;
+}
+.live-layer.on .live-ico {
+  color: #fff;
+  opacity: 1;
+}
+.live-rain-scale {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 3px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #88ddee,
+    #0099cc,
+    #ffee00,
+    #ff4400,
+    #ff00ff
+  );
+}
+.live-fail {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: var(--danger, #c00);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 16px;
+  text-align: center;
+}
+.live-step .rail-icon {
+  font-size: 22px;
+}
+.live-step:disabled {
+  opacity: 0.35;
+}
+.live-hour {
+  font-weight: 900;
+  line-height: 1.05;
+}
+.live-hour-time {
+  font-size: 17px;
+}
+.live-hour-plus {
+  font-size: 12px;
+}
+.live-btn .live-radius-more {
+  right: 4px;
+  bottom: 2px;
+}
+/* The badges of the stations hidden by their button */
+.live-st-off .live-mk-wrap {
+  display: none;
+}
+:root[data-theme='night'] .live-slot > .rail-btn.live-layer.on {
+  border-color: var(--fg);
+  background: var(--fg) !important;
+}
+:root[data-theme='night'] .live-layer.on .live-ico {
+  color: #000;
+}
 .rp-traces {
   padding: 8px 14px;
 }

@@ -2,6 +2,7 @@ import { expect, test } from 'vitest';
 
 import type { Hour } from '../goNoGo.ts';
 import {
+  TIDE_RULES,
   boatKindOf,
   corrected,
   dayVerdict,
@@ -122,4 +123,33 @@ test('the category and the kind come from the boat sheet', () => {
   });
   expect(boatKindOf({ ceCategory: 'E' })).toStrictEqual({ ce: '', kind: null });
   expect(boatKindOf(undefined)).toStrictEqual({ ce: '', kind: null });
+});
+
+test('wind against current, along a route', () => {
+  const limits = thresholdsOf(DUFOUR);
+  // Wind from the west; a current going west is against it.
+  const against = hours([
+    { windKn: 16, currentKn: 1.5, currentToward: 270 },
+    { windKn: 16, currentKn: 1.5, currentToward: 270 },
+  ]);
+  const verdict = dayVerdict(against, against, limits, 0);
+  expect(verdict.light).toBe('prudence');
+  expect(verdict.reasons.join(' ')).toMatch(/vent contre courant/u);
+  const hard = hours([
+    { windKn: 21, currentKn: 2.5, currentToward: 280 },
+    { windKn: 21, currentKn: 2.5, currentToward: 280 },
+  ]);
+  expect(dayVerdict(hard, hard, limits, 0).light).toBe('nogo');
+  const along = hours([
+    { windKn: 16, currentKn: 1.5, currentToward: 90 },
+    { windKn: 16, currentKn: 1.5, currentToward: 90 },
+  ]);
+  expect(dayVerdict(along, along, limits, 0).light).toBe('go');
+  const strong = hours([
+    { windKn: 8, currentKn: TIDE_RULES.strong, currentToward: 90 },
+    { windKn: 8, currentKn: TIDE_RULES.strong, currentToward: 90 },
+  ]);
+  expect(dayVerdict(strong, strong, limits, 0).reasons).toStrictEqual([
+    'courant fort (3 nd)',
+  ]);
 });

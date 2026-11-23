@@ -245,7 +245,6 @@ function FixedAlertsPage() {
         <h1 className="menu-title">
           {tr('⚠ Alertes fixes')}
           <FixedGpsSort />
-          <MenuSortButton menu="fixed" />
         </h1>
       </TitleInNav>
       <FixedAlerts />
