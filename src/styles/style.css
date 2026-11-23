@@ -14743,7 +14743,9 @@ html body.menus-fading .rail-btn.routes-sub {
   color: #0a4c8c;
 }
 .wx-cur {
-  color: #a1006b;
+  /* Courants en noir, comme sur les cartes marines : rien de commun avec
+     les couleurs de cambrure des vagues. */
+  color: #000;
 }
 .wx-bar {
   position: fixed;

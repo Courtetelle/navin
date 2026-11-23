@@ -64,6 +64,10 @@ jobs:
       - name: Dépendances
         if: github.event_name != 'schedule' || steps.check.outputs.build == 'true'
         run: pip install -q -r analyse/requirements.txt
+      - name: Pluie prévue (carte LiveMétéo)
+        if: github.event_name != 'schedule' || steps.check.outputs.build == 'true'
+        continue-on-error: true
+        run: python3 -I analyse/pluie.py --store store
       - name: Analyse
         if: github.event_name != 'schedule' || steps.check.outputs.build == 'true'
         env:

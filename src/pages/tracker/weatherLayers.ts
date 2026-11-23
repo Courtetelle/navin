@@ -59,6 +59,8 @@ export interface WeatherRead {
 export const weatherRead = signal<WeatherRead>({ wind: null, sea: null });
 /** The radar frames read, or why none. */
 export const rainRead = signal<RainFrames | Failure | null>(null);
+/** The fine rain ahead on the map: its model and run, null when not shown. */
+export const rainAheadSource = signal<string | null>(null);
 /** The hour drawn, epoch ms, null out of the forecast. */
 export const weatherShownAt = signal<number | null>(null);
 /** The name of the local model of the wind. */

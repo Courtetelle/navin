@@ -15,3 +15,5 @@ pip install -r analyse/requirements.txt
 python3 -I analyse/run.py --store /tmp/store --zone saint-quay
 python3 -I analyse/run.py --store /tmp/store --lat 48.7167 --lon -2.75
 ```
+
+- `pluie.py` : pluie prévue heure par heure (ICON-EU, 48 h) pour la carte LiveMétéo, dans `pluie/`, publiée sous `analyse/v/pluie/`.
