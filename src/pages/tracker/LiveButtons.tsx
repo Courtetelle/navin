@@ -8,6 +8,7 @@ import { tracker } from '../../features/map/trackerState.ts';
 import type { Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import { FORECAST_HOURS } from '../../features/onwater/mapWeather.ts';
 import { onLake } from '../../features/onwater/onLake.ts';
+import { zonesButtonText, zonesText } from '../../features/zones/meteoZones.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
@@ -24,7 +25,8 @@ import {
   hideLiveOnMap,
   liveOnMap,
   liveOnMapAround,
-  liveRadiusNm,
+  liveZonesShown,
+  zonePickOpen,
 } from './liveOnMap.ts';
 import type { WeatherLayers } from './weatherLayers.ts';
 import {
@@ -83,7 +85,7 @@ function useFade(on: boolean): 'shown' | 'fading' | 'gone' {
 /**
  * LiveMétéo on the map of NavIn: at the right of Météo, buttons of its size
  * with rounded corners: the zone (a touch takes LiveMétéo away, a long press
- * its setting), the wind forecast, the waves, the currents, the rain of the
+ * the Météo-France zones), the wind forecast, the waves, the currents, the rain of the
  * radar, the badges of the stations and buoys, each coloured while shown,
  * then ◀ the hour ▶ of the forecast. Left alone they fade out; a touch on
  * the map or anywhere brings them back. A long press on a layer says its
@@ -355,29 +357,31 @@ function LayerButton({
 }
 
 /**
- * The zone of LiveMétéo, first at the right of Météo: around the zone or
- * the GPS a dashed circle with its radius in NM; on the map shown, a frame.
- * A big red cross blinks over it: a touch takes LiveMétéo away; a long press
- * opens Paramétrages › Alertes › LiveMétéo (its ◀ comes back to the map).
+ * The button of the zone: a dashed outline of a sea zone, the Météo-France
+ * zone in short (or how many) and « zone? » small (« carte » for the
+ * stations of the map shown). A big red cross blinks over it: a touch takes
+ * LiveMétéo away; a long press opens the chooser of the Météo-France zones
+ * over the map (one or several, or groups of them).
  * @returns The button.
  */
 function ZoneButton() {
   useSignals();
   const tr = useTr();
   const around = liveOnMapAround.value;
-  const nm = liveRadiusNm();
+  const zones = liveZonesShown.value;
   const press = useLongPress(() => {
     buzz();
-    go('settings', 'live');
+    if (around) zonePickOpen.value = true;
+    else go('settings', 'live');
   });
   return (
     <Button
       type="button"
       noUiEdit
-      className={`rail-btn live-btn live-radius-btn${press.hit ? ' lp-hit' : ''}`}
+      className={`rail-btn live-btn live-radius-btn live-zone-btn${press.hit ? ' lp-hit' : ''}`}
       aria-label={tr(
         around
-          ? `Rayon LiveMétéo ${nm} NM · toucher : retirer LiveMétéo · appui long : changer le rayon`
+          ? `Zones LiveMétéo : ${zonesText(zones)} · toucher : retirer LiveMétéo · appui long : choisir les zones Météo-France`
           : 'LiveMétéo de la carte affichée · toucher : retirer LiveMétéo · appui long : réglages',
       )}
       onClick={hideLiveOnMap}
@@ -390,25 +394,14 @@ function ZoneButton() {
         aria-hidden="true"
       >
         {around ? (
-          <>
-            <circle
-              cx="20"
-              cy="20"
-              r="16"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeDasharray="4 3"
-            />
-            <path
-              d="M20 20h14m-4-3.5 4 3.5-4 3.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </>
+          <path
+            d="M6 9 L19 5 L34 10 L35 27 L24 35 L8 31 Z"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeDasharray="4 3"
+            strokeLinejoin="round"
+          />
         ) : (
           <rect
             x="5"
@@ -438,9 +431,11 @@ function ZoneButton() {
           vectorEffect="non-scaling-stroke"
         />
       </svg>
-      {around ? <span className="live-radius-nb">{nm}</span> : null}
+      {around ? (
+        <span className="live-radius-nb">{zonesButtonText(zones)}</span>
+      ) : null}
       <span className="live-radius-more" aria-hidden="true">
-        {around ? 'nm?' : 'carte'}
+        {around ? 'zone?' : 'carte'}
       </span>
     </Button>
   );

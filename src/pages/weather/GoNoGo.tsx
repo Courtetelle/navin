@@ -643,7 +643,7 @@ function RouteChooser({
           {routing ? (
             <p className="bd-how" data-gng="route-routing">
               {tr(
-                `Durée : routage polaire du bateau avec le vent prévu, moteur sous ${fr(routing.motorBelow, 1)} nd à ${fr(routing.motorKn, 1)} nd (réglages de Routes › Routage météo).`,
+                `Durée : routage polaire du bateau avec le vent, les vagues et les courants prévus, moteur sous ${fr(routing.motorBelow, 1)} nd à ${fr(routing.motorKn, 1)} nd (réglages de Routes › Routage météo).`,
               )}
             </p>
           ) : null}
@@ -754,7 +754,7 @@ function RouteBlock({
       </ul>
       <p className="bd-how">
         {tr(
-          `Prévision ${briefing.src} et vagues Open-Meteo en plusieurs points le long de la route, lue le ${new Date(briefing.at).toLocaleString('fr-CH')}. Chaque heure, le bateau est placé là où le routage polaire le met (vent prévu, virements et empannages, moteur sous le seuil), sinon à la vitesse prévue ; l’allure vient du cap tenu et du vent de l’heure. Courants du modèle de mer d’Open-Meteo, côté Atlantique et dans les détroits connus de Méditerranée ; vent contre courant : orange dès ${TIDE_RULES.against.orange[0]} nd de courant et ${TIDE_RULES.against.orange[1]} nd de vent, rouge dès ${TIDE_RULES.against.red[0]} nd et ${TIDE_RULES.against.red[1]} nd, courant seul de ${TIDE_RULES.strong} nd ou plus orange (valeurs de départ, à corriger). Mêmes règles qu’au point, sans fenêtre 8 h – 18 h : toutes les heures de la route comptent. La prévision de la route est gardée pour hors ligne à chaque lecture (4 routes au plus).`,
+          `Prévision ${briefing.src} et vagues Open-Meteo en plusieurs points le long de la route, lue le ${new Date(briefing.at).toLocaleString('fr-CH')}. Chaque heure, le bateau est placé là où le routage polaire le met (vent, vagues et courants prévus, virements et empannages, moteur sous le seuil), sinon à la vitesse prévue ; l’allure vient du cap tenu et du vent de l’heure. Courants du modèle de mer d’Open-Meteo, côté Atlantique et dans les détroits connus de Méditerranée ; vent contre courant : orange dès ${TIDE_RULES.against.orange[0]} nd de courant et ${TIDE_RULES.against.orange[1]} nd de vent, rouge dès ${TIDE_RULES.against.red[0]} nd et ${TIDE_RULES.against.red[1]} nd, courant seul de ${TIDE_RULES.strong} nd ou plus orange (valeurs de départ, à corriger). Mêmes règles qu’au point, sans fenêtre 8 h – 18 h : toutes les heures de la route comptent. La prévision de la route est gardée pour hors ligne à chaque lecture (4 routes au plus).`,
         )}
       </p>
     </section>
