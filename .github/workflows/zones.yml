@@ -1,0 +1,53 @@
+# Zones Météo-France de LiveMétéo et grille « 500 m de la côte » (demande de Corban du 22/11/2026).
+# Refait public/meteo-zones.json et public/shore-sea500.bin à partir du trait de côte OpenStreetMap
+# (osmdata.openstreetmap.de) quand scripts/shore/build_zones.py change, et les enregistre sur la branche.
+name: Zones Météo-France
+
+on:
+  push:
+    branches:
+      - 'claude/**'
+    paths:
+      - scripts/shore/build_zones.py
+      - .github/workflows/zones.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  zones:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - run: pip install shapely pyshp pyproj numpy
+      - name: Trait de côte OpenStreetMap
+        run: |
+          mkdir -p work
+          cd work
+          curl -sSfL -o water.zip https://osmdata.openstreetmap.de/download/water-polygons-split-4326.zip
+          unzip -q water.zip
+          rm water.zip
+      - name: Zones et grille
+        run: |
+          cd work
+          python ../scripts/shore/build_zones.py ../public
+          cd ..
+          gzip -9 -n -f public/shore-sea500.bin
+          mv public/shore-sea500.bin.gz public/shore-sea500.bin
+          ls -la public/meteo-zones.json public/shore-sea500.bin
+      - name: Enregistrer sur la branche
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898099+github-actions[bot]@users.noreply.github.com'
+          git add public/meteo-zones.json public/shore-sea500.bin
+          if git diff --cached --quiet; then
+            echo 'Rien de nouveau'
+            exit 0
+          fi
+          git commit -m 'Zones Météo-France et grille 500 m refaites (workflow Zones Météo-France)'
+          git push origin HEAD:${GITHUB_REF_NAME}

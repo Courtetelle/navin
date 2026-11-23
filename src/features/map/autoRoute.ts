@@ -1,8 +1,7 @@
-import { fixedAlertById } from '../../model/fixedAlerts.ts';
 import type { RoutePoint } from '../../model/routes.ts';
 import { store } from '../../storage/store.ts';
 
-import type { AvoidZone, Box } from './waterGrid.ts';
+import type { Box } from './waterGrid.ts';
 import { buildWaterGrid } from './waterGrid.ts';
 import { bendLegs, cellMetres } from './waterRoute.ts';
 
@@ -10,14 +9,9 @@ import { bendLegs, cellMetres } from './waterRoute.ts';
 export interface AutoOptions {
   /** Least distance to the shore, metres. */
   marginM: number;
-  /** Keep out of the offshore wind farms. */
-  avoidFarms: boolean;
 }
 
-const DEFAULTS: AutoOptions = { marginM: 200, avoidFarms: true };
-
-/** The wind farms of the fixed alerts (their zone on the map). */
-const WIND_FARMS = ['eolien-st-brieuc'];
+const DEFAULTS: AutoOptions = { marginM: 200 };
 
 /** Room around the route, in nautical miles, for the way round. */
 const PAD_NM = 3;
@@ -29,9 +23,12 @@ const PORT_REACH_M = 3000;
  * @returns Margin and zones.
  */
 export function autoOptions(): AutoOptions {
+  const kept = store.get<Partial<AutoOptions>>('ldb.routeAuto', {});
   return {
-    ...DEFAULTS,
-    ...store.get<Partial<AutoOptions>>('ldb.routeAuto', {}),
+    marginM:
+      typeof kept.marginM === 'number' && Number.isFinite(kept.marginM)
+        ? kept.marginM
+        : DEFAULTS.marginM,
   };
 }
 
@@ -60,21 +57,6 @@ export function routeBox(points: readonly RoutePoint[]): Box {
   const padLat = Math.max(PAD_NM / 60, (n - s) / 5);
   const padLon = Math.max(PAD_NM / 60 / cos, (e - w) / 5);
   return { s: s - padLat, n: n + padLat, w: w - padLon, e: e + padLon };
-}
-
-/**
- * The zones a route keeps out of.
- * @param options - The options.
- * @returns Round zones.
- */
-export function avoidZones(options: AutoOptions): AvoidZone[] {
-  if (!options.avoidFarms) return [];
-  const zones: AvoidZone[] = [];
-  for (const id of WIND_FARMS) {
-    const zone = fixedAlertById(id)?.zone;
-    if (zone) zones.push({ lat: zone.lat, lon: zone.lon, m: zone.km * 1000 });
-  }
-  return zones;
 }
 
 /** What the way round gave. */
@@ -116,7 +98,7 @@ export async function aroundLand(
       e: Math.max(...lons),
     },
     marginM: options.marginM,
-    avoid: avoidZones(options),
+    avoid: [],
   });
   if (answer.kind !== 'grid') return { kind: answer.kind };
   const { grid, loose } = answer;

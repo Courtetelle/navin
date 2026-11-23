@@ -5,6 +5,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { boatsByNav } from '../../features/boats/navOrder.ts';
+import { shownMap } from '../../features/map/mapFull.ts';
 import { editRoute } from '../../features/map/routeEditor.ts';
 import type {
   RoutingPrefs,
@@ -15,7 +16,14 @@ import {
   runRouting,
   saveRoutingPrefs,
 } from '../../features/map/routingRun.ts';
+import {
+  fitRouting,
+  gotoRouting,
+  showRouting,
+} from '../../features/map/routingShown.ts';
+import { routingShape } from '../../features/map/routingState.ts';
 import { ROUTING_MODELS } from '../../features/map/routingWeather.ts';
+import { tracker } from '../../features/map/trackerState.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtShortDate, fmtTime, pad } from '../../lib/format.ts';
@@ -23,6 +31,7 @@ import { isBoatPolar } from '../../model/polars.ts';
 import type { NavRoute } from '../../model/routes.ts';
 import type { RoutingResult, RoutingStep } from '../../model/sailRouting.ts';
 import { routingTurns } from '../../model/sailRouting.ts';
+import { go } from '../../shell/router.ts';
 import { deliver, saveRoute, state, toast } from '../../state/index.ts';
 
 type Done = Extract<RoutingResult, { kind: 'done' }>;
@@ -262,6 +271,38 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
       <StepTable steps={hourly(result.steps)} />
       <ButtonRow>
         <Button
+          className="btn primary"
+          id="rtgShow"
+          onClick={() => {
+            buzz();
+            showRouting(routingShape(route.name, result, route.points));
+            go('tracker');
+            // The map opens, then the whole routing is shown.
+            setTimeout(() => {
+              const map = tracker.current?.map ?? shownMap();
+              if (map) fitRouting(map);
+            }, 700);
+          }}
+        >
+          {tr('✓ Terminer : voir le routage sur la carte')}
+        </Button>
+      </ButtonRow>
+      <ButtonRow>
+        <Button
+          className="btn"
+          id="rtgGoto"
+          onClick={() => {
+            buzz();
+            showRouting(routingShape(route.name, result, route.points));
+            go('tracker');
+            gotoRouting();
+          }}
+        >
+          {tr('🎯 Go to le long du routage, segment par segment')}
+        </Button>
+      </ButtonRow>
+      <ButtonRow>
+        <Button
           className="btn"
           id="rtgKeep"
           onClick={() => {
@@ -278,7 +319,7 @@ function RoutingOutcome({ run, route }: OutcomeProps) {
             editRoute(kept.id);
           }}
         >
-          {tr('🗺 Garder comme route et voir sur la carte')}
+          {tr('🗺 Garder comme route (à modifier)')}
         </Button>
       </ButtonRow>
       <ButtonRow>

@@ -4,6 +4,7 @@ import { herePos } from '../../state/index.ts';
 
 import { whileMapLive } from './mapExtras.ts';
 import { drawGotoLine, drawMarks, marksMaps } from './marksDraw.ts';
+import { drawRouting } from './routingShown.ts';
 import { crossAttach } from './tapCross.ts';
 import { tracker } from './trackerState.ts';
 import { showZoom } from './zoomShown.ts';
@@ -40,6 +41,7 @@ export function lpAttach(map: LeafletMap): void {
       () => {
         drawMarks(map);
         drawGotoLine(map);
+        drawRouting(map);
       },
       0,
     );

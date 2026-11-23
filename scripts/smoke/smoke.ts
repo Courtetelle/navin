@@ -2449,6 +2449,22 @@ async function turnPhone(browser: Browser): Promise<void> {
  */
 // Routes › Routage météo: the route drawn, the boat and its polar, a wind
 // of the west (Open-Meteo answered here), then the times of the routing.
+async function shomSection(page: Page, theme: string): Promise<void> {
+  await openGear(page);
+  await page.waitForTimeout(400);
+  await page.locator('button[data-sec="shom"]').click();
+  await page.waitForTimeout(400);
+  const href = (await page.locator('#shomBuy').getAttribute('href')) ?? '';
+  const said = (await page.locator('#shomState').textContent()) ?? '';
+  check(
+    theme,
+    'Paramétrages: Copernicus by default, a button to buy a SHOM subscription',
+    href.includes('shom.fr') && said.includes('Copernicus'),
+  );
+  await page.locator(NAVIN).click();
+  await page.waitForTimeout(400);
+}
+
 async function routingWeather(page: Page, theme: string): Promise<void> {
   await page.route(/api\.open-meteo\.com\/v1\/forecast/, async (route) => {
     const url = new globalThis.URL(route.request().url());
@@ -2525,6 +2541,30 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
   );
   const last = (await page.locator('#view .btn').last().textContent()) ?? '';
   check(theme, 'and Partager comes last', last.includes('Partager'));
+  await page.locator('#rtgShow').click();
+  await page.waitForTimeout(1500);
+  check(
+    theme,
+    'Terminer shows the routing on the map, wind, current and waves along it',
+    (await page.locator('.rtm').count()) > 0 &&
+      (await page.locator('.rtm .rtm-current').count()) > 0,
+  );
+  await showRow(page);
+  check(
+    theme,
+    'and the Routes button blinks',
+    await page.locator('#routesBtn.routing-on.menu-here').isVisible(),
+  );
+  await page.locator('#routesBtn').click();
+  await page.waitForTimeout(400);
+  check(
+    theme,
+    'a tap on it erases the routing',
+    (await page.locator('.rtm').count()) === 0 &&
+      (await page.locator('#routesBtn.routing-on').count()) === 0,
+  );
+  await page.locator('#routesBtn').click();
+  await page.waitForTimeout(400);
   await page.locator('[data-part="draw"]').click();
   await page.unroute(/api\.open-meteo\.com\/v1\/forecast/);
   await page.unroute(/marine-api\.open-meteo\.com\/v1\/marine/);
@@ -2756,6 +2796,7 @@ for (const theme of ['day', 'night']) {
     await layoutGaps(page, theme);
     await routeByHand(page, theme);
     await routingWeather(page, theme);
+    await shomSection(page, theme);
     await zoneBulletinSmoke(page, theme);
   } catch (error) {
     check(theme, `no step blocks: ${String(error).slice(0, 700)}`, false);
