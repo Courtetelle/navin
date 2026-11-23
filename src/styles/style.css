@@ -14512,10 +14512,9 @@ html body.menus-fading .rail-btn.routes-sub {
   align-items: center;
   max-width: 100%;
 }
-.wx-analysis-key input {
-  font-size: 16px;
-  width: 100%;
-  max-width: 28em;
+.wx-analysis-key .btn {
+  margin-top: 6px;
+  white-space: normal;
 }
 
 /* Bateaux › polaire: the polar of a boat, its table scrolls sideways */
@@ -15060,4 +15059,27 @@ html body .live-slot > .rail-btn.live-layer.on {
 }
 :root[data-theme='night'] .live-layer.on .live-ico {
   color: #000;
+}
+.rp-traces {
+  padding: 8px 14px;
+}
+
+/* LiveMétéo : degré Douglas des vagues sur la couleur de son groupe, étale
+   des courants en italique. */
+.wx-dg {
+  display: inline-block;
+  margin-left: 2px;
+  padding: 0 3px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 900;
+}
+.wx-slack {
+  font-style: italic;
+}
+/* Les vagues au-dessus de leur flèche, le courant au-dessous : les deux
+   étiquettes ne se couvrent pas. */
+.wx-lbl.wx-wave {
+  top: 2px;
+  bottom: auto;
 }

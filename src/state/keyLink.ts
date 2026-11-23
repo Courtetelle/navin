@@ -11,6 +11,7 @@ export const KEY_LINKS = {
   aemet: { setting: 'aemetKey', name: 'AEMET' },
   metoffice: { setting: 'metOfficeKey', name: 'Met Office' },
   frost: { setting: 'frostKey', name: 'MET Norway (Frost)' },
+  github: { setting: 'githubKey', name: 'GitHub (analyse météo)' },
   relay: { setting: 'relayUrl', name: 'Relais NavIn' },
   sync: { setting: 'syncKey', name: 'Synchronisation' },
 } as const;

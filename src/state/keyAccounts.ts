@@ -98,6 +98,27 @@ export const KEY_GUIDES: Readonly<Record<string, Record<GuidePart, string>>> = {
       '4. Mail perdu ou identifiant refusé : en redemander un avec la 1ʳᵉ partie, la même adresse convient.',
     ].join('\n'),
   },
+  github: {
+    first: [
+      '1. Ouvrir github.com et se connecter avec le compte Courtetelle (celui du dépôt navin).',
+      '2. Ouvrir github.com/settings/personal-access-tokens/new (ou : photo de profil en haut à droite › « Settings » › « Developer settings », tout en bas à gauche › « Personal access tokens » › « Fine-grained tokens » › « Generate new token »).',
+      '3. « Token name » : par exemple « NAVIn analyse ». « Resource owner » : Courtetelle.',
+      '4. « Expiration » : « Custom », une date dans un an (GitHub n’accepte pas plus long).',
+      '5. « Repository access » : « Only select repositories », puis choisir navin.',
+      '6. « Permissions » › « Repository permissions » › « Actions » : « Read and write ». Rien d’autre (« Metadata : Read-only » se coche tout seul).',
+      '7. « Generate token » en bas, puis copier la clé (elle commence par github_pat_) : GitHub ne la montre qu’une fois.',
+      '8. Dans NavIn › Paramétrages › Clés météos et compte relais, la coller sous « Clé GitHub (analyse météo) » et toucher Enregistrer : NavIn l’essaie. Elle part ensuite dans la sauvegarde complète et la synchronisation, vers les autres appareils.',
+    ].join('\n'),
+    again: [
+      '1. Ouvrir github.com/settings/personal-access-tokens et se connecter (compte Courtetelle).',
+      '2. Toucher la clé « NAVIn analyse » dans la liste des « Fine-grained tokens ».',
+      '3. Clé expirée ou bientôt : « Regenerate token », choisir une nouvelle date (« Custom », dans un an), puis « Regenerate token ». Les droits restent les mêmes.',
+      '4. Clé perdue (GitHub ne la remontre jamais) : même bouton « Regenerate token » ; l’ancienne cesse de marcher.',
+      '5. Copier la nouvelle clé (github_pat_…), la coller dans NavIn sous « Clé GitHub (analyse météo) » et toucher Enregistrer.',
+      '6. Clé refusée à l’essai : vérifier « Repository access » (navin choisi) et « Actions : Read and write », ou en recréer une avec la 1ʳᵉ partie.',
+      '7. Appareil perdu : sur la même page, « Delete » sur la clé, puis en créer une nouvelle.',
+    ].join('\n'),
+  },
   relay: {
     first: [
       '1. Ouvrir dash.cloudflare.com et « Sign up » : adresse mail et mot de passe (offre gratuite « Free »), puis confirmer le mail reçu.',

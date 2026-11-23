@@ -163,8 +163,9 @@ export function LiveButtons() {
     rain && 'frames' in rain ? (rain.frames.at(-1)?.time ?? null) : null;
   const sources: Record<keyof WeatherLayers, string> = {
     wind: `Vent prévu : ${model || 'modèle local'}, nœuds, G = rafales.`,
-    waves: 'Vagues : Open-Meteo Marine, hauteur en m.',
-    currents: 'Courants : Open-Meteo Marine, nœuds.',
+    waves:
+      'Vagues : Open-Meteo Marine, hauteur significative Hs en m et degré Douglas en couleur.',
+    currents: 'Courants : Open-Meteo Marine, nœuds ; étale marquée à part.',
     rain: `Pluie : radar RainViewer${rainAt == null ? '' : ` de ${hourText(rainAt)}`}, du bleu clair (faible) au violet (forte).`,
     stations: 'Stations et bouées LiveMétéo : vent mesuré.',
   };
