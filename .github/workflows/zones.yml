@@ -50,4 +50,9 @@ jobs:
             exit 0
           fi
           git commit -m 'Zones Météo-France et grille 500 m refaites (workflow Zones Météo-France)'
-          git push origin HEAD:${GITHUB_REF_NAME}
+          # A push made meanwhile on the branch: the files go on top of it.
+          for attempt in 1 2 3; do
+            git pull --rebase origin ${GITHUB_REF_NAME} && git push origin HEAD:${GITHUB_REF_NAME} && exit 0
+            sleep 5
+          done
+          exit 1
