@@ -12,7 +12,6 @@ import { mapBearing } from '../../features/map/mapOrientation.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { Area, Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import {
-  MOST_ASKED,
   RAIN_NATIVE_ZOOM,
   arrowSvg,
   barbSvg,
@@ -21,9 +20,9 @@ import {
   fetchRainFrames,
   fetchSeaGrid,
   fetchWindGrid,
+  fittedLattice,
   hourRank,
   isSlack,
-  latticePoints,
   localModel,
   rainColor,
   rainTileUrl,
@@ -411,10 +410,7 @@ export function WeatherOnMap() {
       const zones = around ? liveZonesShown.peek() : [];
       const inside = (point: LatLon): boolean =>
         zones.length === 0 || stationInZones(zones, point.lat, point.lon);
-      const step = stepForZoom(map);
-      const points = latticePoints(area, step)
-        .filter(inside)
-        .slice(0, MOST_ASKED);
+      const { step, points } = fittedLattice(area, stepForZoom(map), inside);
       const middle = around ? boatPlace() : mapPlace();
       const chosen = localModel(middle);
       weatherModel.value = chosen.name;

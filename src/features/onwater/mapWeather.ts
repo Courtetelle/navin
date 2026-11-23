@@ -707,6 +707,41 @@ export function roundStep(wanted: number): number {
 }
 
 /**
+ * The next round spacing, coarser; the coarsest stays.
+ * @param step - Degrees.
+ * @returns Degrees.
+ */
+export function coarserStep(step: number): number {
+  return STEPS.find((one) => one > step * 1.001) ?? (STEPS.at(-1) as number);
+}
+
+/**
+ * The grid of the marks over the whole area: the spacing asked, made
+ * coarser while the points kept would be more than {@link MOST_ASKED}.
+ * Before, the grid was cut after the first points, south first, and the top
+ * of the screen stayed empty.
+ * @param area - The area shown.
+ * @param step - Spacing wanted, degrees (see {@link roundStep}).
+ * @param keep - Whether a point may be kept (in the zones chosen).
+ * @returns The spacing taken and its points.
+ */
+export function fittedLattice(
+  area: Area,
+  step: number,
+  keep: (point: LatLon) => boolean = () => true,
+): { step: number; points: LatLon[] } {
+  let taken = step;
+  for (;;) {
+    const points = latticePoints(area, taken).filter(keep);
+    const coarser = coarserStep(taken);
+    if (points.length <= MOST_ASKED || coarser === taken) {
+      return { step: taken, points: points.slice(0, MOST_ASKED) };
+    }
+    taken = coarser;
+  }
+}
+
+/**
  * The points of a round grid over an area, at a spacing.
  * @param area - The area.
  * @param step - Spacing, degrees (see {@link roundStep}).
@@ -758,9 +793,18 @@ export function seaPoints(
     );
     return around.length <= 1;
   };
-  const kept = latticePoints(area, step / 2, true).filter(open);
-  // Thinned by distance: the marks stay apart on the screen.
-  return spreadOut(kept, MOST_ASKED, step * 0.9, 1);
+  // Thinned by distance: the marks stay apart on the screen. Too many for
+  // one request: a coarser spacing, over the whole area still.
+  let taken = step;
+  for (;;) {
+    const kept = latticePoints(area, taken / 2, true).filter(open);
+    const spread = spreadOut(kept, Infinity, taken * 0.9, 1);
+    const coarser = coarserStep(taken);
+    if (spread.length <= MOST_ASKED || coarser === taken) {
+      return spread.slice(0, MOST_ASKED);
+    }
+    taken = coarser;
+  }
 }
 
 /**

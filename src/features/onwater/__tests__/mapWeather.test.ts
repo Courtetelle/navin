@@ -12,6 +12,7 @@ import {
   fetchRainFrames,
   fetchSeaGrid,
   fetchWindGrid,
+  fittedLattice,
   gridPoints,
   hourRank,
   inMediterranean,
@@ -477,5 +478,29 @@ describe('the grid follows the zoom', () => {
     expect(latticePoints(area, 0.1).length).toBeGreaterThan(
       latticePoints(area, 0.25).length,
     );
+  });
+});
+
+describe('the marks cover the whole screen', () => {
+  // Zoomed in on the Gulf of Saint-Malo: more grid points than one request.
+  const area = { south: 48.5, west: -3.2, north: 49.4, east: -1.6 };
+
+  it('takes a coarser spacing instead of cutting the north', () => {
+    const { step, points } = fittedLattice(area, 0.1);
+    expect(step).toBeGreaterThan(0.1);
+    expect(points.length).toBeLessThanOrEqual(MOST_ASKED);
+    const norths = points.map((point) => point.lat);
+    expect(Math.max(...norths)).toBeGreaterThan(area.north - step - 1e-9);
+  });
+
+  it('keeps the spacing when it fits', () => {
+    expect(fittedLattice(area, 0.5).step).toBe(0.5);
+  });
+
+  it('has sea points up to the north of the screen too', () => {
+    const points = seaPoints(area, 0.1, () => false);
+    expect(points.length).toBeLessThanOrEqual(MOST_ASKED);
+    const norths = points.map((point) => point.lat);
+    expect(Math.max(...norths)).toBeGreaterThan(area.north - 0.3);
   });
 });
