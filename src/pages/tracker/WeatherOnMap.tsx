@@ -2,13 +2,11 @@ import { useSignals } from '@preact/signals-react/runtime';
 import type { LayerGroup, Map as LeafletMap, TileLayer } from 'leaflet';
 import { useEffect } from 'react';
 
-import { Button } from '../../components/shared/Button.tsx';
 import { leaflet } from '../../features/map/leaflet.ts';
 import { mapBearing } from '../../features/map/mapOrientation.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { Area, Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import {
-  FORECAST_HOURS,
   MOST_POINTS,
   RAIN_NATIVE_ZOOM,
   arrowSvg,
@@ -25,8 +23,6 @@ import {
   windColor,
 } from '../../features/onwater/mapWeather.ts';
 import { onLake } from '../../features/onwater/onLake.ts';
-import { useTr } from '../../i18n/useTr.ts';
-import { buzz } from '../../lib/dom.ts';
 import { destination } from '../../lib/geo.ts';
 import { boatPlace, mapPlace } from '../meteo/boatPlace.ts';
 
@@ -35,7 +31,6 @@ import type { WeatherLayers, WeatherRead } from './weatherLayers.ts';
 import {
   forecastStep,
   rainRead,
-  toggleLayer,
   weatherLayers,
   weatherMapReady,
   weatherModel,
@@ -60,13 +55,6 @@ const CURRENT_COLOR = '#a1006b';
 
 function decimal(value: number): string {
   return value.toFixed(1).replace('.', ',');
-}
-
-function hourText(ms: number): string {
-  return new Date(ms).toLocaleTimeString('fr-CH', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 function areaAround(lat: number, lon: number, nm: number): Area {
@@ -253,22 +241,17 @@ function drawGrids(
   return drawnAt;
 }
 
-function failText(value: Grid<unknown> | Failure | null): string | null {
-  return value && 'error' in value ? value.error : null;
-}
-
 /**
  * Over the map of LiveMétéo: the wind of the local model at the hour chosen
  * as barbs (the knots below, gusts in small), the waves as a wavy arrow
  * going where they go with their height, the currents as a purple arrow
  * (Atlantic side everywhere, the Mediterranean in its known straits), and the
- * rain of the radar live, shaded by its strength. A bar under the band of
- * LiveMétéo turns each one on or off and steps the hour of the forecast.
- * @returns The bar, or nothing when LiveMétéo is off.
+ * rain of the radar live, shaded by its strength. The buttons at the right of
+ * Météo (LiveButtons) turn each one on or off and step the hour.
+ * @returns Nothing: it draws on the map.
  */
 export function WeatherOnMap() {
   useSignals();
-  const tr = useTr();
   const asked = liveOnMap.value;
   const around = liveOnMapAround.value;
   const nm = liveRadiusNm();
@@ -277,9 +260,6 @@ export function WeatherOnMap() {
   const on = asked > 0;
   const lake = onLake();
   const drawn = weatherRead.value;
-  const rain = rainRead.value;
-  const shownAt = weatherShownAt.value;
-  const model = weatherModel.value;
   const mapReady = weatherMapReady.value;
 
   // The map of NavIn: waited for, then its panes made once.
@@ -293,12 +273,21 @@ export function WeatherOnMap() {
         return;
       }
       if (!map.getPane('wxRain')) {
-        const rainPane = map.createPane('wxRain');
+        // In the pane that turns and pans with the map (leaflet-rotate): a
+        // pane of its own outside it stays where the map was first shown,
+        // and the rain is seen a moment, then lost off the zone.
+        const rainPane = map.createPane(
+          'wxRain',
+          map.getPane('rotatePane') ?? undefined,
+        );
         rainPane.style.zIndex = '350';
         rainPane.style.pointerEvents = 'none';
       }
       if (!map.getPane('wxMarks')) {
-        const marks = map.createPane('wxMarks');
+        const marks = map.createPane(
+          'wxMarks',
+          map.getPane('norotatePane') ?? undefined,
+        );
         marks.style.zIndex = '580';
         marks.style.pointerEvents = 'none';
       }
@@ -421,117 +410,5 @@ export function WeatherOnMap() {
     };
   }, [on, mapReady, layers.rain]);
 
-  if (!on) return null;
-  const rainAt =
-    rain && 'frames' in rain ? (rain.frames.at(-1)?.time ?? null) : null;
-  const notes = [
-    failText(drawn.wind),
-    lake ? null : failText(drawn.sea),
-    layers.rain && rain && 'error' in rain ? rain.error : null,
-  ].filter((note): note is string => note != null);
-  const last = FORECAST_HOURS - 1;
-  return (
-    <div className="wx-bar" role="group" aria-label={tr('Météo sur la carte')}>
-      <div className="wx-row">
-        <LayerButton name="wind" ico="🌬" label={tr('Vent prévu')} />
-        {lake ? null : (
-          <>
-            <LayerButton name="waves" ico="🌊" label={tr('Vagues')} />
-            <LayerButton name="currents" ico="➰" label={tr('Courants')} />
-          </>
-        )}
-        <LayerButton name="rain" ico="🌧" label={tr('Pluie (radar)')} />
-        {layers.wind || layers.waves || layers.currents ? (
-          <span className="wx-time">
-            <Button
-              type="button"
-              noUiEdit
-              className="wx-step"
-              aria-label={tr('Une heure plus tôt')}
-              disabled={step <= 0}
-              onClick={() => {
-                buzz();
-                forecastStep.value = Math.max(0, step - 1);
-              }}
-            >
-              ◀
-            </Button>
-            <span className="wx-when">
-              {shownAt == null
-                ? '…'
-                : `${hourText(shownAt)}${step === 0 ? '' : ` +${step} h`}`}
-            </span>
-            <Button
-              type="button"
-              noUiEdit
-              className="wx-step"
-              aria-label={tr('Une heure plus tard')}
-              disabled={step >= last}
-              onClick={() => {
-                buzz();
-                forecastStep.value = Math.min(last, step + 1);
-              }}
-            >
-              ▶
-            </Button>
-          </span>
-        ) : null}
-      </div>
-      <div className="wx-src">
-        {layers.wind && model ? `🌬 ${model} · ${tr('nd, G rafales')}` : null}
-        {!lake && (layers.waves || layers.currents)
-          ? ` · 🌊 ${tr('Open-Meteo Marine (m, nd)')}`
-          : null}
-        {layers.rain && rainAt != null ? (
-          <span className="wx-rain-key">
-            🌧 {tr('radar')} {hourText(rainAt)}{' '}
-            <span className="wx-rain-scale" aria-hidden="true" />
-            <small>{tr('faible → forte')}</small>
-          </span>
-        ) : null}
-      </div>
-      {notes.length > 0 ? (
-        <div className="wx-note" role="status">
-          {notes.map((note) => (
-            <div key={note}>⚠ {tr(note)}</div>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-/**
- * One button of a layer, lit when on.
- * @param props - Its layer, icon and name.
- * @param props.name - The layer.
- * @param props.ico - Its icon.
- * @param props.label - Its name.
- * @returns The button.
- */
-function LayerButton({
-  name,
-  ico,
-  label,
-}: {
-  name: keyof WeatherLayers;
-  ico: string;
-  label: string;
-}) {
-  useSignals();
-  const lit = weatherLayers.value[name];
-  return (
-    <Button
-      type="button"
-      noUiEdit
-      className={`wx-layer${lit ? ' on' : ''}`}
-      aria-pressed={lit}
-      aria-label={label}
-      title={label}
-      onClick={() => toggleLayer(name)}
-    >
-      <span aria-hidden="true">{ico}</span>
-      <span className="wx-layer-txt">{label}</span>
-    </Button>
-  );
+  return null;
 }

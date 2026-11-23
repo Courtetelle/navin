@@ -129,7 +129,7 @@ function sortToast(order: string, other: OtherOrder, people: boolean): string {
  * @param props.icon - Which drawing.
  * @returns The icon.
  */
-function SortIcon({ icon }: { icon: Icon }) {
+export function SortIcon({ icon }: { icon: Icon }) {
   // First names (P) or last names (N): the A→Z drawing with its letter.
   const badge = icon === 'first' ? 'P' : icon === 'family' ? 'N' : null;
   const wide = badge !== null;
