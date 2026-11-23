@@ -104,7 +104,8 @@ export function LiveButtons() {
   const rain = rainRead.value;
   const lake = onLake();
   const stage = useFade(on);
-  const forecast = layers.wind || layers.waves || layers.currents;
+  const forecast =
+    layers.wind || layers.waves || layers.currents || layers.rain;
   const count = (lake ? 4 : 6) + (forecast ? 3 : 0);
   const [place, setPlace] = useState<Place | null>(null);
   const said = useRef(new Set<string>());
@@ -168,7 +169,10 @@ export function LiveButtons() {
     waves:
       'Vagues : Open-Meteo Marine, hauteur significative Hs en m et degré Douglas en couleur.',
     currents: 'Courants : Open-Meteo Marine, nœuds ; étale marquée à part.',
-    rain: `Pluie : radar RainViewer${rainAt == null ? '' : ` de ${hourText(rainAt)}`}, du bleu clair (faible) au violet (forte).`,
+    rain:
+      step === 0
+        ? `Pluie : radar RainViewer${rainAt == null ? '' : ` de ${hourText(rainAt)}`}, du bleu clair (faible) au violet (forte).`
+        : `Pluie prévue : ${model || 'modèle local'}, mm par heure, du bleu clair (faible) au violet (forte) ; le radar ne montre que l’heure actuelle.`,
     stations: 'Stations et bouées LiveMétéo : vent mesuré.',
   };
   const items: ReactNode[] = [
