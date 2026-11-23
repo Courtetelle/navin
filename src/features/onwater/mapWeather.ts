@@ -133,6 +133,8 @@ export interface PointSea {
   height: number[];
   /** Where the waves come from, degrees, per hour. */
   from: number[];
+  /** Mean period of the waves, seconds, per hour (for their steepness). */
+  period: number[];
   /** Surface current, knots, per hour. */
   current: number[];
   /** Where the current goes, degrees, per hour. */
@@ -249,6 +251,7 @@ export function seaGridOf(
       lon: points[rank]?.lon ?? item.longitude ?? 0,
       height: series(item, 'wave_height', hours.length),
       from: series(item, 'wave_direction', hours.length),
+      period: series(item, 'wave_period', hours.length),
       current: series(item, 'ocean_current_velocity', hours.length).map(
         (kmh) => kmh / KMH_PER_KNOT,
       ),
@@ -325,7 +328,7 @@ export async function fetchWindGrid(
 export async function fetchSeaGrid(
   points: readonly LatLon[],
 ): Promise<Grid<PointSea> | Failure> {
-  const url = `https://marine-api.open-meteo.com/v1/marine?${coords(points)}&hourly=wave_height,wave_direction,ocean_current_velocity,ocean_current_direction&timeformat=unixtime&forecast_hours=${FORECAST_HOURS}&past_hours=1&cell_selection=sea`;
+  const url = `https://marine-api.open-meteo.com/v1/marine?${coords(points)}&hourly=wave_height,wave_direction,wave_period,ocean_current_velocity,ocean_current_direction&timeformat=unixtime&forecast_hours=${FORECAST_HOURS}&past_hours=1&cell_selection=sea`;
   try {
     return (
       seaGridOf(await ask(url), points) ?? { error: 'Prévision de mer vide.' }

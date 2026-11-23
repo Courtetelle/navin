@@ -201,6 +201,7 @@ describe('grids of the replies', () => {
           time: HOURS,
           wave_height: [1.2, 1.4],
           wave_direction: [290, 295],
+          wave_period: [5.5, 6],
           ocean_current_velocity: [3.704, 1.852],
           ocean_current_direction: [80, 260],
         },
@@ -210,6 +211,7 @@ describe('grids of the replies', () => {
     expect(grid?.points[0]?.lat).toBe(48.7);
     expect(grid?.points[0]?.current[0]).toBeCloseTo(2);
     expect(grid?.points[0]?.toward).toEqual([80, 260]);
+    expect(grid?.points[0]?.period).toEqual([5.5, 6]);
   });
 
   it('gives nothing for an empty reply', () => {

@@ -1,6 +1,11 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import type { LayerGroup, Map as LeafletMap, TileLayer } from 'leaflet';
-import { useEffect } from 'react';
+import type {
+  ImageOverlay,
+  LayerGroup,
+  Map as LeafletMap,
+  TileLayer,
+} from 'leaflet';
+import { useEffect, useState } from 'react';
 
 import { leaflet } from '../../features/map/leaflet.ts';
 import { mapBearing } from '../../features/map/mapOrientation.ts';
@@ -30,7 +35,13 @@ import {
   windColor,
 } from '../../features/onwater/mapWeather.ts';
 import { onLake } from '../../features/onwater/onLake.ts';
+import {
+  fetchRainIndex,
+  rainFileAt,
+  rainImageUrl,
+} from '../../features/onwater/rainAhead.ts';
 import { landTest } from '../../features/onwater/shoreFar.ts';
+import { steepnessOf } from '../../features/onwater/steepness.ts';
 import { stationInZones } from '../../features/zones/meteoZones.ts';
 import type { LatLon } from '../../lib/geo.ts';
 import { destination } from '../../lib/geo.ts';
@@ -45,6 +56,7 @@ import {
 import type { WeatherLayers, WeatherRead } from './weatherLayers.ts';
 import {
   forecastStep,
+  rainAheadSource,
   rainRead,
   weatherLayers,
   weatherMapReady,
@@ -64,7 +76,7 @@ const WAVE_FULL_M = 4;
 /** The currents drawn full size at this speed, knots. */
 const CURRENT_FULL_KN = 3;
 const WAVE_COLOR = '#0a4c8c';
-const CURRENT_COLOR = '#a1006b';
+const CURRENT_COLOR = '#000';
 
 function decimal(value: number): string {
   return value.toFixed(1).replace('.', ',');
@@ -258,12 +270,14 @@ function drawGrids(
       for (const point of sea.points) {
         const height = point.height[rank] ?? Number.NaN;
         const from = point.from[rank] ?? Number.NaN;
+        // The arrow in the colour of the steepness (height against period).
+        const steep = steepnessOf(height, point.period[rank]);
         if (layers.waves && Number.isFinite(height) && Number.isFinite(from)) {
           addMark(
             layer,
             point.lat,
             point.lon,
-            `${arrowSvg(from + 180 + turn, height / WAVE_FULL_M, WAVE_COLOR, true)}${waveLabelHtml(height)}`,
+            `${arrowSvg(from + 180 + turn, height / WAVE_FULL_M, steep?.steep.color ?? WAVE_COLOR, true)}${waveLabelHtml(height)}`,
             60,
             -18,
             0,
@@ -309,7 +323,7 @@ function drawGrids(
 /**
  * Over the map of LiveMétéo: the wind of the local model at the hour chosen
  * as barbs (the knots below, gusts in small), the waves as a wavy arrow
- * going where they go with their height, the currents as a purple arrow
+ * going where they go with their height, the currents as a black arrow
  * (Atlantic side everywhere, the Mediterranean in its known straits), and the
  * rain of the radar live, shaded by its strength. The buttons at the right of
  * Météo (LiveButtons) turn each one on or off and step the hour.
@@ -326,6 +340,8 @@ export function WeatherOnMap() {
   const lake = onLake();
   const drawn = weatherRead.value;
   const mapReady = weatherMapReady.value;
+  // The hour shown has the fine rain of the model: no cells around the points.
+  const [fineRain, setFineRain] = useState(false);
 
   // The map of NavIn: waited for, then its panes made once.
   useEffect(() => {
@@ -447,7 +463,14 @@ export function WeatherOnMap() {
     const ms =
       Math.round(Date.now() / 3_600_000) * 3_600_000 + step * 3_600_000;
     const draw = () => {
-      weatherShownAt.value = drawGrids(layer, map, drawn, layers, ms, step > 0);
+      weatherShownAt.value = drawGrids(
+        layer,
+        map,
+        drawn,
+        layers,
+        ms,
+        step > 0 && !fineRain,
+      );
     };
     draw();
     map.on('rotate', draw);
@@ -455,7 +478,7 @@ export function WeatherOnMap() {
       map.off('rotate', draw);
       layer.remove();
     };
-  }, [on, mapReady, drawn, layers, step]);
+  }, [on, mapReady, drawn, layers, step, fineRain]);
 
   // The rain of the radar: the newest image, read every 10 minutes; only
   // for the hour now (the radar has no future: the hours ahead take the
@@ -500,6 +523,53 @@ export function WeatherOnMap() {
       rainRead.value = null;
     };
   }, [on, mapReady, layers.rain, radarNow]);
+
+  // The rain ahead: the hour of the model ICON-EU, smoothed and shaded as
+  // the radar over the whole map; without it, cells around the wind points.
+  useEffect(() => {
+    if (!on || !mapReady || !layers.rain || radarNow) return undefined;
+    const map = tracker.current?.map;
+    if (!map) return undefined;
+    let closed = false;
+    let overlay: ImageOverlay | null = null;
+    let url: string | null = null;
+    const ms =
+      Math.round(Date.now() / 3_600_000) * 3_600_000 + step * 3_600_000;
+    void fetchRainIndex().then(async (index) => {
+      const file = index ? rainFileAt(index, ms) : null;
+      if (closed || !index || !file) return;
+      const made = await rainImageUrl(index, file);
+      if (closed || !made) {
+        if (made) URL.revokeObjectURL(made);
+        return;
+      }
+      url = made;
+      overlay = leaflet()
+        .imageOverlay(
+          made,
+          [
+            [index.lat[0], index.lon[0]],
+            [index.lat[1], index.lon[1]],
+          ],
+          {
+            pane: 'wxRain',
+            opacity: 0.65,
+            interactive: false,
+            attribution: `Pluie prévue ${index.model} (DWD)`,
+          },
+        )
+        .addTo(map);
+      rainAheadSource.value = `${index.model} (DWD, 6,5 km)`;
+      setFineRain(true);
+    });
+    return () => {
+      closed = true;
+      overlay?.remove();
+      if (url) URL.revokeObjectURL(url);
+      rainAheadSource.value = null;
+      setFineRain(false);
+    };
+  }, [on, mapReady, layers.rain, radarNow, step]);
 
   return null;
 }

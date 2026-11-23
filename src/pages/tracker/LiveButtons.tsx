@@ -31,6 +31,7 @@ import {
 import type { WeatherLayers } from './weatherLayers.ts';
 import {
   forecastStep,
+  rainAheadSource,
   rainRead,
   toggleLayer,
   weatherLayers,
@@ -102,6 +103,7 @@ export function LiveButtons() {
   const model = weatherModel.value;
   const drawn = weatherRead.value;
   const rain = rainRead.value;
+  const rainAhead = rainAheadSource.value;
   const lake = onLake();
   const stage = useFade(on);
   const forecast =
@@ -167,12 +169,13 @@ export function LiveButtons() {
   const sources: Record<keyof WeatherLayers, string> = {
     wind: `Vent prévu : ${model || 'modèle local'}, nœuds, G = rafales.`,
     waves:
-      'Vagues : Open-Meteo Marine, hauteur significative Hs en m et degré Douglas en couleur.',
-    currents: 'Courants : Open-Meteo Marine, nœuds ; étale marquée à part.',
+      'Vagues : Open-Meteo Marine, hauteur significative Hs en m et degré Douglas en couleur ; flèche aux couleurs de la cambrure (hauteur sur longueur d’onde, du vert au violet), bleue sans période.',
+    currents:
+      'Courants : Open-Meteo Marine, flèches noires en nœuds ; étale marquée à part.',
     rain:
       step === 0
         ? `Pluie : radar RainViewer${rainAt == null ? '' : ` de ${hourText(rainAt)}`}, du bleu clair (faible) au violet (forte).`
-        : `Pluie prévue : ${model || 'modèle local'}, mm par heure, du bleu clair (faible) au violet (forte) ; le radar ne montre que l’heure actuelle.`,
+        : `Pluie prévue : ${rainAhead ?? (model || 'modèle local')}, mm par heure, du bleu clair (faible) au violet (forte) ; le radar ne montre que l’heure actuelle.`,
     stations: 'Stations et bouées LiveMétéo : vent mesuré.',
   };
   const items: ReactNode[] = [
