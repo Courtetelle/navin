@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { forgetOpenMeteo } from '../../../lib/openMeteo.ts';
 import {
+  MOST_ASKED,
   arrowSvg,
   barbOf,
   barbSvg,
@@ -15,10 +16,12 @@ import {
   hourRank,
   inMediterranean,
   isSlack,
+  latticePoints,
   localModel,
   rainColor,
   rainFramesOf,
   rainTileUrl,
+  roundStep,
   seaGridOf,
   seaPoints,
   slackSvg,
@@ -346,24 +349,43 @@ function isLand(lat: number, lon: number): boolean {
 describe('seaPoints', () => {
   const bay = { south: 48.2, west: -3.6, north: 49.2, east: -2 };
 
-  it('keeps only the points of open sea', () => {
-    const points = seaPoints(bay, 12, isLand);
+  it('keeps only the points of open sea, a spacing apart', () => {
+    const points = seaPoints(bay, 0.25, isLand);
     expect(points.length).toBeGreaterThan(4);
-    expect(points.length).toBeLessThanOrEqual(12);
     for (const point of points) {
       expect(isLand(point.lat, point.lon)).toBe(false);
       expect(point.lon).toBeGreaterThanOrEqual(-2.95);
+      for (const other of points) {
+        if (other === point) continue;
+        expect(
+          Math.hypot(point.lat - other.lat, point.lon - other.lon),
+        ).toBeGreaterThanOrEqual(0.22);
+      }
     }
   });
 
-  it('fills the sea with as many points as asked', () => {
-    const open = seaPoints(bay, 12, () => false);
-    expect(open).toHaveLength(12);
-    expect(new Set(open.map((point) => point.lat)).size).toBeGreaterThan(2);
+  it('shows more points when the spacing is finer (zoomed in)', () => {
+    const far = seaPoints(bay, 0.5, () => false);
+    const near = seaPoints(bay, 0.2, () => false);
+    expect(near.length).toBeGreaterThan(far.length);
+    expect(seaPoints(bay, 0.02, () => false).length).toBeLessThanOrEqual(
+      MOST_ASKED,
+    );
+  });
+
+  it('keeps only the points of the zones chosen', () => {
+    const points = seaPoints(
+      bay,
+      0.2,
+      () => false,
+      (p) => p.lat > 48.8,
+    );
+    expect(points.length).toBeGreaterThan(0);
+    expect(points.every((point) => point.lat > 48.8)).toBe(true);
   });
 
   it('gives nothing on land', () => {
-    expect(seaPoints(bay, 12, () => true)).toEqual([]);
+    expect(seaPoints(bay, 0.25, () => true)).toEqual([]);
   });
 });
 
@@ -399,5 +421,59 @@ describe('rain of the model', () => {
       [{ lat: 48, lon: -3 }],
     );
     expect(grid?.points[0]?.rain).toEqual([0, 2.4]);
+  });
+});
+
+describe('rain of AROME HD', () => {
+  it('takes the rain of AROME 2.5 km in a reply of two models', () => {
+    const grid = windGridOf(
+      {
+        hourly: {
+          time: HOURS,
+          wind_speed_10m_meteofrance_arome_france_hd: [12, 14],
+          wind_direction_10m_meteofrance_arome_france_hd: [250, 260],
+          precipitation_meteofrance_arome_france_hd: [null, null],
+          wind_speed_10m_meteofrance_arome_france: [11, 13],
+          precipitation_meteofrance_arome_france: [0.4, 3.1],
+        },
+      },
+      [{ lat: 48.7, lon: -2.7 }],
+      'meteofrance_arome_france_hd',
+    );
+    expect(grid?.points[0]?.speed).toEqual([12, 14]);
+    expect(grid?.points[0]?.from).toEqual([250, 260]);
+    expect(grid?.points[0]?.rain).toEqual([0.4, 3.1]);
+  });
+
+  it('asks both models in one request', async () => {
+    const fetchMock = vi.fn(async () =>
+      Response.json({ hourly: { time: HOURS } }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    await fetchWindGrid(
+      [{ lat: 48.7, lon: -2.7 }],
+      'meteofrance_arome_france_hd',
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(String((fetchMock.mock.calls[0] as unknown[])[0])).toContain(
+      'models=meteofrance_arome_france_hd,meteofrance_arome_france',
+    );
+  });
+});
+
+describe('the grid follows the zoom', () => {
+  it('rounds the spacing up', () => {
+    expect(roundStep(0.17)).toBe(0.2);
+    expect(roundStep(0.2)).toBe(0.2);
+    expect(roundStep(9)).toBe(3);
+  });
+
+  it('lays a round grid, shifted by half a step for the sea', () => {
+    const area = { south: 48, west: -3, north: 48.5, east: -2.5 };
+    expect(latticePoints(area, 0.25)).toHaveLength(9);
+    expect(latticePoints(area, 0.25, true)).toHaveLength(4);
+    expect(latticePoints(area, 0.1).length).toBeGreaterThan(
+      latticePoints(area, 0.25).length,
+    );
   });
 });
