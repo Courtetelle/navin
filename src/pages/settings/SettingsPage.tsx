@@ -31,6 +31,7 @@ import {
 } from '../../features/onwater/lakeWarnWatch.ts';
 import { lightningTest } from '../../features/onwater/lightningWatch.ts';
 import { ShareThemePicker } from '../../features/publish/index.ts';
+import { ShomSection } from '../../features/sea/ShomSection.tsx';
 import {
   DepthDev,
   DepthSet,
@@ -537,6 +538,12 @@ export function SettingsPage({ from, arg }: PageProps) {
               title="🔑 Clés météos et compte relais (Cloudflare)"
             >
               <WindKeys />
+            </SettingsSection>
+            <SettingsSection
+              section="shom"
+              title="🌊 Courants et marées : Copernicus, ou abonnement SHOM"
+            >
+              <ShomSection />
             </SettingsSection>
             <SettingsSection
               section="share"
