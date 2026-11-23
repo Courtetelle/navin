@@ -15,12 +15,7 @@ import { go } from '../../shell/router.ts';
 import { toast } from '../../state/index.ts';
 
 import type { Place } from './liveButtons.ts';
-import {
-  LIVE_FADE_MS,
-  LIVE_SOLID_MS,
-  livePlace,
-  placeBoxes,
-} from './liveButtons.ts';
+import { columnBoxes, livePlace, placeBoxes } from './liveButtons.ts';
 import {
   hideLiveOnMap,
   liveOnMap,
@@ -52,38 +47,6 @@ function hourText(ms: number): string {
 }
 
 /**
- * Shown, fading, or gone: the buttons go after a while without a touch on
- * the screen, any touch brings them back.
- * @param on - LiveMétéo on the map.
- * @returns The state.
- */
-function useFade(on: boolean): 'shown' | 'fading' | 'gone' {
-  const [stage, setStage] = useState<'shown' | 'fading' | 'gone'>('shown');
-  useEffect(() => {
-    if (!on) return undefined;
-    let fade: ReturnType<typeof setTimeout> | undefined;
-    let gone: ReturnType<typeof setTimeout> | undefined;
-    const wake = () => {
-      clearTimeout(fade);
-      clearTimeout(gone);
-      setStage('shown');
-      fade = setTimeout(() => setStage('fading'), LIVE_SOLID_MS);
-      gone = setTimeout(() => setStage('gone'), LIVE_SOLID_MS + LIVE_FADE_MS);
-    };
-    wake();
-    document.addEventListener('pointerdown', wake, true);
-    document.addEventListener('keydown', wake, true);
-    return () => {
-      clearTimeout(fade);
-      clearTimeout(gone);
-      document.removeEventListener('pointerdown', wake, true);
-      document.removeEventListener('keydown', wake, true);
-    };
-  }, [on]);
-  return stage;
-}
-
-/**
  * LiveMétéo on the map of NavIn: at the right of Météo, buttons of its size
  * with rounded corners: the zone (a touch takes LiveMétéo away, a long press
  * the Météo-France zones), the wind forecast, the waves, the currents, the rain of the
@@ -105,7 +68,9 @@ export function LiveButtons() {
   const rain = rainRead.value;
   const rainAhead = rainAheadSource.value;
   const lake = onLake();
-  const stage = useFade(on);
+  // Shown as long as LiveMétéo is on: they leave all at once with the
+  // red cross of the zone button (no fading any more, Corban 23/11).
+  const stage = 'shown';
   const forecast =
     layers.wind || layers.waves || layers.currents || layers.rain;
   const count = (lake ? 4 : 6) + (forecast ? 3 : 0);
@@ -116,7 +81,7 @@ export function LiveButtons() {
     if (!on) return undefined;
     let wait: ReturnType<typeof setTimeout> | undefined;
     const lay = () => {
-      const found = livePlace(count);
+      const found = livePlace(1);
       setPlace(found);
       if (!found) wait = setTimeout(lay, 300);
     };
@@ -241,7 +206,7 @@ export function LiveButtons() {
           forecastStep.value = Math.max(0, step - 1);
         }}
       >
-        <span className="rail-icon">◀</span>
+        <span className="rail-icon">▲</span>
       </Button>,
       <Button
         key="hour"
@@ -275,7 +240,7 @@ export function LiveButtons() {
           forecastStep.value = Math.min(last, step + 1);
         }}
       >
-        <span className="rail-icon">▶</span>
+        <span className="rail-icon">▼</span>
       </Button>,
     );
   }
@@ -285,7 +250,10 @@ export function LiveButtons() {
       role="group"
       aria-label={tr('LiveMétéo sur la carte')}
     >
-      {placeBoxes(place, items.length).map((box, index) => {
+      {[
+        ...placeBoxes(place, 1),
+        ...columnBoxes(items.length - 1, place.width, place.height),
+      ].map((box, index) => {
         const item = items[index];
         const key = (item as { key?: string | null }).key ?? String(index);
         const style: CSSProperties = {
