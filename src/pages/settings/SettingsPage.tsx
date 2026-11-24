@@ -477,15 +477,15 @@ export function SettingsPage({ from, arg }: PageProps) {
       ) : null}
       <ShownSection.Provider value={section}>
         <div className={section ? 'set-one' : 'set-secs set-menu'}>
-          {/* LiveMétéo first, whatever the order of the menu (Corban,
-              24/11/2026): its zones and the archive of their stations. */}
-          <SettingsSection
-            section="live"
-            title="🌬 LiveMétéo · zones et enregistrement des stations"
-          >
-            <LiveRow />
-          </SettingsSection>
+          {/* Every section in the order chosen, LiveMétéo too (Corban,
+              24/11/2026). */}
           <SortedSections>
+            <SettingsSection
+              section="live"
+              title="🌬 LiveMétéo · zones et enregistrement des stations"
+            >
+              <LiveRow />
+            </SettingsSection>
             <SettingsSection
               section="zone"
               title="🧭 Zone de carte, Langue, Préférences d’affichage"

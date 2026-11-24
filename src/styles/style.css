@@ -15920,6 +15920,99 @@ html body.menus-fading header.topbar #routesBtn.theme-btn.routing-on {
     grid-template-columns: 1fr;
   }
 }
+
+/* data and Paramétrages back in the columns of landscape, right under Météo
+   (Corban, 24/11/2026): always shown, under Météo in the column of X, in the
+   packets of the phone sideways (their places written by railPages.ts). The
+   tab at the top in the middle keeps Routes; upright, it keeps all three. */
+@media (orientation: landscape) and (min-width: 560px) {
+  html:root
+    body
+    header.topbar.topbar
+    nav.topnav
+    .top-tab.top-tab.tab-data.tab-data,
+  html:root body header.topbar.topbar #gearBtn.theme-btn.theme-btn {
+    position: fixed !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: var(--rb-w) !important;
+    height: var(--rb-h) !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    opacity: 1 !important;
+    transition:
+      translate 0.25s ease,
+      top 0.25s ease !important;
+    touch-action: none;
+  }
+}
+/* The landscape screens between the phone and X: the right column, under
+   Météo */
+@media (orientation: landscape) and (min-width: 560px) {
+  html:root
+    body
+    header.topbar.topbar
+    nav.topnav
+    .top-tab.top-tab.tab-data.tab-data {
+    top: calc(
+      var(--rb-top) + 4 * var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: var(--rb-side-r) !important;
+  }
+  html:root body header.topbar.topbar #gearBtn.theme-btn.theme-btn {
+    top: calc(
+      var(--rb-top) + 5 * var(--rb-step) + env(safe-area-inset-top)
+    ) !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: var(--rb-side-r) !important;
+  }
+}
+/* X: the column on the left, under Météo */
+@media (orientation: landscape) and (min-width: 560px) and (min-height: 640px) {
+  html:root
+    body
+    header.topbar.topbar
+    nav.topnav
+    .top-tab.top-tab.tab-data.tab-data {
+    top: calc(var(--rb-row) + 9 * var(--rb-step)) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+  }
+  html:root body header.topbar.topbar #gearBtn.theme-btn.theme-btn {
+    top: calc(var(--rb-row) + 10 * var(--rb-step)) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+  }
+}
+/* The phone sideways: in the column on the left, after Météo */
+@media (orientation: landscape) and (min-width: 560px) and (max-height: 520px) {
+  html:root
+    body
+    header.topbar.topbar
+    nav.topnav
+    .top-tab.top-tab.tab-data.tab-data {
+    top: calc(
+      var(--rb-row-top) + var(--ri-data, 0) * var(--rb-step)
+    ) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+    translate: 0 calc(var(--rp-data, 0) * 100vh);
+  }
+  html:root body header.topbar.topbar #gearBtn.theme-btn.theme-btn {
+    top: calc(
+      var(--rb-row-top) + var(--ri-gear, 0) * var(--rb-step)
+    ) !important;
+    left: var(--rb-side) !important;
+    right: auto !important;
+    translate: 0 calc(var(--rp-gear, 0) * 100vh);
+  }
+}
 .voy-tile-head,
 .voy-title {
   display: inline-flex;

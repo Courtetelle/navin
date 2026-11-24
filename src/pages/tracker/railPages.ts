@@ -5,7 +5,9 @@ import { buzz } from '../../lib/dom.ts';
 
 /**
  * The buttons around the map, in their order: the five of the top row, then
- * the five that stood in the bottom row (SOS last).
+ * the five that stood in the bottom row, data and Paramétrages under Météo
+ * in the columns of landscape (Corban, 24/11/2026), SOS last. Upright they
+ * stay behind their tab.
  */
 export const RAIL_ORDER = [
   'clock',
@@ -17,6 +19,8 @@ export const RAIL_ORDER = [
   'navin',
   'photo',
   'weather',
+  'data',
+  'gear',
   'sos',
 ] as const;
 
@@ -47,6 +51,8 @@ const RAIL_TARGETS = [
   '#clock',
   '#searchBtn',
   '.top-tab[data-view="tracker"]',
+  '.top-tab.tab-data',
+  '#gearBtn',
   '.top-tab.tab-sos',
   '.rail-btn',
 ].join(', ');
@@ -81,7 +87,12 @@ export function railPacket(): number {
 export function railPackets(): RailKey[][] {
   const size = railPacket();
   const sideways = matches(PHONE_SIDEWAYS_QUERY);
-  const keys = RAIL_ORDER.filter((key) => !(sideways && key === 'sos'));
+  const upright = matches(PORTRAIT_QUERY);
+  const keys = RAIL_ORDER.filter(
+    (key) =>
+      !(sideways && key === 'sos') &&
+      !(upright && (key === 'data' || key === 'gear')),
+  );
   const packets: RailKey[][] = [];
   for (let index = 0; index < keys.length; index += size) {
     packets.push(keys.slice(index, index + size));

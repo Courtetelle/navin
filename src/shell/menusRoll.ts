@@ -5,8 +5,9 @@ import { state } from '../state/index.ts';
 import { setBodyClass } from './bodyClass.ts';
 
 /**
- * data and Paramétrages, unrolled by their own tab (at the top in the
- * middle sideways, at the right edge in the middle upright).
+ * Routes, and upright data and Paramétrages, unrolled by their tab (at the
+ * top in the middle sideways, at the right edge in the middle upright);
+ * sideways data and Paramétrages stand under Météo since 24/11/2026.
  */
 export const menusOpen = signal(false);
 
