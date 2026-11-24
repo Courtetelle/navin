@@ -2,7 +2,7 @@ import { afterEach, expect, test, vi } from 'vitest';
 
 import { placeTimeText } from '../../lib/placeZone.ts';
 import { sunTimes } from '../../lib/sun.ts';
-import { state } from '../../state/index.ts';
+import { state, updateSettings } from '../../state/index.ts';
 import {
   clockFace,
   endSunTimes,
@@ -106,5 +106,28 @@ test('a tap switches UTC / legal time and stays; a change of zone brings back th
   state.view.zoneSimV.value = 'lac';
   tickClock();
   expect(clockFace.value.local).toBe(true);
+  state.view.zoneSimV.value = '';
+});
+
+test('from the Atlantique in legal time to the Méditerranée, the clock starts again in UTC', () => {
+  vi.useFakeTimers({ now: NOW });
+  state.view.zoneSimV.value = 'mer';
+  updateSettings((draft) => {
+    draft.seaBasin = 'atl';
+  });
+  tickClock();
+  toggleClock();
+  expect(clockFace.value.local).toBe(true);
+  updateSettings((draft) => {
+    draft.seaBasin = 'med';
+  });
+  tickClock();
+  expect(clockFace.value.local).toBe(false);
+  toggleClock();
+  updateSettings((draft) => {
+    draft.seaBasin = 'atl';
+  });
+  tickClock();
+  expect(clockFace.value.local).toBe(false);
   state.view.zoneSimV.value = '';
 });
