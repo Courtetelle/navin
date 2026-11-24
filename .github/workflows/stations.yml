@@ -1,0 +1,74 @@
+# Stations des zones LiveMétéo (demande de Corban du 23/11/2026).
+# Toutes les 30 minutes : lit toutes les pastilles de la carte (bouées et stations) des zones actives dans NavIn
+# et les garde dans la branche « stations » (releves/AAAA-MM-JJ.json, un fichier par jour UTC, et index.json).
+# NavIn lance ce workflow avec ses zones (entrée « zones ») dès qu'elles changent : elles restent actives jusqu'au suivant.
+# Clés facultatives (secrets du dépôt) : MF_KEY, AEMET_KEY, METOFFICE_KEY, FROST_KEY, RELAY_URL.
+# Un push sur claude/** qui touche le lecteur fait un essai à blanc (Hague–Penmarc’h, Camargue–Saint-Raphaël, Léman), sans rien enregistrer.
+name: Stations des zones LiveMétéo
+
+on:
+  schedule:
+    - cron: '13,43 * * * *'
+  workflow_dispatch:
+    inputs:
+      zones:
+        description: 'Zones actives (ids séparés par des virgules, « aucune » pour arrêter, vide pour garder)'
+        required: false
+        default: ''
+  push:
+    branches:
+      - 'claude/**'
+    paths:
+      - scripts/stations/**
+      - src/features/zones/stationArchive.ts
+      - src/features/zones/stationRecord.ts
+      - .github/workflows/stations.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stations-${{ github.event_name == 'push' && github.ref || 'archive' }}
+  cancel-in-progress: false
+
+jobs:
+  stations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Archive (branche stations)
+        if: github.event_name != 'push'
+        run: |
+          set -e
+          mkdir store
+          if git ls-remote --exit-code --heads origin stations >/dev/null; then
+            git fetch --depth 1 origin stations
+            git --work-tree=store checkout FETCH_HEAD -- .
+            git reset -q
+          fi
+      - name: Lire les stations
+        env:
+          ZONES: ${{ github.event_name == 'push' && 'hague-penmarch,camargue-straphael,leman' || inputs.zones }}
+          MF_KEY: ${{ secrets.MF_KEY }}
+          AEMET_KEY: ${{ secrets.AEMET_KEY }}
+          METOFFICE_KEY: ${{ secrets.METOFFICE_KEY }}
+          FROST_KEY: ${{ secrets.FROST_KEY }}
+          RELAY_URL: ${{ secrets.RELAY_URL }}
+        run: node scripts/stations/record.ts --store store
+      - name: Garder l'archive (branche stations)
+        if: github.event_name != 'push'
+        run: |
+          cd store
+          if [ -z "$(ls -A)" ]; then echo 'Rien à garder'; exit 0; fi
+          git init -q -b stations
+          git config user.name 'navin-stations'
+          git config user.email 'navin-stations@users.noreply.github.com'
+          git add -A
+          git commit -q -m "Stations des zones LiveMétéo $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" stations

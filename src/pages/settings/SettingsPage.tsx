@@ -524,7 +524,7 @@ export function SettingsPage({ from, arg }: PageProps) {
               </SettingsSection>
               <SettingsSection
                 section="live"
-                title="🌬 LiveMétéo · rayon des stations sur la carte"
+                title="🌬 LiveMétéo · zones et enregistrement des stations"
               >
                 <LiveRow />
               </SettingsSection>
