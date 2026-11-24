@@ -5,9 +5,11 @@ import { fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
 import { herePos } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 import {
+  CURRENT_PLAIN,
   SLACK_KN,
   arrowSvg,
   barbSvg,
+  currentWindColor,
   slackSvg,
   waveLabelHtml,
   windColor,
@@ -102,6 +104,9 @@ export function markHtml(mark: RoutingMark, turn = 0): string {
     symbols.push(symbol(arrow, waveLabelHtml(mark.waveM)));
   }
   if (mark.driftKn > 0) {
+    // Wind with or against the current: from green to bright red, as
+    // LiveMétéo (black under a light wind).
+    const current = currentWindColor(mark.setDeg, mark.twd, mark.tws);
     symbols.push(
       mark.driftKn < SLACK_KN
         ? symbol(
@@ -112,8 +117,10 @@ export function markHtml(mark: RoutingMark, turn = 0): string {
             arrowSvg(
               mark.setDeg + turn,
               mark.driftKn / CURRENT_FULL_KN,
-              CURRENT_COLOR,
+              current,
               false,
+              // A black edge on a coloured arrow, as LiveMétéo.
+              current === CURRENT_PLAIN ? '#fff' : '#000',
             ),
             `<span class="wx-lbl wx-cur">${fr(mark.driftKn, 1)} nd</span>`,
           ),

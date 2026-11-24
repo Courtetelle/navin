@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { destination } from '../../../lib/geo.ts';
 import type { RoutingResult, RoutingStep } from '../../../model/sailRouting.ts';
 import { state } from '../../../state/index.ts';
+import { currentWindColor } from '../../onwater/mapWeather.ts';
 import { gotoTarget, gotoUpdate, setGoto } from '../goto.ts';
 import {
   boxEdge,
@@ -241,5 +242,18 @@ describe('markHtml speed', () => {
     const motor = markHtml({ ...mark, mode: 'motor' });
     expect(motor).toContain('rtm-motor');
     expect(motor).not.toContain('⛵');
+  });
+});
+
+describe('markHtml current colour', () => {
+  it('colours the current against the wind as LiveMétéo', () => {
+    const mark = routingShape('Essai', done, [A, B, C]).marks[1];
+    if (!mark) throw new Error('no mark');
+    const color = currentWindColor(mark.setDeg, mark.twd, mark.tws);
+    expect(markHtml(mark)).toContain(`stroke="${color}"`);
+    const against = { ...mark, setDeg: 270, tws: 20 };
+    const red = currentWindColor(270, against.twd, 20);
+    expect(red).toBe('#ff1a1a');
+    expect(markHtml(against)).toContain(`stroke="${red}"`);
   });
 });
