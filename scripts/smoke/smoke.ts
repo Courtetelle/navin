@@ -428,6 +428,35 @@ async function bars(page: Page, theme: string): Promise<void> {
     'T upright: a swipe right brings the first five back',
     back.join(' ') === shownFirst.join(' '),
   );
+  // A finger that slides slowly turns the buttons one by one.
+  const pin = await page.locator('.rail-pin').boundingBox();
+  if (pin) {
+    const y = pin.y + pin.height / 2;
+    await page.mouse.move(pin.x + pin.width / 2, y);
+    await page.mouse.down();
+    for (const dx of [-20, -40, -60, -pin.width - 12]) {
+      // eslint-disable-next-line no-await-in-loop -- a slow slide
+      await page.mouse.move(pin.x + pin.width / 2 + dx, y);
+      // eslint-disable-next-line no-await-in-loop -- idem
+      await page.waitForTimeout(120);
+    }
+    await page.waitForTimeout(200);
+    await page.mouse.up();
+    await page.waitForTimeout(450);
+  }
+  check(
+    theme,
+    'T upright: a slow slide turns the buttons by one',
+    (await page.evaluate(() => document.documentElement.dataset.railStart)) ===
+      '1',
+  );
+  await swipe('.rail-ruler', 150);
+  check(
+    theme,
+    'T upright: a big swipe back shows the first ones again',
+    (await page.evaluate(() => document.documentElement.dataset.railStart)) ===
+      '0',
+  );
   await page.locator('.rail-boat').click();
   await page.waitForTimeout(300);
   check(
