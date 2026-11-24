@@ -13,6 +13,7 @@ import { shownRouting } from '../../features/map/routingState.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { Area, Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import {
+  BARB_PX,
   RAIN_NATIVE_ZOOM,
   arrowSvg,
   barbLabelOffset,
@@ -278,7 +279,7 @@ function drawGrids(
           point.lat,
           point.lon,
           barbSvg(speed, from + turn, color),
-          56,
+          BARB_PX,
         );
         const gust = point.gust[rank] ?? Number.NaN;
         const gusty = Number.isFinite(gust) && gust >= speed + 5;

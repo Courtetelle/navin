@@ -476,45 +476,52 @@ export function barbOf(knots: number): Barb {
   return { pennants, full, half, calm: false };
 }
 
+/** Side of the square of a wind barb, px. */
+export const BARB_PX = 72;
+
 /**
  * The SVG of a wind barb, the staff pointing where the wind comes from
  * (north up; the map turns it), the feathers clockwise of the staff as in
- * the northern hemisphere.
+ * the northern hemisphere. Thick, in the colour of its Beaufort with a black
+ * edge, as the arrows of the currents: as easy to see as the waves and the
+ * currents beside it (Corban, 24/11).
  * @param knots - The wind.
  * @param from - Where it comes from, degrees.
  * @param color - Colour of the barb.
- * @returns The SVG, 56 px square, the station in the middle.
+ * @returns The SVG, `BARB_PX` square, the station in the middle.
  */
 export function barbSvg(knots: number, from: number, color: string): string {
   const barb = barbOf(knots);
-  const size = 56;
+  const size = BARB_PX;
   const mid = size / 2;
-  const halo = 'stroke="#fff" stroke-width="5" stroke-linecap="round"';
+  const width = 3.5;
+  const open = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
   if (barb.calm) {
-    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${mid}" cy="${mid}" r="5" fill="none" ${halo}/><circle cx="${mid}" cy="${mid}" r="5" fill="none" stroke="${color}" stroke-width="2"/></svg>`;
+    return `${open}<circle cx="${mid}" cy="${mid}" r="7" fill="none" stroke="#000" stroke-width="${width + 3}"/><circle cx="${mid}" cy="${mid}" r="7" fill="none" stroke="${color}" stroke-width="${width}"/></svg>`;
   }
   // Staff from the middle up (north), turned to where the wind comes from.
-  const top = 3;
+  const top = 4;
   const parts: string[] = [`M${mid} ${mid}V${top}`];
   let y = top;
-  const tick = 12;
-  const gap = 4.5;
+  const tick = 15;
+  const gap = 6;
   for (let rank = 0; rank < barb.pennants; rank++) {
-    parts.push(`M${mid} ${y}l${tick} 3l-${tick} 3z`);
-    y += 7.5;
+    parts.push(`M${mid} ${y}l${tick} 4l-${tick} 4z`);
+    y += 10;
   }
   for (let rank = 0; rank < barb.full; rank++) {
-    parts.push(`M${mid} ${y}l${tick} -3`);
+    parts.push(`M${mid} ${y}l${tick} -4`);
     y += gap;
   }
   if (barb.half) {
     // A lone 5 kn feather stands a little down the staff, as on charts.
     if (barb.pennants === 0 && barb.full === 0) y += gap;
-    parts.push(`M${mid} ${y}l${tick / 2} -1.5`);
+    parts.push(`M${mid} ${y}l${tick / 2} -2`);
   }
   const path = parts.join('');
   const turn = `transform="rotate(${Math.round(from)} ${mid} ${mid})"`;
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><g ${turn}><path d="${path}" fill="#fff" ${halo} stroke-linejoin="round"/><path d="${path}" fill="${color}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g><circle cx="${mid}" cy="${mid}" r="2.6" fill="${color}" stroke="#fff" stroke-width="1.2"/></svg>`;
+  const line = 'stroke-linecap="round" stroke-linejoin="round"';
+  return `${open}<g ${turn}><path d="${path}" fill="#000" stroke="#000" stroke-width="${width + 3}" ${line}/><path d="${path}" fill="${color}" stroke="${color}" stroke-width="${width}" ${line}/></g><circle cx="${mid}" cy="${mid}" r="4" fill="${color}" stroke="#000" stroke-width="1.5"/></svg>`;
 }
 
 /**
