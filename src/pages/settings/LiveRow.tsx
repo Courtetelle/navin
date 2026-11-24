@@ -32,7 +32,7 @@ const TIME = new Intl.DateTimeFormat('fr-CH', {
 });
 
 /**
- * Paramétrages › Alertes › LiveMétéo: every zone of LiveMétéo in one place
+ * Paramétrages › LiveMétéo: every zone of LiveMétéo in one place
  * (the Météo-France zones, coast and offshore, and the Léman), the zones
  * whose stations the map shows (else the zone where the boat is), and the
  * archive GitHub keeps of every badge of those zones.
