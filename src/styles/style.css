@@ -15920,3 +15920,25 @@ html body.menus-fading header.topbar #routesBtn.theme-btn.routing-on {
     grid-template-columns: 1fr;
   }
 }
+.voy-tile-head,
+.voy-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.voy-medal {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid currentColor;
+}
+.voy-title .voy-medal {
+  width: 72px;
+  height: 72px;
+}
+.voy-medal-icon {
+  flex: none;
+}

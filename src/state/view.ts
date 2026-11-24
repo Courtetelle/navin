@@ -55,6 +55,8 @@ export interface CrewsEdit {
   existing?: boolean;
   /** @default undefined */
   pendingNew?: Set<string>;
+  /** Opened from a cruise: leaving goes back to its crew (`vcrew`). */
+  back?: 'vcrew';
   [key: string]: unknown;
 }
 

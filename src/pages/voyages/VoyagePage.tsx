@@ -8,7 +8,12 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
+import { VoyageMedal } from '../../features/voyages/VoyageMedal.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
+import {
+  pickVoyagePhoto,
+  removeVoyagePhoto,
+} from '../../features/voyages/voyagePhotos.ts';
 import { voyageTiles } from '../../features/voyages/voyageTiles.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -61,7 +66,12 @@ export function VoyagePage() {
     <>
       {back}
       {validate}
-      <PageTitle>{`${isActive ? '⭐' : '⛵'} ${voyage.name}`}</PageTitle>
+      <PageTitle titleText={voyage.name}>
+        <span className="voy-title">
+          <VoyageMedal voyage={voyage} active={isActive} />
+          {voyage.name}
+        </span>
+      </PageTitle>
       <div className="row more-grid data-tiles">
         {voyageTiles().map((tile) => (
           <Button
@@ -93,7 +103,20 @@ export function VoyagePage() {
             );
           }}
         >
-          {isActive ? '⭐ Croisière active' : '☆ Rendre active'}
+          <span className="voy-tile-head">
+            {voyage.photo ? (
+              <VoyageMedal voyage={voyage} active={isActive} />
+            ) : null}
+            {tr(
+              voyage.photo
+                ? isActive
+                  ? 'Croisière active'
+                  : 'Rendre active'
+                : isActive
+                  ? '⭐ Croisière active'
+                  : '☆ Rendre active',
+            )}
+          </span>
           <small>
             {tr(
               isActive
@@ -126,6 +149,35 @@ export function VoyagePage() {
                 />
               </div>
             </div>
+          </FoldSection>
+          <FoldSection title="Médaillon de la croisière" titleText="voy-medal">
+            <HelpText>
+              Une photo ronde à la place de l’étoile, dans la liste et en haut
+              de la croisière.
+            </HelpText>
+            <ButtonRow className={voyage.photo ? 'row c2' : undefined}>
+              <Button
+                className="btn big"
+                data-voyphoto="pick"
+                onClick={() => {
+                  buzz();
+                  pickVoyagePhoto(voyage.id);
+                }}
+              >
+                {tr(voyage.photo ? '📷 Changer la photo' : '📷 + photo')}
+                <small>{tr('photothèque, fichier ou appareil photo')}</small>
+              </Button>
+              {voyage.photo ? (
+                <HoldDeleteButton
+                  className="btn big danger"
+                  data-voyphoto="del"
+                  onClick={buzz}
+                  onDelete={() => removeVoyagePhoto(voyage.id)}
+                >
+                  {tr('🗑 Retirer la photo')}
+                </HoldDeleteButton>
+              ) : null}
+            </ButtonRow>
           </FoldSection>
           <FoldSection
             title="Sections de la croisière"

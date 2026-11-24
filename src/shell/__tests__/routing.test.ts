@@ -14,8 +14,8 @@ const sea = { cruiseOpen: true, alphaBack: 'more' };
 
 test('there is one legacy view per page folder', () => {
   // 41 legacy views, the PréP menu, the sites of the internet and the
-  // journal of the alerts; data › Croisières, a cruise and its five pages.
-  expect(VIEW_NAMES).toHaveLength(52);
+  // journal of the alerts; data › Croisières, a cruise and its six pages.
+  expect(VIEW_NAMES).toHaveLength(53);
 });
 
 test('the tab of a screen follows app.js:662', () => {

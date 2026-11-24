@@ -35,6 +35,7 @@ export const VIEW_LABELS: Readonly<Record<string, string>> = {
   voyage: 'Croisière',
   vrecords: 'Enregistrements de la croisière',
   vinfo: 'Croisière : ports, dates, VHF, météo',
+  vboat: 'Croisière : bateau',
 };
 
 /** Views whose settings may switch the night mode (legacy `NIGHT_VIEWS`). */
