@@ -166,10 +166,11 @@ export function VoyageCrewPage() {
                 onClick={() => {
                   buzz();
                   const name = saveVoyageCrewSet();
-                  if (name)
-                    {toast(
+                  if (name) {
+                    toast(
                       `Équipage enregistré dans data › Équipages : ${name}`,
-                    );}
+                    );
+                  }
                 }}
               >
                 {tr('💾 Enregistrer comme équipage')}

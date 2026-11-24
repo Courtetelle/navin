@@ -40,8 +40,9 @@ export function beginCrewSetEdit(id: string): boolean {
 export function beginVoyageCrewEdit(id: string): boolean {
   if (!beginCrewSetEdit(id)) return false;
   const edit = state.view.crewsEdit.value;
-  if (edit)
-    {state.view.crewsEdit.value = { ...edit, editing: true, back: 'vcrew' };}
+  if (edit) {
+    state.view.crewsEdit.value = { ...edit, editing: true, back: 'vcrew' };
+  }
   return true;
 }
 
