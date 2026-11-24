@@ -119,6 +119,11 @@ export interface FieldDefinition extends FieldLayout {
    */
   clean?: (value: string) => string;
   /**
+   * Help shown by an ⓘ pill next to the label (one paragraph per entry).
+   * @default undefined
+   */
+  help?: readonly string[];
+  /**
    * Short note under a line about its value (e.g. the flag of an MMSI).
    * @default undefined
    */

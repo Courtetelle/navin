@@ -25,7 +25,7 @@ export const RADIO_ID_FIELDS: readonly FieldDefinition[] = [
   },
   {
     key: 'callsign',
-    label: 'Call sign (indicatif)',
+    label: 'Indicatif d’appel',
     type: 'line',
     lock: true,
     wide: true,
