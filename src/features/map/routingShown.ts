@@ -25,6 +25,8 @@ import {
   ROUTING_KEY,
   legTarget,
   routingLeg,
+  saveShiftPrefs,
+  shiftPrefs,
   shownRouting,
 } from './routingState.ts';
 
@@ -58,6 +60,10 @@ const WAVE_FULL_M = 4;
 const CURRENT_FULL_KN = 3;
 const WAVE_COLOR = '#0a4c8c';
 const CURRENT_COLOR = '#000';
+
+/** An engine (Material Design icon « engine », Apache 2.0). */
+const MOTOR_SVG =
+  '<svg class="rtm-motor" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path fill="currentColor" d="M7 4v2h3v2H7l-2 2v3H3v-3H1v8h2v-3h2v3h3l2 2h8v-4h2v3h3V9h-3v3h-2V8h-6V6h3V4z"/></svg>';
 
 function symbol(svg: string, label: string): string {
   return `<span class="rtm-sym">${svg}${label}</span>`;
@@ -117,7 +123,9 @@ export function markHtml(mark: RoutingMark, turn = 0): string {
   const speed = mark.sog ?? mark.kn;
   if (speed !== undefined) {
     tag.push(
-      `<span class="rtm-kn" title="Vitesse estimée du bateau (fond)">⛵ ${fr(speed, 1)} nd</span>`,
+      mark.mode === 'motor'
+        ? `<span class="rtm-kn rtm-kn-motor" title="Vitesse estimée du bateau (fond), au moteur">${MOTOR_SVG} ${fr(speed, 1)} nd</span>`
+        : `<span class="rtm-kn" title="Vitesse estimée du bateau (fond), à la voile">⛵ ${fr(speed, 1)} nd</span>`,
     );
   }
   if (mark.awa !== undefined && mark.aws !== undefined) {
@@ -126,7 +134,6 @@ export function markHtml(mark: RoutingMark, turn = 0): string {
       `<span class="rtm-aw" title="Angle du bateau au vent apparent">∡ ${mark.awa}° ${side} · app. ${fr(mark.aws, 0)} nd</span>`,
     );
   }
-  if (mark.mode === 'motor') tag.push('moteur');
   return `<div class="rtm-syms">${symbols.join('')}</div><div class="rtm-tag">${tag.join(' · ')}</div>`;
 }
 
@@ -149,15 +156,40 @@ export interface PlacedMark {
   dy: number;
 }
 
+/** A box on the screen, pixels. */
+export interface ScreenBox {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+/** Room kept between two boxes, pixels. */
+const BOX_ROOM = 6;
+
+function overlaps(one: ScreenBox, two: ScreenBox): boolean {
+  return (
+    Math.abs(one.x - two.x) * 2 < one.w + two.w + 2 * BOX_ROOM &&
+    Math.abs(one.y - two.y) * 2 < one.h + two.h + 2 * BOX_ROOM
+  );
+}
+
 /**
  * Where to put the symbols along the route on the screen: as many places as
- * fit without the symbols touching, on one side of the route then the
- * other, set off from the line so that it stays seen.
+ * fit, on one side of the route then the other, set off from the line so
+ * that it stays seen. No box ever covers another, nor what is already on
+ * the map (the ETD and ETA tags): a place whose box would is set off a
+ * little more, or on the other side, else left out.
  * @param points - The places, in order along the route, pixels.
+ * @param taken - Boxes already on the screen (centre and size).
  * @returns The places kept and their offsets.
  */
-export function placeMarks(points: readonly ScreenMark[]): PlacedMark[] {
+export function placeMarks(
+  points: readonly ScreenMark[],
+  taken: readonly ScreenBox[] = [],
+): PlacedMark[] {
   const placed: PlacedMark[] = [];
+  const boxes: ScreenBox[] = [...taken];
   let last: ScreenMark | null = null;
   let side = 1;
   for (const [rank, point] of points.entries()) {
@@ -174,17 +206,28 @@ export function placeMarks(points: readonly ScreenMark[]): PlacedMark[] {
     if (last && Math.hypot(point.x - last.x, point.y - last.y) < along) {
       continue;
     }
-    // Across the route, far enough for the box to clear the line.
-    const nx = -uy * side;
-    const ny = ux * side;
-    const away = (Math.abs(nx) * BOX_W + Math.abs(ny) * BOX_H) / 2 + ROUTE_GAP;
-    placed.push({
-      rank,
-      dx: Math.round(nx * away),
-      dy: Math.round(ny * away),
-    });
+    let found: PlacedMark | null = null;
+    // This side first, then the other; a little further each time.
+    for (const extra of [0, 24, 48]) {
+      for (const turn of [side, -side]) {
+        const nx = -uy * turn;
+        const ny = ux * turn;
+        const away =
+          (Math.abs(nx) * BOX_W + Math.abs(ny) * BOX_H) / 2 + ROUTE_GAP + extra;
+        const dx = Math.round(nx * away);
+        const dy = Math.round(ny * away);
+        const box = { x: point.x + dx, y: point.y + dy, w: BOX_W, h: BOX_H };
+        if (boxes.some((other) => overlaps(box, other))) continue;
+        found = { rank, dx, dy };
+        boxes.push(box);
+        side = -turn;
+        break;
+      }
+      if (found) break;
+    }
+    if (!found) continue;
+    placed.push(found);
     last = point;
-    side = -side;
   }
   return placed;
 }
@@ -210,20 +253,26 @@ function day(ms: number): string {
   return `${fmtShortDate(date)} ${fmtTime(date)}`;
 }
 
+/** An ETD or ETA tag. */
+interface EndTag {
+  end: 'etd' | 'eta';
+  at: [number, number];
+  html: string;
+  blink: boolean;
+}
+
 /**
  * The ETD on the point of departure and the ETA on the point of arrival.
  * @param shown - The routing.
  * @returns Where and what.
  */
-function endTags(
-  shown: ShownRouting,
-): Array<{ at: [number, number]; html: string; blink: boolean }> {
+function endTags(shown: ShownRouting): EndTag[] {
   const first = shown.track[0];
   const last = shown.track.at(-1);
-  const tags: Array<{ at: [number, number]; html: string; blink: boolean }> =
-    [];
+  const tags: EndTag[] = [];
   if (first && shown.departMs !== undefined) {
     tags.push({
+      end: 'etd',
       at: first,
       html: `<b>ETD</b> ${escapeHtml(day(shown.departMs))}`,
       blink:
@@ -232,6 +281,7 @@ function endTags(
   }
   if (last && shown.arriveMs !== undefined) {
     tags.push({
+      end: 'eta',
       at: last,
       html: `<b>ETA</b> ${escapeHtml(day(shown.arriveMs))}`,
       blink:
@@ -239,6 +289,20 @@ function endTags(
     });
   }
   return tags;
+}
+
+/** Size of an ETD or ETA tag on the screen, pixels (set off 8 px). */
+const END_W = 184;
+const END_H = 26;
+
+/** The box of an ETD or ETA tag on the screen. */
+function endBox(point: { x: number; y: number }): ScreenBox {
+  return {
+    x: point.x + 8 + END_W / 2,
+    y: point.y + 8 + END_H / 2,
+    w: END_W,
+    h: END_H,
+  };
 }
 
 /** The ETD and ETA drawn last: a change makes their tags blink. */
@@ -251,6 +315,24 @@ const seenTimes: {
   departMs: null,
   arriveMs: null,
 };
+
+/** The tag just touched: it blinks three times. */
+let picked: 'etd' | 'eta' | null = null;
+
+/**
+ * A touch on the ETD or the ETA tag: the arrows of the routing move it.
+ * @param end - The tag touched.
+ */
+export function pickEnd(end: 'etd' | 'eta'): void {
+  picked = end;
+  const prefs = shiftPrefs.peek();
+  if (prefs.moves === end) {
+    // Already the one: blink it again all the same.
+    for (const map of marksMaps) drawRouting(map);
+    return;
+  }
+  saveShiftPrefs({ ...prefs, moves: end });
+}
 
 const layers = new WeakMap<LeafletMap, { remove: () => void }>();
 const turning = new WeakSet<LeafletMap>();
@@ -270,10 +352,12 @@ function routingPopup(shown: ShownRouting): HTMLElement {
  * current and waves along it.
  * @param map - Leaflet map.
  * @param shown - The routing.
+ * @param moves - The tag the arrows move.
  */
 export function drawRouting(
   map: LeafletMap,
   shown: ShownRouting | null = shownRouting.peek(),
+  moves: 'etd' | 'eta' = shiftPrefs.peek().moves,
 ): void {
   watchRouting();
   layers.get(map)?.remove();
@@ -304,7 +388,10 @@ export function drawRouting(
   const screen = shown.marks.map((mark) =>
     map.latLngToContainerPoint([mark.lat, mark.lon]),
   );
-  const marks = placeMarks(screen).flatMap(({ rank, dx, dy }) => {
+  const taken = [shown.track[0], shown.track.at(-1)].flatMap((at) =>
+    at ? [endBox(map.latLngToContainerPoint(at))] : [],
+  );
+  const marks = placeMarks(screen, taken).flatMap(({ rank, dx, dy }) => {
     const mark = shown.marks[rank] as RoutingMark;
     const point = screen[rank] as { x: number; y: number };
     // A line from the point of the route to the edge of its circle.
@@ -356,18 +443,28 @@ export function drawRouting(
   const tags = endTags(shown);
   seenTimes.departMs = shown.departMs ?? null;
   seenTimes.arriveMs = shown.arriveMs ?? null;
-  const ends = tags.map(({ at, html, blink }) =>
-    L.marker(at, {
-      interactive: false,
+  const blinkPick = picked;
+  picked = null;
+  const ends = tags.map(({ end, at, html, blink }) => {
+    const classes = ['rtm-end'];
+    if (end === moves) classes.push('rtm-on');
+    if (end === blinkPick) classes.push('rtm-pick');
+    else if (blink) classes.push('rtm-blink');
+    return L.marker(at, {
       keyboard: false,
+      bubblingMouseEvents: false,
+      title:
+        end === 'etd'
+          ? 'Toucher : les flèches décalent l’ETD'
+          : 'Toucher : les flèches décalent l’ETA',
       icon: L.divIcon({
-        className: blink ? 'rtm-end rtm-blink' : 'rtm-end',
-        html,
+        className: classes.join(' '),
+        html: `<span data-end="${end}">${html}</span>`,
         iconSize: [0, 0],
         iconAnchor: [0, 0],
       }),
-    }),
-  );
+    }).on('click', () => pickEnd(end));
+  });
   const group = L.layerGroup([line, ...turns, ...marks, ...ends]).addTo(map);
   layers.set(map, group);
 }
@@ -390,6 +487,8 @@ function watchRouting(): void {
   watching = true;
   effect(() => {
     const shown = shownRouting.value;
-    for (const map of marksMaps) drawRouting(map, shown);
+    // The tag the arrows move is shown on the map.
+    const { moves } = shiftPrefs.value;
+    for (const map of marksMaps) drawRouting(map, shown, moves);
   });
 }

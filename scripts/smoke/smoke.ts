@@ -2689,15 +2689,15 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
         'ETA',
       ),
   );
-  const etd = (await page.locator('#rtgBar .rtg-times').textContent()) ?? '';
+  const etd = (await page.locator('#rtgInfo').textContent()) ?? '';
   await page.locator('#rtgLater').click();
   await page.waitForTimeout(2000);
-  const later = (await page.locator('#rtgBar .rtg-times').textContent()) ?? '';
+  const later = (await page.locator('#rtgInfo').textContent()) ?? '';
   check(
     theme,
     `▶ moves the ETD 30 min later, routed again (${later.slice(0, 40)})`,
     later !== etd &&
-      ((await page.locator('#rtgChanges').textContent()) ?? '').includes(
+      ((await page.locator('#rtgInfo').textContent()) ?? '').includes(
         '+30 min',
       ) &&
       (await page.locator('.rtm-end.rtm-blink').count()) > 0,
@@ -2715,24 +2715,66 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
   check(
     theme,
     'a touch in the middle goes back to the routing calculated',
-    ((await page.locator('#rtgChanges').textContent()) ?? '').includes(
+    ((await page.locator('#rtgInfo').textContent()) ?? '').includes(
       'routage calculé',
     ),
   );
-  await showRow(page);
+  await page.locator('.rtm-end:has([data-end="eta"])').click();
+  await page.waitForTimeout(300);
   check(
     theme,
-    'and the Routes button blinks',
-    await page.locator('#routesBtn.routing-on.menu-here').isVisible(),
+    'a touch on the ETA tag: it blinks and the arrows move the ETA',
+    (await page
+      .locator('.rtm-end.rtm-on.rtm-pick [data-end="eta"]')
+      .count()) === 1 &&
+      ((await page.locator('#rtgLater').textContent()) ?? '').includes('ETA'),
+  );
+  await page.locator('.rtm-end:has([data-end="etd"])').click();
+  await page.waitForTimeout(300);
+  check(
+    theme,
+    'and on the ETD tag, back to the ETD',
+    (await page.locator('.rtm-end.rtm-on [data-end="etd"]').count()) === 1,
+  );
+  const upBox = await page.locator('#rtgLater').boundingBox();
+  if (upBox) {
+    await page.mouse.move(
+      upBox.x + upBox.width / 2,
+      upBox.y + upBox.height / 2,
+    );
+    await page.mouse.down();
+    await page.waitForTimeout(800);
+    await page.mouse.up();
+  }
+  await page.waitForTimeout(600);
+  check(
+    theme,
+    'a long press on an arrow opens Paramétrages › Routages',
+    await page.locator('#rtgShiftPrefs').isVisible(),
+  );
+  await page.locator('#navBack').click();
+  await page.waitForTimeout(600);
+  check(
+    theme,
+    'and ◀ comes back to the routing on the map',
+    await page.locator('#rtgBar').isVisible(),
+  );
+  check(
+    theme,
+    'Routes stays shown with a red cross on it',
+    (await page.locator('#routesBtn.routing-on .routes-x').isVisible()) &&
+      (await page.locator('#routesBtn.routing-on.menu-here').count()) === 0,
   );
   await page.locator('#routesBtn').click();
   await page.waitForTimeout(400);
   check(
     theme,
-    'a tap on it erases the routing',
+    'a tap on it leaves the routing, back to the map',
     (await page.locator('.rtm').count()) === 0 &&
-      (await page.locator('#routesBtn.routing-on').count()) === 0,
+      (await page.locator('#routesBtn.routing-on').count()) === 0 &&
+      (await page.locator('#rtgBar').count()) === 0,
   );
+  await showRow(page);
   await page.locator('#routesBtn').click();
   await page.waitForTimeout(400);
   check(

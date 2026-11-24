@@ -160,26 +160,28 @@ function GearButton({ focused }: { focused: boolean }) {
 function RoutesButton() {
   useSignals();
   const here = state.view.currentView.value === 'routes' || inMenu('routes');
-  // A routing on the map: the button blinks yellow, a tap erases it.
+  // A routing on the map: the button stays shown with a red cross blinking
+  // on it, a tap leaves the routing (back to the map, and the track).
   const routing = shownRouting.value !== null;
   return (
     <Button
       className={[
         'theme-btn',
         'routes-top',
-        (here || routing) && 'menu-here',
+        here && !routing && 'menu-here',
         routing && 'routing-on',
       ]
         .filter(Boolean)
         .join(' ')}
       id="routesBtn"
-      aria-label={routing ? 'Effacer le routage de la carte' : 'Routes'}
-      title={routing ? 'Effacer le routage' : 'Routes'}
+      aria-label={routing ? 'Sortir du routage' : 'Routes'}
+      title={routing ? 'Sortir du routage' : 'Routes'}
       onClick={() => {
         buzz();
         if (shownRouting.peek()) {
           clearRouting();
-          toast('Routage effacé de la carte');
+          if (state.view.currentView.peek() !== 'tracker') go('tracker');
+          toast('Sortie du routage : retour à la carte');
           return;
         }
         navinRowChosen();
@@ -187,6 +189,22 @@ function RoutesButton() {
       }}
     >
       <span className="routes-ico">{markupToReact(ROUTE_ICON)}</span>
+      {routing ? (
+        <svg
+          className="routes-x"
+          viewBox="0 0 40 40"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            className="live-radius-cross"
+            d="M5 5l30 30m0-30-30 30"
+            stroke="#e00016"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
+        </svg>
+      ) : null}
     </Button>
   );
 }
