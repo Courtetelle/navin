@@ -71,6 +71,12 @@ export interface Voyages {
   crew: VoyageCrewLine[];
   categories: VoyageCategory[];
   docs: VoyageDoc[];
+  /** Photo id of the medallion of the cruise (base photos), if any. */
+  photo?: string;
+  /** Photo id of the crew group photo, if any. */
+  crewPhoto?: string;
+  /** Caption over the bottom of the crew group photo. */
+  crewPhotoCap?: string;
   /** ISO time of the last change (the newer one wins in a restoration). */
   mod: string;
 }
@@ -286,7 +292,28 @@ export function cleanVoyages(raw: unknown): Voyages | null {
     const kept = text(rawInfo?.[key]);
     if (kept) info[key] = kept;
   }
-  return { info, crew, categories, docs, mod: text(value.mod) };
+  const out: Voyages = { info, crew, categories, docs, mod: text(value.mod) };
+  for (const key of ['photo', 'crewPhoto', 'crewPhotoCap'] as const) {
+    const kept = text(value[key]);
+    if (kept) out[key] = kept;
+  }
+  return out;
+}
+
+/**
+ * The photos of a cruise kept in the photo base: its documents, its
+ * medallion and the crew group photo.
+ * @param voyages - The content.
+ * @returns Their ids.
+ */
+export function voyagePhotoIds(
+  voyages: Pick<Voyages, 'docs' | 'photo' | 'crewPhoto'>,
+): string[] {
+  return [
+    ...voyages.docs.map((doc) => doc.id),
+    ...(voyages.photo ? [voyages.photo] : []),
+    ...(voyages.crewPhoto ? [voyages.crewPhoto] : []),
+  ];
 }
 
 /**

@@ -5,6 +5,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { VoyageMedal } from '../../features/voyages/VoyageMedal.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
@@ -162,7 +163,7 @@ export function VoyagesPage() {
           {shown.map((voyage) => (
             <Button
               key={voyage.id}
-              className={`btn big ${voyage.id === active ? 'voy-active' : ''}`}
+              className={`btn big voy-tile ${voyage.id === active ? 'on voy-active' : ''}`}
               data-voyopen={voyage.id}
               onClick={() => {
                 buzz();
@@ -170,8 +171,10 @@ export function VoyagesPage() {
                 go('voyage');
               }}
             >
-              {voyage.id === active ? '⭐ ' : '⛵ '}
-              {voyage.name}
+              <span className="voy-tile-head">
+                <VoyageMedal voyage={voyage} active={voyage.id === active} />
+                {voyage.name}
+              </span>
               <small>
                 {voyage.id === active ? tr('croisière active · ') : ''}
                 {voyage.created

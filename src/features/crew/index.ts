@@ -31,4 +31,6 @@ export { openCrewSet } from './crewsEdit.ts';
 export { Fiche } from './Fiche.tsx';
 export type { FicheProps } from './Fiche.tsx';
 export { FicheList } from './FicheList.tsx';
+export { LongPressButton } from './LongPressButton.tsx';
+export { showFiche } from './screen.ts';
 export { cvBlankText } from './cvBlank.ts';

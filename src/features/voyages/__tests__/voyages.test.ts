@@ -11,12 +11,15 @@ import {
   docCategoryOf,
   knownSections,
   mergedVoyages,
+  voyagePhotoIds,
 } from '../../../model/voyages.ts';
 import {
   activeVoyageId,
+  allVoyageDocIds,
   blankCruise,
   createVoyage,
   mergeVoyages,
+  patchVoyage,
   removeVoyage,
   renameVoyage,
   saveCruiseRecord,
@@ -31,7 +34,11 @@ import {
 import { store } from '../../../storage/store.ts';
 import { load, useHarnessClock } from '../../data/__tests__/fixtures.ts';
 import { backupAll } from '../../data/backup.ts';
-import { crewSections, toggleVoyageMember } from '../voyageCrew.ts';
+import {
+  crewSections,
+  saveVoyageCrewSet,
+  toggleVoyageMember,
+} from '../voyageCrew.ts';
 import { freeRecords, voyageRecords } from '../voyageRecords.ts';
 import { voyageTiles } from '../voyageTiles.ts';
 
@@ -310,4 +317,37 @@ test('cruises kept before get the section Croisière and the brokers', () => {
   expect(defaultVoyages().categories.map((cat) => cat.name)).toContain(
     'Courtiers',
   );
+});
+
+test('the medallion and the crew group photo are kept, saved and synced', () => {
+  load('sample-sea');
+  const voyage = createVoyage(['crew'], true);
+  patchVoyage(voyage.id, (draft) => {
+    draft.photo = 'pmedal';
+    draft.crewPhoto = 'pgroup';
+    draft.crewPhotoCap = 'Au départ';
+  });
+  const kept = state.data.voyageStore.value.list[0];
+  const cleaned = cleanVoyages(structuredClone(kept));
+
+  expect(cleaned?.photo).toBe('pmedal');
+  expect(cleaned?.crewPhotoCap).toBe('Au départ');
+  expect(kept ? voyagePhotoIds(kept) : []).toStrictEqual(['pmedal', 'pgroup']);
+  expect(allVoyageDocIds()).toStrictEqual(['pmedal', 'pgroup']);
+});
+
+test('the cruise crew is kept among the saved crews under its name', () => {
+  load('sample-sea');
+  const before = state.data.crewSets.value.length;
+  createVoyage(['crew'], false);
+  expect(saveVoyageCrewSet()).toBeNull();
+  const member = state.data.members.value[0];
+  if (member) toggleVoyageMember(member.id);
+  const name = saveVoyageCrewSet();
+  const sets = state.data.crewSets.value;
+
+  expect(name).toBe(state.data.voyages.value.name);
+  expect(sets).toHaveLength(before + 1);
+  expect(sets.at(-1)?.name).toBe(name);
+  expect(sets.at(-1)?.crew[0]?.fonction).toBe('Skipper');
 });

@@ -1,20 +1,31 @@
 import { useSignals } from '@preact/signals-react/runtime';
+import { useEffect } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
+import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { membersByNav } from '../../features/boats/index.ts';
+import { LongPressButton } from '../../features/crew/index.ts';
+import { usePhotoUrl } from '../../features/onwater/index.ts';
 import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
 import {
+  addNewVoyageMembers,
   crewSections,
   memberField,
+  openVoyageFiche,
+  saveVoyageCrewSet,
   toggleVoyageMember,
 } from '../../features/voyages/voyageCrew.ts';
+import {
+  pickVoyagePhoto,
+  removeVoyagePhoto,
+} from '../../features/voyages/voyagePhotos.ts';
 import { shareSections } from '../../features/voyages/voyageShare.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -25,10 +36,99 @@ import { go } from '../../shell/router.ts';
 import {
   crewSetName,
   memberName,
+  patchVoyage,
   state,
   toast,
   updateVoyages,
 } from '../../state/index.ts';
+
+/**
+ * The group photo of the cruise crew, its caption over its bottom; while
+ * editing, the caption field and the buttons to change or remove it.
+ * @param props - Cruise and mode.
+ * @param props.id - Cruise id.
+ * @param props.photo - Photo id.
+ * @param props.caption - Its caption.
+ * @param props.editing - The pencil is on.
+ * @returns The photo.
+ */
+function GroupPhoto({
+  id,
+  photo,
+  caption,
+  editing,
+}: {
+  id: string;
+  photo: string | undefined;
+  caption: string | undefined;
+  editing: boolean;
+}) {
+  const tr = useTr();
+  const url = usePhotoUrl(photo ?? '');
+  if (!photo && !editing) return null;
+  return (
+    <section className="field crew-photo-sec">
+      <h3>{tr('Photo de groupe')}</h3>
+      {photo ? (
+        <figure className="crew-photo">
+          <img
+            data-voycrewphoto={photo}
+            alt="Photo de groupe"
+            src={url ?? undefined}
+          />
+          {caption ? <figcaption>{caption}</figcaption> : null}
+        </figure>
+      ) : null}
+      {editing && photo ? (
+        <input
+          className="text"
+          id="voyCrewCap"
+          defaultValue={caption ?? ''}
+          placeholder={tr.placeholder(
+            'Légende (au centre, en bas de la photo)',
+          )}
+          autoComplete="off"
+          onChange={(event) => {
+            const text = event.target.value.trim();
+            patchVoyage(id, (draft) => {
+              if (text) draft.crewPhotoCap = text;
+              else delete draft.crewPhotoCap;
+            });
+          }}
+        />
+      ) : null}
+      {editing ? (
+        <ButtonRow className={photo ? 'row c2' : undefined}>
+          <Button
+            className={photo ? 'btn' : 'btn big'}
+            data-voycrewphoto="pick"
+            onClick={() => {
+              buzz();
+              pickVoyagePhoto(id, 'crewPhoto');
+            }}
+          >
+            {tr(photo ? '📷 Changer la photo' : '📷 + photo')}
+            {photo ? null : (
+              <small>
+                {tr('photo de groupe : photothèque, fichier ou appareil photo')}
+              </small>
+            )}
+          </Button>
+          {photo ? (
+            <HoldDeleteButton
+              className="btn danger"
+              data-voycrewphoto="del"
+              onClick={buzz}
+              onDelete={() => removeVoyagePhoto(id, 'crewPhoto')}
+            >
+              {tr('🗑 Retirer la photo')}
+            </HoldDeleteButton>
+          ) : null}
+        </ButtonRow>
+      ) : null}
+    </section>
+  );
+}
 
 /**
  * Screen `vcrew` (data › Croisières › Équipage): who leaves on the cruise,
@@ -40,7 +140,10 @@ export function VoyageCrewPage() {
   useSignals();
   const tr = useTr();
   const { editing, validate } = useChapterEdit();
-  const { crew, id } = state.data.voyages.value;
+  const { crew, id, crewPhoto, crewPhotoCap } = state.data.voyages.value;
+  useEffect(() => {
+    addNewVoyageMembers();
+  }, []);
   const members = state.data.members.value;
   const sorted = membersByNav();
   const sets = state.data.crewSets.value.filter((set) => set.crew.length > 0);
@@ -60,11 +163,17 @@ export function VoyageCrewPage() {
       {validate}
       <PageTitle
         helps={[
-          'L’équipage de la croisière, propre à Croisières : il ne change pas celui de la navigation en cours. Le crayon en haut permet de choisir les personnes et leurs rôles ; les fiches se créent dans data › Équipiers·ères.',
+          'L’équipage de la croisière, propre à Croisières : il ne change pas celui de la navigation en cours. Le crayon en haut permet de choisir les personnes et leurs rôles, d’ajouter une photo de groupe, de créer un·e équipier·ère ou de reprendre un équipage enregistré. Un appui long sur un nom ouvre sa fiche.',
         ]}
       >
         {`👥 Équipage · ${crew.length}`}
       </PageTitle>
+      <GroupPhoto
+        id={id}
+        photo={crewPhoto}
+        caption={crewPhotoCap}
+        editing={editing}
+      />
       {crew.map((line, index) => {
         const member = members.find((item) => item.id === line.memberId);
         const tel = memberField(member, 'tel');
@@ -135,7 +244,7 @@ export function VoyageCrewPage() {
                   (line) => line.memberId === member.id,
                 );
                 return (
-                  <Button
+                  <LongPressButton
                     key={member.id}
                     className={`btn big ${selected ? 'on' : ''}`}
                     data-voymember={member.id}
@@ -143,10 +252,11 @@ export function VoyageCrewPage() {
                       buzz();
                       toggleVoyageMember(member.id);
                     }}
+                    onLongPress={() => openVoyageFiche(member.id)}
                   >
                     {selected ? '✔ ' : ''}
                     {memberName(member) || '…'}
-                  </Button>
+                  </LongPressButton>
                 );
               })}
             </ButtonRow>
@@ -184,19 +294,34 @@ export function VoyageCrewPage() {
               </ButtonRow>
             </FoldSection>
           ) : null}
-          <ButtonRow>
+          <HelpText>Appui long sur un nom : sa fiche.</HelpText>
+          <ButtonRow className="row c2">
             <Button
               className="btn big"
-              data-go="people"
+              data-voycrew-new
               onClick={() => {
                 buzz();
-                go('people');
+                openVoyageFiche('new');
               }}
             >
-              {tr('🧭 Fiches des équipiers·ères')}
-              <small>
-                {tr('créer ou compléter une fiche (téléphone, courriel…)')}
-              </small>
+              {tr('＋ Nouvel·le équipier·ère')}
+              <small>{tr('sa fiche, puis dans l’équipage')}</small>
+            </Button>
+            <Button
+              className="btn big"
+              data-voycrew-save
+              onClick={() => {
+                buzz();
+                const name = saveVoyageCrewSet();
+                toast(
+                  name
+                    ? `Équipage enregistré dans data › Équipages : ${name}`
+                    : 'Personne dans l’équipage pour l’instant',
+                );
+              }}
+            >
+              {tr('💾 Enregistrer comme équipage')}
+              <small>{tr('à reprendre dans data › Équipages')}</small>
             </Button>
           </ButtonRow>
         </>
