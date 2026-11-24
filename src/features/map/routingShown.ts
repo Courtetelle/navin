@@ -114,6 +114,12 @@ export function markHtml(mark: RoutingMark, turn = 0): string {
     );
   }
   const tag = [`<b>${escapeHtml(fmtTime(new Date(mark.ms)))}</b>`];
+  const speed = mark.sog ?? mark.kn;
+  if (speed !== undefined) {
+    tag.push(
+      `<span class="rtm-kn" title="Vitesse estimée du bateau (fond)">⛵ ${fr(speed, 1)} nd</span>`,
+    );
+  }
   if (mark.awa !== undefined && mark.aws !== undefined) {
     const side = mark.side === 'tribord' ? 'Td' : 'Bd';
     tag.push(
@@ -125,8 +131,8 @@ export function markHtml(mark: RoutingMark, turn = 0): string {
 }
 
 /** Size of the symbols of a place on the screen, pixels. */
-const BOX_W = 196;
-const BOX_H = 96;
+const BOX_W = 236;
+const BOX_H = 100;
 /** Room between the route and the symbols, pixels. */
 const ROUTE_GAP = 12;
 
@@ -183,6 +189,22 @@ export function placeMarks(points: readonly ScreenMark[]): PlacedMark[] {
   return placed;
 }
 
+/**
+ * Where a line from the point of the route meets the circle of its symbols,
+ * from that point.
+ * @param dx - Offset of the middle of the symbols, pixels.
+ * @param dy - Offset of the middle of the symbols, pixels.
+ * @returns The point, pixels from the point of the route.
+ */
+export function boxEdge(dx: number, dy: number): { x: number; y: number } {
+  const across = Math.min(
+    dx === 0 ? Infinity : BOX_W / 2 / Math.abs(dx),
+    dy === 0 ? Infinity : BOX_H / 2 / Math.abs(dy),
+  );
+  const share = Math.max(0, 1 - Math.min(1, across));
+  return { x: Math.round(dx * share), y: Math.round(dy * share) };
+}
+
 function day(ms: number): string {
   const date = new Date(ms);
   return `${fmtShortDate(date)} ${fmtTime(date)}`;
@@ -195,24 +217,40 @@ function day(ms: number): string {
  */
 function endTags(
   shown: ShownRouting,
-): Array<{ at: [number, number]; html: string }> {
+): Array<{ at: [number, number]; html: string; blink: boolean }> {
   const first = shown.track[0];
   const last = shown.track.at(-1);
-  const tags: Array<{ at: [number, number]; html: string }> = [];
+  const tags: Array<{ at: [number, number]; html: string; blink: boolean }> =
+    [];
   if (first && shown.departMs !== undefined) {
     tags.push({
       at: first,
       html: `<b>ETD</b> ${escapeHtml(day(shown.departMs))}`,
+      blink:
+        seenTimes.departMs !== null && seenTimes.departMs !== shown.departMs,
     });
   }
   if (last && shown.arriveMs !== undefined) {
     tags.push({
       at: last,
       html: `<b>ETA</b> ${escapeHtml(day(shown.arriveMs))}`,
+      blink:
+        seenTimes.arriveMs !== null && seenTimes.arriveMs !== shown.arriveMs,
     });
   }
   return tags;
 }
+
+/** The ETD and ETA drawn last: a change makes their tags blink. */
+const seenTimes: {
+  name: string;
+  departMs: number | null;
+  arriveMs: number | null;
+} = {
+  name: '',
+  departMs: null,
+  arriveMs: null,
+};
 
 const layers = new WeakMap<LeafletMap, { remove: () => void }>();
 const turning = new WeakSet<LeafletMap>();
@@ -268,7 +306,27 @@ export function drawRouting(
   );
   const marks = placeMarks(screen).flatMap(({ rank, dx, dy }) => {
     const mark = shown.marks[rank] as RoutingMark;
+    const point = screen[rank] as { x: number; y: number };
+    // A line from the point of the route to the edge of its circle.
+    const edge = boxEdge(dx, dy);
+    const end = map.containerPointToLatLng([
+      point.x + edge.x,
+      point.y + edge.y,
+    ]);
     return [
+      L.polyline(
+        [
+          [mark.lat, mark.lon],
+          [end.lat, end.lng],
+        ],
+        {
+          className: 'rtm-lead',
+          color: '#1a1a1a',
+          weight: 1.5,
+          opacity: 0.7,
+          interactive: false,
+        },
+      ),
       L.circleMarker([mark.lat, mark.lon], {
         radius: 4,
         color: '#1a1a1a',
@@ -289,12 +347,21 @@ export function drawRouting(
       }),
     ];
   });
-  const ends = endTags(shown).map(({ at, html }) =>
+  // Another routing: nothing to blink.
+  if (seenTimes.name !== shown.name) {
+    seenTimes.name = shown.name;
+    seenTimes.departMs = null;
+    seenTimes.arriveMs = null;
+  }
+  const tags = endTags(shown);
+  seenTimes.departMs = shown.departMs ?? null;
+  seenTimes.arriveMs = shown.arriveMs ?? null;
+  const ends = tags.map(({ at, html, blink }) =>
     L.marker(at, {
       interactive: false,
       keyboard: false,
       icon: L.divIcon({
-        className: 'rtm-end',
+        className: blink ? 'rtm-end rtm-blink' : 'rtm-end',
         html,
         iconSize: [0, 0],
         iconAnchor: [0, 0],

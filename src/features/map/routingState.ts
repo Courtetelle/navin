@@ -25,6 +25,9 @@ export interface RoutingMark {
   /** Where the waves come from, degrees, and their period, seconds (`null` unknown). @default undefined */
   waveFrom?: number | null;
   wavePeriod?: number | null;
+  /** Estimated speed of the boat through the water and over the ground, knots. @default undefined */
+  kn?: number;
+  sog?: number;
   /** Under sail or under motor. @default undefined */
   mode?: 'sail' | 'motor';
   /** Angle to the true wind and side. @default undefined */
@@ -133,6 +136,8 @@ export function routingShape(
       waveM: Number.isFinite(step.waveM) ? step.waveM : null,
       waveFrom: Number.isFinite(step.waveFrom) ? step.waveFrom : null,
       wavePeriod: Number.isFinite(step.wavePeriod) ? step.wavePeriod : null,
+      kn: step.kn,
+      sog: step.sog,
       mode: step.mode,
       twa: step.twa,
       side: step.side,

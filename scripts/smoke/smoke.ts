@@ -2695,11 +2695,29 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
   const later = (await page.locator('#rtgBar .rtg-times').textContent()) ?? '';
   check(
     theme,
-    `▶ moves the ETD an hour later, routed again (${later.slice(0, 40)})`,
+    `▶ moves the ETD 30 min later, routed again (${later.slice(0, 40)})`,
     later !== etd &&
       ((await page.locator('#rtgChanges').textContent()) ?? '').includes(
-        '+1 h',
-      ),
+        '+30 min',
+      ) &&
+      (await page.locator('.rtm-end.rtm-blink').count()) > 0,
+  );
+  check(
+    theme,
+    'the routing labels are framed and tied to the track, with the speed',
+    (await page.locator('.rtm-lead').count()) > 0 &&
+      (
+        (await page.locator('.rtm .rtm-tag').first().textContent()) ?? ''
+      ).includes('nd'),
+  );
+  await page.locator('#rtgInfo').click();
+  await page.waitForTimeout(2000);
+  check(
+    theme,
+    'a touch in the middle goes back to the routing calculated',
+    ((await page.locator('#rtgChanges').textContent()) ?? '').includes(
+      'routage calculé',
+    ),
   );
   await showRow(page);
   check(
