@@ -33,6 +33,10 @@ const store = path.resolve(
   storeArg > 0 ? (process.argv[storeArg + 1] ?? 'store') : 'store',
 );
 
+/** The site of NavIn, an origin the relay accepts. */
+const NAVIN_ORIGIN = 'https://courtetelle.github.io';
+const relay = (process.env.RELAY_URL ?? '').trim().replace(/\/$/u, '');
+
 // The files of NavIn (zones, grid of the 500 m) read from public/, as the
 // app reads them from its site.
 const webFetch = globalThis.fetch;
@@ -50,6 +54,13 @@ globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     } catch {
       return new Response(null, { status: 404 });
     }
+  }
+  // The relay of NavIn answers only the pages of NavIn: GitHub says it
+  // comes from there (the relay itself is the skipper's own).
+  if (relay && url.startsWith(`${relay}/`)) {
+    const headers = new Headers(init?.headers);
+    headers.set('Origin', NAVIN_ORIGIN);
+    return webFetch(input, { ...init, headers });
   }
   return webFetch(input, init);
 };
@@ -110,7 +121,7 @@ try {
       aemet: process.env.AEMET_KEY ?? '',
       metOffice: process.env.METOFFICE_KEY ?? '',
       frost: process.env.FROST_KEY ?? '',
-      relay: (process.env.RELAY_URL ?? '').replace(/\/$/u, ''),
+      relay,
     };
     const readings = await recorder.readZoneStations(zones, keys);
     const daysDir = path.join(store, archive.DAYS_DIR);
