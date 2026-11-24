@@ -92,9 +92,21 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/marks/MarksPage.tsx').then((module) => ({
       default: module.MarksPage,
     })),
+  vinfo: () =>
+    import('../pages/voyages/VoyageInfoPage.tsx').then((module) => ({
+      default: module.VoyageInfoPage,
+    })),
+  voyage: () =>
+    import('../pages/voyages/VoyagePage.tsx').then((module) => ({
+      default: module.VoyagePage,
+    })),
   voyages: () =>
     import('../pages/voyages/VoyagesPage.tsx').then((module) => ({
       default: module.VoyagesPage,
+    })),
+  vrecords: () =>
+    import('../pages/voyages/VoyageRecordsPage.tsx').then((module) => ({
+      default: module.VoyageRecordsPage,
     })),
   weather: () =>
     import('../pages/weather/WeatherPage.tsx').then((module) => ({

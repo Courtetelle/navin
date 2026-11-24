@@ -1,4 +1,4 @@
-import { signal } from '@preact/signals-react';
+import { computed, signal } from '@preact/signals-react';
 
 import type { NavRoute } from '../model/routes.ts';
 import type {
@@ -16,8 +16,8 @@ import type {
   TaskTemplate,
   UiEdit,
 } from '../model/types.ts';
-import type { Voyages } from '../model/voyages.ts';
-import { defaultVoyages } from '../model/voyages.ts';
+import type { Voyage, VoyageStore } from '../model/voyages.ts';
+import { ALL_SECTIONS, defaultVoyages } from '../model/voyages.ts';
 
 /** State of the PréP flow (legacy `prep`, not persisted). */
 export interface PrepState {
@@ -58,6 +58,18 @@ export interface PrepUseLog {
   [key: string]: PrepUse[];
 }
 
+const voyageStore = signal<VoyageStore>({ list: [], active: null, mod: '' });
+const voyageOpen = signal<string | null>(null);
+/** What a page of a cruise shows when none is opened. */
+const NO_VOYAGE: Voyage = {
+  ...defaultVoyages(),
+  id: '',
+  num: 0,
+  name: '',
+  created: '',
+  sections: [...ALL_SECTIONS],
+};
+
 /**
  * Domain records. Each signal mirrors one legacy global; it is loaded by
  * `initState()` and written back through the entity actions (same `ldb.*`
@@ -80,8 +92,16 @@ export const data = {
   marks: signal<Mark[]>([]),
   /** Routes planned on the map (`ldb.routes`). */
   routes: signal<NavRoute[]>([]),
-  /** data › Croisières: crew, contracts, documents (`ldb.voyages`). */
-  voyages: signal<Voyages>(defaultVoyages()),
+  /** data › Croisières: the cruises and the active one (`ldb.voyages`). */
+  voyageStore,
+  /** The cruise opened in data › Croisières (`ldb.voyageOpen`). */
+  voyageOpen,
+  /** Content of the cruise opened: crew, contracts, documents. */
+  voyages: computed<Voyage>(
+    () =>
+      voyageStore.value.list.find((item) => item.id === voyageOpen.value) ??
+      NO_VOYAGE,
+  ),
   /** Automatic SOS logs (`ldb.sosLogs`). */
   sosLogs: signal<SosLog[]>([]),
   /** Checklist bases (`ldb.ckLib`). */
