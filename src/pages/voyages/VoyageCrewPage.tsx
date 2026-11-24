@@ -68,6 +68,8 @@ export function VoyageCrewPage() {
   }, []);
   if (!id) return <NoVoyage />;
   const photo = chosen?.photo as string | undefined;
+  // Without a crew, the list is shown at once; once chosen, the pencil
+  // changes it.
   return (
     <>
       <PageBack
@@ -83,7 +85,7 @@ export function VoyageCrewPage() {
       {validate}
       <PageTitle
         helps={[
-          'L’équipage de la croisière est un des équipages de data › Équipages. Le crayon en haut permet de le choisir dans la liste, de le modifier d’ici ou d’en créer un nouveau.',
+          'L’équipage de la croisière est un des équipages de data › Équipages : touchez-le dans la liste. Une fois choisi, la liste disparaît ; le crayon en haut permet d’en changer, de le modifier d’ici ou d’en créer un nouveau.',
         ]}
       >
         {`👥 Équipage · ${lines.length}`}
@@ -131,15 +133,9 @@ export function VoyageCrewPage() {
           </div>
         );
       })}
-      {lines.length === 0 && !editing ? (
-        <HelpText>
-          Aucun équipage choisi : touchez le crayon en haut pour en choisir un
-          dans data › Équipages.
-        </HelpText>
-      ) : null}
-      {editing ? (
+      {chosen && !editing ? null : (
         <>
-          {chosen ? (
+          {chosen && editing ? (
             <ButtonRow>
               <Button
                 className="btn big"
@@ -223,7 +219,7 @@ export function VoyageCrewPage() {
             </Button>
           </ButtonRow>
         </>
-      ) : null}
+      )}
       <FoldSection title="📎 Documents de l’équipage" titleText="voy-crew-docs">
         <DocList cat={CREW_CAT} editing={editing} />
         {editing ? <DocImport cat={CREW_CAT} /> : null}

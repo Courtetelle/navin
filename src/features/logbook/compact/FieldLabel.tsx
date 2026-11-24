@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { HelpPill } from '../../../components/shared/HelpText.tsx';
+import { helpBubbleText } from '../../../components/shared/helpRules.ts';
 import { useTr } from '../../../i18n/useTr.ts';
 import type { FieldDefinition } from '../../../model/field.ts';
 
@@ -27,7 +29,7 @@ interface FieldLabelProps {
 export function FieldLabel({ field, htmlFor }: FieldLabelProps) {
   const form = useCompactForm();
   const tr = useTr();
-  const { key, label, labelCycle, unit, unitOnly, rule } = field;
+  const { key, label, labelCycle, unit, unitOnly, rule, help } = field;
   if (!label && !unitOnly && !labelCycle) return null;
   const id = htmlFor ?? form.ids.get(key);
   let title: ReactNode = null;
@@ -40,6 +42,14 @@ export function FieldLabel({ field, htmlFor }: FieldLabelProps) {
         <>
           {' '}
           <span className="u">{tr(`(${unit})`)}</span>
+        </>
+      ) : null}
+      {help ? (
+        <>
+          {' '}
+          <HelpPill
+            text={helpBubbleText(help.map((text) => tr(text, { help: true })))}
+          />
         </>
       ) : null}
       {rule ? (

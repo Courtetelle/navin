@@ -61,40 +61,35 @@ export function VoyageBoatPage() {
       {validate}
       <PageTitle
         helps={[
-          'Le bateau de la croisière est un des bateaux de data › Bateaux. Le crayon en haut permet de le choisir dans la liste ou de modifier sa fiche d’ici.',
+          'Le bateau de la croisière est un des bateaux de data › Bateaux : touchez-le dans la liste. Une fois choisi, la liste disparaît ; le crayon en haut permet d’en changer ou de modifier sa fiche d’ici.',
         ]}
       >
         {`🚤 ${boat?.info.boat || tr('Bateau')}`}
       </PageTitle>
       {thumb ? <BoatPhoto photo={thumb} /> : null}
-      {boat ? (
-        sections.map((section) => (
-          <FoldSection
-            key={section.title}
-            title={section.title}
-            titleText={`voy-boat-${section.title}`}
-          >
-            <dl className="voy-lines">
-              {section.rows.map(([label, value]) => (
-                <div key={label} className="voy-line">
-                  <dt>{tr(label)}</dt>
-                  <dd>
-                    <span className="voy-text">{value}</span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </FoldSection>
-        ))
-      ) : editing ? null : (
-        <HelpText>
-          Aucun bateau choisi : touchez le crayon en haut pour en choisir un
-          dans data › Bateaux.
-        </HelpText>
-      )}
-      {editing ? (
+      {boat
+        ? sections.map((section) => (
+            <FoldSection
+              key={section.title}
+              title={section.title}
+              titleText={`voy-boat-${section.title}`}
+            >
+              <dl className="voy-lines">
+                {section.rows.map(([label, value]) => (
+                  <div key={label} className="voy-line">
+                    <dt>{tr(label)}</dt>
+                    <dd>
+                      <span className="voy-text">{value}</span>
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </FoldSection>
+          ))
+        : null}
+      {boat && !editing ? null : (
         <>
-          {boat ? (
+          {boat && editing ? (
             <ButtonRow>
               <Button
                 className="btn big"
@@ -156,7 +151,7 @@ export function VoyageBoatPage() {
             </Button>
           </ButtonRow>
         </>
-      ) : null}
+      )}
       <ShareButton
         data-voyshare="boat"
         onShare={(format) => {

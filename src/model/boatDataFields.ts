@@ -11,6 +11,14 @@ import { frN } from '../lib/format.ts';
 import type { FieldDefinition } from './field.ts';
 import { numField as n } from './field.ts';
 
+/** What each design category of the CE marking allows (text of Corban). */
+export const CE_CATEGORY_HELP = [
+  'Catégorie de conception A : navires de plaisance conçus pour des vents qui peuvent dépasser la force 8 (sur l’échelle de Beaufort) et pour des vagues qui peuvent dépasser une hauteur significative de 4 mètres, à l’exclusion des conditions exceptionnelles telles que des tempêtes, des tempêtes violentes, des tornades et des conditions maritimes extrêmes ou des vagues énormes (ces conditions excluent les forces 10 et suivantes).',
+  'Catégorie de conception B : navires de plaisance conçus pour des vents qui peuvent aller jusqu’à la force 8 comprise et pour des vagues qui peuvent atteindre une hauteur significative jusqu’à 4 mètres compris.',
+  'Catégorie de conception C : navires de plaisance conçus pour des vents qui peuvent aller jusqu’à la force 6 comprise et pour des vagues qui peuvent atteindre une hauteur significative jusqu’à deux mètres compris.',
+  'Catégorie de conception D : navires de plaisance conçus pour des vents qui peuvent aller jusqu’à la force 4 comprise et pour des vagues qui peuvent atteindre une hauteur significative jusqu’à 0.30 mètre compris, avec des vagues occasionnelles d’une hauteur maximale de 0,50 mètres.',
+] as const;
+
 /** Fields of the "Données techniques" section of the boat sheet. */
 export const BOAT_DATA_FIELDS: readonly FieldDefinition[] = [
   {
@@ -47,8 +55,8 @@ export const BOAT_DATA_FIELDS: readonly FieldDefinition[] = [
     label: 'Catégorie de conception CE',
     type: 'choice',
     options: [['A'], ['B'], ['C'], ['D']],
-    cycle: true,
     wide: true,
+    help: CE_CATEGORY_HELP,
   },
   {
     key: 'year',
@@ -181,12 +189,12 @@ export const BOAT_DATA_FIELDS: readonly FieldDefinition[] = [
       }),
     ],
   },
-  n('waterCap', 'Vₘₐₓ eau potable', 'l', {
+  n('waterCap', 'Vₘₐₓ eau douce', 'l', {
     addMore: { key: 'waterCap2', label: '2ᵉᵐᵉ réservoir' },
   }),
-  n('waterCap2', 'Vₘₐₓ eau potable 2ᵉᵐᵉ réservoir', 'l', {
+  n('waterCap2', 'Vₘₐₓ eau douce 2ᵉᵐᵉ réservoir', 'l', {
     reveal: true,
     addMore: { key: 'waterCap3', label: '3ᵉᵐᵉ réservoir' },
   }),
-  n('waterCap3', 'Vₘₐₓ eau potable 3ᵉᵐᵉ réservoir', 'l', { reveal: true }),
+  n('waterCap3', 'Vₘₐₓ eau douce 3ᵉᵐᵉ réservoir', 'l', { reveal: true }),
 ];
