@@ -15286,7 +15286,8 @@ html body.menus-fading .rail-btn.routes-sub {
 .zone-pick-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  /* Buttons one above the other never touch: 8 px, as in the menus */
+  gap: 8px;
 }
 .zone-pick-sets .btn,
 .zone-pick-list .btn {
