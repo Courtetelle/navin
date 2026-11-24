@@ -21,6 +21,7 @@ import {
   mergeSiteLinks,
   mergeTraceNames,
   mergeUiEdits,
+  mergeVoyages,
   openCruise,
   restoreTraceCuts,
   saveSettings,
@@ -70,6 +71,11 @@ export interface BackupFile {
   marks?: unknown;
   /** @default undefined */
   routes?: unknown;
+  /**
+   * data › Croisières.
+   * @default undefined
+   */
+  voyages?: unknown;
   /** @default undefined */
   sosLogs?: unknown;
   /**
@@ -297,6 +303,7 @@ function restoreRecords(file: BackupFile): void {
   if (file.uiEdits) mergeUiEdits(file.uiEdits);
   if (file.marks) mergeMarks(file.marks);
   if (file.routes) mergeRoutes(file.routes);
+  if (file.voyages) mergeVoyages(file.voyages);
   if (Array.isArray(file.sosLogs)) restoreSosLogs(file);
   mergeAlerts(file.alerts);
   if (Array.isArray(file.crewSets)) restoreCrewSets(file.crewSets as CrewSet[]);

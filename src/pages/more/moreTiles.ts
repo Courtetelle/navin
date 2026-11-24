@@ -52,6 +52,11 @@ const SITES: MoreTile = {
   title: '🌐 Sites internet',
   sub: 'les sites liés dans NavIn : texte des boutons et adresses',
 };
+const VOYAGES: MoreTile = {
+  key: 'voyages',
+  title: '⛵ Croisières',
+  sub: 'équipage, contrats, assurances, documents',
+};
 const STATS: MoreTile = {
   key: 'stats',
   title: '📊 NM effectués sur les lacs',
@@ -80,6 +85,7 @@ export function tilesWithoutCruise(): MoreTile[] {
       title: '👥 Équipages',
       sub: `${crewSets.value.length} groupe${crewSets.value.length > 1 ? 's' : ''} de navigants, avec les rôles`,
     },
+    VOYAGES,
     {
       key: 'tasktpl',
       title: '🧑‍🤝‍🧑 Modèle des tâches à bord',
@@ -173,6 +179,7 @@ export function tilesWithCruise(): MoreTile[] {
       title: '👥 Équipages',
       sub: `${cruise.value?.crew.length} à bord · ${setCount} groupe${setPlural} enregistré${setPlural}`,
     },
+    VOYAGES,
     LISTS,
     marksTile(marks.value.length),
     chartsTile(),

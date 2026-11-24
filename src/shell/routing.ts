@@ -49,6 +49,10 @@ const COMMON_TABS: Record<string, string> = {
   douglas: 'more',
   meteo: 'more',
   weather: 'tracker',
+  voyages: 'more',
+  vcrew: 'more',
+  vcontracts: 'more',
+  vdocs: 'more',
 };
 
 /**
@@ -138,6 +142,9 @@ export function alphaBackFor(current: string): string {
   return ['sos', 'vhf', 'lists'].includes(current) ? current : 'more';
 }
 
+/** The pages of data › Croisières: their back button leads to its menu. */
+const VOYAGE_VIEWS = new Set(['vcrew', 'vcontracts', 'vdocs']);
+
 const DATA_BACK_VIEWS = new Set([
   'traces',
   'day',
@@ -165,6 +172,7 @@ const DATA_BACK_VIEWS = new Set([
   'people',
   'crews',
   'nmea',
+  'voyages',
 ]);
 
 /**
@@ -175,6 +183,7 @@ const DATA_BACK_VIEWS = new Set([
 export function backFallback(current: string): string {
   if (DATA_BACK_VIEWS.has(current)) return 'more';
   if (current === 'beaufort' || current === 'douglas') return 'lists';
+  if (VOYAGE_VIEWS.has(current)) return 'voyages';
   return 'tracker';
 }
 

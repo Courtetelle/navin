@@ -28,6 +28,10 @@ export const VIEW_LABELS: Readonly<Record<string, string>> = {
   alpha: 'Alphabet',
   rules: 'Règles du Léman',
   docs: 'Documents',
+  voyages: 'Croisières',
+  vcrew: 'Équipage de la croisière',
+  vcontracts: 'Contrats',
+  vdocs: 'Documents de la croisière',
 };
 
 /** Views whose settings may switch the night mode (legacy `NIGHT_VIEWS`). */

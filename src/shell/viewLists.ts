@@ -43,7 +43,11 @@ export const VIEW_NAMES = [
   'tasktpl',
   'traces',
   'tracker',
+  'vcontracts',
+  'vcrew',
+  'vdocs',
   'vhf',
+  'voyages',
   'weather',
 ] as const;
 
@@ -99,4 +103,8 @@ export const NO_CRUISE_VIEWS: readonly string[] = [
   'douglas',
   'meteo',
   'weather',
+  'voyages',
+  'vcrew',
+  'vcontracts',
+  'vdocs',
 ];

@@ -92,6 +92,10 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/marks/MarksPage.tsx').then((module) => ({
       default: module.MarksPage,
     })),
+  voyages: () =>
+    import('../pages/voyages/VoyagesPage.tsx').then((module) => ({
+      default: module.VoyagesPage,
+    })),
   weather: () =>
     import('../pages/weather/WeatherPage.tsx').then((module) => ({
       default: module.WeatherPage,
@@ -183,6 +187,18 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
   tracker: () =>
     import('../pages/tracker/TrackerPage.tsx').then((module) => ({
       default: module.TrackerPage,
+    })),
+  vcontracts: () =>
+    import('../pages/voyages/ContractsPage.tsx').then((module) => ({
+      default: module.ContractsPage,
+    })),
+  vcrew: () =>
+    import('../pages/voyages/VoyageCrewPage.tsx').then((module) => ({
+      default: module.VoyageCrewPage,
+    })),
+  vdocs: () =>
+    import('../pages/voyages/VoyageDocsPage.tsx').then((module) => ({
+      default: module.VoyageDocsPage,
     })),
   vhf: () =>
     import('../pages/vhf/VhfPage.tsx').then((module) => ({
