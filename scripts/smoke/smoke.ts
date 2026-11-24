@@ -2782,6 +2782,17 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
     'a long press on an arrow opens Paramétrages › Routages',
     await page.locator('#rtgShiftPrefs').isVisible(),
   );
+  await page.locator('#rtgShiftPrefs [data-step="60"]').click();
+  check(
+    theme,
+    'big buttons choose the step and what the arrows move',
+    (await page
+      .locator('#rtgShiftPrefs [data-step="60"][aria-pressed="true"]')
+      .count()) === 1 &&
+      (await page.locator('#rtgShiftPrefs select').count()) === 0 &&
+      (await page.locator('#rtgShiftPrefs [data-moves="eta"]').isVisible()),
+  );
+  await page.locator('#rtgShiftPrefs [data-step="30"]').click();
   await page.locator('#navBack').click();
   await page.waitForTimeout(600);
   check(
