@@ -3,6 +3,7 @@ import { freeze, produce } from 'immer';
 import { dayKey, num, uid } from '../lib/format.ts';
 import { DEFAULT_CONTACTS } from '../model/contacts.ts';
 import type { Cruise, CruiseMeta, Draft } from '../model/types.ts';
+import { voyageNavInfo } from '../model/voyages.ts';
 import { delPhoto } from '../storage/photos.ts';
 import { store } from '../storage/store.ts';
 
@@ -47,6 +48,16 @@ export function blankCruise(name: string, from?: Cruise | null): Cruise {
     if (lastDay) keep.moteurInit = from.days[lastDay]?.moteurSoir as string;
     Object.assign(cruise.info, keep, { name });
   }
+  // The active cruise of data › Croisières gathers the new navigations, which
+  // take its ports, dates, VHF, weather and renter's numbers.
+  const active = data.voyageStore.peek().active;
+  const voyage = data.voyageStore
+    .peek()
+    .list.find((item) => item.id === active);
+  if (voyage) {
+    cruise.voyage = voyage.id;
+    Object.assign(cruise.info, voyageNavInfo(voyage));
+  }
   return cruise;
 }
 
@@ -62,6 +73,7 @@ function cruiseMeta(cruise: Cruise): CruiseMeta {
     created: cruise.created,
     type: cruise.type || 'mer',
     duree: cruise.duree,
+    ...(typeof cruise.voyage === 'string' ? { voyage: cruise.voyage } : {}),
   };
 }
 

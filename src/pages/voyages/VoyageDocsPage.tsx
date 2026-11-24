@@ -5,7 +5,9 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
+import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
 import { docsOf, shareVoyageDocs } from '../../features/voyages/voyageFiles.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -23,27 +25,30 @@ import { state } from '../../state/index.ts';
 export function VoyageDocsPage() {
   useSignals();
   const tr = useTr();
+  const { editing, validate } = useChapterEdit();
   const voyages = state.data.voyages.value;
+  if (!voyages.id) return <NoVoyage />;
   return (
     <>
       <PageBack
-        label="◀ Croisières"
-        data-go="voyages"
+        label="◀ Croisière"
+        data-go="voyage"
         onClick={() => {
           buzz();
-          go('voyages');
+          go('voyage');
         }}
       >
-        {tr('◀ Croisières')}
+        {tr('◀ Croisière')}
       </PageBack>
+      {validate}
       <PageTitle
         helps={[
-          'Contrats, conditions générales et particulières, attestations d’assurance, photos : chaque fichier reçoit un titre et une catégorie. Toucher un document l’ouvre, sans réseau.',
+          'Contrats, conditions générales et particulières, attestations d’assurance, photos : chaque fichier reçoit un titre et une catégorie. Le crayon en haut permet d’ajouter, renommer, reclasser et supprimer. Toucher un document l’ouvre, sans réseau.',
         ]}
       >
         📎 Documents
       </PageTitle>
-      <DocImport />
+      {editing ? <DocImport /> : null}
       {docCategories(voyages).map((cat) => {
         const count = docsOf(cat.id).length;
         return (
@@ -53,7 +58,7 @@ export function VoyageDocsPage() {
             title={`${cat.name} · ${count}`}
             titleText={cat.id}
           >
-            <DocList cat={cat.id} />
+            <DocList cat={cat.id} editing={editing} />
           </FoldSection>
         );
       })}

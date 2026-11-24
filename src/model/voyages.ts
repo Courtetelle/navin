@@ -66,6 +66,8 @@ export interface VoyageDoc {
 
 /** Everything of data › Croisières. */
 export interface Voyages {
+  /** The cruise itself: ports, dates, VHF, weather (keys of {@link INFO_FIELDS}). */
+  info: Record<string, string>;
   crew: VoyageCrewLine[];
   categories: VoyageCategory[];
   docs: VoyageDoc[];
@@ -101,7 +103,26 @@ export const CARD_FIELDS: ReadonlyArray<
   ['urgence', 'Urgence, assistance 24 h / 24', 'tel'],
   ['mail', 'Courriel', 'mail'],
   ['web', 'Site internet', 'web'],
-  ['notes', 'Notes (garanties, franchise, montant…)', 'area'],
+  ['notes', 'Notes : tarifs, règlement, garanties, franchise…', 'area'],
+];
+
+/**
+ * The fields of the cruise itself, taken from « Bateau et croisière »: key,
+ * label, kind. They go into the navigations of the cruise (VHF, SOS, CV).
+ */
+export const INFO_FIELDS: ReadonlyArray<
+  readonly [key: string, label: string, kind: 'text' | 'date' | 'area']
+> = [
+  ['ports', 'Port de départ et d’arrivée', 'text'],
+  ['du', 'Du', 'date'],
+  ['au', 'Au', 'date'],
+  ['vhfMarina', 'Canal VHF de la marina', 'text'],
+  ['coastStation', 'Station côtière radio', 'text'],
+  [
+    'meteo',
+    'Météo : bulletins VHF (canaux, horaires), sites, heure légale',
+    'area',
+  ],
 ];
 
 /** The fields of a person: key, label, link kind. */
@@ -156,10 +177,16 @@ export function emptyPerson(id: string): VoyagePerson {
  */
 export function defaultVoyages(): Voyages {
   return {
+    info: {},
     crew: [],
     categories: [
       { id: 'agence', name: 'Agence', cards: [emptyCard('agence1', 'Agence')] },
       { id: 'loueur', name: 'Loueur', cards: [emptyCard('loueur1', 'Loueur')] },
+      {
+        id: 'courtiers',
+        name: 'Courtiers',
+        cards: [emptyCard('courtier1', 'Courtier')],
+      },
       {
         id: 'assurances',
         name: 'Assurances',
@@ -253,7 +280,13 @@ export function cleanVoyages(raw: unknown): Voyages | null {
       at: text(item.at),
     });
   }
-  return { crew, categories, docs, mod: text(value.mod) };
+  const info: Record<string, string> = {};
+  const rawInfo = record(value.info);
+  for (const [key] of INFO_FIELDS) {
+    const kept = text(rawInfo?.[key]);
+    if (kept) info[key] = kept;
+  }
+  return { info, crew, categories, docs, mod: text(value.mod) };
 }
 
 /**
@@ -349,7 +382,10 @@ export function filledCount(card: VoyageCard): number {
  * @param received - Content of the file.
  * @returns The content to keep, with the documents of both.
  */
-export function mergedVoyages(kept: Voyages, received: Voyages): Voyages {
+export function mergedVoyages<Content extends Voyages>(
+  kept: Content,
+  received: Content,
+): Content {
   const newer = (received.mod || '') > (kept.mod || '') ? received : kept;
   const older = newer === received ? kept : received;
   const docs = [...newer.docs];
@@ -357,4 +393,311 @@ export function mergedVoyages(kept: Voyages, received: Voyages): Voyages {
     if (!docs.some((item) => item.id === doc.id)) docs.push(doc);
   }
   return { ...newer, docs };
+}
+
+/** The sections a cruise can hold; more will come. */
+export type VoyageSectionKey = 'info' | 'crew' | 'contracts' | 'docs';
+
+/** Each section: key, view opened, title and text of its tile. */
+export const VOYAGE_SECTIONS: ReadonlyArray<{
+  key: VoyageSectionKey;
+  view: string;
+  title: string;
+  sub: string;
+}> = [
+  {
+    key: 'info',
+    view: 'vinfo',
+    title: '🧭 Croisière',
+    sub: 'ports, dates, canaux VHF, station côtière, météo',
+  },
+  {
+    key: 'crew',
+    view: 'vcrew',
+    title: '👥 Équipage',
+    sub: 'qui part, avec les rôles et les contacts',
+  },
+  {
+    key: 'contracts',
+    view: 'vcontracts',
+    title: '📑 Contrats',
+    sub: 'agence, loueur, assurances, contacts d’urgence',
+  },
+  {
+    key: 'docs',
+    view: 'vdocs',
+    title: '📎 Documents',
+    sub: 'contrats, conditions générales et particulières, photos',
+  },
+];
+
+/** One cruise of data › Croisières: its number, name, sections and content. */
+export interface Voyage extends Voyages {
+  id: string;
+  /** Automatic number, from the last one kept. */
+  num: number;
+  name: string;
+  /** ISO creation time. */
+  created: string;
+  /** Sections chosen for this cruise, in the order of {@link VOYAGE_SECTIONS}. */
+  sections: VoyageSectionKey[];
+}
+
+/** All the cruises, and the active one. */
+export interface VoyageStore {
+  list: Voyage[];
+  /** The active cruise: new navigations, routes and routings go into it. */
+  active: string | null;
+  /** ISO time of the last change of the list or of the active cruise. */
+  mod: string;
+  /**
+   * Version of the content: 2 since the section Croisière and the
+   * category Courtiers.
+   * @default undefined
+   */
+  v?: number;
+}
+
+/** Version of {@link VoyageStore} written now. */
+export const VOYAGE_STORE_V = 2;
+
+/**
+ * A cruise kept before version 2 gets the section Croisière and the
+ * category Courtiers.
+ * @param voyage - The cruise read.
+ * @returns The cruise brought up to date.
+ */
+function upgraded(voyage: Voyage): Voyage {
+  const sections: VoyageSectionKey[] = voyage.sections.includes('info')
+    ? voyage.sections
+    : ['info', ...voyage.sections];
+  const categories = voyage.categories.some((cat) => cat.id === 'courtiers')
+    ? voyage.categories
+    : [
+        ...voyage.categories,
+        {
+          id: 'courtiers',
+          name: 'Courtiers',
+          cards: [emptyCard(`${voyage.id}-courtier`, 'Courtier')],
+        },
+      ];
+  return { ...voyage, sections, categories };
+}
+
+/** The sections every new cruise proposes, ticked. */
+export const ALL_SECTIONS: readonly VoyageSectionKey[] = VOYAGE_SECTIONS.map(
+  (section) => section.key,
+);
+
+function cleanSections(raw: unknown): VoyageSectionKey[] {
+  if (!Array.isArray(raw)) return [...ALL_SECTIONS];
+  return ALL_SECTIONS.filter((key) => raw.includes(key));
+}
+
+/**
+ * Read one stored or received cruise.
+ * @param raw - Untrusted value.
+ * @returns The cruise, or null.
+ */
+export function cleanVoyage(raw: unknown): Voyage | null {
+  const value = record(raw);
+  const content = cleanVoyages(raw);
+  const id = text(value?.id);
+  if (!value || !content || !id) return null;
+  const num = typeof value.num === 'number' && value.num > 0 ? value.num : 0;
+  return {
+    ...content,
+    id,
+    num,
+    name: text(value.name) || `${num || ''} Croisière`.trim(),
+    created: text(value.created),
+    sections: cleanSections(value.sections),
+  };
+}
+
+/**
+ * Read the stored or received cruises. The first version kept one cruise
+ * only (its content at the root): it becomes cruise 1.
+ * @param raw - Untrusted value.
+ * @returns The cruises, or null when it is none.
+ */
+export function cleanVoyageStore(raw: unknown): VoyageStore | null {
+  const value = record(raw);
+  if (!value) return null;
+  if (Array.isArray(value.list)) {
+    const list: Voyage[] = [];
+    for (const item of value.list) {
+      const voyage = cleanVoyage(item);
+      if (voyage && !list.some((known) => known.id === voyage.id)) {
+        list.push(voyage);
+      }
+    }
+    const active = text(value.active);
+    const old = typeof value.v !== 'number' || value.v < VOYAGE_STORE_V;
+    return {
+      list: old ? list.map(upgraded) : list,
+      active: list.some((voyage) => voyage.id === active) ? active : null,
+      mod: text(value.mod),
+      v: VOYAGE_STORE_V,
+    };
+  }
+  const single = cleanVoyages(raw);
+  if (!single) return null;
+  if (!single.mod) {
+    return { list: [], active: null, mod: '', v: VOYAGE_STORE_V };
+  }
+  const year = (single.mod.slice(0, 4) || '').trim();
+  const voyage: Voyage = {
+    ...single,
+    id: 'v1',
+    num: 1,
+    name: `1 Croisière ${year}`.trim(),
+    created: single.mod,
+    sections: [...ALL_SECTIONS],
+  };
+  return {
+    list: [upgraded(voyage)],
+    active: null,
+    mod: single.mod,
+    v: VOYAGE_STORE_V,
+  };
+}
+
+/**
+ * The number of a new cruise: one after the highest kept (its number, or
+ * the number its name starts with).
+ * @param list - The cruises.
+ * @returns The number.
+ */
+export function nextVoyageNum(list: readonly Voyage[]): number {
+  let highest = 0;
+  for (const voyage of list) {
+    const lead = /^\s*(?<n>\d+)/u.exec(voyage.name)?.groups?.n;
+    highest = Math.max(highest, voyage.num, lead ? Number(lead) : 0);
+  }
+  return highest + 1;
+}
+
+/**
+ * A new cruise: its number and automatic name, the sections chosen, empty,
+ * keeping the categories and contract types of the last cruise (without
+ * their contents).
+ * @param list - The cruises kept.
+ * @param options - Id, sections chosen and time.
+ * @param options.id - Its id.
+ * @param options.sections - Sections ticked.
+ * @param options.now - Creation time.
+ * @param options.newId - Makes the ids of the copied categories and cards.
+ * @returns The cruise.
+ */
+export function blankVoyage(
+  list: readonly Voyage[],
+  {
+    id,
+    sections,
+    now,
+    newId,
+  }: {
+    id: string;
+    sections: readonly VoyageSectionKey[];
+    now: Date;
+    newId: () => string;
+  },
+): Voyage {
+  const num = nextVoyageNum(list);
+  const last = list.toSorted((first, second) =>
+    second.created.localeCompare(first.created),
+  )[0];
+  const base = defaultVoyages();
+  const categories = last
+    ? last.categories.map((cat) => ({
+        id: cat.id,
+        name: cat.name,
+        cards: cat.cards.map((card) => emptyCard(newId(), card.title)),
+      }))
+    : base.categories;
+  return {
+    ...base,
+    categories,
+    id,
+    num,
+    name: `${num} Nouvelle croisière ${now.getFullYear()}`,
+    created: now.toISOString(),
+    sections: ALL_SECTIONS.filter((key) => sections.includes(key)),
+    mod: now.toISOString(),
+  };
+}
+
+/**
+ * The sections of all the cruises kept, proposed when one is created; all
+ * of them when there is no cruise yet.
+ * @param list - The cruises.
+ * @returns The keys, in their order.
+ */
+export function knownSections(list: readonly Voyage[]): VoyageSectionKey[] {
+  if (list.length === 0) return [...ALL_SECTIONS];
+  return ALL_SECTIONS.filter((key) =>
+    list.some((voyage) => voyage.sections.includes(key)),
+  );
+}
+
+/**
+ * Cruises from a backup or another device: unknown ones are added, a known
+ * one keeps its newer change (with the documents of both); the active one
+ * comes from the newer list.
+ * @param kept - Cruises of this device.
+ * @param received - Cruises of the file.
+ * @returns The cruises to keep.
+ */
+export function mergedStores(
+  kept: VoyageStore,
+  received: VoyageStore,
+): VoyageStore {
+  const list = kept.list.map((voyage) => {
+    const other = received.list.find((item) => item.id === voyage.id);
+    return other ? mergedVoyages(voyage, other) : voyage;
+  });
+  for (const voyage of received.list) {
+    if (!list.some((item) => item.id === voyage.id)) list.push(voyage);
+  }
+  const newer = (received.mod || '') > (kept.mod || '') ? received : kept;
+  const active =
+    newer.active && list.some((voyage) => voyage.id === newer.active)
+      ? newer.active
+      : null;
+  return { list, active, mod: newer.mod, v: VOYAGE_STORE_V };
+}
+
+/**
+ * What a cruise gives to its navigations: its ports, dates, VHF and weather,
+ * and the renter's numbers for the SOS book (`base`, « Nom : numéro »).
+ * @param voyage - The cruise.
+ * @returns The values of `cruise.info` to set, empty ones left out.
+ */
+export function voyageNavInfo(
+  voyage: Pick<Voyages, 'info' | 'categories'>,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key] of INFO_FIELDS) {
+    const value = voyage.info[key]?.trim();
+    if (value) out[key] = value;
+  }
+  const lines: string[] = [];
+  const renter = voyage.categories.find((cat) => cat.id === 'loueur');
+  for (const card of renter?.cards ?? []) {
+    const who = card.org.trim() || card.title.trim() || 'Loueur';
+    if (card.tel.trim()) lines.push(`${who} : ${card.tel.trim()}`);
+    if (card.urgence.trim()) {
+      lines.push(`${who} urgence : ${card.urgence.trim()}`);
+    }
+    for (const person of card.persons) {
+      if (!person.tel.trim()) continue;
+      const name = [person.nom.trim(), person.role.trim()]
+        .filter(Boolean)
+        .join(', ');
+      lines.push(`${name || who} : ${person.tel.trim()}`);
+    }
+  }
+  if (lines.length > 0) out.base = lines.join('\n');
+  return out;
 }

@@ -5,6 +5,7 @@ import { distNM, rad } from '../../lib/geo.ts';
 import type { RoutePoint } from '../../model/routes.ts';
 import type { RoutingResult } from '../../model/sailRouting.ts';
 import { routingTurns } from '../../model/sailRouting.ts';
+import { activeVoyageId } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 
 export const ROUTING_KEY = 'ldb.routingShown';
@@ -178,6 +179,11 @@ export interface SavedRouting {
   /** Weather model. */
   model: string;
   shown: ShownRouting;
+  /**
+   * The cruise of data › Croisières it belongs to (active when kept).
+   * @default undefined
+   */
+  voyage?: string;
 }
 
 function isSaved(value: unknown): value is SavedRouting {
@@ -199,8 +205,10 @@ export const savedRoutings = signal<SavedRouting[]>(
  * @param routing - The routing.
  */
 export function saveRouting(routing: SavedRouting): void {
+  const known = savedRoutings.peek().find((item) => item.id === routing.id);
+  const voyage = known ? known.voyage : activeVoyageId();
   const list = [
-    routing,
+    voyage ? { ...routing, voyage } : routing,
     ...savedRoutings.peek().filter((item) => item.id !== routing.id),
   ];
   savedRoutings.value = list;
@@ -230,6 +238,21 @@ export function renameRouting(id: string, name: string): void {
         ? { ...item, shown: { ...item.shown, name: name.trim() } }
         : item,
     );
+  savedRoutings.value = list;
+  store.set(SAVED_KEY, list);
+}
+
+/**
+ * Put a routing into a cruise of data › Croisières, or take it out.
+ * @param id - Routing id.
+ * @param voyage - Cruise id, or undefined.
+ */
+export function setRoutingVoyage(id: string, voyage: string | undefined): void {
+  const list = savedRoutings.peek().map((item) => {
+    if (item.id !== id) return item;
+    const { voyage: _old, ...rest } = item;
+    return voyage ? { ...rest, voyage } : rest;
+  });
   savedRoutings.value = list;
   store.set(SAVED_KEY, list);
 }

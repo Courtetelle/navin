@@ -11,6 +11,7 @@
 import { signal } from '@preact/signals-react';
 
 import {
+  allVoyageDocIds,
   removeBoat,
   removeCruise,
   removeMark,
@@ -416,7 +417,7 @@ function photoIds(pack: SyncPack): string[] {
   for (const crew of state.data.crewSets.peek()) {
     if (typeof crew.photo === 'string') ids.push(crew.photo);
   }
-  for (const doc of state.data.voyages.peek().docs) ids.push(doc.id);
+  ids.push(...allVoyageDocIds());
   return [...new Set(ids)];
 }
 
