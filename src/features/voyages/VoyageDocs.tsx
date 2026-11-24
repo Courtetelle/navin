@@ -215,11 +215,12 @@ export function DocImport({ cat = OTHER_CAT }: { cat?: string }) {
  * One document: a touch opens it; below, change, delete, and share last.
  * @param props - The document.
  * @param props.doc - The document.
+ * @param props.editing - The chapter is being changed: change and delete too.
  * @returns The band.
  */
-function DocRow({ doc }: { doc: VoyageDoc }) {
+function DocRow({ doc, editing }: { doc: VoyageDoc; editing: boolean }) {
   const tr = useTr();
-  const [editing, setEditing] = useState(false);
+  const [changing, setChanging] = useState(false);
   const image = doc.type.startsWith('image/');
   return (
     <div className="voy-doc" data-voydocid={doc.id}>
@@ -242,37 +243,41 @@ function DocRow({ doc }: { doc: VoyageDoc }) {
           </small>
         </span>
       </button>
-      {editing ? (
+      {changing ? (
         <DocForm
           title={doc.title}
           cat={doc.cat}
           okLabel="✔ Enregistrer"
           onOk={(title, cat) => {
             editVoyageDoc(doc.id, { title: title.trim() || doc.title, cat });
-            setEditing(false);
+            setChanging(false);
           }}
-          onCancel={() => setEditing(false)}
+          onCancel={() => setChanging(false)}
         />
       ) : (
-        <ButtonRow className="row c3">
-          <Button
-            className="btn"
-            data-voydocedit={doc.id}
-            onClick={() => {
-              buzz();
-              setEditing(true);
-            }}
-          >
-            {tr('✏️ Modifier')}
-          </Button>
-          <HoldDeleteButton
-            className="btn danger"
-            data-voydocdel={doc.id}
-            onClick={buzz}
-            onDelete={() => removeVoyageDoc(doc.id)}
-          >
-            {tr('🗑 Supprimer')}
-          </HoldDeleteButton>
+        <ButtonRow className={editing ? 'row c3' : 'row'}>
+          {editing ? (
+            <Button
+              className="btn"
+              data-voydocedit={doc.id}
+              onClick={() => {
+                buzz();
+                setChanging(true);
+              }}
+            >
+              {tr('✏️ Modifier')}
+            </Button>
+          ) : null}
+          {editing ? (
+            <HoldDeleteButton
+              className="btn danger"
+              data-voydocdel={doc.id}
+              onClick={buzz}
+              onDelete={() => removeVoyageDoc(doc.id)}
+            >
+              {tr('🗑 Supprimer')}
+            </HoldDeleteButton>
+          ) : null}
           <Button
             className="btn ck-pub share-btn"
             data-voydocshare={doc.id}
@@ -293,9 +298,10 @@ function DocRow({ doc }: { doc: VoyageDoc }) {
  * The documents of a category.
  * @param props - The category.
  * @param props.cat - Category id.
+ * @param props.editing - The chapter is being changed.
  * @returns The bands, or a line saying there is none.
  */
-export function DocList({ cat }: { cat: string }) {
+export function DocList({ cat, editing }: { cat: string; editing: boolean }) {
   useSignals();
   const docs = docsOf(cat);
   if (docs.length === 0) {
@@ -304,7 +310,7 @@ export function DocList({ cat }: { cat: string }) {
   return (
     <div className="voy-docs">
       {docs.map((doc) => (
-        <DocRow key={doc.id} doc={doc} />
+        <DocRow key={doc.id} doc={doc} editing={editing} />
       ))}
     </div>
   );

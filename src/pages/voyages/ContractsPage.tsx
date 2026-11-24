@@ -1,5 +1,4 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -11,6 +10,7 @@ import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
+import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
 import { shareSections } from '../../features/voyages/voyageShare.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -94,7 +94,7 @@ function CardReading({ card }: { card: VoyageCard }) {
     ),
   );
   if (lines.length === 0 && persons.length === 0) {
-    return <HelpText>À compléter : touchez ✏️ Modifier.</HelpText>;
+    return <HelpText>À compléter : touchez le crayon en haut.</HelpText>;
   }
   return (
     <dl className="voy-lines">
@@ -192,15 +192,7 @@ function PersonEdit({
  * @param props.onDone - Back to reading.
  * @returns The form.
  */
-function CardEdit({
-  catId,
-  card,
-  onDone,
-}: {
-  catId: string;
-  card: VoyageCard;
-  onDone: () => void;
-}) {
+function CardEdit({ catId, card }: { catId: string; card: VoyageCard }) {
   const tr = useTr();
   return (
     <div className="voy-card-edit">
@@ -275,7 +267,7 @@ function CardEdit({
         />
       ))}
       <HelpText>Enregistrement automatique.</HelpText>
-      <ButtonRow className="row c3">
+      <ButtonRow className="row c2">
         <Button
           className="btn big act-add"
           data-voypersonadd={card.id}
@@ -299,45 +291,31 @@ function CardEdit({
                 cat.cards = cat.cards.filter((item) => item.id !== card.id);
               }
             });
-            onDone();
           }}
         >
           {tr('🗑 Supprimer la fiche')}
         </HoldDeleteButton>
-        <Button
-          className="btn big primary"
-          data-voycarddone={card.id}
-          onClick={() => {
-            buzz();
-            onDone();
-          }}
-        >
-          {tr('✔ Terminé')}
-        </Button>
       </ButtonRow>
     </div>
   );
 }
 
 /**
- * One contract: read, or changed after ✏️ Modifier.
+ * One contract: read, or changed while the chapter is edited.
  * @param props - Where it is.
  * @param props.catId - Category id.
  * @param props.card - The contract.
- * @param props.editing - It is being changed.
- * @param props.onEdit - Change it, or stop (null).
+ * @param props.editing - The chapter is being changed.
  * @returns The block.
  */
 function CardBlock({
   catId,
   card,
   editing,
-  onEdit,
 }: {
   catId: string;
   card: VoyageCard;
   editing: boolean;
-  onEdit: (id: string | null) => void;
 }) {
   const tr = useTr();
   return (
@@ -346,138 +324,113 @@ function CardBlock({
         {card.title.trim() || tr('Sans titre')}
       </h3>
       {editing ? (
-        <CardEdit catId={catId} card={card} onDone={() => onEdit(null)} />
+        <CardEdit catId={catId} card={card} />
       ) : (
-        <>
-          <CardReading card={card} />
-          <ButtonRow>
-            <Button
-              className="btn"
-              data-voycardedit={card.id}
-              onClick={() => {
-                buzz();
-                onEdit(card.id);
-              }}
-            >
-              {tr('✏️ Modifier')}
-            </Button>
-          </ButtonRow>
-        </>
+        <CardReading card={card} />
       )}
     </div>
   );
 }
 
 /**
- * A category: its contracts, the new contract button, its documents, and
- * its own name and deletion.
+ * A category: its contracts and documents; while the chapter is edited,
+ * also its name, its new contract and document buttons, its deletion.
  * @param props - The category.
  * @param props.cat - The category.
- * @param props.editing - Id of the contract being changed.
- * @param props.onEdit - Change a contract, or stop.
+ * @param props.editing - The chapter is being changed.
  * @returns The section.
  */
 function CategorySection({
   cat,
   editing,
-  onEdit,
 }: {
   cat: VoyageCategory;
-  editing: string | null;
-  onEdit: (id: string | null) => void;
+  editing: boolean;
 }) {
   const tr = useTr();
-  const [renaming, setRenaming] = useState(false);
   return (
     <FoldSection
       data-voycat={cat.id}
       title={`${cat.name || 'Sans nom'} · ${cat.cards.length}`}
       titleText={cat.id}
     >
-      {cat.cards.map((card) => (
-        <CardBlock
-          key={card.id}
-          catId={cat.id}
-          card={card}
-          editing={editing === card.id}
-          onEdit={onEdit}
-        />
-      ))}
-      <ButtonRow>
-        <Button
-          className="btn big act-add"
-          data-voycardadd={cat.id}
-          onClick={() => {
-            buzz();
-            const id = uid();
-            updateVoyages((voyages) => {
-              voyages.categories
-                .find((item) => item.id === cat.id)
-                ?.cards.push(emptyCard(id, ''));
-            });
-            onEdit(id);
-          }}
-        >
-          {tr(
-            cat.id === 'assurances'
-              ? '＋ Type d’assurance'
-              : `＋ Fiche ${cat.name || ''}`.trim(),
-          )}
-        </Button>
-      </ButtonRow>
-      <h3 className="sub-h">{tr('📎 Documents')}</h3>
-      <DocList cat={cat.id} />
-      <DocImport cat={cat.id} />
-      {renaming ? (
-        <div className="cgrid voy-rename">
-          <div className="cf wide">
-            <label htmlFor={`vcat-${cat.id}`}>
-              {tr('Nom de la catégorie')}
-            </label>
-            <input
-              id={`vcat-${cat.id}`}
-              className="text"
-              value={cat.name}
-              autoComplete="off"
-              onChange={(event) =>
-                updateVoyages((voyages) => {
-                  const found = voyages.categories.find(
-                    (item) => item.id === cat.id,
-                  );
-                  if (found) found.name = event.target.value;
-                })
-              }
-            />
+      <div className="voy-cat-body">
+        {editing ? (
+          <div className="cgrid voy-rename">
+            <div className="cf wide">
+              <label htmlFor={`vcat-${cat.id}`}>
+                {tr('Nom de la catégorie')}
+              </label>
+              <input
+                id={`vcat-${cat.id}`}
+                className="text"
+                value={cat.name}
+                autoComplete="off"
+                onChange={(event) =>
+                  updateVoyages((voyages) => {
+                    const found = voyages.categories.find(
+                      (item) => item.id === cat.id,
+                    );
+                    if (found) found.name = event.target.value;
+                  })
+                }
+              />
+            </div>
           </div>
-        </div>
-      ) : null}
-      <ButtonRow className="row c2">
-        <Button
-          className="btn"
-          data-voycatrename={cat.id}
-          onClick={() => {
-            buzz();
-            setRenaming(!renaming);
-          }}
-        >
-          {tr(renaming ? '✔ Terminé' : '✏️ Renommer la catégorie')}
-        </Button>
-        <HoldDeleteButton
-          className="btn danger"
-          data-voycatdel={cat.id}
-          onClick={buzz}
-          onDelete={() => {
-            updateVoyages((voyages) => {
-              voyages.categories = voyages.categories.filter(
-                (item) => item.id !== cat.id,
-              );
-            });
-            toast('Catégorie supprimée · ses documents vont dans Autres');
-          }}
-        >
-          {tr('🗑 Supprimer la catégorie')}
-        </HoldDeleteButton>
-      </ButtonRow>
+        ) : null}
+        {cat.cards.map((card) => (
+          <CardBlock
+            key={card.id}
+            catId={cat.id}
+            card={card}
+            editing={editing}
+          />
+        ))}
+        {editing ? (
+          <ButtonRow>
+            <Button
+              className="btn big act-add"
+              data-voycardadd={cat.id}
+              onClick={() => {
+                buzz();
+                updateVoyages((voyages) => {
+                  voyages.categories
+                    .find((item) => item.id === cat.id)
+                    ?.cards.push(emptyCard(uid(), ''));
+                });
+              }}
+            >
+              {tr(
+                cat.id === 'assurances'
+                  ? '＋ Type d’assurance'
+                  : `＋ Fiche ${cat.name || ''}`.trim(),
+              )}
+            </Button>
+          </ButtonRow>
+        ) : null}
+        <h3 className="sub-h">{tr('📎 Documents')}</h3>
+        <DocList cat={cat.id} editing={editing} />
+        {editing ? <DocImport cat={cat.id} /> : null}
+        {editing ? (
+          <ButtonRow>
+            <HoldDeleteButton
+              className="btn danger"
+              data-voycatdel={cat.id}
+              onClick={buzz}
+              onDelete={() => {
+                updateVoyages((voyages) => {
+                  voyages.categories = voyages.categories.filter(
+                    (item) => item.id !== cat.id,
+                  );
+                });
+                toast('Catégorie supprimée · ses documents vont dans Autres');
+              }}
+            >
+              {tr('🗑 Supprimer la catégorie')}
+            </HoldDeleteButton>
+          </ButtonRow>
+        ) : null}
+      </div>
     </FoldSection>
   );
 }
@@ -491,7 +444,7 @@ function CategorySection({
 export function ContractsPage() {
   useSignals();
   const tr = useTr();
-  const [editing, setEditing] = useState<string | null>(null);
+  const { editing, validate } = useChapterEdit();
   const { categories, id } = state.data.voyages.value;
   if (!id) return <NoVoyage />;
   return (
@@ -506,41 +459,39 @@ export function ContractsPage() {
       >
         {tr('◀ Croisière')}
       </PageBack>
+      {validate}
       <PageTitle
         helps={[
-          'Une catégorie par interlocuteur (agence, loueur, assurances…), une fiche par contrat : adresse, téléphone, urgence, contacts. Les catégories et les fiches s’ajoutent, se renomment et se suppriment (appui long). Un numéro touché appelle, un courriel touché écrit.',
+          'Une catégorie par interlocuteur (agence, loueur, assurances…), une fiche par contrat : adresse, téléphone, urgence, contacts. Le crayon en haut ouvre la modification de tout le chapitre : catégories et fiches s’ajoutent, se renomment et se suppriment (appui long), ✔ pour finir. Un numéro touché appelle, un courriel touché écrit.',
         ]}
       >
         📑 Contrats
       </PageTitle>
       {categories.map((cat) => (
-        <CategorySection
-          key={cat.id}
-          cat={cat}
-          editing={editing}
-          onEdit={setEditing}
-        />
+        <CategorySection key={cat.id} cat={cat} editing={editing} />
       ))}
-      <ButtonRow>
-        <Button
-          className="btn big act-add"
-          data-voycatadd
-          onClick={() => {
-            buzz();
-            const id = uid();
-            updateVoyages((voyages) => {
-              voyages.categories.push({
-                id,
-                name: 'Nouvelle catégorie',
-                cards: [emptyCard(uid(), '')],
+      {editing ? (
+        <ButtonRow>
+          <Button
+            className="btn big act-add"
+            data-voycatadd
+            onClick={() => {
+              buzz();
+              const id = uid();
+              updateVoyages((voyages) => {
+                voyages.categories.push({
+                  id,
+                  name: 'Nouvelle catégorie',
+                  cards: [emptyCard(uid(), '')],
+                });
               });
-            });
-            toast('Catégorie ajoutée : renommez-la en bas de sa section');
-          }}
-        >
-          {tr('＋ Nouvelle catégorie')}
-        </Button>
-      </ButtonRow>
+              toast('Catégorie ajoutée : renommez-la en haut de sa section');
+            }}
+          >
+            {tr('＋ Nouvelle catégorie')}
+          </Button>
+        </ButtonRow>
+      ) : null}
       <ShareButton
         data-voyshare="contracts"
         onShare={(format) =>
