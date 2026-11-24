@@ -151,7 +151,7 @@ describe('barbs', () => {
   it('draws a circle for a calm and turns the staff to the wind', () => {
     expect(barbSvg(0, 90, '#000')).toContain('<circle');
     const svg = barbSvg(15, 225, '#123456');
-    expect(svg).toContain('rotate(225 28 28)');
+    expect(svg).toContain('rotate(225 36 36)');
     expect(svg).toContain('#123456');
   });
 
