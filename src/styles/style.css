@@ -15525,6 +15525,178 @@ html body .live-slot > .rail-btn.live-layer.on {
 :root[data-theme='night'] .rtm .rtm-aw {
   color: var(--fg);
 }
+
+/* « Fonds de cartes » › Plan des cartes · Europe: the whole screen, the plan
+   on the left and what covers the place touched on the right (tablet
+   landscape), or below (portrait). */
+.map-plan {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--fg);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.map-plan-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--line);
+}
+.map-plan-bar h2 {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+.map-plan-bar .btn {
+  min-height: 56px;
+  padding: 0 16px;
+  font-size: 18px;
+}
+.map-plan-scale {
+  display: flex;
+  gap: 6px;
+}
+.map-plan-scale .btn.on,
+.map-plan-acts .btn.on {
+  background: var(--primary);
+  color: #fff;
+}
+.map-plan-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+}
+.map-plan-mapbox {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+.map-plan-map {
+  position: absolute;
+  inset: 0;
+}
+.map-plan-zoom {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.map-plan-zoom .btn {
+  width: 60px;
+  min-height: 60px;
+  padding: 0;
+  font-size: 32px;
+  line-height: 1;
+}
+.map-plan-side {
+  flex: 0 0 420px;
+  max-width: 45%;
+  overflow-y: auto;
+  padding: 10px 14px 24px;
+  border-left: 2px solid var(--line);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.map-plan-side h3 {
+  margin: 6px 0 8px;
+  font-size: 21px;
+}
+.map-plan-side h4 {
+  margin: 16px 0 6px;
+  font-size: 18px;
+  color: var(--muted);
+}
+.map-plan-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.map-plan-row > div:first-child {
+  flex: 1 1 180px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.map-plan-row small {
+  display: block;
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--muted);
+}
+.map-plan-row .btn,
+.map-plan-job .btn {
+  min-height: 52px;
+  padding: 0 14px;
+  font-size: 17px;
+}
+.map-plan-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.map-plan-job {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 2px solid var(--line);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.map-plan-job progress {
+  width: 100%;
+  height: 22px;
+}
+.map-plan-legend {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+  font-size: 17px;
+}
+.map-plan-legend li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+}
+.map-plan-legend i {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 20px;
+  border: 3px solid;
+  border-radius: 3px;
+}
+@media (orientation: portrait) {
+  .map-plan-body {
+    flex-direction: column;
+  }
+  .map-plan-mapbox {
+    flex: 0 0 52%;
+  }
+  .map-plan-side {
+    flex: 1 1 auto;
+    max-width: none;
+    border-left: none;
+    border-top: 2px solid var(--line);
+  }
+}
+
 /* ETD on the point of departure, ETA on the point of arrival. */
 .leaflet-marker-icon.rtm-end {
   width: max-content !important;

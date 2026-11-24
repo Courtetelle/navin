@@ -100,3 +100,18 @@ export function addRegional(
     // The map has no view yet: the first move shows the entry.
   }
 }
+
+/**
+ * The area of an online background or layer, as the map gives them: the
+ * Swiss ones over Switzerland, the Lake Geneva ones over the lake, the
+ * others everywhere.
+ * @param name - Its name in « Fonds de cartes ».
+ * @returns Its area, or `null` for the whole world.
+ */
+export function onlineLayerBox(name: string): GeoBox | null {
+  if (name.includes('Léman') || name.includes('Vaud')) return LEMAN_BOX;
+  if (name.includes('suisse') || name.includes('swissBATHY3D')) {
+    return SWISS_BOX;
+  }
+  return null;
+}
