@@ -19,10 +19,13 @@ import {
   mergeVoyages,
   removeVoyage,
   renameVoyage,
+  saveCruiseRecord,
   saveRoute,
   setActiveVoyage,
   state,
+  syncVoyageNavigations,
   updateVoyages,
+  voyageOfNavigation,
   voyagesChanged,
 } from '../../../state/index.ts';
 import { store } from '../../../storage/store.ts';
@@ -44,15 +47,17 @@ test('a new device has the agency, the renter and the two insurances', () => {
   expect(voyages.categories.map((cat) => cat.name)).toStrictEqual([
     'Agence',
     'Loueur',
+    'Courtiers',
     'Assurances',
   ]);
-  expect(voyages.categories[2]?.cards.map((card) => card.title)).toStrictEqual([
+  expect(voyages.categories[3]?.cards.map((card) => card.title)).toStrictEqual([
     'Assurance annulation',
     'Rachat de caution',
   ]);
   expect(docCategories(voyages).map((cat) => cat.id)).toStrictEqual([
     'agence',
     'loueur',
+    'courtiers',
     'assurances',
     CREW_CAT,
     OTHER_CAT,
@@ -88,7 +93,7 @@ test('a document of a deleted category goes to Autres', () => {
 
 test('the contracts are shared without their empty lines', () => {
   const voyages = defaultVoyages();
-  const insurance = voyages.categories[2]?.cards[0];
+  const insurance = voyages.categories[3]?.cards[0];
   if (insurance) {
     insurance.org = 'Assur Plus';
     insurance.urgence = '+33 1 23 45 67 89';
@@ -107,7 +112,7 @@ test('the contracts are shared without their empty lines', () => {
     title: 'Agence',
     rows: [['', 'à compléter']],
   });
-  expect(sections[2]).toStrictEqual({
+  expect(sections[3]).toStrictEqual({
     title: 'Assurances · Assurance annulation',
     rows: [
       ['Société, agence', 'Assur Plus'],
@@ -187,6 +192,7 @@ test('new cruises are numbered after the last one, with the year', () => {
   expect(second.categories.map((cat) => cat.name)).toStrictEqual([
     'Agence',
     'Loueur',
+    'Courtiers',
     'Assurances',
     'Ports',
   ]);
@@ -255,4 +261,53 @@ test('a restoration adds the cruises of another device', () => {
     state.data.voyageStore.value.list.map((voyage) => voyage.name),
   ).toStrictEqual(['Ici', '2 Là-bas']);
   expect(state.data.voyageStore.value.active).toBe('other');
+});
+
+test('the navigations of a cruise take its ports, VHF, weather and renter', () => {
+  load('empty');
+  const voyage = createVoyage(['info', 'contracts'], true);
+  updateVoyages((draft) => {
+    draft.info.ports = 'Saint-Quay-Portrieux';
+    draft.info.vhfMarina = '9';
+    const renter = draft.categories.find((cat) => cat.id === 'loueur');
+    const card = renter?.cards[0];
+    if (card) {
+      card.org = 'Base';
+      card.tel = '+33 2 96';
+    }
+  });
+  const sortie = blankCruise('Sortie');
+
+  expect(sortie.info.ports).toBe('Saint-Quay-Portrieux');
+  expect(sortie.info.vhfMarina).toBe('9');
+  expect(sortie.info.base).toBe('Base : +33 2 96');
+
+  saveCruiseRecord(sortie);
+  updateVoyages((draft) => {
+    draft.info.coastStation = 'CROSS Corsen';
+  });
+  syncVoyageNavigations(voyage.id);
+
+  expect(
+    store.get<{ info: Record<string, string> }>(`ldb.cruise.${sortie.id}`, {
+      info: {},
+    }).info.coastStation,
+  ).toBe('CROSS Corsen');
+  expect(voyageOfNavigation(sortie.id)).toBe(voyage.id);
+});
+
+test('cruises kept before get the section Croisière and the brokers', () => {
+  const kept = cleanVoyageStore({
+    list: [
+      { ...defaultVoyages(), id: 'a', num: 1, name: '1 A', sections: ['crew'] },
+    ],
+    active: null,
+    mod: '2026-11-24',
+  });
+
+  expect(kept?.list[0]?.sections).toStrictEqual(['info', 'crew']);
+  expect(kept?.list[0]?.categories.map((cat) => cat.id)).toContain('courtiers');
+  expect(defaultVoyages().categories.map((cat) => cat.name)).toContain(
+    'Courtiers',
+  );
 });

@@ -3,6 +3,7 @@ import { freeze, produce } from 'immer';
 import { dayKey, num, uid } from '../lib/format.ts';
 import { DEFAULT_CONTACTS } from '../model/contacts.ts';
 import type { Cruise, CruiseMeta, Draft } from '../model/types.ts';
+import { voyageNavInfo } from '../model/voyages.ts';
 import { delPhoto } from '../storage/photos.ts';
 import { store } from '../storage/store.ts';
 
@@ -36,9 +37,6 @@ export function blankCruise(name: string, from?: Cruise | null): Cruise {
     entries: [],
     days: {},
   };
-  // The active cruise of data › Croisières gathers the new navigations.
-  const voyage = data.voyageStore.peek().active;
-  if (voyage) cruise.voyage = voyage;
   if (from) {
     const keep = { ...from.info };
     for (const key of ['name', 'ports', 'du', 'au']) {
@@ -49,6 +47,16 @@ export function blankCruise(name: string, from?: Cruise | null): Cruise {
       .findLast((key) => num(from.days[key]?.moteurSoir) != null);
     if (lastDay) keep.moteurInit = from.days[lastDay]?.moteurSoir as string;
     Object.assign(cruise.info, keep, { name });
+  }
+  // The active cruise of data › Croisières gathers the new navigations, which
+  // take its ports, dates, VHF, weather and renter's numbers.
+  const active = data.voyageStore.peek().active;
+  const voyage = data.voyageStore
+    .peek()
+    .list.find((item) => item.id === active);
+  if (voyage) {
+    cruise.voyage = voyage.id;
+    Object.assign(cruise.info, voyageNavInfo(voyage));
   }
   return cruise;
 }

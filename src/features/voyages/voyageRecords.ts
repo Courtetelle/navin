@@ -1,7 +1,6 @@
 import type { NavRoute } from '../../model/routes.ts';
-import type { Cruise, CruiseMeta } from '../../model/types.ts';
-import { saveCruiseRecord, state, updateRoutes } from '../../state/index.ts';
-import { store } from '../../storage/store.ts';
+import type { CruiseMeta } from '../../model/types.ts';
+import { state, updateRoutes } from '../../state/index.ts';
 import type { SavedRouting } from '../map/routingState.ts';
 import { savedRoutings } from '../map/routingState.ts';
 
@@ -42,27 +41,6 @@ export function freeRecords(): VoyageRecords {
 }
 
 /**
- * Put a navigation into a cruise, or take it out.
- * @param id - Navigation id.
- * @param voyage - Cruise id, or undefined.
- */
-export function setNavigationVoyage(
-  id: string,
-  voyage: string | undefined,
-): void {
-  const open = state.data.cruise.peek();
-  const cruise =
-    open?.id === id ? open : store.get<Cruise | null>(`ldb.cruise.${id}`, null);
-  if (!cruise) return;
-  const { voyage: _old, ...rest } = cruise;
-  const current = store.get<string | null>('ldb.current', null);
-  saveCruiseRecord(voyage ? { ...rest, voyage } : rest, true);
-  // Saving marks it current: the current one stays so.
-  if (current) store.set('ldb.current', current);
-  else store.del('ldb.current');
-}
-
-/**
  * Put a route into a cruise, or take it out.
  * @param id - Route id.
  * @param voyage - Cruise id, or undefined.
@@ -77,3 +55,4 @@ export function setRouteVoyage(id: string, voyage: string | undefined): void {
 }
 
 export { setRoutingVoyage } from '../map/routingState.ts';
+export { setNavigationVoyage } from '../../state/index.ts';

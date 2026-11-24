@@ -29,7 +29,12 @@ import {
 } from '../../model/voyages.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
-import { state, toast, updateVoyages } from '../../state/index.ts';
+import {
+  state,
+  syncVoyageNavigations,
+  toast,
+  updateVoyages,
+} from '../../state/index.ts';
 
 type LinkKind = 'text' | 'tel' | 'mail' | 'web' | 'area';
 
@@ -444,8 +449,8 @@ function CategorySection({
 export function ContractsPage() {
   useSignals();
   const tr = useTr();
-  const { editing, validate } = useChapterEdit();
   const { categories, id } = state.data.voyages.value;
+  const { editing, validate } = useChapterEdit(() => syncVoyageNavigations(id));
   if (!id) return <NoVoyage />;
   return (
     <>

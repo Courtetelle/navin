@@ -168,11 +168,6 @@ export function tilesWithCruise(): MoreTile[] {
       title: '🚤 Bateaux',
       sub: `${boatCount} bateau${boatCount > 1 ? 'x' : ''}, données et check-lists`,
     },
-    {
-      key: 'info',
-      title: '⚓ Bateau et croisière',
-      sub: 'identité radio, moteur, numéros utiles',
-    },
     peopleTile(members.value.length),
     {
       key: 'crews',

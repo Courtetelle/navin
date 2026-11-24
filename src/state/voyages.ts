@@ -1,6 +1,7 @@
 import { produce } from 'immer';
 
 import { uid } from '../lib/format.ts';
+import type { Cruise } from '../model/types.ts';
 import type {
   Voyage,
   VoyageSectionKey,
@@ -8,16 +9,24 @@ import type {
   Voyages,
 } from '../model/voyages.ts';
 import {
+  VOYAGE_STORE_V,
   blankVoyage,
   cleanVoyageStore,
   mergedStores,
+  voyageNavInfo,
 } from '../model/voyages.ts';
 import { delPhoto } from '../storage/photos.ts';
 import { store } from '../storage/store.ts';
 
+import { saveCruiseRecord } from './cruise.ts';
 import { data } from './data.ts';
 
-const EMPTY: VoyageStore = { list: [], active: null, mod: '' };
+const EMPTY: VoyageStore = {
+  list: [],
+  active: null,
+  mod: '',
+  v: VOYAGE_STORE_V,
+};
 
 /** Load data › Croisières (`ldb.voyages`) and the cruise opened. */
 export function loadVoyages(): void {
@@ -45,6 +54,7 @@ export function updateVoyageStore(recipe: (draft: VoyageStore) => void): void {
     produce(data.voyageStore.value, (draft) => {
       recipe(draft);
       draft.mod = new Date().toISOString();
+      draft.v = VOYAGE_STORE_V;
     }),
   );
 }
@@ -190,4 +200,77 @@ export function mergeVoyages(raw: unknown): void {
   const merged = mergedStores(kept, received);
   if (JSON.stringify(merged) === JSON.stringify(kept)) return;
   saveStore(merged);
+}
+
+/**
+ * Save a navigation without opening it, the current one staying current.
+ * @param cruise - The navigation.
+ */
+function saveNavigation(cruise: Cruise): void {
+  const current = store.get<string | null>('ldb.current', null);
+  saveCruiseRecord(cruise, true);
+  if (current) store.set('ldb.current', current);
+  else store.del('ldb.current');
+}
+
+function navigation(id: string): Cruise | null {
+  const open = data.cruise.peek();
+  return open?.id === id
+    ? open
+    : store.get<Cruise | null>(`ldb.cruise.${id}`, null);
+}
+
+/**
+ * The navigations of a cruise take its ports, dates, VHF, weather and the
+ * renter's numbers (used by the VHF calls, the SOS page and the CV).
+ * @param id - Cruise id.
+ */
+export function syncVoyageNavigations(id: string): void {
+  const voyage = data.voyageStore.peek().list.find((item) => item.id === id);
+  if (!voyage) return;
+  const values = voyageNavInfo(voyage);
+  if (Object.keys(values).length === 0) return;
+  for (const meta of data.index.peek()) {
+    if (meta.voyage !== id) continue;
+    const cruise = navigation(meta.id);
+    if (!cruise) continue;
+    const changed = Object.entries(values).some(
+      ([key, value]) => cruise.info[key] !== value,
+    );
+    if (changed) {
+      saveNavigation({ ...cruise, info: { ...cruise.info, ...values } });
+    }
+  }
+}
+
+/**
+ * Put a navigation into a cruise (it takes its values), or take it out.
+ * @param id - Navigation id.
+ * @param voyage - Cruise id, or undefined.
+ */
+export function setNavigationVoyage(
+  id: string,
+  voyage: string | undefined,
+): void {
+  const cruise = navigation(id);
+  if (!cruise) return;
+  const { voyage: _old, ...rest } = cruise;
+  saveNavigation(voyage ? { ...rest, voyage } : rest);
+  if (voyage) syncVoyageNavigations(voyage);
+}
+
+/**
+ * The cruise a navigation belongs to, if it still exists.
+ * @param navigationId - Navigation id.
+ * @returns The cruise id, or undefined.
+ */
+export function voyageOfNavigation(
+  navigationId: string | undefined,
+): string | undefined {
+  if (!navigationId) return undefined;
+  const meta = data.index.value.find((line) => line.id === navigationId);
+  const id = typeof meta?.voyage === 'string' ? meta.voyage : undefined;
+  return id && data.voyageStore.value.list.some((item) => item.id === id)
+    ? id
+    : undefined;
 }

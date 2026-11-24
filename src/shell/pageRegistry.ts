@@ -92,6 +92,10 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/marks/MarksPage.tsx').then((module) => ({
       default: module.MarksPage,
     })),
+  vinfo: () =>
+    import('../pages/voyages/VoyageInfoPage.tsx').then((module) => ({
+      default: module.VoyageInfoPage,
+    })),
   voyage: () =>
     import('../pages/voyages/VoyagePage.tsx').then((module) => ({
       default: module.VoyagePage,

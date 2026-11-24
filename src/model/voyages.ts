@@ -66,6 +66,8 @@ export interface VoyageDoc {
 
 /** Everything of data › Croisières. */
 export interface Voyages {
+  /** The cruise itself: ports, dates, VHF, weather (keys of {@link INFO_FIELDS}). */
+  info: Record<string, string>;
   crew: VoyageCrewLine[];
   categories: VoyageCategory[];
   docs: VoyageDoc[];
@@ -101,7 +103,26 @@ export const CARD_FIELDS: ReadonlyArray<
   ['urgence', 'Urgence, assistance 24 h / 24', 'tel'],
   ['mail', 'Courriel', 'mail'],
   ['web', 'Site internet', 'web'],
-  ['notes', 'Notes (garanties, franchise, montant…)', 'area'],
+  ['notes', 'Notes : tarifs, règlement, garanties, franchise…', 'area'],
+];
+
+/**
+ * The fields of the cruise itself, taken from « Bateau et croisière »: key,
+ * label, kind. They go into the navigations of the cruise (VHF, SOS, CV).
+ */
+export const INFO_FIELDS: ReadonlyArray<
+  readonly [key: string, label: string, kind: 'text' | 'date' | 'area']
+> = [
+  ['ports', 'Port de départ et d’arrivée', 'text'],
+  ['du', 'Du', 'date'],
+  ['au', 'Au', 'date'],
+  ['vhfMarina', 'Canal VHF de la marina', 'text'],
+  ['coastStation', 'Station côtière radio', 'text'],
+  [
+    'meteo',
+    'Météo : bulletins VHF (canaux, horaires), sites, heure légale',
+    'area',
+  ],
 ];
 
 /** The fields of a person: key, label, link kind. */
@@ -156,10 +177,16 @@ export function emptyPerson(id: string): VoyagePerson {
  */
 export function defaultVoyages(): Voyages {
   return {
+    info: {},
     crew: [],
     categories: [
       { id: 'agence', name: 'Agence', cards: [emptyCard('agence1', 'Agence')] },
       { id: 'loueur', name: 'Loueur', cards: [emptyCard('loueur1', 'Loueur')] },
+      {
+        id: 'courtiers',
+        name: 'Courtiers',
+        cards: [emptyCard('courtier1', 'Courtier')],
+      },
       {
         id: 'assurances',
         name: 'Assurances',
@@ -253,7 +280,13 @@ export function cleanVoyages(raw: unknown): Voyages | null {
       at: text(item.at),
     });
   }
-  return { crew, categories, docs, mod: text(value.mod) };
+  const info: Record<string, string> = {};
+  const rawInfo = record(value.info);
+  for (const [key] of INFO_FIELDS) {
+    const kept = text(rawInfo?.[key]);
+    if (kept) info[key] = kept;
+  }
+  return { info, crew, categories, docs, mod: text(value.mod) };
 }
 
 /**
@@ -363,7 +396,7 @@ export function mergedVoyages<Content extends Voyages>(
 }
 
 /** The sections a cruise can hold; more will come. */
-export type VoyageSectionKey = 'crew' | 'contracts' | 'docs';
+export type VoyageSectionKey = 'info' | 'crew' | 'contracts' | 'docs';
 
 /** Each section: key, view opened, title and text of its tile. */
 export const VOYAGE_SECTIONS: ReadonlyArray<{
@@ -372,6 +405,12 @@ export const VOYAGE_SECTIONS: ReadonlyArray<{
   title: string;
   sub: string;
 }> = [
+  {
+    key: 'info',
+    view: 'vinfo',
+    title: '🧭 Croisière',
+    sub: 'ports, dates, canaux VHF, station côtière, météo',
+  },
   {
     key: 'crew',
     view: 'vcrew',
@@ -411,6 +450,38 @@ export interface VoyageStore {
   active: string | null;
   /** ISO time of the last change of the list or of the active cruise. */
   mod: string;
+  /**
+   * Version of the content: 2 since the section Croisière and the
+   * category Courtiers.
+   * @default undefined
+   */
+  v?: number;
+}
+
+/** Version of {@link VoyageStore} written now. */
+export const VOYAGE_STORE_V = 2;
+
+/**
+ * A cruise kept before version 2 gets the section Croisière and the
+ * category Courtiers.
+ * @param voyage - The cruise read.
+ * @returns The cruise brought up to date.
+ */
+function upgraded(voyage: Voyage): Voyage {
+  const sections: VoyageSectionKey[] = voyage.sections.includes('info')
+    ? voyage.sections
+    : ['info', ...voyage.sections];
+  const categories = voyage.categories.some((cat) => cat.id === 'courtiers')
+    ? voyage.categories
+    : [
+        ...voyage.categories,
+        {
+          id: 'courtiers',
+          name: 'Courtiers',
+          cards: [emptyCard(`${voyage.id}-courtier`, 'Courtier')],
+        },
+      ];
+  return { ...voyage, sections, categories };
 }
 
 /** The sections every new cruise proposes, ticked. */
@@ -462,15 +533,19 @@ export function cleanVoyageStore(raw: unknown): VoyageStore | null {
       }
     }
     const active = text(value.active);
+    const old = typeof value.v !== 'number' || value.v < VOYAGE_STORE_V;
     return {
-      list,
+      list: old ? list.map(upgraded) : list,
       active: list.some((voyage) => voyage.id === active) ? active : null,
       mod: text(value.mod),
+      v: VOYAGE_STORE_V,
     };
   }
   const single = cleanVoyages(raw);
   if (!single) return null;
-  if (!single.mod) return { list: [], active: null, mod: '' };
+  if (!single.mod) {
+    return { list: [], active: null, mod: '', v: VOYAGE_STORE_V };
+  }
   const year = (single.mod.slice(0, 4) || '').trim();
   const voyage: Voyage = {
     ...single,
@@ -480,7 +555,12 @@ export function cleanVoyageStore(raw: unknown): VoyageStore | null {
     created: single.mod,
     sections: [...ALL_SECTIONS],
   };
-  return { list: [voyage], active: null, mod: single.mod };
+  return {
+    list: [upgraded(voyage)],
+    active: null,
+    mod: single.mod,
+    v: VOYAGE_STORE_V,
+  };
 }
 
 /**
@@ -585,5 +665,39 @@ export function mergedStores(
     newer.active && list.some((voyage) => voyage.id === newer.active)
       ? newer.active
       : null;
-  return { list, active, mod: newer.mod };
+  return { list, active, mod: newer.mod, v: VOYAGE_STORE_V };
+}
+
+/**
+ * What a cruise gives to its navigations: its ports, dates, VHF and weather,
+ * and the renter's numbers for the SOS book (`base`, « Nom : numéro »).
+ * @param voyage - The cruise.
+ * @returns The values of `cruise.info` to set, empty ones left out.
+ */
+export function voyageNavInfo(
+  voyage: Pick<Voyages, 'info' | 'categories'>,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key] of INFO_FIELDS) {
+    const value = voyage.info[key]?.trim();
+    if (value) out[key] = value;
+  }
+  const lines: string[] = [];
+  const renter = voyage.categories.find((cat) => cat.id === 'loueur');
+  for (const card of renter?.cards ?? []) {
+    const who = card.org.trim() || card.title.trim() || 'Loueur';
+    if (card.tel.trim()) lines.push(`${who} : ${card.tel.trim()}`);
+    if (card.urgence.trim()) {
+      lines.push(`${who} urgence : ${card.urgence.trim()}`);
+    }
+    for (const person of card.persons) {
+      if (!person.tel.trim()) continue;
+      const name = [person.nom.trim(), person.role.trim()]
+        .filter(Boolean)
+        .join(', ');
+      lines.push(`${name || who} : ${person.tel.trim()}`);
+    }
+  }
+  if (lines.length > 0) out.base = lines.join('\n');
+  return out;
 }

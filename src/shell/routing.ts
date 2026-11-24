@@ -55,6 +55,7 @@ const COMMON_TABS: Record<string, string> = {
   vdocs: 'more',
   voyage: 'more',
   vrecords: 'more',
+  vinfo: 'more',
 };
 
 /**
@@ -145,7 +146,13 @@ export function alphaBackFor(current: string): string {
 }
 
 /** The pages of a cruise of data › Croisières: their back button leads to its menu. */
-const VOYAGE_VIEWS = new Set(['vcrew', 'vcontracts', 'vdocs', 'vrecords']);
+const VOYAGE_VIEWS = new Set([
+  'vcrew',
+  'vcontracts',
+  'vdocs',
+  'vrecords',
+  'vinfo',
+]);
 
 const DATA_BACK_VIEWS = new Set([
   'traces',
