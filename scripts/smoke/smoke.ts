@@ -2219,7 +2219,7 @@ async function liveButtons(page: Page, theme: string): Promise<void> {
         globalThis.innerHeight + 1,
     ),
   );
-  await page.locator('.live-step').last().click();
+  await page.locator('.live-step').first().click();
   await page.waitForTimeout(300);
   check(
     theme,
