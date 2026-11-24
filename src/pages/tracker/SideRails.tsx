@@ -144,9 +144,8 @@ function run(key: string): void {
  * The column of the landscape tablet, on the left of the map, top to bottom:
  * the clock, the arrow of the boat with ＋ and − at its right (3 s after
  * the arrow), NavIn, START (and Amarrage at its right during a track), the mark,
- * the dividers, the photo, Météo, and SOS at the very bottom; the magnifier
- * alone at the top right. NavIn unrolls at its right PréP, data, the
- * settings and the phone or the VHF.
+ * the dividers, the photo, Météo, data, Paramétrages, and SOS at the very
+ * bottom. NavIn unrolls at its right PréP and the phone or the VHF.
  * @returns The column, or nothing on a phone held upright.
  */
 export function SideRails() {
@@ -174,10 +173,11 @@ export function SideRails() {
 }
 
 /**
- * The tab of data and Paramétrages: at the top in the middle sideways, at
- * the right edge in the middle upright. A touch unrolls the two beside it
- * (data at the left or above, Paramétrages at the right or below); left
- * alone, they fade out as the other buttons that roll back.
+ * The tab at the top in the middle sideways, at the right edge in the middle
+ * upright. A touch unrolls Routes, Nouvelle route and Routage météo, and
+ * upright data and Paramétrages too (sideways they stand under Météo,
+ * Corban 24/11/2026); left alone, they fade out as the other buttons that
+ * roll back.
  * @returns The tab.
  */
 function MenusTab() {
@@ -186,7 +186,7 @@ function MenusTab() {
     <button
       type="button"
       className={menusOpen.value ? 'menus-tab open' : 'menus-tab'}
-      aria-label="data et Paramétrages"
+      aria-label="Routes, data et Paramétrages"
       aria-expanded={menusOpen.value}
       onClick={() => {
         buzz();
@@ -228,7 +228,7 @@ function WeatherButton() {
 
 /**
  * The row NavIn unrolls at its right: PréP, then the phone or the VHF
- * (data and Paramétrages have their own tab). Leaving one of their menus
+ * (data and Paramétrages: under Météo sideways, their tab upright). Leaving one of their menus
  * rolls it back. Météo has its own button.
  * @returns The row, or nothing while rolled.
  */
