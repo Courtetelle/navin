@@ -8,7 +8,13 @@ import {
 import { pad } from '../../lib/format.ts';
 import { placeTimeText } from '../../lib/placeZone.ts';
 import { sunTimes } from '../../lib/sun.ts';
-import { lastKnownPos, navZone, state, toast } from '../../state/index.ts';
+import {
+  lastKnownPos,
+  navZone,
+  sailedSea,
+  state,
+  toast,
+} from '../../state/index.ts';
 import { setBodyClass } from '../bodyClass.ts';
 
 /** What the top bar clock shows since the last tick. */
@@ -35,8 +41,8 @@ export const clockFace = signal<ClockFace>({
 
 /** The time chosen by a tap (`true` zone time), until the zone changes. */
 let chosen: boolean | null = null;
-/** The zone of the last tick: lake or sea. */
-let lastInland: boolean | null = null;
+/** The zone of the last tick: lake, Atlantique or Méditerranée, GPS or chosen. */
+let lastZone: string | null = null;
 let sunTimer: ReturnType<typeof setInterval> | undefined;
 
 /** Sunrise and sunset shown four times each, in turn. */
@@ -48,8 +54,8 @@ const GPS_FRESH_MS = 120_000;
 
 /**
  * Inland waters show the zone time, the sea UTC; a tap switches and the
- * choice stays until the zone changes (lake ↔ sea), which brings back the
- * time of the new zone. Also sets the body classes `zone-lac` and `zone-auto`.
+ * choice stays until the zone changes (any change: lake, Atlantique,
+ * Méditerranée, GPS), which brings back the time of the new zone. Also sets the body classes `zone-lac` and `zone-auto`.
  * @param now - Current time (ms).
  */
 export function tickClock(now = Date.now()): void {
@@ -60,8 +66,9 @@ export function tickClock(now = Date.now()): void {
   } catch {
     inland = false;
   }
-  if (inland !== lastInland) {
-    lastInland = inland;
+  const zone = zoneKey(inland);
+  if (zone !== lastZone) {
+    lastZone = zone;
     chosen = null;
   }
   const local = chosen ?? inland;
@@ -72,6 +79,23 @@ export function tickClock(now = Date.now()): void {
     setBodyClass('zone-lac', inland);
     setBodyClass('zone-auto', !state.view.zoneSimV.value);
   });
+}
+
+/**
+ * The zone the clock follows: chosen with NavIn or GPS, and which water.
+ * @param inland - On a lake.
+ * @returns A key that changes with the zone.
+ */
+function zoneKey(inland: boolean): string {
+  let water = 'lac';
+  if (!inland) {
+    try {
+      water = sailedSea();
+    } catch {
+      water = 'mer';
+    }
+  }
+  return `${state.view.zoneSimV.value}|${water}`;
 }
 
 /**
