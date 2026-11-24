@@ -55,7 +55,7 @@ export function hideLiveOnMap(): void {
 
 /**
  * The Météo-France zones chosen for LiveMétéo (long press on the button of
- * the zone, or Paramétrages › Alertes › LiveMétéo): their ids, empty for
+ * the zone, or Paramétrages › LiveMétéo): their ids, empty for
  * « the zone where I am ».
  * @returns The ids.
  */

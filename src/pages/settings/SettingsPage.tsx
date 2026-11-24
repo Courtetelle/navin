@@ -112,7 +112,6 @@ const ALERT_SECTIONS = [
   'lightning',
   'lakes',
   'alert',
-  'live',
   'tests',
 ] as const;
 
@@ -478,6 +477,14 @@ export function SettingsPage({ from, arg }: PageProps) {
       ) : null}
       <ShownSection.Provider value={section}>
         <div className={section ? 'set-one' : 'set-secs set-menu'}>
+          {/* LiveMétéo first, whatever the order of the menu (Corban,
+              24/11/2026): its zones and the archive of their stations. */}
+          <SettingsSection
+            section="live"
+            title="🌬 LiveMétéo · zones et enregistrement des stations"
+          >
+            <LiveRow />
+          </SettingsSection>
           <SortedSections>
             <SettingsSection
               section="zone"
@@ -522,12 +529,6 @@ export function SettingsPage({ from, arg }: PageProps) {
               </SettingsSection>
               <SettingsSection section="alert" title="⚠️ Alerte de profondeur">
                 <DepthSet reOn={<ReOnChoices kind="depth" />} />
-              </SettingsSection>
-              <SettingsSection
-                section="live"
-                title="🌬 LiveMétéo · zones et enregistrement des stations"
-              >
-                <LiveRow />
               </SettingsSection>
               <SettingsSection section="tests" title="🧪 Tests des alertes">
                 <TestsSection />
