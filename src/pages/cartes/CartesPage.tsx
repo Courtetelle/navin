@@ -2,6 +2,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
+import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpPill, HelpText } from '../../components/shared/HelpText.tsx';
 import { SiteLink } from '../../components/shared/SiteLink.tsx';
@@ -22,6 +23,7 @@ import { state } from '../../state/index.ts';
 
 import { LemanTools } from './LemanTools.tsx';
 import { MapLayersSection } from './MapLayersSection.tsx';
+import { MapPlan } from './MapPlan.tsx';
 import { OfflineMaps } from './OfflineMaps.tsx';
 
 const HELP =
@@ -47,6 +49,7 @@ function CartesContent({ onChange }: { onChange: () => void }) {
   const [zones] = useState(zoneList);
   const fresh = useIntroLead(state.view.currentView.value, 'Fonds de cartes');
   const help = tr(HELP, { help: true });
+  const [plan, setPlan] = useState(false);
   return (
     <>
       <TitleInNav>
@@ -58,6 +61,26 @@ function CartesContent({ onChange }: { onChange: () => void }) {
       <p className={fresh ? 'help help-pop help-lead' : 'help help-pop'}>
         {help}
       </p>
+      <ButtonRow>
+        <Button
+          className="btn big primary"
+          id="mapPlanOpen"
+          onClick={() => {
+            buzz();
+            setPlan(true);
+          }}
+        >
+          {tr('🗺 Plan des cartes · Europe')}
+        </Button>
+      </ButtonRow>
+      {plan ? (
+        <MapPlan
+          onClose={() => {
+            setPlan(false);
+            onChange();
+          }}
+        />
+      ) : null}
       <MapLayersSection />
       <OfflineMaps />
       <FoldSection title="🏔 Léman : alertes de rive et de profondeur">

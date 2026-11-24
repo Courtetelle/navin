@@ -6,10 +6,12 @@
  *   npm run build && npm run smoke
  */
 
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import type { Browser, BrowserContext, Page } from 'playwright-core';
 import { chromium } from 'playwright-core';
+import { PMTiles } from 'pmtiles';
 
 const URL = process.argv[2] ?? 'http://localhost:11105/';
 const failures: string[] = [];
@@ -566,6 +568,118 @@ async function buoyage(page: Page, theme: string): Promise<void> {
     text !== '' && !text.includes('Profondeur'),
   );
   await page.keyboard.press('Escape');
+}
+
+// A real vector tile, from a map file of the fixtures: the stand-in of the
+// tiles of OpenFreeMap when the plan downloads a sheet.
+async function fixtureTile(): Promise<Buffer> {
+  const bytes = await readFile(
+    path.join(import.meta.dirname, 'fixtures', 'porquerolles.pmtiles'),
+  );
+  const reader = new PMTiles({
+    getKey: () => 'fixture',
+    getBytes: async (offset, length) => ({
+      data: bytes.buffer.slice(
+        bytes.byteOffset + offset,
+        bytes.byteOffset + offset + length,
+      ),
+    }),
+  });
+  const header = await reader.getHeader();
+  const zoom = header.maxZoom;
+  const count = 2 ** zoom;
+  const x = Math.floor(((header.centerLon + 180) / 360) * count);
+  const sin = Math.sin((header.centerLat * Math.PI) / 180);
+  const y = Math.floor(
+    (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * count,
+  );
+  const tile = await reader.getZxy(zoom, x, y);
+  if (!tile) throw new Error('no fixture tile');
+  return Buffer.from(tile.data);
+}
+
+// « Fonds de cartes » › Plan des cartes: the plan over the whole screen, a
+// touch lists what covers the place, a sheet downloads into a map file of
+// this device, nothing overflows.
+async function mapPlan(page: Page, theme: string): Promise<void> {
+  const tile = await fixtureTile();
+  const cors = { 'access-control-allow-origin': '*' };
+  await page.route(/tiles\.openfreemap\.org/u, (route) =>
+    route.request().url().endsWith('/planet')
+      ? route.fulfill({
+          json: {
+            tiles: ['https://tiles.openfreemap.org/planet/t/{z}/{x}/{y}.pbf'],
+          },
+          headers: cors,
+        })
+      : route.fulfill({ body: tile, headers: cors }),
+  );
+  await openGear(page);
+  await page.waitForTimeout(300);
+  await openData(page);
+  await page.waitForTimeout(300);
+  await page.locator('[data-tile="cartes"]').click();
+  await page.waitForTimeout(500);
+  await page.locator('#mapPlanOpen').click();
+  await page.locator('#mapPlanMap.leaflet-container').waitFor();
+  await page.waitForTimeout(800);
+  const plan = await page.locator('#mapPlan').boundingBox();
+  check(
+    theme,
+    'map plan: over the whole screen',
+    plan?.width === page.viewportSize()?.width &&
+      plan?.height === page.viewportSize()?.height,
+  );
+  const shown = await page.locator('#mapPlanMap').boundingBox();
+  if (!shown) throw new Error('no plan');
+  await page.mouse.click(
+    shown.x + shown.width * 0.3,
+    shown.y + shown.height * 0.45,
+  );
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    'map plan: a touch offers the large and the detailed sheet',
+    (await page.locator('#mapPlanHere [data-download]').count()) === 2,
+  );
+  const sheet =
+    (await page
+      .locator('[data-download^="Grande carte"]')
+      .getAttribute('data-download')) ?? '';
+  await page.locator('[data-download^="Grande carte"]').click();
+  await page.locator('#mapPlanJob').waitFor({ state: 'detached' });
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    'map plan: the large sheet is now on this device',
+    (await page.locator(`[data-plan-map="${sheet}"]`).count()) === 1,
+  );
+  check(
+    theme,
+    'map plan: nothing overflows',
+    await page.evaluate(() =>
+      [...document.querySelectorAll('#mapPlan *')].every(
+        (element) =>
+          element.closest('.leaflet-container') !== null ||
+          element.scrollWidth <= element.clientWidth + 1,
+      ),
+    ),
+  );
+  await page.locator(`[data-plan-show="${sheet}"]`).click();
+  check(
+    theme,
+    'map plan: a map of this device can be hidden',
+    (await page
+      .locator(`[data-plan-show="${sheet}"]`)
+      .getAttribute('aria-pressed')) === 'false',
+  );
+  await page.locator('#mapPlanClose').click();
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    'map plan: the sheet is listed with the maps of this device',
+    (await page.locator(`[data-offline-map="${sheet}"]`).count()) === 1,
+  );
 }
 
 async function myMaps(page: Page, theme: string): Promise<void> {
@@ -2875,6 +2989,7 @@ for (const [theme, viewport] of [
     await zones(page, theme);
     await trackButton(page, theme);
     if (viewport.width === 1280) await liveButtons(page, theme);
+    if (viewport.width === 1280) await mapPlan(page, theme);
   } catch (error) {
     check(
       theme,
