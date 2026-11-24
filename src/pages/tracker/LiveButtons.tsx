@@ -188,16 +188,17 @@ export function LiveButtons() {
   if (forecast) {
     const last = FORECAST_HOURS - 1;
     items.push(
+      // ▲ on top: an hour later; ▼ below: an hour earlier (Corban 24/11).
       <Button
-        key="back"
+        key="next"
         type="button"
         noUiEdit
         className="rail-btn live-btn live-step"
-        aria-label={tr('Une heure plus tôt')}
-        disabled={step <= 0}
+        aria-label={tr('Une heure plus tard')}
+        disabled={step >= last}
         onClick={() => {
           buzz();
-          forecastStep.value = Math.max(0, step - 1);
+          forecastStep.value = Math.min(last, step + 1);
         }}
       >
         <span className="rail-icon">▲</span>
@@ -223,15 +224,15 @@ export function LiveButtons() {
         {step === 0 ? null : <span className="live-hour-plus">+{step} h</span>}
       </Button>,
       <Button
-        key="next"
+        key="back"
         type="button"
         noUiEdit
         className="rail-btn live-btn live-step"
-        aria-label={tr('Une heure plus tard')}
-        disabled={step >= last}
+        aria-label={tr('Une heure plus tôt')}
+        disabled={step <= 0}
         onClick={() => {
           buzz();
-          forecastStep.value = Math.min(last, step + 1);
+          forecastStep.value = Math.max(0, step - 1);
         }}
       >
         <span className="rail-icon">▼</span>
