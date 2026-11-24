@@ -27,6 +27,7 @@ import {
   setActiveVoyage,
   state,
   syncVoyageNavigations,
+  updateCrewSets,
   updateVoyages,
   voyageOfNavigation,
   voyagesChanged,
@@ -34,10 +35,12 @@ import {
 import { store } from '../../../storage/store.ts';
 import { load, useHarnessClock } from '../../data/__tests__/fixtures.ts';
 import { backupAll } from '../../data/backup.ts';
+import { chooseVoyageBoat, voyageBoat } from '../voyageBoat.ts';
 import {
+  chooseVoyageCrewSet,
   crewSections,
   saveVoyageCrewSet,
-  toggleVoyageMember,
+  voyageCrewLines,
 } from '../voyageCrew.ts';
 import { freeRecords, voyageRecords } from '../voyageRecords.ts';
 import { voyageTiles } from '../voyageTiles.ts';
@@ -149,7 +152,7 @@ test('the newer content wins, the documents of both are kept', () => {
   expect(merged.docs.map((doc) => doc.id)).toStrictEqual(['b', 'a']);
 });
 
-test('the crew of the cruise is its own, and goes to the backup', () => {
+test('the crew of the cruise is a saved crew, and goes to the backup', () => {
   load('sample-sea');
   const cruiseCrew = state.data.cruise.value?.crew.length;
 
@@ -158,11 +161,20 @@ test('the crew of the cruise is its own, and goes to the backup', () => {
 
   createVoyage(['crew', 'docs'], false);
   const [first, second] = state.data.members.value;
-  toggleVoyageMember(first?.id ?? '');
-  toggleVoyageMember(second?.id ?? '');
+  updateCrewSets((sets) => {
+    sets.push({
+      id: 'set-bzh',
+      name: 'Bretagne',
+      crew: [
+        { memberId: first?.id ?? '', fonction: 'Skipper' },
+        { memberId: second?.id ?? '', fonction: 'Équipier' },
+      ],
+    });
+  });
+  chooseVoyageCrewSet('set-bzh');
 
   expect(
-    state.data.voyages.value.crew.map((line) => line.fonction),
+    voyageCrewLines(state.data.voyages.value).map((line) => line.fonction),
   ).toStrictEqual(['Skipper', 'Équipier']);
   expect(state.data.cruise.value?.crew.length).toBe(cruiseCrew);
   expect(crewSections()).toHaveLength(2);
@@ -171,16 +183,22 @@ test('the crew of the cruise is its own, and goes to the backup', () => {
     'vdocs',
     'vrecords',
   ]);
-  expect(voyageTiles()[0]?.sub).toBe('2 personnes pour la croisière');
+  expect(voyageTiles()[0]?.sub).toBe('Bretagne · 2 personnes');
   expect(
-    store.get<{ list: Array<{ crew: unknown[] }> } | null>('ldb.voyages', null)
-      ?.list[0]?.crew,
-  ).toHaveLength(2);
+    store.get<{ list: Array<{ crewSet?: string }> } | null>('ldb.voyages', null)
+      ?.list[0]?.crewSet,
+  ).toBe('set-bzh');
   expect(backupAll().data.voyages).toStrictEqual(state.data.voyageStore.value);
 
-  toggleVoyageMember(first?.id ?? '');
+  updateCrewSets((sets) => {
+    sets.find((set) => set.id === 'set-bzh')?.crew.pop();
+  });
 
-  expect(state.data.voyages.value.crew).toHaveLength(1);
+  expect(crewSections()).toHaveLength(1);
+
+  chooseVoyageCrewSet(undefined);
+
+  expect(crewSections()).toHaveLength(0);
 });
 
 test('new cruises are numbered after the last one, with the year', () => {
@@ -303,7 +321,7 @@ test('the navigations of a cruise take its ports, VHF, weather and renter', () =
   expect(voyageOfNavigation(sortie.id)).toBe(voyage.id);
 });
 
-test('cruises kept before get the section Croisière and the brokers', () => {
+test('cruises kept before get the sections Croisière and Bateau and the brokers', () => {
   const kept = cleanVoyageStore({
     list: [
       { ...defaultVoyages(), id: 'a', num: 1, name: '1 A', sections: ['crew'] },
@@ -312,42 +330,51 @@ test('cruises kept before get the section Croisière and the brokers', () => {
     mod: '2026-11-24',
   });
 
-  expect(kept?.list[0]?.sections).toStrictEqual(['info', 'crew']);
+  expect(kept?.list[0]?.sections).toStrictEqual(['info', 'boat', 'crew']);
   expect(kept?.list[0]?.categories.map((cat) => cat.id)).toContain('courtiers');
   expect(defaultVoyages().categories.map((cat) => cat.name)).toContain(
     'Courtiers',
   );
 });
 
-test('the medallion and the crew group photo are kept, saved and synced', () => {
+test('the medallion, the crew and the boat chosen are kept and synced', () => {
   load('sample-sea');
-  const voyage = createVoyage(['crew'], true);
+  const voyage = createVoyage(['boat', 'crew'], true);
+  const boat = state.data.boats.value[0];
+  chooseVoyageBoat(boat?.id);
   patchVoyage(voyage.id, (draft) => {
     draft.photo = 'pmedal';
-    draft.crewPhoto = 'pgroup';
-    draft.crewPhotoCap = 'Au départ';
+    draft.crewSet = 'set-x';
   });
   const kept = state.data.voyageStore.value.list[0];
   const cleaned = cleanVoyages(structuredClone(kept));
 
   expect(cleaned?.photo).toBe('pmedal');
-  expect(cleaned?.crewPhotoCap).toBe('Au départ');
-  expect(kept ? voyagePhotoIds(kept) : []).toStrictEqual(['pmedal', 'pgroup']);
-  expect(allVoyageDocIds()).toStrictEqual(['pmedal', 'pgroup']);
+  expect(cleaned?.crewSet).toBe('set-x');
+  expect(cleaned?.boat).toBe(boat?.id);
+  expect(voyageBoat(state.data.voyages.value)?.id).toBe(boat?.id);
+  expect(kept ? voyagePhotoIds(kept) : []).toStrictEqual(['pmedal']);
+  expect(allVoyageDocIds()).toStrictEqual(['pmedal']);
 });
 
-test('the cruise crew is kept among the saved crews under its name', () => {
+test('a crew picked one by one becomes a saved crew of the cruise', () => {
   load('sample-sea');
   const before = state.data.crewSets.value.length;
   createVoyage(['crew'], false);
+
   expect(saveVoyageCrewSet()).toBeNull();
+
   const member = state.data.members.value[0];
-  if (member) toggleVoyageMember(member.id);
+  updateVoyages((voyages) => {
+    voyages.crew = [{ memberId: member?.id ?? '', fonction: 'Skipper' }];
+  });
   const name = saveVoyageCrewSet();
   const sets = state.data.crewSets.value;
 
   expect(name).toBe(state.data.voyages.value.name);
   expect(sets).toHaveLength(before + 1);
   expect(sets.at(-1)?.name).toBe(name);
-  expect(sets.at(-1)?.crew[0]?.fonction).toBe('Skipper');
+  expect(state.data.voyages.value.crewSet).toBe(sets.at(-1)?.id);
+  expect(state.data.voyages.value.crew).toHaveLength(0);
+  expect(crewSections()[0]?.rows[0]).toStrictEqual(['Rôle', 'Skipper']);
 });

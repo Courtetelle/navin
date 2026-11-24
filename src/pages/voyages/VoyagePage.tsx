@@ -161,7 +161,7 @@ export function VoyagePage() {
                 data-voyphoto="pick"
                 onClick={() => {
                   buzz();
-                  pickVoyagePhoto(voyage.id, 'photo');
+                  pickVoyagePhoto(voyage.id);
                 }}
               >
                 {tr(voyage.photo ? '📷 Changer la photo' : '📷 + photo')}
@@ -172,7 +172,7 @@ export function VoyagePage() {
                   className="btn big danger"
                   data-voyphoto="del"
                   onClick={buzz}
-                  onDelete={() => removeVoyagePhoto(voyage.id, 'photo')}
+                  onDelete={() => removeVoyagePhoto(voyage.id)}
                 >
                   {tr('🗑 Retirer la photo')}
                 </HoldDeleteButton>

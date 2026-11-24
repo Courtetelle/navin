@@ -48,6 +48,7 @@ export const VIEW_NAMES = [
   'vdocs',
   'vhf',
   'vinfo',
+  'vboat',
   'voyage',
   'voyages',
   'vrecords',
@@ -113,4 +114,5 @@ export const NO_CRUISE_VIEWS: readonly string[] = [
   'voyage',
   'vrecords',
   'vinfo',
+  'vboat',
 ];

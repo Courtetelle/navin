@@ -1,7 +1,6 @@
 import { batch, signal } from '@preact/signals-react';
 
 import type { Member } from '../../model/types.ts';
-import { go } from '../../shell/router.ts';
 import { state } from '../../state/index.ts';
 
 import type { ParsedSheet } from './blankParse.ts';
@@ -92,7 +91,6 @@ export function showFiche(id: string): void {
 export function ficheBackLabel(): string {
   const backTo = state.view.crewFicheBack.value;
   if (backTo === 'crews') return '◀ Équipages';
-  if (backTo === 'vcrew') return '◀ Équipage de la croisière';
   if (backTo === 'list' || !state.data.cruise.value) {
     return '◀ Équipiers·ères';
   }
@@ -106,7 +104,6 @@ export function leaveFiche(): void {
     state.view.crewFicheBack.value = null;
   });
   if (backTo === 'crews') showCrews();
-  else if (backTo === 'vcrew') go('vcrew');
   else if (backTo === 'list' || !state.data.cruise.value) showFicheList();
   else showCrewPick();
 }

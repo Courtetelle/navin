@@ -56,6 +56,7 @@ const COMMON_TABS: Record<string, string> = {
   voyage: 'more',
   vrecords: 'more',
   vinfo: 'more',
+  vboat: 'more',
 };
 
 /**
@@ -152,6 +153,7 @@ const VOYAGE_VIEWS = new Set([
   'vdocs',
   'vrecords',
   'vinfo',
+  'vboat',
 ]);
 
 const DATA_BACK_VIEWS = new Set([

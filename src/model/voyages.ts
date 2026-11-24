@@ -73,10 +73,10 @@ export interface Voyages {
   docs: VoyageDoc[];
   /** Photo id of the medallion of the cruise (base photos), if any. */
   photo?: string;
-  /** Photo id of the crew group photo, if any. */
-  crewPhoto?: string;
-  /** Caption over the bottom of the crew group photo. */
-  crewPhotoCap?: string;
+  /** The crew of the cruise: a saved crew of data › Équipages (its id). */
+  crewSet?: string;
+  /** The boat of the cruise: one of data › Bateaux (its id). */
+  boat?: string;
   /** ISO time of the last change (the newer one wins in a restoration). */
   mod: string;
 }
@@ -293,7 +293,7 @@ export function cleanVoyages(raw: unknown): Voyages | null {
     if (kept) info[key] = kept;
   }
   const out: Voyages = { info, crew, categories, docs, mod: text(value.mod) };
-  for (const key of ['photo', 'crewPhoto', 'crewPhotoCap'] as const) {
+  for (const key of ['photo', 'crewSet', 'boat'] as const) {
     const kept = text(value[key]);
     if (kept) out[key] = kept;
   }
@@ -301,18 +301,17 @@ export function cleanVoyages(raw: unknown): Voyages | null {
 }
 
 /**
- * The photos of a cruise kept in the photo base: its documents, its
- * medallion and the crew group photo.
+ * The photos of a cruise kept in the photo base: its documents and its
+ * medallion.
  * @param voyages - The content.
  * @returns Their ids.
  */
 export function voyagePhotoIds(
-  voyages: Pick<Voyages, 'docs' | 'photo' | 'crewPhoto'>,
+  voyages: Pick<Voyages, 'docs' | 'photo'>,
 ): string[] {
   return [
     ...voyages.docs.map((doc) => doc.id),
     ...(voyages.photo ? [voyages.photo] : []),
-    ...(voyages.crewPhoto ? [voyages.crewPhoto] : []),
   ];
 }
 
@@ -423,7 +422,7 @@ export function mergedVoyages<Content extends Voyages>(
 }
 
 /** The sections a cruise can hold; more will come. */
-export type VoyageSectionKey = 'info' | 'crew' | 'contracts' | 'docs';
+export type VoyageSectionKey = 'info' | 'boat' | 'crew' | 'contracts' | 'docs';
 
 /** Each section: key, view opened, title and text of its tile. */
 export const VOYAGE_SECTIONS: ReadonlyArray<{
@@ -439,10 +438,16 @@ export const VOYAGE_SECTIONS: ReadonlyArray<{
     sub: 'ports, dates, canaux VHF, station côtière, météo',
   },
   {
+    key: 'boat',
+    view: 'vboat',
+    title: '🚤 Bateau',
+    sub: 'choisi dans data › Bateaux',
+  },
+  {
     key: 'crew',
     view: 'vcrew',
     title: '👥 Équipage',
-    sub: 'qui part, avec les rôles et les contacts',
+    sub: 'choisi dans data › Équipages',
   },
   {
     key: 'contracts',
@@ -479,25 +484,25 @@ export interface VoyageStore {
   mod: string;
   /**
    * Version of the content: 2 since the section Croisière and the
-   * category Courtiers.
+   * category Courtiers, 3 since the section Bateau.
    * @default undefined
    */
   v?: number;
 }
 
 /** Version of {@link VoyageStore} written now. */
-export const VOYAGE_STORE_V = 2;
+export const VOYAGE_STORE_V = 3;
 
 /**
- * A cruise kept before version 2 gets the section Croisière and the
- * category Courtiers.
+ * A cruise kept before version 3 gets the sections Croisière and Bateau
+ * and the category Courtiers.
  * @param voyage - The cruise read.
  * @returns The cruise brought up to date.
  */
 function upgraded(voyage: Voyage): Voyage {
-  const sections: VoyageSectionKey[] = voyage.sections.includes('info')
-    ? voyage.sections
-    : ['info', ...voyage.sections];
+  const sections = ALL_SECTIONS.filter(
+    (key) => key === 'info' || key === 'boat' || voyage.sections.includes(key),
+  );
   const categories = voyage.categories.some((cat) => cat.id === 'courtiers')
     ? voyage.categories
     : [
