@@ -304,3 +304,42 @@ export function legTarget(
     leg,
   };
 }
+
+const PREFS_KEY = 'ldb.routingShift';
+
+/** How the arrows of a routing move it (Paramétrages › Routages). */
+export interface ShiftPrefs {
+  /** Minutes moved at each touch. */
+  stepMin: number;
+  /** The arrows move the ETD, or the ETA (the ETD then follows). */
+  moves: 'etd' | 'eta';
+}
+
+/** By default: 30 minutes, the ETD. */
+export const DEFAULT_SHIFT: ShiftPrefs = { stepMin: 30, moves: 'etd' };
+
+/** The steps offered, minutes. */
+export const SHIFT_STEPS: readonly number[] = [10, 15, 30, 60, 120];
+
+/** How the arrows move a routing, as set. */
+export const shiftPrefs = signal<ShiftPrefs>(readShiftPrefs());
+
+function readShiftPrefs(): ShiftPrefs {
+  const kept = store.get<Partial<ShiftPrefs> | null>(PREFS_KEY, null);
+  return {
+    stepMin:
+      typeof kept?.stepMin === 'number' && SHIFT_STEPS.includes(kept.stepMin)
+        ? kept.stepMin
+        : DEFAULT_SHIFT.stepMin,
+    moves: kept?.moves === 'eta' ? 'eta' : 'etd',
+  };
+}
+
+/**
+ * Keep how the arrows move a routing.
+ * @param prefs - The step and what moves.
+ */
+export function saveShiftPrefs(prefs: ShiftPrefs): void {
+  shiftPrefs.value = prefs;
+  store.set(PREFS_KEY, prefs);
+}

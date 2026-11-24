@@ -198,3 +198,48 @@ describe('boxEdge', () => {
     expect(boxEdge(10, 5)).toStrictEqual({ x: 0, y: 0 });
   });
 });
+
+function cover(
+  one: { x: number; y: number },
+  two: { x: number; y: number },
+): boolean {
+  return Math.abs(one.x - two.x) < 236 && Math.abs(one.y - two.y) < 100;
+}
+
+describe('placeMarks never lets two boxes cover each other', () => {
+  it('on a route that comes back on itself, and off the ETD tag', () => {
+    const there = Array.from({ length: 30 }, (_, rank) => ({
+      x: 100 + rank * 25,
+      y: 300,
+    }));
+    const back = there.toReversed().map((point) => ({ ...point, y: 330 }));
+    const points = [...there, ...back];
+    const tag = { x: 200, y: 200, w: 184, h: 26 };
+    const placed = placeMarks(points, [tag]);
+    expect(placed.length).toBeGreaterThan(2);
+    const boxes = placed.map(({ rank, dx, dy }) => ({
+      x: (points[rank]?.x ?? 0) + dx,
+      y: (points[rank]?.y ?? 0) + dy,
+    }));
+    for (const [rank, box] of boxes.entries()) {
+      for (const other of boxes.slice(rank + 1)) {
+        expect(cover(box, other)).toBe(false);
+      }
+      expect(
+        Math.abs(box.x - tag.x) < (236 + 184) / 2 &&
+          Math.abs(box.y - tag.y) < (100 + 26) / 2,
+      ).toBe(false);
+    }
+  });
+});
+
+describe('markHtml speed', () => {
+  it('shows a boat under sail and an engine under motor', () => {
+    const mark = routingShape('Essai', done, [A, B, C]).marks[1];
+    if (!mark) throw new Error('no mark');
+    expect(markHtml(mark)).toContain('⛵ 6,0 nd');
+    const motor = markHtml({ ...mark, mode: 'motor' });
+    expect(motor).toContain('rtm-motor');
+    expect(motor).not.toContain('⛵');
+  });
+});

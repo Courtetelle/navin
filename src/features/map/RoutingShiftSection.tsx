@@ -12,7 +12,7 @@ function stepName(minutes: number): string {
 }
 
 /**
- * Paramétrages › Routages: how the ◀ ▶ arrows beside a routing shown on the
+ * Paramétrages › Routages: how the ▲ ▼ arrows beside a routing shown on the
  * map move it, by how many minutes, its ETD or its ETA.
  * @returns The section.
  */
@@ -22,7 +22,7 @@ export function RoutingShiftSection() {
   const prefs = shiftPrefs.value;
   return (
     <div className="field rtg-form" id="rtgShiftPrefs">
-      <label htmlFor="rtgStep">{tr('Incrément des flèches ◀ ▶')}</label>
+      <label htmlFor="rtgStep">{tr('Incrément des flèches ▲ ▼')}</label>
       <select
         id="rtgStep"
         value={prefs.stepMin}
@@ -54,7 +54,7 @@ export function RoutingShiftSection() {
       </select>
       <HelpText>
         {tr(
-          'Un routage affiché sur la carte a trois boutons à droite : ◀ et ▶ décalent l’ETD (ou l’ETA, le départ étant alors recalculé) de l’incrément choisi et refont le routage avec la météo des nouvelles heures. Le bouton du milieu montre l’ETD, l’ETA et ce qui change ; le toucher revient au routage calculé, un appui long cherche le meilleur départ du jour (le plus rapide, le moteur comptant moitié plus).',
+          'Un routage affiché sur la carte a trois boutons à droite. ▲ et ▼ décalent l’ETD ou l’ETA de l’incrément choisi et refont le routage avec la météo des nouvelles heures (en ETA, le départ est recalculé). Toucher l’étiquette ETD ou ETA sur la carte la choisit : elle clignote trois fois et les flèches agissent sur elle. Le bouton du milieu montre ce qui change ; le toucher revient au routage calculé. Un appui long le met en vert : les routages du jour sont triés du plus efficient (le plus rapide, le moteur comptant moitié plus) au moins efficient, ▼ et ▲ passent de l’un à l’autre, un toucher revient au plus efficient, un nouvel appui long revient au tri par heure. Un appui long sur une flèche ouvre ces réglages',
         )}
       </HelpText>
     </div>

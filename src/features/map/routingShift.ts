@@ -1,62 +1,30 @@
 import { signal } from '@preact/signals-react';
 
-import { fmtTime } from '../../lib/format.ts';
 import type { NavRoute } from '../../model/routes.ts';
 import type { RoutingResult } from '../../model/sailRouting.ts';
 import type { Boat } from '../../model/types.ts';
 import { state, toast } from '../../state/index.ts';
-import { store } from '../../storage/store.ts';
 
 import { runRouting } from './routingRun.ts';
 import { showRouting } from './routingShown.ts';
 import type {
   RoutingPlan,
   RoutingStats,
+  ShiftPrefs,
   ShownRouting,
 } from './routingState.ts';
-import { routingShape, shownRouting } from './routingState.ts';
+import { routingShape, shiftPrefs, shownRouting } from './routingState.ts';
+
+export type { ShiftPrefs } from './routingState.ts';
+export {
+  DEFAULT_SHIFT,
+  SHIFT_STEPS,
+  saveShiftPrefs,
+  shiftPrefs,
+} from './routingState.ts';
 
 /** A routing is being computed again at another ETD. */
 export const shiftBusy = signal(false);
-
-const PREFS_KEY = 'ldb.routingShift';
-
-/** How the arrows of a routing move it (Paramétrages › Routages). */
-export interface ShiftPrefs {
-  /** Minutes moved at each touch. */
-  stepMin: number;
-  /** The arrows move the ETD, or the ETA (the ETD then follows). */
-  moves: 'etd' | 'eta';
-}
-
-/** By default: 30 minutes, the ETD. */
-export const DEFAULT_SHIFT: ShiftPrefs = { stepMin: 30, moves: 'etd' };
-
-/** The steps offered, minutes. */
-export const SHIFT_STEPS: readonly number[] = [10, 15, 30, 60, 120];
-
-/** How the arrows move a routing, as set. */
-export const shiftPrefs = signal<ShiftPrefs>(readShiftPrefs());
-
-function readShiftPrefs(): ShiftPrefs {
-  const kept = store.get<Partial<ShiftPrefs> | null>(PREFS_KEY, null);
-  return {
-    stepMin:
-      typeof kept?.stepMin === 'number' && SHIFT_STEPS.includes(kept.stepMin)
-        ? kept.stepMin
-        : DEFAULT_SHIFT.stepMin,
-    moves: kept?.moves === 'eta' ? 'eta' : 'etd',
-  };
-}
-
-/**
- * Keep how the arrows move a routing.
- * @param prefs - The step and what moves.
- */
-export function saveShiftPrefs(prefs: ShiftPrefs): void {
-  shiftPrefs.value = prefs;
-  store.set(PREFS_KEY, prefs);
-}
 
 type Done = Extract<RoutingResult, { kind: 'done' }>;
 
@@ -176,13 +144,71 @@ export function shiftRouting(
 }
 
 /**
- * Back to the routing first calculated.
+ * The routings of the day sorted from the most efficient to the least (the
+ * green sort of the bar), for the routing they were calculated from.
+ */
+export const daySort = signal<{
+  plan: RoutingPlan;
+  rank: number;
+  count: number;
+} | null>(null);
+
+/** The routings of the green sort, most efficient first. */
+let ranked: Done[] = [];
+
+/**
+ * Back to the routing first calculated; in the green sort, to the most
+ * efficient of the day.
  * @returns When done.
  */
 export function resetRouting(): Promise<void> {
+  const sort = daySort.peek();
+  if (sort && sort.plan === shownRouting.peek()?.plan) return showRank(0);
   return busyWith(({ plan, route, boat }) =>
     routeAt(plan, route, boat, plan.base.departMs),
   );
+}
+
+/**
+ * Show another routing of the green sort.
+ * @param rank - Its rank, 0 the most efficient.
+ * @returns When done.
+ */
+export function showRank(rank: number): Promise<void> {
+  const sort = daySort.peek();
+  const result = ranked[rank];
+  if (!sort || !result) return Promise.resolve();
+  return busyWith(({ plan }) => {
+    if (plan !== sort.plan) return Promise.resolve(null);
+    daySort.value = { ...sort, rank };
+    return Promise.resolve(result);
+  });
+}
+
+/**
+ * Move in the green sort: toward the less efficient (1) or the more (−1).
+ * @param step - How many ranks.
+ * @returns When done.
+ */
+export function stepRank(step: number): Promise<void> {
+  const sort = daySort.peek();
+  if (!sort) return Promise.resolve();
+  const rank = Math.min(sort.count - 1, Math.max(0, sort.rank + step));
+  if (rank === sort.rank) {
+    toast(
+      rank === 0
+        ? 'Déjà le routage le plus efficient du jour'
+        : 'Déjà le routage le moins efficient du jour',
+    );
+    return Promise.resolve();
+  }
+  return showRank(rank);
+}
+
+/** Leave the green sort: the arrows move the hour again. */
+export function leaveDaySort(): void {
+  daySort.value = null;
+  ranked = [];
 }
 
 /**
@@ -197,35 +223,44 @@ export function routingCost(result: Done): number {
 }
 
 /**
- * The best routing with an ETD in the same day as the ETD shown (not
- * before now): the fastest, the motor counting half more.
+ * The green sort: every ETD of the day of the ETD shown (not before now),
+ * routed and sorted from the most efficient (the fastest, the motor
+ * counting half more) to the least; the most efficient shown.
  * @returns When done.
  */
-export function bestOfDay(): Promise<void> {
+export function sortDay(): Promise<void> {
   return busyWith(async ({ shown, plan, route, boat }) => {
     const day = new Date(shown.departMs as number);
     day.setHours(0, 0, 0, 0);
     const step = Math.max(30, shiftPrefs.peek().stepMin) * 60_000;
     const first = Math.max(day.getTime(), Math.ceil(Date.now() / step) * step);
     const end = day.getTime() + 86_400_000;
-    let best: Done | null = null;
+    const found: Done[] = [];
     let lastError = '';
     for (let departMs = first; departMs < end; departMs += step) {
       // eslint-disable-next-line no-await-in-loop -- one routing after the other
       const result = await routeAt(plan, route, boat, departMs);
-      if ('error' in result) {
-        lastError = result.error;
-        continue;
-      }
-      if (!best || routingCost(result) < routingCost(best)) best = result;
+      if ('error' in result) lastError = result.error;
+      else found.push(result);
     }
+    const best = sortByCost(found)[0];
     if (!best) return { error: lastError || 'Aucun départ possible ce jour.' };
-    const departMs = best.steps[0]?.ms ?? best.arriveMs;
+    ranked = sortByCost(found);
+    daySort.value = { plan, rank: 0, count: ranked.length };
     toast(
-      `Meilleur départ du jour : ETD ${fmtTime(new Date(departMs))}, ETA ${fmtTime(new Date(best.arriveMs))}`,
+      `${ranked.length} routages du jour, du plus au moins efficient : ▼ le suivant, ▲ le précédent`,
     );
     return best;
   });
+}
+
+/**
+ * Routings sorted from the most efficient to the least.
+ * @param results - The routings.
+ * @returns A sorted copy.
+ */
+export function sortByCost(results: readonly Done[]): Done[] {
+  return results.toSorted((one, two) => routingCost(one) - routingCost(two));
 }
 
 /**

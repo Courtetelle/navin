@@ -15490,6 +15490,12 @@ html body .live-slot > .rail-btn.live-layer.on {
 .rtm .rtm-kn {
   color: #0a4c8c;
 }
+.rtm .rtm-kn-motor {
+  color: #8a2a00;
+}
+.rtm .rtm-motor {
+  vertical-align: -3px;
+}
 /* The ETD or the ETA changed: its tag blinks a few times. */
 .leaflet-marker-icon.rtm-end.rtm-blink {
   animation: rtmBlink 0.6s ease-in-out 5;
@@ -15733,62 +15739,117 @@ html body .live-slot > .rail-btn.live-layer.on {
   border-radius: 6px;
   transform-origin: 0 0;
   margin: 8px 0 0 8px;
-  pointer-events: none;
+  cursor: pointer;
 }
 .leaflet-marker-icon.rtm-end b {
   color: #f5b800;
 }
-/* The routing shown: three buttons at the right edge, low enough to leave
-   the tab of the menus (middle of the right edge) free. */
+/* The tag the arrows move: a thicker frame, and a touch on the other one
+   picks it (it blinks three times). */
+.leaflet-marker-icon.rtm-end.rtm-on {
+  border-width: 3px;
+  box-shadow: 0 0 0 2px #1a1a1a;
+}
+.leaflet-marker-icon.rtm-end.rtm-pick {
+  animation: rtmBlink 0.5s ease-in-out 3;
+}
+/* The routing shown: three buttons at the right edge, the size of the
+   buttons at the left, high enough to leave the tab of the menus (middle of
+   the right edge) and the 💬 pill (low at the right) free. */
 .rtg-rail {
   position: fixed;
   right: var(--rb-side-r, 8px);
-  bottom: calc(var(--bottombar-h, 72px) + 16px + env(safe-area-inset-bottom));
+  top: calc(var(--topbar-h, 72px) + 24px);
+  max-width: 34vw;
   z-index: 1500;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: var(--rb-gap, 10px);
 }
-.rtg-rail .rail-btn.rtg-arrow {
-  width: 84px;
-  height: 56px;
-}
-.rtg-rail .rtg-arrow span {
-  font-size: 24px;
-  line-height: 1;
-}
-.rtg-rail .rtg-arrow small {
-  font-size: 12px;
-  font-weight: 700;
-}
-.rtg-rail .rail-btn.rtg-info {
-  width: 168px;
-  height: auto;
-  min-height: 70px;
-  padding: 6px 8px;
-  gap: 4px;
-  border-color: #f5b800;
+html body .rtg-rail .rail-btn.rail-btn {
+  width: var(--rb-w, 96px);
+  height: var(--rb-h, 52px);
+  min-height: 0;
+  padding: 2px 3px;
+  gap: 0;
+  overflow: hidden;
   touch-action: none;
   -webkit-user-select: none;
   user-select: none;
 }
+.rtg-rail .rtg-arrow span {
+  font-size: 20px;
+  line-height: 1;
+}
+.rtg-rail .rtg-arrow small {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+html body .rtg-rail .rail-btn.rtg-info {
+  border-color: #f5b800;
+}
 .rtg-rail .rtg-info.busy {
   opacity: 0.7;
 }
-.rtg-rail .rtg-times {
-  display: flex;
-  flex-direction: column;
-  font-size: 13px;
-  line-height: 1.25;
+.rtg-rail .rtg-head {
+  max-width: 100%;
+  font-size: 11px;
+  line-height: 1.1;
   text-align: center;
-  white-space: nowrap;
+}
+/* Upright: under the row of buttons at the top. */
+@media (orientation: portrait) {
+  .rtg-rail {
+    top: calc(env(safe-area-inset-top) + var(--rb-h, 52px) + 28px);
+  }
+  .rtg-rail .rtg-arrow small,
+  .rtg-rail .rtg-head {
+    font-size: 10px;
+  }
 }
 .rtg-rail .rtg-changes {
-  font-size: 11px;
-  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.15;
   text-align: center;
-  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+/* The routings of the day sorted by efficiency: the three turn green. */
+html body .rtg-rail.rtg-green .rail-btn.rail-btn {
+  background: color-mix(in srgb, #2e9e4f 28%, var(--surface, #fff));
+}
+:root[data-theme='night'] body .rtg-rail.rtg-green .rail-btn.rail-btn {
+  background: #0d2a12;
+}
+
+/* A routing on the map: Routes stays shown, a red cross blinks on it (a
+   touch leaves the routing). */
+@media (orientation: landscape) and (min-width: 560px),
+  (orientation: portrait) {
+  html
+    body:not(.menus-open)
+    header.topbar.topbar
+    #routesBtn.theme-btn.routing-on {
+    display: flex !important;
+  }
+}
+html body.menus-fading header.topbar #routesBtn.theme-btn.routing-on {
+  opacity: 1 !important;
+}
+#routesBtn.routing-on {
+  position: relative;
+}
+#routesBtn .routes-x {
+  position: absolute;
+  inset: 5px 8px;
+  width: calc(100% - 16px);
+  height: calc(100% - 10px);
+  pointer-events: none;
 }
 
 /* data › Croisières : contrats, documents, équipage */
