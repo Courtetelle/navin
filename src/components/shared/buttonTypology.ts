@@ -30,6 +30,8 @@ const DATA_VIEWS: ReadonlySet<string> = new Set([
   'vcrew',
   'vcontracts',
   'vdocs',
+  'voyage',
+  'vrecords',
 ]);
 
 const CHOICE_DATA = new Set([

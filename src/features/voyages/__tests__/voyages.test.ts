@@ -3,15 +3,24 @@ import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import {
   CREW_CAT,
   OTHER_CAT,
+  cleanVoyageStore,
   cleanVoyages,
   contractSections,
   defaultVoyages,
   docCategories,
   docCategoryOf,
+  knownSections,
   mergedVoyages,
 } from '../../../model/voyages.ts';
 import {
+  activeVoyageId,
+  blankCruise,
+  createVoyage,
   mergeVoyages,
+  removeVoyage,
+  renameVoyage,
+  saveRoute,
+  setActiveVoyage,
   state,
   updateVoyages,
   voyagesChanged,
@@ -20,6 +29,7 @@ import { store } from '../../../storage/store.ts';
 import { load, useHarnessClock } from '../../data/__tests__/fixtures.ts';
 import { backupAll } from '../../data/backup.ts';
 import { crewSections, toggleVoyageMember } from '../voyageCrew.ts';
+import { freeRecords, voyageRecords } from '../voyageRecords.ts';
 import { voyageTiles } from '../voyageTiles.ts';
 
 beforeEach(useHarnessClock);
@@ -127,13 +137,14 @@ test('the newer content wins, the documents of both are kept', () => {
   expect(merged.docs.map((doc) => doc.id)).toStrictEqual(['b', 'a']);
 });
 
-test('the crew of the cruise is its own, and goes to the backup once changed', () => {
+test('the crew of the cruise is its own, and goes to the backup', () => {
   load('sample-sea');
   const cruiseCrew = state.data.cruise.value?.crew.length;
 
   expect(voyagesChanged()).toBe(false);
   expect(backupAll().data.voyages).toBeUndefined();
 
+  createVoyage(['crew', 'docs'], false);
   const [first, second] = state.data.members.value;
   toggleVoyageMember(first?.id ?? '');
   toggleVoyageMember(second?.id ?? '');
@@ -143,30 +154,105 @@ test('the crew of the cruise is its own, and goes to the backup once changed', (
   ).toStrictEqual(['Skipper', 'Équipier']);
   expect(state.data.cruise.value?.crew.length).toBe(cruiseCrew);
   expect(crewSections()).toHaveLength(2);
+  expect(voyageTiles().map((tile) => tile.key)).toStrictEqual([
+    'vcrew',
+    'vdocs',
+    'vrecords',
+  ]);
   expect(voyageTiles()[0]?.sub).toBe('2 personnes pour la croisière');
   expect(
-    store.get<{ crew: unknown[] } | null>('ldb.voyages', null)?.crew,
+    store.get<{ list: Array<{ crew: unknown[] }> } | null>('ldb.voyages', null)
+      ?.list[0]?.crew,
   ).toHaveLength(2);
-  expect(backupAll().data.voyages).toStrictEqual(state.data.voyages.value);
+  expect(backupAll().data.voyages).toStrictEqual(state.data.voyageStore.value);
 
   toggleVoyageMember(first?.id ?? '');
 
   expect(state.data.voyages.value.crew).toHaveLength(1);
 });
 
-test('a restoration brings the content of another device', () => {
+test('new cruises are numbered after the last one, with the year', () => {
   load('empty');
+  const first = createVoyage(['crew', 'contracts', 'docs'], false);
+  renameVoyage(first.id, '12 Croatie');
   updateVoyages((voyages) => {
-    const [first] = voyages.categories;
-    if (first) first.name = 'Agence ici';
+    const card = voyages.categories[0]?.cards[0];
+    if (card) card.tel = '+385 1 234';
+    voyages.categories.push({ id: 'port', name: 'Ports', cards: [] });
   });
-  const older = { ...state.data.voyages.value, mod: '2000-01-01' };
+  const second = createVoyage(['contracts'], true);
 
-  mergeVoyages({ ...older, categories: [] });
+  expect(second.name).toBe('13 Nouvelle croisière 2026');
+  expect(second.sections).toStrictEqual(['contracts']);
+  expect(second.categories.map((cat) => cat.name)).toStrictEqual([
+    'Agence',
+    'Loueur',
+    'Assurances',
+    'Ports',
+  ]);
+  expect(second.categories[0]?.cards[0]?.tel).toBe('');
+  expect(state.data.voyageStore.value.active).toBe(second.id);
+  expect(knownSections(state.data.voyageStore.value.list)).toStrictEqual([
+    'crew',
+    'contracts',
+    'docs',
+  ]);
+});
 
-  expect(state.data.voyages.value.categories[0]?.name).toBe('Agence ici');
+test('the active cruise gathers the new navigations and routes', () => {
+  load('empty');
+  const voyage = createVoyage(['crew'], true);
 
-  mergeVoyages({ ...older, mod: '2999-01-01', categories: [] });
+  expect(activeVoyageId()).toBe(voyage.id);
+  expect(blankCruise('Sortie').voyage).toBe(voyage.id);
 
-  expect(state.data.voyages.value.categories).toStrictEqual([]);
+  const route = saveRoute({ points: [{ lat: 46, lon: 6 }] });
+
+  expect(route.voyage).toBe(voyage.id);
+  expect(voyageRecords(voyage.id).routes).toHaveLength(1);
+
+  setActiveVoyage(null);
+
+  expect(blankCruise('Autre').voyage).toBeUndefined();
+
+  removeVoyage(voyage.id);
+
+  expect(freeRecords().routes).toHaveLength(1);
+});
+
+test('the first version, one cruise only, becomes cruise 1', () => {
+  const old = { ...defaultVoyages(), mod: '2026-11-24T10:00:00Z' };
+  const store1 = cleanVoyageStore(old);
+
+  expect(store1?.list.map((voyage) => voyage.name)).toStrictEqual([
+    '1 Croisière 2026',
+  ]);
+  expect(cleanVoyageStore(defaultVoyages())?.list).toStrictEqual([]);
+});
+
+test('a restoration adds the cruises of another device', () => {
+  load('empty');
+  const here = createVoyage(['crew'], false);
+  renameVoyage(here.id, 'Ici');
+  const received = {
+    list: [
+      { ...state.data.voyages.value, name: 'Vieux', mod: '2000-01-01' },
+      {
+        ...defaultVoyages(),
+        id: 'other',
+        num: 2,
+        name: '2 Là-bas',
+        mod: '2999-01-01',
+      },
+    ],
+    active: 'other',
+    mod: '2999-01-01',
+  };
+
+  mergeVoyages(received);
+
+  expect(
+    state.data.voyageStore.value.list.map((voyage) => voyage.name),
+  ).toStrictEqual(['Ici', '2 Là-bas']);
+  expect(state.data.voyageStore.value.active).toBe('other');
 });

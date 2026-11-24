@@ -36,6 +36,9 @@ export function blankCruise(name: string, from?: Cruise | null): Cruise {
     entries: [],
     days: {},
   };
+  // The active cruise of data › Croisières gathers the new navigations.
+  const voyage = data.voyageStore.peek().active;
+  if (voyage) cruise.voyage = voyage;
   if (from) {
     const keep = { ...from.info };
     for (const key of ['name', 'ports', 'du', 'au']) {
@@ -62,6 +65,7 @@ function cruiseMeta(cruise: Cruise): CruiseMeta {
     created: cruise.created,
     type: cruise.type || 'mer',
     duree: cruise.duree,
+    ...(typeof cruise.voyage === 'string' ? { voyage: cruise.voyage } : {}),
   };
 }
 

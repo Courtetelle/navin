@@ -5,6 +5,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
 import { docsOf, shareVoyageDocs } from '../../features/voyages/voyageFiles.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -24,17 +25,18 @@ export function VoyageDocsPage() {
   useSignals();
   const tr = useTr();
   const voyages = state.data.voyages.value;
+  if (!state.data.voyages.value.id) return <NoVoyage />;
   return (
     <>
       <PageBack
-        label="◀ Croisières"
-        data-go="voyages"
+        label="◀ Croisière"
+        data-go="voyage"
         onClick={() => {
           buzz();
-          go('voyages');
+          go('voyage');
         }}
       >
-        {tr('◀ Croisières')}
+        {tr('◀ Croisière')}
       </PageBack>
       <PageTitle
         helps={[

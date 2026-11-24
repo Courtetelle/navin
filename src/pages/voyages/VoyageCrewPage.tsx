@@ -7,6 +7,7 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import { membersByNav } from '../../features/boats/index.ts';
+import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
 import {
   crewSections,
@@ -37,21 +38,22 @@ import {
 export function VoyageCrewPage() {
   useSignals();
   const tr = useTr();
-  const { crew } = state.data.voyages.value;
+  const { crew, id } = state.data.voyages.value;
   const members = state.data.members.value;
   const sorted = membersByNav();
   const sets = state.data.crewSets.value.filter((set) => set.crew.length > 0);
+  if (!id) return <NoVoyage />;
   return (
     <>
       <PageBack
-        label="◀ Croisières"
-        data-go="voyages"
+        label="◀ Croisière"
+        data-go="voyage"
         onClick={() => {
           buzz();
-          go('voyages');
+          go('voyage');
         }}
       >
-        {tr('◀ Croisières')}
+        {tr('◀ Croisière')}
       </PageBack>
       <PageTitle
         helps={[

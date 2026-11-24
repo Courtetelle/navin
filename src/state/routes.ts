@@ -71,6 +71,10 @@ export function saveRoute(
     at: known?.at || route.at || now,
     mod: now,
     points: rounded(route.points),
+    // A new route joins the active cruise of data › Croisières.
+    ...(!known && data.voyageStore.peek().active
+      ? { voyage: data.voyageStore.peek().active }
+      : {}),
     speed:
       route.speed && route.speed > 0
         ? route.speed

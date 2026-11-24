@@ -53,6 +53,8 @@ const COMMON_TABS: Record<string, string> = {
   vcrew: 'more',
   vcontracts: 'more',
   vdocs: 'more',
+  voyage: 'more',
+  vrecords: 'more',
 };
 
 /**
@@ -142,8 +144,8 @@ export function alphaBackFor(current: string): string {
   return ['sos', 'vhf', 'lists'].includes(current) ? current : 'more';
 }
 
-/** The pages of data › Croisières: their back button leads to its menu. */
-const VOYAGE_VIEWS = new Set(['vcrew', 'vcontracts', 'vdocs']);
+/** The pages of a cruise of data › Croisières: their back button leads to its menu. */
+const VOYAGE_VIEWS = new Set(['vcrew', 'vcontracts', 'vdocs', 'vrecords']);
 
 const DATA_BACK_VIEWS = new Set([
   'traces',
@@ -183,7 +185,8 @@ const DATA_BACK_VIEWS = new Set([
 export function backFallback(current: string): string {
   if (DATA_BACK_VIEWS.has(current)) return 'more';
   if (current === 'beaufort' || current === 'douglas') return 'lists';
-  if (VOYAGE_VIEWS.has(current)) return 'voyages';
+  if (VOYAGE_VIEWS.has(current)) return 'voyage';
+  if (current === 'voyage') return 'voyages';
   return 'tracker';
 }
 

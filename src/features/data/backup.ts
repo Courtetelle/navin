@@ -3,6 +3,7 @@ import type { Cruise } from '../../model/types.ts';
 import type { TrackPoint } from '../../state/index.ts';
 import {
   alertLog,
+  allVoyageDocIds,
   keyBook,
   loadTrack,
   siteLinkEdits,
@@ -107,7 +108,7 @@ export function backupAll(): BackupPack {
     crewSets: data.crewSets.value,
     // data › Croisières, only once changed: an untouched one keeps the file
     // the one of the first app.
-    ...(voyagesChanged() ? { voyages: data.voyages.value } : {}),
+    ...(voyagesChanged() ? { voyages: data.voyageStore.value } : {}),
     mob: store.get('ldb.mob2', null),
     mobMer: store.get('ldb.mob2mer', null),
     sosLogs: data.sosLogs.value,
@@ -188,9 +189,9 @@ async function cruisePhotos(
 async function voyagePhotos(): Promise<BackupPhoto[]> {
   const photos: BackupPhoto[] = [];
   /* eslint-disable no-await-in-loop -- one IndexedDB read at a time */
-  for (const doc of state.data.voyages.value.docs) {
-    const url = await getPhoto(doc.id);
-    if (url) photos.push({ id: doc.id, url });
+  for (const id of allVoyageDocIds()) {
+    const url = await getPhoto(id);
+    if (url) photos.push({ id, url });
   }
   /* eslint-enable no-await-in-loop */
   return photos;

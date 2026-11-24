@@ -9,6 +9,7 @@ import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
 import type { ShareFormat } from '../../components/shared/shareFormat.ts';
+import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
 import { shareSections } from '../../features/voyages/voyageShare.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -491,18 +492,19 @@ export function ContractsPage() {
   useSignals();
   const tr = useTr();
   const [editing, setEditing] = useState<string | null>(null);
-  const { categories } = state.data.voyages.value;
+  const { categories, id } = state.data.voyages.value;
+  if (!id) return <NoVoyage />;
   return (
     <>
       <PageBack
-        label="◀ Croisières"
-        data-go="voyages"
+        label="◀ Croisière"
+        data-go="voyage"
         onClick={() => {
           buzz();
-          go('voyages');
+          go('voyage');
         }}
       >
-        {tr('◀ Croisières')}
+        {tr('◀ Croisière')}
       </PageBack>
       <PageTitle
         helps={[
