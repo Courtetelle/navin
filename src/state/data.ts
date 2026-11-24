@@ -16,6 +16,8 @@ import type {
   TaskTemplate,
   UiEdit,
 } from '../model/types.ts';
+import type { Voyages } from '../model/voyages.ts';
+import { defaultVoyages } from '../model/voyages.ts';
 
 /** State of the PréP flow (legacy `prep`, not persisted). */
 export interface PrepState {
@@ -78,6 +80,8 @@ export const data = {
   marks: signal<Mark[]>([]),
   /** Routes planned on the map (`ldb.routes`). */
   routes: signal<NavRoute[]>([]),
+  /** data › Croisières: crew, contracts, documents (`ldb.voyages`). */
+  voyages: signal<Voyages>(defaultVoyages()),
   /** Automatic SOS logs (`ldb.sosLogs`). */
   sosLogs: signal<SosLog[]>([]),
   /** Checklist bases (`ldb.ckLib`). */

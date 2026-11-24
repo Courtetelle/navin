@@ -23,6 +23,7 @@ import { loadRoutes } from './routes.ts';
 import { loadTaskTpl, loadUiEdits } from './templates.ts';
 import { toast } from './toast.ts';
 import { resetView } from './view.ts';
+import { loadVoyages } from './voyages.ts';
 
 /**
  * Load every entity from storage, running the one-shot migrations in the
@@ -47,6 +48,7 @@ export function initState(backend?: Storage | null): void {
   loadUiEdits();
   loadMarks();
   loadRoutes();
+  loadVoyages();
   loadPrep();
   loadCrewSets();
   loadSosLogs();

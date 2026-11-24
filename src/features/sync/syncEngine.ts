@@ -395,7 +395,7 @@ async function fetchPhotos(
 
 /* ---------- What is sent from here ---------- */
 
-/** Ids of every photo of this device: cruises, boats, cards, crews. */
+/** Ids of every photo of this device: cruises, boats, cards, crews, data › Croisières. */
 function photoIds(pack: SyncPack): string[] {
   const ids: string[] = [];
   for (const { cruise } of (pack.cruises ?? []) as Array<{
@@ -416,6 +416,7 @@ function photoIds(pack: SyncPack): string[] {
   for (const crew of state.data.crewSets.peek()) {
     if (typeof crew.photo === 'string') ids.push(crew.photo);
   }
+  for (const doc of state.data.voyages.peek().docs) ids.push(doc.id);
   return [...new Set(ids)];
 }
 

@@ -9,6 +9,7 @@ import {
   state,
   traceCutTimes,
   traceNames,
+  voyagesChanged,
 } from '../../state/index.ts';
 import { getPhoto } from '../../storage/photos.ts';
 import { store } from '../../storage/store.ts';
@@ -104,6 +105,9 @@ export function backupAll(): BackupPack {
     // one of the first app.
     ...(data.routes.value.length > 0 ? { routes: data.routes.value } : {}),
     crewSets: data.crewSets.value,
+    // data › Croisières, only once changed: an untouched one keeps the file
+    // the one of the first app.
+    ...(voyagesChanged() ? { voyages: data.voyages.value } : {}),
     mob: store.get('ldb.mob2', null),
     mobMer: store.get('ldb.mob2mer', null),
     sosLogs: data.sosLogs.value,
@@ -151,7 +155,11 @@ export async function syncPack(
   if (withPhotos) {
     pack.data.photos = await cruisePhotos(pack.data.cruises);
   }
-  pack.data.photos = [...(pack.data.photos ?? []), ...(await boatPhotos())];
+  pack.data.photos = [
+    ...(pack.data.photos ?? []),
+    ...(await boatPhotos()),
+    ...(await voyagePhotos()),
+  ];
   const date = new Date();
   pack.name = `NavIn-synchro-${dateStamp(date)}-${pad(date.getHours())}${pad(date.getMinutes())}.json`;
   return pack;
@@ -167,6 +175,22 @@ async function cruisePhotos(
       const url = await getPhoto(reference.id);
       if (url) photos.push({ id: reference.id, url });
     }
+  }
+  /* eslint-enable no-await-in-loop */
+  return photos;
+}
+
+/**
+ * The PDF and photos of data › Croisières: they always go with the sync
+ * file, like the documents of the boats.
+ * @returns The stored files.
+ */
+async function voyagePhotos(): Promise<BackupPhoto[]> {
+  const photos: BackupPhoto[] = [];
+  /* eslint-disable no-await-in-loop -- one IndexedDB read at a time */
+  for (const doc of state.data.voyages.value.docs) {
+    const url = await getPhoto(doc.id);
+    if (url) photos.push({ id: doc.id, url });
   }
   /* eslint-enable no-await-in-loop */
   return photos;

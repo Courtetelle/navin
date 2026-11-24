@@ -12,6 +12,7 @@ export * from './init.ts';
 export * from './logs.ts';
 export * from './marks.ts';
 export * from './routes.ts';
+export * from './voyages.ts';
 export * from './members.ts';
 export * from './mode.ts';
 export * from './position.ts';

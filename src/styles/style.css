@@ -15735,3 +15735,72 @@ html body .live-slot > .rail-btn.live-layer.on {
   font-size: 13px;
   text-align: center;
 }
+
+/* data › Croisières : contrats, documents, équipage */
+.voy-card {
+  border: 1px solid rgba(127, 127, 127, 0.35);
+  border-radius: 12px;
+  padding: 8px 12px 4px;
+  margin: 0 0 12px;
+}
+.voy-card-title {
+  margin: 4px 0 8px;
+  font-size: 1.1em;
+}
+.voy-lines {
+  margin: 0 0 8px;
+}
+.voy-line {
+  display: grid;
+  grid-template-columns: minmax(120px, 38%) 1fr;
+  gap: 4px 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line, rgba(127, 127, 127, 0.2));
+}
+.voy-line dt {
+  font-weight: 600;
+  opacity: 0.8;
+}
+.voy-line dd {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  overflow-wrap: anywhere;
+}
+.voy-text {
+  white-space: pre-wrap;
+}
+.voy-link {
+  color: inherit;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.crew-on-name .voy-link {
+  margin-left: 14px;
+  font-size: 0.95em;
+}
+.voy-person-edit {
+  border-left: 3px solid var(--line, rgba(127, 127, 127, 0.4));
+  margin: 0 0 10px;
+  padding-left: 6px;
+}
+.voy-doc {
+  margin: 0 0 12px;
+}
+.voy-doc-band {
+  width: 100%;
+  text-align: left;
+}
+.voy-file {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.voy-catpick {
+  margin: 0 0 10px;
+}
+@media (max-width: 520px) {
+  .voy-line {
+    grid-template-columns: 1fr;
+  }
+}
