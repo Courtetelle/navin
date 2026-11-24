@@ -8,6 +8,7 @@ import { buzz } from '../../lib/dom.ts';
 import { GITHUB_KEY_SETTING, checkGithubKey } from '../../model/analysis.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
 
+import { CopyKeyButton } from './CopyKeyButton.tsx';
 import { KeyAccount } from './KeyAccount.tsx';
 import { KeyGuide } from './KeyGuide.tsx';
 import { KeyQr } from './KeyQr.tsx';
@@ -95,6 +96,7 @@ export function GithubKeyRow() {
             <Button className="btn" type="submit" disabled={busy}>
               {tr(busy ? 'Essai…' : 'Enregistrer')}
             </Button>
+            <CopyKeyButton value={key} />
           </div>
         </div>
         {result ? (
