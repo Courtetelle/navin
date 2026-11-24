@@ -33,8 +33,8 @@ export const PORTRAIT_QUERY = '(orientation: portrait)';
 export const PHONE_SIDEWAYS_QUERY =
   '(orientation: landscape) and (min-width: 560px) and (max-height: 520px)';
 
-/** The packet of buttons shown (0 the first). */
-export const railPage = signal(0);
+/** The first button shown, its rank among those that turn (0 the first). */
+export const railStart = signal(0);
 /** The packet of white figures shown at the bottom (0 the first). */
 export const dashPage = signal(0);
 
@@ -44,6 +44,10 @@ const SWIPE_PX = 40;
 const SLIDE_PX = 10;
 /** The click that ends a swipe comes within this time (ms). */
 const CLICK_AFTER_MS = 300;
+/** A swipe quicker than this is a big swipe: five buttons at once (ms). */
+const FLICK_MS = 280;
+/** Buttons a big swipe turns (Corban, 24/11/2026). */
+export const FLICK_BUTTONS = 5;
 
 /** The buttons of the rails, what a swipe on them turns. */
 const RAIL_TARGETS = [
@@ -62,9 +66,9 @@ function matches(query: string): boolean {
 }
 
 /**
- * How many buttons a packet holds, the layout of the screen: five upright,
- * as many as fit above SOS sideways, all of them otherwise.
- * @returns The size of a packet.
+ * How many buttons are shown at once, the layout of the screen: five
+ * upright, as many as fit above SOS sideways, all of them otherwise.
+ * @returns How many.
  */
 export function railPacket(): number {
   if (matches(PORTRAIT_QUERY)) return 5;
@@ -81,56 +85,91 @@ export function railPacket(): number {
 }
 
 /**
- * The buttons in packets: SOS stays out of them sideways (its own place).
- * @returns The keys of each packet.
+ * The buttons that turn, in their order: SOS stays out of them sideways (its
+ * own place), data and Paramétrages upright (their tab).
+ * @returns Their keys.
  */
-export function railPackets(): RailKey[][] {
-  const size = railPacket();
+export function railKeys(): RailKey[] {
   const sideways = matches(PHONE_SIDEWAYS_QUERY);
   const upright = matches(PORTRAIT_QUERY);
-  const keys = RAIL_ORDER.filter(
+  return RAIL_ORDER.filter(
     (key) =>
       !(sideways && key === 'sos') &&
       !(upright && (key === 'data' || key === 'gear')),
   );
-  const packets: RailKey[][] = [];
-  for (let index = 0; index < keys.length; index += size) {
-    packets.push(keys.slice(index, index + size));
-  }
-  return packets;
 }
 
 /**
- * Write where each button stands: its place in its packet (`--ri-<key>`)
- * and how many packets away from the one shown it is (`--rp-<key>`).
+ * The places of the buttons when the first shown is `start`: its rank in
+ * the window (`index`) and whether it stands before it (-1), in it (0) or
+ * after it (1).
+ * @param count - How many buttons turn.
+ * @param size - How many are shown at once.
+ * @param start - The first shown, wanted.
+ * @returns The first shown (kept between 0 and the last window) and each
+ *   place, by rank.
+ */
+export function railWindow(
+  count: number,
+  size: number,
+  start: number,
+): { start: number; places: Array<{ index: number; away: -1 | 0 | 1 }> } {
+  const first = Math.max(0, Math.min(start, count - size));
+  const places = Array.from({ length: count }, (_, rank) => {
+    const index = rank - first;
+    if (index < 0) return { index: index + size, away: -1 as const };
+    if (index >= size) return { index: index - size, away: 1 as const };
+    return { index, away: 0 as const };
+  });
+  return { start: first, places };
+}
+
+/**
+ * Write where each button stands: its place in the window shown
+ * (`--ri-<key>`) and whether it is before it, in it or after it
+ * (`--rp-<key>`).
  */
 export function placeRails(): void {
   const root = document.documentElement;
-  const packets = railPackets();
-  const page = Math.min(railPage.peek(), packets.length - 1);
-  if (page !== railPage.peek()) railPage.value = page;
-  root.dataset.railPages = String(packets.length);
-  root.dataset.railPage = String(page);
-  for (const [number, packet] of packets.entries()) {
-    for (const [index, key] of packet.entries()) {
-      root.style.setProperty(`--ri-${key}`, String(index));
-      root.style.setProperty(`--rp-${key}`, String(number - page));
-    }
+  const keys = railKeys();
+  const size = railPacket();
+  const { start, places } = railWindow(keys.length, size, railStart.peek());
+  if (start !== railStart.peek()) railStart.value = start;
+  root.dataset.railStart = String(start);
+  root.dataset.railMore = String(Math.max(0, keys.length - size - start));
+  for (const [rank, key] of keys.entries()) {
+    const place = places[rank];
+    if (!place) continue;
+    root.style.setProperty(`--ri-${key}`, String(place.index));
+    root.style.setProperty(`--rp-${key}`, String(place.away));
   }
 }
 
 /**
- * Turn the packets of buttons by one.
- * @param by - `1` the next, `-1` the previous.
+ * Turn the buttons by some places.
+ * @param by - Positive: the next ones, negative: the previous ones.
  * @returns Whether it turned.
  */
 export function turnRails(by: number): boolean {
-  const count = railPackets().length;
-  const next = railPage.peek() + by;
-  if (next < 0 || next >= count) return false;
-  railPage.value = next;
+  const keys = railKeys();
+  const { start } = railWindow(
+    keys.length,
+    railPacket(),
+    railStart.peek() + by,
+  );
+  if (start === railStart.peek()) return false;
+  railStart.value = start;
   placeRails();
   return true;
+}
+
+/** The distance from one button to the next along the rails (px). */
+function railStepPx(sideways: boolean): number {
+  const style = globalThis.getComputedStyle(document.documentElement);
+  const gap = Number.parseFloat(style.getPropertyValue('--rb-gap')) || 6;
+  const box = document.querySelector('#clock')?.getBoundingClientRect();
+  const size = sideways ? box?.height : box?.width;
+  return size && size > 0 ? size + gap : 56;
 }
 
 /**
@@ -165,7 +204,9 @@ function swallowClick(): void {
 
 /**
  * The swipes on the buttons and on the white figures: left and right upright
- * (and on the figures everywhere), up and down sideways, a packet at a time.
+ * (and on the figures everywhere), up and down sideways. On the buttons a
+ * big quick swipe turns them five at a time, a finger that slides turns
+ * them one by one as it goes; the figures turn a packet at a time.
  */
 export function useRailSwipe(): void {
   useEffect(() => {
@@ -173,67 +214,92 @@ export function useRailSwipe(): void {
     let start: {
       x: number;
       y: number;
+      at: number;
       on: 'rails' | 'dash';
       target: Element;
       moved: boolean;
+      first: number;
+      turned: boolean;
     } | null = null;
     const down = (event: PointerEvent) => {
       const target = event.target as Element | null;
       if (!target?.closest) return;
-      if (target.closest('.trk-dash')) {
-        start = {
-          x: event.clientX,
-          y: event.clientY,
-          on: 'dash',
-          target,
-          moved: false,
-        };
-      } else if (target.closest(RAIL_TARGETS)) {
-        start = {
-          x: event.clientX,
-          y: event.clientY,
-          on: 'rails',
-          target,
-          moved: false,
-        };
-      } else {
-        start = null;
-      }
+      const on = target.closest('.trk-dash')
+        ? 'dash'
+        : target.closest(RAIL_TARGETS)
+          ? 'rails'
+          : null;
+      start = on
+        ? {
+            x: event.clientX,
+            y: event.clientY,
+            at: event.timeStamp,
+            on,
+            target,
+            moved: false,
+            first: railStart.peek(),
+            turned: false,
+          }
+        : null;
     };
     // A finger that slides is no long press: the button under it hears so
-    // even when the finger has left it.
+    // even when the finger has left it. On the buttons it turns them one
+    // by one as it slides (Corban, 24/11/2026).
     const move = (event: PointerEvent) => {
-      if (!start || start.moved) return;
-      const far = Math.hypot(event.clientX - start.x, event.clientY - start.y);
-      if (far <= SLIDE_PX) return;
-      start.moved = true;
-      start.target.dispatchEvent(
-        new PointerEvent('pointercancel', { bubbles: true }),
-      );
+      if (!start) return;
+      const dx = event.clientX - start.x;
+      const dy = event.clientY - start.y;
+      if (!start.moved) {
+        if (Math.hypot(dx, dy) <= SLIDE_PX) return;
+        start.moved = true;
+        start.target.dispatchEvent(
+          new PointerEvent('pointercancel', { bubbles: true }),
+        );
+      }
+      if (start.on !== 'rails') return;
+      const sideways = matches(PHONE_SIDEWAYS_QUERY);
+      const along = sideways ? dy : dx;
+      const across = sideways ? dx : dy;
+      if (Math.abs(along) <= Math.abs(across)) return;
+      const steps = Math.trunc(-along / railStepPx(sideways));
+      const wanted = start.first + steps;
+      if (wanted === railStart.peek()) return;
+      if (turnRails(wanted - railStart.peek())) {
+        start.turned = true;
+        buzz();
+      }
     };
     const up = (event: PointerEvent) => {
       if (!start) return;
       const dx = event.clientX - start.x;
       const dy = event.clientY - start.y;
-      const on = start.on;
+      const { on, first, at } = start;
+      let turned = start.turned;
       start = null;
       const sideways = matches(PHONE_SIDEWAYS_QUERY);
-      let turned = false;
       if (on === 'dash') {
         if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
           turned = turnDash(dx < 0 ? 1 : -1, DASH_PACKETS);
+          if (turned) buzz();
         }
-      } else if (sideways) {
-        if (Math.abs(dy) > SWIPE_PX && Math.abs(dy) > Math.abs(dx)) {
-          turned = turnRails(dy < 0 ? 1 : -1);
+      } else {
+        const along = sideways ? dy : dx;
+        const across = sideways ? dx : dy;
+        const quick = event.timeStamp - at < FLICK_MS;
+        if (
+          quick &&
+          Math.abs(along) > SWIPE_PX &&
+          Math.abs(along) > Math.abs(across)
+        ) {
+          // A big swipe: five buttons from where the finger came down.
+          const by = along < 0 ? FLICK_BUTTONS : -FLICK_BUTTONS;
+          if (turnRails(first + by - railStart.peek())) buzz();
+          turned = turned || railStart.peek() !== first;
         }
-      } else if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
-        turned = turnRails(dx < 0 ? 1 : -1);
       }
       if (turned) {
         // The touch was a swipe: the button under it does not act.
         event.stopPropagation();
-        buzz();
         swallowClick();
       }
     };
