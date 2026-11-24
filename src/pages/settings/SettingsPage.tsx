@@ -17,6 +17,7 @@ import { MenuSortButton } from '../../components/shared/MenuSortButton.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { WindsockIcon } from '../../components/shared/WindsockIcon.tsx';
 import { bumpIn, inMenuOrder } from '../../features/data/dataOrder.ts';
+import { RoutingShiftSection } from '../../features/map/RoutingShiftSection.tsx';
 import {
   ALERT_KINDS,
   ReOnChoices,
@@ -537,6 +538,9 @@ export function SettingsPage({ from, arg }: PageProps) {
               title="🔑 Clés météos et compte relais (Cloudflare)"
             >
               <WindKeys />
+            </SettingsSection>
+            <SettingsSection section="routages" title="🧭 Routages">
+              <RoutingShiftSection />
             </SettingsSection>
             <SettingsSection
               section="shom"

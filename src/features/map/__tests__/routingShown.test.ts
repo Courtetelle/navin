@@ -5,6 +5,7 @@ import type { RoutingResult, RoutingStep } from '../../../model/sailRouting.ts';
 import { state } from '../../../state/index.ts';
 import { gotoTarget, gotoUpdate, setGoto } from '../goto.ts';
 import {
+  boxEdge,
   clearRouting,
   gotoRouting,
   markHtml,
@@ -183,5 +184,17 @@ describe('placeMarks', () => {
     }));
     // Across the screen, the boxes are wider: fewer of them.
     expect(placeMarks(across).length).toBeLessThan(placed.length);
+  });
+});
+
+describe('boxEdge', () => {
+  it('ends the line from the route at the edge of the label', () => {
+    // Set off sideways: the edge is half the width short of the centre.
+    const side = boxEdge(200, 0);
+    expect(side.y).toBe(0);
+    expect(side.x).toBeGreaterThan(0);
+    expect(side.x).toBeLessThan(200);
+    // A label over the point: no line.
+    expect(boxEdge(10, 5)).toStrictEqual({ x: 0, y: 0 });
   });
 });

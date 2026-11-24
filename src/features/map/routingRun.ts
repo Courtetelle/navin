@@ -185,9 +185,29 @@ export async function runRouting(
  * @param route - The route.
  * @returns The check, or `undefined` without a map file covering the route.
  */
-async function landCheck(
-  route: NavRoute,
-): Promise<((from: LatLon, to: LatLon) => boolean) | undefined> {
+type LandCheck = ((from: LatLon, to: LatLon) => boolean) | undefined;
+
+/** The water of a route, kept: a routing moved hour by hour asks it again. */
+const landKept = new Map<string, Promise<LandCheck>>();
+
+function landCheck(route: NavRoute): Promise<LandCheck> {
+  const key = JSON.stringify([
+    route.points.map((point) => [point.lat, point.lon]),
+    autoOptions().marginM,
+  ]);
+  let kept = landKept.get(key);
+  if (!kept) {
+    kept = landCheckNow(route);
+    landKept.set(key, kept);
+    // A few routes at most.
+    if (landKept.size > 8) {
+      landKept.delete(landKept.keys().next().value as string);
+    }
+  }
+  return kept;
+}
+
+async function landCheckNow(route: NavRoute): Promise<LandCheck> {
   const lats = route.points.map((point) => point.lat);
   const lons = route.points.map((point) => point.lon);
   const options = autoOptions();
