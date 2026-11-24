@@ -14,6 +14,7 @@ import {
   cleanVoyageStore,
   mergedStores,
   voyageNavInfo,
+  voyagePhotoIds,
 } from '../model/voyages.ts';
 import { delPhoto } from '../storage/photos.ts';
 import { store } from '../storage/store.ts';
@@ -146,7 +147,9 @@ export function removeVoyage(id: string): void {
     if (draft.active === id) draft.active = null;
   });
   if (data.voyageOpen.value === id) openVoyage(null);
-  for (const doc of voyage?.docs ?? []) void delPhoto(doc.id);
+  for (const photo of voyage ? voyagePhotoIds(voyage) : []) {
+    void delPhoto(photo);
+  }
 }
 
 /**
@@ -180,13 +183,11 @@ export function voyagesChanged(): boolean {
 }
 
 /**
- * Every document of every cruise.
+ * Every photo of every cruise: documents, medallions, crew group photos.
  * @returns Their ids.
  */
 export function allVoyageDocIds(): string[] {
-  return data.voyageStore.value.list.flatMap((voyage) =>
-    voyage.docs.map((doc) => doc.id),
-  );
+  return data.voyageStore.value.list.flatMap(voyagePhotoIds);
 }
 
 /**

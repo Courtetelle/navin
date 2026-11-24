@@ -15,6 +15,7 @@ import type { CrewSet } from '../../model/types.ts';
 import { PageBack, PageValidate } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
 import { useNavEdit } from '../../shell/navbar/useNavEdit.ts';
+import { go } from '../../shell/router.ts';
 import { crewSetName, memberName, state, toast } from '../../state/index.ts';
 import type { CrewsEdit } from '../../state/view.ts';
 import { membersByNav } from '../boats/index.ts';
@@ -62,6 +63,8 @@ export function CrewsEditor() {
     saveCrewsEdit();
   }, []);
   const pending = choicePending(edit, base);
+  const backLabel =
+    edit.back === 'vcrew' ? '◀ Équipage de la croisière' : '◀ Équipages';
   // A saved crew opens read-only: the pencil edits it until the green tick.
   const reading = Boolean(base) && !edit.editing && !pending;
   useNavEdit(reading, () => {
@@ -79,8 +82,10 @@ export function CrewsEditor() {
     }
     if (edit.crew.length > 0) toast('Équipage enregistré');
     else if (!base) toast('Équipage vide : pas gardé');
+    const back = current?.back;
     state.view.crewsEdit.value = null;
-    showCrews();
+    if (back === 'vcrew') go('vcrew');
+    else showCrews();
   };
   const validate = () => {
     buzz();
@@ -92,7 +97,7 @@ export function CrewsEditor() {
       document.querySelector('#ceChoice')?.scrollIntoView({ block: 'center' });
       return;
     }
-    if (!base || current.crew.length === 0) {
+    if (!base || current.crew.length === 0 || current.back === 'vcrew') {
       leave();
       return;
     }
@@ -102,8 +107,8 @@ export function CrewsEditor() {
   };
   return (
     <>
-      <PageBack id="ceBack" label="◀ Équipages" onClick={leave}>
-        {tr('◀ Équipages')}
+      <PageBack id="ceBack" label={backLabel} onClick={leave}>
+        {tr(backLabel)}
       </PageBack>
       {reading ? null : (
         <PageValidate label="Valider" onClick={validate} hidden>

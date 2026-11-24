@@ -32,6 +32,21 @@ export function beginCrewSetEdit(id: string): boolean {
 }
 
 /**
+ * Open a composition for editing from a cruise: leaving the editor goes back
+ * to the cruise crew.
+ * @param id - Composition id.
+ * @returns `false` when it does not exist.
+ */
+export function beginVoyageCrewEdit(id: string): boolean {
+  if (!beginCrewSetEdit(id)) return false;
+  const edit = state.view.crewsEdit.value;
+  if (edit) {
+    state.view.crewsEdit.value = { ...edit, editing: true, back: 'vcrew' };
+  }
+  return true;
+}
+
+/**
  * Open a composition for editing from another screen (legacy nav.js:1285).
  * @param id - Composition id.
  */

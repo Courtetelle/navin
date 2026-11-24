@@ -1,6 +1,8 @@
 import { VOYAGE_SECTIONS } from '../../model/voyages.ts';
 import { state } from '../../state/index.ts';
 
+import { voyageBoat } from './voyageBoat.ts';
+import { voyageCrewLines, voyageCrewSet } from './voyageCrew.ts';
 import { voyageRecords } from './voyageRecords.ts';
 
 /** One tile of a cruise menu. */
@@ -21,13 +23,19 @@ function plural(count: number, word: string): string {
  */
 export function voyageTiles(): VoyageTile[] {
   const voyage = state.data.voyages.value;
-  const { crew, categories, docs, sections, id } = voyage;
+  const { categories, docs, sections, id } = voyage;
+  const crew = voyageCrewLines(voyage);
+  const crewSet = voyageCrewSet(voyage);
+  const boat = voyageBoat(voyage);
   const cards = categories.reduce((sum, cat) => sum + cat.cards.length, 0);
   const subs: Record<string, string> = {
     crew:
       crew.length > 0
-        ? `${plural(crew.length, 'personne')} pour la croisière`
-        : 'qui part, avec les rôles et les contacts',
+        ? `${crewSet?.name ? `${crewSet.name} · ` : ''}${plural(crew.length, 'personne')}`
+        : 'choisi dans data › Équipages',
+    boat: boat
+      ? boat.info.boat || 'bateau sans nom'
+      : 'choisi dans data › Bateaux',
     contracts: `agence, loueur, assurances · ${plural(cards, 'fiche')}`,
     docs:
       docs.length > 0

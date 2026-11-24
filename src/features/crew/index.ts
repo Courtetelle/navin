@@ -27,7 +27,7 @@ export { blankPdf } from './blankPdf.tsx';
 export { blankImport, blankSend } from './blankSheet.ts';
 export { CrewPick } from './CrewPick.tsx';
 export { CrewScreenHost } from './CrewScreenHost.tsx';
-export { openCrewSet } from './crewsEdit.ts';
+export { beginVoyageCrewEdit, openCrewSet } from './crewsEdit.ts';
 export { Fiche } from './Fiche.tsx';
 export type { FicheProps } from './Fiche.tsx';
 export { FicheList } from './FicheList.tsx';
