@@ -62,3 +62,31 @@ export function useRails(): boolean {
 export function railsScreen(): boolean {
   return railsList()?.matches ?? false;
 }
+
+/**
+ * The tablet sideways (X, SP10X), not the phone turned: one column of
+ * buttons on the left, tall enough for Routes under START.
+ */
+export const TABLET_SIDEWAYS_QUERY = `${WIDE_QUERY} and (min-height: 640px)`;
+
+function tabletList(): MediaQueryList | null {
+  return globalThis.matchMedia?.(TABLET_SIDEWAYS_QUERY) ?? null;
+}
+
+function subscribeTablet(changed: () => void): () => void {
+  const list = tabletList();
+  list?.addEventListener('change', changed);
+  return () => list?.removeEventListener('change', changed);
+}
+
+/**
+ * Whether the screen is the tablet sideways, following rotations.
+ * @returns `true` on such a screen.
+ */
+export function useTabletSideways(): boolean {
+  return useSyncExternalStore(
+    subscribeTablet,
+    () => tabletList()?.matches ?? false,
+    () => false,
+  );
+}

@@ -4,6 +4,7 @@ import type { Coords, DoneCallback, LayerGroup, TileLayer } from 'leaflet';
 import { useEffect } from 'react';
 
 import { leaflet } from '../../features/map/leaflet.ts';
+import { routingOverlay } from '../../features/map/routingState.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type {
   LightningReport,
@@ -428,9 +429,13 @@ function LightningAim() {
  */
 export function LightningOnMap() {
   useSignals();
-  const on = lightningOnMap(
-    state.preferences.settings.value.lightning as LightningSettings | undefined,
-  );
+  // Asked over a routing leaving now: shown even when set off.
+  const on =
+    routingOverlay.value ||
+    lightningOnMap(
+      state.preferences.settings.value.lightning as
+        LightningSettings | undefined,
+    );
   useEffect(() => {
     if (!on) return undefined;
     let closed = false;

@@ -18,6 +18,10 @@ export interface Wind {
   twd: number;
   /** Knots. */
   tws: number;
+  /** Gusts, knots. @default undefined */
+  gust?: number;
+  /** Convective energy, J/kg (storms). @default undefined */
+  cape?: number;
 }
 
 /** The sea at a place and time: waves and current. */
@@ -115,6 +119,10 @@ export interface RoutingStep {
   awa: number;
   /** Apparent wind, knots. */
   aws: number;
+  /** Gusts, knots. @default undefined */
+  gust?: number;
+  /** Convective energy, J/kg. @default undefined */
+  cape?: number;
 }
 
 /** One leg of the routing, from a point of the route to the next. */
@@ -297,6 +305,10 @@ export function routeSail(ask: RoutingAsk): RoutingResult {
         waveFrom: Math.round(sea.waveFrom ?? Number.NaN),
         wavePeriod: Math.round((sea.wavePeriod ?? Number.NaN) * 10) / 10,
         ...apparentWind(twa, wind.tws, kn),
+        ...(wind.gust === undefined
+          ? {}
+          : { gust: Math.round(wind.gust * 10) / 10 }),
+        ...(wind.cape === undefined ? {} : { cape: Math.round(wind.cape) }),
       });
       const nm = (ground.sog * runMs) / 3_600_000;
       here =

@@ -25,6 +25,10 @@ export interface RouteWind {
   speed: number[][];
   /** `[place][hour]` direction it comes from, degrees. */
   from: number[][];
+  /** `[place][hour]` gusts, knots. @default undefined */
+  gust?: number[][];
+  /** `[place][hour]` convective energy, J/kg. @default undefined */
+  cape?: number[][];
   model: string;
 }
 
@@ -63,6 +67,9 @@ interface HourlyReply {
     wind_speed_10m?: Array<number | null>;
     // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
     wind_direction_10m?: Array<number | null>;
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- name in the API
+    wind_gusts_10m?: Array<number | null>;
+    cape?: Array<number | null>;
   };
 }
 
@@ -82,6 +89,7 @@ export async function fetchRouteWind(
     'https://api.open-meteo.com/v1/forecast',
     `forecast_days=10&models=${model}`,
     model,
+    true,
   );
 }
 
@@ -124,11 +132,12 @@ async function askWind(
   base: string,
   extra: string,
   model: string,
+  storms = false,
 ): Promise<RouteWind | { error: string }> {
   if (places.length === 0) return { error: 'La route n’a pas de point.' };
   const lat = places.map((place) => place.lat.toFixed(3)).join(',');
   const lon = places.map((place) => place.lon.toFixed(3)).join(',');
-  const url = `${base}?latitude=${lat}&longitude=${lon}&hourly=wind_speed_10m,wind_direction_10m&wind_speed_unit=kn&timeformat=unixtime&${extra}`;
+  const url = `${base}?latitude=${lat}&longitude=${lon}&hourly=wind_speed_10m,wind_direction_10m${storms ? ',wind_gusts_10m,cape' : ''}&wind_speed_unit=kn&timeformat=unixtime&${extra}`;
   let reply: Response;
   try {
     reply = await openMeteoFetch(url);
@@ -153,6 +162,12 @@ async function askWind(
     hours,
     speed: list.map((item) => clean(item.hourly?.wind_speed_10m)),
     from: list.map((item) => clean(item.hourly?.wind_direction_10m)),
+    ...(storms
+      ? {
+          gust: list.map((item) => clean(item.hourly?.wind_gusts_10m)),
+          cape: list.map((item) => clean(item.hourly?.cape)),
+        }
+      : {}),
     model,
   };
 }
@@ -208,7 +223,22 @@ export function windAt(
     b.tws * Math.sin((b.twd * Math.PI) / 180) * share;
   const tws = a.tws * (1 - share) + b.tws * share;
   const twd = ((((Math.atan2(y, x) * 180) / Math.PI) % 360) + 360) % 360;
-  return { tws, twd };
+  const mix = (values: number[][] | undefined) => {
+    const row = values?.[place];
+    const one = row?.[low] ?? Number.NaN;
+    const two = row?.[high] ?? Number.NaN;
+    return Number.isFinite(one) && Number.isFinite(two)
+      ? one * (1 - share) + two * share
+      : undefined;
+  };
+  const gust = mix(wind.gust);
+  const cape = mix(wind.cape);
+  return {
+    tws,
+    twd,
+    ...(gust === undefined ? {} : { gust }),
+    ...(cape === undefined ? {} : { cape }),
+  };
 }
 
 /** The sea along a route, hour by hour: waves and current. */

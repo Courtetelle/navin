@@ -27,8 +27,7 @@ import {
   ROUTING_KEY,
   legTarget,
   routingLeg,
-  saveShiftPrefs,
-  shiftPrefs,
+  routingOverlay,
   shownRouting,
 } from './routingState.ts';
 
@@ -45,6 +44,7 @@ export function showRouting(shown: ShownRouting): void {
 export function clearRouting(): void {
   if (gotoTarget.peek()?.leg !== undefined) setGoto(null);
   shownRouting.value = null;
+  routingOverlay.value = false;
   store.set(ROUTING_KEY, null);
 }
 
@@ -323,24 +323,6 @@ const seenTimes: {
   arriveMs: null,
 };
 
-/** The tag just touched: it blinks three times. */
-let picked: 'etd' | 'eta' | null = null;
-
-/**
- * A touch on the ETD or the ETA tag: the arrows of the routing move it.
- * @param end - The tag touched.
- */
-export function pickEnd(end: 'etd' | 'eta'): void {
-  picked = end;
-  const prefs = shiftPrefs.peek();
-  if (prefs.moves === end) {
-    // Already the one: blink it again all the same.
-    for (const map of marksMaps) drawRouting(map);
-    return;
-  }
-  saveShiftPrefs({ ...prefs, moves: end });
-}
-
 const layers = new WeakMap<LeafletMap, { remove: () => void }>();
 const turning = new WeakSet<LeafletMap>();
 
@@ -359,12 +341,10 @@ function routingPopup(shown: ShownRouting): HTMLElement {
  * current and waves along it.
  * @param map - Leaflet map.
  * @param shown - The routing.
- * @param moves - The tag the arrows move.
  */
 export function drawRouting(
   map: LeafletMap,
   shown: ShownRouting | null = shownRouting.peek(),
-  moves: 'etd' | 'eta' = shiftPrefs.peek().moves,
 ): void {
   watchRouting();
   layers.get(map)?.remove();
@@ -450,27 +430,19 @@ export function drawRouting(
   const tags = endTags(shown);
   seenTimes.departMs = shown.departMs ?? null;
   seenTimes.arriveMs = shown.arriveMs ?? null;
-  const blinkPick = picked;
-  picked = null;
   const ends = tags.map(({ end, at, html, blink }) => {
     const classes = ['rtm-end'];
-    if (end === moves) classes.push('rtm-on');
-    if (end === blinkPick) classes.push('rtm-pick');
-    else if (blink) classes.push('rtm-blink');
+    if (blink) classes.push('rtm-blink');
     return L.marker(at, {
+      interactive: false,
       keyboard: false,
-      bubblingMouseEvents: false,
-      title:
-        end === 'etd'
-          ? 'Toucher : les flèches décalent l’ETD'
-          : 'Toucher : les flèches décalent l’ETA',
       icon: L.divIcon({
         className: classes.join(' '),
         html: `<span data-end="${end}">${html}</span>`,
         iconSize: [0, 0],
         iconAnchor: [0, 0],
       }),
-    }).on('click', () => pickEnd(end));
+    });
   });
   const group = L.layerGroup([line, ...turns, ...marks, ...ends]).addTo(map);
   layers.set(map, group);
@@ -494,8 +466,6 @@ function watchRouting(): void {
   watching = true;
   effect(() => {
     const shown = shownRouting.value;
-    // The tag the arrows move is shown on the map.
-    const { moves } = shiftPrefs.value;
-    for (const map of marksMaps) drawRouting(map, shown, moves);
+    for (const map of marksMaps) drawRouting(map, shown);
   });
 }
