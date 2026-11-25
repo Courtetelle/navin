@@ -2691,8 +2691,11 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(400);
   check(
     theme,
-    'Routes has two parts, Dessiner and Routage',
-    (await page.locator('#rtParts [data-part]').count()) === 2,
+    'Planification d’itinéraire has two parts, Route and Routage',
+    (await page.locator('#rtParts [data-part]').count()) === 2 &&
+      ((await page.locator('[data-part="draw"]').textContent()) ?? '').includes(
+        'Route',
+      ),
   );
   await page.locator('[data-part="routing"]').click();
   await page.waitForTimeout(300);
@@ -2849,8 +2852,28 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(400);
   check(
     theme,
-    'and the routing is kept in Routages',
-    (await page.locator('#rtgSaved [data-routing]').count()) > 0,
+    'and the routing is kept in Routages, named « Routage » with its date',
+    (await page.locator('#rtgSaved [data-routing]').count()) > 0 &&
+      /^Routage \d/u.test(
+        (
+          (await page
+            .locator('#rtgSaved [data-routing] .b-nm')
+            .first()
+            .textContent()) ?? ''
+        ).trim(),
+      ) &&
+      (
+        (await page
+          .locator('#rtgSaved [data-routing] small')
+          .first()
+          .textContent()) ?? ''
+      ).includes('Route'),
+  );
+  check(
+    theme,
+    'big buttons, no dropdown, to choose the route, the boat and the model',
+    (await page.locator('#rtgForm select').count()) === 0 &&
+      (await page.locator('#rtgModel [aria-pressed="true"]').count()) === 1,
   );
   await page.locator('[data-part="draw"]').click();
   await page.unroute(/api\.open-meteo\.com\/v1\/forecast/);

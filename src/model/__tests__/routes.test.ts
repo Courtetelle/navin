@@ -5,6 +5,7 @@ import {
   midpoint,
   pointName,
   routeDuration,
+  routeLabel,
   routeLegs,
   routeNm,
   routeTimes,
@@ -83,4 +84,21 @@ test('only usable routes are taken from another device', () => {
   expect(isRoute({ ...good, points: [{ lat: 'x', lon: 2 }] })).toBe(false);
   expect(isRoute({ ...good, points: [{ lat: 91, lon: 2 }] })).toBe(false);
   expect(isRoute(null)).toBe(false);
+});
+
+function route(id: string, name: string): never {
+  return { id, name, points: [], speed: 6 } as never;
+}
+
+test('routeLabel gives the number and the name of a route, no date', () => {
+  const routes = [
+    route('a', 'Route 1'),
+    route('b', 'Portrieux → Bréhat'),
+    route('c', 'Route 2 · routage 25/11/2026 19:00'),
+  ];
+  expect(routeLabel(routes[0] as never, routes)).toBe('Route 1');
+  expect(routeLabel(routes[1] as never, routes)).toBe(
+    'Route 2 · Portrieux → Bréhat',
+  );
+  expect(routeLabel(routes[2] as never, routes)).toBe('Route 2');
 });

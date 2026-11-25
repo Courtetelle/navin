@@ -47,7 +47,7 @@ const OTHER_FUNCTIONS: readonly FunctionEntry[] = [
   { key: 'marks', title: '◆ Mes repères', sub: 'points marques' },
   {
     key: 'routes',
-    title: '🧭 Routes',
+    title: '🧭 Planification d’itinéraire',
     sub: 'route tracer itinéraire points waypoints GPX',
   },
   {

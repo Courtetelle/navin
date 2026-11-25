@@ -478,7 +478,7 @@ export function addRouteControl(map: LeafletMap): void {
       <button type="button" class="btn" data-rp="undo">↶ Annuler</button>
       <button type="button" class="btn danger" data-rp="drop" hidden></button>
       <button type="button" class="btn" data-rp="goto">🎯 Go to</button>
-      <button type="button" class="btn" data-rp="list">🧭 Routes</button>
+      <button type="button" class="btn" data-rp="list">🧭 Planification d’itinéraire</button>
       <button type="button" class="btn primary" data-rp="done">✓ Terminer</button>
     </div>
     <div class="rp-auto">

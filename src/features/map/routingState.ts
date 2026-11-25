@@ -180,6 +180,11 @@ export interface SavedRouting {
   model: string;
   shown: ShownRouting;
   /**
+   * The route it follows, number and name, without date or hour.
+   * @default undefined
+   */
+  route?: string;
+  /**
    * Last changed, ISO: on the other devices, the newest change wins.
    * @default undefined
    */
