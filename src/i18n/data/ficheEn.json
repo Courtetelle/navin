@@ -1609,5 +1609,7 @@
   "Synchronisation en cours…": "Synchronising…",
   "Synchronisation prête": "Synchronisation ready",
   "dernière à": "last at",
-  "Il faut d’abord le relais : Paramétrages › Clés météos et compte relais (Cloudflare).": "The relay comes first: Settings › Weather keys and relay account (Cloudflare)."
+  "Il faut d’abord le relais : Paramétrages › Clés météos et compte relais (Cloudflare).": "The relay comes first: Settings › Weather keys and relay account (Cloudflare).",
+  "Maritime": "Sea",
+  "Lacustre": "Lake"
 }

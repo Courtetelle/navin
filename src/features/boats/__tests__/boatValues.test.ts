@@ -138,7 +138,7 @@ test('info rows: units, labels, no SOS numbers', () => {
   const first = rows[0]?.rows ?? [];
   expect(first.slice(0, 3)).toStrictEqual([
     ['Nom du bateau', 'Savannah'],
-    ['Navigue', 'en eaux intérieures'],
+    ['Plan d’eau', 'Lacustre'],
     ['Modèle', 'Hanse 325'],
   ]);
   expect(first.find(([label]) => label === 'Tirant d’eau')?.[1]).toBe('1,53 m');

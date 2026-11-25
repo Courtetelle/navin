@@ -1,4 +1,8 @@
-import { VOYAGE_SECTIONS } from '../../model/voyages.ts';
+import {
+  CONTRACT_KINDS,
+  VOYAGE_SECTIONS,
+  contractFilled,
+} from '../../model/voyages.ts';
 import { state } from '../../state/index.ts';
 
 import { voyageBoat } from './voyageBoat.ts';
@@ -27,7 +31,10 @@ export function voyageTiles(): VoyageTile[] {
   const crew = voyageCrewLines(voyage);
   const crewSet = voyageCrewSet(voyage);
   const boat = voyageBoat(voyage);
-  const cards = categories.reduce((sum, cat) => sum + cat.cards.length, 0);
+  const filled = CONTRACT_KINDS.filter((kind) => {
+    const card = categories.find((cat) => cat.id === kind.id)?.cards[0];
+    return card ? contractFilled(card) : false;
+  }).length;
   const subs: Record<string, string> = {
     crew:
       crew.length > 0
@@ -36,7 +43,7 @@ export function voyageTiles(): VoyageTile[] {
     boat: boat
       ? boat.info.boat || 'bateau sans nom'
       : 'choisi dans data › Bateaux',
-    contracts: `agence, loueur, assurances · ${plural(cards, 'fiche')}`,
+    contracts: `courtier, location, assurance annulation, protection de caution · ${filled} sur ${CONTRACT_KINDS.length} renseignés`,
     docs:
       docs.length > 0
         ? `${plural(docs.length, 'document')} PDF et photos`

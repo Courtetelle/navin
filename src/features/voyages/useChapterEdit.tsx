@@ -12,15 +12,19 @@ import { toast } from '../../state/index.ts';
  * A chapter of a cruise is read until the pencil at the top is touched:
  * then every part of it changes, until the green ✔.
  * @param onValidate - Run at the ✔ (the navigations take the new values).
+ * @param startEditing - Opens already changed (a chapter still empty).
  * @returns Whether it is being changed, and the ✔ to put in the page.
  */
-export function useChapterEdit(onValidate?: () => void): {
+export function useChapterEdit(
+  onValidate?: () => void,
+  startEditing = false,
+): {
   editing: boolean;
   validate: ReactNode;
 } {
   const tr = useTr();
   useNavFields();
-  const [reading, setReading] = useState(true);
+  const [reading, setReading] = useState(!startEditing);
   useNavEdit(reading, () => setReading(false));
   const validate = reading ? null : (
     <PageValidate

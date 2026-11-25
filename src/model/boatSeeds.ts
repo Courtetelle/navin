@@ -6,7 +6,7 @@ import type { CruiseInfo } from './types.ts';
  */
 export const SAVANNAH_INFO: Readonly<CruiseInfo> = {
   boat: 'Savannah',
-  waters: 'Eaux intérieures',
+  waters: 'Lacustre',
   model: 'Hanse 325',
   year: '2013',
   pas: 'Tribord',
@@ -58,7 +58,7 @@ export const SAVANNAH_INFO: Readonly<CruiseInfo> = {
 /** Second example boat, at sea with electric propulsion (added once). */
 export const INSPIRATION_INFO: Readonly<CruiseInfo> = {
   boat: 'Inspiration',
-  waters: 'Eaux maritimes',
+  waters: 'Maritime',
   model: 'Dufour 530',
   year: '2024',
   pas: 'Tribord',
@@ -80,7 +80,7 @@ export const EXAMPLE_BOATS: ReadonlyArray<{ id: string; info: CruiseInfo }> = [
     id: 'exb1',
     info: {
       boat: 'Alizé',
-      waters: 'Eaux maritimes',
+      waters: 'Maritime',
       model: 'Lagoon 42',
       year: '2019',
       pas: 'Sans',
@@ -114,7 +114,7 @@ export const EXAMPLE_BOATS: ReadonlyArray<{ id: string; info: CruiseInfo }> = [
     id: 'exb2',
     info: {
       boat: 'Bise Noire',
-      waters: 'Eaux intérieures',
+      waters: 'Lacustre',
       model: 'Surprise',
       year: '1998',
       pas: 'Bâbord',
@@ -146,7 +146,7 @@ export const EXAMPLE_BOATS: ReadonlyArray<{ id: string; info: CruiseInfo }> = [
     id: 'exb3',
     info: {
       boat: 'Mistral',
-      waters: 'Eaux maritimes',
+      waters: 'Maritime',
       model: 'Bavaria C42',
       year: '2021',
       pas: 'Bâbord',

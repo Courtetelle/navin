@@ -4397,10 +4397,12 @@ h2.fold-h {
   color: #fff !important;
 }
 /* v197 : Eaux intérieures (lac) en vert d'eau douce, Eaux maritimes en bleu marine */
+.btn.cyc.on[data-val='Lacustre']:not(.cyc-ask),
 .btn.cyc.on[data-val='Eaux intérieures']:not(.cyc-ask) {
   background: #0f8b8d !important;
   color: #fff !important;
 }
+.btn.cyc.on[data-val='Maritime']:not(.cyc-ask),
 .btn.cyc.on[data-val='Eaux maritimes']:not(.cyc-ask) {
   background: #0b3d91 !important;
   color: #fff !important;
@@ -16062,4 +16064,25 @@ html body.menus-fading header.topbar #routesBtn.theme-btn.routing-on {
 }
 .voy-medal-icon {
   flex: none;
+}
+.voy-info .cf.voy-au {
+  grid-column-start: 1;
+}
+
+/* 25/11/2026 : en mode nuit, Gasoil / Électrique, Plan d'eau et les champs du
+   groupe Énergie restent rouge sur noir (plus de fond clair éblouissant). */
+:root[data-theme='night'] .btn.cyc[data-val='Gasoil'],
+:root[data-theme='night'] .btn.cyc[data-val='Électrique'],
+:root[data-theme='night'] .btn.cyc.on[data-val='Lacustre']:not(.cyc-ask),
+:root[data-theme='night'] .btn.cyc.on[data-val='Maritime']:not(.cyc-ask),
+:root[data-theme='night']
+  .btn.cyc.on[data-val='Eaux intérieures']:not(.cyc-ask),
+:root[data-theme='night'] .btn.cyc.on[data-val='Eaux maritimes']:not(.cyc-ask) {
+  background: var(--btn) !important;
+  color: var(--btn-fg) !important;
+  border-color: var(--hair) !important;
+}
+:root[data-theme='night'] .cf-group .grp-in input.text {
+  background: var(--card);
+  color: var(--fg);
 }

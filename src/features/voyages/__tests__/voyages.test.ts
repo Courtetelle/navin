@@ -11,6 +11,7 @@ import {
   docCategoryOf,
   knownSections,
   mergedVoyages,
+  voyageNavInfo,
   voyagePhotoIds,
 } from '../../../model/voyages.ts';
 import {
@@ -42,6 +43,7 @@ import {
   saveVoyageCrewSet,
   voyageCrewLines,
 } from '../voyageCrew.ts';
+import { dayText } from '../voyageDates.ts';
 import { freeRecords, voyageRecords } from '../voyageRecords.ts';
 import { voyageTiles } from '../voyageTiles.ts';
 
@@ -51,27 +53,54 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test('a new device has the agency, the renter and the two insurances', () => {
+test('a cruise has four contracts: broker, charter, cancellation, deposit', () => {
   const voyages = defaultVoyages();
 
   expect(voyages.categories.map((cat) => cat.name)).toStrictEqual([
-    'Agence',
-    'Loueur',
-    'Courtiers',
-    'Assurances',
-  ]);
-  expect(voyages.categories[3]?.cards.map((card) => card.title)).toStrictEqual([
+    'Courtier (broker)',
+    'Compagnie de location (charter)',
     'Assurance annulation',
-    'Rachat de caution',
+    'Protection de caution',
   ]);
+  expect(voyages.categories.every((cat) => cat.cards.length === 1)).toBe(true);
   expect(docCategories(voyages).map((cat) => cat.id)).toStrictEqual([
-    'agence',
-    'loueur',
     'courtiers',
-    'assurances',
+    'loueur',
+    'annulation',
+    'caution',
     CREW_CAT,
     OTHER_CAT,
   ]);
+});
+
+test('the contracts kept before go to their sheet, the others apart', () => {
+  const clean = cleanVoyages({
+    categories: [
+      { id: 'agence', name: 'Agence', cards: [{ id: 'g', org: 'Agence X' }] },
+      { id: 'loueur', name: 'Loueur', cards: [{ id: 'l', tel: '+33 2' }] },
+      {
+        id: 'assurances',
+        name: 'Assurances',
+        cards: [
+          { id: 'a', title: 'Assurance annulation', ref: 'A-1' },
+          { id: 'c', title: 'Rachat de caution', ref: 'C-2' },
+        ],
+      },
+    ],
+  });
+
+  expect(clean?.categories.map((cat) => cat.id)).toStrictEqual([
+    'courtiers',
+    'loueur',
+    'annulation',
+    'caution',
+    'anciens',
+  ]);
+  expect(clean?.categories[1]?.cards[0]?.tel).toBe('+33 2');
+  expect(clean?.categories[2]?.cards[0]?.ref).toBe('A-1');
+  expect(clean?.categories[3]?.cards[0]?.ref).toBe('C-2');
+  expect(clean?.categories[4]?.cards[0]?.org).toBe('Agence X');
+  expect(cleanVoyages(clean)?.categories).toStrictEqual(clean?.categories);
 });
 
 test('malformed content is dropped, the rest is kept', () => {
@@ -80,16 +109,17 @@ test('malformed content is dropped, the rest is kept', () => {
 
   const clean = cleanVoyages({
     categories: [
-      { id: 'a', name: 'Agence', cards: [{ id: 'c', title: 'T', tel: 5 }, 3] },
+      { id: 'loueur', name: 'Loueur', cards: [{ id: 'c', tel: 5 }, 3] },
       { name: 'sans id' },
     ],
     crew: [{ memberId: 'm1' }, { memberId: 'm1' }, {}],
-    docs: [{ id: 'd', title: 'Contrat', cat: 'a' }, { title: 'x' }],
+    docs: [{ id: 'd', title: 'Contrat', cat: 'loueur' }, { title: 'x' }],
     mod: '2026-01-01',
   });
 
-  expect(clean?.categories).toHaveLength(1);
-  expect(clean?.categories[0]?.cards[0]?.tel).toBe('');
+  expect(clean?.categories).toHaveLength(4);
+  expect(clean?.categories[1]?.cards[0]?.id).toBe('c');
+  expect(clean?.categories[1]?.cards[0]?.tel).toBe('');
   expect(clean?.crew).toStrictEqual([{ memberId: 'm1', fonction: 'Équipier' }]);
   expect(clean?.docs.map((doc) => doc.id)).toStrictEqual(['d']);
 });
@@ -103,7 +133,7 @@ test('a document of a deleted category goes to Autres', () => {
 
 test('the contracts are shared without their empty lines', () => {
   const voyages = defaultVoyages();
-  const insurance = voyages.categories[3]?.cards[0];
+  const insurance = voyages.categories[2]?.cards[0];
   if (insurance) {
     insurance.org = 'Assur Plus';
     insurance.urgence = '+33 1 23 45 67 89';
@@ -119,13 +149,13 @@ test('the contracts are shared without their empty lines', () => {
   const sections = contractSections(voyages.categories);
 
   expect(sections[0]).toStrictEqual({
-    title: 'Agence',
+    title: 'Courtier (broker)',
     rows: [['', 'à compléter']],
   });
-  expect(sections[3]).toStrictEqual({
-    title: 'Assurances · Assurance annulation',
+  expect(sections[2]).toStrictEqual({
+    title: 'Assurance annulation',
     rows: [
-      ['Société, agence', 'Assur Plus'],
+      ['Société', 'Assur Plus'],
       ['Urgence, assistance 24 h / 24', '+33 1 23 45 67 89'],
       ['Anne Martin', 'Conseillère · anne@example.org'],
     ],
@@ -208,18 +238,16 @@ test('new cruises are numbered after the last one, with the year', () => {
   updateVoyages((voyages) => {
     const card = voyages.categories[0]?.cards[0];
     if (card) card.tel = '+385 1 234';
-    voyages.categories.push({ id: 'port', name: 'Ports', cards: [] });
   });
   const second = createVoyage(['contracts'], true);
 
   expect(second.name).toBe('13 Nouvelle croisière 2026');
   expect(second.sections).toStrictEqual(['contracts']);
-  expect(second.categories.map((cat) => cat.name)).toStrictEqual([
-    'Agence',
-    'Loueur',
-    'Courtiers',
-    'Assurances',
-    'Ports',
+  expect(second.categories.map((cat) => cat.id)).toStrictEqual([
+    'courtiers',
+    'loueur',
+    'annulation',
+    'caution',
   ]);
   expect(second.categories[0]?.cards[0]?.tel).toBe('');
   expect(state.data.voyageStore.value.active).toBe(second.id);
@@ -321,7 +349,7 @@ test('the navigations of a cruise take its ports, VHF, weather and renter', () =
   expect(voyageOfNavigation(sortie.id)).toBe(voyage.id);
 });
 
-test('cruises kept before get the sections Croisière and Bateau and the brokers', () => {
+test('cruises kept before get the sections Croisière and Bateau and the four contracts', () => {
   const kept = cleanVoyageStore({
     list: [
       { ...defaultVoyages(), id: 'a', num: 1, name: '1 A', sections: ['crew'] },
@@ -332,9 +360,7 @@ test('cruises kept before get the sections Croisière and Bateau and the brokers
 
   expect(kept?.list[0]?.sections).toStrictEqual(['info', 'boat', 'crew']);
   expect(kept?.list[0]?.categories.map((cat) => cat.id)).toContain('courtiers');
-  expect(defaultVoyages().categories.map((cat) => cat.name)).toContain(
-    'Courtiers',
-  );
+  expect(kept?.list[0]?.categories.map((cat) => cat.id)).toContain('caution');
 });
 
 test('the medallion, the crew and the boat chosen are kept and synced', () => {
@@ -377,4 +403,26 @@ test('a crew picked one by one becomes a saved crew of the cruise', () => {
   expect(state.data.voyages.value.crewSet).toBe(sets.at(-1)?.id);
   expect(state.data.voyages.value.crew).toHaveLength(0);
   expect(crewSections()[0]?.rows[0]).toStrictEqual(['Rôle', 'Skipper']);
+});
+
+test('the dates of the cruise are read with their day and hour', () => {
+  expect(dayText('2027-06-12', '14:30')).toBe('Samedi 12/06/2027 · 14 h 30');
+  expect(dayText('2027-06-13', '')).toBe('Dimanche 13/06/2027');
+  expect(dayText('n.c.', '')).toBe('n.c.');
+});
+
+test('the remarks of the cruise stay in the cruise', () => {
+  const info = voyageNavInfo({
+    info: {
+      ports: 'Saint-Quay',
+      telMarina: '+33 2 96 70 81 30',
+      meteo: 'clés au bureau',
+    },
+    categories: [],
+  });
+
+  expect(info).toStrictEqual({
+    ports: 'Saint-Quay',
+    telMarina: '+33 2 96 70 81 30',
+  });
 });

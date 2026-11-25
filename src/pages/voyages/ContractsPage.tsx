@@ -7,7 +7,6 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { ShareButton } from '../../components/shared/ShareButton.tsx';
-import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
@@ -15,24 +14,22 @@ import { shareSections } from '../../features/voyages/voyageShare.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { uid } from '../../lib/format.ts';
-import type {
-  VoyageCard,
-  VoyageCategory,
-  VoyagePerson,
-} from '../../model/voyages.ts';
+import type { VoyageCard, VoyagePerson } from '../../model/voyages.ts';
 import {
   CARD_FIELDS,
+  CONTRACT_KINDS,
   PERSON_FIELDS,
+  contractCard,
+  contractFilled,
   contractSections,
-  emptyCard,
   emptyPerson,
 } from '../../model/voyages.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
+import type { PageProps } from '../../shell/pageTypes.ts';
 import { go } from '../../shell/router.ts';
 import {
   state,
   syncVoyageNavigations,
-  toast,
   updateVoyages,
 } from '../../state/index.ts';
 
@@ -202,23 +199,6 @@ function CardEdit({ catId, card }: { catId: string; card: VoyageCard }) {
   return (
     <div className="voy-card-edit">
       <div className="cgrid">
-        <div className="cf wide">
-          <label htmlFor={`vc-${card.id}-title`}>
-            {tr('Type (titre de la fiche)')}
-          </label>
-          <input
-            id={`vc-${card.id}-title`}
-            className="text"
-            value={card.title}
-            placeholder={tr.placeholder('ex. Assurance annulation')}
-            autoComplete="off"
-            onChange={(event) =>
-              patchCard(catId, card.id, (draft) => {
-                draft.title = event.target.value;
-              })
-            }
-          />
-        </div>
         {CARD_FIELDS.map(([key, label, kind]) => (
           <div
             key={key}
@@ -272,7 +252,7 @@ function CardEdit({ catId, card }: { catId: string; card: VoyageCard }) {
         />
       ))}
       <HelpText>Enregistrement automatique.</HelpText>
-      <ButtonRow className="row c2">
+      <ButtonRow>
         <Button
           className="btn big act-add"
           data-voypersonadd={card.id}
@@ -285,173 +265,94 @@ function CardEdit({ catId, card }: { catId: string; card: VoyageCard }) {
         >
           {tr('＋ Contact')}
         </Button>
-        <HoldDeleteButton
-          className="btn big danger"
-          data-voycarddel={card.id}
-          onClick={buzz}
-          onDelete={() => {
-            updateVoyages((voyages) => {
-              const cat = voyages.categories.find((item) => item.id === catId);
-              if (cat) {
-                cat.cards = cat.cards.filter((item) => item.id !== card.id);
-              }
-            });
-          }}
-        >
-          {tr('🗑 Supprimer la fiche')}
-        </HoldDeleteButton>
       </ButtonRow>
     </div>
   );
 }
 
 /**
- * One contract: read, or changed while the chapter is edited.
- * @param props - Where it is.
- * @param props.catId - Category id.
- * @param props.card - The contract.
- * @param props.editing - The chapter is being changed.
- * @returns The block.
- */
-function CardBlock({
-  catId,
-  card,
-  editing,
-}: {
-  catId: string;
-  card: VoyageCard;
-  editing: boolean;
-}) {
-  const tr = useTr();
-  return (
-    <div className="voy-card" data-voycard={card.id}>
-      <h3 className="voy-card-title">
-        {card.title.trim() || tr('Sans titre')}
-      </h3>
-      {editing ? (
-        <CardEdit catId={catId} card={card} />
-      ) : (
-        <CardReading card={card} />
-      )}
-    </div>
-  );
-}
-
-/**
- * A category: its contracts and documents; while the chapter is edited,
- * also its name, its new contract and document buttons, its deletion.
- * @param props - The category.
- * @param props.cat - The category.
- * @param props.editing - The chapter is being changed.
- * @returns The section.
- */
-function CategorySection({
-  cat,
-  editing,
-}: {
-  cat: VoyageCategory;
-  editing: boolean;
-}) {
-  const tr = useTr();
-  return (
-    <FoldSection
-      data-voycat={cat.id}
-      title={`${cat.name || 'Sans nom'} · ${cat.cards.length}`}
-      titleText={cat.id}
-    >
-      <div className="voy-cat-body">
-        {editing ? (
-          <div className="cgrid voy-rename">
-            <div className="cf wide">
-              <label htmlFor={`vcat-${cat.id}`}>
-                {tr('Nom de la catégorie')}
-              </label>
-              <input
-                id={`vcat-${cat.id}`}
-                className="text"
-                value={cat.name}
-                autoComplete="off"
-                onChange={(event) =>
-                  updateVoyages((voyages) => {
-                    const found = voyages.categories.find(
-                      (item) => item.id === cat.id,
-                    );
-                    if (found) found.name = event.target.value;
-                  })
-                }
-              />
-            </div>
-          </div>
-        ) : null}
-        {cat.cards.map((card) => (
-          <CardBlock
-            key={card.id}
-            catId={cat.id}
-            card={card}
-            editing={editing}
-          />
-        ))}
-        {editing ? (
-          <ButtonRow>
-            <Button
-              className="btn big act-add"
-              data-voycardadd={cat.id}
-              onClick={() => {
-                buzz();
-                updateVoyages((voyages) => {
-                  voyages.categories
-                    .find((item) => item.id === cat.id)
-                    ?.cards.push(emptyCard(uid(), ''));
-                });
-              }}
-            >
-              {tr(
-                cat.id === 'assurances'
-                  ? '＋ Type d’assurance'
-                  : `＋ Fiche ${cat.name || ''}`.trim(),
-              )}
-            </Button>
-          </ButtonRow>
-        ) : null}
-        <h3 className="sub-h">{tr('📎 Documents')}</h3>
-        <DocList cat={cat.id} editing={editing} />
-        {editing ? <DocImport cat={cat.id} /> : null}
-        {editing ? (
-          <ButtonRow>
-            <HoldDeleteButton
-              className="btn danger"
-              data-voycatdel={cat.id}
-              onClick={buzz}
-              onDelete={() => {
-                updateVoyages((voyages) => {
-                  voyages.categories = voyages.categories.filter(
-                    (item) => item.id !== cat.id,
-                  );
-                });
-                toast('Catégorie supprimée · ses documents vont dans Autres');
-              }}
-            >
-              {tr('🗑 Supprimer la catégorie')}
-            </HoldDeleteButton>
-          </ButtonRow>
-        ) : null}
-      </div>
-    </FoldSection>
-  );
-}
-
-/**
- * Screen `vcontracts` (data › Croisières › Contrats): the agency, the renter
- * and the insurances, with addresses, phones, emergency numbers and
- * contacts; categories and contracts are added and deleted at will.
+ * One contract (sub-screen of `vcontracts`): its sheet read, or its fields
+ * with the pencil; its documents; its sharing.
+ * @param props - The contract.
+ * @param props.kind - Its kind in {@link CONTRACT_KINDS}.
  * @returns The screen content.
  */
-export function ContractsPage() {
+function ContractScreen({ kind }: { kind: (typeof CONTRACT_KINDS)[number] }) {
   useSignals();
   const tr = useTr();
-  const { categories, id } = state.data.voyages.value;
+  const voyages = state.data.voyages.value;
+  const { id, categories } = voyages;
   const { editing, validate } = useChapterEdit(() => syncVoyageNavigations(id));
+  const card = contractCard(voyages, kind.id);
+  const category = categories.find((cat) => cat.id === kind.id);
+  return (
+    <>
+      <PageBack
+        label="◀ Contrats"
+        data-go="vcontracts"
+        onClick={() => {
+          buzz();
+          go('vcontracts');
+        }}
+      >
+        {tr('◀ Contrats')}
+      </PageBack>
+      {validate}
+      <PageTitle
+        titleText={kind.name}
+        helps={[
+          'Le crayon en haut ouvre les champs : société, n° de contrat, adresse, téléphones, courriel, site, notes et contacts ; ✔ pour finir. Un numéro touché appelle, un courriel touché écrit.',
+        ]}
+      >
+        {`${kind.icon} ${kind.name}`}
+      </PageTitle>
+      {card ? (
+        <div className="voy-card" data-voycard={card.id}>
+          {editing ? (
+            <CardEdit catId={kind.id} card={card} />
+          ) : (
+            <CardReading card={card} />
+          )}
+        </div>
+      ) : null}
+      <FoldSection title="📎 Documents" titleText={`voy-docs-${kind.id}`}>
+        <div className="voy-cat-body">
+          <DocList cat={kind.id} editing={editing} />
+          {editing ? <DocImport cat={kind.id} /> : null}
+        </div>
+      </FoldSection>
+      <ShareButton
+        data-voyshare={kind.id}
+        onShare={(format) =>
+          void shareSections(
+            `Croisière · ${kind.name}`,
+            contractSections(category ? [category] : []),
+            format,
+          )
+        }
+      />
+    </>
+  );
+}
+
+/**
+ * Screen `vcontracts` (data › Croisières › Contrats): four buttons, Courtier,
+ * Compagnie de location, Assurance annulation, Protection de caution; each
+ * opens its sheet (`go('vcontracts', kind)`), filled with the pencil.
+ * @param props - Page props; `arg` is the contract opened.
+ * @returns The screen content.
+ */
+export function ContractsPage({ arg }: PageProps) {
+  useSignals();
+  const tr = useTr();
+  const voyages = state.data.voyages.value;
+  const { categories, id } = voyages;
   if (!id) return <NoVoyage />;
+  const opened = CONTRACT_KINDS.find((kind) => kind.id === arg);
+  if (opened) return <ContractScreen key={opened.id} kind={opened} />;
+  const shown = categories.filter((cat) =>
+    CONTRACT_KINDS.some((kind) => kind.id === cat.id),
+  );
   return (
     <>
       <PageBack
@@ -464,70 +365,47 @@ export function ContractsPage() {
       >
         {tr('◀ Croisière')}
       </PageBack>
-      {validate}
       <PageTitle
         helps={[
-          'Une catégorie par interlocuteur (agence, loueur, assurances…), une fiche par contrat : adresse, téléphone, urgence, contacts. Le crayon en haut ouvre la modification de tout le chapitre : catégories et fiches s’ajoutent, se renomment et se suppriment (appui long), ✔ pour finir. Un numéro touché appelle, un courriel touché écrit.',
+          'Un bouton par contrat de la croisière : touchez-le pour ouvrir sa fiche, puis le crayon en haut pour la remplir.',
         ]}
       >
         📑 Contrats
       </PageTitle>
-      {categories.map((cat) => (
-        <CategorySection key={cat.id} cat={cat} editing={editing} />
-      ))}
-      {editing ? (
-        <ButtonRow>
-          <Button
-            className="btn big act-add"
-            data-voycatadd
-            onClick={() => {
-              buzz();
-              const id = uid();
-              updateVoyages((voyages) => {
-                voyages.categories.push({
-                  id,
-                  name: 'Nouvelle catégorie',
-                  cards: [emptyCard(uid(), '')],
-                });
-              });
-              toast('Catégorie ajoutée : renommez-la en haut de sa section');
-            }}
-          >
-            {tr('＋ Nouvelle catégorie')}
-          </Button>
-        </ButtonRow>
-      ) : null}
+      <div className="row more-grid data-tiles" style={{ marginBottom: 12 }}>
+        {CONTRACT_KINDS.map((kind) => {
+          const card = contractCard(voyages, kind.id);
+          const filled = card ? contractFilled(card) : false;
+          const summary = [card?.org.trim(), card?.ref.trim()]
+            .filter(Boolean)
+            .join(' · ');
+          return (
+            <Button
+              key={kind.id}
+              className="btn big"
+              data-voycontract={kind.id}
+              onClick={() => {
+                buzz();
+                go('vcontracts', kind.id);
+              }}
+            >
+              {`${kind.icon} ${tr(kind.name)}`}
+              <small>
+                {filled ? summary || tr('renseigné') : tr('à compléter')}
+              </small>
+            </Button>
+          );
+        })}
+      </div>
       <ShareButton
         data-voyshare="contracts"
         onShare={(format) =>
           void shareSections(
             'Croisière · contrats',
-            contractSections(categories),
+            contractSections(shown),
             format,
           )
         }
-        choices={[
-          {
-            key: 'all',
-            label: 'Tous les contrats',
-            onShare: (format) =>
-              void shareSections(
-                'Croisière · contrats',
-                contractSections(categories),
-                format,
-              ),
-          },
-          ...categories.map((cat) => ({
-            key: cat.id,
-            label: cat.name || 'Sans nom',
-            onShare: (format: ShareFormat) =>
-              void shareSections(
-                `Croisière · ${cat.name || 'contrats'}`,
-                contractSections([cat]),
-                format,
-              ),
-          })),
-        ]}
       />
     </>
   );

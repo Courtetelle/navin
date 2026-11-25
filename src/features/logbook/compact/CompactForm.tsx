@@ -73,7 +73,7 @@ export function CompactForm({
     : values;
   const inland =
     fields.some((field) => field.key === 'waters') &&
-    shown.waters === 'Eaux intérieures';
+    ['Lacustre', 'Eaux intérieures'].includes(String(shown.waters));
   const context: CompactFormContext = {
     values,
     shown,

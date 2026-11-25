@@ -26,6 +26,7 @@ import {
   splitAnchorAndSails,
   splitFlagPort,
   splitModelYear,
+  watersRenamed,
 } from './boatMigrations.ts';
 import { examplesWanted } from './examplesWanted.ts';
 import { migrateSavannahChecklists } from './savannahChecklists.ts';
@@ -64,6 +65,7 @@ export function readBoats(): Boat[] {
     boats = store.arr<Boat>('ldb.boats', (boat) => {
       if (!boat.info || typeof boat.info !== 'object') boat.info = {};
       if (!boat.id) boat.id = randomId('b');
+      watersRenamed(boat.info);
       if (boat.checklist != null && !Array.isArray(boat.checklist)) {
         boat.checklist = [];
       }
