@@ -8,7 +8,7 @@ import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { fmtDur, fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
+import { fmtDateTime, fmtDur, fmtTime, fr } from '../../lib/format.ts';
 import { go } from '../../shell/router.ts';
 import { state, toast } from '../../state/index.ts';
 
@@ -42,7 +42,7 @@ function ImportPreview({ plan }: { plan: ImportPlan }) {
       <PageTitle>Importer la trace</PageTitle>
       <FoldSection className="field" title={name}>
         <HelpText>
-          {`${points.length} points · du ${fmtShortDate(first)} ${fmtTime(first)} au ${fmtShortDate(last)} ${fmtTime(last)}`}
+          {`${points.length} points · du ${fmtDateTime(first)} au ${fmtDateTime(last)}`}
         </HelpText>
         <div className="auto-stats">
           <div>

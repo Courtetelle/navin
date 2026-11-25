@@ -1,4 +1,5 @@
 import type { ShareFormat } from '../../components/shared/shareFormat.ts';
+import { utcMark } from '../../lib/clockMode.ts';
 import { fmtDotDateTime } from '../../lib/format.ts';
 import { fmtPos, nmText } from '../../lib/geo.ts';
 import { bft, compassPoint, windTxt } from '../../lib/wind.ts';
@@ -82,7 +83,7 @@ export function reportRows(report: AlertReport): Array<[string, string]> {
   }
   // An airport: what its METAR says beyond the wind.
   rows.push(...metarRows(reading.metar));
-  const time = fmtDotDateTime(new Date(reading.t));
+  const time = `${fmtDotDateTime(new Date(reading.t))}${utcMark()}`;
   rows.push(
     [forecast ? 'Prévu pour le' : 'Mesuré le', time],
     [

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 
+import { showsUtc } from '../../../lib/clockMode.ts';
 import { fmtValue } from '../../../lib/fieldFormat.ts';
 import {
   dayKey,
@@ -78,11 +79,17 @@ export function DayPage({ cruise, dayId, columns }: DayPageProps) {
               <tr key={entry.id}>
                 <td>
                   {`${fmtTime(new Date(entry.t))}${entry.auto ? '*' : ''}`}
-                  <br />
-                  <small>{fmtUtc(new Date(entry.t))}</small>
+                  {showsUtc() ? null : (
+                    <>
+                      <br />
+                      <small>{fmtUtc(new Date(entry.t))}</small>
+                    </>
+                  )}
                 </td>
                 {columns.map((field) => (
-                  <td key={field.key}>{fmtValue(field, entry.v[field.key])}</td>
+                  <td key={field.key} data-no-hr="">
+                    {fmtValue(field, entry.v[field.key])}
+                  </td>
                 ))}
               </tr>
             ))}

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { state } from '../../state/index.ts';
 
-import { localText, utcText } from './timeText.ts';
+import { localText, shownText, utcText } from './timeText.ts';
 
 /** Props of {@link TzTime}. */
 interface TzTimeProps {
@@ -20,7 +20,9 @@ interface TzTimeProps {
  * A time on screen (legacy `tzHtml` + `tzShowLocal`, app.js:473-488): UTC with
  * a small « UTC », a touch shows the local time for 3 s (« locale », class
  * `tz-local`) without triggering the button around it. In lake procedures
- * (`state.view.tzLocalOnly`), the local time only (`time.tz-loc`).
+ * (`state.view.tzLocalOnly`), the local time only (`time.tz-loc`), UTC when
+ * the top bar clock shows UTC. While the clock shows UTC, the UTC time is red
+ * and the local time shown by a touch is not.
  * @param props - Moment and seconds flag.
  * @returns The `<time>` element.
  */
@@ -34,11 +36,13 @@ export function TzTime({ date, seconds = false }: TzTimeProps) {
     return () => clearTimeout(timer);
   }, [local]);
   if (state.view.tzLocalOnly.value) {
-    return <time className="tz-loc">{localText(moment, seconds)}</time>;
+    // Local in lake procedures, UTC (red) when the clock shows UTC.
+    return <time className="tz-loc">{shownText(moment, seconds)}</time>;
   }
   return (
     <time
       className={local ? 'tz tz-local' : 'tz'}
+      data-no-hr={local ? '' : undefined}
       data-t={moment.toISOString()}
       data-s={seconds ? '1' : undefined}
       onPointerDown={() => setLocal((count) => count + 1)}

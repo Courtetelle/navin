@@ -3,7 +3,7 @@ import { useSignals } from '@preact/signals-react/runtime';
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { TzTime } from '../../components/shared/TzTime.tsx';
-import { fmtDate, toLocalInput } from '../../lib/format.ts';
+import { fmtDate, fromLocalInput, toLocalInput } from '../../lib/format.ts';
 import { state, updateDraft } from '../../state/index.ts';
 
 import { CommitInput } from './CommitInput.tsx';
@@ -61,9 +61,11 @@ export function DateTimeEntry() {
           defaultValue={local}
           aria-label="Choisir date et heure"
           onCommit={(value) => {
-            if (!value) return;
+            // Typed in UTC when the clock shows UTC, like the time above.
+            const typed = fromLocalInput(value);
+            if (!Number.isFinite(typed)) return;
             updateDraft((form) => {
-              form.t = new Date(value).toISOString();
+              form.t = new Date(typed).toISOString();
               form.tManual = true;
             });
           }}

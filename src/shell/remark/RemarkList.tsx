@@ -3,6 +3,7 @@ import { Fragment, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
+import { shownTimeOptions } from '../../lib/format.ts';
 import { toast } from '../../state/index.ts';
 
 import type { Remark } from './remarkContext.ts';
@@ -39,7 +40,7 @@ export function RemarkList({ onClose }: { onClose: () => void }) {
             key={`${remark.t}${remark.text}`}
           >
             <small>
-              {new Date(remark.t).toLocaleString('fr-CH')}
+              {new Date(remark.t).toLocaleString('fr-CH', shownTimeOptions())}
               {statusLabel(remark)}
             </small>
             <div>{lines(remark.text)}</div>

@@ -1,7 +1,7 @@
 import { fmtNum, fmtValue } from '../../lib/fieldFormat.ts';
 import {
+  fmtLocalTime,
   fmtShortDate,
-  fmtTime,
   fmtUtc,
   keyToDate,
   stringOf,
@@ -51,7 +51,7 @@ export function csvEntries(cruise: Cruise): string {
     const date = new Date(entry.t);
     const row: unknown[] = [
       fmtShortDate(date),
-      fmtTime(date),
+      fmtLocalTime(date),
       fmtUtc(date).replace(' UTC', ''),
       entry.auto ? 'oui' : '',
     ];

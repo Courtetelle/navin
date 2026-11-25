@@ -99,7 +99,7 @@ test('entryPopup escapes the texts and joins the values', () => {
       v: { cog: 45, sog: 4.5, evt: ['Départ'], note: 'a<b' },
     }),
   ).toBe(
-    '<b>15/07/2026 10:40</b> Départ<br>COG 045° · 4,5 nd<br><i>a&lt;b</i>',
+    '<b>15/07/2026 10:40</b> Départ<br>COG 045° · 4,5 nd<br><i data-no-hr>a&lt;b</i>',
   );
   expect(state.data.cruise.value?.id).toBe('c1');
 });

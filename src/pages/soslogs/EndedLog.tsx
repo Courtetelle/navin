@@ -4,7 +4,7 @@ import { SwipeRow } from '../../features/prep/index.ts';
 import { openListPublish } from '../../features/publish/index.ts';
 import { toastThenRedraw } from '../../features/safety/toastThenRedraw.ts';
 import { useTr } from '../../i18n/useTr.ts';
-import { fmtShortDate, pad } from '../../lib/format.ts';
+import { fmtShortDate, fmtTime } from '../../lib/format.ts';
 import type { SosLog } from '../../model/types.ts';
 import { saveSosLogs, state } from '../../state/index.ts';
 
@@ -65,6 +65,5 @@ function summaryOf(log: SosLog): string {
 }
 
 function hoursMinutes(iso: string): string {
-  const date = new Date(iso);
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return fmtTime(new Date(iso));
 }

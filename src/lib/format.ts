@@ -1,3 +1,5 @@
+import { shownParts, utcClock } from './clockMode.ts';
+
 /**
  * Left-pad with zeros (legacy `pad`).
  * @param value - Value to pad.
@@ -39,12 +41,34 @@ export function frN(value: unknown): string {
 }
 
 /**
- * Local time `HH:MM` (legacy `fmtTime`).
+ * Time `HH:MM` on screen (legacy `fmtTime`): the phone's time, or UTC when
+ * the top bar clock shows UTC (then red on screen).
+ * @param date - Date to format.
+ * @returns The time.
+ */
+export function fmtTime(date: Date): string {
+  const shown = shownParts(date);
+  return `${pad(shown.hours)}:${pad(shown.minutes)}`;
+}
+
+/**
+ * The phone's time `HH:MM`, whatever the clock shows (files whose columns say
+ * which time they hold).
  * @param date - Date to format.
  * @returns The local time.
  */
-export function fmtTime(date: Date): string {
+export function fmtLocalTime(date: Date): string {
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/**
+ * Time `HH:MM` for a text read away from the screen (shared, printed): with
+ * « UTC » when the clock shows UTC, since the red is lost there.
+ * @param date - Date to format.
+ * @returns The time.
+ */
+export function fmtTimeShared(date: Date): string {
+  return utcClock.value ? fmtUtc(date) : fmtTime(date);
 }
 
 /**
@@ -57,11 +81,13 @@ export function fmtUtc(date: Date): string {
 }
 
 /**
- * Local and UTC time `HH:MM (HH:MM UTC)` (legacy `fmtTime2`).
+ * Local and UTC time `HH:MM (HH:MM UTC)` (legacy `fmtTime2`); UTC alone when
+ * the clock shows UTC.
  * @param date - Date to format.
  * @returns Both times.
  */
 export function fmtTime2(date: Date): string {
+  if (utcClock.value) return fmtUtc(date);
   return `${fmtTime(date)} (${fmtUtc(date)})`;
 }
 
@@ -108,12 +134,46 @@ export function fmtDotDate(date: Date): string {
 }
 
 /**
- * Date and hour, `14.11.2026 à 11h30`.
+ * Date and hour, `14.11.2026 à 11h30`, in UTC when the clock shows UTC.
  * @param date - Date.
  * @returns The date and hour.
  */
 export function fmtDotDateTime(date: Date): string {
-  return `${fmtDotDate(date)} à ${pad(date.getHours())}h${pad(date.getMinutes())}`;
+  const shown = shownParts(date);
+  return `${pad(shown.day)}.${pad(shown.month)}.${shown.year} à ${pad(shown.hours)}h${pad(shown.minutes)}`;
+}
+
+/**
+ * Hour and minutes `9h05` on screen, in UTC when the clock shows UTC.
+ * @param date - Moment.
+ * @returns The text.
+ */
+export function fmtHhMm(date: Date): string {
+  const shown = shownParts(date);
+  return `${shown.hours}h${pad(shown.minutes)}`;
+}
+
+/**
+ * Short date and time, `14/11/2026 11:30`, both in UTC when the clock shows
+ * UTC (the day may differ from the phone's near midnight).
+ * @param date - Date.
+ * @returns The date and time.
+ */
+export function fmtDateTime(date: Date): string {
+  const shown = shownParts(date);
+  return `${pad(shown.day)}/${pad(shown.month)}/${shown.year} ${pad(shown.hours)}:${pad(shown.minutes)}`;
+}
+
+/**
+ * `toLocaleString` / `toLocaleTimeString` options of a time on screen: in UTC
+ * when the clock shows UTC.
+ * @param options - Other options.
+ * @returns The options with the time zone.
+ */
+export function shownTimeOptions(
+  options: Intl.DateTimeFormatOptions = {},
+): Intl.DateTimeFormatOptions {
+  return utcClock.value ? { ...options, timeZone: 'UTC' } : options;
 }
 
 /**
@@ -136,21 +196,48 @@ export function keyToDate(key: string): Date {
 }
 
 /**
- * Value of a `datetime-local` input (legacy `toLocalInput`).
+ * Value of a `datetime-local` input (legacy `toLocalInput`), in UTC when the
+ * clock shows UTC; read it back with {@link fromLocalInput}.
  * @param date - Date.
  * @returns `YYYY-MM-DDTHH:MM`.
  */
 export function toLocalInput(date: Date): string {
-  return `${dayKey(date)}T${fmtTime(date)}`;
+  const shown = shownParts(date);
+  return `${shown.year}-${pad(shown.month)}-${pad(shown.day)}T${pad(shown.hours)}:${pad(shown.minutes)}`;
 }
 
 /**
- * `HH:MM:SS` local time (legacy `hms`).
+ * Value of a `datetime-local` input in the phone's time, whatever the clock
+ * shows (a value kept as typed in the phone's time).
+ * @param date - Date.
+ * @returns `YYYY-MM-DDTHH:MM`.
+ */
+export function toPhoneInput(date: Date): string {
+  return `${dayKey(date)}T${fmtLocalTime(date)}`;
+}
+
+/**
+ * The moment of a `datetime-local` value written by {@link toLocalInput}:
+ * UTC when the clock shows UTC, else the phone's time.
+ * @param value - `YYYY-MM-DDTHH:MM`.
+ * @returns Milliseconds, `NaN` when empty or invalid.
+ */
+export function fromLocalInput(value: string): number {
+  if (!value) return Number.NaN;
+  return utcClock.value
+    ? Date.parse(`${value.length === 16 ? `${value}:00` : value}Z`)
+    : new Date(value).getTime();
+}
+
+/**
+ * `HH:MM:SS` on screen (legacy `hms`): the phone's time, or UTC when the
+ * clock shows UTC.
  * @param date - Date.
  * @returns The time with seconds.
  */
 export function hms(date: Date): string {
-  return `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  const shown = shownParts(date);
+  return `${pad(shown.hours)}:${pad(shown.minutes)}:${pad(shown.seconds)}`;
 }
 
 /**
@@ -163,13 +250,28 @@ export function hmsUtc(date: Date): string {
 }
 
 /**
- * Local and UTC times with seconds `HH:MM:SS · HH:MM:SS UTC` (legacy `bothTimes`).
+ * Local and UTC times with seconds `HH:MM:SS · HH:MM:SS UTC` (legacy
+ * `bothTimes`); UTC alone when the clock shows UTC.
  * @param iso - ISO time.
  * @returns Both times.
  */
 export function bothTimes(iso: string): string {
   const date = new Date(iso);
+  if (utcClock.value) return hmsUtc(date);
   return `${hms(date)} · ${hmsUtc(date)}`;
+}
+
+/**
+ * Time of an event of a log (SOS, man overboard), with seconds: local on a
+ * lake, local and UTC at sea, UTC alone (« UTC » written) when the clock
+ * shows UTC.
+ * @param iso - ISO time.
+ * @param lake - The log was kept on a lake.
+ * @returns The time(s).
+ */
+export function logTimes(iso: string, lake: boolean): string {
+  if (utcClock.value) return hmsUtc(new Date(iso));
+  return lake ? hms(new Date(iso)) : bothTimes(iso);
 }
 
 /**

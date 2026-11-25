@@ -1,5 +1,5 @@
 import { TzTime } from '../../components/shared/TzTime.tsx';
-import { localText } from '../../components/shared/timeText.ts';
+import { shownText } from '../../components/shared/timeText.ts';
 import { sosPlaceWords } from '../../features/safety/sosPlaces.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { fmtPos } from '../../lib/geo.ts';
@@ -65,7 +65,7 @@ function EventRow({ log, event }: SosLogProps & { event: LogEvent }) {
 
 function LogTime({ log, date }: SosLogProps & { date: string }) {
   if (log.zone === 'lac') {
-    return <time className="tz-loc">{localText(new Date(date), true)}</time>;
+    return <time className="tz-loc">{shownText(new Date(date), true)}</time>;
   }
   return <TzTime date={date} seconds />;
 }

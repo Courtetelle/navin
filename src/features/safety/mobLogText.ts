@@ -1,4 +1,4 @@
-import { bothTimes, fmtShortDate, hms } from '../../lib/format.ts';
+import { fmtShortDate, logTimes } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 
 import type { MobLogRecord } from './mobLog.ts';
@@ -18,8 +18,7 @@ export function mobLogText(
     `${title} HOMME À LA MER · ${fmtShortDate(new Date(log.start))}${cruiseName ? ` · ${cruiseName}` : ''}`,
   ];
   for (const event of log.events) {
-    const time =
-      log.zone === 'lac' ? hms(new Date(event.t)) : bothTimes(event.t);
+    const time = logTimes(event.t, log.zone === 'lac');
     const position = event.pos ? `  (${fmtPos(event.pos)})` : '';
     lines.push(`${time}  ${event.what}${position}`);
   }

@@ -88,7 +88,9 @@ function Table({ table, level }: { table: BulletinTable; level: number }) {
             <tr key={row[0]}>
               {row.map((value, index) => (
                 // eslint-disable-next-line react/no-array-index-key -- the columns never move
-                <td key={index}>{tr(value)}</td>
+                <td key={index} className={index === 0 ? 'hr' : undefined}>
+                  {tr(value)}
+                </td>
               ))}
             </tr>
           ))}

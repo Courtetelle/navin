@@ -1,7 +1,7 @@
 import { batch } from '@preact/signals-react';
 
 import { buzz } from '../../lib/dom.ts';
-import { fmtDur, fmtTime, fr, uid } from '../../lib/format.ts';
+import { fmtDur, fmtTimeShared, fr, uid } from '../../lib/format.ts';
 import { angDiff, distNM } from '../../lib/geo.ts';
 import type { TrackPoint } from '../../state/index.ts';
 import {
@@ -155,7 +155,7 @@ function noteGap(trip: LiveTrip, last: TrackPoint, sample: TrackSample): void {
     auto: true,
     v: {
       pos: { lat: sample.lat, lon: sample.lon },
-      note: `Trace interrompue de ${fmtTime(from)} à ${fmtTime(to)} (appli fermée ou en arrière-plan) : ${fr(miles)} NM complétés en ligne droite.`,
+      note: `Trace interrompue de ${fmtTimeShared(from)} à ${fmtTimeShared(to)} (appli fermée ou en arrière-plan) : ${fr(miles)} NM complétés en ligne droite.`,
     },
   });
   toast(

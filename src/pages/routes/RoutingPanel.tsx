@@ -39,8 +39,18 @@ import { ROUTING_MODELS } from '../../features/map/routingWeather.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import { SwipeRow } from '../../features/prep/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
+import { utcMark } from '../../lib/clockMode.ts';
 import { buzz } from '../../lib/dom.ts';
-import { fmtDur, fmtShortDate, fmtTime, pad, uid } from '../../lib/format.ts';
+import {
+  fmtDateTime,
+  fmtDur,
+  fmtTime,
+  fromLocalInput,
+  pad,
+  toLocalInput,
+  toPhoneInput,
+  uid,
+} from '../../lib/format.ts';
 import { isBoatPolar } from '../../model/polars.ts';
 import type { NavRoute } from '../../model/routes.ts';
 import { routeLabel } from '../../model/routes.ts';
@@ -61,8 +71,7 @@ function nextHour(): string {
 }
 
 function when(ms: number): string {
-  const date = new Date(ms);
-  return `${fmtShortDate(date)} ${fmtTime(date)}`;
+  return fmtDateTime(new Date(ms));
 }
 
 /** A choice among a few: big buttons, easy on a boat that pitches. */
@@ -184,8 +193,17 @@ export function RoutingPanel() {
           <input
             type="datetime-local"
             id="rtgDepart"
-            value={depart}
-            onChange={(event) => setDepart(event.target.value)}
+            // Kept in the time of the device, shown and typed in UTC when
+            // the clock shows UTC.
+            value={toLocalInput(new Date(depart))}
+            onChange={(event) => {
+              const typed = fromLocalInput(event.target.value);
+              setDepart(
+                Number.isFinite(typed)
+                  ? toPhoneInput(new Date(typed))
+                  : event.target.value,
+              );
+            }}
           />
         </label>
         <Choice
@@ -305,7 +323,11 @@ function RoutingOutcome({ run, route, prefs }: OutcomeProps) {
   const summary = routingSummary(result, depart);
   // Kept in « Routages » under one id, however many buttons are touched.
   const keep = () => {
-    const shape = routingShape(`Routage ${when(depart)}`, result, route.points);
+    const shape = routingShape(
+      `Routage ${when(depart)}${utcMark()}`,
+      result,
+      route.points,
+    );
     const shown = {
       ...shape,
       id,
@@ -577,10 +599,10 @@ function StepTable({ steps }: { steps: readonly RoutingStep[] }) {
 function routingText(result: Done, route: NavRoute, depart: number): string {
   const lines = [
     `Routage NavIn · ${routeLabel(route, state.data.routes.peek())}`,
-    `Départ ${when(depart)} · arrivée ${when(result.arriveMs)}`,
+    `Départ ${when(depart)}${utcMark()} · arrivée ${when(result.arriveMs)}${utcMark()}`,
     routingSummary(result, depart),
     '',
-    'Heure · cap (°) · vitesse surface (nd) · route fond (° / nd) · vent (° / nd) · courant (vers ° / nd) · vagues (m) · angle au vent · voiles',
+    `Heure${utcMark()} · cap (°) · vitesse surface (nd) · route fond (° / nd) · vent (° / nd) · courant (vers ° / nd) · vagues (m) · angle au vent · voiles`,
   ];
   for (const step of hourly(result.steps)) {
     lines.push(

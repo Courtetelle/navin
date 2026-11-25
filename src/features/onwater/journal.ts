@@ -1,3 +1,4 @@
+import { showsUtc } from '../../lib/clockMode.ts';
 import { dayKey, fmtTime, fmtUtc, fr, num, pad } from '../../lib/format.ts';
 import { windTxt } from '../../lib/wind.ts';
 import type { Cruise, Entry } from '../../model/types.ts';
@@ -157,6 +158,7 @@ function extractRow(entry: Entry): JournalRow {
   return {
     time: fmtTime(time),
     what,
-    more: [fmtUtc(time), details].filter(Boolean).join(' · '),
+    // The clock in UTC: the time above is the UTC one already.
+    more: [showsUtc() ? '' : fmtUtc(time), details].filter(Boolean).join(' · '),
   };
 }

@@ -1,5 +1,6 @@
 import { signal } from '@preact/signals-react';
 
+import { shownTimeOptions } from '../../lib/format.ts';
 import { go } from '../../shell/router.ts';
 import { state } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
@@ -250,10 +251,13 @@ export function showWindAlert(content: WindPopupContent): void {
 export function replayWindAlert(): boolean {
   const last = lastAlert ?? store.get<LastAlert | null>(LAST_ALERT_KEY, null);
   if (!last) return false;
-  const time = new Date(last.at).toLocaleTimeString('fr-CH', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const time = new Date(last.at).toLocaleTimeString(
+    'fr-CH',
+    shownTimeOptions({
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+  );
   // An alert kept before the lake lost its sea state: shown without it.
   const sea = onLake() ? { sea: '', omm: '' } : {};
   showWindPopup({

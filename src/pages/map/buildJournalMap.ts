@@ -136,7 +136,7 @@ export function buildJournalMap(
       fillOpacity: 1,
     })
       .addTo(map)
-      .bindPopup(entryPopup(entry));
+      .bindPopup(() => entryPopup(entry));
   }
   const fit = () => {
     if (points.length > 0) {

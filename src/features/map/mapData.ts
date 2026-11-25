@@ -1,4 +1,4 @@
-import { dayKey, fmtShortDate, fmtTime, fr, pad } from '../../lib/format.ts';
+import { dayKey, fmtDateTime, fr, pad } from '../../lib/format.ts';
 import { distNM } from '../../lib/geo.ts';
 import { windTxt } from '../../lib/wind.ts';
 import type { Entry, Position } from '../../model/types.ts';
@@ -126,7 +126,10 @@ export function entryPopup(entry: Entry): string {
       : `loch ${fr(Number(values.loch))} NM`,
   ].filter(Boolean);
   const when = new Date(entry.t);
-  const note = values.note ? `<br><i>${escapeHtml(values.note)}</i>` : '';
+  // What was typed stays as typed, never painted as UTC.
+  const note = values.note
+    ? `<br><i data-no-hr>${escapeHtml(values.note)}</i>`
+    : '';
   const events = escapeHtml((values.evt ?? []).join(', '));
-  return `<b>${fmtShortDate(when)} ${fmtTime(when)}</b> ${events}<br>${escapeHtml(parts.join(' · '))}${note}`;
+  return `<b>${fmtDateTime(when)}</b> ${events}<br>${escapeHtml(parts.join(' · '))}${note}`;
 }

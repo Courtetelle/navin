@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { fmtHhMm } from '../../lib/format.ts';
 
 import { Button } from './Button.tsx';
 
@@ -50,10 +51,7 @@ export function RefreshButton({
     if (phase !== 'running' || busy || pending) return undefined;
     const timer = setTimeout(
       () => {
-        const now = new Date();
-        setDoneText(
-          `✓ Actualisé à ${now.getHours()}h${String(now.getMinutes()).padStart(2, '0')}`,
-        );
+        setDoneText(`✓ Actualisé à ${fmtHhMm(new Date())}`);
         setPhase('done');
       },
       Math.max(0, startedAt + LEAST_RUN_MS - Date.now()),

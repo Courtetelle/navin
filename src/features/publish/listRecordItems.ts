@@ -1,4 +1,12 @@
-import { fmtDur, fmtShortDate, fmtTime, fr, pad } from '../../lib/format.ts';
+import { utcMark } from '../../lib/clockMode.ts';
+import {
+  fmtDateTime,
+  fmtDur,
+  fmtShortDate,
+  fmtTimeShared,
+  fr,
+  pad,
+} from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import type { NavRoute } from '../../model/routes.ts';
 import {
@@ -40,8 +48,8 @@ export function traceItems(tracks: readonly PublishableTrack[]): PublishItem[] {
     const end = new Date(track.end);
     const rows: PublishRowData[] = [
       ['Date', fmtShortDate(start)],
-      ['Départ', fmtTime(start)],
-      ['Arrivée', fmtTime(end)],
+      ['Départ', fmtTimeShared(start)],
+      ['Arrivée', fmtTimeShared(end)],
       ['Durée', fmtDur(track.end - track.start)],
       ['Distance', `${fr(track.nm)} NM`],
     ];
@@ -147,7 +155,7 @@ function dayText(iso: string): string {
 
 function timeText(iso: string): string {
   const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? '' : fmtTime(date);
+  return Number.isNaN(date.getTime()) ? '' : fmtTimeShared(date);
 }
 
 /**
@@ -167,7 +175,7 @@ export function routeItems(routes: readonly NavRoute[]): PublishItem[] {
     ];
     if (times) {
       const start = new Date(times[0] as number);
-      rows.push(['Départ', `${fmtShortDate(start)} ${fmtTime(start)}`]);
+      rows.push(['Départ', `${fmtDateTime(start)}${utcMark()}`]);
     }
     const legs = routeLegs(route.points);
     const points: PublishRowData[] = route.points.map((point, index) => {
@@ -179,7 +187,7 @@ export function routeItems(routes: readonly NavRoute[]): PublishItem[] {
         );
       }
       const time = times?.[index];
-      if (time !== undefined) parts.push(fmtTime(new Date(time)));
+      if (time !== undefined) parts.push(fmtTimeShared(new Date(time)));
       return [pointName(route.points, index), parts.join(' · ')];
     });
     return {
