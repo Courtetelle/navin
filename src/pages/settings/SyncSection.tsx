@@ -15,6 +15,7 @@ import {
 } from '../../features/sync/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { fmtHhMm } from '../../lib/format.ts';
 import { state, toast, updateSettings } from '../../state/index.ts';
 
 /**
@@ -139,6 +140,5 @@ function SyncPairing() {
 }
 
 function timeOf(at: number): string {
-  const date = new Date(at);
-  return `${date.getHours()}h${String(date.getMinutes()).padStart(2, '0')}`;
+  return fmtHhMm(new Date(at));
 }

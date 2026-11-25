@@ -1,7 +1,7 @@
 import { effect } from '@preact/signals-react';
 import type { Map as LeafletMap } from 'leaflet';
 
-import { fmtShortDate, fmtTime, fr } from '../../lib/format.ts';
+import { fmtDateTime, fmtTime, fr } from '../../lib/format.ts';
 import { herePos } from '../../state/index.ts';
 import { store } from '../../storage/store.ts';
 import {
@@ -257,7 +257,7 @@ export function boxEdge(dx: number, dy: number): { x: number; y: number } {
 
 function day(ms: number): string {
   const date = new Date(ms);
-  return `${fmtShortDate(date)} ${fmtTime(date)}`;
+  return fmtDateTime(date);
 }
 
 /** An ETD or ETA tag. */

@@ -265,13 +265,13 @@ export function trkReset(): void {
  * Pin a point on the tracker (legacy `trkPin`).
  * @param position - `[lat, lon]`.
  * @param simulated - Point without GPS, drawn dashed.
- * @param text - Popup text.
+ * @param text - Popup text, or what writes it when it opens.
  * @returns The marker, or `null` when the map is not ready.
  */
 export function trkPin(
   position: LatLngPair,
   simulated: boolean,
-  text: string,
+  text: string | (() => string),
 ): Marker | null {
   const map = tracker.current?.map;
   if (!map) return null;
@@ -287,7 +287,8 @@ export function trkPin(
     }),
     zIndexOffset: 500,
   }).addTo(map);
-  if (text) marker.bindPopup(text);
+  // Written when it opens: its time follows the clock (UTC or not).
+  if (text) marker.bindPopup(typeof text === 'string' ? text : () => text());
   return marker;
 }
 
@@ -302,11 +303,11 @@ export function trkDrawPins(): void {
       trkPin(
         [position.lat, position.lon],
         false,
-        `📌 Point · ${fmtTime(new Date(entry.t))}`,
+        () => `📌 Point · ${fmtTime(new Date(entry.t))}`,
       );
     }
   }
   for (const pin of simulatedPins) {
-    trkPin(pin.ll, true, `📌 Point simulé · ${fmtTime(new Date(pin.t))}`);
+    trkPin(pin.ll, true, () => `📌 Point simulé · ${fmtTime(new Date(pin.t))}`);
   }
 }

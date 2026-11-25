@@ -25,6 +25,7 @@ import {
 } from '../../features/onwater/lakeWarnings.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { shownTimeOptions } from '../../lib/format.ts';
 import { exitOrigin } from '../../shell/exitOrigin.ts';
 import { go } from '../../shell/router.ts';
 import { state, toast } from '../../state/index.ts';
@@ -38,11 +39,14 @@ const TROUBLES: Readonly<Record<string, string>> = {
 };
 
 const time = (t: number) =>
-  new Date(t).toLocaleString('fr-CH', {
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  new Date(t).toLocaleString(
+    'fr-CH',
+    shownTimeOptions({
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+  );
 
 /**
  * The warnings of MeteoSwiss for the lakes, those that switch on the

@@ -16086,3 +16086,38 @@ html body.menus-fading header.topbar #routesBtn.theme-btn.routing-on {
   background: var(--card);
   color: var(--fg);
 }
+
+/* 25/11/2026 (Corban) : quand l'horloge est en UTC, toutes les heures de
+   l'appli passent en UTC et en rouge, comme l'horloge (src/shell/utcHighlight.ts). */
+::highlight(utc-time) {
+  color: #d70015;
+}
+::highlight(utc-time-on-red) {
+  color: #ffe14d;
+}
+:root[data-theme='night'] ::highlight(utc-time) {
+  color: #ff4d4d;
+  text-decoration: underline;
+}
+:root[data-theme='night'] ::highlight(utc-time-on-red) {
+  color: currentcolor;
+  text-decoration: underline;
+}
+body.utc-times input[type='datetime-local']:not([data-no-hr]),
+body.utc-times input[type='time'][data-utc] {
+  color: #d70015;
+}
+:root[data-theme='night']
+  body.utc-times
+  input[type='datetime-local']:not([data-no-hr]),
+:root[data-theme='night'] body.utc-times input[type='time'][data-utc] {
+  color: #ff4d4d;
+}
+/* Une heure sans minutes (« 14 h ») dans une colonne d'heures : rouge en UTC. */
+body.utc-times .hr {
+  color: #d70015;
+}
+:root[data-theme='night'] body.utc-times .hr {
+  color: #ff4d4d;
+  text-decoration: underline;
+}

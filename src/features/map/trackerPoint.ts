@@ -48,7 +48,8 @@ export async function trkPointNow(): Promise<void> {
     const entry = await addAutoEntry(last.event, last.lochBase);
     if (entry) markAsPoint(entry.id);
     if (state.view.currentView.value === 'tracker') {
-      trkPin([lat, lon], false, `📌 Point · ${fmtTime(new Date())}`);
+      const at = new Date();
+      trkPin([lat, lon], false, () => `📌 Point · ${fmtTime(at)}`);
     }
     toast('📌 Point enregistré');
     return;
@@ -65,11 +66,12 @@ export async function trkPointNow(): Promise<void> {
   let position: LatLngPair = [center.lat, center.lng];
   if (lastPoint) position = [lastPoint[1], lastPoint[2]];
   else if (fix) position = [fix.lat, fix.lon];
-  simulatedPins.push({ ll: position, t: Date.now() });
+  const at = new Date();
+  simulatedPins.push({ ll: position, t: at.getTime() });
   const marker = trkPin(
     position,
     true,
-    `📌 Point simulé · ${fmtTime(new Date())}`,
+    () => `📌 Point simulé · ${fmtTime(at)}`,
   );
   if (marker && !map.getBounds().contains(marker.getLatLng())) {
     map.panTo(position);

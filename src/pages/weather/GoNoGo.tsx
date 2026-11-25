@@ -41,7 +41,14 @@ import {
 } from '../../features/onwater/routeBriefing.ts';
 import { shareCards } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
+import { showsUtc, utcMark } from '../../lib/clockMode.ts';
 import { buzz } from '../../lib/dom.ts';
+import {
+  fromLocalInput,
+  shownTimeOptions,
+  toLocalInput,
+  toPhoneInput,
+} from '../../lib/format.ts';
 import { compassPoint } from '../../lib/wind.ts';
 import { parseTyped } from '../../model/beaufortDouglas.ts';
 import { inInland } from '../../model/contacts.ts';
@@ -85,16 +92,13 @@ const fr = (value: number, digits = 0) =>
     .toString()
     .replace('.', ',');
 
-const two = (value: number) => String(value).padStart(2, '0');
-
 /**
  * A time for an input `datetime-local`, in the time of the device.
  * @param ms - Epoch ms.
  * @returns `YYYY-MM-DDTHH:MM`.
  */
 function localInput(ms: number): string {
-  const date = new Date(ms);
-  return `${date.getFullYear()}-${two(date.getMonth() + 1)}-${two(date.getDate())}T${two(date.getHours())}:${two(date.getMinutes())}`;
+  return toPhoneInput(new Date(ms));
 }
 
 /**
@@ -417,14 +421,14 @@ export function GoNoGo() {
           {read.live ? null : (
             <p className="fx-draft" role="status">
               {tr(
-                `Hors réseau : paquet ${data.light ? 'ultra-léger' : 'complet'} du ${new Date(data.at).toLocaleString('fr-CH', { weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}.`,
+                `Hors réseau : paquet ${data.light ? 'ultra-léger' : 'complet'} du ${new Date(data.at).toLocaleString('fr-CH', shownTimeOptions({ weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }))}.`,
               )}
             </p>
           )}
           {measure ? (
             <p className="gng-corrected" data-gng="corrected">
               {tr(
-                `Corrigé d’après votre saisie de ${new Date(measure.t).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' }).replace(':', ' h ')} (s’efface sur 6 h).`,
+                `Corrigé d’après votre saisie de ${new Date(measure.t).toLocaleTimeString('fr-CH', shownTimeOptions({ hour: '2-digit', minute: '2-digit' })).replace(':', ' h ')}${utcMark()} (s’efface sur 6 h).`,
               )}
             </p>
           ) : null}
@@ -473,7 +477,7 @@ export function GoNoGo() {
           <PacketState packets={packets} />
           <ThresholdTable limits={limits} />
           <HelpText>
-            {`Prévision ${data.src}, vagues Open-Meteo, lue le ${new Date(data.at).toLocaleString('fr-CH')}. Fenêtre de navigation ${WINDOW.from} h à ${WINDOW.to} h. Règles sans IA : un critère compte s’il est dépassé 2 heures de suite ; le feu du jour est le pire ; deux critères orange en même temps donnent rouge ; une rafale orange ne compte que 12 nœuds au-dessus du vent moyen (toujours pour un multicoque). Seuils du Dufour 445 GL décalés selon la longueur (−6 nœuds et −1 m sous 8 m, −3 et −0,5 de 8 à 11 m, +3 et +0,5 au-delà de 14 m), plafonnés par la catégorie CE ; catégorie CE et type (monocoque, multicoque, dériveur) lus dans la fiche du bateau, Données techniques ; quel que soit le bateau, no-go dès ${NOGO_WIND_MAX} nœuds de vent moyen, sous force 7 ; équipage réduit : −3 nœuds et −0,5 m. Ce sont des valeurs de départ, à corriger. Toujours lire le bulletin côtier, le BMS en cours et la vigilance.`}
+            {`Prévision ${data.src}, vagues Open-Meteo, lue le ${new Date(data.at).toLocaleString('fr-CH', shownTimeOptions())}. Fenêtre de navigation ${WINDOW.from} h à ${WINDOW.to} h${showsUtc() ? ', heure locale' : ''}. Règles sans IA : un critère compte s’il est dépassé 2 heures de suite ; le feu du jour est le pire ; deux critères orange en même temps donnent rouge ; une rafale orange ne compte que 12 nœuds au-dessus du vent moyen (toujours pour un multicoque). Seuils du Dufour 445 GL décalés selon la longueur (−6 nœuds et −1 m sous 8 m, −3 et −0,5 de 8 à 11 m, +3 et +0,5 au-delà de 14 m), plafonnés par la catégorie CE ; catégorie CE et type (monocoque, multicoque, dériveur) lus dans la fiche du bateau, Données techniques ; quel que soit le bateau, no-go dès ${NOGO_WIND_MAX} nœuds de vent moyen, sous force 7 ; équipage réduit : −3 nœuds et −0,5 m. Ce sont des valeurs de départ, à corriger. Toujours lire le bulletin côtier, le BMS en cours et la vigilance.`}
           </HelpText>
           <ShareButton
             data-gng="share"
@@ -636,8 +640,17 @@ function RouteChooser({
               id="gng-depart"
               type="datetime-local"
               data-gng="route-depart"
-              value={plan.depart}
-              onChange={(event) => onPlan({ depart: event.target.value })}
+              // Kept in the time of the device, shown and typed in UTC when
+              // the clock shows UTC.
+              value={toLocalInput(new Date(plan.depart))}
+              onChange={(event) => {
+                const typed = fromLocalInput(event.target.value);
+                onPlan({
+                  depart: Number.isFinite(typed)
+                    ? localInput(typed)
+                    : event.target.value,
+                });
+              }}
             />
           </div>
           {routing ? (
@@ -722,7 +735,7 @@ function RouteBlock({
       {keptAt == null ? null : (
         <p className="fx-draft" role="status" data-gng="route-offline">
           {tr(
-            `Hors réseau : prévision de la route gardée du ${new Date(keptAt).toLocaleString('fr-CH', { weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}.`,
+            `Hors réseau : prévision de la route gardée du ${new Date(keptAt).toLocaleString('fr-CH', shownTimeOptions({ weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }))}.`,
           )}
         </p>
       )}
@@ -754,7 +767,7 @@ function RouteBlock({
       </ul>
       <p className="bd-how">
         {tr(
-          `Prévision ${briefing.src} et vagues Open-Meteo en plusieurs points le long de la route, lue le ${new Date(briefing.at).toLocaleString('fr-CH')}. Chaque heure, le bateau est placé là où le routage polaire le met (vent, vagues et courants prévus, virements et empannages, moteur sous le seuil), sinon à la vitesse prévue ; l’allure vient du cap tenu et du vent de l’heure. Courants du modèle de mer d’Open-Meteo, côté Atlantique et dans les détroits connus de Méditerranée ; vent contre courant : orange dès ${TIDE_RULES.against.orange[0]} nd de courant et ${TIDE_RULES.against.orange[1]} nd de vent, rouge dès ${TIDE_RULES.against.red[0]} nd et ${TIDE_RULES.against.red[1]} nd, courant seul de ${TIDE_RULES.strong} nd ou plus orange (valeurs de départ, à corriger). Mêmes règles qu’au point, sans fenêtre 8 h – 18 h : toutes les heures de la route comptent. La prévision de la route est gardée pour hors ligne à chaque lecture (4 routes au plus).`,
+          `Prévision ${briefing.src} et vagues Open-Meteo en plusieurs points le long de la route, lue le ${new Date(briefing.at).toLocaleString('fr-CH', shownTimeOptions())}. Chaque heure, le bateau est placé là où le routage polaire le met (vent, vagues et courants prévus, virements et empannages, moteur sous le seuil), sinon à la vitesse prévue ; l’allure vient du cap tenu et du vent de l’heure. Courants du modèle de mer d’Open-Meteo, côté Atlantique et dans les détroits connus de Méditerranée ; vent contre courant : orange dès ${TIDE_RULES.against.orange[0]} nd de courant et ${TIDE_RULES.against.orange[1]} nd de vent, rouge dès ${TIDE_RULES.against.red[0]} nd et ${TIDE_RULES.against.red[1]} nd, courant seul de ${TIDE_RULES.strong} nd ou plus orange (valeurs de départ, à corriger). Mêmes règles qu’au point, sans fenêtre 8 h – 18 h : toutes les heures de la route comptent. La prévision de la route est gardée pour hors ligne à chaque lecture (4 routes au plus).`,
         )}
       </p>
     </section>
@@ -1098,12 +1111,15 @@ function AiPrompt({ text }: { text: string }) {
 
 function packetWhen(data: BriefingData | null): string {
   return data
-    ? new Date(data.at).toLocaleString('fr-CH', {
-        weekday: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+    ? new Date(data.at).toLocaleString(
+        'fr-CH',
+        shownTimeOptions({
+          weekday: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      )
     : '';
 }
 

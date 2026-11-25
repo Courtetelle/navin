@@ -1,4 +1,16 @@
+import { showsUtc } from '../../lib/clockMode.ts';
 import { pad } from '../../lib/format.ts';
+
+/**
+ * `HH:MM` (or `HH:MM:SS`) as shown: local time, or UTC when the top bar clock
+ * shows UTC.
+ * @param date - Moment.
+ * @param seconds - With seconds.
+ * @returns The text.
+ */
+export function shownText(date: Date, seconds: boolean): string {
+  return showsUtc() ? utcText(date, seconds) : localText(date, seconds);
+}
 
 /**
  * `HH:MM` (or `HH:MM:SS`) in local time.

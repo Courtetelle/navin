@@ -6,6 +6,7 @@
  * (for the point of sail), and the same rules as at one point.
  */
 
+import { shownOffset, showsUtc, utcMark } from '../../lib/clockMode.ts';
 import type { LatLon } from '../../lib/geo.ts';
 import { bearing, destination, distNM } from '../../lib/geo.ts';
 import { bft, compassPoint } from '../../lib/wind.ts';
@@ -563,7 +564,8 @@ export const POINT_WORDS: Readonly<Record<PointOfSail, string>> = {
 };
 
 /**
- * A time in words, local: « sam. 23, 9 h 30 ».
+ * A time in words, local: « sam. 23, 9 h 30 »; « sam. 23, 8 h 30 UTC » when
+ * the top bar clock shows UTC.
  * @param ms - Epoch ms.
  * @param offset - Offset of local time, seconds.
  * @param withDay - With the day.
@@ -571,9 +573,11 @@ export const POINT_WORDS: Readonly<Record<PointOfSail, string>> = {
  */
 export function whenWords(ms: number, offset: number, withDay = true): string {
   // To 5 minutes: a plan, not a timetable.
-  const local = new Date(Math.round((ms + offset * 1000) / 300_000) * 300_000);
+  // In UTC when the top bar clock shows UTC.
+  const shift = shownOffset(offset) * 1000;
+  const local = new Date(Math.round((ms + shift) / 300_000) * 300_000);
   const minutes = local.getUTCMinutes();
-  const time = `${local.getUTCHours()} h${minutes ? ` ${String(minutes).padStart(2, '0')}` : ''}`;
+  const time = `${local.getUTCHours()} h${minutes ? ` ${String(minutes).padStart(2, '0')}` : ''}${utcMark()}`;
   if (!withDay) return time;
   const day = local.toLocaleDateString('fr-CH', {
     weekday: 'short',
@@ -861,7 +865,7 @@ export function routePrompt(name: string, briefing: RouteBriefing): string {
   return [
     '',
     `Route prévue « ${name} » : ${lines[0] ?? ''}`,
-    'Heure par heure le long de la route (heure locale) : heure | position | cap ° | allure | vent nd | direction ° | rafales nd | Hs m | courant nd vers °',
+    `Heure par heure le long de la route (${showsUtc() ? 'UTC' : 'heure locale'}) : heure | position | cap ° | allure | vent nd | direction ° | rafales nd | Hs m | courant nd vers °`,
     ...hours.map(
       (one) =>
         `${whenWords(one.hour.t, offset)} | ${fr(one.lat, 3)}, ${fr(one.lon, 3)} | ${one.course} | ${POINT_WORDS[one.point]} | ${one.hour.windKn == null ? '–' : fr(one.hour.windKn)} | ${one.hour.windFrom == null ? '–' : fr(one.hour.windFrom)} | ${one.hour.gustKn == null ? '–' : fr(one.hour.gustKn)} | ${one.hour.hs == null ? '–' : fr(one.hour.hs, 1)} | ${one.hour.currentKn == null ? '–' : `${fr(one.hour.currentKn, 1)} vers ${fr(one.hour.currentToward ?? 0)}`}`,

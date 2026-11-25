@@ -6,6 +6,7 @@ import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
 import { dayText } from '../../features/voyages/voyageDates.ts';
 import { useTr } from '../../i18n/useTr.ts';
+import { showsUtc } from '../../lib/clockMode.ts';
 import { buzz } from '../../lib/dom.ts';
 import { INFO_FIELDS } from '../../model/voyages.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
@@ -73,7 +74,13 @@ export function VoyageInfoPage() {
               key={key}
               className={`cf voy-${key} ${kind === 'date' || kind === 'time' ? '' : 'wide'}`}
             >
-              <label htmlFor={`vi-${key}`}>{tr(label)}</label>
+              <label htmlFor={`vi-${key}`}>
+                {tr(label)}
+                {/* Typed in the phone's time, even when the clock shows UTC. */}
+                {kind === 'time' && showsUtc() ? (
+                  <small>{` (${tr('heure locale')})`}</small>
+                ) : null}
+              </label>
               {kind === 'area' ? (
                 <textarea
                   id={`vi-${key}`}
@@ -130,7 +137,11 @@ export function VoyageInfoPage() {
                     🌐 {voyage.info[key]}
                   </a>
                 ) : (
-                  <span className="voy-text">
+                  <span
+                    className="voy-text"
+                    // What was typed stays as typed, never painted as UTC.
+                    data-no-hr={kind === 'date' ? undefined : ''}
+                  >
                     {kind === 'date'
                       ? dayText(
                           voyage.info[key] ?? '',

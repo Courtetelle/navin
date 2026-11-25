@@ -16,6 +16,7 @@ import {
 } from '../../features/zones/zoneArchiveSync.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { shownTimeOptions } from '../../lib/format.ts';
 import { ZoneChoices } from '../tracker/ZoneChoices.tsx';
 import {
   liveZoneIds,
@@ -24,12 +25,12 @@ import {
 } from '../tracker/liveOnMap.ts';
 import { shownIds } from '../tracker/zoneChoice.ts';
 
-const TIME = new Intl.DateTimeFormat('fr-CH', {
+const TIME: Intl.DateTimeFormatOptions = {
   day: 'numeric',
   month: 'numeric',
   hour: '2-digit',
   minute: '2-digit',
-});
+};
 
 /**
  * Paramétrages › LiveMétéo: every zone of LiveMétéo in one place
@@ -117,7 +118,7 @@ function ArchiveBlock() {
     };
   }, [key, sending.sent]);
   const last = index
-    ? `Dernier relevé ${TIME.format(new Date(index.at))} : ${index.last.stations} stations (${Object.entries(
+    ? `Dernier relevé ${new Date(index.at).toLocaleString('fr-CH', shownTimeOptions(TIME))} : ${index.last.stations} stations (${Object.entries(
         index.last.nets,
       )
         .map(([net, count]) => `${net} ${count}`)

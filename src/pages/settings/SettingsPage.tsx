@@ -574,7 +574,7 @@ export function SettingsPage({ from, arg }: PageProps) {
         </div>
       </ShownSection.Provider>
       {section ? null : (
-        <p className="help" id="buildId">
+        <p className="help" id="buildId" data-no-hr="">
           Version {BUILD_ID}
         </p>
       )}

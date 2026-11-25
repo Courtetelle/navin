@@ -1,6 +1,6 @@
 import { freeze, produce } from 'immer';
 
-import { fmtShortDate, hms, hmsUtc, uid } from '../lib/format.ts';
+import { fmtShortDate, logTimes, uid } from '../lib/format.ts';
 import { fmtPos } from '../lib/geo.ts';
 import type { LogEvent, MobLog, SosLog } from '../model/types.ts';
 import { store } from '../storage/store.ts';
@@ -190,10 +190,8 @@ export function sosLogText(log: SosLog): string {
     `LOG SOS · ${fmtShortDate(new Date(log.start))}${log.boat ? ` · ${log.boat}` : ''}${log.nav ? ` · ${log.nav}` : ''}`,
   ];
   for (const event of log.events) {
-    const date = new Date(event.t);
-    const utc = log.zone === 'lac' ? '' : ` · ${hmsUtc(date)}`;
     lines.push(
-      `${hms(date)}${utc}  ${event.what}${event.pos ? `  (${fmtPos(event.pos)})` : ''}`,
+      `${logTimes(event.t, log.zone === 'lac')}  ${event.what}${event.pos ? `  (${fmtPos(event.pos)})` : ''}`,
     );
   }
   if (log.end) {

@@ -5,6 +5,7 @@
  * It is a help to see a storm coming, not a warning system.
  */
 
+import { fmtHhMm } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 
 /** The map server of EUMETView. */
@@ -997,13 +998,12 @@ export function lightningEtaShown(eta: LightningEta, now: number): boolean {
 }
 
 /**
- * The local time as 14h35.
+ * The local time as 14h35, UTC when the top bar clock shows UTC.
  * @param time - Epoch ms.
  * @returns The text.
  */
 export function hourText(time: number): string {
-  const date = new Date(time);
-  return `${date.getHours()}h${String(date.getMinutes()).padStart(2, '0')}`;
+  return fmtHhMm(new Date(time));
 }
 
 /**

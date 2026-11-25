@@ -1,3 +1,4 @@
+import { shownOffset, utcMark } from '../../lib/clockMode.ts';
 import { openMeteoFetch } from '../../lib/openMeteo.ts';
 import { bft, compassPoint } from '../../lib/wind.ts';
 import { degreeOfHeight } from '../../model/beaufortDouglas.ts';
@@ -461,7 +462,9 @@ function dayOf(
 ): BriefingDay {
   const verdict = dayVerdict(hours, all, limits, course);
   const hourOf = (hour: Hour | undefined) =>
-    hour ? `${new Date(hour.t + offset * 1000).getUTCHours()} h` : '';
+    hour
+      ? `${new Date(hour.t + shownOffset(offset) * 1000).getUTCHours()} h${utcMark()}`
+      : '';
   const winds = hours.map((hour) => hour.windKn);
   const windMax = max(winds);
   const windMin = Math.min(

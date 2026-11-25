@@ -1,8 +1,10 @@
+import { showsUtc } from '../../lib/clockMode.ts';
 import {
   dayKey,
   fmtDate,
   fmtDur,
   fmtTime,
+  fmtTimeShared,
   fmtUtc,
   keyToDate,
   textOf,
@@ -131,11 +133,13 @@ function departureText(key: string): string {
   const end = t1 ? new Date(t1) : null;
   const local = `${fmtTime(start)} → ${end ? fmtTime(end) : '…'}`;
   const utc = `${fmtUtc(start)} → ${end ? fmtUtc(end) : '…'}`;
-  return `${local} (${utc})${nav ? ` (${nav})` : ''}`;
+  // The clock in UTC: the UTC times alone.
+  const both = showsUtc() ? utc : `${local} (${utc})`;
+  return `${both}${nav ? ` (${nav})` : ''}`;
 }
 
 function clock(time: number | null, missing: string): string {
-  return time ? fmtTime(new Date(time)) : missing;
+  return time ? fmtTimeShared(new Date(time)) : missing;
 }
 
 function propulsionRows(times: LakeTimes): SheetRow[] {
@@ -157,7 +161,7 @@ function blackWaterTimes(key: string, cruise: Cruise): string {
     .filter(
       (entry) => dayKey(new Date(entry.t)) === key && hasEvt(entry, BLACK_EVT),
     )
-    .map((entry) => fmtTime(new Date(entry.t)))
+    .map((entry) => fmtTimeShared(new Date(entry.t)))
     .join(', ');
 }
 

@@ -1,5 +1,5 @@
 import { allLakeTracks } from '../../features/map/trackStats.ts';
-import { textOf } from '../../lib/format.ts';
+import { shownTimeOptions, textOf } from '../../lib/format.ts';
 import {
   crewSetName,
   memberName,
@@ -358,13 +358,16 @@ function sosLogName(start: string, boat: string): string {
   const date = new Date(start);
   const day = Number.isNaN(date.getTime())
     ? start
-    : date.toLocaleString('fr-CH', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
+    : date.toLocaleString(
+        'fr-CH',
+        shownTimeOptions({
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      );
   return boat ? `${day} · ${boat}` : day;
 }
 

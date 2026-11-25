@@ -2,7 +2,7 @@ import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import type { CardsDocument, CardsRow } from '../../features/publish/index.ts';
 import { shareCards } from '../../features/publish/index.ts';
 import type { MobLogRecord } from '../../features/safety/mobLog.ts';
-import { bothTimes, fmtShortDate, hms } from '../../lib/format.ts';
+import { fmtShortDate, logTimes } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import { state } from '../../state/index.ts';
 
@@ -18,7 +18,7 @@ export function mobLogDocument(
 ): CardsDocument {
   const kind = log.kind === 'train' ? 'Entraînement' : 'Incident';
   const rows = log.events.map((event): [string, string] => [
-    log.zone === 'lac' ? hms(new Date(event.t)) : bothTimes(event.t),
+    logTimes(event.t, log.zone === 'lac'),
     `${event.what}${event.pos ? ` (${fmtPos(event.pos)})` : ''}`,
   ]);
   const minutes = log.end

@@ -5,6 +5,7 @@ import {
   defaultMapCenter,
   shownMapCenter,
 } from '../../features/map/shownMap.ts';
+import { utcClock } from '../../lib/clockMode.ts';
 import { pad } from '../../lib/format.ts';
 import { placeTimeText } from '../../lib/placeZone.ts';
 import { sunTimes } from '../../lib/sun.ts';
@@ -55,7 +56,9 @@ const GPS_FRESH_MS = 120_000;
 /**
  * Inland waters show the zone time, the sea UTC; a tap switches and the
  * choice stays until the zone changes (any change: lake, Atlantique,
- * Méditerranée, GPS), which brings back the time of the new zone. Also sets the body classes `zone-lac` and `zone-auto`.
+ * Méditerranée, GPS), which brings back the time of the new zone. Every time
+ * of day in the app follows it ({@link utcClock}, body class `utc-times`).
+ * Also sets the body classes `zone-lac` and `zone-auto`.
  * @param now - Current time (ms).
  */
 export function tickClock(now = Date.now()): void {
@@ -76,6 +79,9 @@ export function tickClock(now = Date.now()): void {
   const time = clockText(date, local, sunPlace(now));
   batch(() => {
     clockFace.value = { local, time, tick: clockFace.value.tick + 1 };
+    // Every time of day in the app follows the clock (UTC in red).
+    utcClock.value = !local;
+    setBodyClass('utc-times', !local);
     setBodyClass('zone-lac', inland);
     setBodyClass('zone-auto', !state.view.zoneSimV.value);
   });

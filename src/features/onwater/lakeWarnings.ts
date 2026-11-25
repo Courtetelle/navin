@@ -1,3 +1,4 @@
+import { shownTimeOptions } from '../../lib/format.ts';
 /*
  * The warnings of MeteoSwiss for the lakes: the same that light the warning
  * lights on the shores (40 flashes a minute for a strong wind warning, 90
@@ -210,10 +211,13 @@ export function lightOf(level: number): { words: string; perMinute: number } {
  * @returns e.g. `14:00`, `demain 14:00`, `mer. 14:00`.
  */
 export function whenText(t: number, now: number): string {
-  const hour = new Date(t).toLocaleTimeString('fr-CH', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  const hour = new Date(t).toLocaleTimeString(
+    'fr-CH',
+    shownTimeOptions({
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+  );
   const day = (time: number) => new Date(time).toDateString();
   if (day(t) === day(now)) return hour;
   if (day(t) === day(now + 86_400_000)) return `demain ${hour}`;

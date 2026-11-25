@@ -11,6 +11,7 @@ import { onLake } from '../../features/onwater/onLake.ts';
 import { zonesButtonText, zonesText } from '../../features/zones/meteoZones.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import { shownTimeOptions } from '../../lib/format.ts';
 import { go } from '../../shell/router.ts';
 import { toast } from '../../state/index.ts';
 
@@ -40,10 +41,13 @@ function failText(value: Grid<unknown> | Failure | null): string | null {
 }
 
 function hourText(ms: number): string {
-  return new Date(ms).toLocaleTimeString('fr-CH', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
+  return new Date(ms).toLocaleTimeString(
+    'fr-CH',
+    shownTimeOptions({
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+  );
 }
 
 /**

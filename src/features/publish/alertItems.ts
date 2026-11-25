@@ -1,17 +1,21 @@
+import { utcMark } from '../../lib/clockMode.ts';
+import { fmtDotDateTime } from '../../lib/format.ts';
 import type { AlertRecord } from '../../model/alertLog.ts';
 import { ALERT_KINDS, alertIcon, latestFirst } from '../../model/alertLog.ts';
 
 import type { PublishItem } from './types.ts';
 
 /**
- * A time written « 14.11.2026 à 11h30 ».
+ * A time written « 14.11.2026 à 11h30 » (« 14.11.2026 à 10h30 UTC » when the
+ * clock shows UTC).
  * @param iso - ISO time.
  * @returns The text.
  */
 export function alertWhen(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return '';
-  return `${two(date.getDate())}.${two(date.getMonth() + 1)}.${date.getFullYear()} à ${two(date.getHours())}h${two(date.getMinutes())}`;
+  // In UTC, « UTC » written, when the top bar clock shows UTC.
+  return `${fmtDotDateTime(date)}${utcMark()}`;
 }
 
 /**
@@ -41,13 +45,4 @@ export function alertItems(alerts: readonly AlertRecord[]): PublishItem[] {
       ],
     };
   });
-}
-
-/**
- * A number on two digits.
- * @param value - The number.
- * @returns e.g. `07`.
- */
-function two(value: number): string {
-  return String(value).padStart(2, '0');
 }

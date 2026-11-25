@@ -1,4 +1,4 @@
-import { fmtTime } from '../../lib/format.ts';
+import { fmtTimeShared } from '../../lib/format.ts';
 import { PHOTO_CTX, getPhoto } from '../../storage/photos.ts';
 import type { CruisePhoto } from '../onwater/index.ts';
 import { traceImage } from '../onwater/index.ts';
@@ -15,7 +15,7 @@ import type { SheetImageContent } from './sheetTypes.ts';
 function pictureCaption(photo: CruisePhoto): string {
   if (typeof photo.cap === 'string' && photo.cap) return photo.cap;
   const moment = (PHOTO_CTX[photo.ctx] ?? '').replace('📷 ', '');
-  return `${moment} · ${fmtTime(new Date(photo.t))}`;
+  return `${moment} · ${fmtTimeShared(new Date(photo.t))}`;
 }
 
 /* eslint-disable no-await-in-loop -- photos are read one by one to keep memory low on a phone */

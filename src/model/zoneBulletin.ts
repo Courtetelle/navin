@@ -9,6 +9,7 @@
  * (the text of the BMS, the tides of the SHOM) is said, with its link.
  */
 
+import { shownOffset, showsUtc, utcMark } from '../lib/clockMode.ts';
 import { bft, compassPoint } from '../lib/wind.ts';
 
 import { fetchSea } from './fetchWaves.ts';
@@ -238,19 +239,36 @@ function hoursOf(data: BulletinData, now: number): H[] {
 const WEEKDAYS = ['dim.', 'lun.', 'mar.', 'mer.', 'jeu.', 'ven.', 'sam.'];
 
 /**
+ * The head of the hour column of the tables.
+ * @returns « Heure locale », or « Heure UTC » when the clock shows UTC.
+ */
+function hourHead(): string {
+  return showsUtc() ? 'Heure UTC' : 'Heure locale';
+}
+
+/**
  * A time in words, local to the place: « 14 h » today, « dem. 14 h »,
- * else the day.
+ * else the day; in UTC, « 14 h UTC », when the top bar clock shows UTC.
  * @param t - Epoch ms.
  * @param now - Epoch ms.
  * @param offset - Offset of local time, s.
+ * @param mark - Write « UTC » after a UTC hour (not in a table, whose head
+ * says it).
  * @returns The words.
  */
-export function whenLocal(t: number, now: number, offset: number): string {
-  const local = new Date(t + offset * 1000);
-  const today = new Date(now + offset * 1000);
+export function whenLocal(
+  t: number,
+  now: number,
+  offset: number,
+  mark = true,
+): string {
+  // In UTC when the top bar clock shows UTC.
+  const shown = shownOffset(offset);
+  const local = new Date(t + shown * 1000);
+  const today = new Date(now + shown * 1000);
   const day = (date: Date) => Math.floor(date.getTime() / 86_400_000);
   const shift = day(local) - day(today);
-  const hour = `${local.getUTCHours()} h`;
+  const hour = `${local.getUTCHours()} h${mark ? utcMark() : ''}`;
   if (shift === 0) return hour;
   if (shift === 1) return `dem. ${hour}`;
   return `${WEEKDAYS[local.getUTCDay()] ?? ''} ${hour}`;
@@ -708,7 +726,7 @@ function windLevel(input: BulletinInput, hours: readonly H[]): BulletinLevel {
   }
   const hasName = kind !== 'manche' && (kind === 'med' || leman);
   const head = [
-    'Heure locale',
+    hourHead(),
     'Direction (° / point)',
     'Vent moyen (nd)',
     'Beaufort (force)',
@@ -717,7 +735,7 @@ function windLevel(input: BulletinInput, hours: readonly H[]): BulletinLevel {
   if (hasName) head.push('Vent régional (nom)');
   const rows = sampled(hours).map((hour) => {
     const row = [
-      whenLocal(hour.t, now, data.offset),
+      whenLocal(hour.t, now, data.offset, false),
       hour.from == null ? '–' : `${fr(hour.from)}° ${compassPoint(hour.from)}`,
       cell(hour.wind),
       hour.wind == null ? '–' : String(bft(hour.wind)),
@@ -758,7 +776,7 @@ function seaLevel(input: BulletinInput, hours: readonly H[]): BulletinLevel {
         hour.wind != null && km != null ? fetchSea(hour.wind, km) : null;
       if (sea && (!worst || sea.hs > worst.hs)) worst = { t: hour.t, ...sea };
       rows.push([
-        whenLocal(hour.t, now, data.offset),
+        whenLocal(hour.t, now, data.offset, false),
         cell(hour.wind),
         cell(km),
         sea ? cell(sea.hs * 100) : '–',
@@ -787,7 +805,7 @@ function seaLevel(input: BulletinInput, hours: readonly H[]): BulletinLevel {
       lines,
       table: {
         head: [
-          'Heure locale',
+          hourHead(),
           'Vent moyen (nd)',
           'Longueur d’eau (km)',
           'Clapot (cm)',
@@ -858,7 +876,7 @@ function seaLevel(input: BulletinInput, hours: readonly H[]): BulletinLevel {
     lines,
     table: {
       head: [
-        'Heure locale',
+        hourHead(),
         'Vagues (m)',
         'Période (s)',
         'Houle (dir.)',
@@ -867,7 +885,7 @@ function seaLevel(input: BulletinInput, hours: readonly H[]): BulletinLevel {
         'Mer du vent (m)',
       ],
       rows: sampled(hours).map((hour) => [
-        whenLocal(hour.t, now, data.offset),
+        whenLocal(hour.t, now, data.offset, false),
         cell(hour.hs, 1),
         cell(hour.period),
         hour.swellDir == null ? '–' : compassPoint(hour.swellDir),
@@ -965,7 +983,7 @@ function weatherLevel(
     lines,
     table: {
       head: [
-        'Heure locale',
+        hourHead(),
         'Pluie (mm/3 h)',
         'CAPE (J/kg)',
         'CIN (J/kg)',
@@ -977,7 +995,7 @@ function weatherLevel(
           .slice(index * STEP, index * STEP + STEP)
           .reduce((sum, one) => sum + (one.rain ?? 0), 0);
         return [
-          whenLocal(hour.t, now, data.offset),
+          whenLocal(hour.t, now, data.offset, false),
           fr(rain, 1),
           cell(hour.cape),
           cell(hour.cin),
@@ -1008,12 +1026,12 @@ const KIND_TITLE: Readonly<Record<ZoneKind, string>> = {
  */
 export function zoneBulletin(input: BulletinInput): Bulletin {
   const hours = hoursOf(input.data, input.now);
-  const read = new Date(input.data.at + input.data.offset * 1000);
-  const readAt = `${String(read.getUTCHours()).padStart(2, '0')}:${String(read.getUTCMinutes()).padStart(2, '0')}`;
+  const read = new Date(input.data.at + shownOffset(input.data.offset) * 1000);
+  const readAt = `${String(read.getUTCHours()).padStart(2, '0')}:${String(read.getUTCMinutes()).padStart(2, '0')}${showsUtc() ? ' UTC' : ''}`;
   return {
     kind: input.kind,
     title: `${input.name} · ${KIND_TITLE[input.kind]}`,
-    source: `${input.data.src}, lu à ${readAt} (heure locale du lieu) ; texte écrit par les règles de NavIn, sans IA.`,
+    source: `${input.data.src}, lu à ${readAt}${showsUtc() ? '' : ' (heure locale du lieu)'} ; texte écrit par les règles de NavIn, sans IA.`,
     old: input.now - input.data.at > OLD_MS,
     levels: [
       alerts(input, hours),

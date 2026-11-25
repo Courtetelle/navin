@@ -1,4 +1,4 @@
-import { fmtTime } from '../../lib/format.ts';
+import { fmtTimeShared } from '../../lib/format.ts';
 import { distKm, nmText } from '../../lib/geo.ts';
 import { store } from '../../storage/store.ts';
 
@@ -221,6 +221,6 @@ function measureOf(row: SmnRow, station: string, km: number): SmnMeasure {
     at: row.t,
     station,
     km,
-    src: `Mesure MeteoSwiss, station ${station} (${nmText(km)}), ${fmtTime(new Date(row.t))}`,
+    src: `Mesure MeteoSwiss, station ${station} (${nmText(km)}), ${fmtTimeShared(new Date(row.t))}`,
   };
 }

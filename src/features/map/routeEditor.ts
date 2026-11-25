@@ -1,7 +1,13 @@
 import type { LatLng, Map as LeafletMap, Marker, Polyline } from 'leaflet';
 
 import { buzz } from '../../lib/dom.ts';
-import { fmtDur, fmtTime, fr, toLocalInput } from '../../lib/format.ts';
+import {
+  fmtDur,
+  fmtTime,
+  fr,
+  fromLocalInput,
+  toLocalInput,
+} from '../../lib/format.ts';
 import { distNM } from '../../lib/geo.ts';
 import type { NavRoute, RoutePoint } from '../../model/routes.ts';
 import {
@@ -560,10 +566,9 @@ export function addRouteControl(map: LeafletMap): void {
     element
       .querySelector<HTMLInputElement>('[data-rp="depart"]')
       ?.addEventListener('change', (event) => {
-        const typed = (event.target as HTMLInputElement).value;
-        const date = typed ? new Date(typed) : null;
-        depart =
-          date && Number.isFinite(date.getTime()) ? date.toISOString() : null;
+        // Typed in UTC when the clock shows UTC, like the times shown.
+        const typed = fromLocalInput((event.target as HTMLInputElement).value);
+        depart = Number.isFinite(typed) ? new Date(typed).toISOString() : null;
         save();
         drawAll();
       });

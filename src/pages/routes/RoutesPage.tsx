@@ -14,7 +14,7 @@ import {
 } from '../../features/publish/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { fmtShortDate, fmtTime } from '../../lib/format.ts';
+import { fmtDateTime } from '../../lib/format.ts';
 import type { NavRoute } from '../../model/routes.ts';
 import { routeTimes, routeToGpx } from '../../model/routes.ts';
 import { deliver, removeRoute, renameRoute, state } from '../../state/index.ts';
@@ -132,7 +132,7 @@ function RouteItem({ route }: { route: NavRoute }) {
   const press = useLongPress(() => setEditing(route.name));
   const times = routeTimes(route);
   const start = times
-    ? ` · départ ${fmtShortDate(new Date(times[0] as number))} ${fmtTime(new Date(times[0] as number))}`
+    ? ` · départ ${fmtDateTime(new Date(times[0] as number))}`
     : '';
   const auto = route.how === 'auto' ? ' · calculée' : '';
   const save = (text: string) => {

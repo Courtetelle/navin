@@ -32,6 +32,7 @@ import { followTabEdits } from './topbar/tabEdits.ts';
 import { refreshBase, resetTab } from './topbar/topMenuState.ts';
 import { followTopState } from './topbar/topState.ts';
 import { installRollListeners } from './uiEdit/rollListeners.ts';
+import { installUtcHighlight } from './utcHighlight.ts';
 import { followWake } from './wake.ts';
 
 let booted = false;
@@ -58,6 +59,8 @@ function boot(): void {
   installPressFeedback();
   // A text longer than its button or field scrolls once, then at each touch.
   installTextMarquee();
+  // The clock in UTC: every time of day on screen in red.
+  installUtcHighlight();
   effect(() => {
     document.documentElement.classList.toggle(
       'no-help-i',

@@ -6,6 +6,7 @@ import type {
 } from 'leaflet';
 
 import { buzz } from '../../lib/dom.ts';
+import { shownTimeOptions } from '../../lib/format.ts';
 import { fmtPos } from '../../lib/geo.ts';
 import { go } from '../../shell/router.ts';
 import { pinSvg } from '../../shell/topbar/tabIcons.ts';
@@ -200,7 +201,7 @@ function openBranch(map: LeafletMap, branch: CrossBranch, at: LatLng): void {
   } else if (branch === 'weather') {
     const alertAt = lastWindAlertAt();
     const replay = alertAt
-      ? `<button class="btn" data-lp="alert">🔔 Revoir la dernière alerte (${new Date(alertAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })})</button>`
+      ? `<button class="btn" data-lp="alert">🔔 Revoir la dernière alerte (${new Date(alertAt).toLocaleTimeString('fr-CH', shownTimeOptions({ hour: '2-digit', minute: '2-digit' }))})</button>`
       : '';
     body = `<div class="lp-wx" id="lpWx">${navigator.onLine ? 'Prévision : recherche…' : 'Prévision : hors réseau'}</div><div class="lp-btns"><button class="btn" data-lp="bd">🌬🌊 Beaufort et Douglas ici</button>${replay}${send}</div>`;
   } else if (branch === 'goto') {
@@ -297,10 +298,13 @@ function showForecast(point: Spot): void {
         return;
       }
       const lines = rows.slice(0, 4).map((row) => {
-        const hour = new Date(row.t).toLocaleTimeString('fr-CH', {
-          hour: '2-digit',
-          minute: '2-digit',
-        });
+        const hour = new Date(row.t).toLocaleTimeString(
+          'fr-CH',
+          shownTimeOptions({
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        );
         const gust =
           row.gust === null || row.gust === undefined
             ? ''
