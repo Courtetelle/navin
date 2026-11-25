@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import { hourText, labelLines, stormRisk } from '../routingLabel.ts';
 import {
   DEFAULT_SHIFT,
+  canGoEarlier,
+  planKey,
+  rankDeparts,
   routingChanges,
   routingCost,
   saveShiftPrefs,
@@ -52,11 +56,33 @@ describe('routingCost', () => {
 });
 
 describe('shiftPrefs', () => {
-  it('moves the ETD by 30 minutes by default, and keeps what is set', () => {
-    expect(DEFAULT_SHIFT).toStrictEqual({ stepMin: 30, moves: 'etd' });
-    saveShiftPrefs({ stepMin: 60, moves: 'eta' });
-    expect(shiftPrefs.value).toStrictEqual({ stepMin: 60, moves: 'eta' });
+  it('moves the ETD by 30 minutes and sorts 6 hours by default, and keeps what is set', () => {
+    expect(DEFAULT_SHIFT).toStrictEqual({ stepMin: 30, rankHours: 6 });
+    saveShiftPrefs({ stepMin: 60, rankHours: 24 });
+    expect(shiftPrefs.value).toStrictEqual({ stepMin: 60, rankHours: 24 });
     saveShiftPrefs(DEFAULT_SHIFT);
+  });
+});
+
+describe('canGoEarlier', () => {
+  it('never departs before now', () => {
+    const now = Date.UTC(2027, 5, 12, 8);
+    expect(canGoEarlier(now + 3_600_000, 30, now)).toBe(true);
+    expect(canGoEarlier(now + 20 * 60_000, 30, now)).toBe(false);
+    expect(canGoEarlier(now, 10, now)).toBe(false);
+  });
+});
+
+describe('rankDeparts', () => {
+  it('takes the next hours from now, about 25 departures at most', () => {
+    const now = Date.UTC(2027, 5, 12, 8, 10);
+    const six = rankDeparts(6, 30, now);
+    expect(six[0]).toBe(Date.UTC(2027, 5, 12, 8, 30));
+    expect(six.at(-1)).toBe(Date.UTC(2027, 5, 12, 14));
+    expect(six).toHaveLength(12);
+    const day = rankDeparts(24, 30, now);
+    expect((day[1] ?? 0) - (day[0] ?? 0)).toBe(3_600_000);
+    expect(day.length).toBeLessThanOrEqual(25);
   });
 });
 
@@ -78,5 +104,76 @@ describe('sortByCost', () => {
     expect(sorted.map((item) => routingCost(item))).toStrictEqual([
       240, 300, 300,
     ]);
+  });
+});
+
+describe('labelLines', () => {
+  const departMs = new Date(2027, 5, 12, 21, 30).getTime();
+  const plan = {
+    routeId: 'r',
+    boatId: 'b',
+    motorBelow: 5,
+    motorKn: 6,
+    model: 'best_match',
+    base: {
+      departMs,
+      arriveMs: departMs + 5 * 3_600_000,
+      stats: { ...base },
+    },
+  };
+  const shown = {
+    name: 'Routage',
+    departMs,
+    arriveMs: departMs + 5 * 3_600_000,
+    plan,
+    stats: {
+      ...base,
+      motorMin: 70,
+      maxTws: 18.4,
+      maxGust: 26,
+      maxWaveM: 1.4,
+      maxCape: 800,
+    },
+    track: [],
+    turns: [],
+    marks: [],
+  };
+
+  it('gives the hours, length, manoeuvres, motor, wind, waves and storms', () => {
+    expect(hourText(departMs)).toBe('21h30');
+    expect(labelLines(shown, null)).toStrictEqual([
+      'ETD 21h30 · ETA 02h30',
+      'Durée 5 h 00',
+      '2 virements · 0 empannage',
+      'Moteur 1 h 10',
+      'Vent max 18 nd · rafales 26 nd',
+      'Vagues max 1,4 m',
+      'Risque orageux possible (CAPE 800 J/kg)',
+    ]);
+  });
+
+  it('says the time lost against the best departure of the next hours', () => {
+    const best = {
+      key: planKey(plan),
+      hours: 6,
+      departMs: departMs + 3_600_000,
+      lengthMin: 240,
+      at: departMs,
+    };
+    expect(labelLines(shown, best)[2]).toBe(
+      '+1 h 00 sur le meilleur départ des 6 h (22h30)',
+    );
+    expect(labelLines(shown, { ...best, lengthMin: 298 })[2]).toBe(
+      'Meilleur départ des 6 prochaines heures',
+    );
+    expect(labelLines(shown, { ...best, key: 'other' })[2]).toBe(
+      '2 virements · 0 empannage',
+    );
+  });
+
+  it('reads the storm risk with the go/no-go thresholds', () => {
+    expect(stormRisk(200)).toBe('faible');
+    expect(stormRisk(500)).toBe('possible');
+    expect(stormRisk(1500)).toBe('fort');
   });
 });

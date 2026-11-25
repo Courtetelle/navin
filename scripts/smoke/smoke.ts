@@ -1879,6 +1879,7 @@ async function tablet(page: Page, theme: string): Promise<void> {
       '#clock',
       '.rail-boat',
       '.rail-start',
+      '.side-rail #routesBtn',
       '.rail-pin',
       '.rail-ruler',
       '#searchBtn',
@@ -1912,30 +1913,74 @@ async function tablet(page: Page, theme: string): Promise<void> {
     theme,
     'tablet: data and the settings always shown, under Météo',
     (await page.locator('.top-tab.tab-data').isVisible()) &&
-      (await page.locator('#gearBtn').isVisible()) &&
-      !(await page.locator('#routesBtn').isVisible()),
-  );
-  await page.locator('.menus-tab').click();
-  await page.waitForTimeout(400);
-  const tab = await page.locator('.menus-tab').boundingBox();
-  const routes = await page.locator('#routesBtn').boundingBox();
-  check(
-    theme,
-    'tablet: the tab at the top in the middle unrolls Routes under it',
-    tab !== null &&
-      routes !== null &&
-      tab.y < 2 &&
-      routes.y >= tab.y + tab.height &&
-      routes.x < tab.x + tab.width / 2 &&
-      routes.x + routes.width > tab.x + tab.width / 2,
-  );
-  await page.waitForTimeout(5300);
-  check(
-    theme,
-    'tablet: left alone, Routes fades and goes after 5 s; data and the settings stay',
-    !(await page.locator('#routesBtn').isVisible()) &&
       (await page.locator('#gearBtn').isVisible()),
   );
+  if (tall) {
+    const start = await page.locator('.rail-start').boundingBox();
+    const routes = await page.locator('#routesBtn').boundingBox();
+    check(
+      theme,
+      'tablet: Routes in the column under START, no tab of the menus',
+      start !== null &&
+        routes !== null &&
+        Math.abs(routes.x - start.x) < 2 &&
+        routes.y > start.y + start.height &&
+        (await page.locator('.menus-tab').count()) === 0 &&
+        (await page.locator('#routesBtn').count()) === 1,
+    );
+    await page.locator('#routesBtn').click();
+    await page.waitForTimeout(500);
+    const made = await page.locator('#routeNewBtn').boundingBox();
+    const wx = await page.locator('#routeWxBtn').boundingBox();
+    check(
+      theme,
+      'tablet: Routes unrolls Nouvelle route and Routage météo at its right',
+      routes !== null &&
+        made !== null &&
+        wx !== null &&
+        Math.abs(made.y - routes.y) < 2 &&
+        made.x > routes.x + routes.width &&
+        wx.x > made.x + made.width,
+    );
+    await page.locator('#routesBtn').click();
+    await page.waitForTimeout(500);
+    check(
+      theme,
+      'tablet: a second touch rolls them back',
+      (await page.locator('#routeNewBtn').count()) === 0,
+    );
+    await page.locator(NAVIN).click();
+    await page.waitForTimeout(400);
+    await page.locator(NAVIN).click();
+    await page.waitForTimeout(400);
+  } else {
+    check(
+      theme,
+      'phone sideways: Routes behind the tab',
+      !(await page.locator('#routesBtn').isVisible()),
+    );
+    await page.locator('.menus-tab').click();
+    await page.waitForTimeout(400);
+    const tab = await page.locator('.menus-tab').boundingBox();
+    const routes = await page.locator('#routesBtn').boundingBox();
+    check(
+      theme,
+      'phone sideways: the tab at the top in the middle unrolls Routes under it',
+      tab !== null &&
+        routes !== null &&
+        tab.y < 2 &&
+        routes.y >= tab.y + tab.height &&
+        routes.x < tab.x + tab.width / 2 &&
+        routes.x + routes.width > tab.x + tab.width / 2,
+    );
+    await page.waitForTimeout(5300);
+    check(
+      theme,
+      'phone sideways: left alone, Routes fades and goes after 5 s; data and the settings stay',
+      !(await page.locator('#routesBtn').isVisible()) &&
+        (await page.locator('#gearBtn').isVisible()),
+    );
+  }
   await page.locator(NAVIN).click();
   await page.waitForTimeout(400);
   check(
@@ -2656,6 +2701,9 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
         wind_speed_10m: time.map(() => 12),
         // eslint-disable-next-line camelcase -- name in the API
         wind_direction_10m: time.map(() => 270),
+        // eslint-disable-next-line camelcase -- name in the API
+        wind_gusts_10m: time.map(() => 20),
+        cape: time.map(() => 700),
       },
     };
     await route.fulfill({
@@ -2751,17 +2799,30 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
         'ETA',
       ),
   );
+  const label = (await page.locator('#rtgLabel').textContent()) ?? '';
+  check(
+    theme,
+    `a label gives the length, manoeuvres, wind, gusts, waves and storms (${label.slice(0, 160)})`,
+    label.includes('Durée') &&
+      label.includes('virement') &&
+      label.includes('rafales 20 nd') &&
+      label.includes('Vagues max') &&
+      label.includes('Risque orageux possible'),
+  );
   const etd = (await page.locator('#rtgInfo').textContent()) ?? '';
+  check(
+    theme,
+    `the middle button gives the hour of departure (${etd.slice(0, 40)})`,
+    etd.includes('Départ à'),
+  );
   await page.locator('#rtgLater').click();
   await page.waitForTimeout(2000);
   const later = (await page.locator('#rtgInfo').textContent()) ?? '';
   check(
     theme,
-    `▶ moves the ETD 30 min later, routed again (${later.slice(0, 40)})`,
+    `▲ moves the ETD 30 min later, routed again (${later.slice(0, 40)})`,
     later !== etd &&
-      ((await page.locator('#rtgInfo').textContent()) ?? '').includes(
-        '+30 min',
-      ) &&
+      later.includes('Départ à') &&
       (await page.locator('.rtm-end.rtm-blink').count()) > 0,
   );
   check(
@@ -2772,32 +2833,79 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
         (await page.locator('.rtm .rtm-tag').first().textContent()) ?? ''
       ).includes('nd'),
   );
+  check(
+    theme,
+    'the ETD and ETA tags are not touched any more',
+    (await page.locator('.rtm-end.leaflet-interactive').count()) === 0,
+  );
   await page.locator('#rtgInfo').click();
   await page.waitForTimeout(2000);
   check(
     theme,
-    'a touch in the middle goes back to the routing calculated',
+    'a touch in the middle: Départ imminent, ▼ greyed, the button of the wind measured',
     ((await page.locator('#rtgInfo').textContent()) ?? '').includes(
-      'routage calculé',
-    ),
+      'Départ imminent',
+    ) &&
+      (await page.locator('#rtgEarlier[aria-disabled="true"]').count()) === 1 &&
+      (await page.locator('#rtgOverlay').isVisible()),
   );
-  await page.locator('.rtm-end:has([data-end="eta"])').click();
+  await page.locator('#rtgOverlay').click();
   await page.waitForTimeout(300);
   check(
     theme,
-    'a touch on the ETA tag: it blinks and the arrows move the ETA',
-    (await page
-      .locator('.rtm-end.rtm-on.rtm-pick [data-end="eta"]')
-      .count()) === 1 &&
-      ((await page.locator('#rtgLater').textContent()) ?? '').includes('ETA'),
+    'the wind measured and the storms over the routing leaving now',
+    (await page.locator('#rtgOverlay[aria-pressed="true"]').count()) === 1,
   );
-  await page.locator('.rtm-end:has([data-end="etd"])').click();
+  await page.locator('#rtgOverlay').click();
   await page.waitForTimeout(300);
+  const labelBox = await page.locator('#rtgLabel').boundingBox();
+  if (labelBox) {
+    await page.mouse.move(labelBox.x + 20, labelBox.y + 10);
+    await page.mouse.down();
+    await page.mouse.move(labelBox.x - 60, labelBox.y + 160, { steps: 6 });
+    await page.mouse.up();
+  }
+  await page.waitForTimeout(300);
+  const moved = await page.locator('#rtgLabel').boundingBox();
   check(
     theme,
-    'and on the ETD tag, back to the ETD',
-    (await page.locator('.rtm-end.rtm-on [data-end="etd"]').count()) === 1,
+    'the label moves with the finger',
+    labelBox !== null &&
+      moved !== null &&
+      Math.abs(moved.y - labelBox.y - 150) < 12,
   );
+  await page.evaluate(() => localStorage.removeItem('ldb.routingLabel'));
+  const middleBox = await page.locator('#rtgInfo').boundingBox();
+  if (middleBox) {
+    await page.mouse.move(
+      middleBox.x + middleBox.width / 2,
+      middleBox.y + middleBox.height / 2,
+    );
+    await page.mouse.down();
+    await page.waitForTimeout(800);
+    await page.mouse.up();
+  }
+  await page
+    .locator('#rtgBar.rtg-green')
+    .waitFor({ timeout: 20_000 })
+    .catch(() => null);
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    'a long press in the middle sorts the routings of the 6 next hours',
+    (await page.locator('#rtgBar.rtg-green').count()) === 1 &&
+      ((await page.locator('#rtgInfo').textContent()) ?? '').includes('n° 1/'),
+  );
+  if (middleBox) {
+    await page.mouse.move(
+      middleBox.x + middleBox.width / 2,
+      middleBox.y + middleBox.height / 2,
+    );
+    await page.mouse.down();
+    await page.waitForTimeout(800);
+    await page.mouse.up();
+  }
+  await page.waitForTimeout(300);
   const upBox = await page.locator('#rtgLater').boundingBox();
   if (upBox) {
     await page.mouse.move(
@@ -2817,12 +2925,13 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
   await page.locator('#rtgShiftPrefs [data-step="60"]').click();
   check(
     theme,
-    'big buttons choose the step and what the arrows move',
+    'big buttons choose the step and the span of the sort, no ETA any more',
     (await page
       .locator('#rtgShiftPrefs [data-step="60"][aria-pressed="true"]')
       .count()) === 1 &&
       (await page.locator('#rtgShiftPrefs select').count()) === 0 &&
-      (await page.locator('#rtgShiftPrefs [data-moves="eta"]').isVisible()),
+      (await page.locator('#rtgShiftPrefs [data-moves]').count()) === 0 &&
+      (await page.locator('#rtgShiftPrefs [data-span="12"]').isVisible()),
   );
   await page.locator('#rtgShiftPrefs [data-step="30"]').click();
   await page.locator('#navBack').click();

@@ -30,7 +30,7 @@ import {
 import { takePhoto } from '../../features/onwater/index.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { useRails } from '../../lib/useWide.ts';
+import { useRails, useTabletSideways } from '../../lib/useWide.ts';
 import { hasBodyClass } from '../../shell/bodyClass.ts';
 import { inMenu, menuButtonPress } from '../../shell/menuOwner.ts';
 import { menusOpen, openMenus } from '../../shell/menusRoll.ts';
@@ -39,6 +39,10 @@ import { navinRowChosen, navinRowOpen } from '../../shell/navinRow.ts';
 import { go } from '../../shell/router.ts';
 import type { FunctionEntry } from '../../shell/search/searchIndex.ts';
 import { functionEntries } from '../../shell/search/searchIndex.ts';
+import {
+  RoutesButton,
+  RoutesUnroll,
+} from '../../shell/topbar/RoutesButton.tsx';
 import { domainActions } from '../../shell/topbar/tabDisplays.ts';
 import {
   FLAG_SVG,
@@ -143,13 +147,17 @@ function run(key: string): void {
  *
  * The column of the landscape tablet, on the left of the map, top to bottom:
  * the clock, the arrow of the boat with ＋ and − at its right (3 s after
- * the arrow), NavIn, START (and Amarrage at its right during a track), the mark,
+ * the arrow), NavIn, START (and Amarrage at its right during a track),
+ * Routes (Nouvelle route and Routage météo unrolled at its right), the mark,
  * the dividers, the photo, Météo, data, Paramétrages, and SOS at the very
  * bottom. NavIn unrolls at its right PréP and the phone or the VHF.
  * @returns The column, or nothing on a phone held upright.
  */
 export function SideRails() {
   const rails = useRails();
+  // The tablet sideways: Routes under START, its two buttons at its right;
+  // no tab of the menus then (data and Paramétrages stand under Météo).
+  const column = useTabletSideways();
   useRailSwipe();
   if (!rails) return null;
   return (
@@ -161,13 +169,19 @@ export function SideRails() {
         </div>
         <div className="rail-navin-place" aria-hidden="true" />
         <StartLine />
+        {column ? (
+          <div className="rail-line rail-routes-line">
+            <RoutesButton rail />
+            <RoutesUnroll rail />
+          </div>
+        ) : null}
         <PinButton />
         <RulerButton />
         <PhotoButton />
         <WeatherButton />
       </div>
       <NavinRow />
-      <MenusTab />
+      {column ? null : <MenusTab />}
     </>
   );
 }

@@ -15769,19 +15769,9 @@ html body .live-slot > .rail-btn.live-layer.on {
   border-radius: 6px;
   transform-origin: 0 0;
   margin: 8px 0 0 8px;
-  cursor: pointer;
 }
 .leaflet-marker-icon.rtm-end b {
   color: #f5b800;
-}
-/* The tag the arrows move: a thicker frame, and a touch on the other one
-   picks it (it blinks three times). */
-.leaflet-marker-icon.rtm-end.rtm-on {
-  border-width: 3px;
-  box-shadow: 0 0 0 2px #1a1a1a;
-}
-.leaflet-marker-icon.rtm-end.rtm-pick {
-  animation: rtmBlink 0.5s ease-in-out 3;
 }
 /* The routing shown: three buttons at the right edge, the size of the
    buttons at the left, high enough to leave the tab of the menus (middle of
@@ -15839,22 +15829,87 @@ html body .rtg-rail .rail-btn.rtg-info {
     font-size: 10px;
   }
 }
-.rtg-rail .rtg-changes {
-  max-width: 100%;
-  overflow: hidden;
-  font-size: 10px;
-  line-height: 1.15;
-  text-align: center;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-}
 /* The routings of the day sorted by efficiency: the three turn green. */
 html body .rtg-rail.rtg-green .rail-btn.rail-btn {
   background: color-mix(in srgb, #2e9e4f 28%, var(--surface, #fff));
 }
 :root[data-theme='night'] body .rtg-rail.rtg-green .rail-btn.rail-btn {
   background: #0d2a12;
+}
+
+/* ▼ greyed: no departure before now (its long press still opens the
+   settings). */
+html body .rtg-rail .rail-btn.rtg-arrow[aria-disabled='true'] {
+  opacity: 0.4;
+}
+/* « Départ imminent »: the middle one framed in green. */
+html body .rtg-rail .rail-btn.rtg-info.rtg-live {
+  border-color: #2e9e4f;
+}
+.rtg-rail .rtg-overlay span {
+  font-size: 18px;
+  line-height: 1;
+}
+.rtg-rail .rtg-overlay small {
+  font-size: 11px;
+  font-weight: 700;
+}
+/* The figures of the routing, on a label the finger moves anywhere. */
+.rtg-label {
+  position: fixed;
+  z-index: 1490;
+  right: calc(var(--rb-side-r, 8px) + var(--rb-w, 96px) + 14px);
+  top: calc(var(--topbar-h, 72px) + 24px);
+  max-width: min(320px, 70vw);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.25;
+  color: #fff;
+  background: rgba(26, 26, 26, 0.88);
+  border: 2px solid #f5b800;
+  border-radius: 8px;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: grab;
+}
+.rtg-label .rtg-label-name {
+  color: #f5b800;
+  font-size: 14px;
+}
+@media (orientation: portrait) {
+  .rtg-label {
+    top: calc(env(safe-area-inset-top) + 2 * var(--rb-h, 52px) + 40px);
+    right: calc(var(--rb-side-r, 8px) + var(--rb-w, 96px) + 10px);
+    font-size: 12px;
+  }
+}
+:root[data-theme='night'] .rtg-label {
+  color: #ff4040;
+  background: rgba(20, 0, 0, 0.9);
+  border-color: #ff4040;
+}
+:root[data-theme='night'] .rtg-label .rtg-label-name {
+  color: #ff4040;
+}
+/* The tablet sideways: Routes in the column under START, Nouvelle route and
+   Routage météo unrolled at its right. */
+.rail-routes .routes-ico svg,
+.routes-rail-sub .rail-icon svg {
+  display: block;
+  width: 34px;
+  height: 34px;
+}
+:root[data-theme='night'] .rail-routes,
+:root[data-theme='night'] .routes-rail-sub {
+  color: #ff4040;
+}
+:root[data-theme='night'] .rail-routes circle[fill='#fff'],
+:root[data-theme='night'] .routes-rail-sub circle[fill='#fff'] {
+  fill: #200000;
 }
 
 /* A routing on the map: Routes stays shown, a red cross blinks on it (a

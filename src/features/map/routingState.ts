@@ -46,6 +46,14 @@ export interface RoutingStats {
   motorMin: number;
   tacks: number;
   gybes: number;
+  /** Strongest wind, knots. @default undefined */
+  maxTws?: number;
+  /** Strongest gusts, knots. @default undefined */
+  maxGust?: number;
+  /** Highest waves, metres. @default undefined */
+  maxWaveM?: number;
+  /** Highest convective energy, J/kg (storm risk). @default undefined */
+  maxCape?: number;
 }
 
 /** What a routing was asked with, to route it again at another ETD. */
@@ -73,6 +81,11 @@ export interface ShownRouting {
   stats?: RoutingStats;
   /** How to route it again at another hour. @default undefined */
   plan?: RoutingPlan;
+  /**
+   * « Départ imminent »: routed from now, again every few minutes.
+   * @default undefined
+   */
+  live?: boolean;
   /** The way the boat goes, `[lat, lon]`. */
   track: Array<[number, number]>;
   /** The turns of the routing: the Go to goes from one to the next. */
@@ -89,6 +102,32 @@ function kept(): ShownRouting | null {
 
 /** The routing on the map, `null` without. */
 export const shownRouting = signal<ShownRouting | null>(kept());
+
+/**
+ * Over a routing leaving now: the wind measured (LiveMétéo stations) and
+ * the storms detected shown too.
+ */
+export const routingOverlay = signal(false);
+
+/**
+ * The highest of some values, rounded; undefined when none is known.
+ * @param values - The values (NaN or undefined unknown).
+ * @param tenths - Rounded to tenths rather than units.
+ * @returns The highest.
+ */
+export function highest(
+  values: ReadonlyArray<number | undefined>,
+  tenths = true,
+): number | undefined {
+  let top = Number.NEGATIVE_INFINITY;
+  for (const value of values) {
+    if (value !== undefined && Number.isFinite(value) && value > top) {
+      top = value;
+    }
+  }
+  if (top === Number.NEGATIVE_INFINITY) return undefined;
+  return tenths ? Math.round(top * 10) / 10 : Math.round(top);
+}
 
 /**
  * At most this many places with the wind, the current and the waves: the
@@ -111,7 +150,7 @@ export function routingShape(
   result: Extract<RoutingResult, { kind: 'done' }>,
   points: readonly RoutePoint[],
 ): ShownRouting {
-  const { steps, nm, arriveMs, sailMin, motorMin, tacks, gybes } = result;
+  const { steps, nm, arriveMs } = result;
   const track: Array<[number, number]> = steps.map((step) => [
     step.lat,
     step.lon,
@@ -154,14 +193,33 @@ export function routingShape(
     marks,
     departMs: steps[0]?.ms ?? arriveMs,
     arriveMs,
-    stats: {
-      nm,
-      sailMin,
-      motorMin,
-      tacks,
-      gybes,
-    },
+    stats: stepStats(result),
   };
+}
+
+/**
+ * The figures of a routing: length, sail and motor, manoeuvres, and the
+ * strongest wind and gusts, the highest waves and storm energy met.
+ * @param result - The routing.
+ * @returns The figures.
+ */
+export function stepStats(
+  result: Extract<RoutingResult, { kind: 'done' }>,
+): RoutingStats {
+  const { steps, nm, sailMin, motorMin, tacks, gybes } = result;
+  const stats: RoutingStats = { nm, sailMin, motorMin, tacks, gybes };
+  const maxTws = highest(steps.map((step) => step.tws));
+  const maxGust = highest(steps.map((step) => step.gust));
+  const maxWaveM = highest(steps.map((step) => step.waveM));
+  const maxCape = highest(
+    steps.map((step) => step.cape),
+    false,
+  );
+  if (maxTws !== undefined) stats.maxTws = maxTws;
+  if (maxGust !== undefined) stats.maxGust = maxGust;
+  if (maxWaveM !== undefined) stats.maxWaveM = maxWaveM;
+  if (maxCape !== undefined) stats.maxCape = maxCape;
+  return stats;
 }
 
 const SAVED_KEY = 'ldb.routings';
@@ -378,17 +436,20 @@ const PREFS_KEY = 'ldb.routingShift';
 
 /** How the arrows of a routing move it (Paramétrages › Routages). */
 export interface ShiftPrefs {
-  /** Minutes moved at each touch. */
+  /** Minutes the ETD moves at each touch. */
   stepMin: number;
-  /** The arrows move the ETD, or the ETA (the ETD then follows). */
-  moves: 'etd' | 'eta';
+  /** The routings sorted by efficiency: the next hours looked at. */
+  rankHours: number;
 }
 
-/** By default: 30 minutes, the ETD. */
-export const DEFAULT_SHIFT: ShiftPrefs = { stepMin: 30, moves: 'etd' };
+/** By default: 30 minutes, the 6 next hours. */
+export const DEFAULT_SHIFT: ShiftPrefs = { stepMin: 30, rankHours: 6 };
 
 /** The steps offered, minutes. */
 export const SHIFT_STEPS: readonly number[] = [10, 15, 30, 60, 120];
+
+/** The spans of the sort by efficiency offered, hours. */
+export const RANK_SPANS: readonly number[] = [6, 12, 24];
 
 /** How the arrows move a routing, as set. */
 export const shiftPrefs = signal<ShiftPrefs>(readShiftPrefs());
@@ -400,13 +461,16 @@ function readShiftPrefs(): ShiftPrefs {
       typeof kept?.stepMin === 'number' && SHIFT_STEPS.includes(kept.stepMin)
         ? kept.stepMin
         : DEFAULT_SHIFT.stepMin,
-    moves: kept?.moves === 'eta' ? 'eta' : 'etd',
+    rankHours:
+      typeof kept?.rankHours === 'number' && RANK_SPANS.includes(kept.rankHours)
+        ? kept.rankHours
+        : DEFAULT_SHIFT.rankHours,
   };
 }
 
 /**
  * Keep how the arrows move a routing.
- * @param prefs - The step and what moves.
+ * @param prefs - The step and the span of the sort.
  */
 export function saveShiftPrefs(prefs: ShiftPrefs): void {
   shiftPrefs.value = prefs;
