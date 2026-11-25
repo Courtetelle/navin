@@ -9,8 +9,8 @@ import {
   fmtDotDateTime,
   fmtHhMm,
   fmtLocalTime,
-  fmtTime,
   fmtTime2,
+  fmtTime,
   fmtTimeShared,
   fromLocalInput,
   hms,
@@ -134,9 +134,11 @@ test('the hours of a cruise and of a bulletin follow the clock', () => {
   expect(whenLocal(at, now, 7200, false)).toBe('12 h');
 });
 
+function found(text: string): string[] {
+  return timeSpans(text).map(([from, to]) => text.slice(from, to));
+}
+
 test('the times of day found in a text, never the durations', () => {
-  const found = (text: string) =>
-    timeSpans(text).map(([from, to]) => text.slice(from, to));
   expect(found('Départ 14:30 → 16:05:09, arrivée 9h05')).toStrictEqual([
     '14:30',
     '16:05:09',
