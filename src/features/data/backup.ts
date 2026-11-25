@@ -14,6 +14,7 @@ import {
 } from '../../state/index.ts';
 import { getPhoto } from '../../storage/photos.ts';
 import { store } from '../../storage/store.ts';
+import { savedRoutings } from '../map/routingState.ts';
 
 /** One photo carried by a sync file. */
 interface BackupPhoto {
@@ -105,6 +106,10 @@ export function backupAll(): BackupPack {
     // The routes only when there are some: an empty list keeps the file the
     // one of the first app.
     ...(data.routes.value.length > 0 ? { routes: data.routes.value } : {}),
+    // The weather routings of « Routages », as the routes.
+    ...(savedRoutings.value.length > 0
+      ? { routings: savedRoutings.value }
+      : {}),
     crewSets: data.crewSets.value,
     // data › Croisières, only once changed: an untouched one keeps the file
     // the one of the first app.

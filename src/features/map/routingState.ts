@@ -180,6 +180,11 @@ export interface SavedRouting {
   model: string;
   shown: ShownRouting;
   /**
+   * Last changed, ISO: on the other devices, the newest change wins.
+   * @default undefined
+   */
+  mod?: string;
+  /**
    * The cruise of data › Croisières it belongs to (active when kept).
    * @default undefined
    */
@@ -200,6 +205,15 @@ export const savedRoutings = signal<SavedRouting[]>(
   store.get<unknown[]>(SAVED_KEY, []).filter(isSaved),
 );
 
+function keepList(list: SavedRouting[]): void {
+  savedRoutings.value = list;
+  store.set(SAVED_KEY, list);
+}
+
+function changed(item: SavedRouting): SavedRouting {
+  return { ...item, mod: new Date().toISOString() };
+}
+
 /**
  * Keep a routing in « Routages » (the same id replaces it).
  * @param routing - The routing.
@@ -207,12 +221,10 @@ export const savedRoutings = signal<SavedRouting[]>(
 export function saveRouting(routing: SavedRouting): void {
   const known = savedRoutings.peek().find((item) => item.id === routing.id);
   const voyage = known ? known.voyage : activeVoyageId();
-  const list = [
-    voyage ? { ...routing, voyage } : routing,
+  keepList([
+    changed(voyage ? { ...routing, voyage } : routing),
     ...savedRoutings.peek().filter((item) => item.id !== routing.id),
-  ];
-  savedRoutings.value = list;
-  store.set(SAVED_KEY, list);
+  ]);
 }
 
 /**
@@ -220,9 +232,7 @@ export function saveRouting(routing: SavedRouting): void {
  * @param id - Its id.
  */
 export function removeRouting(id: string): void {
-  const list = savedRoutings.peek().filter((item) => item.id !== id);
-  savedRoutings.value = list;
-  store.set(SAVED_KEY, list);
+  keepList(savedRoutings.peek().filter((item) => item.id !== id));
 }
 
 /**
@@ -231,15 +241,15 @@ export function removeRouting(id: string): void {
  * @param name - Its new name.
  */
 export function renameRouting(id: string, name: string): void {
-  const list = savedRoutings
-    .peek()
-    .map((item) =>
-      item.id === id
-        ? { ...item, shown: { ...item.shown, name: name.trim() } }
-        : item,
-    );
-  savedRoutings.value = list;
-  store.set(SAVED_KEY, list);
+  keepList(
+    savedRoutings
+      .peek()
+      .map((item) =>
+        item.id === id
+          ? changed({ ...item, shown: { ...item.shown, name: name.trim() } })
+          : item,
+      ),
+  );
 }
 
 /**
@@ -248,13 +258,44 @@ export function renameRouting(id: string, name: string): void {
  * @param voyage - Cruise id, or undefined.
  */
 export function setRoutingVoyage(id: string, voyage: string | undefined): void {
-  const list = savedRoutings.peek().map((item) => {
-    if (item.id !== id) return item;
-    const { voyage: _old, ...rest } = item;
-    return voyage ? { ...rest, voyage } : rest;
-  });
-  savedRoutings.value = list;
-  store.set(SAVED_KEY, list);
+  keepList(
+    savedRoutings.peek().map((item) => {
+      if (item.id !== id) return item;
+      const { voyage: _old, ...rest } = item;
+      return changed(voyage ? { ...rest, voyage } : rest);
+    }),
+  );
+}
+
+function changedAt(item: SavedRouting): string {
+  return item.mod ?? item.at;
+}
+
+/**
+ * Take the routings of a backup or of another device (synchronisation): a
+ * new one is added, a known one is replaced when changed later there.
+ * @param list - The routings received (untrusted).
+ */
+export function mergeRoutings(list: unknown): void {
+  if (!Array.isArray(list)) return;
+  const received = list.filter(isSaved);
+  if (received.length === 0) return;
+  const here = [...savedRoutings.peek()];
+  let touched = false;
+  for (const routing of received) {
+    const at = here.findIndex((item) => item.id === routing.id);
+    const old = here[at];
+    if (!old) {
+      here.push(routing);
+      touched = true;
+    } else if (changedAt(routing) > changedAt(old)) {
+      here[at] = routing;
+      touched = true;
+    }
+  }
+  if (!touched) return;
+  // Newest first, as kept here.
+  keepList(here.toSorted((one, two) => (two.at > one.at ? 1 : -1)));
 }
 
 /** A turn is reached this close, nautical miles. */

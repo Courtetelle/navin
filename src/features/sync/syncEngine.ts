@@ -31,6 +31,7 @@ import { menusChanges } from '../data/menusChanges.ts';
 import { menusFile } from '../data/menusExport.ts';
 import type { BackupFile } from '../data/restoreBackup.ts';
 import { mergeSynced } from '../data/restoreBackup.ts';
+import { removeRouting, savedRoutings } from '../map/routingState.ts';
 import { relayAddress } from '../onwater/relayRecord.ts';
 
 import { aesKey, hashName, isSyncKey, seal, unseal } from './syncCrypto.ts';
@@ -57,6 +58,7 @@ const KINDS = [
   'boats',
   'marks',
   'routes',
+  'routings',
   'crewSets',
   'sosLogs',
 ] as const;
@@ -217,6 +219,7 @@ async function ask(url: string, init?: RequestInit): Promise<Response> {
 function idsOf(kind: Kind): string[] {
   const { data } = state;
   if (kind === 'cruises') return data.index.peek().map((line) => line.id);
+  if (kind === 'routings') return savedRoutings.peek().map((item) => item.id);
   const list = data[kind].peek() as ReadonlyArray<{ id?: string }>;
   return list.map((item) => item.id ?? '').filter(Boolean);
 }
@@ -323,6 +326,9 @@ function deleteHere(kept: Gone, tracked: string | undefined): void {
   for (const id of ids('routes')) {
     if (idsOf('routes').includes(id)) removeRoute(id);
   }
+  for (const id of ids('routings')) {
+    if (idsOf('routings').includes(id)) removeRouting(id);
+  }
   const members = ids('members');
   if (idsOf('members').some((id) => members.has(id))) {
     updateMembers((list) => {
@@ -374,6 +380,7 @@ function withoutGone(pack: SyncPack, kept: Gone): SyncPack {
     boats: out('boats', pack.boats),
     marks: out('marks', pack.marks),
     routes: out('routes', pack.routes),
+    routings: out('routings', pack.routings),
     crewSets: out('crewSets', pack.crewSets),
     sosLogs: out('sosLogs', pack.sosLogs),
   };
