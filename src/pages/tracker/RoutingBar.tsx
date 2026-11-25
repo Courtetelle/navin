@@ -44,6 +44,9 @@ const LIVE_CHECK_MS = 60_000;
 /** The best departure of the next hours looked for after this delay. */
 const BEST_DELAY_MS = 3000;
 
+/** The stations were laid by the button of the routing (taken off with it). */
+const overlayLaid = { on: false };
+
 /**
  * The wind measured and the storms detected over the routing leaving now:
  * the LiveMétéo stations of the zone are laid if they were not.
@@ -52,7 +55,13 @@ function toggleOverlay(): void {
   buzz();
   const on = !routingOverlay.peek();
   routingOverlay.value = on;
-  if (on && liveOnMap.peek() === 0) layLiveAround();
+  if (on && liveOnMap.peek() === 0) {
+    overlayLaid.on = true;
+    layLiveAround();
+  } else if (!on && overlayLaid.on) {
+    overlayLaid.on = false;
+    liveOnMap.value = 0;
+  }
 }
 
 /**

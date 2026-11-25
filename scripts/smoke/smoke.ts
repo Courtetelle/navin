@@ -2350,9 +2350,13 @@ async function liveButtons(page: Page, theme: string): Promise<void> {
     'LiveMétéo: the zone button takes it away',
     (await page.locator('.live-btns').count()) === 0,
   );
-  await page.locator('.menus-tab').click();
-  await page.waitForTimeout(400);
-  const unrolled = await page.evaluate(() => {
+  // The tablet sideways: Routes in the column, its two buttons at its
+  // right; elsewhere behind the tab, under it.
+  const inColumn = (await page.locator('.menus-tab').count()) === 0;
+  await page.locator(inColumn ? '#routesBtn' : '.menus-tab').click();
+  // The button touched sinks in a moment (pressFeedback): wait it is back.
+  await page.waitForTimeout(inColumn ? 1100 : 400);
+  const unrolled = await page.evaluate((side) => {
     const routes = document
       .querySelector('#routesBtn')
       ?.getBoundingClientRect();
@@ -2360,19 +2364,20 @@ async function liveButtons(page: Page, theme: string): Promise<void> {
       .querySelector('#routeNewBtn')
       ?.getBoundingClientRect();
     const wx = document.querySelector('#routeWxBtn')?.getBoundingClientRect();
-    return Boolean(
-      routes &&
-      made &&
-      wx &&
-      Math.abs(made.x - routes.x) < 1 &&
-      made.y > routes.bottom &&
-      Math.abs(wx.x - routes.x) < 1 &&
-      wx.y > made.bottom,
-    );
-  });
+    if (!routes || !made || !wx) return false;
+    return side
+      ? Math.abs(made.y - routes.y) < 2 &&
+          made.x > routes.right &&
+          Math.abs(wx.y - routes.y) < 2 &&
+          wx.x > made.right
+      : Math.abs(made.x - routes.x) < 1 &&
+          made.y > routes.bottom &&
+          Math.abs(wx.x - routes.x) < 1 &&
+          wx.y > made.bottom;
+  }, inColumn);
   check(
     theme,
-    'Routes: Nouvelle route and Routage météo unroll under it',
+    'Routes: Nouvelle route and Routage météo unroll beside it',
     unrolled,
   );
   await page.locator('#routeWxBtn').click();
@@ -2386,7 +2391,13 @@ async function liveButtons(page: Page, theme: string): Promise<void> {
   );
   await page.locator(NAVIN).click();
   await page.waitForTimeout(600);
-  await page.locator('.menus-tab').click();
+  await page
+    .locator(
+      (await page.locator('.menus-tab').count()) === 0
+        ? '#routesBtn'
+        : '.menus-tab',
+    )
+    .click();
   await page.waitForTimeout(400);
   await page.locator('#routeNewBtn').click();
   await page.waitForTimeout(800);

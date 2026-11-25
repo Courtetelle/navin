@@ -67,7 +67,7 @@ export function railsScreen(): boolean {
  * The tablet sideways (X, SP10X), not the phone turned: one column of
  * buttons on the left, tall enough for Routes under START.
  */
-export const TABLET_SIDEWAYS_QUERY = `${WIDE_QUERY} and (min-height: 521px)`;
+export const TABLET_SIDEWAYS_QUERY = `${WIDE_QUERY} and (min-height: 640px)`;
 
 function tabletList(): MediaQueryList | null {
   return globalThis.matchMedia?.(TABLET_SIDEWAYS_QUERY) ?? null;

@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { useLongPress } from '../../components/shared/useLongPress.ts';
+import { shownRouting } from '../../features/map/routingState.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import { FORECAST_HOURS } from '../../features/onwater/mapWeather.ts';
@@ -59,7 +60,8 @@ function hourText(ms: number): string {
 export function LiveButtons() {
   useSignals();
   const tr = useTr();
-  const on = liveOnMap.value > 0;
+  // A routing on the map: its own buttons, not these.
+  const on = liveOnMap.value > 0 && shownRouting.value === null;
   const layers = weatherLayers.value;
   const step = forecastStep.value;
   const shownAt = weatherShownAt.value;

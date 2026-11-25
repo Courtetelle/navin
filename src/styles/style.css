@@ -14673,34 +14673,40 @@ html body.menus-fading .rail-btn.routes-sub {
 }
 
 /* X in landscape (the tablet, not the phone sideways): one column on the
-   left, top to bottom the clock, the arrow, START, the mark, the dividers,
+   left, top to bottom the clock, the arrow, START, Routes, the mark, the dividers,
    then the buttons of the right column in their order (the magnifier, NavIn,
    the photo, Météo), and SOS always at the very bottom; NavIn unrolls its
    menus to its right. */
 @media (orientation: landscape) and (min-width: 560px) and (min-height: 640px) {
+  /* Thirteen places from the clock to SOS (Routes under START): the
+     buttons and their gaps shrink a little on a lower screen. */
+  :root {
+    --rb-h: min(52px, calc((100vh - 16px - 12 * 8px) / 13));
+    --rb-gap: min(10px, max(6px, calc((100vh - 16px - 13 * var(--rb-h)) / 12)));
+  }
   html body {
     --rb-row: calc(var(--rb-top) + env(safe-area-inset-top));
   }
   html body #searchBtn {
-    top: calc(var(--rb-row) + 5 * var(--rb-step)) !important;
+    top: calc(var(--rb-row) + 6 * var(--rb-step)) !important;
     bottom: auto !important;
     left: var(--rb-side) !important;
     right: auto !important;
   }
   html body header.topbar nav.topnav .top-tab.top-tab[data-view='tracker'] {
-    top: calc(var(--rb-row) + 6 * var(--rb-step)) !important;
+    top: calc(var(--rb-row) + 7 * var(--rb-step)) !important;
     left: var(--rb-side) !important;
     right: auto !important;
   }
   html body .side-rail-left .rail-btn.rail-photo {
     position: fixed;
-    top: calc(var(--rb-row) + 7 * var(--rb-step));
+    top: calc(var(--rb-row) + 8 * var(--rb-step));
     left: var(--rb-side);
     right: auto;
   }
   html body .side-rail-left .rail-btn.rail-weather {
     position: fixed;
-    top: calc(var(--rb-row) + 8 * var(--rb-step));
+    top: calc(var(--rb-row) + 9 * var(--rb-step));
     left: var(--rb-side);
     right: auto;
   }
@@ -14711,7 +14717,7 @@ html body.menus-fading .rail-btn.routes-sub {
     right: auto !important;
   }
   html body .navin-row {
-    top: calc(var(--rb-row) + 6 * var(--rb-step));
+    top: calc(var(--rb-row) + 7 * var(--rb-step));
     left: calc(var(--rb-side) + var(--rb-x));
     right: auto;
     flex-direction: row;
@@ -16065,12 +16071,12 @@ html body.menus-fading header.topbar #routesBtn.theme-btn.routing-on {
     header.topbar.topbar
     nav.topnav
     .top-tab.top-tab.tab-data.tab-data {
-    top: calc(var(--rb-row) + 9 * var(--rb-step)) !important;
+    top: calc(var(--rb-row) + 10 * var(--rb-step)) !important;
     left: var(--rb-side) !important;
     right: auto !important;
   }
   html:root body header.topbar.topbar #gearBtn.theme-btn.theme-btn {
-    top: calc(var(--rb-row) + 10 * var(--rb-step)) !important;
+    top: calc(var(--rb-row) + 11 * var(--rb-step)) !important;
     left: var(--rb-side) !important;
     right: auto !important;
   }
