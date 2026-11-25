@@ -117,19 +117,27 @@ export const CARD_FIELDS: ReadonlyArray<
  * label, kind. They go into the navigations of the cruise (VHF, SOS, CV).
  */
 export const INFO_FIELDS: ReadonlyArray<
-  readonly [key: string, label: string, kind: 'text' | 'date' | 'area']
+  readonly [
+    key: string,
+    label: string,
+    kind: 'text' | 'date' | 'time' | 'tel' | 'url' | 'area',
+  ]
 > = [
   ['ports', 'Port de départ et d’arrivée', 'text'],
+  ['quai', 'Quai / lieu d’amarrage', 'text'],
   ['du', 'Du', 'date'],
+  ['duH', 'Heure de départ', 'time'],
   ['au', 'Au', 'date'],
+  ['auH', 'Heure d’arrivée', 'time'],
   ['vhfMarina', 'Canal VHF de la marina', 'text'],
+  ['telMarina', 'Téléphone de la capitainerie / marina', 'tel'],
+  ['webMarina', 'Site internet', 'url'],
   ['coastStation', 'Station côtière radio', 'text'],
-  [
-    'meteo',
-    'Météo : bulletins VHF (canaux, horaires), sites, heure légale',
-    'area',
-  ],
+  ['meteo', 'Observations / Remarques', 'area'],
 ];
+
+/** Fields of the cruise kept to itself: not given to its navigations. */
+const OWN_INFO = new Set(['meteo']);
 
 /** The fields of a person: key, label, link kind. */
 export const PERSON_FIELDS: ReadonlyArray<
@@ -513,8 +521,8 @@ export const VOYAGE_SECTIONS: ReadonlyArray<{
   {
     key: 'info',
     view: 'vinfo',
-    title: '🧭 Croisière',
-    sub: 'ports, dates, canaux VHF, station côtière, météo',
+    title: '🧭 Port d’attache',
+    sub: 'ports, dates et heures, VHF, téléphone, station côtière, remarques',
   },
   {
     key: 'boat',
@@ -759,7 +767,7 @@ export function mergedStores(
 }
 
 /**
- * What a cruise gives to its navigations: its ports, dates, VHF and weather,
+ * What a cruise gives to its navigations: its ports, dates, VHF, marina phone,
  * and the renter's numbers for the SOS book (`base`, « Nom : numéro »).
  * @param voyage - The cruise.
  * @returns The values of `cruise.info` to set, empty ones left out.
@@ -769,6 +777,7 @@ export function voyageNavInfo(
 ): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key] of INFO_FIELDS) {
+    if (OWN_INFO.has(key)) continue;
     const value = voyage.info[key]?.trim();
     if (value) out[key] = value;
   }

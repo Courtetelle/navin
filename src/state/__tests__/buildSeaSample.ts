@@ -13,7 +13,7 @@ export function buildSeaCruise(): void {
     boat: 'Mistral',
     model: 'Bavaria C42',
     year: '2021',
-    waters: 'Eaux maritimes',
+    waters: 'Maritime',
     loa: '12,35',
     beam: '4,29',
     draft: '2,10',

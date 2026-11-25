@@ -11,6 +11,7 @@ import {
   docCategoryOf,
   knownSections,
   mergedVoyages,
+  voyageNavInfo,
   voyagePhotoIds,
 } from '../../../model/voyages.ts';
 import {
@@ -42,6 +43,7 @@ import {
   saveVoyageCrewSet,
   voyageCrewLines,
 } from '../voyageCrew.ts';
+import { dayText } from '../voyageDates.ts';
 import { freeRecords, voyageRecords } from '../voyageRecords.ts';
 import { voyageTiles } from '../voyageTiles.ts';
 
@@ -401,4 +403,26 @@ test('a crew picked one by one becomes a saved crew of the cruise', () => {
   expect(state.data.voyages.value.crewSet).toBe(sets.at(-1)?.id);
   expect(state.data.voyages.value.crew).toHaveLength(0);
   expect(crewSections()[0]?.rows[0]).toStrictEqual(['Rôle', 'Skipper']);
+});
+
+test('the dates of the cruise are read with their day and hour', () => {
+  expect(dayText('2027-06-12', '14:30')).toBe('Samedi 12/06/2027 · 14 h 30');
+  expect(dayText('2027-06-13', '')).toBe('Dimanche 13/06/2027');
+  expect(dayText('n.c.', '')).toBe('n.c.');
+});
+
+test('the remarks of the cruise stay in the cruise', () => {
+  const info = voyageNavInfo({
+    info: {
+      ports: 'Saint-Quay',
+      telMarina: '+33 2 96 70 81 30',
+      meteo: 'clés au bureau',
+    },
+    categories: [],
+  });
+
+  expect(info).toStrictEqual({
+    ports: 'Saint-Quay',
+    telMarina: '+33 2 96 70 81 30',
+  });
 });
