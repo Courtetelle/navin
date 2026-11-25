@@ -222,3 +222,56 @@ test('a trace deleted on another device goes here and does not come back', async
 
   expect(pack.tracesGone).toHaveProperty(['c1|1000|2000']);
 });
+
+test('the routings of « Routages » travel too, and their deletion', async () => {
+  const { savedRoutings } = await import('../../map/routingState.ts');
+  const routing = {
+    id: 'r9',
+    at: '2026-11-25T06:00:00.000Z',
+    departMs: 1,
+    arriveMs: 2,
+    nm: 4,
+    summary: '',
+    model: 'best_match',
+    shown: { name: 'Portrieux → Bréhat', track: [], turns: [], marks: [] },
+  };
+  const space = await hashName(key, 'space');
+  const send = async (pack: object, at: number) => {
+    kv.set(
+      `sync:${space}:dev:E`,
+      await seal(await aesKey(key), JSON.stringify(pack)),
+    );
+    kv.set(
+      `sync:${space}:index`,
+      JSON.stringify({
+        ...(JSON.parse(kv.get(`sync:${space}:index`) ?? '{}') as object),
+        E: { at },
+      }),
+    );
+  };
+  await send(
+    { all: true, from: 'E', cruises: [], photoNames: {}, routings: [routing] },
+    Date.now() + 10_000,
+  );
+  await syncRound(true);
+
+  expect(savedRoutings.peek().map((item) => item.id)).toContain('r9');
+  const pack = await packOf();
+  const sent = pack.routings as Array<{ id: string }>;
+
+  expect(sent.map((item) => item.id)).toContain('r9');
+
+  await send(
+    {
+      all: true,
+      from: 'E',
+      cruises: [],
+      photoNames: {},
+      gone: { routings: { r9: Date.now() } },
+    },
+    Date.now() + 20_000,
+  );
+  await syncRound(true);
+
+  expect(savedRoutings.peek().map((item) => item.id)).not.toContain('r9');
+});

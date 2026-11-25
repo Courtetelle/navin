@@ -33,6 +33,7 @@ import {
 } from '../../state/index.ts';
 import { getPhoto, putPhoto } from '../../storage/photos.ts';
 import { store } from '../../storage/store.ts';
+import { mergeRoutings } from '../map/routingState.ts';
 
 import { mergeCruise } from './mergeCruise.ts';
 
@@ -71,6 +72,8 @@ export interface BackupFile {
   marks?: unknown;
   /** @default undefined */
   routes?: unknown;
+  /** @default undefined */
+  routings?: unknown;
   /**
    * data › Croisières.
    * @default undefined
@@ -303,6 +306,7 @@ function restoreRecords(file: BackupFile): void {
   if (file.uiEdits) mergeUiEdits(file.uiEdits);
   if (file.marks) mergeMarks(file.marks);
   if (file.routes) mergeRoutes(file.routes);
+  if (file.routings) mergeRoutings(file.routings);
   if (file.voyages) mergeVoyages(file.voyages);
   if (Array.isArray(file.sosLogs)) restoreSosLogs(file);
   mergeAlerts(file.alerts);
