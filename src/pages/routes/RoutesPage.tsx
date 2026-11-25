@@ -22,7 +22,7 @@ import { deliver, removeRoute, renameRoute, state } from '../../state/index.ts';
 import { RoutingPanel } from './RoutingPanel.tsx';
 
 /**
- * Screen `routes`, in two parts: « Dessiner » (the routes drawn on the map,
+ * Screen `routes` (Planification d’itinéraire), in two parts: « Route » (the routes drawn on the map,
  * a new one, and Partager) and « Routage météo » (a routing along a route).
  * @returns The screen content, rendered inside `<main id="view">`.
  */
@@ -41,13 +41,13 @@ export function RoutesPage() {
           'Toucher une route : l’ouvrir sur la carte. Appui long : changer son nom. Glisser vers la gauche : 🗺 Sur la carte, 📤 Partager (texte ou GPX), 🗑 Effacer. Sur la carte, 🎯 Go to mène au prochain point.',
         ]}
       >
-        🧭 Routes
+        {tr('🧭 Planification d’itinéraire')}
       </PageTitle>
       <div className="rt-parts" role="tablist" id="rtParts">
         <button
           type="button"
           role="tab"
-          className={`btn rt-part${part === 'draw' ? ' rt-part-on' : ''}`}
+          className={`btn big rt-part${part === 'draw' ? ' rt-part-on' : ''}`}
           aria-selected={part === 'draw'}
           data-part="draw"
           onClick={() => {
@@ -55,12 +55,12 @@ export function RoutesPage() {
             routesPart.value = 'draw';
           }}
         >
-          {tr('✏️ Dessiner')}
+          {tr('✏️ Route')}
         </button>
         <button
           type="button"
           role="tab"
-          className={`btn rt-part${part === 'routing' ? ' rt-part-on' : ''}`}
+          className={`btn big rt-part${part === 'routing' ? ' rt-part-on' : ''}`}
           aria-selected={part === 'routing'}
           data-part="routing"
           onClick={() => {

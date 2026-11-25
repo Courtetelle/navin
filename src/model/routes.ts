@@ -191,3 +191,26 @@ export function isRoute(value: unknown): value is NavRoute {
     )
   );
 }
+
+/**
+ * The route as said in a routing: its number and its name, without the date
+ * and hour some names carry.
+ * @param route - The route.
+ * @param routes - All the routes, in the order they were made.
+ * @returns « Route 2 » or « Route 3 · Portrieux → Bréhat ».
+ */
+export function routeLabel(
+  route: NavRoute,
+  routes: readonly NavRoute[],
+): string {
+  const name = route.name
+    .replaceAll(
+      /\s*·?\s*(?:routage\s*)?\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s+\d{1,2}[:h]\d{2}/giu,
+      '',
+    )
+    .replace(/\s*·\s*$/u, '')
+    .trim();
+  if (/^Route \d+\b/u.test(name)) return name;
+  const rank = routes.findIndex((item) => item.id === route.id) + 1;
+  return rank > 0 ? `Route ${rank} · ${name || 'sans nom'}` : name;
+}

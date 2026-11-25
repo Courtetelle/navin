@@ -43,6 +43,7 @@ import { buzz } from '../../lib/dom.ts';
 import { fmtDur, fmtShortDate, fmtTime, pad, uid } from '../../lib/format.ts';
 import { isBoatPolar } from '../../model/polars.ts';
 import type { NavRoute } from '../../model/routes.ts';
+import { routeLabel } from '../../model/routes.ts';
 import type { RoutingResult, RoutingStep } from '../../model/sailRouting.ts';
 import { routingTurns } from '../../model/sailRouting.ts';
 import { go } from '../../shell/router.ts';
@@ -62,6 +63,45 @@ function nextHour(): string {
 function when(ms: number): string {
   const date = new Date(ms);
   return `${fmtShortDate(date)} ${fmtTime(date)}`;
+}
+
+/** A choice among a few: big buttons, easy on a boat that pitches. */
+function Choice<T extends string>({
+  id,
+  label,
+  choices,
+  value,
+  onPick,
+}: {
+  id: string;
+  label: string;
+  choices: ReadonlyArray<{ key: T; text: string }>;
+  value: T;
+  onPick: (key: T) => void;
+}) {
+  const tr = useTr();
+  return (
+    <div className="rtg-choice" id={id} role="group" aria-label={tr(label)}>
+      <span className="rtg-choice-title">{tr(label)}</span>
+      <ButtonRow className="row c2">
+        {choices.map(({ key, text }) => (
+          <Button
+            key={key}
+            type="button"
+            className={key === value ? 'btn on' : 'btn'}
+            aria-pressed={key === value}
+            data-choice={key}
+            onClick={() => {
+              buzz();
+              onPick(key);
+            }}
+          >
+            {tr(text)}
+          </Button>
+        ))}
+      </ButtonRow>
+    </div>
+  );
 }
 
 function kn(value: number): string {
@@ -99,9 +139,9 @@ export function RoutingPanel() {
   if (routes.length === 0) {
     return (
       <HelpText>
-        Aucune route pour l’instant : dessinez d’abord la route (partie «
-        Dessiner »), même grossièrement. Le routage part de son premier point,
-        passe par les suivants et finit au dernier.
+        Aucune route pour l’instant : dessinez d’abord la route (partie « Route
+        »), même grossièrement. Le routage part de son premier point, passe par
+        les suivants et finit au dernier.
       </HelpText>
     );
   }
@@ -122,34 +162,23 @@ export function RoutingPanel() {
       </HelpText>
       <SavedRoutings />
       <div className="section rtg-form" id="rtgForm">
-        <label>
-          {tr('Route')}
-          <select
-            id="rtgRoute"
-            value={route?.id ?? ''}
-            onChange={(event) => setRouteId(event.target.value)}
-          >
-            {routes.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          {tr('Bateau')}
-          <select
-            id="rtgBoat"
-            value={boatId}
-            onChange={(event) => change({ boatId: event.target.value })}
-          >
-            {boats.map((item) => (
-              <option key={item.id} value={item.id}>
-                {`${item.info.boat || 'Bateau'}${isBoatPolar(item.polar) ? '' : ' (sans polaire)'}`}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Choice
+          id="rtgRoute"
+          label="Route"
+          choices={routes.map((item) => ({ key: item.id, text: item.name }))}
+          value={route?.id ?? ''}
+          onPick={setRouteId}
+        />
+        <Choice
+          id="rtgBoat"
+          label="Bateau"
+          choices={boats.map((item) => ({
+            key: item.id,
+            text: `${item.info.boat || 'Bateau'}${isBoatPolar(item.polar) ? '' : ' (sans polaire)'}`,
+          }))}
+          value={boatId}
+          onPick={(key) => change({ boatId: key })}
+        />
         <label>
           {tr('Départ (date et heure)')}
           <input
@@ -159,20 +188,16 @@ export function RoutingPanel() {
             onChange={(event) => setDepart(event.target.value)}
           />
         </label>
-        <label>
-          {tr('Modèle météo')}
-          <select
-            id="rtgModel"
-            value={prefs.model}
-            onChange={(event) => change({ model: event.target.value })}
-          >
-            {ROUTING_MODELS.map((model) => (
-              <option key={model.id} value={model.id}>
-                {model.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <Choice
+          id="rtgModel"
+          label="Modèle météo"
+          choices={ROUTING_MODELS.map((model) => ({
+            key: model.id,
+            text: model.name,
+          }))}
+          value={prefs.model}
+          onPick={(key) => change({ model: key })}
+        />
         <label>
           {tr('Moteur quand la vitesse du bateau (polaires) passe sous (nd)')}
           <input
@@ -189,23 +214,19 @@ export function RoutingPanel() {
             }}
           />
         </label>
-        <label>
-          {tr('Le moteur')}
-          <select
-            id="rtgMotorAssist"
-            value={prefs.motorAssist ? 'assist' : 'replace'}
-            onChange={(event) =>
-              change({ motorAssist: event.target.value === 'assist' })
-            }
-          >
-            <option value="replace">
-              {tr('remplace les voiles (en ligne droite)')}
-            </option>
-            <option value="assist">
-              {tr('appuie les voiles (voiles + moteur, en ligne droite)')}
-            </option>
-          </select>
-        </label>
+        <Choice
+          id="rtgMotorAssist"
+          label="Le moteur"
+          choices={[
+            { key: 'replace', text: 'remplace les voiles (en ligne droite)' },
+            {
+              key: 'assist',
+              text: 'appuie les voiles (voiles + moteur, en ligne droite)',
+            },
+          ]}
+          value={prefs.motorAssist ? 'assist' : 'replace'}
+          onPick={(key) => change({ motorAssist: key === 'assist' })}
+        />
         <label>
           {tr('Vitesse au moteur (nd)')}
           <input
@@ -284,11 +305,7 @@ function RoutingOutcome({ run, route, prefs }: OutcomeProps) {
   const summary = routingSummary(result, depart);
   // Kept in « Routages » under one id, however many buttons are touched.
   const keep = () => {
-    const shape = routingShape(
-      `${route.name} · ${when(depart)}`,
-      result,
-      route.points,
-    );
+    const shape = routingShape(`Routage ${when(depart)}`, result, route.points);
     const shown = {
       ...shape,
       id,
@@ -314,6 +331,7 @@ function RoutingOutcome({ run, route, prefs }: OutcomeProps) {
       nm: result.nm,
       summary,
       model: wind.model,
+      route: routeLabel(route, state.data.routes.peek()),
       shown,
     });
     return shown;
@@ -395,7 +413,7 @@ function RoutingOutcome({ run, route, prefs }: OutcomeProps) {
             buzz();
             const hours = (result.arriveMs - depart) / 3_600_000;
             const kept = saveRoute({
-              name: `${route.name} · routage ${when(depart)}`,
+              name: `${routeLabel(route, state.data.routes.peek())} · routage`,
               points: routingTurns(result, route.points),
               speed: hours > 0 ? Math.round((result.nm / hours) * 10) / 10 : 0,
               depart: new Date(depart).toISOString(),
@@ -558,7 +576,7 @@ function StepTable({ steps }: { steps: readonly RoutingStep[] }) {
  */
 function routingText(result: Done, route: NavRoute, depart: number): string {
   const lines = [
-    `Routage NavIn · ${route.name}`,
+    `Routage NavIn · ${routeLabel(route, state.data.routes.peek())}`,
     `Départ ${when(depart)} · arrivée ${when(result.arriveMs)}`,
     routingSummary(result, depart),
     '',
@@ -583,7 +601,7 @@ function openOnMap(saved: SavedRouting): void {
 }
 
 /**
- * The routings kept, as the routes of « Dessiner »: a touch shows one on the
+ * The routings kept, as the routes of « Route »: a touch shows one on the
  * map, a long press changes its name; swiped, 🎯 Go to along it and 🗑.
  * @returns The list.
  */
@@ -644,7 +662,9 @@ function SavedItem({ saved }: { saved: SavedRouting }) {
             <span className="mk-text">
               <b className="b-nm">{name}</b>
               <small>
-                {tr(`Arrivée ${when(saved.arriveMs)} · ${saved.summary}`)}
+                {tr(
+                  `${saved.route ? `${saved.route} · ` : ''}Arrivée ${when(saved.arriveMs)} · ${saved.summary}`,
+                )}
               </small>
             </span>
           </button>
