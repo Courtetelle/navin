@@ -34,13 +34,16 @@ export function leaveHarnessWorld(): void {
 
 /**
  * A legacy fixture as NavIn keeps it today: the design category text of the
- * seeds is the number of people on board (one-shot `ldb.crewMax`).
+ * seeds is the number of people on board (one-shot `ldb.crewMax`), and
+ * « Navigue » is « Plan d’eau : Maritime / Lacustre » (25/11/2026).
  * @param raw - The fixture file text.
  * @returns The text, brought up to date.
  */
 export function modernFixture(raw: string): string {
   return raw
     .replaceAll(/A · (\d+) personnes au maximum/g, '$1')
+    .replaceAll('"waters": "Eaux maritimes"', '"waters": "Maritime"')
+    .replaceAll('"waters": "Eaux intérieures"', '"waters": "Lacustre"')
     .replace(
       '"ldb.flagSplit": true,',
       '"ldb.flagSplit": true,\n  "ldb.crewMax": true,',

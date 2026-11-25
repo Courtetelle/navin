@@ -102,7 +102,7 @@ export const CARD_FIELDS: ReadonlyArray<
     kind: 'text' | 'tel' | 'mail' | 'web' | 'area',
   ]
 > = [
-  ['org', 'Société, agence', 'text'],
+  ['org', 'Société', 'text'],
   ['ref', 'N° de contrat ou de police', 'text'],
   ['adresse', 'Adresse', 'text'],
   ['tel', 'Téléphone', 'tel'],
@@ -117,19 +117,27 @@ export const CARD_FIELDS: ReadonlyArray<
  * label, kind. They go into the navigations of the cruise (VHF, SOS, CV).
  */
 export const INFO_FIELDS: ReadonlyArray<
-  readonly [key: string, label: string, kind: 'text' | 'date' | 'area']
+  readonly [
+    key: string,
+    label: string,
+    kind: 'text' | 'date' | 'time' | 'tel' | 'url' | 'area',
+  ]
 > = [
   ['ports', 'Port de départ et d’arrivée', 'text'],
+  ['quai', 'Quai / lieu d’amarrage', 'text'],
   ['du', 'Du', 'date'],
+  ['duH', 'Heure de départ', 'time'],
   ['au', 'Au', 'date'],
+  ['auH', 'Heure d’arrivée', 'time'],
   ['vhfMarina', 'Canal VHF de la marina', 'text'],
+  ['telMarina', 'Téléphone de la capitainerie / marina', 'tel'],
+  ['webMarina', 'Site internet', 'url'],
   ['coastStation', 'Station côtière radio', 'text'],
-  [
-    'meteo',
-    'Météo : bulletins VHF (canaux, horaires), sites, heure légale',
-    'area',
-  ],
+  ['meteo', 'Observations / Remarques', 'area'],
 ];
+
+/** Fields of the cruise kept to itself: not given to its navigations. */
+const OWN_INFO = new Set(['meteo']);
 
 /** The fields of a person: key, label, link kind. */
 export const PERSON_FIELDS: ReadonlyArray<
@@ -176,32 +184,106 @@ export function emptyPerson(id: string): VoyagePerson {
   return { id, nom: '', role: '', tel: '', mail: '' };
 }
 
+/** The contracts of a cruise: one button each, opening its sheet. */
+export const CONTRACT_KINDS: ReadonlyArray<{
+  id: string;
+  icon: string;
+  name: string;
+}> = [
+  { id: 'courtiers', icon: '🤝', name: 'Courtier (broker)' },
+  { id: 'loueur', icon: '⛵', name: 'Compagnie de location (charter)' },
+  { id: 'annulation', icon: '🛡', name: 'Assurance annulation' },
+  { id: 'caution', icon: '🔐', name: 'Protection de caution' },
+];
+
+/** Where the contracts kept apart before go: the other filled ones. */
+export const OLD_CONTRACTS = 'anciens';
+
 /**
- * What data › Croisières holds before any change: the agency, the renter,
- * and the cancellation and deposit buy-back insurances.
+ * A contract holds something: a field or a contact.
+ * @param card - The contract.
+ * @returns True when something is filled.
+ */
+export function contractFilled(card: VoyageCard): boolean {
+  return (
+    CARD_FIELDS.some(([key]) => card[key].trim() !== '') ||
+    card.persons.some((person) =>
+      [person.nom, person.role, person.tel, person.mail].some((part) =>
+        part.trim(),
+      ),
+    )
+  );
+}
+
+/**
+ * The contracts as the four sheets: Courtier, Compagnie de location,
+ * Assurance annulation, Protection de caution, one sheet each. Sheets kept
+ * before (Agence, Loueur, Courtiers, Assurances…) go to theirs: the renter
+ * to the charter company, the cancellation and deposit insurances to theirs;
+ * other filled ones are kept apart (not shown, still in the backups).
+ * @param categories - The categories read.
+ * @param newId - Makes the id of a missing sheet.
+ * @returns The four categories, then the one kept apart if any.
+ */
+export function contractCategories(
+  categories: readonly VoyageCategory[],
+  newId: (kind: string) => string = (kind) => `${kind}1`,
+): VoyageCategory[] {
+  const pool = categories.flatMap((cat) =>
+    cat.cards.map((card) => ({ cat: cat.id, card })),
+  );
+  const taken = new Set<VoyageCard>();
+  const kindOf = (cat: string, title: string): string | null => {
+    if (CONTRACT_KINDS.some((kind) => kind.id === cat)) return cat;
+    if (cat === 'assurances' || cat === OLD_CONTRACTS) {
+      if (/annul/iu.test(title)) return 'annulation';
+      if (/caution/iu.test(title)) return 'caution';
+    }
+    return null;
+  };
+  const out: VoyageCategory[] = CONTRACT_KINDS.map((kind) => {
+    const mine = pool.filter(
+      (item) => kindOf(item.cat, item.card.title) === kind.id,
+    );
+    const chosen =
+      mine.find((item) => contractFilled(item.card)) ?? mine[0] ?? null;
+    if (chosen) taken.add(chosen.card);
+    const card = chosen
+      ? { ...chosen.card, title: kind.name }
+      : emptyCard(newId(kind.id), kind.name);
+    return { id: kind.id, name: kind.name, cards: [card] };
+  });
+  const apart = pool
+    .filter((item) => !taken.has(item.card) && contractFilled(item.card))
+    .map((item) => item.card);
+  if (apart.length > 0) {
+    out.push({ id: OLD_CONTRACTS, name: 'Autres contrats', cards: apart });
+  }
+  return out;
+}
+
+/**
+ * The sheet of one contract of a cruise.
+ * @param voyages - The content.
+ * @param kind - Its id in {@link CONTRACT_KINDS}.
+ * @returns The sheet.
+ */
+export function contractCard(
+  voyages: Pick<Voyages, 'categories'>,
+  kind: string,
+): VoyageCard | undefined {
+  return voyages.categories.find((cat) => cat.id === kind)?.cards[0];
+}
+
+/**
+ * What data › Croisières holds before any change: the four contracts, empty.
  * @returns The default content.
  */
 export function defaultVoyages(): Voyages {
   return {
     info: {},
     crew: [],
-    categories: [
-      { id: 'agence', name: 'Agence', cards: [emptyCard('agence1', 'Agence')] },
-      { id: 'loueur', name: 'Loueur', cards: [emptyCard('loueur1', 'Loueur')] },
-      {
-        id: 'courtiers',
-        name: 'Courtiers',
-        cards: [emptyCard('courtier1', 'Courtier')],
-      },
-      {
-        id: 'assurances',
-        name: 'Assurances',
-        cards: [
-          emptyCard('annulation', 'Assurance annulation'),
-          emptyCard('caution', 'Rachat de caution'),
-        ],
-      },
-    ],
+    categories: contractCategories([]),
     docs: [],
     mod: '',
   };
@@ -292,7 +374,13 @@ export function cleanVoyages(raw: unknown): Voyages | null {
     const kept = text(rawInfo?.[key]);
     if (kept) info[key] = kept;
   }
-  const out: Voyages = { info, crew, categories, docs, mod: text(value.mod) };
+  const out: Voyages = {
+    info,
+    crew,
+    categories: contractCategories(categories),
+    docs,
+    mod: text(value.mod),
+  };
   for (const key of ['photo', 'crewSet', 'boat'] as const) {
     const kept = text(value[key]);
     if (kept) out[key] = kept;
@@ -325,10 +413,9 @@ export function docCategories(
   voyages: Pick<Voyages, 'categories'>,
 ): Array<{ id: string; name: string }> {
   return [
-    ...voyages.categories.map(({ id, name }) => ({
-      id,
-      name: name || 'Sans nom',
-    })),
+    ...voyages.categories
+      .filter((cat) => CONTRACT_KINDS.some((kind) => kind.id === cat.id))
+      .map(({ id, name }) => ({ id, name: name || 'Sans nom' })),
     { id: CREW_CAT, name: 'Équipage' },
     { id: OTHER_CAT, name: 'Autres' },
   ];
@@ -434,8 +521,8 @@ export const VOYAGE_SECTIONS: ReadonlyArray<{
   {
     key: 'info',
     view: 'vinfo',
-    title: '🧭 Croisière',
-    sub: 'ports, dates, canaux VHF, station côtière, météo',
+    title: '🧭 Port d’attache',
+    sub: 'ports, dates et heures, VHF, téléphone, station côtière, remarques',
   },
   {
     key: 'boat',
@@ -453,7 +540,7 @@ export const VOYAGE_SECTIONS: ReadonlyArray<{
     key: 'contracts',
     view: 'vcontracts',
     title: '📑 Contrats',
-    sub: 'agence, loueur, assurances, contacts d’urgence',
+    sub: 'courtier, compagnie de location, assurance annulation, protection de caution',
   },
   {
     key: 'docs',
@@ -503,17 +590,7 @@ function upgraded(voyage: Voyage): Voyage {
   const sections = ALL_SECTIONS.filter(
     (key) => key === 'info' || key === 'boat' || voyage.sections.includes(key),
   );
-  const categories = voyage.categories.some((cat) => cat.id === 'courtiers')
-    ? voyage.categories
-    : [
-        ...voyage.categories,
-        {
-          id: 'courtiers',
-          name: 'Courtiers',
-          cards: [emptyCard(`${voyage.id}-courtier`, 'Courtier')],
-        },
-      ];
-  return { ...voyage, sections, categories };
+  return { ...voyage, sections };
 }
 
 /** The sections every new cruise proposes, ticked. */
@@ -612,14 +689,13 @@ export function nextVoyageNum(list: readonly Voyage[]): number {
 
 /**
  * A new cruise: its number and automatic name, the sections chosen, empty,
- * keeping the categories and contract types of the last cruise (without
- * their contents).
+ * with the four contracts empty.
  * @param list - The cruises kept.
  * @param options - Id, sections chosen and time.
  * @param options.id - Its id.
  * @param options.sections - Sections ticked.
  * @param options.now - Creation time.
- * @param options.newId - Makes the ids of the copied categories and cards.
+ * @param options.newId - Makes the ids of its contracts.
  * @returns The cruise.
  */
 export function blankVoyage(
@@ -637,20 +713,10 @@ export function blankVoyage(
   },
 ): Voyage {
   const num = nextVoyageNum(list);
-  const last = list.toSorted((first, second) =>
-    second.created.localeCompare(first.created),
-  )[0];
   const base = defaultVoyages();
-  const categories = last
-    ? last.categories.map((cat) => ({
-        id: cat.id,
-        name: cat.name,
-        cards: cat.cards.map((card) => emptyCard(newId(), card.title)),
-      }))
-    : base.categories;
   return {
     ...base,
-    categories,
+    categories: contractCategories([], newId),
     id,
     num,
     name: `${num} Nouvelle croisière ${now.getFullYear()}`,
@@ -701,7 +767,7 @@ export function mergedStores(
 }
 
 /**
- * What a cruise gives to its navigations: its ports, dates, VHF and weather,
+ * What a cruise gives to its navigations: its ports, dates, VHF, marina phone,
  * and the renter's numbers for the SOS book (`base`, « Nom : numéro »).
  * @param voyage - The cruise.
  * @returns The values of `cruise.info` to set, empty ones left out.
@@ -711,6 +777,7 @@ export function voyageNavInfo(
 ): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key] of INFO_FIELDS) {
+    if (OWN_INFO.has(key)) continue;
     const value = voyage.info[key]?.trim();
     if (value) out[key] = value;
   }

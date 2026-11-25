@@ -30,13 +30,11 @@ export const BOAT_DATA_FIELDS: readonly FieldDefinition[] = [
   },
   {
     key: 'waters',
-    label: 'Navigue',
+    label: 'Plan d’eau',
     type: 'choice',
-    options: [['Eaux intérieures'], ['Eaux maritimes']],
-    show: {
-      'Eaux intérieures': 'en eaux intérieures',
-      'Eaux maritimes': 'en eaux maritimes',
-    },
+    options: [['Maritime'], ['Lacustre']],
+    // Values written before 25/11/2026 (cruise sheets copied from a boat).
+    show: { 'Eaux intérieures': 'Lacustre', 'Eaux maritimes': 'Maritime' },
     cycle: true,
     wide: true,
     frame: 'boatId',

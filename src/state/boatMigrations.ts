@@ -103,6 +103,24 @@ export function powerWithoutKw(info: CruiseInfo | null | undefined): void {
   if (power) info.power = power.replace('.', ',');
 }
 
+/** Old « Navigue » values and their « Plan d’eau » choice. */
+const WATERS_RENAMED: Readonly<Record<string, string>> = {
+  'Eaux intérieures': 'Lacustre',
+  'Eaux maritimes': 'Maritime',
+};
+
+/**
+ * « Navigue : Eaux maritimes / intérieures » becomes « Plan d’eau : Maritime /
+ * Lacustre » (25/11/2026); run at every load, so restored backups follow.
+ * @param info - Sheet values, changed in place.
+ */
+export function watersRenamed(info: CruiseInfo | null | undefined): void {
+  const value = info?.waters;
+  if (info && typeof value === 'string' && WATERS_RENAMED[value]) {
+    info.waters = WATERS_RENAMED[value];
+  }
+}
+
 /**
  * An item ending with ":" is a value item (legacy `ckColon`).
  * @param item - Checklist item, changed in place.

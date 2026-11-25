@@ -4,7 +4,7 @@
   "Informations": "Información",
   "Nom du bateau": "Nombre del barco",
   "Navigation": "Aguas",
-  "Plan d’eau": "Aguas",
+  "Plan d’eau": "Masa de agua",
   "Navigue en": "Navega en",
   "Eaux intérieures / Eaux maritimes": "Aguas interiores / Aguas marítimas",
   "Eaux intérieures": "Aguas interiores",
@@ -1609,5 +1609,7 @@
   "Synchronisation en cours…": "Sincronizando…",
   "Synchronisation prête": "Sincronización lista",
   "dernière à": "última a las",
-  "Il faut d’abord le relais : Paramétrages › Clés météos et compte relais (Cloudflare).": "Primero hace falta el relé: Ajustes › Claves meteo y cuenta del relé (Cloudflare)."
+  "Il faut d’abord le relais : Paramétrages › Clés météos et compte relais (Cloudflare).": "Primero hace falta el relé: Ajustes › Claves meteo y cuenta del relé (Cloudflare).",
+  "Maritime": "Marítima",
+  "Lacustre": "Lacustre"
 }

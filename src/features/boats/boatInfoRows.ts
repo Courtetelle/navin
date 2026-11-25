@@ -13,6 +13,9 @@ export interface BoatInfoSection {
   rows: BoatInfoRow[];
 }
 
+const CE_LABEL = 'Catégorie de conception CE';
+const CREW_MAX_LABEL = 'Nombre maximal de personnes à bord';
+
 const NO_VALUE_TYPES = new Set(['signature', 'check', 'tides', 'calc']);
 
 /**
@@ -54,7 +57,30 @@ export function boatInfoRows(boat: Boat): BoatInfoSection[] {
     }
     if (rows.length > 0) out.push({ title: section.title, rows });
   }
-  return out;
+  return crewMaxUnderCe(out);
+}
+
+/**
+ * The maximum number of people on board, shown just under the CE design
+ * category it goes with (Corban, 25/11/2026).
+ * @param sections - Sections of the sheet, changed in place.
+ * @returns The same sections.
+ */
+function crewMaxUnderCe(sections: BoatInfoSection[]): BoatInfoSection[] {
+  const ce = sections.find((section) =>
+    section.rows.some(([label]) => label === CE_LABEL),
+  );
+  if (!ce) return sections;
+  for (const section of sections) {
+    const at = section.rows.findIndex(([label]) => label === CREW_MAX_LABEL);
+    if (at === -1) continue;
+    const [row] = section.rows.splice(at, 1);
+    if (!row) continue;
+    const ceAt = ce.rows.findIndex(([label]) => label === CE_LABEL);
+    ce.rows.splice(ceAt + 1, 0, row);
+    break;
+  }
+  return sections.filter((section) => section.rows.length > 0);
 }
 
 function valueText(field: FieldDefinition, value: unknown): string {
