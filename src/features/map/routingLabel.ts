@@ -1,4 +1,6 @@
 import { fmtDur, fmtTime, fr } from '../../lib/format.ts';
+import { angDiff } from '../../lib/geo.ts';
+import { sunTimes } from '../../lib/sun.ts';
 import { REFERENCE } from '../../model/goNoGo.ts';
 
 import type { BestAhead } from './routingShift.ts';
@@ -42,6 +44,78 @@ export function stormRisk(cape: number): string {
   return 'faible';
 }
 
+/** The wind and the current at one moment of the routing. */
+export interface WindCurrent {
+  ms: number;
+  /** Where the wind comes from, degrees, and its speed, knots. */
+  twd: number;
+  tws: number;
+  /** Where the current flows to, degrees, and its speed, knots. */
+  setDeg: number;
+  driftKn: number;
+}
+
+/** The current flows within this angle of where the wind comes from. */
+const AGAINST_DEG = 45;
+/** A current under this speed does not raise the sea. */
+const AGAINST_KN = 0.5;
+
+/**
+ * The strongest current flowing against the wind (it raises a short,
+ * steep sea).
+ * @param points - Moments of the routing.
+ * @returns The worst one, or `null` when none.
+ */
+export function worstAgainst(
+  points: readonly WindCurrent[],
+): WindCurrent | null {
+  let worst: WindCurrent | null = null;
+  for (const point of points) {
+    if (
+      Number.isFinite(point.driftKn) &&
+      point.driftKn >= AGAINST_KN &&
+      angDiff(point.setDeg, point.twd) <= AGAINST_DEG &&
+      (!worst || point.driftKn * point.tws > worst.driftKn * worst.tws)
+    ) {
+      worst = point;
+    }
+  }
+  return worst;
+}
+
+/** Night is checked every this often. */
+const NIGHT_STEP_MS = 5 * 60_000;
+
+/**
+ * The minutes under way between sunset and sunrise, and the sunset of the
+ * day of departure.
+ * @param departMs - ETD.
+ * @param arriveMs - ETA.
+ * @param place - Where (the start).
+ * @param place.lat - Latitude.
+ * @param place.lon - Longitude.
+ * @returns Night minutes, and the sunset and sunrise met.
+ */
+export function nightOf(
+  departMs: number,
+  arriveMs: number,
+  place: { lat: number; lon: number },
+): { minutes: number; set: number | null; rise: number | null } {
+  let minutes = 0;
+  let set: number | null = null;
+  let rise: number | null = null;
+  for (let at = departMs; at < arriveMs; at += NIGHT_STEP_MS) {
+    const sun = sunTimes(at, place.lat, place.lon);
+    if (!sun) continue;
+    const dark = at < sun.rise || at >= sun.set;
+    if (!dark) continue;
+    minutes += Math.min(NIGHT_STEP_MS, arriveMs - at) / 60_000;
+    if (at >= sun.set && set === null) set = sun.set;
+    if (at < sun.rise) rise = sun.rise;
+  }
+  return { minutes, set, rise };
+}
+
 /**
  * The lines of the label of a routing: its hours and length (and against
  * the most efficient departure of the next hours), its manoeuvres, its
@@ -71,6 +145,32 @@ export function labelLines(
         : `Meilleur départ des ${best.hours} prochaines heures`,
     );
   }
+  if (stats && stats.nm > 0) {
+    const speed = lengthMin > 0 ? stats.nm / (lengthMin / 60) : 0;
+    lines.push(
+      `Distance ${fr(stats.nm)} NM${speed > 0 ? ` · moyenne ${fr(speed)} nd` : ''}`,
+    );
+  }
+  const start = marks[0];
+  if (start && arriveMs > departMs) {
+    const night = nightOf(departMs, arriveMs, start);
+    if (night.minutes >= 10) {
+      const when = [
+        night.set === null ? '' : `coucher ${hourText(night.set)}`,
+        night.rise === null ? '' : `lever ${hourText(night.rise)}`,
+      ].filter(Boolean);
+      lines.push(
+        `De nuit ${minutesText(night.minutes)}${when.length > 0 ? ` (${when.join(', ')})` : ''}`,
+      );
+    } else {
+      const sun = sunTimes(arriveMs, start.lat, start.lon);
+      if (sun && arriveMs < sun.set) {
+        lines.push(
+          `De jour : arrivée ${minutesText((sun.set - arriveMs) / 60_000)} avant le coucher (${hourText(sun.set)})`,
+        );
+      }
+    }
+  }
   if (stats) {
     const turns = [
       `${stats.tacks} virement${stats.tacks > 1 ? 's' : ''}`,
@@ -91,6 +191,12 @@ export function labelLines(
   const wave =
     stats?.maxWaveM ?? highest(marks.map((mark) => mark.waveM ?? undefined));
   if (wave !== undefined) lines.push(`Vagues max ${fr(wave)} m`);
+  const against = worstAgainst(marks);
+  if (against) {
+    lines.push(
+      `Courant contre le vent ${fr(against.driftKn)} nd / vent ${Math.round(against.tws)} nd à ${hourText(against.ms)}`,
+    );
+  }
   const cape = stats?.maxCape;
   if (cape !== undefined) {
     lines.push(

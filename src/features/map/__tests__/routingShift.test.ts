@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { hourText, labelLines, stormRisk } from '../routingLabel.ts';
+import {
+  hourText,
+  labelLines,
+  nightOf,
+  stormRisk,
+  worstAgainst,
+} from '../routingLabel.ts';
 import {
   DEFAULT_SHIFT,
   canGoEarlier,
@@ -144,6 +150,7 @@ describe('labelLines', () => {
     expect(labelLines(shown, null)).toStrictEqual([
       'ETD 21h30 · ETA 02h30',
       'Durée 5 h 00',
+      'Distance 30,0 NM · moyenne 6,0 nd',
       '2 virements · 0 empannage',
       'Moteur 1 h 10',
       'Vent max 18 nd · rafales 26 nd',
@@ -167,7 +174,7 @@ describe('labelLines', () => {
       'Meilleur départ des 6 prochaines heures',
     );
     expect(labelLines(shown, { ...best, key: 'other' })[2]).toBe(
-      '2 virements · 0 empannage',
+      'Distance 30,0 NM · moyenne 6,0 nd',
     );
   });
 
@@ -175,5 +182,38 @@ describe('labelLines', () => {
     expect(stormRisk(200)).toBe('faible');
     expect(stormRisk(500)).toBe('possible');
     expect(stormRisk(1500)).toBe('fort');
+  });
+});
+
+describe('worstAgainst', () => {
+  it('finds the strongest current flowing against the wind', () => {
+    const ms = Date.UTC(2027, 5, 12, 8);
+    const point = (setDeg: number, driftKn: number, tws: number) => ({
+      ms,
+      twd: 270,
+      tws,
+      setDeg,
+      driftKn,
+    });
+    expect(worstAgainst([point(90, 3, 20)])).toBeNull();
+    expect(worstAgainst([point(260, 0.3, 20)])).toBeNull();
+    const worst = point(250, 2, 20);
+    expect(worstAgainst([point(280, 1, 20), worst, point(90, 4, 25)])).toBe(
+      worst,
+    );
+  });
+});
+
+describe('nightOf', () => {
+  it('counts the minutes under way between sunset and sunrise', () => {
+    // Saint-Quay-Portrieux, mid-June: sunset about 22:00 UTC+2.
+    const place = { lat: 48.65, lon: -2.83 };
+    const noon = Date.UTC(2027, 5, 15, 10);
+    expect(nightOf(noon, noon + 4 * 3_600_000, place).minutes).toBe(0);
+    const evening = Date.UTC(2027, 5, 15, 18);
+    const night = nightOf(evening, evening + 4 * 3_600_000, place);
+    expect(night.minutes).toBeGreaterThan(60);
+    expect(night.minutes).toBeLessThan(4 * 60);
+    expect(night.set).not.toBeNull();
   });
 });

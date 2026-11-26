@@ -26,6 +26,7 @@ import type { RoutingMark, ShownRouting } from './routingState.ts';
 import {
   ROUTING_KEY,
   legTarget,
+  routingLabelShown,
   routingLeg,
   routingOverlay,
   shownRouting,
@@ -265,7 +266,6 @@ interface EndTag {
   end: 'etd' | 'eta';
   at: [number, number];
   html: string;
-  blink: boolean;
 }
 
 /**
@@ -282,8 +282,6 @@ function endTags(shown: ShownRouting): EndTag[] {
       end: 'etd',
       at: first,
       html: `<b>ETD</b> ${escapeHtml(day(shown.departMs))}`,
-      blink:
-        seenTimes.departMs !== null && seenTimes.departMs !== shown.departMs,
     });
   }
   if (last && shown.arriveMs !== undefined) {
@@ -291,8 +289,6 @@ function endTags(shown: ShownRouting): EndTag[] {
       end: 'eta',
       at: last,
       html: `<b>ETA</b> ${escapeHtml(day(shown.arriveMs))}`,
-      blink:
-        seenTimes.arriveMs !== null && seenTimes.arriveMs !== shown.arriveMs,
     });
   }
   return tags;
@@ -311,17 +307,6 @@ function endBox(point: { x: number; y: number }): ScreenBox {
     h: END_H,
   };
 }
-
-/** The ETD and ETA drawn last: a change makes their tags blink. */
-const seenTimes: {
-  name: string;
-  departMs: number | null;
-  arriveMs: number | null;
-} = {
-  name: '',
-  departMs: null,
-  arriveMs: null,
-};
 
 const layers = new WeakMap<LeafletMap, { remove: () => void }>();
 const turning = new WeakSet<LeafletMap>();
@@ -421,29 +406,22 @@ export function drawRouting(
       }),
     ];
   });
-  // Another routing: nothing to blink.
-  if (seenTimes.name !== shown.name) {
-    seenTimes.name = shown.name;
-    seenTimes.departMs = null;
-    seenTimes.arriveMs = null;
-  }
-  const tags = endTags(shown);
-  seenTimes.departMs = shown.departMs ?? null;
-  seenTimes.arriveMs = shown.arriveMs ?? null;
-  const ends = tags.map(({ end, at, html, blink }) => {
-    const classes = ['rtm-end'];
-    if (blink) classes.push('rtm-blink');
-    return L.marker(at, {
-      interactive: false,
+  // A touch on the ETD or the ETA shows the label of the routing again.
+  const ends = endTags(shown).map(({ end, at, html }) =>
+    L.marker(at, {
       keyboard: false,
+      bubblingMouseEvents: false,
+      title: 'Toucher : afficher l’étiquette du routage',
       icon: L.divIcon({
-        className: classes.join(' '),
+        className: 'rtm-end',
         html: `<span data-end="${end}">${html}</span>`,
         iconSize: [0, 0],
         iconAnchor: [0, 0],
       }),
-    });
-  });
+    }).on('click', () => {
+      routingLabelShown.value = true;
+    }),
+  );
   const group = L.layerGroup([line, ...turns, ...marks, ...ends]).addTo(map);
   layers.set(map, group);
 }

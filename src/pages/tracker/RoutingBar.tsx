@@ -18,6 +18,7 @@ import {
   stepRank,
 } from '../../features/map/routingShift.ts';
 import {
+  routingLabelShown,
   routingOverlay,
   shownRouting,
 } from '../../features/map/routingState.ts';
@@ -118,7 +119,11 @@ export function RoutingBar() {
   let head = live ? 'Départ imminent' : departAt;
   if (green) head = `n° ${sort.rank + 1}/${sort.count} · ${departAt}`;
   const step = stepText(prefs.stepMin);
-  const earlier = green || canGoEarlier(shown.departMs, prefs.stepMin, now);
+  // In the sort, ▲ greyed on the most efficient, ▼ on the least.
+  const later = !green || sort.rank > 0;
+  const earlier = green
+    ? sort.rank < sort.count - 1
+    : canGoEarlier(shown.departMs, prefs.stepMin, now);
   const move = (sign: number) => {
     buzz();
     if (green) void stepRank(-sign);
@@ -141,8 +146,11 @@ export function RoutingBar() {
               ? 'Routage plus efficient · appui long : réglages'
               : `Départ ${step} plus tard · appui long : réglages`,
           )}
+          aria-disabled={!later}
           disabled={busy}
-          onClick={() => move(1)}
+          onClick={() => {
+            if (later) move(1);
+          }}
           {...up.handlers}
         >
           <span aria-hidden="true">▲</span>
@@ -242,7 +250,13 @@ function RoutingLabel() {
     y0: number;
     moved: boolean;
   } | null>(null);
-  if (!shown?.plan || shown.departMs === undefined) return null;
+  if (
+    !shown?.plan ||
+    shown.departMs === undefined ||
+    !routingLabelShown.value
+  ) {
+    return null;
+  }
   const lines = labelLines(shown, best);
   const width = globalThis.innerWidth || 800;
   const height = globalThis.innerHeight || 600;
@@ -271,6 +285,8 @@ function RoutingLabel() {
             }
       }
       onPointerDown={(event) => {
+        // The ✕ hears its own touch.
+        if ((event.target as Element).closest('.rtg-label-x')) return;
         try {
           event.currentTarget.setPointerCapture(event.pointerId);
         } catch {
@@ -310,6 +326,18 @@ function RoutingLabel() {
         drag.current = null;
       }}
     >
+      <button
+        type="button"
+        className="rtg-label-x"
+        id="rtgLabelX"
+        aria-label={tr('Masquer l’étiquette (toucher ETD ou ETA la rend)')}
+        onClick={() => {
+          buzz();
+          routingLabelShown.value = false;
+        }}
+      >
+        ✕
+      </button>
       <b className="rtg-label-name">{shown.name}</b>
       {lines.map((line) => (
         <span key={line}>{tr(line)}</span>

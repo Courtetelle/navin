@@ -110,6 +110,12 @@ export const shownRouting = signal<ShownRouting | null>(kept());
 export const routingOverlay = signal(false);
 
 /**
+ * The label of the routing is shown: its ✕ hides it, a touch on the ETD or
+ * the ETA shows it again.
+ */
+export const routingLabelShown = signal(true);
+
+/**
  * The highest of some values, rounded; undefined when none is known.
  * @param values - The values (NaN or undefined unknown).
  * @param tenths - Rounded to tenths rather than units.
