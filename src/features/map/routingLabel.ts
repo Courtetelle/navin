@@ -141,7 +141,7 @@ export function labelLines(
     const more = lengthMin - best.lengthMin;
     lines.push(
       more >= 5
-        ? `+${minutesText(more)} sur le meilleur départ des ${best.hours} h (${hourText(best.departMs)})`
+        ? `+${minutesText(more)} sur le meilleur départ des prochaines ${best.hours} h (${hourText(best.departMs)})`
         : `Meilleur départ des ${best.hours} prochaines heures`,
     );
   }

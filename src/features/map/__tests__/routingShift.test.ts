@@ -18,6 +18,7 @@ import {
   shiftPrefs,
   sortByCost,
 } from '../routingShift.ts';
+import { markAt } from '../routingState.ts';
 
 const base = { nm: 30, sailMin: 300, motorMin: 0, tacks: 2, gybes: 0 };
 
@@ -168,7 +169,7 @@ describe('labelLines', () => {
       at: departMs,
     };
     expect(labelLines(shown, best)[2]).toBe(
-      '+1 h 00 sur le meilleur départ des 6 h (22h30)',
+      '+1 h 00 sur le meilleur départ des prochaines 6 h (22h30)',
     );
     expect(labelLines(shown, { ...best, lengthMin: 298 })[2]).toBe(
       'Meilleur départ des 6 prochaines heures',
@@ -215,5 +216,42 @@ describe('nightOf', () => {
     expect(night.minutes).toBeGreaterThan(60);
     expect(night.minutes).toBeLessThan(4 * 60);
     expect(night.set).not.toBeNull();
+  });
+});
+
+function playMark(lat: number, at: number, tws: number) {
+  return {
+    lat,
+    lon: -2.8,
+    ms: at,
+    twd: 270,
+    tws,
+    setDeg: 0,
+    driftKn: 0,
+    waveM: null,
+  };
+}
+
+describe('markAt', () => {
+  it('places the boat played between the marks, with their weather', () => {
+    const ms = Date.UTC(2027, 5, 12, 8);
+    const shown = {
+      name: 'Routage',
+      departMs: ms,
+      arriveMs: ms + 2 * 3_600_000,
+      track: [
+        [48.6, -2.8],
+        [48.8, -2.8],
+      ] as Array<[number, number]>,
+      turns: [],
+      marks: [playMark(48.6, ms, 10), playMark(48.7, ms + 3_600_000, 14)],
+    };
+    expect(markAt(shown, ms - 1)?.lat).toBe(48.6);
+    const half = markAt(shown, ms + 1_800_000);
+    expect(half?.lat).toBeCloseTo(48.65);
+    expect(half?.tws).toBe(10);
+    const late = markAt(shown, ms + 1.5 * 3_600_000);
+    expect(late?.lat).toBeCloseTo(48.75);
+    expect(late?.tws).toBe(14);
   });
 });

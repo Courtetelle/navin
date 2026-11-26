@@ -1,4 +1,4 @@
-import { effect } from '@preact/signals-react';
+import { computed, effect } from '@preact/signals-react';
 import type { Map as LeafletMap } from 'leaflet';
 
 import { fmtDateTime, fmtTime, fr } from '../../lib/format.ts';
@@ -26,9 +26,12 @@ import type { RoutingMark, ShownRouting } from './routingState.ts';
 import {
   ROUTING_KEY,
   legTarget,
+  markAt,
   routingLabelShown,
   routingLeg,
   routingOverlay,
+  routingPlay,
+  routingRain,
   shownRouting,
 } from './routingState.ts';
 
@@ -46,6 +49,8 @@ export function clearRouting(): void {
   if (gotoTarget.peek()?.leg !== undefined) setGoto(null);
   shownRouting.value = null;
   routingOverlay.value = false;
+  routingRain.value = false;
+  routingPlay.value = null;
   store.set(ROUTING_KEY, null);
 }
 
@@ -326,10 +331,12 @@ function routingPopup(shown: ShownRouting): HTMLElement {
  * current and waves along it.
  * @param map - Leaflet map.
  * @param shown - The routing.
+ * @param marksShown - The wind and sea along it (not while played).
  */
 export function drawRouting(
   map: LeafletMap,
   shown: ShownRouting | null = shownRouting.peek(),
+  marksShown = routingPlay.peek() === null,
 ): void {
   watchRouting();
   layers.get(map)?.remove();
@@ -340,7 +347,10 @@ export function drawRouting(
   if (!turning.has(map)) {
     turning.add(map);
     // Turned or zoomed: the symbols are set again (as many as fit).
-    map.on('rotate zoomend', () => drawRouting(map));
+    map.on('rotate zoomend', () => {
+      drawRouting(map);
+      drawPlay(map);
+    });
   }
   const turn = mapBearing(map);
   const line = L.polyline(shown.track, {
@@ -422,9 +432,68 @@ export function drawRouting(
       routingLabelShown.value = true;
     }),
   );
-  const group = L.layerGroup([line, ...turns, ...marks, ...ends]).addTo(map);
+  // Played: only the boat carries the wind and the sea (drawPlay).
+  const shownMarks = marksShown ? marks : [];
+  const group = L.layerGroup([line, ...turns, ...shownMarks, ...ends]).addTo(
+    map,
+  );
   layers.set(map, group);
 }
+
+/** The blue boat of the routing played. */
+const PLAY_BOAT_SVG =
+  '<svg viewBox="0 0 32 32" width="34" height="34" aria-hidden="true"><path d="M16 3 16 21 6 21z" fill="#1e5aa8" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><path d="M18 8 25 21 18 21z" fill="#4a90e2" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 23h26l-4 6H7z" fill="#1e5aa8" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+
+const playLayers = new WeakMap<LeafletMap, { remove: () => void }>();
+
+/**
+ * The boat of the routing played, where it is at the time played, with the
+ * wind, the current and the waves there.
+ * @param map - Leaflet map.
+ * @param play - The time played.
+ * @param shown - The routing.
+ */
+export function drawPlay(
+  map: LeafletMap,
+  play = routingPlay.peek(),
+  shown = shownRouting.peek(),
+): void {
+  playLayers.get(map)?.remove();
+  playLayers.delete(map);
+  if (!play || !shown || !isMapLive(map)) return;
+  const mark = markAt(shown, play.ms);
+  if (!mark) return;
+  const L = leaflet();
+  const at: [number, number] = [mark.lat, mark.lon];
+  const group = L.layerGroup([
+    L.marker(at, {
+      interactive: false,
+      keyboard: false,
+      zIndexOffset: 1000,
+      icon: L.divIcon({
+        className: 'rtm-boat',
+        html: PLAY_BOAT_SVG,
+        iconSize: [34, 34],
+        iconAnchor: [17, 28],
+      }),
+    }),
+    L.marker(at, {
+      interactive: false,
+      keyboard: false,
+      zIndexOffset: 900,
+      icon: L.divIcon({
+        className: 'rtm rtm-play',
+        html: markHtml(mark, mapBearing(map)),
+        iconSize: [BOX_W, BOX_H],
+        iconAnchor: [BOX_W / 2, BOX_H + 30],
+      }),
+    }),
+  ]).addTo(map);
+  playLayers.set(map, group);
+}
+
+/** The routing is being played (its marks give way to the boat). */
+const playing = computed(() => routingPlay.value !== null);
 
 /**
  * Show the whole routing on a map.
@@ -444,6 +513,13 @@ function watchRouting(): void {
   watching = true;
   effect(() => {
     const shown = shownRouting.value;
-    for (const map of marksMaps) drawRouting(map, shown);
+    const marksShown = !playing.value;
+    for (const map of marksMaps) drawRouting(map, shown, marksShown);
+  });
+  effect(() => {
+    // Each step of the boat played, on the routing shown.
+    const play = routingPlay.value;
+    const shown = shownRouting.value;
+    for (const map of marksMaps) drawPlay(map, play, shown);
   });
 }

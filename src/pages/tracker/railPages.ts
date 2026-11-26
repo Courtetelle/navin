@@ -317,9 +317,10 @@ export function useRailSwipe(): void {
         ) {
           // A flick: the faster the finger, the more buttons (one at
           // least, five at most) from where the finger came down.
-          const count = flickButtons(
-            Math.abs(along) / Math.max(1, event.timeStamp - at),
-          );
+          // Upright, a whole packet of five.
+          const count = sideways
+            ? flickButtons(Math.abs(along) / Math.max(1, event.timeStamp - at))
+            : FLICK_BUTTONS;
           const by = along < 0 ? count : -count;
           if (turnRails(first + by - railStart.peek())) buzz();
           turned = turned || railStart.peek() !== first;

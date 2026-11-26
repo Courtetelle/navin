@@ -17,9 +17,13 @@ import {
   sortAhead,
   stepRank,
 } from '../../features/map/routingShift.ts';
+import type { ShownRouting } from '../../features/map/routingState.ts';
 import {
+  PLAY_SPEED,
   routingLabelShown,
   routingOverlay,
+  routingPlay,
+  routingRain,
   shownRouting,
 } from '../../features/map/routingState.ts';
 import { useTr } from '../../i18n/useTr.ts';
@@ -27,7 +31,7 @@ import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
 import { store } from '../../storage/store.ts';
 
-import { layLiveAround, liveOnMap } from './liveOnMap.ts';
+import { layLiveAround, liveOnMap, liveOnMapAround } from './liveOnMap.ts';
 
 function stepText(minutes: number): string {
   return minutes >= 60 && minutes % 60 === 0
@@ -63,6 +67,60 @@ function toggleOverlay(): void {
     overlayLaid.on = false;
     liveOnMap.value = 0;
   }
+}
+
+/**
+ * « Départ imminent » touched: the wind measured, the storms and the rain
+ * forecast laid over the routing (the map stays at its zoom: the stations
+ * of the map shown), and the routing played from its departure.
+ */
+function startLive(): void {
+  routingOverlay.value = true;
+  routingRain.value = true;
+  if (liveOnMap.peek() === 0) {
+    overlayLaid.on = true;
+    liveOnMapAround.value = false;
+    liveOnMap.value = Date.now();
+  }
+  const shown = shownRouting.peek();
+  if (shown?.live && shown.departMs !== undefined) {
+    routingPlay.value = { ms: shown.departMs, playing: true };
+  }
+}
+
+/** The rain forecast over the routing, on or off. */
+function toggleRain(): void {
+  buzz();
+  routingRain.value = !routingRain.peek();
+}
+
+/** The boat played moves this often. */
+const PLAY_TICK_MS = 250;
+
+/**
+ * ▶: play the routing (from its departure again once at its arrival).
+ * @param shown - The routing.
+ */
+function play(shown: ShownRouting): void {
+  buzz();
+  const now = routingPlay.peek();
+  const departMs = shown.departMs ?? 0;
+  const end = shown.arriveMs ?? departMs;
+  const ms = now && now.ms < end ? now.ms : departMs;
+  routingPlay.value = { ms, playing: true };
+}
+
+/** II: pause the routing played. */
+function pause(): void {
+  buzz();
+  const now = routingPlay.peek();
+  if (now) routingPlay.value = { ...now, playing: false };
+}
+
+/** ■: stop playing, back to the buttons of the hours. */
+function stopPlay(): void {
+  buzz();
+  routingPlay.value = null;
 }
 
 /**
@@ -112,8 +170,31 @@ export function RoutingBar() {
     const timer = setTimeout(() => void findBestAhead(), BEST_DELAY_MS);
     return () => clearTimeout(timer);
   }, [planShown, prefs.rankHours]);
+  // The boat played runs along the routing, one hour in four seconds.
+  const played = routingPlay.value;
+  const running = played?.playing === true;
+  const endMs = shown?.arriveMs;
+  useEffect(() => {
+    if (!running || endMs === undefined) return undefined;
+    const timer = setInterval(() => {
+      const at = routingPlay.peek();
+      if (!at?.playing) return;
+      const ms = at.ms + PLAY_TICK_MS * PLAY_SPEED;
+      routingPlay.value =
+        ms >= endMs ? { ms: endMs, playing: false } : { ms, playing: true };
+    }, PLAY_TICK_MS);
+    return () => clearInterval(timer);
+  }, [running, endMs]);
   const plan = shown?.plan;
   if (!shown || !plan || shown.departMs === undefined) return null;
+  if (played) {
+    return (
+      <>
+        <PlayBar shown={shown} running={running} at={played.ms} />
+        <RoutingLabel />
+      </>
+    );
+  }
   const green = sort !== null && sort.plan === plan;
   const departAt = `Départ à ${hourText(shown.departMs)}`;
   let head = live ? 'Départ imminent' : departAt;
@@ -168,7 +249,10 @@ export function RoutingBar() {
           disabled={busy}
           onClick={() => {
             buzz();
-            void resetRouting();
+            const sorting = green;
+            void resetRouting().then(() => {
+              if (!sorting) startLive();
+            });
           }}
           {...middle.handlers}
         >
@@ -196,10 +280,11 @@ export function RoutingBar() {
           <span aria-hidden="true">▼</span>
           <small>{green ? tr('moins efficient') : `−${step}`}</small>
         </button>
+        <RainButton />
         {live ? (
           <button
             type="button"
-            className={`rail-btn rtg-overlay${overlay ? ' rail-on' : ''}`}
+            className={`rail-btn rtg-overlay${overlay ? ' on' : ''}`}
             id="rtgOverlay"
             aria-pressed={overlay}
             aria-label={tr(
@@ -216,6 +301,116 @@ export function RoutingBar() {
       </div>
       <RoutingLabel />
     </>
+  );
+}
+
+/**
+ * The rain forecast over the routing: blue while shown, as the layers of
+ * LiveMétéo; played, at the hour of the boat.
+ * @returns The button.
+ */
+function RainButton() {
+  useSignals();
+  const tr = useTr();
+  const on = routingRain.value;
+  return (
+    <button
+      type="button"
+      className={`rail-btn rtg-rain${on ? ' on' : ''}`}
+      id="rtgRain"
+      aria-pressed={on}
+      aria-label={tr(
+        on ? 'Masquer la pluie prévue' : 'Afficher la pluie prévue',
+      )}
+      onClick={toggleRain}
+    >
+      <span aria-hidden="true">🌧</span>
+      <small>{tr('pluie')}</small>
+    </button>
+  );
+}
+
+/**
+ * The routing played: ▶ plays it, II pauses it, ■ stops and brings back the
+ * buttons of the hours; the middle one says the hour of the boat.
+ * @param props - The routing and the time played.
+ * @param props.shown - The routing.
+ * @param props.running - It plays.
+ * @param props.at - The time of the boat.
+ * @returns The buttons.
+ */
+function PlayBar({
+  shown,
+  running,
+  at,
+}: {
+  shown: ShownRouting;
+  running: boolean;
+  at: number;
+}) {
+  useSignals();
+  const tr = useTr();
+  const overlay = routingOverlay.value;
+  return (
+    <div
+      className="rtg-rail rtg-playing"
+      id="rtgBar"
+      role="group"
+      aria-label={tr('Lecture du routage')}
+    >
+      <button
+        type="button"
+        className={`rail-btn rtg-arrow${running ? ' on' : ''}`}
+        id="rtgLater"
+        aria-label={tr('Lire le routage')}
+        aria-pressed={running}
+        onClick={() => play(shown)}
+      >
+        <span aria-hidden="true">▶</span>
+        <small>{tr('lecture')}</small>
+      </button>
+      <button
+        type="button"
+        className="rail-btn rtg-info rtg-live"
+        id="rtgInfo"
+        aria-label={tr('Arrêter la lecture, revenir aux heures de départ')}
+        onClick={stopPlay}
+      >
+        <span className="rtg-stop" aria-hidden="true">
+          ■
+        </span>
+        <b className="rtg-head" aria-live="off">
+          {hourText(at)}
+        </b>
+      </button>
+      <button
+        type="button"
+        className={`rail-btn rtg-arrow${running ? '' : ' on'}`}
+        id="rtgEarlier"
+        aria-label={tr('Mettre la lecture en pause')}
+        aria-pressed={!running}
+        onClick={pause}
+      >
+        <span aria-hidden="true">II</span>
+        <small>{tr('pause')}</small>
+      </button>
+      <RainButton />
+      <button
+        type="button"
+        className={`rail-btn rtg-overlay${overlay ? ' on' : ''}`}
+        id="rtgOverlay"
+        aria-pressed={overlay}
+        aria-label={tr(
+          overlay
+            ? 'Masquer le vent mesuré et les orages détectés'
+            : 'Afficher le vent mesuré et les orages détectés',
+        )}
+        onClick={toggleOverlay}
+      >
+        <span aria-hidden="true">🌬⚡</span>
+        <small>{tr('mesuré')}</small>
+      </button>
+    </div>
   );
 }
 

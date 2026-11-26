@@ -115,6 +115,58 @@ export const routingOverlay = signal(false);
  */
 export const routingLabelShown = signal(true);
 
+/** The forecast rain shown over the routing (the hour of the boat). */
+export const routingRain = signal(false);
+
+/**
+ * The routing played: a blue boat runs along it, sped up, with the wind and
+ * the sea where it is; `null` when not played.
+ */
+export const routingPlay = signal<{ ms: number; playing: boolean } | null>(
+  null,
+);
+
+/** Played this much faster than real time: one hour in four seconds. */
+export const PLAY_SPEED = 900;
+
+/**
+ * Where the boat of the routing is at a time, with the wind and the sea
+ * there (those of the last place passed).
+ * @param shown - The routing.
+ * @param ms - The time.
+ * @returns The place and its weather, `null` without marks.
+ */
+export function markAt(shown: ShownRouting, ms: number): RoutingMark | null {
+  const { marks, track, arriveMs } = shown;
+  const first = marks[0];
+  if (!first) return null;
+  if (ms <= first.ms) return first;
+  const end = track.at(-1);
+  for (let rank = 0; rank < marks.length; rank++) {
+    const from = marks[rank] as RoutingMark;
+    const next = marks[rank + 1];
+    const to =
+      next ??
+      (end && arriveMs !== undefined
+        ? { lat: end[0], lon: end[1], ms: arriveMs }
+        : null);
+    if (!to) return from;
+    if (ms < to.ms || !next) {
+      const share = Math.max(
+        0,
+        Math.min(1, (ms - from.ms) / Math.max(1, to.ms - from.ms)),
+      );
+      return {
+        ...from,
+        lat: from.lat + (to.lat - from.lat) * share,
+        lon: from.lon + (to.lon - from.lon) * share,
+        ms,
+      };
+    }
+  }
+  return first;
+}
+
 /**
  * The highest of some values, rounded; undefined when none is known.
  * @param values - The values (NaN or undefined unknown).
