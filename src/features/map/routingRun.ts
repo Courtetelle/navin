@@ -1,10 +1,15 @@
 import type { LatLon } from '../../lib/geo.ts';
+import { routeIsochrones } from '../../model/isochrones.ts';
 import type { BoatPolar } from '../../model/polars.ts';
 import { isBoatPolar, polarSpeed } from '../../model/polars.ts';
 import type { RealPolar } from '../../model/realPolar.ts';
 import { binKey, binSpeed, isRealPolar } from '../../model/realPolar.ts';
 import type { NavRoute } from '../../model/routes.ts';
-import type { RoutingResult, SailSpeed } from '../../model/sailRouting.ts';
+import type {
+  RoutingAsk,
+  RoutingResult,
+  SailSpeed,
+} from '../../model/sailRouting.ts';
 import { routeSail } from '../../model/sailRouting.ts';
 import type { Boat } from '../../model/types.ts';
 import { store } from '../../storage/store.ts';
@@ -152,7 +157,7 @@ export async function runRouting(
   if ('error' in wind) return { kind: 'error', error: wind.error };
   const seaKnown = 'error' in sea ? null : sea;
   const navigable = await landCheck(route);
-  const result = routeSail({
+  const ask: RoutingAsk = {
     points: route.points,
     departMs,
     windAt: (lat, lon, ms) => windAt(wind, lat, lon, ms),
@@ -168,7 +173,11 @@ export async function runRouting(
             seaAt(seaKnown, lat, lon, ms),
         }
       : {}),
-  });
+  };
+  // By isochrones: the boat takes the course its polar, the wind and the
+  // current make best; point to point if they find no way in time.
+  const found = routeIsochrones(ask);
+  const result = found.kind === 'too-long' ? routeSail(ask) : found;
   return {
     kind: 'result',
     result,

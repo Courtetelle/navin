@@ -196,9 +196,16 @@ export function RoutingBar() {
     );
   }
   const green = sort !== null && sort.plan === plan;
-  const departAt = `Départ à ${hourText(shown.departMs)}`;
-  let head = live ? 'Départ imminent' : departAt;
-  if (green) head = `n° ${sort.rank + 1}/${sort.count} · ${departAt}`;
+  // The hour in a span of its own: red when the clock shows UTC.
+  const rank = green ? `n° ${sort.rank + 1}/${sort.count} · ` : '';
+  const head = live ? (
+    tr('Départ imminent')
+  ) : (
+    <>
+      {rank}
+      {tr('Départ à')} <UtcHour ms={shown.departMs} />
+    </>
+  );
   const step = stepText(prefs.stepMin);
   // In the sort, ▲ greyed on the most efficient, ▼ on the least.
   const later = !green || sort.rank > 0;
@@ -257,7 +264,7 @@ export function RoutingBar() {
           {...middle.handlers}
         >
           <b className="rtg-head" aria-live="polite">
-            {busy ? tr('calcul…') : tr(head)}
+            {busy ? tr('calcul…') : head}
           </b>
         </button>
         <button
@@ -380,7 +387,7 @@ function PlayBar({
           ■
         </span>
         <b className="rtg-head" aria-live="off">
-          {hourText(at)}
+          <UtcHour ms={at} />
         </b>
       </button>
       <button
@@ -411,6 +418,21 @@ function PlayBar({
         <small>{tr('mesuré')}</small>
       </button>
     </div>
+  );
+}
+
+/**
+ * An hour of the bar, « 14h00 »: in red when the clock shows UTC (the
+ * class does it, whatever the browser paints of the times of the page).
+ * @param props - The time.
+ * @param props.ms - Epoch ms.
+ * @returns The hour.
+ */
+function UtcHour({ ms }: { ms: number }) {
+  return (
+    <span className="rtg-hr" data-no-hr="">
+      {hourText(ms)}
+    </span>
   );
 }
 

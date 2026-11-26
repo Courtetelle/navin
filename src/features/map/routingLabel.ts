@@ -139,11 +139,15 @@ export function labelLines(
   ];
   if (best && plan && best.key === planKey(plan)) {
     const more = lengthMin - best.lengthMin;
-    lines.push(
-      more >= 5
-        ? `+${minutesText(more)} sur le meilleur départ des prochaines ${best.hours} h (${hourText(best.departMs)})`
-        : `Meilleur départ des ${best.hours} prochaines heures`,
-    );
+    const gain = best.soonLengthMin - lengthMin;
+    let line = `Meilleur départ des prochaines ${best.hours} h`;
+    if (more >= 5) {
+      line = `+${minutesText(more)} sur le meilleur départ des prochaines ${best.hours} h (${hourText(best.departMs)})`;
+    } else if (Math.abs(departMs - best.soonDepartMs) >= 60_000) {
+      // Against leaving at the first hour of the span.
+      line += ` : ${gain >= 0 ? '−' : '+'}${minutesText(gain)} sur un départ à ${hourText(best.soonDepartMs)}`;
+    }
+    lines.push(line);
   }
   if (stats && stats.nm > 0) {
     const speed = lengthMin > 0 ? stats.nm / (lengthMin / 60) : 0;

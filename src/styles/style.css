@@ -15817,6 +15817,14 @@ html body .rtg-rail .rail-btn.rtg-info {
 .rtg-rail .rtg-info.busy {
   opacity: 0.7;
 }
+/* The hours of the bar in red when the clock shows UTC (Corban 26/11). */
+body.utc-times .rtg-rail .rtg-hr {
+  color: #d70015;
+}
+:root[data-theme='night'] body.utc-times .rtg-rail .rtg-hr {
+  color: #ff4d4d;
+  text-decoration: underline;
+}
 .rtg-rail .rtg-head {
   max-width: 100%;
   font-size: 11px;

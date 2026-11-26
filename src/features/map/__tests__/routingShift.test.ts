@@ -166,14 +166,30 @@ describe('labelLines', () => {
       hours: 6,
       departMs: departMs + 3_600_000,
       lengthMin: 240,
+      soonDepartMs: departMs - 3_600_000,
+      soonLengthMin: 345,
       at: departMs,
     };
     expect(labelLines(shown, best)[2]).toBe(
       '+1 h 00 sur le meilleur départ des prochaines 6 h (22h30)',
     );
+    // The best shown: the time gained on leaving at the first hour.
     expect(labelLines(shown, { ...best, lengthMin: 298 })[2]).toBe(
-      'Meilleur départ des 6 prochaines heures',
+      'Meilleur départ des prochaines 6 h : −45 min sur un départ à 20h30',
     );
+    expect(
+      labelLines(shown, { ...best, lengthMin: 298, soonLengthMin: 270 })[2],
+    ).toBe(
+      'Meilleur départ des prochaines 6 h : +30 min sur un départ à 20h30',
+    );
+    expect(
+      labelLines(shown, {
+        ...best,
+        lengthMin: 298,
+        soonDepartMs: departMs,
+        soonLengthMin: 300,
+      })[2],
+    ).toBe('Meilleur départ des prochaines 6 h');
     expect(labelLines(shown, { ...best, key: 'other' })[2]).toBe(
       'Distance 30,0 NM · moyenne 6,0 nd',
     );
