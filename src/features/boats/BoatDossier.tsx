@@ -87,10 +87,26 @@ interface DossierSheetProps {
   onFields: () => void;
 }
 
+/**
+ * Whether a boat sheet holds nothing but its name.
+ * @param boat - Boat.
+ * @returns `true` when nothing else is filled.
+ */
+function blankSheet(boat: Boat): boolean {
+  return Object.entries(boat.info).every(
+    ([key, value]) =>
+      key === 'boat' ||
+      value == null ||
+      value === '' ||
+      (Array.isArray(value) && value.length === 0),
+  );
+}
+
 function DossierSheet({ boat, fresh, onRefresh, onFields }: DossierSheetProps) {
   const tr = useTr();
   useNavFields();
-  const [reading, setReading] = useState(true);
+  // A sheet with only its name opens on its fields, for the first entry.
+  const [reading, setReading] = useState(() => !blankSheet(boat));
   useNavEdit(reading, () => setReading(false));
   const sheet = useRef<HTMLDivElement>(null);
   useReadingMarquee(reading, sheet);
