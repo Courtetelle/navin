@@ -355,7 +355,7 @@ for V in REGT:
                     col = '#c62828' if kk == 'D' else '#1565c0'
                     t = ax.text(b, a, kk, color=col, fontsize=20, weight='bold', ha='center', va='center', transform=P, zorder=9); t.set_path_effects(HALO)
                     t = ax.text(b, a - 0.55, str(p), color=col, fontsize=8, weight='bold', ha='center', transform=P, zorder=9); t.set_path_effects(HALO)
-                ax.plot(lon[im], lat[im], marker='*', ms=13, mfc='#d62728', mec='white', transform=P, zorder=9)
+                ax.plot(lon[im], lat[jm], marker='*', ms=13, mfc='#d62728', mec='white', transform=P, zorder=9)
                 ax.legend(handles=[Line2D([], [], color='#f39a2b', lw=2.2, label='Vent moyen 18 nd (orange au près)'),
                                    Line2D([], [], color='#d62728', lw=2.2, label='Vent moyen 25 nd (rouge au près)'),
                                    Line2D([], [], color='#7b1fa2', lw=2, ls='--', label='Rafales 35 nd (rouge)'),
