@@ -62,6 +62,8 @@ export interface VoyageDoc {
   type: string;
   /** ISO time of the import. */
   at: string;
+  /** « Remarques / Observations », free text. */
+  note: string;
 }
 
 /** Everything of data › Croisières. */
@@ -366,6 +368,7 @@ export function cleanVoyages(raw: unknown): Voyages | null {
       name: text(item.name),
       type: text(item.type),
       at: text(item.at),
+      note: text(item.note),
     });
   }
   const info: Record<string, string> = {};

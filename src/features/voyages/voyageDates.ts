@@ -33,3 +33,16 @@ function utcDayText(moment: Date): string {
   const time = `${pad(moment.getUTCHours())} h ${pad(moment.getUTCMinutes())} UTC`;
   return `${day.charAt(0).toUpperCase()}${day.slice(1)} ${date} · ${time}`;
 }
+
+/**
+ * The dates of a cruise for its label, « Croisière du Samedi 12/06/2027 au
+ * Samedi 19/06/2027 », without the hours; empty while one of them is missing.
+ * @param info - The cruise fields (`du`, `au`).
+ * @returns The text, or `''`.
+ */
+export function cruiseSpan(info: Readonly<Record<string, string>>): string {
+  const from = info.du?.trim() ?? '';
+  const to = info.au?.trim() ?? '';
+  if (!from || !to) return '';
+  return `Croisière du ${dayText(from, '')} au ${dayText(to, '')}`;
+}

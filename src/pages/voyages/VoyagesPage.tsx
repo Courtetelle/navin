@@ -6,6 +6,7 @@ import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { VoyageMedal } from '../../features/voyages/VoyageMedal.tsx';
+import { cruiseSpan } from '../../features/voyages/voyageDates.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
@@ -177,9 +178,11 @@ export function VoyagesPage() {
               </span>
               <small>
                 {voyage.id === active ? tr('croisière active · ') : ''}
-                {voyage.created
-                  ? `${tr('créée le')} ${fmtShortDate(new Date(voyage.created))}`
-                  : ''}
+                {/* The dates once both are given, else the day it was made. */}
+                {cruiseSpan(voyage.info) ||
+                  (voyage.created
+                    ? `${tr('créée le')} ${fmtShortDate(new Date(voyage.created))}`
+                    : '')}
               </small>
             </Button>
           ))}
