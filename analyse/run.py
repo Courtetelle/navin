@@ -141,7 +141,13 @@ def main():
     ap.add_argument('--zone'); ap.add_argument('--lat', type=float); ap.add_argument('--lon', type=float); ap.add_argument('--nom', default='')
     a = ap.parse_args(); os.makedirs(a.store, exist_ok=True)
     L = R.latest(); print('derniers runs', L, flush=True)
-    if not all(L.values()): raise SystemExit(f'runs introuvables : {L}')
+    if not all(L.values()):
+        # Un fournisseur muet ne doit pas faire un échec (et un mail) toutes les 30 min.
+        print(f'::warning title=Analyse météo::runs introuvables : {L}', flush=True)
+        if a.check or a.auto:
+            if a.check and os.environ.get('GITHUB_OUTPUT'): open(os.environ['GITHUB_OUTPUT'], 'a').write('build=false\n')
+            return
+        raise SystemExit(f'runs introuvables : {L}')
     state = jload(os.path.join(a.store, 'state.json'), {})
     sig = f"{L['ifs']}|{L['icon']}"   # EWAM suit ICON ; IBI est quotidien
     todo = []
@@ -167,11 +173,23 @@ def main():
         if os.environ.get('GITHUB_OUTPUT'):
             open(os.environ['GITHUB_OUTPUT'], 'a').write(f"build={'true' if todo else 'false'}\n")
         return
+    # Une zone en échec ne bloque pas les autres. En relance automatique, elle n'est
+    # retentée qu'au run suivant (state[zid] = sig) et le workflow reste vert : pas de
+    # mail d'échec toutes les 30 min. L'échec est noté dans state.json et en annotation.
+    echecs = state.setdefault('echecs', {}); failed = []
     for zid, Z, auto in todo:
-        build(a.store, zid, Z, L, auto)
+        try:
+            build(a.store, zid, Z, L, auto)
+            echecs.pop(zid, None)
+        except SystemExit as e:
+            msg = str(e.code); failed.append(msg)
+            echecs[zid] = dict(sig=sig, at=now.isoformat(timespec='minutes'), msg=msg)
+            print(f'::warning title=Analyse météo::{msg} (run {sig}, nouvel essai au prochain run)', flush=True)
         state[zid] = sig
     jsave(os.path.join(a.store, 'state.json'), state)
     prune(a.store)
+    # Relance demandée à la main (zone, GPS) : l'échec se voit, en rouge.
+    if failed and not a.auto and len(failed) == len(todo): raise SystemExit(' ; '.join(failed))
 
 
 if __name__ == '__main__':
