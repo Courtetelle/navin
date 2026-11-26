@@ -282,8 +282,12 @@ function ContractScreen({ kind }: { kind: (typeof CONTRACT_KINDS)[number] }) {
   const tr = useTr();
   const voyages = state.data.voyages.value;
   const { id, categories } = voyages;
-  const { editing, validate } = useChapterEdit(() => syncVoyageNavigations(id));
   const card = contractCard(voyages, kind.id);
+  // A contract still empty opens on its fields, for the first entry.
+  const { editing, validate } = useChapterEdit(
+    () => syncVoyageNavigations(id),
+    !card || !contractFilled(card),
+  );
   const category = categories.find((cat) => cat.id === kind.id);
   return (
     <>

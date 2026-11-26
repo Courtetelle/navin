@@ -25,8 +25,12 @@ import { state } from '../../state/index.ts';
 export function VoyageDocsPage() {
   useSignals();
   const tr = useTr();
-  const { editing, validate } = useChapterEdit();
   const voyages = state.data.voyages.value;
+  // No document yet: the import buttons show at once.
+  const { editing, validate } = useChapterEdit(
+    undefined,
+    docCategories(voyages).every((cat) => docsOf(cat.id).length === 0),
+  );
   if (!voyages.id) return <NoVoyage />;
   return (
     <>
