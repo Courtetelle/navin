@@ -157,17 +157,17 @@ export function RoutingPanel() {
   return (
     <>
       <HelpText>
-        Le routage suit la route dessinée de point en point, avec le vent prévu
-        là où le bateau sera, à l’heure où il y sera, et la polaire du bateau
-        (ou mieux, sa polaire réelle). Au près il tire des bords, au vent
-        arrière il empanne. La vitesse du bateau vient de ses polaires, à
-        l’angle et à la force du vent prévus : quand elle passe sous le seuil
-        choisi, le moteur remplace ou appuie les voiles, en ligne droite, et
-        l’heure d’arrivée suit. Avec une carte hors ligne (Fonds de cartes) qui
-        couvre la route, les bords s’arrêtent avant la terre. Le courant
-        (Copernicus, marée comprise) pousse le bateau : en ligne droite il
-        remonte le courant pour tenir la route, et la vitesse fond donne l’heure
-        d’arrivée. Les vagues de plus d’un mètre ralentissent, surtout au près.
+        Le routage suit la route dessinée de point en point, par isochrones :
+        toutes les 10 minutes, depuis chaque position atteinte, le bateau peut
+        prendre tous les caps, à la vitesse que lui donne sa polaire (ou mieux,
+        sa polaire réelle) dans le vent prévu là où il sera, à l’heure où il y
+        sera ; le courant (Copernicus, marée comprise) le porte, et les vagues
+        de plus d’un mètre le ralentissent, surtout au près. La trace retenue
+        est celle qui arrive le plus tôt : elle tire des bords au près, empanne
+        au portant et se laisse porter par le courant quand il aide. Quand les
+        voiles avancent sous le seuil choisi, le moteur remplace ou appuie les
+        voiles, vers le point. Avec une carte hors ligne (Fonds de cartes) qui
+        couvre la route, la trace reste dans l’eau.
       </HelpText>
       <SavedRoutings />
       <div className="section rtg-form" id="rtgForm">
@@ -236,10 +236,10 @@ export function RoutingPanel() {
           id="rtgMotorAssist"
           label="Le moteur"
           choices={[
-            { key: 'replace', text: 'remplace les voiles (en ligne droite)' },
+            { key: 'replace', text: 'remplace les voiles' },
             {
               key: 'assist',
-              text: 'appuie les voiles (voiles + moteur, en ligne droite)',
+              text: 'appuie les voiles (voiles + moteur)',
             },
           ]}
           value={prefs.motorAssist ? 'assist' : 'replace'}

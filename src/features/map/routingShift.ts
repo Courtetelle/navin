@@ -326,6 +326,11 @@ export interface BestAhead {
   departMs: number;
   /** Its length, minutes. */
   lengthMin: number;
+  /** The earliest departure of the span, and its length, minutes. */
+  soonDepartMs: number;
+  soonLengthMin: number;
+  /** Its motor, minutes. */
+  motorMin: number;
   /** When it was found. */
   at: number;
 }
@@ -343,13 +348,27 @@ export function planKey(plan: RoutingPlan): string {
   return JSON.stringify(asked);
 }
 
-function keepBest(plan: RoutingPlan, best: Done): void {
-  const departMs = best.steps[0]?.ms ?? best.arriveMs;
+function departOf(result: Done): number {
+  return result.steps[0]?.ms ?? result.arriveMs;
+}
+
+function keepBest(plan: RoutingPlan, found: readonly Done[]): void {
+  const best = found[0];
+  if (!best) return;
+  let soon = best;
+  for (const result of found) {
+    if (departOf(result) < departOf(soon)) soon = result;
+  }
+  const departMs = departOf(best);
+  const soonDepartMs = departOf(soon);
   bestAhead.value = {
     key: planKey(plan),
     hours: shiftPrefs.peek().rankHours,
     departMs,
     lengthMin: (best.arriveMs - departMs) / 60_000,
+    soonDepartMs,
+    soonLengthMin: (soon.arriveMs - soonDepartMs) / 60_000,
+    motorMin: best.motorMin,
     at: Date.now(),
   };
 }
@@ -368,19 +387,21 @@ const seeking = { on: false };
 export async function findBestAhead(): Promise<void> {
   const ask = asked();
   if (!ask || seeking.on) return;
+  // The green sort shown found it: one best departure, the same for all.
+  if (rankSort.peek()?.plan === ask.plan) return;
   const known = bestAhead.peek();
   if (
     known?.key === planKey(ask.plan) &&
     known.hours === shiftPrefs.peek().rankHours &&
-    Date.now() - known.at < BEST_FRESH_MS
+    Date.now() - known.at < BEST_FRESH_MS &&
+    known.departMs >= Date.now() - 60_000
   ) {
     return;
   }
   seeking.on = true;
   try {
     const found = await routeAhead(ask.plan, ask.route, ask.boat);
-    const best = Array.isArray(found) ? found[0] : undefined;
-    if (best) keepBest(ask.plan, best);
+    if (Array.isArray(found)) keepBest(ask.plan, found);
   } finally {
     seeking.on = false;
   }
@@ -398,7 +419,7 @@ export function sortAhead(): Promise<void> {
     if (!Array.isArray(found)) return found;
     ranked = found;
     const best = found[0] as Done;
-    keepBest(plan, best);
+    keepBest(plan, found);
     rankSort.value = { plan, rank: 0, count: ranked.length };
     toast(
       `${ranked.length} routages des ${shiftPrefs.peek().rankHours} prochaines heures, du plus au moins efficient : ▼ le suivant, ▲ le précédent`,
