@@ -43,9 +43,10 @@ import {
   saveVoyageCrewSet,
   voyageCrewLines,
 } from '../voyageCrew.ts';
-import { dayText } from '../voyageDates.ts';
+import { cruiseSpan, dayText } from '../voyageDates.ts';
 import { freeRecords, voyageRecords } from '../voyageRecords.ts';
 import { voyageTiles } from '../voyageTiles.ts';
+import { whatsappHref } from '../whatsapp.ts';
 
 beforeEach(useHarnessClock);
 
@@ -166,14 +167,34 @@ test('the newer content wins, the documents of both are kept', () => {
   const kept = {
     ...defaultVoyages(),
     mod: '2026-02-01',
-    docs: [{ id: 'a', cat: 'agence', title: 'A', name: '', type: '', at: '' }],
+    docs: [
+      {
+        id: 'a',
+        cat: 'agence',
+        title: 'A',
+        name: '',
+        type: '',
+        at: '',
+        note: '',
+      },
+    ],
   };
   const received = {
     ...defaultVoyages(),
     mod: '2026-03-01',
     crew: [],
     categories: [],
-    docs: [{ id: 'b', cat: 'other', title: 'B', name: '', type: '', at: '' }],
+    docs: [
+      {
+        id: 'b',
+        cat: 'other',
+        title: 'B',
+        name: '',
+        type: '',
+        at: '',
+        note: '',
+      },
+    ],
   };
 
   const merged = mergedVoyages(kept, received);
@@ -425,4 +446,35 @@ test('the remarks of the cruise stay in the cruise', () => {
     ports: 'Saint-Quay',
     telMarina: '+33 2 96 70 81 30',
   });
+});
+
+test('the label of a cruise gives its days once both dates are there', () => {
+  expect(cruiseSpan({ du: '2027-06-12', au: '2027-06-19', duH: '14:30' })).toBe(
+    'Croisière du Samedi 12/06/2027 au Samedi 19/06/2027',
+  );
+  expect(cruiseSpan({ du: '2027-06-12' })).toBe('');
+});
+
+test('WhatsApp needs a number with its country', () => {
+  expect(whatsappHref('+33 6 23 82 11 68')).toBe('https://wa.me/33623821168');
+  expect(whatsappHref('0041 79 000 00 00')).toBe('https://wa.me/41790000000');
+  expect(whatsappHref('06 23 82 11 68')).toBeNull();
+});
+
+test('a document keeps its remarks', () => {
+  const kept = cleanVoyages({
+    ...defaultVoyages(),
+    docs: [
+      {
+        id: 'd',
+        cat: 'other',
+        title: 'T',
+        name: 'n.pdf',
+        type: 'application/pdf',
+        at: '',
+        note: 'Caution 2 000 €',
+      },
+    ],
+  });
+  expect(kept?.docs[0]?.note).toBe('Caution 2 000 €');
 });

@@ -77,7 +77,8 @@ export type SortedMenu =
   | 'sites'
   | 'marks'
   | 'weather'
-  | 'fixed';
+  | 'fixed'
+  | 'voyage';
 
 /** The order chosen for each menu, kept on the device (`ldb.menuSort`). */
 export const menuSort = signal<Readonly<Partial<Record<SortedMenu, MenuSort>>>>(

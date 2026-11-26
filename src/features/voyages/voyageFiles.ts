@@ -99,6 +99,7 @@ export async function importVoyageDoc(
       name: file.name,
       type: image ? 'image/jpeg' : file.type || 'application/pdf',
       at: new Date().toISOString(),
+      note: '',
     };
     updateVoyages((voyages) => {
       voyages.docs.push(doc);
@@ -222,13 +223,14 @@ export function removeVoyageDoc(id: string): void {
  */
 export function editVoyageDoc(
   id: string,
-  patch: Partial<Pick<VoyageDoc, 'title' | 'cat'>>,
+  patch: Partial<Pick<VoyageDoc, 'title' | 'cat' | 'note'>>,
 ): void {
   updateVoyages((voyages) => {
     const doc = voyages.docs.find((item) => item.id === id);
     if (!doc) return;
     if (patch.title !== undefined) doc.title = patch.title;
     if (patch.cat !== undefined) doc.cat = patch.cat;
+    if (patch.note !== undefined) doc.note = patch.note;
   });
 }
 

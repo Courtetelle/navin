@@ -11,6 +11,7 @@ import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
 import { shareSections } from '../../features/voyages/voyageShare.ts';
+import { whatsappHref } from '../../features/voyages/whatsapp.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { uid } from '../../lib/format.ts';
@@ -44,10 +45,27 @@ type LinkKind = 'text' | 'tel' | 'mail' | 'web' | 'area';
  */
 function Value({ value, kind }: { value: string; kind: LinkKind }) {
   if (kind === 'tel') {
+    const whatsapp = whatsappHref(value);
     return (
-      <a className="voy-link" href={`tel:${value.replaceAll(/[^\d+]/gu, '')}`}>
-        📞 {value}
-      </a>
+      <>
+        <a
+          className="voy-link"
+          href={`tel:${value.replaceAll(/[^\d+]/gu, '')}`}
+        >
+          📞 {value}
+        </a>
+        {whatsapp ? (
+          <a
+            className="voy-link voy-wa"
+            href={whatsapp}
+            target="_blank"
+            rel="noopener"
+            data-voywa={value}
+          >
+            💬 WhatsApp
+          </a>
+        ) : null}
+      </>
     );
   }
   if (kind === 'mail') {
@@ -292,14 +310,14 @@ function ContractScreen({ kind }: { kind: (typeof CONTRACT_KINDS)[number] }) {
   return (
     <>
       <PageBack
-        label="◀ Contrats"
-        data-go="vcontracts"
+        label="◀ Croisière"
+        data-go="voyage"
         onClick={() => {
           buzz();
-          go('vcontracts');
+          go('voyage');
         }}
       >
-        {tr('◀ Contrats')}
+        {tr('◀ Croisière')}
       </PageBack>
       {validate}
       <PageTitle

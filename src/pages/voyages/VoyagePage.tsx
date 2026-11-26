@@ -7,6 +7,7 @@ import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { HoldDeleteButton } from '../../components/shared/HoldDeleteButton.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
+import { bumpIn, inMenuOrder } from '../../features/data/dataOrder.ts';
 import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { VoyageMedal } from '../../features/voyages/VoyageMedal.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
@@ -42,6 +43,14 @@ export function VoyagePage() {
   const isActive = state.data.voyageStore.value.active === voyage.id;
   const [name, setName] = useState(voyage.name);
   const { editing, validate } = useChapterEdit();
+  // Alphabetical, or by their use: the button at the right of the title.
+  const tiles = inMenuOrder(
+    'voyage',
+    voyageTiles(),
+    (tile) => tile.key,
+    (tile) => tr(tile.title).replace(/^\P{L}+/u, ''),
+  );
+  const shown = tiles.map((tile) => tile.key);
   const back = (
     <PageBack
       label="◀ Croisières"
@@ -66,22 +75,23 @@ export function VoyagePage() {
     <>
       {back}
       {validate}
-      <PageTitle titleText={voyage.name}>
+      <PageTitle titleText={voyage.name} sort="voyage">
         <span className="voy-title">
           <VoyageMedal voyage={voyage} active={isActive} />
           {voyage.name}
         </span>
       </PageTitle>
       <div className="row more-grid data-tiles">
-        {voyageTiles().map((tile) => (
+        {tiles.map((tile) => (
           <Button
             key={tile.key}
             className="btn big"
-            data-go={tile.key}
+            data-go={tile.view ?? tile.key}
             data-tile={tile.key}
             onClick={() => {
+              bumpIn('voyage', shown, tile.key);
               buzz();
-              go(tile.key);
+              go(tile.view ?? tile.key, tile.arg);
             }}
           >
             {tr(tile.title)}

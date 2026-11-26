@@ -12,11 +12,12 @@ import type { VoyageDoc } from '../../model/voyages.ts';
 import { OTHER_CAT, docCategories } from '../../model/voyages.ts';
 import { state } from '../../state/index.ts';
 
+import { DocViewer } from './DocViewer.tsx';
+import { showVoyageDoc } from './docShown.ts';
 import {
   docsOf,
   editVoyageDoc,
   importVoyageDoc,
-  openVoyageDoc,
   removeVoyageDoc,
   shareVoyageDoc,
   titleFromName,
@@ -212,6 +213,41 @@ export function DocImport({ cat = OTHER_CAT }: { cat?: string }) {
 }
 
 /**
+ * « Remarques / Observations » of a document: a free text field with the
+ * pencil, its text when read.
+ * @param props - The document.
+ * @param props.doc - The document.
+ * @param props.editing - The chapter is being changed.
+ * @returns The field, the text, or nothing.
+ */
+function DocNote({ doc, editing }: { doc: VoyageDoc; editing: boolean }) {
+  const tr = useTr();
+  const id = `voy-note-${doc.id}`;
+  if (!editing) {
+    return doc.note.trim() ? (
+      <p className="voy-doc-note voy-text" data-voydocnote={doc.id}>
+        <b>{tr('Remarques / Observations')} : </b>
+        {doc.note}
+      </p>
+    ) : null;
+  }
+  return (
+    <div className="cf wide voy-doc-note">
+      <label htmlFor={id}>{tr('Remarques / Observations')}</label>
+      <textarea
+        id={id}
+        className="text"
+        data-voydocnote={doc.id}
+        defaultValue={doc.note}
+        onChange={(event) =>
+          editVoyageDoc(doc.id, { note: event.target.value })
+        }
+      />
+    </div>
+  );
+}
+
+/**
  * One document: a touch opens it; below, change, delete, and share last.
  * @param props - The document.
  * @param props.doc - The document.
@@ -229,7 +265,7 @@ function DocRow({ doc, editing }: { doc: VoyageDoc; editing: boolean }) {
         className="section site-band voy-doc-band"
         onClick={() => {
           buzz();
-          void openVoyageDoc(doc);
+          void showVoyageDoc(doc);
         }}
       >
         <span className="site-band-text">
@@ -243,6 +279,8 @@ function DocRow({ doc, editing }: { doc: VoyageDoc; editing: boolean }) {
           </small>
         </span>
       </button>
+      <DocViewer docId={doc.id} />
+      <DocNote doc={doc} editing={editing} />
       {changing ? (
         <DocForm
           title={doc.title}
