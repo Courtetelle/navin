@@ -1901,10 +1901,13 @@ async function tablet(page: Page, theme: string): Promise<void> {
     `X landscape: ${tall ? 'one column on the left, in order, SOS at the very bottom' : 'the phone sideways keeps its two columns'}`,
     !tall ||
       (column.every((box) => box !== null && box.x < 40) &&
-        column.every(
-          (box, index) =>
-            index === 0 || (box?.y ?? 0) > (column[index - 1]?.y ?? 0),
-        ) &&
+        // The column turns when it does not fit: the buttons on screen.
+        column
+          .filter((box) => (box?.y ?? 0) < (page.viewportSize()?.height ?? 0))
+          .every(
+            (box, index, shown) =>
+              index === 0 || (box?.y ?? 0) > (shown[index - 1]?.y ?? 0),
+          ) &&
         sos !== null &&
         sos !== undefined &&
         sos.bottom > (page.viewportSize()?.height ?? 0) - 30),
@@ -2815,6 +2818,8 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
     theme,
     `a label gives the length, manoeuvres, wind, gusts, waves and storms (${label.slice(0, 160)})`,
     label.includes('Durée') &&
+      label.includes('Distance') &&
+      /De (?:nuit|jour)/u.test(label) &&
       label.includes('virement') &&
       label.includes('rafales 20 nd') &&
       label.includes('Vagues max') &&
@@ -2834,7 +2839,7 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
     `▲ moves the ETD 30 min later, routed again (${later.slice(0, 40)})`,
     later !== etd &&
       later.includes('Départ à') &&
-      (await page.locator('.rtm-end.rtm-blink').count()) > 0,
+      (await page.locator('.rtm-end.rtm-blink').count()) === 0,
   );
   check(
     theme,
@@ -2844,31 +2849,65 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
         (await page.locator('.rtm .rtm-tag').first().textContent()) ?? ''
       ).includes('nd'),
   );
+  await page.locator('#rtgLabelX').click();
+  await page.waitForTimeout(300);
+  const hidden = (await page.locator('#rtgLabel').count()) === 0;
+  await page.locator('.rtm-end:has([data-end="eta"])').click();
+  await page.waitForTimeout(300);
   check(
     theme,
-    'the ETD and ETA tags are not touched any more',
-    (await page.locator('.rtm-end.leaflet-interactive').count()) === 0,
+    'its ✕ hides the label, a touch on the ETA shows it again',
+    hidden && (await page.locator('#rtgLabel').isVisible()),
   );
   await page.locator('#rtgInfo').click();
   await page.waitForTimeout(2000);
   check(
     theme,
-    'a touch in the middle: Départ imminent, ▼ greyed, the button of the wind measured',
+    'Départ imminent: the wind measured, the storms and the rain turn on, blue, and the routing plays',
+    (await page.locator('#rtgBar.rtg-playing').count()) === 1 &&
+      (await page.locator('#rtgOverlay.on[aria-pressed="true"]').count()) ===
+        1 &&
+      (await page.locator('#rtgRain.on[aria-pressed="true"]').count()) === 1 &&
+      (await page.locator('.rtm-boat').count()) > 0 &&
+      (await page.locator('.rtm-play').count()) > 0,
+  );
+  const first = (await page.locator('#rtgInfo').textContent()) ?? '';
+  await page.waitForTimeout(1200);
+  const then = (await page.locator('#rtgInfo').textContent()) ?? '';
+  check(
+    theme,
+    `the blue boat runs along the routing, sped up (${first} → ${then})`,
+    first !== then,
+  );
+  await page.locator('#rtgEarlier').click();
+  await page.waitForTimeout(600);
+  const paused = (await page.locator('#rtgInfo').textContent()) ?? '';
+  await page.waitForTimeout(600);
+  check(
+    theme,
+    'II pauses it',
+    (await page.locator('#rtgEarlier[aria-pressed="true"]').count()) === 1 &&
+      ((await page.locator('#rtgInfo').textContent()) ?? '') === paused,
+  );
+  await page.locator('#rtgInfo').click();
+  await page.waitForTimeout(500);
+  check(
+    theme,
+    '■ stops it: back to Départ imminent, ▼ greyed, the marks along again',
     ((await page.locator('#rtgInfo').textContent()) ?? '').includes(
       'Départ imminent',
     ) &&
       (await page.locator('#rtgEarlier[aria-disabled="true"]').count()) === 1 &&
-      (await page.locator('#rtgOverlay').isVisible()),
+      (await page.locator('.rtm-boat').count()) === 0 &&
+      (await page.locator('.rtm:not(.rtm-play)').count()) > 0,
   );
   await page.locator('#rtgOverlay').click();
   await page.waitForTimeout(300);
   check(
     theme,
-    'the wind measured and the storms over the routing leaving now',
-    (await page.locator('#rtgOverlay[aria-pressed="true"]').count()) === 1,
+    'the wind measured and the storms can be turned off',
+    (await page.locator('#rtgOverlay[aria-pressed="false"]').count()) === 1,
   );
-  await page.locator('#rtgOverlay').click();
-  await page.waitForTimeout(300);
   const labelBox = await page.locator('#rtgLabel').boundingBox();
   if (labelBox) {
     await page.mouse.move(labelBox.x + 20, labelBox.y + 10);
@@ -2905,7 +2944,10 @@ async function routingWeather(page: Page, theme: string): Promise<void> {
     theme,
     'a long press in the middle sorts the routings of the 6 next hours',
     (await page.locator('#rtgBar.rtg-green').count()) === 1 &&
-      ((await page.locator('#rtgInfo').textContent()) ?? '').includes('n° 1/'),
+      ((await page.locator('#rtgInfo').textContent()) ?? '').includes(
+        'n° 1/',
+      ) &&
+      (await page.locator('#rtgLater[aria-disabled="true"]').count()) === 1,
   );
   if (middleBox) {
     await page.mouse.move(

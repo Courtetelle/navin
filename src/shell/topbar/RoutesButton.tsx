@@ -69,7 +69,10 @@ export function RoutesButton({ rail = false }: { rail?: boolean }) {
         menuButtonPress('routes', navBack);
       }}
     >
-      <span className="routes-ico">{markupToReact(ROUTE_ICON)}</span>
+      {/* A routing on the map: the button of the routing, crossed. */}
+      <span className="routes-ico">
+        {markupToReact(routing ? ROUTE_WX_ICON : ROUTE_ICON)}
+      </span>
       {routing ? (
         <svg
           className="routes-x"

@@ -13,6 +13,7 @@ export const RAIL_ORDER = [
   'clock',
   'boat',
   'start',
+  'routes',
   'pin',
   'ruler',
   'search',
@@ -30,6 +31,9 @@ export type RailKey = (typeof RAIL_ORDER)[number];
 /** The phone held upright: the buttons in one row, five at a time. */
 export const PORTRAIT_QUERY = '(orientation: portrait)';
 /** The phone sideways: the buttons in one column on the left, SOS at its foot. */
+/** The tablet sideways (X): one column, turned when it does not fit. */
+export const TABLET_SIDEWAYS_QUERY =
+  '(orientation: landscape) and (min-width: 560px) and (min-height: 640px)';
 export const PHONE_SIDEWAYS_QUERY =
   '(orientation: landscape) and (min-width: 560px) and (max-height: 520px)';
 
@@ -72,7 +76,8 @@ function matches(query: string): boolean {
  */
 export function railPacket(): number {
   if (matches(PORTRAIT_QUERY)) return 5;
-  if (!matches(PHONE_SIDEWAYS_QUERY)) return RAIL_ORDER.length;
+  const tablet = matches(TABLET_SIDEWAYS_QUERY);
+  if (!tablet && !matches(PHONE_SIDEWAYS_QUERY)) return RAIL_ORDER.length;
   const style = globalThis.getComputedStyle(document.documentElement);
   const height = Number.parseFloat(style.getPropertyValue('--rb-h'));
   const step = height + Number.parseFloat(style.getPropertyValue('--rb-gap'));
@@ -81,7 +86,9 @@ export function railPacket(): number {
   // SOS has its own place at the bottom, the same gap from the edge as the
   // top: the buttons that stand above it, a gap between each.
   const free = globalThis.innerHeight - 2 * top - height;
-  return Math.max(1, Math.floor(free / step));
+  const fit = Math.max(1, Math.floor(free / step));
+  // X: all of them when they fit, else turned as the phone sideways.
+  return tablet ? Math.min(fit, railKeys().length) : fit;
 }
 
 /**
@@ -90,11 +97,14 @@ export function railPacket(): number {
  * @returns Their keys.
  */
 export function railKeys(): RailKey[] {
-  const sideways = matches(PHONE_SIDEWAYS_QUERY);
+  const tablet = matches(TABLET_SIDEWAYS_QUERY);
+  const sideways = tablet || matches(PHONE_SIDEWAYS_QUERY);
   const upright = matches(PORTRAIT_QUERY);
+  // Routes stands in the column on X only; SOS stays at the foot sideways.
   return RAIL_ORDER.filter(
     (key) =>
       !(sideways && key === 'sos') &&
+      !(!tablet && key === 'routes') &&
       !(upright && (key === 'data' || key === 'gear')),
   );
 }
@@ -188,6 +198,20 @@ export function turnDash(by: number, count: number): boolean {
 /** How many packets of white figures the dashboard has. */
 export const DASH_PACKETS = 2;
 
+/** The column turns up and down (sideways), the row left and right. */
+function vertical(): boolean {
+  return matches(PHONE_SIDEWAYS_QUERY) || matches(TABLET_SIDEWAYS_QUERY);
+}
+
+/**
+ * How many buttons a flick turns: the faster the finger, the more.
+ * @param speed - Pixels per millisecond.
+ * @returns From one to {@link FLICK_BUTTONS}.
+ */
+export function flickButtons(speed: number): number {
+  return Math.max(1, Math.min(FLICK_BUTTONS, Math.round(speed * 2.5)));
+}
+
 function swallow(event: Event): void {
   event.preventDefault();
   event.stopPropagation();
@@ -257,7 +281,7 @@ export function useRailSwipe(): void {
         );
       }
       if (start.on !== 'rails') return;
-      const sideways = matches(PHONE_SIDEWAYS_QUERY);
+      const sideways = vertical();
       const along = sideways ? dy : dx;
       const across = sideways ? dx : dy;
       if (Math.abs(along) <= Math.abs(across)) return;
@@ -276,7 +300,7 @@ export function useRailSwipe(): void {
       const { on, first, at } = start;
       let turned = start.turned;
       start = null;
-      const sideways = matches(PHONE_SIDEWAYS_QUERY);
+      const sideways = vertical();
       if (on === 'dash') {
         if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(dy)) {
           turned = turnDash(dx < 0 ? 1 : -1, DASH_PACKETS);
@@ -291,8 +315,13 @@ export function useRailSwipe(): void {
           Math.abs(along) > SWIPE_PX &&
           Math.abs(along) > Math.abs(across)
         ) {
-          // A big swipe: five buttons from where the finger came down.
-          const by = along < 0 ? FLICK_BUTTONS : -FLICK_BUTTONS;
+          // A flick: the faster the finger, the more buttons (one at
+          // least, five at most) from where the finger came down.
+          // Upright, a whole packet of five.
+          const count = sideways
+            ? flickButtons(Math.abs(along) / Math.max(1, event.timeStamp - at))
+            : FLICK_BUTTONS;
+          const by = along < 0 ? count : -count;
           if (turnRails(first + by - railStart.peek())) buzz();
           turned = turned || railStart.peek() !== first;
         }
@@ -307,9 +336,11 @@ export function useRailSwipe(): void {
       // Not the one sent to the button above: the system took the touch.
       if (event.isTrusted) start = null;
     };
-    const lists = [PORTRAIT_QUERY, PHONE_SIDEWAYS_QUERY].map(
-      (query) => globalThis.matchMedia?.(query) ?? null,
-    );
+    const lists = [
+      PORTRAIT_QUERY,
+      PHONE_SIDEWAYS_QUERY,
+      TABLET_SIDEWAYS_QUERY,
+    ].map((query) => globalThis.matchMedia?.(query) ?? null);
     for (const list of lists) list?.addEventListener('change', placeRails);
     globalThis.addEventListener('resize', placeRails);
     document.addEventListener('pointerdown', down, { capture: true });

@@ -9,7 +9,11 @@ import { useEffect, useState } from 'react';
 
 import { leaflet } from '../../features/map/leaflet.ts';
 import { mapBearing } from '../../features/map/mapOrientation.ts';
-import { shownRouting } from '../../features/map/routingState.ts';
+import {
+  routingPlay,
+  routingRain,
+  shownRouting,
+} from '../../features/map/routingState.ts';
 import { tracker } from '../../features/map/trackerState.ts';
 import type { Area, Failure, Grid } from '../../features/onwater/mapWeather.ts';
 import {
@@ -407,6 +411,26 @@ function drawGrids(
   return drawnAt;
 }
 
+/** Over a routing: the rain alone. */
+const RAIN_ONLY: WeatherLayers = {
+  wind: false,
+  waves: false,
+  currents: false,
+  rain: true,
+  stations: false,
+};
+
+/**
+ * The hour of the forecast for the boat played: hours after the hour now.
+ * @param ms - The time played, `null` when not played (the hour now).
+ * @returns Hours ahead, 0 at least.
+ */
+function playStep(ms: number | null): number {
+  if (ms === null) return 0;
+  const hour = Math.round(Date.now() / 3_600_000) * 3_600_000;
+  return Math.max(0, Math.round((ms - hour) / 3_600_000));
+}
+
 /**
  * Over the map of LiveMétéo: the wind of the local model at the hour chosen
  * as barbs (the knots below, gusts in small), the waves as a wavy arrow
@@ -421,10 +445,13 @@ export function WeatherOnMap() {
   const asked = liveOnMap.value;
   const around = liveOnMapAround.value;
   const zoneArea = liveZoneArea.value;
-  const layers = weatherLayers.value;
-  const step = forecastStep.value;
-  // A routing on the map: only the route and its marks are shown.
-  const on = asked > 0 && shownRouting.value === null;
+  // A routing on the map: only the route and its marks are shown, and the
+  // rain forecast when asked over it, at the hour of the boat played.
+  const routed = shownRouting.value !== null;
+  const play = routingPlay.value;
+  const layers = routed ? RAIN_ONLY : weatherLayers.value;
+  const step = routed ? playStep(play?.ms ?? null) : forecastStep.value;
+  const on = routed ? routingRain.value : asked > 0;
   const lake = onLake();
   const drawn = weatherRead.value;
   const mapReady = weatherMapReady.value;
@@ -470,9 +497,9 @@ export function WeatherOnMap() {
   }, [on, asked]);
 
   // The forecast of the grid: read at start, when the map leaves the area
-  // read, and every 30 minutes.
+  // read, and every 30 minutes (not over a routing: its rain only).
   useEffect(() => {
-    if (!on || !mapReady) return undefined;
+    if (!on || !mapReady || routed) return undefined;
     const map = tracker.current?.map;
     if (!map) return undefined;
     let closed = false;
@@ -537,11 +564,11 @@ export function WeatherOnMap() {
       clearInterval(timer);
       weatherRead.value = { wind: null, sea: null };
     };
-  }, [on, mapReady, around, zoneArea, lake]);
+  }, [on, mapReady, around, zoneArea, lake, routed]);
 
   // The marks of the hour asked, drawn again when the map turns.
   useEffect(() => {
-    if (!on || !mapReady) return undefined;
+    if (!on || !mapReady || routed) return undefined;
     const map = tracker.current?.map;
     if (!map) return undefined;
     const layer = leaflet().layerGroup().addTo(map);
@@ -563,7 +590,7 @@ export function WeatherOnMap() {
       map.off('rotate', draw);
       layer.remove();
     };
-  }, [on, mapReady, drawn, layers, step, fineRain]);
+  }, [on, mapReady, drawn, layers, step, fineRain, routed]);
 
   // The rain of the radar: the newest image, read every 10 minutes; only
   // for the hour now (the radar has no future: the hours ahead take the
