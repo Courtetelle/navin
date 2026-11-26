@@ -329,6 +329,8 @@ export interface BestAhead {
   /** The earliest departure of the span, and its length, minutes. */
   soonDepartMs: number;
   soonLengthMin: number;
+  /** Its motor, minutes. */
+  motorMin: number;
   /** When it was found. */
   at: number;
 }
@@ -366,6 +368,7 @@ function keepBest(plan: RoutingPlan, found: readonly Done[]): void {
     lengthMin: (best.arriveMs - departMs) / 60_000,
     soonDepartMs,
     soonLengthMin: (soon.arriveMs - soonDepartMs) / 60_000,
+    motorMin: best.motorMin,
     at: Date.now(),
   };
 }
@@ -384,11 +387,14 @@ const seeking = { on: false };
 export async function findBestAhead(): Promise<void> {
   const ask = asked();
   if (!ask || seeking.on) return;
+  // The green sort shown found it: one best departure, the same for all.
+  if (rankSort.peek()?.plan === ask.plan) return;
   const known = bestAhead.peek();
   if (
     known?.key === planKey(ask.plan) &&
     known.hours === shiftPrefs.peek().rankHours &&
-    Date.now() - known.at < BEST_FRESH_MS
+    Date.now() - known.at < BEST_FRESH_MS &&
+    known.departMs >= Date.now() - 60_000
   ) {
     return;
   }

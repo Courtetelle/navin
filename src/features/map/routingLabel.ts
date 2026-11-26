@@ -117,6 +117,34 @@ export function nightOf(
 }
 
 /**
+ * The routing against the one most efficient departure of the next hours
+ * (the same as the first of the green sort): that departure itself, with
+ * the time it gains on leaving at the first hour; any other, with the time
+ * it takes more (or less, but with more motor).
+ * @param shown - The routing.
+ * @param best - The most efficient departure.
+ * @returns The line.
+ */
+export function bestLine(shown: ShownRouting, best: BestAhead): string {
+  const departMs = shown.departMs ?? 0;
+  const lengthMin = ((shown.arriveMs ?? departMs) - departMs) / 60_000;
+  const span = `des prochaines ${best.hours} h`;
+  if (Math.abs(departMs - best.departMs) < 60_000) {
+    const line = `Meilleur départ ${span}`;
+    if (Math.abs(departMs - best.soonDepartMs) < 60_000) return line;
+    const gain = best.soonLengthMin - lengthMin;
+    return `${line} : ${gain >= 0 ? '−' : '+'}${minutesText(gain)} sur un départ à ${hourText(best.soonDepartMs)}`;
+  }
+  const more = Math.round(lengthMin - best.lengthMin);
+  const which = `le meilleur départ ${span} (${hourText(best.departMs)})`;
+  if (more === 0) return `Même durée que ${which}`;
+  if (more > 0) return `+${minutesText(more)} sur ${which}`;
+  // Shorter, but the motor counts more: the sort weighs it half more.
+  const motor = (shown.stats?.motorMin ?? 0) - best.motorMin;
+  return `−${minutesText(more)} sur ${which}${motor > 0 ? `, mais ${minutesText(motor)} de moteur en plus` : ''}`;
+}
+
+/**
  * The lines of the label of a routing: its hours and length (and against
  * the most efficient departure of the next hours), its manoeuvres, its
  * motor, the strongest wind and gusts, the highest waves, the storm risk,
@@ -138,16 +166,7 @@ export function labelLines(
     `Durée ${fmtDur(arriveMs - departMs)}`,
   ];
   if (best && plan && best.key === planKey(plan)) {
-    const more = lengthMin - best.lengthMin;
-    const gain = best.soonLengthMin - lengthMin;
-    let line = `Meilleur départ des prochaines ${best.hours} h`;
-    if (more >= 5) {
-      line = `+${minutesText(more)} sur le meilleur départ des prochaines ${best.hours} h (${hourText(best.departMs)})`;
-    } else if (Math.abs(departMs - best.soonDepartMs) >= 60_000) {
-      // Against leaving at the first hour of the span.
-      line += ` : ${gain >= 0 ? '−' : '+'}${minutesText(gain)} sur un départ à ${hourText(best.soonDepartMs)}`;
-    }
-    lines.push(line);
+    lines.push(bestLine(shown, best));
   }
   if (stats && stats.nm > 0) {
     const speed = lengthMin > 0 ? stats.nm / (lengthMin / 60) : 0;

@@ -168,28 +168,30 @@ describe('labelLines', () => {
       lengthMin: 240,
       soonDepartMs: departMs - 3_600_000,
       soonLengthMin: 345,
+      motorMin: 30,
       at: departMs,
     };
     expect(labelLines(shown, best)[2]).toBe(
       '+1 h 00 sur le meilleur départ des prochaines 6 h (22h30)',
     );
+    // Another departure shorter, with more motor.
+    expect(labelLines(shown, { ...best, lengthMin: 330 })[2]).toBe(
+      '−30 min sur le meilleur départ des prochaines 6 h (22h30), mais 40 min de moteur en plus',
+    );
+    expect(labelLines(shown, { ...best, lengthMin: 300 })[2]).toBe(
+      'Même durée que le meilleur départ des prochaines 6 h (22h30)',
+    );
     // The best shown: the time gained on leaving at the first hour.
-    expect(labelLines(shown, { ...best, lengthMin: 298 })[2]).toBe(
+    const itself = { ...best, departMs, lengthMin: 300 };
+    expect(labelLines(shown, itself)[2]).toBe(
       'Meilleur départ des prochaines 6 h : −45 min sur un départ à 20h30',
     );
-    expect(
-      labelLines(shown, { ...best, lengthMin: 298, soonLengthMin: 270 })[2],
-    ).toBe(
+    expect(labelLines(shown, { ...itself, soonLengthMin: 270 })[2]).toBe(
       'Meilleur départ des prochaines 6 h : +30 min sur un départ à 20h30',
     );
-    expect(
-      labelLines(shown, {
-        ...best,
-        lengthMin: 298,
-        soonDepartMs: departMs,
-        soonLengthMin: 300,
-      })[2],
-    ).toBe('Meilleur départ des prochaines 6 h');
+    expect(labelLines(shown, { ...itself, soonDepartMs: departMs })[2]).toBe(
+      'Meilleur départ des prochaines 6 h',
+    );
     expect(labelLines(shown, { ...best, key: 'other' })[2]).toBe(
       'Distance 30,0 NM · moyenne 6,0 nd',
     );
