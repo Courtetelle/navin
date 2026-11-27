@@ -744,8 +744,8 @@ async function myMaps(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(300);
   check(
     theme,
-    'my marks are in data',
-    (await page.locator('[data-tile="marks"]').count()) === 1,
+    'my marks are no longer in data (they are in each cruise or outing)',
+    (await page.locator('[data-tile="marks"]').count()) === 0,
   );
   await page.locator('[data-tile="cartes"]').click();
   await page.waitForTimeout(500);
@@ -1206,9 +1206,8 @@ async function marksShare(page: Page, theme: string): Promise<void> {
   });
   await page.reload();
   await page.waitForTimeout(1500);
-  await openData(page);
-  await page.locator('[data-tile="marks"]').click();
-  await page.waitForTimeout(400);
+  // « Marques » opens from a long press on the pin of the rail.
+  await longPress(page, '.rail-pin');
   check(
     theme,
     'marks: one « Tout partager » only, no list row beside it',
@@ -1243,9 +1242,8 @@ async function marksShare(page: Page, theme: string): Promise<void> {
     'marks: a touch shows the mark on the map',
     await page.evaluate(() => document.body.classList.contains('trk-mode')),
   );
-  await openData(page);
-  await page.locator('[data-tile="marks"]').click();
-  await page.waitForTimeout(400);
+  // « Marques » opens from a long press on the pin of the rail.
+  await longPress(page, '.rail-pin');
   await page.locator('[data-lxpub="marks"]').click();
   await page.waitForTimeout(200);
   // Rule of the layout: Envoyer has the height of the action buttons
