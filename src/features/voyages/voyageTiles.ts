@@ -32,7 +32,7 @@ function plural(count: number, word: string): string {
  */
 export function voyageTiles(): VoyageTile[] {
   const voyage = state.data.voyages.value;
-  const { categories, docs, sections, id } = voyage;
+  const { categories, docs, sections, id, lake } = voyage;
   const crew = voyageCrewLines(voyage);
   const crewSet = voyageCrewSet(voyage);
   const boat = voyageBoat(voyage);
@@ -86,7 +86,7 @@ export function voyageTiles(): VoyageTile[] {
     sub:
       total > 0
         ? `${plural(records.navigations.length, 'navigation')} (traces, photos) · ${plural(records.routes.length, 'route')} · ${plural(records.routings.length, 'routage')}`
-        : `navigations, traces, photos, routes et routages de la ${voyage.lake ? 'sortie' : 'croisière'}`,
+        : `navigations, traces, photos, routes et routages de la ${lake ? 'sortie' : 'croisière'}`,
   });
   return tiles;
 }
