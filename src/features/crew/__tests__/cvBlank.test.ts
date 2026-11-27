@@ -127,3 +127,23 @@ test('a CV written out is read back the same', () => {
     'Permis lac',
   ]);
 });
+
+test('the charter company is asked as « Compagnie Charter », a CV sent before with « Loueur » still read', () => {
+  expect(cvBlankText()).toContain('Compagnie Charter : ');
+  expect(cvBlankText()).not.toContain('Loueur');
+  const [now] = parseCvBlank(
+    filled([
+      ['Année ou période', '2024'],
+      ['Compagnie Charter', 'Sunsail'],
+    ]),
+  );
+  expect(now?.cv.trips?.[0]?.charter).toBe('Sunsail');
+  const before = [
+    'NavIn · CV nautique à remplir',
+    'Prénom : Léa',
+    '— Navigation —',
+    'Année ou période : 2023',
+    'Loueur : Dream Yacht',
+  ].join('\n');
+  expect(parseCvBlank(before)[0]?.cv.trips?.[0]?.charter).toBe('Dream Yacht');
+});

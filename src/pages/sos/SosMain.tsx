@@ -108,7 +108,10 @@ export function SosMain({ onScript, onRedraw }: SosMainProps) {
         </div>
       </FoldSection>
       {info.base ? (
-        <ContactsSection title="Loueur, base" text={textOf(info.base)} />
+        <ContactsSection
+          title="Compagnie Charter, base"
+          text={textOf(info.base)}
+        />
       ) : null}
       <CrewCalls calls={crewCalls(crew)} />
       {info.meteo ? (

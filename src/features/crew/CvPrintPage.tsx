@@ -143,7 +143,10 @@ function TripRow({
         {trip.charter || trip.duration ? (
           <small>
             {trip.route ? ' · ' : ''}
-            {[trip.charter ? `loueur ${trip.charter}` : '', trip.duration]
+            {[
+              trip.charter ? `Compagnie Charter ${trip.charter}` : '',
+              trip.duration,
+            ]
               .filter(Boolean)
               .join(' · ')}
           </small>

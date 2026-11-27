@@ -12,6 +12,7 @@ import type { ShareFormat } from '../../components/shared/shareFormat.ts';
 import { useReadingMarquee } from '../../components/shared/useReadingMarquee.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
+import type { MemberCv } from '../../model/memberCv.ts';
 import { cvFilled } from '../../model/memberCv.ts';
 import { PageBack, PageValidate } from '../../shell/navbar/PageBack.tsx';
 import { useNavFields } from '../../shell/navbar/navHooks.ts';
@@ -34,7 +35,6 @@ import { FicheCv } from './FicheCv.tsx';
 import { FicheForm } from './FicheForm.tsx';
 import { FicheIdentity } from './FicheIdentity.tsx';
 import { FichePhotos } from './FichePhotos.tsx';
-import { cvWithNavIn } from './cvNavIn.ts';
 import { shareCv } from './cvShare.ts';
 import { deleteFiche } from './ficheActions.ts';
 import { ficheBackLabel, leaveFiche, showFiche, showLabels } from './screen.ts';
@@ -92,7 +92,7 @@ export function Fiche({ id }: FicheProps) {
     ({ key }) => key !== 'sexe' && isFilled(record.latest()[key]),
   );
   // The CV is shared from Partager of the card, once it holds something.
-  const hasCv = cvFilled(cvWithNavIn(record.recordId, record.data.cv ?? {}));
+  const hasCv = cvFilled(record.data.cv as MemberCv | undefined);
   const shareCard = (format: ShareFormat) => {
     record.persist();
     const savedId = record.latestId();
