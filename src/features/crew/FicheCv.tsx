@@ -119,7 +119,7 @@ function CvReading({ cv }: { cv: MemberCv }) {
                     trip.boatType,
                     trip.role,
                     trip.route,
-                    trip.charter ? `Compagnie Charter ${trip.charter}` : '',
+                    trip.charter ? `Compagnie Charter : ${trip.charter}` : '',
                     trip.duration,
                   ]
                     .filter(Boolean)
