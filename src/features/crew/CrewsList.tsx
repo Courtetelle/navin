@@ -12,6 +12,7 @@ import {
   crewSetDate,
   crewSetName,
   crewSetPeople,
+  openVoyage,
   state,
   updateCrewSets,
 } from '../../state/index.ts';
@@ -37,35 +38,70 @@ export function CrewsList() {
     (set) => set.id,
     (set) => crewSetName(set),
   );
-  const crewCount = cruise?.crew.length ?? 0;
-  const names = (cruise?.crew ?? [])
-    .map((line) => line.nom)
-    .filter(Boolean)
-    .join(', ');
+  const store = state.data.voyageStore.value;
+  const voyage = store.list.find((item) => item.id === store.active);
+  const chosen = voyage?.crewSet
+    ? state.data.crewSets.value.find((set) => set.id === voyage.crewSet)
+    : undefined;
+  const word = voyage?.lake ? 'sortie' : 'croisière';
+  const openActive = (): void => {
+    if (!voyage) return;
+    buzz();
+    openVoyage(voyage.id);
+    go('vcrew');
+  };
   return (
     <>
       <PageTitle sort="crews">Équipages</PageTitle>
-      {cruise ? (
-        <>
-          <h2 className="sub-h">{tr('À bord maintenant')}</h2>
-          <ButtonRow>
-            <Button
-              className="btn big"
-              id="csAboard"
-              onClick={() => {
-                buzz();
-                go('crew');
-              }}
-            >
+      <h2 className="sub-h">{tr('À bord maintenant')}</h2>
+      {voyage ? (
+        <ButtonRow>
+          <Button
+            className={`btn big ${chosen ? 'on' : ''}`}
+            id="csAboard"
+            data-aboard={chosen?.id ?? ''}
+            onClick={openActive}
+          >
+            {chosen
+              ? `👥 ${crewSetName(chosen)}`
+              : tr('👥 Aucun équipage choisi')}
+            <small>
+              {chosen
+                ? `${crewSetPeople(chosen)} · ${tr(`${word} active`)} « ${voyage.name} »`
+                : tr(
+                    `à choisir dans la ${word} active « ${voyage.name} » › Équipage`,
+                  )}
+            </small>
+          </Button>
+        </ButtonRow>
+      ) : (
+        <ButtonRow>
+          <Button
+            className="btn big"
+            id="csAboard"
+            onClick={() => {
+              buzz();
+              go('voyages');
+            }}
+          >
+            {tr('👥 Aucune croisière ni sortie active')}
+            <small>
               {tr(
-                `⛵ Équipage à bord · ${crewCount} personne${crewCount > 1 ? 's' : ''}`,
+                'l’équipage à bord se choisit dans la croisière ou la sortie active › Équipage',
               )}
-              <small>{names || tr('personne pour l’instant')}</small>
-            </Button>
-          </ButtonRow>
-          <h2 className="sub-h">{tr('Équipages enregistrés')}</h2>
-        </>
+            </small>
+          </Button>
+        </ButtonRow>
+      )}
+      {cruise && !chosen && cruise.crew.length > 0 ? (
+        <HelpText>
+          {`${tr('Navigation en cours')} : ${cruise.crew
+            .map((line) => line.nom)
+            .filter(Boolean)
+            .join(', ')}`}
+        </HelpText>
       ) : null}
+      <h2 className="sub-h">{tr('Équipages enregistrés')}</h2>
       {sets.length > 0 ? (
         <ButtonRow className="row prep-col">
           {sets.map((set) => (
@@ -81,7 +117,10 @@ export function CrewsList() {
                 });
               }}
             >
-              <SetButton className="btn big" set={set} />
+              <SetButton
+                className={`btn big ${set.id === chosen?.id ? 'primary' : ''}`}
+                set={set}
+              />
             </SwipeRow>
           ))}
         </ButtonRow>
