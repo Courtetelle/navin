@@ -5,6 +5,7 @@ import {
   OTHER_CAT,
   cleanVoyageStore,
   cleanVoyages,
+  contractKindsOf,
   contractSections,
   defaultVoyages,
   docCategories,
@@ -54,7 +55,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test('a cruise has four contracts: broker, charter, cancellation, deposit', () => {
+test('a cruise has four contracts: broker, charter, cancellation, deposit; an outing its owner', () => {
   const voyages = defaultVoyages();
 
   expect(voyages.categories.map((cat) => cat.name)).toStrictEqual([
@@ -62,6 +63,7 @@ test('a cruise has four contracts: broker, charter, cancellation, deposit', () =
     'Compagnie de location (charter)',
     'Assurance annulation',
     'Protection de caution',
+    'Propriétaire',
   ]);
   expect(voyages.categories.every((cat) => cat.cards.length === 1)).toBe(true);
   expect(docCategories(voyages).map((cat) => cat.id)).toStrictEqual([
@@ -95,12 +97,13 @@ test('the contracts kept before go to their sheet, the others apart', () => {
     'loueur',
     'annulation',
     'caution',
+    'proprio',
     'anciens',
   ]);
   expect(clean?.categories[1]?.cards[0]?.tel).toBe('+33 2');
   expect(clean?.categories[2]?.cards[0]?.ref).toBe('A-1');
   expect(clean?.categories[3]?.cards[0]?.ref).toBe('C-2');
-  expect(clean?.categories[4]?.cards[0]?.org).toBe('Agence X');
+  expect(clean?.categories[5]?.cards[0]?.org).toBe('Agence X');
   expect(cleanVoyages(clean)?.categories).toStrictEqual(clean?.categories);
 });
 
@@ -118,7 +121,7 @@ test('malformed content is dropped, the rest is kept', () => {
     mod: '2026-01-01',
   });
 
-  expect(clean?.categories).toHaveLength(4);
+  expect(clean?.categories).toHaveLength(5);
   expect(clean?.categories[1]?.cards[0]?.id).toBe('c');
   expect(clean?.categories[1]?.cards[0]?.tel).toBe('');
   expect(clean?.crew).toStrictEqual([{ memberId: 'm1', fonction: 'Équipier' }]);
@@ -269,6 +272,7 @@ test('new cruises are numbered after the last one, with the year', () => {
     'loueur',
     'annulation',
     'caution',
+    'proprio',
   ]);
   expect(second.categories[0]?.cards[0]?.tel).toBe('');
   expect(state.data.voyageStore.value.active).toBe(second.id);
@@ -477,4 +481,27 @@ test('a document keeps its remarks', () => {
     ],
   });
   expect(kept?.docs[0]?.note).toBe('Caution 2 000 €');
+});
+
+test('a lake outing is numbered apart and shows its owner only', () => {
+  const sea = createVoyage(['contracts'], false);
+  const lake = createVoyage(['contracts', 'docs'], false, true);
+
+  expect(sea.lake).toBeUndefined();
+  expect(lake.lake).toBe(true);
+  expect(lake.name).toMatch(/^1 Nouvelle sortie \d{4}$/u);
+  expect(contractKindsOf(lake).map((kind) => kind.id)).toStrictEqual([
+    'proprio',
+  ]);
+  expect(contractKindsOf(sea).map((kind) => kind.id)).toStrictEqual([
+    'courtiers',
+    'loueur',
+    'annulation',
+    'caution',
+  ]);
+  expect(docCategories(lake).map((cat) => cat.id)).toStrictEqual([
+    'proprio',
+    'crew',
+    'other',
+  ]);
 });

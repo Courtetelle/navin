@@ -2,11 +2,13 @@ import { beforeEach, expect, test } from 'vitest';
 
 import {
   blankCruise,
+  createVoyage,
   initState,
   saveCruise,
   setCruise,
   setPrep,
   state,
+  updateVoyageStore,
 } from '../../../state/index.ts';
 import { createMemoryStorage } from '../../../storage/memoryStorage.ts';
 import { applyCrewSet, crewKey, crewSetFromCruise } from '../prepCrew.ts';
@@ -67,4 +69,19 @@ test('crewSetFromCruise creates a new composition with the next number', () => {
   expect(set?.ident).toBe('EQ004');
   expect(set?.crew).toStrictEqual([{ memberId: 'ex1', fonction: 'Skipper' }]);
   expect(state.data.crewSets.value).toHaveLength(4);
+});
+
+test('a new navigation takes the crew chosen in the active cruise', () => {
+  const voyage = createVoyage(['crew'], true);
+  updateVoyageStore((draft) => {
+    const item = draft.list.find((line) => line.id === voyage.id);
+    if (item) item.crewSet = 'exc3';
+  });
+  const cruise = blankCruise('Test', null);
+  expect(cruise.voyage).toBe(voyage.id);
+  expect(cruise.crew.map((line) => line.memberId)).toStrictEqual([
+    'ex4',
+    'ex3',
+  ]);
+  expect(cruise.crew[0]?.fonction).toBe('Skipper');
 });

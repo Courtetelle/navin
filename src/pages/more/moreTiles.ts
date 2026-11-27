@@ -54,8 +54,13 @@ const SITES: MoreTile = {
 };
 const VOYAGES: MoreTile = {
   key: 'voyages',
-  title: '⛵ Croisières',
+  title: '⛵ Croisières maritimes',
   sub: 'équipage, contrats, assurances, documents',
+};
+const OUTINGS: MoreTile = {
+  key: 'sorties',
+  title: '🏞 Sorties lacustres',
+  sub: 'bateau, propriétaire, équipage, documents',
 };
 const STATS: MoreTile = {
   key: 'stats',
@@ -86,6 +91,7 @@ export function tilesWithoutCruise(): MoreTile[] {
       sub: `${crewSets.value.length} groupe${crewSets.value.length > 1 ? 's' : ''} de navigants, avec les rôles`,
     },
     VOYAGES,
+    OUTINGS,
     {
       key: 'tasktpl',
       title: '🧑‍🤝‍🧑 Modèle des tâches à bord',
@@ -175,6 +181,7 @@ export function tilesWithCruise(): MoreTile[] {
       sub: `${cruise.value?.crew.length} à bord · ${setCount} groupe${setPlural} enregistré${setPlural}`,
     },
     VOYAGES,
+    OUTINGS,
     LISTS,
     marksTile(marks.value.length),
     chartsTile(),

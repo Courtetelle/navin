@@ -9,6 +9,7 @@ import { store } from '../storage/store.ts';
 
 import { data } from './data.ts';
 import { hooks } from './hooks.ts';
+import { crewFromMember } from './members.ts';
 import { view } from './view.ts';
 
 /** Storage key prefixes of everything that belongs to one cruise. */
@@ -57,6 +58,16 @@ export function blankCruise(name: string, from?: Cruise | null): Cruise {
   if (voyage) {
     cruise.voyage = voyage.id;
     Object.assign(cruise.info, voyageNavInfo(voyage));
+    // Its crew goes on board: the crew is chosen only from the active cruise.
+    const set = voyage.crewSet
+      ? data.crewSets.peek().find((item) => item.id === voyage.crewSet)
+      : undefined;
+    for (const line of set?.crew ?? voyage.crew) {
+      const member = data.members
+        .peek()
+        .find((item) => item.id === line.memberId);
+      if (member) cruise.crew.push(crewFromMember(member, line.fonction));
+    }
   }
   return cruise;
 }

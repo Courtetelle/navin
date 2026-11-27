@@ -15,6 +15,7 @@ import {
   voyageBoat,
 } from '../../features/voyages/voyageBoat.ts';
 import { shareSections } from '../../features/voyages/voyageShare.ts';
+import { voyageBack } from '../../features/voyages/voyageWords.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
@@ -49,14 +50,14 @@ export function VoyageBoatPage() {
   return (
     <>
       <PageBack
-        label="◀ Croisière"
+        label={voyageBack()}
         data-go="voyage"
         onClick={() => {
           buzz();
           go('voyage');
         }}
       >
-        {tr('◀ Croisière')}
+        {tr(voyageBack())}
       </PageBack>
       {validate}
       <PageTitle

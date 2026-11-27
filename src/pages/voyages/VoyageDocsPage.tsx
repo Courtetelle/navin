@@ -9,6 +9,7 @@ import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
 import { docsOf, shareVoyageDocs } from '../../features/voyages/voyageFiles.ts';
+import { voyageBack } from '../../features/voyages/voyageWords.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { docCategories } from '../../model/voyages.ts';
@@ -35,14 +36,14 @@ export function VoyageDocsPage() {
   return (
     <>
       <PageBack
-        label="◀ Croisière"
+        label={voyageBack()}
         data-go="voyage"
         onClick={() => {
           buzz();
           go('voyage');
         }}
       >
-        {tr('◀ Croisière')}
+        {tr(voyageBack())}
       </PageBack>
       {validate}
       <PageTitle

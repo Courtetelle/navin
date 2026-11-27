@@ -23,14 +23,18 @@ import { createVoyage, openVoyage, state, toast } from '../../state/index.ts';
  * @param props.onClose - Closes the form.
  * @returns The form.
  */
-function NewVoyage({ onClose }: { onClose: () => void }) {
+function NewVoyage({ onClose, lake }: { onClose: () => void; lake: boolean }) {
   const tr = useTr();
-  const offered = knownSections(state.data.voyageStore.value.list);
+  const offered = knownSections(
+    state.data.voyageStore.value.list.filter(
+      (voyage) => Boolean(voyage.lake) === lake,
+    ),
+  );
   const [ticked, setTicked] = useState<VoyageSectionKey[]>(offered);
   const [active, setActive] = useState(true);
   return (
     <section className="field voy-new">
-      <h2>{tr('Nouvelle croisière')}</h2>
+      <h2>{tr(lake ? 'Nouvelle sortie' : 'Nouvelle croisière')}</h2>
       <HelpText>
         Sections à reprendre, vides : d’autres s’ajoutent ensuite une à une.
       </HelpText>
@@ -53,7 +57,11 @@ function NewVoyage({ onClose }: { onClose: () => void }) {
                 }}
               >
                 {on ? '☑ ' : '☐ '}
-                {tr(section.title)}
+                {tr(
+                  lake && section.key === 'contracts'
+                    ? '🔑 Propriétaire'
+                    : section.title,
+                )}
               </Button>
             );
           },
@@ -69,7 +77,7 @@ function NewVoyage({ onClose }: { onClose: () => void }) {
           }}
         >
           {active ? '☑ ' : '☐ '}
-          {tr('⭐ Croisière active')}
+          {tr(lake ? '⭐ Sortie active' : '⭐ Croisière active')}
           <small>
             {tr(
               'les nouvelles navigations (traces, photos), routes et routages la rejoignent',
@@ -83,7 +91,7 @@ function NewVoyage({ onClose }: { onClose: () => void }) {
           data-voynew="ok"
           onClick={() => {
             buzz();
-            const voyage = createVoyage(ticked, active);
+            const voyage = createVoyage(ticked, active, lake);
             toast(`« ${voyage.name} » créée`);
             onClose();
             go('voyage');
@@ -112,10 +120,24 @@ function NewVoyage({ onClose }: { onClose: () => void }) {
  * @returns The screen content.
  */
 export function VoyagesPage() {
+  return <VoyageList lake={false} />;
+}
+
+/**
+ * Screen `sorties` (data › Sorties lacustres): the lake outings, made and
+ * shown like the cruises, with the owner of the boat instead of the companies.
+ * @returns The screen content.
+ */
+export function LakeOutingsPage() {
+  return <VoyageList lake />;
+}
+
+function VoyageList({ lake }: { lake: boolean }) {
   useSignals();
   const tr = useTr();
   const [creating, setCreating] = useState(false);
-  const { list, active } = state.data.voyageStore.value;
+  const { list: all, active } = state.data.voyageStore.value;
+  const list = all.filter((voyage) => Boolean(voyage.lake) === lake);
   const shown = list.toSorted(
     (first, second) =>
       Number(second.id === active) - Number(first.id === active) ||
@@ -136,13 +158,15 @@ export function VoyagesPage() {
       </PageBack>
       <PageTitle
         helps={[
-          'Une fiche par croisière en location : équipage, contrats, documents, et ce qui est enregistré pendant qu’elle est active (navigations avec traces et photos, routes, routages). Le nom est automatique (« 13 Nouvelle croisière 2026 ») et se change dans la croisière.',
+          lake
+            ? 'Une fiche par sortie sur le lac : bateau, propriétaire, équipage, documents, et ce qui est enregistré pendant qu’elle est active (navigations avec traces et photos, routes, routages). Le nom est automatique (« 3 Nouvelle sortie 2026 ») et se change dans la sortie.'
+            : 'Une fiche par croisière en location : équipage, contrats, documents, et ce qui est enregistré pendant qu’elle est active (navigations avec traces et photos, routes, routages). Le nom est automatique (« 13 Nouvelle croisière 2026 ») et se change dans la croisière.',
         ]}
       >
-        ⛵ Croisières
+        {lake ? '🏞 Sorties lacustres' : '⛵ Croisières maritimes'}
       </PageTitle>
       {creating ? (
-        <NewVoyage onClose={() => setCreating(false)} />
+        <NewVoyage lake={lake} onClose={() => setCreating(false)} />
       ) : (
         <ButtonRow>
           <Button
@@ -153,12 +177,16 @@ export function VoyagesPage() {
               setCreating(true);
             }}
           >
-            {tr('＋ Nouvelle croisière')}
+            {tr(lake ? '＋ Nouvelle sortie' : '＋ Nouvelle croisière')}
           </Button>
         </ButtonRow>
       )}
       {shown.length === 0 ? (
-        <HelpText>Aucune croisière pour l’instant.</HelpText>
+        <HelpText>
+          {lake
+            ? 'Aucune sortie pour l’instant.'
+            : 'Aucune croisière pour l’instant.'}
+        </HelpText>
       ) : (
         <div className="row more-grid data-tiles voy-list">
           {shown.map((voyage) => (
@@ -177,7 +205,9 @@ export function VoyagesPage() {
                 {voyage.name}
               </span>
               <small>
-                {voyage.id === active ? tr('croisière active · ') : ''}
+                {voyage.id === active
+                  ? tr(lake ? 'sortie active · ' : 'croisière active · ')
+                  : ''}
                 {/* The dates once both are given, else the day it was made. */}
                 {cruiseSpan(voyage.info) ||
                   (voyage.created

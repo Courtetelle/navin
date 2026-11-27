@@ -1,7 +1,7 @@
 import {
-  CONTRACT_KINDS,
   VOYAGE_SECTIONS,
   contractFilled,
+  contractKindsOf,
 } from '../../model/voyages.ts';
 import { state } from '../../state/index.ts';
 
@@ -32,7 +32,7 @@ function plural(count: number, word: string): string {
  */
 export function voyageTiles(): VoyageTile[] {
   const voyage = state.data.voyages.value;
-  const { categories, docs, sections, id } = voyage;
+  const { categories, docs, sections, id, lake } = voyage;
   const crew = voyageCrewLines(voyage);
   const crewSet = voyageCrewSet(voyage);
   const boat = voyageBoat(voyage);
@@ -54,7 +54,7 @@ export function voyageTiles(): VoyageTile[] {
     sections.includes(section.key),
   ).flatMap((section) =>
     section.key === 'contracts'
-      ? CONTRACT_KINDS.map((kind) => {
+      ? contractKindsOf(voyage).map((kind) => {
           const card = categories.find((cat) => cat.id === kind.id)?.cards[0];
           const org = card?.org.trim() ?? '';
           return {
@@ -86,7 +86,7 @@ export function voyageTiles(): VoyageTile[] {
     sub:
       total > 0
         ? `${plural(records.navigations.length, 'navigation')} (traces, photos) · ${plural(records.routes.length, 'route')} · ${plural(records.routings.length, 'routage')}`
-        : 'navigations, traces, photos, routes et routages de la croisière',
+        : `navigations, traces, photos, routes et routages de la ${lake ? 'sortie' : 'croisière'}`,
   });
   return tiles;
 }

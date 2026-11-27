@@ -5,6 +5,7 @@ import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
 import { dayText } from '../../features/voyages/voyageDates.ts';
+import { voyageBack } from '../../features/voyages/voyageWords.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { showsUtc } from '../../lib/clockMode.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -50,14 +51,14 @@ export function VoyageInfoPage() {
   return (
     <>
       <PageBack
-        label="◀ Croisière"
+        label={voyageBack()}
         data-go="voyage"
         onClick={() => {
           buzz();
           go('voyage');
         }}
       >
-        {tr('◀ Croisière')}
+        {tr(voyageBack())}
       </PageBack>
       {validate}
       <PageTitle

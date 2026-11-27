@@ -95,12 +95,14 @@ export function openVoyage(id: string | null): void {
 export function createVoyage(
   sections: readonly VoyageSectionKey[],
   active: boolean,
+  lake = false,
 ): Voyage {
   const voyage = blankVoyage(data.voyageStore.value.list, {
     id: uid(),
     sections,
     now: new Date(),
     newId: uid,
+    lake,
   });
   updateVoyageStore((draft) => {
     draft.list.push(voyage);

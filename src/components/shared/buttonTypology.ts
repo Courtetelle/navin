@@ -27,6 +27,7 @@ const DATA_VIEWS: ReadonlySet<string> = new Set([
   'day',
   'nmea',
   'voyages',
+  'sorties',
   'vcrew',
   'vcontracts',
   'vdocs',
