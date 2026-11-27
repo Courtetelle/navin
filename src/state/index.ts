@@ -17,6 +17,7 @@ if ('document' in globalThis) {
   firstZone();
 }
 export {
+  ALERT_MOST,
   alertLog,
   eraseAlerts,
   eraseAlertsBetween,

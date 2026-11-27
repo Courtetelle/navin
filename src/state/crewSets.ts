@@ -1,4 +1,4 @@
-import { produce } from 'immer';
+import { original, produce } from 'immer';
 
 import type { CrewSet, CrewSetLine } from '../model/types.ts';
 import { store } from '../storage/store.ts';
@@ -132,7 +132,18 @@ export function saveCrewSets(): void {
  * @param recipe - Mutates the draft list.
  */
 export function updateCrewSets(recipe: (sets: CrewSet[]) => void): void {
-  data.crewSets.value = produce(data.crewSets.value, recipe);
+  const before = new Map(data.crewSets.value.map((set) => [set.id, set]));
+  const now = new Date().toISOString();
+  data.crewSets.value = produce(
+    produce(data.crewSets.value, recipe),
+    (sets: CrewSet[]) => {
+      // A crew changed here is newer than its copies on the other devices.
+      for (const set of sets) {
+        const old = before.get(set.id);
+        if (old && old !== original(set) && old.mod === set.mod) set.mod = now;
+      }
+    },
+  );
   saveCrewSets();
 }
 

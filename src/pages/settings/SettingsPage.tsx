@@ -59,6 +59,7 @@ import { LiveRow } from './LiveRow.tsx';
 import { MarginRows } from './MarginRows.tsx';
 import { SeaCenterRow } from './SeaCenterRow.tsx';
 import { SimulationSection } from './SimulationSection.tsx';
+import { TrashSection } from './TrashSection.tsx';
 import {
   AutoLogRows,
   GotoArrivalRows,
@@ -563,6 +564,9 @@ export function SettingsPage({ from, arg }: PageProps) {
               title="🚤 Marges de sécurité et rapports de longueurs"
             >
               <MarginRows />
+            </SettingsSection>
+            <SettingsSection section="trash" title="🗑 Poubelle">
+              <TrashSection />
             </SettingsSection>
             <SettingsSection
               section="data"
