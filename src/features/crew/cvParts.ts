@@ -9,22 +9,26 @@ export const WATERS_TITLE: Record<CvWaters, string> = {
 };
 
 /**
- * The identity lines a renter needs: born, nationality, phone, mail, address.
+ * The identity lines a renter needs, as the band of the CV writes them: born
+ * and nationality, then phone and mail, then the address.
  * @param member - The card.
- * @returns The lines, the empty ones left out.
+ * @returns The lines, each with its parts; the empty ones left out.
  */
-export function identity(member: Member): string[] {
+export function identity(member: Member): string[][] {
   const text = (key: string) => {
     const value = member[key];
     return typeof value === 'string' ? value.trim() : '';
   };
   return [
-    text('naissance') ? `${born(member.sexe)} le ${text('naissance')}` : '',
-    text('nationalite'),
-    text('tel'),
-    text('email'),
-    text('adresse').replaceAll('\n', ', '),
-  ].filter(Boolean);
+    [
+      text('naissance') ? `${born(member.sexe)} le ${text('naissance')}` : '',
+      text('nationalite'),
+    ],
+    [text('tel'), text('email')],
+    [text('adresse').replaceAll('\n', ', ')],
+  ]
+    .map((line) => line.filter(Boolean))
+    .filter((line) => line.length > 0);
 }
 
 /**

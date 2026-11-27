@@ -22,7 +22,11 @@ export function CvPage({ member, cv }: { member: Member; cv: MemberCv }) {
         <div className="cv-name">{memberName(member)}</div>
         <div className="cv-ident">
           {identity(member).map((line) => (
-            <span key={line}>{line}</span>
+            <div key={line.join(' · ')}>
+              {line.map((part) => (
+                <span key={part}>{part}</span>
+              ))}
+            </div>
           ))}
         </div>
       </header>
@@ -144,7 +148,7 @@ function TripRow({
           <small>
             {trip.route ? ' · ' : ''}
             {[
-              trip.charter ? `Compagnie Charter ${trip.charter}` : '',
+              trip.charter ? `Compagnie Charter : ${trip.charter}` : '',
               trip.duration,
             ]
               .filter(Boolean)

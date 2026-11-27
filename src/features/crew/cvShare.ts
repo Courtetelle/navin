@@ -23,6 +23,7 @@ const CV_CSS = `@media print {
 .cv-print .cv-name { font-size: 25pt; font-weight: 800; margin: 1mm 0 2mm }
 .cv-print .cv-ident { font-size: 9.5pt; opacity: .92 }
 .cv-print .cv-ident span + span::before { content: '  ·  ' }
+.cv-print .cv-ident > div + div { margin-top: .8mm }
 .cv-print .cv-intro { margin: 0 0 5mm; font-style: italic }
 .cv-print .cv-tiles { display: flex; gap: 3mm; margin: 0 0 4mm }
 .cv-print .cv-tile { flex: 1; border: 1px solid #c9d6e8; border-radius: 3mm; padding: 3mm; text-align: center; background: #f2f6fb }
@@ -101,7 +102,7 @@ function cvSections(
     title: string;
     rows: Array<readonly [string, string]>;
   }> = [];
-  const who = identity(member);
+  const who = identity(member).flat();
   const totals = tiles(cv).map(([value, label]) => `${value} ${label}`);
   if (
     who.length > 0 ||
@@ -135,7 +136,7 @@ function cvSections(
               trip.boatType,
               trip.role,
               trip.route,
-              trip.charter ? `Compagnie Charter ${trip.charter}` : '',
+              trip.charter ? `Compagnie Charter : ${trip.charter}` : '',
               trip.duration,
               nmShown(trip.nm),
             ]
