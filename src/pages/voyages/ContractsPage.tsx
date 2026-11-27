@@ -11,6 +11,7 @@ import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import { DocImport, DocList } from '../../features/voyages/VoyageDocs.tsx';
 import { useChapterEdit } from '../../features/voyages/useChapterEdit.tsx';
 import { shareSections } from '../../features/voyages/voyageShare.ts';
+import { voyageBack } from '../../features/voyages/voyageWords.ts';
 import { whatsappHref } from '../../features/voyages/whatsapp.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
@@ -22,6 +23,7 @@ import {
   PERSON_FIELDS,
   contractCard,
   contractFilled,
+  contractKindsOf,
   contractSections,
   emptyPerson,
 } from '../../model/voyages.ts';
@@ -310,14 +312,14 @@ function ContractScreen({ kind }: { kind: (typeof CONTRACT_KINDS)[number] }) {
   return (
     <>
       <PageBack
-        label="◀ Croisière"
+        label={voyageBack()}
         data-go="voyage"
         onClick={() => {
           buzz();
           go('voyage');
         }}
       >
-        {tr('◀ Croisière')}
+        {tr(voyageBack())}
       </PageBack>
       {validate}
       <PageTitle
@@ -372,20 +374,21 @@ export function ContractsPage({ arg }: PageProps) {
   if (!id) return <NoVoyage />;
   const opened = CONTRACT_KINDS.find((kind) => kind.id === arg);
   if (opened) return <ContractScreen key={opened.id} kind={opened} />;
+  const kinds = contractKindsOf(voyages);
   const shown = categories.filter((cat) =>
-    CONTRACT_KINDS.some((kind) => kind.id === cat.id),
+    kinds.some((kind) => kind.id === cat.id),
   );
   return (
     <>
       <PageBack
-        label="◀ Croisière"
+        label={voyageBack()}
         data-go="voyage"
         onClick={() => {
           buzz();
           go('voyage');
         }}
       >
-        {tr('◀ Croisière')}
+        {tr(voyageBack())}
       </PageBack>
       <PageTitle
         helps={[
@@ -395,7 +398,7 @@ export function ContractsPage({ arg }: PageProps) {
         📑 Contrats
       </PageTitle>
       <div className="row more-grid data-tiles" style={{ marginBottom: 12 }}>
-        {CONTRACT_KINDS.map((kind) => {
+        {kinds.map((kind) => {
           const card = contractCard(voyages, kind.id);
           const filled = card ? contractFilled(card) : false;
           const summary = [card?.org.trim(), card?.ref.trim()]

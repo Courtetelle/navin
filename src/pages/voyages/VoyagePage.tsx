@@ -43,6 +43,12 @@ export function VoyagePage() {
   const isActive = state.data.voyageStore.value.active === voyage.id;
   const [name, setName] = useState(voyage.name);
   const { editing, validate } = useChapterEdit();
+  // A lake outing comes from « Sorties lacustres », a cruise from « Croisières maritimes ».
+  const list = voyage.lake
+    ? { view: 'sorties', back: '◀ Sorties lacustres' }
+    : { view: 'voyages', back: '◀ Croisières maritimes' };
+  const word = voyage.lake ? 'sortie' : 'croisière';
+  const Word = voyage.lake ? 'Sortie' : 'Croisière';
   // Alphabetical, or by their use: the button at the right of the title.
   const tiles = inMenuOrder(
     'voyage',
@@ -53,14 +59,14 @@ export function VoyagePage() {
   const shown = tiles.map((tile) => tile.key);
   const back = (
     <PageBack
-      label="◀ Croisières"
-      data-go="voyages"
+      label={list.back}
+      data-go={list.view}
       onClick={() => {
         buzz();
-        go('voyages');
+        go(list.view);
       }}
     >
-      {tr('◀ Croisières')}
+      {tr(list.back)}
     </PageBack>
   );
   if (!voyage.id) {
@@ -108,8 +114,8 @@ export function VoyagePage() {
             setActiveVoyage(isActive ? null : voyage.id);
             toast(
               isActive
-                ? 'Plus de croisière active'
-                : `« ${voyage.name} » est la croisière active`,
+                ? `Plus de ${word} active`
+                : `« ${voyage.name} » est la ${word} active`,
             );
           }}
         >
@@ -120,10 +126,10 @@ export function VoyagePage() {
             {tr(
               voyage.photo
                 ? isActive
-                  ? 'Croisière active'
+                  ? `${Word} active`
                   : 'Rendre active'
                 : isActive
-                  ? '⭐ Croisière active'
+                  ? `⭐ ${Word} active`
                   : '☆ Rendre active',
             )}
           </span>
@@ -232,11 +238,15 @@ export function VoyagePage() {
               onClick={buzz}
               onDelete={() => {
                 removeVoyage(voyage.id);
-                toast('Croisière supprimée');
-                go('voyages');
+                toast(voyage.lake ? 'Sortie supprimée' : 'Croisière supprimée');
+                go(list.view);
               }}
             >
-              {tr('🗑 Supprimer la croisière')}
+              {tr(
+                voyage.lake
+                  ? '🗑 Supprimer la sortie'
+                  : '🗑 Supprimer la croisière',
+              )}
             </HoldDeleteButton>
           </ButtonRow>
         </>

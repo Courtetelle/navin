@@ -1,5 +1,16 @@
 import { NO_CRUISE_VIEWS } from './viewLists.ts';
 
+let lakeOpen: (() => boolean) | null = null;
+
+/**
+ * Tell whether the open cruise is a lake outing (its list is « Sorties
+ * lacustres »), for the back button.
+ * @param test - The test.
+ */
+export function setLakeOpen(test: () => boolean): void {
+  lakeOpen = test;
+}
+
 export { NO_CRUISE_VIEWS, ROOTS, VIEW_NAMES } from './viewLists.ts';
 export type { ViewName } from './viewLists.ts';
 
@@ -50,6 +61,7 @@ const COMMON_TABS: Record<string, string> = {
   meteo: 'more',
   weather: 'tracker',
   voyages: 'more',
+  sorties: 'more',
   vcrew: 'more',
   vcontracts: 'more',
   vdocs: 'more',
@@ -195,7 +207,9 @@ export function backFallback(current: string): string {
   if (DATA_BACK_VIEWS.has(current)) return 'more';
   if (current === 'beaufort' || current === 'douglas') return 'lists';
   if (VOYAGE_VIEWS.has(current)) return 'voyage';
-  if (current === 'voyage') return 'voyages';
+  if (current === 'voyage') {
+    return lakeOpen?.() ? 'sorties' : 'voyages';
+  }
   return 'tracker';
 }
 

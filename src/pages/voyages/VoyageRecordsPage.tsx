@@ -13,6 +13,7 @@ import {
   setRoutingVoyage,
   voyageRecords,
 } from '../../features/voyages/voyageRecords.ts';
+import { voyageBack } from '../../features/voyages/voyageWords.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
@@ -99,14 +100,14 @@ export function VoyageRecordsPage() {
   const voyage = state.data.voyages.value;
   const back = (
     <PageBack
-      label="◀ Croisière"
+      label={voyageBack()}
       data-go="voyage"
       onClick={() => {
         buzz();
         go('voyage');
       }}
     >
-      {tr('◀ Croisière')}
+      {tr(voyageBack())}
     </PageBack>
   );
   if (!voyage.id) {

@@ -186,17 +186,45 @@ export function emptyPerson(id: string): VoyagePerson {
   return { id, nom: '', role: '', tel: '', mail: '' };
 }
 
-/** The contracts of a cruise: one button each, opening its sheet. */
-export const CONTRACT_KINDS: ReadonlyArray<{
+/** One contract sheet: its id, icon and name. */
+export interface ContractKind {
   id: string;
   icon: string;
   name: string;
-}> = [
+}
+
+/** The contracts of a sea cruise: one button each, opening its sheet. */
+export const SEA_CONTRACT_KINDS: readonly ContractKind[] = [
   { id: 'courtiers', icon: '🤝', name: 'Courtier (broker)' },
   { id: 'loueur', icon: '⛵', name: 'Compagnie de location (charter)' },
   { id: 'annulation', icon: '🛡', name: 'Assurance annulation' },
   { id: 'caution', icon: '🔐', name: 'Protection de caution' },
 ];
+
+/** The owner of the boat, for a lake outing (instead of the companies). */
+export const OWNER_KIND: ContractKind = {
+  id: 'proprio',
+  icon: '🔑',
+  name: 'Propriétaire',
+};
+
+/** Every contract sheet a cruise or an outing keeps. */
+export const CONTRACT_KINDS: readonly ContractKind[] = [
+  ...SEA_CONTRACT_KINDS,
+  OWNER_KIND,
+];
+
+/**
+ * The contracts shown for a cruise (sea) or an outing (lake).
+ * @param voyage - The cruise or outing.
+ * @param voyage.lake - A lake outing.
+ * @returns Its kinds.
+ */
+export function contractKindsOf(voyage: {
+  lake?: boolean;
+}): readonly ContractKind[] {
+  return voyage.lake ? [OWNER_KIND] : SEA_CONTRACT_KINDS;
+}
 
 /** Where the contracts kept apart before go: the other filled ones. */
 export const OLD_CONTRACTS = 'anciens';
@@ -415,9 +443,10 @@ export function voyagePhotoIds(
 export function docCategories(
   voyages: Pick<Voyages, 'categories'>,
 ): Array<{ id: string; name: string }> {
+  const kinds = contractKindsOf(voyages as { lake?: boolean });
   return [
     ...voyages.categories
-      .filter((cat) => CONTRACT_KINDS.some((kind) => kind.id === cat.id))
+      .filter((cat) => kinds.some((kind) => kind.id === cat.id))
       .map(({ id, name }) => ({ id, name: name || 'Sans nom' })),
     { id: CREW_CAT, name: 'Équipage' },
     { id: OTHER_CAT, name: 'Autres' },
@@ -563,6 +592,11 @@ export interface Voyage extends Voyages {
   created: string;
   /** Sections chosen for this cruise, in the order of {@link VOYAGE_SECTIONS}. */
   sections: VoyageSectionKey[];
+  /**
+   * A lake outing (data › Sorties lacustres), not a sea cruise.
+   * @default undefined
+   */
+  lake?: boolean;
 }
 
 /** All the cruises, and the active one. */
@@ -624,6 +658,7 @@ export function cleanVoyage(raw: unknown): Voyage | null {
     name: text(value.name) || `${num || ''} Croisière`.trim(),
     created: text(value.created),
     sections: cleanSections(value.sections),
+    ...(value.lake === true ? { lake: true } : {}),
   };
 }
 
@@ -708,24 +743,28 @@ export function blankVoyage(
     sections,
     now,
     newId,
+    lake = false,
   }: {
     id: string;
     sections: readonly VoyageSectionKey[];
     now: Date;
     newId: () => string;
+    lake?: boolean;
   },
 ): Voyage {
-  const num = nextVoyageNum(list);
+  // Cruises and outings are numbered apart.
+  const num = nextVoyageNum(list.filter((item) => Boolean(item.lake) === lake));
   const base = defaultVoyages();
   return {
     ...base,
     categories: contractCategories([], newId),
     id,
     num,
-    name: `${num} Nouvelle croisière ${now.getFullYear()}`,
+    name: `${num} ${lake ? 'Nouvelle sortie' : 'Nouvelle croisière'} ${now.getFullYear()}`,
     created: now.toISOString(),
     sections: ALL_SECTIONS.filter((key) => sections.includes(key)),
     mod: now.toISOString(),
+    ...(lake ? { lake: true } : {}),
   };
 }
 
