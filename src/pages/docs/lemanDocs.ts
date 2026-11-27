@@ -49,3 +49,7 @@ export const LEMAN_DOCS: readonly LemanDocument[] = [
     url: 'https://www.haute-savoie.gouv.fr/contenu/telechargement/31420/186874/file/00-RNL-2019-compile-et-accord.pdf',
   },
 ];
+
+/** Who must carry them, and the map needed far from the shore. */
+export const DOCS_HELP =
+  'Exigés à bord de tout bateau autorisé à s’éloigner à plus de 300 m de la rive. Au-delà de 3,7 km de la rive, il faut en plus une carte de navigation du Léman (papier, ou électronique sur un GPS par exemple).';

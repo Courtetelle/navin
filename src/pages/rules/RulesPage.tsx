@@ -5,6 +5,8 @@ import { Fragment } from 'react';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { useTr } from '../../i18n/useTr.ts';
+import { DocsBody } from '../docs/DocsPage.tsx';
+import { DOCS_HELP } from '../docs/lemanDocs.ts';
 
 import { LEMAN_RULES } from './lemanRules.ts';
 
@@ -37,7 +39,7 @@ export function RulesPage() {
           'Aide-mémoire disponible sans réseau. Les textes officiels font foi : l’ONI, le Règlement de la navigation sur le Léman (nouvelle version en vigueur depuis 2019) et les règlements locaux.',
         ]}
       >
-        Règles du Léman
+        Règles du Léman et documents obligatoires à bord
       </PageTitle>
       {LEMAN_RULES.map(([title, items], index) => (
         <details key={title} className="section rules" open={index === 0}>
@@ -57,6 +59,11 @@ export function RulesPage() {
         Haute-Savoie, dossier de presse « Lac Léman » ; SISL, « Le Léman » ;
         OFDF, « Entrée en Suisse en bateau ».
       </HelpText>
+      <h2 className="sub-h" id="rulesDocs">
+        {tr('📄 Documents obligatoires à bord')}
+      </h2>
+      <HelpText>{DOCS_HELP}</HelpText>
+      <DocsBody />
     </>
   );
 }

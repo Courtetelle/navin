@@ -85,7 +85,7 @@ export const SITES: readonly SiteDef[] = [
     id: 'docs-arcgis-leman',
     label: 'Carte interactive du Léman (ArcGIS)',
     url: 'https://www.arcgis.com/apps/instant/sidebar/index.html?appid=37cabc11c62a446faa17e32a035850c0&locale=fr&center=6.5218;46.366&level=10',
-    where: 'data › Documents obligatoires à bord',
+    where: 'data › Règles du Léman et documents obligatoires à bord',
   },
   {
     id: 'moncvnautique',

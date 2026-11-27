@@ -39,8 +39,8 @@ const LISTS: MoreTile = {
 };
 const RULES: MoreTile = {
   key: 'rules',
-  title: '📘 Règles du Léman',
-  sub: 'permis, priorités, rives, feux de tempête',
+  title: '📘 Règles du Léman et documents obligatoires à bord',
+  sub: 'permis, priorités, rives, feux de tempête, titre de navigation, RPP, RGP',
 };
 const NMEA: MoreTile = {
   key: 'nmea',
@@ -105,11 +105,6 @@ export function tilesWithoutCruise(): MoreTile[] {
     sosLogsTile(),
     alertsTile(),
     RULES,
-    {
-      key: 'docs',
-      title: '📄 Documents obligatoires à bord',
-      sub: 'permis, titre de navigation, RPP, RGP',
-    },
     chartsTile(),
     NMEA,
     marksTile(marks.value.length),
@@ -160,11 +155,6 @@ export function tilesWithCruise(): MoreTile[] {
         sub: 'à envoyer sur WhatsApp',
       },
       RULES,
-      {
-        key: 'docs',
-        title: '📄 Documents obligatoires à bord',
-        sub: 'permis, titre de navigation, RPP, RGP, accord franco-suisse',
-      },
     );
   }
   if (hasLakeCruise()) tiles.push(STATS);

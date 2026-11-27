@@ -12,18 +12,36 @@ import { go } from '../../shell/router.ts';
 import { toast } from '../../state/index.ts';
 
 import { DocumentCard } from './DocumentCard.tsx';
-import { LEMAN_DOCS } from './lemanDocs.ts';
+import { DOCS_HELP, LEMAN_DOCS } from './lemanDocs.ts';
 
 type DocumentRecords = Record<string, StoredDocument | null>;
 
 /**
  * Screen `docs`: the documents required on board, kept in the app to open
- * without network (legacy `VIEWS.docs`).
+ * without network (legacy `VIEWS.docs`). Its content is also at the end of
+ * Règles du Léman (Corban, 27/11).
  * @returns The screen content, rendered inside `<main id="view">`.
  */
 export function DocsPage() {
   useSignals();
   const tr = useTr();
+  return (
+    <>
+      <PageBack label="◀ Plus" data-go="more" onClick={() => go('more')}>
+        {tr('◀ Plus')}
+      </PageBack>
+      <PageTitle helps={[DOCS_HELP]}>Documents obligatoires à bord</PageTitle>
+      <DocsBody />
+    </>
+  );
+}
+
+/**
+ * The documents required on board, each with its file kept in the app.
+ * @returns The list.
+ */
+export function DocsBody() {
+  useSignals();
   const [records, setRecords] = useState<DocumentRecords>({});
   const fileInput = useRef<HTMLInputElement>(null);
   const target = useRef<string | null>(null);
@@ -57,16 +75,6 @@ export function DocsPage() {
   };
   return (
     <>
-      <PageBack label="◀ Plus" data-go="more" onClick={() => go('more')}>
-        {tr('◀ Plus')}
-      </PageBack>
-      <PageTitle
-        helps={[
-          'Exigés à bord de tout bateau autorisé à s’éloigner à plus de 300 m de la rive. Au-delà de 3,7 km de la rive, il faut en plus une carte de navigation du Léman (papier, ou électronique sur un GPS par exemple).',
-        ]}
-      >
-        Documents obligatoires à bord
-      </PageTitle>
       <SiteLink id="docs-arcgis-leman" />
       <div id="docList">
         {LEMAN_DOCS.map((document) => (

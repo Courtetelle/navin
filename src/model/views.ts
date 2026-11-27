@@ -26,7 +26,7 @@ export const VIEW_LABELS: Readonly<Record<string, string>> = {
   people: 'Équipiers·ères',
   crews: 'Équipages',
   alpha: 'Alphabet',
-  rules: 'Règles du Léman',
+  rules: 'Règles du Léman et documents obligatoires à bord',
   docs: 'Documents',
   voyages: 'Croisières maritimes',
   sorties: 'Sorties lacustres',
