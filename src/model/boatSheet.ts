@@ -15,7 +15,7 @@ export const BOAT_SECTIONS: readonly SectionDefinition[] =
   BOAT_SECTIONS_ALL.filter(
     (section) =>
       ![
-        'Loueur, base',
+        'Compagnie Charter, base',
         'Location et règlement du bateau',
         'Radio et identification',
       ].includes(section.title),

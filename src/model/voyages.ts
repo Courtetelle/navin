@@ -787,7 +787,7 @@ export function voyageNavInfo(
   const lines: string[] = [];
   const renter = voyage.categories.find((cat) => cat.id === 'loueur');
   for (const card of renter?.cards ?? []) {
-    const who = card.org.trim() || card.title.trim() || 'Loueur';
+    const who = card.org.trim() || card.title.trim() || 'Compagnie Charter';
     if (card.tel.trim()) lines.push(`${who} : ${card.tel.trim()}`);
     if (card.urgence.trim()) {
       lines.push(`${who} urgence : ${card.urgence.trim()}`);

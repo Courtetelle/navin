@@ -147,7 +147,7 @@ export const INFO_SECTIONS: readonly SectionDefinition[] = [
     ],
   },
   {
-    title: 'Loueur, base',
+    title: 'Compagnie Charter, base',
     fields: [
       { key: 'base', label: 'Chef de base, bureau, téléphones', type: 'area' },
     ],

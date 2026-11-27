@@ -17,7 +17,7 @@ const TITLE_SECTIONS: ReadonlySet<string> = new Set([
   'Croisière',
   'Données techniques',
   'Radio et identification',
-  'Loueur, base',
+  'Compagnie Charter, base',
 ]);
 const TECH_SECTIONS: ReadonlySet<string> = new Set([
   'Données techniques',

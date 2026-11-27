@@ -42,7 +42,7 @@ const TRIP_FIELDS: ReadonlyArray<readonly [keyof CvTrip, string]> = [
   ['boatType', 'Type (monocoque, catamaran…)'],
   ['role', 'Rôle à bord (skipper, second, équipier…)'],
   ['route', 'Itinéraire ou zone'],
-  ['charter', 'Loueur'],
+  ['charter', 'Compagnie Charter'],
   ['duration', 'Durée'],
   ['nm', 'Milles parcourus'],
 ];
@@ -153,9 +153,11 @@ export interface ReceivedCv {
 const HEAD_LABELS = HEAD_FIELDS.map(
   ([key, label]) => [key, normLabel(label)] as const,
 );
-const TRIP_LABELS = TRIP_FIELDS.map(
-  ([key, label]) => [key, normLabel(label)] as const,
-);
+const TRIP_LABELS = [
+  ...TRIP_FIELDS.map(([key, label]) => [key, normLabel(label)] as const),
+  // CVs sent before « Compagnie Charter » said « Loueur ».
+  ['charter', normLabel('Loueur')] as const,
+];
 const CERT_LABELS = CERT_FIELDS.map(
   ([key, label]) => [key, normLabel(label)] as const,
 );

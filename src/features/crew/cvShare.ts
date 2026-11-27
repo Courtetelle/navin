@@ -9,7 +9,6 @@ import { sheetPng } from '../boats/index.ts';
 import { printInHolder } from '../publish/index.ts';
 
 import { CvPage } from './CvPrintPage.tsx';
-import { cvWithNavIn } from './cvNavIn.ts';
 import { WATERS_TITLE, footLine, identity, nmShown, tiles } from './cvParts.ts';
 
 /** The A4 page of the CV, its colours kept in print. */
@@ -57,8 +56,8 @@ export async function shareCv(
   member: Member,
   format: ShareFormat,
 ): Promise<void> {
-  // The outings saved in NavIn are added to what was typed.
-  const cv = cvWithNavIn(member.id, member.cv ?? {});
+  // Only what was typed: NavIn adds no navigation of its own.
+  const cv = member.cv ?? {};
   const name = memberName(member);
   const file = `CV-nautique-${name}`
     .normalize('NFD')
@@ -136,7 +135,7 @@ function cvSections(
               trip.boatType,
               trip.role,
               trip.route,
-              trip.charter ? `loueur ${trip.charter}` : '',
+              trip.charter ? `Compagnie Charter ${trip.charter}` : '',
               trip.duration,
               nmShown(trip.nm),
             ]
