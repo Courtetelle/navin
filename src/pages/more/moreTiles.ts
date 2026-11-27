@@ -19,8 +19,25 @@ interface MoreTile {
 
 const TRACES: MoreTile = {
   key: 'traces',
-  title: '🛰 Traces',
-  sub: 'traces enregistrées, carte, GPX',
+  title: '🛰 Toutes les traces',
+  sub: 'de toutes les croisières et sorties, carte, GPX',
+};
+// The records of every cruise and outing (Corban, 27/11): each one shows
+// its own under Enregistrements.
+const ROUTES: MoreTile = {
+  key: 'routes',
+  title: '✏️ Toutes les routes',
+  sub: 'de toutes les croisières et sorties',
+};
+const ROUTINGS: MoreTile = {
+  key: 'routings',
+  title: '⛵ Tous les routages',
+  sub: 'de toutes les croisières et sorties',
+};
+const MARKS: MoreTile = {
+  key: 'marks',
+  title: '📌 Toutes les marques',
+  sub: 'de toutes les croisières et sorties, Go to',
 };
 const CHECKLIST_BASES: MoreTile = {
   key: 'ckbases',
@@ -77,6 +94,9 @@ export function tilesWithoutCruise(): MoreTile[] {
   const boatCount = boats.value.length;
   const tiles = [
     TRACES,
+    ROUTES,
+    ROUTINGS,
+    MARKS,
     METEO,
     CHECKLIST_BASES,
     {
@@ -134,7 +154,15 @@ export function tilesWithCruise(): MoreTile[] {
       sub: lake ? 'fiche de la sortie' : 'fiche du jour, météo, route prévue',
     });
   }
-  tiles.push(sosLogsTile(), alertsTile(), TRACES, METEO);
+  tiles.push(
+    sosLogsTile(),
+    alertsTile(),
+    TRACES,
+    ROUTES,
+    ROUTINGS,
+    MARKS,
+    METEO,
+  );
   if (hasAboard()) {
     tiles.push({
       key: 'aboard',

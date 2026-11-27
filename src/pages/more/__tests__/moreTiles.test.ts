@@ -22,6 +22,9 @@ test('without a cruise, the menu lists the records of the phone', () => {
 
   expect(keys(tiles)).toStrictEqual([
     'traces',
+    'routes',
+    'routings',
+    'marks',
     'meteo',
     'ckbases',
     'boats',
@@ -39,8 +42,8 @@ test('without a cruise, the menu lists the records of the phone', () => {
     'lists',
     'sites',
   ]);
-  expect(tiles[3]?.sub).toBe('5 bateaux, données et check-lists du lac');
-  expect(tiles[5]?.sub).toBe('3 groupes de navigants, avec les rôles');
+  expect(tiles[6]?.sub).toBe('5 bateaux, données et check-lists du lac');
+  expect(tiles[8]?.sub).toBe('3 groupes de navigants, avec les rôles');
 });
 
 test('a lake outing shows its day, its rules and the lake totals', () => {
@@ -52,6 +55,9 @@ test('a lake outing shows its day, its rules and the lake totals', () => {
     'soslogs',
     'alerts',
     'traces',
+    'routes',
+    'routings',
+    'marks',
     'meteo',
     'checklist',
     'ckbases',
@@ -69,7 +75,7 @@ test('a lake outing shows its day, its rules and the lake totals', () => {
     'export',
   ]);
   expect(tiles[0]?.sub).toBe('fiche de la sortie');
-  expect(tiles[11]?.sub).toBe('3 à bord · 4 groupes enregistrés');
+  expect(tiles[14]?.sub).toBe('3 à bord · 4 groupes enregistrés');
 });
 
 test('a sea cruise has its task rotation and the GPX exchange', () => {

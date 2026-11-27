@@ -744,8 +744,8 @@ async function myMaps(page: Page, theme: string): Promise<void> {
   await page.waitForTimeout(300);
   check(
     theme,
-    'my marks are no longer in data (they are in each cruise or outing)',
-    (await page.locator('[data-tile="marks"]').count()) === 0,
+    'all my marks are in data (each cruise or outing has its own)',
+    (await page.locator('[data-tile="marks"]').count()) === 1,
   );
   await page.locator('[data-tile="cartes"]').click();
   await page.waitForTimeout(500);

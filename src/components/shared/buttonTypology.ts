@@ -33,6 +33,7 @@ const DATA_VIEWS: ReadonlySet<string> = new Set([
   'vdocs',
   'voyage',
   'vrecords',
+  'vrecs',
   'vinfo',
   'vboat',
 ]);

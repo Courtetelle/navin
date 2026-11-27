@@ -4,6 +4,7 @@ import { Button } from '../../components/shared/Button.tsx';
 import { MenuSortButton } from '../../components/shared/MenuSortButton.tsx';
 import { TitleInNav } from '../../components/shared/TitleInNav.tsx';
 import { bumpTile, inMenuOrder } from '../../features/data/dataOrder.ts';
+import { routesPart } from '../../features/map/routeMode.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
 import { go } from '../../shell/router.ts';
@@ -50,7 +51,7 @@ export function MorePage() {
             onClick={() => {
               bumpTile(shown, tile.key);
               buzz();
-              go(tile.key);
+              openTile(tile.key);
             }}
           >
             {tr(tile.title)}
@@ -60,4 +61,18 @@ export function MorePage() {
       </div>
     </>
   );
+}
+
+/**
+ * Open a tile: « Toutes les routes » and « Tous les routages » are the two
+ * parts of the routes screen.
+ * @param key - The tile.
+ */
+function openTile(key: string): void {
+  if (key === 'routes' || key === 'routings') {
+    routesPart.value = key === 'routes' ? 'draw' : 'routing';
+    go('routes');
+    return;
+  }
+  go(key);
 }

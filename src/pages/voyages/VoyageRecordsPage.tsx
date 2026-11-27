@@ -1,141 +1,22 @@
 import { useSignals } from '@preact/signals-react/runtime';
-import { Fragment, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
-import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
-import { FoldSection } from '../../components/shared/FoldSection.tsx';
 import { HelpText } from '../../components/shared/HelpText.tsx';
 import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
-import {
-  freeRecords,
-  setMarkVoyage,
-  setNavigationVoyage,
-  setRouteVoyage,
-  setRoutingVoyage,
-  voyageRecords,
-} from '../../features/voyages/voyageRecords.ts';
+import { RECORD_KINDS } from '../../features/voyages/recordKinds.ts';
+import { voyageRecords } from '../../features/voyages/voyageRecords.ts';
 import { voyageBack } from '../../features/voyages/voyageWords.ts';
 import { useTr } from '../../i18n/useTr.ts';
 import { buzz } from '../../lib/dom.ts';
-import { fmtShortDate } from '../../lib/format.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
-import { state, toast } from '../../state/index.ts';
-
-/** One record: its name and date, and the button that moves it. */
-interface RecordLine {
-  id: string;
-  name: string;
-  when: string;
-}
-
-/** Another cruise or outing a record can go to. */
-interface Elsewhere {
-  id: string;
-  name: string;
-}
+import { state } from '../../state/index.ts';
 
 /**
- * Records of one kind: those of the cruise, each with « ↪ Déplacer » (to
- * another cruise or outing) and « Retirer », or the free ones, each with
- * « ＋ Ajouter ».
- * @param props - Lines and actions.
- * @param props.kind - `nav`, `route`, `routing` or `mark` (data attributes).
- * @param props.lines - The records.
- * @param props.inside - They are in the cruise.
- * @param props.onMove - Move one in or out, or to another cruise.
- * @param props.empty - Text when there is none.
- * @param props.elsewhere - The other cruises and outings.
- * @returns The lines.
- */
-function Lines({
-  kind,
-  lines,
-  inside,
-  onMove,
-  empty,
-  elsewhere = [],
-}: {
-  kind: string;
-  lines: readonly RecordLine[];
-  inside: boolean;
-  onMove: (id: string, to?: string) => void;
-  empty: string;
-  elsewhere?: readonly Elsewhere[];
-}) {
-  const tr = useTr();
-  const [moving, setMoving] = useState<string | null>(null);
-  if (lines.length === 0) return <HelpText>{empty}</HelpText>;
-  return (
-    <div className="voy-records">
-      {lines.map((line) => (
-        <Fragment key={line.id}>
-          <div className="voy-record" data-voyrec={`${kind}:${line.id}`}>
-            <span className="voy-record-text">
-              <b>{line.name}</b>
-              {line.when ? <small>{line.when}</small> : null}
-            </span>
-            {inside && elsewhere.length > 0 ? (
-              <Button
-                className={`btn ${moving === line.id ? 'on' : ''}`}
-                data-voyrecto={`${kind}:${line.id}`}
-                onClick={() => {
-                  buzz();
-                  setMoving(moving === line.id ? null : line.id);
-                }}
-              >
-                {tr('↪ Déplacer')}
-              </Button>
-            ) : null}
-            <Button
-              className={`btn ${inside ? '' : 'act-add'}`}
-              data-voyrecmove={`${kind}:${line.id}`}
-              onClick={() => {
-                buzz();
-                onMove(line.id);
-              }}
-            >
-              {tr(inside ? 'Retirer' : '＋ Ajouter')}
-            </Button>
-          </div>
-          {moving === line.id ? (
-            <div className="voy-record-to">
-              {elsewhere.map((other) => (
-                <Button
-                  key={other.id}
-                  className="btn"
-                  data-voyrecdest={other.id}
-                  onClick={() => {
-                    buzz();
-                    setMoving(null);
-                    onMove(line.id, other.id);
-                    toast(
-                      `« ${line.name} » ${tr('déplacé dans')} ${other.name}`,
-                    );
-                  }}
-                >
-                  {other.name}
-                </Button>
-              ))}
-            </div>
-          ) : null}
-        </Fragment>
-      ))}
-    </div>
-  );
-}
-
-function day(iso: string | number | undefined): string {
-  if (!iso) return '';
-  const date = new Date(iso);
-  return Number.isNaN(date.getTime()) ? '' : fmtShortDate(date);
-}
-
-/**
- * Screen `vrecords` (a cruise › Enregistrements): the navigations (with
- * their traces and photos), routes and routings of the cruise. Those made
- * while it is active join it by themselves; the others can be added.
+ * Screen `vrecords` (a cruise or outing › Enregistrements): four tiles,
+ * Traces, Routes, Routages and Marques, each with what belongs to it
+ * (Corban, 27/11). What is made while it is active joins it by itself.
  * @returns The screen content.
  */
 export function VoyageRecordsPage() {
@@ -163,152 +44,48 @@ export function VoyageRecordsPage() {
     );
   }
   const mine = voyageRecords(voyage.id);
-  const free = freeRecords();
-  const navLines = (list: typeof mine.navigations): RecordLine[] =>
-    list.map((meta) => ({
-      id: meta.id,
-      name: meta.name,
-      when: day(meta.created),
-    }));
-  const routeLines = (list: typeof mine.routes): RecordLine[] =>
-    list.map((route) => ({
-      id: route.id,
-      name: route.name,
-      when: day(route.at),
-    }));
-  const routingLines = (list: typeof mine.routings): RecordLine[] =>
-    list.map((routing) => ({
-      id: routing.id,
-      name: routing.shown.name || routing.summary,
-      when: day(routing.departMs),
-    }));
-  const markLines = (list: typeof mine.marks): RecordLine[] =>
-    list.map((mark) => ({
-      id: mark.id,
-      name: mark.note ? `${mark.name} · ${mark.note}` : mark.name,
-      when: day(mark.at),
-    }));
-  const elsewhere: Elsewhere[] = state.data.voyageStore.value.list
-    .filter((item) => item.id !== voyage.id)
-    .map((item) => ({
-      id: item.id,
-      name: `${item.lake ? '🏞' : '⛵'} ${item.name}`,
-    }));
-  const isActive = state.data.voyageStore.value.active === voyage.id;
   const word = voyage.lake ? 'sortie' : 'croisière';
+  const Word = voyage.lake ? 'Sortie' : 'Croisière';
+  const isActive = state.data.voyageStore.value.active === voyage.id;
   return (
     <>
       {back}
       <PageTitle
         helps={[
-          `Les navigations (avec leurs traces et leurs photos), routes, routages et marques créés pendant que la ${word} est active la rejoignent tout seuls. « ＋ Ajouter » y range ceux d’avant, « ↪ Déplacer » les envoie dans une autre croisière ou sortie, « Retirer » les en sort.`,
+          `Les traces (navigations avec leurs photos), routes, routages et marques créés pendant que la ${word} est active la rejoignent tout seuls. Dans chaque tuile, le crayon en haut permet de les déplacer dans une autre croisière ou sortie, de les renommer, de les effacer ou d’y ajouter ceux d’avant.`,
         ]}
       >
         🛰 Enregistrements
       </PageTitle>
       <HelpText>
         {isActive
-          ? `⭐ ${voyage.lake ? 'Sortie' : 'Croisière'} active : ce qui est créé maintenant la rejoint.`
-          : `${voyage.lake ? 'Sortie' : 'Croisière'} non active : rendez-la active pour qu’elle rassemble ce qui est créé.`}
+          ? `⭐ ${Word} active : ce qui est créé maintenant la rejoint.`
+          : `${Word} non active : rendez-la active pour qu’elle rassemble ce qui est créé.`}
       </HelpText>
-      <FoldSection
-        title={`Navigations, traces et photos · ${mine.navigations.length}`}
-        titleText="voy-rec-nav"
-      >
-        <Lines
-          kind="nav"
-          lines={navLines(mine.navigations)}
-          inside
-          elsewhere={elsewhere}
-          onMove={(id, to) => setNavigationVoyage(id, to)}
-          empty={`Aucune navigation dans cette ${word}.`}
-        />
-        <ButtonRow>
-          <Button
-            className="btn"
-            data-go="cruises"
-            onClick={() => {
-              buzz();
-              go('cruises');
-            }}
-          >
-            {tr('📒 Mes navigations')}
-          </Button>
-        </ButtonRow>
-      </FoldSection>
-      <FoldSection
-        title={`Routes · ${mine.routes.length}`}
-        titleText="voy-rec-route"
-      >
-        <Lines
-          kind="route"
-          lines={routeLines(mine.routes)}
-          inside
-          elsewhere={elsewhere}
-          onMove={(id, to) => setRouteVoyage(id, to)}
-          empty={`Aucune route dans cette ${word}.`}
-        />
-      </FoldSection>
-      <FoldSection
-        title={`Routages · ${mine.routings.length}`}
-        titleText="voy-rec-routing"
-      >
-        <Lines
-          kind="routing"
-          lines={routingLines(mine.routings)}
-          inside
-          elsewhere={elsewhere}
-          onMove={(id, to) => setRoutingVoyage(id, to)}
-          empty={`Aucun routage dans cette ${word}.`}
-        />
-      </FoldSection>
-      <FoldSection
-        title={`Marques · ${mine.marks.length}`}
-        titleText="voy-rec-mark"
-      >
-        <Lines
-          kind="mark"
-          lines={markLines(mine.marks)}
-          inside
-          elsewhere={elsewhere}
-          onMove={(id, to) => setMarkVoyage(id, to)}
-          empty={`Aucune marque dans cette ${word}.`}
-        />
-      </FoldSection>
-      <FoldSection title={`Ajouter à la ${word}`} titleText="voy-rec-free">
-        <h3 className="sub-h">{tr('Navigations')}</h3>
-        <Lines
-          kind="nav"
-          lines={navLines(free.navigations)}
-          inside={false}
-          onMove={(id) => setNavigationVoyage(id, voyage.id)}
-          empty="Aucune autre navigation."
-        />
-        <h3 className="sub-h">{tr('Routes')}</h3>
-        <Lines
-          kind="route"
-          lines={routeLines(free.routes)}
-          inside={false}
-          onMove={(id) => setRouteVoyage(id, voyage.id)}
-          empty="Aucune autre route."
-        />
-        <h3 className="sub-h">{tr('Routages')}</h3>
-        <Lines
-          kind="routing"
-          lines={routingLines(free.routings)}
-          inside={false}
-          onMove={(id) => setRoutingVoyage(id, voyage.id)}
-          empty="Aucun autre routage."
-        />
-        <h3 className="sub-h">{tr('Marques')}</h3>
-        <Lines
-          kind="mark"
-          lines={markLines(free.marks)}
-          inside={false}
-          onMove={(id) => setMarkVoyage(id, voyage.id)}
-          empty="Aucune autre marque."
-        />
-      </FoldSection>
+      <div className="row more-grid data-tiles">
+        {RECORD_KINDS.map((info) => {
+          const count = mine[info.list].length;
+          return (
+            <Button
+              key={info.kind}
+              className="btn big"
+              data-go="vrecs"
+              data-tile={`rec-${info.kind}`}
+              onClick={() => {
+                buzz();
+                go('vrecs', info.kind);
+              }}
+            >
+              {tr(`${info.icon} ${info.title}`)}
+              <small>
+                {count > 0
+                  ? `${count} ${tr(`${info.one}${count > 1 ? 's' : ''}`)}`
+                  : tr('rien pour l’instant')}
+              </small>
+            </Button>
+          );
+        })}
+      </div>
     </>
   );
 }
