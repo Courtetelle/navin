@@ -87,7 +87,10 @@ export function mergeMarks(list: unknown): void {
   const received = list as Mark[];
   data.marks.value = produce(data.marks.value, (marks) => {
     for (const mark of received) {
-      if (!marks.some((item) => item.id === mark.id)) marks.push(mark);
+      const at = marks.findIndex((item) => item.id === mark.id);
+      if (at === -1) marks.push(mark);
+      // A mark moved to another cruise on another device is newer there.
+      else if ((mark.mod ?? '') > (marks[at]?.mod ?? '')) marks[at] = mark;
     }
     marks.sort((a, b) => a.n - b.n);
   });
@@ -180,10 +183,28 @@ export function addMark(lat: number, lon: number, depth?: string): Mark {
     depth: depth || '',
     note: '',
   };
+  // The active cruise or outing gathers the new marks.
+  const voyage = data.voyageStore.peek().active;
+  if (voyage) mark.voyage = voyage;
   updateMarks((marks) => {
     marks.push(mark);
   });
   return mark;
+}
+
+/**
+ * Put a mark into a cruise or outing, or take it out.
+ * @param id - Mark id.
+ * @param voyage - Its id, or undefined.
+ */
+export function setMarkVoyage(id: string, voyage: string | undefined): void {
+  updateMarks((marks) => {
+    const mark = marks.find((item) => item.id === id);
+    if (!mark) return;
+    if (voyage) mark.voyage = voyage;
+    else Reflect.deleteProperty(mark, 'voyage');
+    mark.mod = new Date().toISOString();
+  });
 }
 
 /**

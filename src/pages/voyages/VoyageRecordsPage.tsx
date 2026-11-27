@@ -1,4 +1,5 @@
 import { useSignals } from '@preact/signals-react/runtime';
+import { Fragment, useState } from 'react';
 
 import { Button } from '../../components/shared/Button.tsx';
 import { ButtonRow } from '../../components/shared/ButtonRow.tsx';
@@ -8,6 +9,7 @@ import { PageTitle } from '../../components/shared/PageTitle.tsx';
 import { NoVoyage } from '../../features/voyages/NoVoyage.tsx';
 import {
   freeRecords,
+  setMarkVoyage,
   setNavigationVoyage,
   setRouteVoyage,
   setRoutingVoyage,
@@ -19,7 +21,7 @@ import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
 import { PageBack } from '../../shell/navbar/PageBack.tsx';
 import { go } from '../../shell/router.ts';
-import { state } from '../../state/index.ts';
+import { state, toast } from '../../state/index.ts';
 
 /** One record: its name and date, and the button that moves it. */
 interface RecordLine {
@@ -28,15 +30,23 @@ interface RecordLine {
   when: string;
 }
 
+/** Another cruise or outing a record can go to. */
+interface Elsewhere {
+  id: string;
+  name: string;
+}
+
 /**
- * Records of one kind: those of the cruise, each with « Retirer », or the
- * free ones, each with « ＋ Ajouter ».
+ * Records of one kind: those of the cruise, each with « ↪ Déplacer » (to
+ * another cruise or outing) and « Retirer », or the free ones, each with
+ * « ＋ Ajouter ».
  * @param props - Lines and actions.
- * @param props.kind - `nav`, `route` or `routing` (data attributes).
+ * @param props.kind - `nav`, `route`, `routing` or `mark` (data attributes).
  * @param props.lines - The records.
  * @param props.inside - They are in the cruise.
- * @param props.onMove - Move one in or out.
+ * @param props.onMove - Move one in or out, or to another cruise.
  * @param props.empty - Text when there is none.
+ * @param props.elsewhere - The other cruises and outings.
  * @returns The lines.
  */
 function Lines({
@@ -45,38 +55,72 @@ function Lines({
   inside,
   onMove,
   empty,
+  elsewhere = [],
 }: {
   kind: string;
   lines: readonly RecordLine[];
   inside: boolean;
-  onMove: (id: string) => void;
+  onMove: (id: string, to?: string) => void;
   empty: string;
+  elsewhere?: readonly Elsewhere[];
 }) {
   const tr = useTr();
+  const [moving, setMoving] = useState<string | null>(null);
   if (lines.length === 0) return <HelpText>{empty}</HelpText>;
   return (
     <div className="voy-records">
       {lines.map((line) => (
-        <div
-          key={line.id}
-          className="voy-record"
-          data-voyrec={`${kind}:${line.id}`}
-        >
-          <span className="voy-record-text">
-            <b>{line.name}</b>
-            {line.when ? <small>{line.when}</small> : null}
-          </span>
-          <Button
-            className={`btn ${inside ? '' : 'act-add'}`}
-            data-voyrecmove={`${kind}:${line.id}`}
-            onClick={() => {
-              buzz();
-              onMove(line.id);
-            }}
-          >
-            {tr(inside ? 'Retirer' : '＋ Ajouter')}
-          </Button>
-        </div>
+        <Fragment key={line.id}>
+          <div className="voy-record" data-voyrec={`${kind}:${line.id}`}>
+            <span className="voy-record-text">
+              <b>{line.name}</b>
+              {line.when ? <small>{line.when}</small> : null}
+            </span>
+            {inside && elsewhere.length > 0 ? (
+              <Button
+                className={`btn ${moving === line.id ? 'on' : ''}`}
+                data-voyrecto={`${kind}:${line.id}`}
+                onClick={() => {
+                  buzz();
+                  setMoving(moving === line.id ? null : line.id);
+                }}
+              >
+                {tr('↪ Déplacer')}
+              </Button>
+            ) : null}
+            <Button
+              className={`btn ${inside ? '' : 'act-add'}`}
+              data-voyrecmove={`${kind}:${line.id}`}
+              onClick={() => {
+                buzz();
+                onMove(line.id);
+              }}
+            >
+              {tr(inside ? 'Retirer' : '＋ Ajouter')}
+            </Button>
+          </div>
+          {moving === line.id ? (
+            <div className="voy-record-to">
+              {elsewhere.map((other) => (
+                <Button
+                  key={other.id}
+                  className="btn"
+                  data-voyrecdest={other.id}
+                  onClick={() => {
+                    buzz();
+                    setMoving(null);
+                    onMove(line.id, other.id);
+                    toast(
+                      `« ${line.name} » ${tr('déplacé dans')} ${other.name}`,
+                    );
+                  }}
+                >
+                  {other.name}
+                </Button>
+              ))}
+            </div>
+          ) : null}
+        </Fragment>
       ))}
     </div>
   );
@@ -138,21 +182,34 @@ export function VoyageRecordsPage() {
       name: routing.shown.name || routing.summary,
       when: day(routing.departMs),
     }));
+  const markLines = (list: typeof mine.marks): RecordLine[] =>
+    list.map((mark) => ({
+      id: mark.id,
+      name: mark.note ? `${mark.name} · ${mark.note}` : mark.name,
+      when: day(mark.at),
+    }));
+  const elsewhere: Elsewhere[] = state.data.voyageStore.value.list
+    .filter((item) => item.id !== voyage.id)
+    .map((item) => ({
+      id: item.id,
+      name: `${item.lake ? '🏞' : '⛵'} ${item.name}`,
+    }));
   const isActive = state.data.voyageStore.value.active === voyage.id;
+  const word = voyage.lake ? 'sortie' : 'croisière';
   return (
     <>
       {back}
       <PageTitle
         helps={[
-          'Les navigations (avec leurs traces et leurs photos), routes et routages créés pendant que la croisière est active la rejoignent tout seuls. « ＋ Ajouter » y range ceux d’avant, « Retirer » les en sort.',
+          `Les navigations (avec leurs traces et leurs photos), routes, routages et marques créés pendant que la ${word} est active la rejoignent tout seuls. « ＋ Ajouter » y range ceux d’avant, « ↪ Déplacer » les envoie dans une autre croisière ou sortie, « Retirer » les en sort.`,
         ]}
       >
         🛰 Enregistrements
       </PageTitle>
       <HelpText>
         {isActive
-          ? '⭐ Croisière active : ce qui est créé maintenant la rejoint.'
-          : 'Croisière non active : rendez-la active pour qu’elle rassemble ce qui est créé.'}
+          ? `⭐ ${voyage.lake ? 'Sortie' : 'Croisière'} active : ce qui est créé maintenant la rejoint.`
+          : `${voyage.lake ? 'Sortie' : 'Croisière'} non active : rendez-la active pour qu’elle rassemble ce qui est créé.`}
       </HelpText>
       <FoldSection
         title={`Navigations, traces et photos · ${mine.navigations.length}`}
@@ -162,8 +219,9 @@ export function VoyageRecordsPage() {
           kind="nav"
           lines={navLines(mine.navigations)}
           inside
-          onMove={(id) => setNavigationVoyage(id, undefined)}
-          empty="Aucune navigation dans cette croisière."
+          elsewhere={elsewhere}
+          onMove={(id, to) => setNavigationVoyage(id, to)}
+          empty={`Aucune navigation dans cette ${word}.`}
         />
         <ButtonRow>
           <Button
@@ -186,8 +244,9 @@ export function VoyageRecordsPage() {
           kind="route"
           lines={routeLines(mine.routes)}
           inside
-          onMove={(id) => setRouteVoyage(id, undefined)}
-          empty="Aucune route dans cette croisière."
+          elsewhere={elsewhere}
+          onMove={(id, to) => setRouteVoyage(id, to)}
+          empty={`Aucune route dans cette ${word}.`}
         />
       </FoldSection>
       <FoldSection
@@ -198,11 +257,25 @@ export function VoyageRecordsPage() {
           kind="routing"
           lines={routingLines(mine.routings)}
           inside
-          onMove={(id) => setRoutingVoyage(id, undefined)}
-          empty="Aucun routage dans cette croisière."
+          elsewhere={elsewhere}
+          onMove={(id, to) => setRoutingVoyage(id, to)}
+          empty={`Aucun routage dans cette ${word}.`}
         />
       </FoldSection>
-      <FoldSection title="Ajouter à la croisière" titleText="voy-rec-free">
+      <FoldSection
+        title={`Marques · ${mine.marks.length}`}
+        titleText="voy-rec-mark"
+      >
+        <Lines
+          kind="mark"
+          lines={markLines(mine.marks)}
+          inside
+          elsewhere={elsewhere}
+          onMove={(id, to) => setMarkVoyage(id, to)}
+          empty={`Aucune marque dans cette ${word}.`}
+        />
+      </FoldSection>
+      <FoldSection title={`Ajouter à la ${word}`} titleText="voy-rec-free">
         <h3 className="sub-h">{tr('Navigations')}</h3>
         <Lines
           kind="nav"
@@ -226,6 +299,14 @@ export function VoyageRecordsPage() {
           inside={false}
           onMove={(id) => setRoutingVoyage(id, voyage.id)}
           empty="Aucun autre routage."
+        />
+        <h3 className="sub-h">{tr('Marques')}</h3>
+        <Lines
+          kind="mark"
+          lines={markLines(free.marks)}
+          inside={false}
+          onMove={(id) => setMarkVoyage(id, voyage.id)}
+          empty="Aucune autre marque."
         />
       </FoldSection>
     </>

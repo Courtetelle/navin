@@ -79,14 +79,24 @@ export function voyageTiles(): VoyageTile[] {
   const total =
     records.navigations.length +
     records.routes.length +
-    records.routings.length;
+    records.routings.length +
+    records.marks.length;
   tiles.push({
     key: 'vrecords',
     title: '🛰 Enregistrements',
     sub:
       total > 0
-        ? `${plural(records.navigations.length, 'navigation')} (traces, photos) · ${plural(records.routes.length, 'route')} · ${plural(records.routings.length, 'routage')}`
-        : `navigations, traces, photos, routes et routages de la ${lake ? 'sortie' : 'croisière'}`,
+        ? `${plural(records.navigations.length, 'navigation')} (traces, photos) · ${plural(records.routes.length, 'route')} · ${plural(records.routings.length, 'routage')} · ${plural(records.marks.length, 'marque')}`
+        : `navigations, traces, photos, routes, routages et marques de la ${lake ? 'sortie' : 'croisière'}`,
   });
+  // The day sheet of the navigation under way lives in its cruise or outing.
+  const cruise = state.data.cruise.value;
+  if (cruise?.voyage === id && cruise) {
+    tiles.push({
+      key: 'day',
+      title: '📅 Journée et fiche du jour',
+      sub: `fiche du jour de « ${cruise.info.name || 'la navigation'} »`,
+    });
+  }
   return tiles;
 }

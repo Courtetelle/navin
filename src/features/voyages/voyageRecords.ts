@@ -1,5 +1,5 @@
 import type { NavRoute } from '../../model/routes.ts';
-import type { CruiseMeta } from '../../model/types.ts';
+import type { CruiseMeta, Mark } from '../../model/types.ts';
 import { state, updateRoutes } from '../../state/index.ts';
 import type { SavedRouting } from '../map/routingState.ts';
 import { savedRoutings } from '../map/routingState.ts';
@@ -9,6 +9,7 @@ export interface VoyageRecords {
   navigations: CruiseMeta[];
   routes: NavRoute[];
   routings: SavedRouting[];
+  marks: Mark[];
 }
 
 /**
@@ -22,6 +23,7 @@ export function voyageRecords(id: string): VoyageRecords {
     navigations: state.data.index.value.filter((meta) => meta.voyage === id),
     routes: state.data.routes.value.filter((route) => route.voyage === id),
     routings: savedRoutings.value.filter((routing) => routing.voyage === id),
+    marks: state.data.marks.value.filter((mark) => mark.voyage === id),
   };
 }
 
@@ -37,6 +39,7 @@ export function freeRecords(): VoyageRecords {
     navigations: state.data.index.value.filter((meta) => free(meta.voyage)),
     routes: state.data.routes.value.filter((route) => free(route.voyage)),
     routings: savedRoutings.value.filter((routing) => free(routing.voyage)),
+    marks: state.data.marks.value.filter((mark) => free(mark.voyage)),
   };
 }
 
@@ -51,8 +54,9 @@ export function setRouteVoyage(id: string, voyage: string | undefined): void {
     if (!route) return;
     if (voyage) route.voyage = voyage;
     else Reflect.deleteProperty(route, 'voyage');
+    route.mod = new Date().toISOString();
   });
 }
 
 export { setRoutingVoyage } from '../map/routingState.ts';
-export { setNavigationVoyage } from '../../state/index.ts';
+export { setMarkVoyage, setNavigationVoyage } from '../../state/index.ts';

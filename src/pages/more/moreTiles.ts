@@ -39,8 +39,8 @@ const LISTS: MoreTile = {
 };
 const RULES: MoreTile = {
   key: 'rules',
-  title: '📘 Règles du Léman',
-  sub: 'permis, priorités, rives, feux de tempête',
+  title: '📘 Règles du Léman et documents obligatoires à bord',
+  sub: 'permis, priorités, rives, feux de tempête, titre de navigation, RPP, RGP',
 };
 const NMEA: MoreTile = {
   key: 'nmea',
@@ -73,7 +73,7 @@ const STATS: MoreTile = {
  * @returns The tiles in their default order.
  */
 export function tilesWithoutCruise(): MoreTile[] {
-  const { boats, crewSets, marks, members } = state.data;
+  const { boats, crewSets, members } = state.data;
   const boatCount = boats.value.length;
   const tiles = [
     TRACES,
@@ -105,14 +105,8 @@ export function tilesWithoutCruise(): MoreTile[] {
     sosLogsTile(),
     alertsTile(),
     RULES,
-    {
-      key: 'docs',
-      title: '📄 Documents obligatoires à bord',
-      sub: 'permis, titre de navigation, RPP, RGP',
-    },
     chartsTile(),
     NMEA,
-    marksTile(marks.value.length),
     LISTS,
     SITES,
   ];
@@ -126,21 +120,21 @@ export function tilesWithoutCruise(): MoreTile[] {
  */
 export function tilesWithCruise(): MoreTile[] {
   const lake = isLake();
-  const { boats, crewSets, cruise, marks, members } = state.data;
+  const { boats, crewSets, cruise, members } = state.data;
   const boatCount = boats.value.length;
   const setCount = crewSets.value.length;
   const setPlural = setCount > 1 ? 's' : '';
-  const tiles: MoreTile[] = [
-    {
+  const tiles: MoreTile[] = [];
+  // Journée et fiche du jour live in the cruise or outing of the navigation
+  // (Corban, 27/11): here only when the navigation has none.
+  if (!navigationInVoyage()) {
+    tiles.push({
       key: 'day',
-      title: '📅 Journée',
+      title: '📅 Journée et fiche du jour',
       sub: lake ? 'fiche de la sortie' : 'fiche du jour, météo, route prévue',
-    },
-    sosLogsTile(),
-    alertsTile(),
-    TRACES,
-    METEO,
-  ];
+    });
+  }
+  tiles.push(sosLogsTile(), alertsTile(), TRACES, METEO);
   if (hasAboard()) {
     tiles.push({
       key: 'aboard',
@@ -152,21 +146,7 @@ export function tilesWithCruise(): MoreTile[] {
     { key: 'checklist', title: '✅ Check-lists', sub: checklistSub() },
     CHECKLIST_BASES,
   );
-  if (lake) {
-    tiles.push(
-      {
-        key: 'sheet',
-        title: '📸 Fiche du jour',
-        sub: 'à envoyer sur WhatsApp',
-      },
-      RULES,
-      {
-        key: 'docs',
-        title: '📄 Documents obligatoires à bord',
-        sub: 'permis, titre de navigation, RPP, RGP, accord franco-suisse',
-      },
-    );
-  }
+  if (lake) tiles.push(RULES);
   if (hasLakeCruise()) tiles.push(STATS);
   tiles.push(
     {
@@ -183,7 +163,6 @@ export function tilesWithCruise(): MoreTile[] {
     VOYAGES,
     OUTINGS,
     LISTS,
-    marksTile(marks.value.length),
     chartsTile(),
     NMEA,
     SITES,
@@ -194,6 +173,14 @@ export function tilesWithCruise(): MoreTile[] {
     },
   );
   return tiles;
+}
+
+function navigationInVoyage(): boolean {
+  const voyage = state.data.cruise.value?.voyage;
+  return (
+    typeof voyage === 'string' &&
+    state.data.voyageStore.value.list.some((item) => item.id === voyage)
+  );
 }
 
 function hasLakeCruise(): boolean {
@@ -220,14 +207,6 @@ function peopleTile(count: number): MoreTile {
     key: 'people',
     title: '🧭 Équipiers·ères',
     sub: `${count} fiche${count > 1 ? 's' : ''} : les personnes et leurs caractéristiques`,
-  };
-}
-
-function marksTile(count: number): MoreTile {
-  return {
-    key: 'marks',
-    title: '📌 Marques',
-    sub: `${count} marque(s), Go to`,
   };
 }
 
