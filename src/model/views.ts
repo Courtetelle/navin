@@ -35,6 +35,7 @@ export const VIEW_LABELS: Readonly<Record<string, string>> = {
   vdocs: 'Documents de la croisière',
   voyage: 'Croisière',
   vrecords: 'Enregistrements de la croisière',
+  vrecs: 'Enregistrements de la croisière : une sorte',
   vinfo: 'Croisière : ports, dates, VHF, météo',
   vboat: 'Croisière : bateau',
 };

@@ -116,6 +116,10 @@ const pageLoaders: Record<ViewName, () => PageModule> = {
     import('../pages/voyages/VoyageRecordsPage.tsx').then((module) => ({
       default: module.VoyageRecordsPage,
     })),
+  vrecs: () =>
+    import('../pages/voyages/VoyageRecordListPage.tsx').then((module) => ({
+      default: module.VoyageRecordListPage,
+    })),
   weather: () =>
     import('../pages/weather/WeatherPage.tsx').then((module) => ({
       default: module.WeatherPage,

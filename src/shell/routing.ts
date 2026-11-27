@@ -67,6 +67,7 @@ const COMMON_TABS: Record<string, string> = {
   vdocs: 'more',
   voyage: 'more',
   vrecords: 'more',
+  vrecs: 'more',
   vinfo: 'more',
   vboat: 'more',
 };
@@ -206,6 +207,7 @@ const DATA_BACK_VIEWS = new Set([
 export function backFallback(current: string): string {
   if (DATA_BACK_VIEWS.has(current)) return 'more';
   if (current === 'beaufort' || current === 'douglas') return 'lists';
+  if (current === 'vrecs') return 'vrecords';
   if (VOYAGE_VIEWS.has(current)) return 'voyage';
   if (current === 'voyage') {
     return lakeOpen?.() ? 'sorties' : 'voyages';

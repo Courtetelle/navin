@@ -15,8 +15,8 @@ const sea = { cruiseOpen: true, alphaBack: 'more' };
 test('there is one legacy view per page folder', () => {
   // 41 legacy views, the PréP menu, the sites of the internet and the
   // journal of the alerts; data › Croisières maritimes, Sorties lacustres,
-  // a cruise and its six pages.
-  expect(VIEW_NAMES).toHaveLength(54);
+  // a cruise, its six pages and its records of one kind.
+  expect(VIEW_NAMES).toHaveLength(55);
 });
 
 test('the tab of a screen follows app.js:662', () => {
