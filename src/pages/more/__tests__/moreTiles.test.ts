@@ -36,7 +36,6 @@ test('without a cruise, the menu lists the records of the phone', () => {
     'rules',
     'cartes',
     'nmea',
-    'marks',
     'lists',
     'sites',
   ]);
@@ -44,7 +43,7 @@ test('without a cruise, the menu lists the records of the phone', () => {
   expect(tiles[5]?.sub).toBe('3 groupes de navigants, avec les rôles');
 });
 
-test('a lake outing shows its sheet, its rules and the lake totals', () => {
+test('a lake outing shows its day, its rules and the lake totals', () => {
   load('sample-lake');
   const tiles = tilesWithCruise();
 
@@ -56,7 +55,6 @@ test('a lake outing shows its sheet, its rules and the lake totals', () => {
     'meteo',
     'checklist',
     'ckbases',
-    'sheet',
     'rules',
     'stats',
     'boats',
@@ -65,14 +63,13 @@ test('a lake outing shows its sheet, its rules and the lake totals', () => {
     'voyages',
     'sorties',
     'lists',
-    'marks',
     'cartes',
     'nmea',
     'sites',
     'export',
   ]);
   expect(tiles[0]?.sub).toBe('fiche de la sortie');
-  expect(tiles[12]?.sub).toBe('3 à bord · 4 groupes enregistrés');
+  expect(tiles[11]?.sub).toBe('3 à bord · 4 groupes enregistrés');
 });
 
 test('a sea cruise has its task rotation and the GPX exchange', () => {

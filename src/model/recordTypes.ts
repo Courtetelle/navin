@@ -127,5 +127,9 @@ export interface Mark {
   lon: number;
   depth: string;
   note: string;
+  /** The cruise or outing it belongs to. */
+  voyage?: string;
+  /** Last change (moved to another cruise). */
+  mod?: string;
   [key: string]: unknown;
 }
