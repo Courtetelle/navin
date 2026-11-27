@@ -16305,3 +16305,32 @@ div.doc-viewer-body {
   width: 100%;
   min-height: 90px;
 }
+
+/* 27/11/2026 : Paramètres › Poubelle. */
+.trash-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.trash-line {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--hair);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+.trash-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-wrap: anywhere;
+}
+.trash-line .btn {
+  flex: none;
+  width: auto;
+  min-width: 180px;
+}

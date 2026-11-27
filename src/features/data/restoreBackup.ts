@@ -330,11 +330,15 @@ function restoreSosLogs(file: BackupFile): void {
 }
 
 function restoreCrewSets(received: ReadonlyArray<CrewSet | null>): void {
+  const stamp = (set: CrewSet) => set.mod || set.at || '';
   updateCrewSets((sets) => {
     for (const set of received) {
-      if (!set?.id || sets.some((known) => known.id === set.id)) continue;
+      if (!set?.id) continue;
       if (set._sig === undefined) set._sig = crewSig(set);
-      sets.push(set);
+      const at = sets.findIndex((known) => known.id === set.id);
+      if (at === -1) sets.push(set);
+      // Changed later on the other device: its version replaces this one.
+      else if (stamp(set) > stamp(sets[at] as CrewSet)) sets[at] = set;
     }
   });
 }

@@ -4,6 +4,7 @@
  */
 export { newSyncKey } from './syncCrypto.ts';
 export {
+  noteRevived,
   syncDevice,
   syncKey,
   syncReady,

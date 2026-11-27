@@ -172,6 +172,14 @@ export function openCruise(id: string): boolean {
  */
 function deleteCruiseData(id: string): void {
   const cruise = store.get<Cruise | null>(`ldb.cruise.${id}`, null);
+  if (hooks.cruiseGone) {
+    const keys: Record<string, unknown> = {};
+    for (const prefix of CRUISE_KEY_PREFIXES) {
+      const value = store.get<unknown>(prefix + id, null);
+      if (value !== null) keys[prefix + id] = value;
+    }
+    hooks.cruiseGone(id, keys);
+  }
   if (cruise?.photos) {
     for (const photo of cruise.photos) void delPhoto(photo.id);
   }

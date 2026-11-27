@@ -10,7 +10,8 @@ import { data } from './data.ts';
 /** Where the journal is kept on the device. */
 const KEY = 'ldb.alertLog';
 /** The oldest alerts go beyond this many. */
-const MOST = 3000;
+export const ALERT_MOST = 3000;
+const MOST = ALERT_MOST;
 
 /** The journal of the alerts. */
 export const alertLog = signal<readonly AlertRecord[]>(

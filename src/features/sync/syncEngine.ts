@@ -11,11 +11,15 @@
 import { signal } from '@preact/signals-react';
 
 import {
+  ALERT_MOST,
+  alertLog,
   allVoyageDocIds,
+  eraseAlerts,
   removeBoat,
   removeCruise,
   removeMark,
   removeRoute,
+  removeVoyage,
   state,
   takeTracesGone,
   tracesGone,
@@ -61,6 +65,8 @@ const KINDS = [
   'routings',
   'crewSets',
   'sosLogs',
+  'voyages',
+  'alerts',
 ] as const;
 type Kind = (typeof KINDS)[number];
 
@@ -88,6 +94,8 @@ interface SyncPack extends BackupFile {
   keys?: KeysPack;
   /** The traces it deleted (`cruise|first time|last time` → when). */
   tracesGone?: Record<string, number>;
+  /** Records taken back from the Poubelle: their deletion no longer holds. */
+  revived?: Gone;
 }
 
 /**
@@ -220,6 +228,13 @@ function idsOf(kind: Kind): string[] {
   const { data } = state;
   if (kind === 'cruises') return data.index.peek().map((line) => line.id);
   if (kind === 'routings') return savedRoutings.peek().map((item) => item.id);
+  if (kind === 'voyages') {
+    return data.voyageStore.peek().list.map((voyage) => voyage.id);
+  }
+  if (kind === 'alerts') {
+    // Beyond the limit of the journal the oldest leave: not a deletion.
+    return alertLog.peek().map((alert) => alert.id);
+  }
   const list = data[kind].peek() as ReadonlyArray<{ id?: string }>;
   return list.map((item) => item.id ?? '').filter(Boolean);
 }
@@ -242,6 +257,8 @@ function noteDeletions(): void {
   const kept = gone();
   const now = Date.now();
   for (const kind of KINDS) {
+    // A full journal drops its oldest alerts: not deletions.
+    if (kind === 'alerts' && alertLog.peek().length >= ALERT_MOST) continue;
     const here = new Set(idsOf(kind));
     for (const id of known[kind] ?? []) {
       if (!here.has(id)) kept[kind] = { ...kept[kind], [id]: now };
@@ -290,10 +307,13 @@ async function take(
   aes: CryptoKey,
   pack: SyncPack,
 ): Promise<void> {
+  const back = takeRevived(pack.revived);
   const kept = gone();
-  // Deleted there: deleted here. Deleted here: not brought back.
+  // Deleted there: deleted here. Deleted here: not brought back. Taken back
+  // from a Poubelle after its deletion: kept.
   for (const kind of KINDS) {
     for (const [id, at] of Object.entries(pack.gone?.[kind] ?? {})) {
+      if ((back[kind]?.[id] ?? 0) >= at) continue;
       kept[kind] = { ...kept[kind], [id]: Math.max(at, kept[kind]?.[id] ?? 0) };
     }
   }
@@ -345,6 +365,13 @@ function deleteHere(kept: Gone, tracked: string | undefined): void {
       }
     });
   }
+  for (const id of ids('voyages')) {
+    if (idsOf('voyages').includes(id)) removeVoyage(id);
+  }
+  const alerts = [...ids('alerts')].filter((id) =>
+    idsOf('alerts').includes(id),
+  );
+  if (alerts.length > 0) eraseAlerts(alerts);
   const logs = ids('sosLogs');
   if (idsOf('sosLogs').some((id) => logs.has(id))) {
     updateSosLogs((list) => {
@@ -383,7 +410,74 @@ function withoutGone(pack: SyncPack, kept: Gone): SyncPack {
     routings: out('routings', pack.routings),
     crewSets: out('crewSets', pack.crewSets),
     sosLogs: out('sosLogs', pack.sosLogs),
+    alerts: out('alerts', pack.alerts),
+    voyages: withoutGoneVoyages(pack.voyages, kept),
   };
+}
+
+function withoutGoneVoyages(voyages: unknown, kept: Gone): unknown {
+  if (!voyages || typeof voyages !== 'object') return voyages;
+  const { list } = voyages as { list?: unknown };
+  if (!Array.isArray(list)) return voyages;
+  return {
+    ...voyages,
+    list: (list as Array<{ id?: string }>).filter(
+      (item) => !kept.voyages?.[item?.id ?? ''],
+    ),
+  };
+}
+
+/* ---------- Taken back from the Poubelle ---------- */
+
+const REVIVED_KEY = 'ldb.syncRevived';
+
+function revived(): Gone {
+  const kept = store.get<Gone>(REVIVED_KEY, {});
+  const limit = Date.now() - GONE_MS;
+  for (const kind of KINDS) {
+    for (const [id, at] of Object.entries(kept[kind] ?? {})) {
+      if (at < limit) Reflect.deleteProperty(kept[kind] ?? {}, id);
+    }
+  }
+  return kept;
+}
+
+/**
+ * A record taken back from the Poubelle here: no longer deleted, here and,
+ * at the next round, on the other devices.
+ * @param kind - Its kind.
+ * @param id - Its id.
+ */
+export function noteRevived(kind: string, id: string): void {
+  if (!(KINDS as readonly string[]).includes(kind)) return;
+  const key = kind as Kind;
+  const back = revived();
+  back[key] = { ...back[key], [id]: Date.now() };
+  store.set(REVIVED_KEY, back);
+  const kept = gone();
+  if (kept[key]?.[id]) {
+    Reflect.deleteProperty(kept[key], id);
+    store.set('ldb.syncGone', kept);
+  }
+}
+
+/** What another device took back: its deletion no longer holds here. */
+function takeRevived(received: Gone | undefined): Gone {
+  const back = revived();
+  const kept = gone();
+  for (const kind of KINDS) {
+    for (const [id, at] of Object.entries(received?.[kind] ?? {})) {
+      back[kind] = { ...back[kind], [id]: Math.max(at, back[kind]?.[id] ?? 0) };
+    }
+    for (const [id, at] of Object.entries(back[kind] ?? {})) {
+      if ((kept[kind]?.[id] ?? Infinity) <= at) {
+        Reflect.deleteProperty(kept[kind] ?? {}, id);
+      }
+    }
+  }
+  store.set(REVIVED_KEY, back);
+  store.set('ldb.syncGone', kept);
+  return back;
 }
 
 async function fetchPhotos(
@@ -445,6 +539,7 @@ export function packOfDevice(): SyncPack {
     photoNames: {},
     keys: keysOfDevice(),
     tracesGone: tracesGone(),
+    revived: revived(),
   };
 }
 

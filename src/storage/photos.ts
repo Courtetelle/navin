@@ -3,6 +3,8 @@
  * `p`, key = photo id, value = data URL), as in legacy.
  */
 
+import { store } from './store.ts';
+
 /** Photo moments of an outing: context → label (legacy `PHOTO_CTX`). */
 export const PHOTO_CTX: Readonly<Record<string, string>> = {
   dep: '📷 Prise du bateau',
@@ -51,8 +53,10 @@ export async function putPhoto(
   id: string,
   value: PhotoData,
 ): Promise<IDBValidKey> {
-  const store = await photoStore('readwrite');
-  return idbRequest(store.put(value, id));
+  const db = await photoStore('readwrite');
+  const key = await idbRequest(db.put(value, id));
+  keepPhotos([id]);
+  return key;
 }
 
 /**
@@ -64,22 +68,87 @@ export async function getPhoto(
   id: string,
 ): Promise<PhotoData | undefined | null> {
   try {
-    const store = await photoStore('readonly');
-    return await idbRequest<PhotoData | undefined>(store.get(id));
+    const db = await photoStore('readonly');
+    return await idbRequest<PhotoData | undefined>(db.get(id));
   } catch {
     return null;
   }
 }
 
+/** Photos deleted, kept this long for the Poubelle, then freed. */
+export const PHOTO_BIN_MS = 30 * 24 * 3600 * 1000;
+const BIN_KEY = 'ldb.photoBin';
+
 /**
- * Delete a photo or document (legacy `delPhoto`); never rejects.
+ * Delete a photo or document; never rejects. It stays 30 days in the bin, so
+ * that a record taken back from the Poubelle finds its photos again.
  * @param id - Photo id.
  * @returns Resolves when done.
  */
-export async function delPhoto(id: string): Promise<void> {
+export function delPhoto(id: string): Promise<void> {
+  if (!id.startsWith(TRASH_PREFIX)) {
+    store.set(BIN_KEY, {
+      ...store.get<Record<string, number>>(BIN_KEY, {}),
+      [id]: Date.now(),
+    });
+  }
+  return Promise.resolve();
+}
+
+/**
+ * Photos taken back from the bin (a record restored): kept again.
+ * @param ids - Their ids.
+ */
+export function keepPhotos(ids: Iterable<string>): void {
+  const bin = { ...store.get<Record<string, number>>(BIN_KEY, {}) };
+  let changed = false;
+  for (const id of ids) {
+    if (id in bin) {
+      Reflect.deleteProperty(bin, id);
+      changed = true;
+    }
+  }
+  if (changed) store.set(BIN_KEY, bin);
+}
+
+/**
+ * The ids in the bin, to know which ones a restored record holds.
+ * @returns The ids.
+ */
+export function binnedPhotos(): string[] {
+  return Object.keys(store.get<Record<string, number>>(BIN_KEY, {}));
+}
+
+/**
+ * Free the photos deleted more than 30 days ago.
+ * @param now - Current time.
+ * @returns When done.
+ */
+export async function emptyPhotoBin(now = Date.now()): Promise<void> {
+  const bin = { ...store.get<Record<string, number>>(BIN_KEY, {}) };
+  const old = Object.entries(bin).filter(([, at]) => now - at > PHOTO_BIN_MS);
+  if (old.length === 0) return;
+  /* eslint-disable no-await-in-loop -- one IndexedDB delete at a time */
+  for (const [id] of old) {
+    await dropPhoto(id);
+    Reflect.deleteProperty(bin, id);
+  }
+  /* eslint-enable no-await-in-loop */
+  store.set(BIN_KEY, bin);
+}
+
+/** Records of the Poubelle are kept in the photo database under this prefix. */
+export const TRASH_PREFIX = 'trash:';
+
+/**
+ * Delete at once from IndexedDB; never rejects.
+ * @param id - Photo id.
+ * @returns Resolves when done.
+ */
+export async function dropPhoto(id: string): Promise<void> {
   try {
-    const store = await photoStore('readwrite');
-    await idbRequest(store.delete(id));
+    const db = await photoStore('readwrite');
+    await idbRequest(db.delete(id));
   } catch {
     // IndexedDB unavailable: nothing to delete.
   }
