@@ -4,6 +4,10 @@ import { createMemoryStorage } from '../../storage/memoryStorage.ts';
 import * as actions from '../actions.ts';
 import { state } from '../index.ts';
 
+function byId(id: string) {
+  return state.data.crewSets.value.find((set) => set.id === id);
+}
+
 beforeEach(() => {
   actions.initState(createMemoryStorage({}));
   actions.updateCrewSets((sets) => {
@@ -19,8 +23,6 @@ test('a crew changed here takes the time of its change', () => {
     const set = sets.find((item) => item.id === 'a');
     if (set) set.name = 'Bretagne Nord';
   });
-  const byId = (id: string) =>
-    state.data.crewSets.value.find((set) => set.id === id);
   const changed = byId('a');
   const same = byId('b');
   expect(changed?.mod).not.toBe('2026-01-01T00:00:00.000Z');
