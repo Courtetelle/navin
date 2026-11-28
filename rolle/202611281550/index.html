@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Analyse Rolle, Léman</title>
+<style>
+/* Layout : une colonne de lecture, du plus grand au plus petit, comme on descend une carte marine à l'échelle */
+:root {
+  --bg: #f3f5f6;
+  --paper: #ffffff;
+  --fg: #14212b;
+  --muted: #53636f;
+  --line: #d5dde2;
+  --sea: #0b5d7a;
+  --sea-soft: #e1eff4;
+  --go: #1f8a4c;
+  --warn: #d9822b;
+  --nogo: #c4322f;
+  --display: 'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0e171d;
+    --paper: #15222a;
+    --fg: #e4ecf0;
+    --muted: #9aaab4;
+    --line: #2a3a44;
+    --sea: #5cb8d8;
+    --sea-soft: #163240;
+    --go: #45c27a;
+    --warn: #f0a24e;
+    --nogo: #f06a63;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #0e171d;
+  --paper: #15222a;
+  --fg: #e4ecf0;
+  --muted: #9aaab4;
+  --line: #2a3a44;
+  --sea: #5cb8d8;
+  --sea-soft: #163240;
+  --go: #45c27a;
+  --warn: #f0a24e;
+  --nogo: #f06a63;
+  color-scheme: dark;
+}
+html {
+  font-size: 17px;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  line-height: 1.55;
+  font-size: 1rem;
+}
+.wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 28px;
+}
+header {
+  display: grid;
+  gap: 6px;
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sea);
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.15;
+  margin: 0;
+  text-wrap: balance;
+}
+h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.45rem;
+  margin: 0;
+  text-wrap: balance;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+h2 .scale {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+h3 {
+  font-size: 1.02rem;
+  margin: 0;
+  font-weight: 600;
+}
+p {
+  margin: 0;
+  max-width: 68ch;
+}
+.meta {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.fontbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+section {
+  display: grid;
+  gap: 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+}
+.essentiel {
+  display: grid;
+  gap: 8px;
+}
+.essentiel li {
+  max-width: 68ch;
+}
+ul {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 4px;
+}
+.tblwrap {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+}
+th,
+td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+thead th,
+tfoot th {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+tfoot th {
+  border-bottom: 0;
+  border-top: 1px solid var(--line);
+}
+.light {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.dot {
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 50%;
+  display: inline-block;
+}
+.go .dot {
+  background: var(--go);
+}
+.warn .dot {
+  background: var(--warn);
+}
+.nogo .dot {
+  background: var(--nogo);
+}
+.go {
+  color: var(--go);
+}
+.warn {
+  color: var(--warn);
+}
+.nogo {
+  color: var(--nogo);
+}
+figure {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.map {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  cursor: zoom-in;
+}
+.map img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.map img.layer {
+  position: absolute;
+  inset: 0;
+}
+figcaption {
+  font-size: 0.84rem;
+  color: var(--muted);
+  max-width: none;
+}
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+button {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--fg);
+  cursor: pointer;
+  min-height: 40px;
+}
+button[aria-pressed='true'] {
+  background: var(--sea);
+  border-color: var(--sea);
+  color: var(--paper);
+}
+button:focus-visible {
+  outline: 3px solid var(--sea);
+  outline-offset: 2px;
+}
+.note {
+  background: var(--sea-soft);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: grid;
+  gap: 6px;
+}
+.note.alert {
+  background: color-mix(in srgb, var(--warn) 16%, var(--paper));
+}
+a {
+  color: var(--sea);
+}
+.src {
+  font-size: 0.84rem;
+  color: var(--muted);
+  display: grid;
+  gap: 4px;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 14px;
+}
+.grid2 > * {
+  min-width: 0;
+}
+#zoom {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 12, 16, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px)
+    max(12px, env(safe-area-inset-right, 0px))
+    calc(env(safe-area-inset-bottom, 0px) + 12px)
+    max(12px, env(safe-area-inset-left, 0px));
+  overflow: auto;
+  cursor: zoom-out;
+}
+#zoom[hidden] {
+  display: none;
+}
+#zoom .stack {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+}
+#zoom img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 40px);
+  width: auto;
+  height: auto;
+}
+#zoom img.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 520px) {
+  html {
+    font-size: 16px;
+  }
+  h1 {
+    font-size: 1.7rem;
+  }
+  section {
+    padding: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+.versions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.versions select{font:inherit;font-size:1rem;padding:.35em .5em;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);max-width:100%}
+table.sys td:first-child{white-space:nowrap}
+small.ev{color:var(--nogo);white-space:normal}
+</style>
+</head>
+<body>
+<div class="wrap" data-zone="rolle" data-version="202611281550">
+<header>
+  <div class="eyebrow">Zone Lacs · 46°27,6&#x27; N 006°20,3&#x27; E</div>
+  <h1>Analyse Rolle, Léman, de l'hémisphère au local</h1>
+  <p class="meta">Version du 28 novembre 2026 à 16 h 53 (heure de Paris), pour dimanche 29, lundi 30, mardi 1. Runs : ECMWF IFS 28/11 06 UTC, DWD ICON-EU 28/11 12 UTC. Bateau de référence : Dufour 445 Grand Large, seuils au près.</p>
+  <div class="versions" id="versions" hidden><label>Version <select id="vsel" aria-label="Choisir une version"></select></label> <a id="vlast" href="#" hidden>dernière version</a></div>
+  <div class="fontbar"><button id="fminus" type="button" aria-label="Réduire le texte">A−</button><button id="fplus" type="button" aria-label="Agrandir le texte">A+</button><span class="meta">Touchez une carte pour l'ouvrir en plein écran.</span></div>
+</header>
+<section aria-labelledby="h-ess">
+  <h2 id="h-ess">L'essentiel</h2>
+  <p>Grande échelle : dimanche 29 : jet à 300 km (80 nd) ; une <b>dorsale</b> passe à 150 km de Rolle, axe à 100 km au nord-ouest de Milan ; dépression la plus proche 974 hPa à 450 km à l'ouest de Reykjavik ; anticyclone 1 044 hPa à 450 km au nord-ouest de Kiev, soit 500 km au nord-est de Varsovie.</p>
+  <ul class="essentiel"><li><b>Dimanche 29 : <span class="go">go</span>.</b> Vent de 0 à 1 nd (SSO, N), rafales jusqu'à 3 nd.</li><li><b>Lundi 30 : <span class="go">go</span>.</b> Vent de 4 à 11 nd (NE, NNE), rafales jusqu'à 16 nd.</li><li><b>Mardi 1 : <span class="go">go</span>.</b> Vent de 1 à 2 nd (N, SO, S), rafales jusqu'à 4 nd.</li></ul>
+  <div class="tblwrap"><table><thead><tr><th>Jour</th><th>Feu</th><th>Vent moyen (nd)</th><th>Rafales (nd)</th><th>Hs (m)</th><th>Beaufort / Douglas</th></tr></thead><tbody><tr><td>dim. 29</td><td><span class="light go"><span class="dot"></span>Go</span></td><td>1</td><td>3</td><td>n.d.</td><td>1 / n.d.</td></tr><tr><td>lun. 30</td><td><span class="light go"><span class="dot"></span>Go</span></td><td>11</td><td>16</td><td>n.d.</td><td>4 / n.d.</td></tr><tr><td>mar. 1</td><td><span class="light go"><span class="dot"></span>Go</span></td><td>2</td><td>4</td><td>n.d.</td><td>1 / n.d.</td></tr></tbody><tfoot><tr><th>Jour</th><th>Feu</th><th>Vent moyen (nd)</th><th>Rafales (nd)</th><th>Hs (m)</th><th>Beaufort / Douglas</th></tr></tfoot></table></div>
+  <p class="meta">Valeurs maximales de 7 h à 18 h (heures étudiées toutes les 3 h) au point de référence en mer « Large de Rolle » : vent et rafales DWD ICON-EU. Seuils go/no-go de NAVIn pour le Dufour 445 au près (vent 18 / 25 nd, rafales 28 / 35 nd, Hs 2 / 3,5 m ; no-go toujours à partir de 27 nd). Le calcul détaillé reste celui de NAVIn, Météo › Go / no-go.</p>
+  <p class="meta">Depuis la version du 28/11 14 h 03 : pas de changement notable des feux ni du vent maximal.</p>
+</section>
+<section aria-labelledby="h-nh">
+  <h2 id="h-nh">1. Hémisphère Nord <span class="scale">≈ 10 000 km</span></h2>
+  <p>Dimanche 29 midi : une <b>dorsale</b> passe à 150 km de Rolle, axe à 100 km au nord-ouest de Milan; au sol, dépression 974 hPa à 450 km à l'ouest de Reykjavik; anticyclone 1 044 hPa à 450 km au nord-ouest de Kiev, soit 500 km au nord-est de Varsovie.</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Carte hémisphérique">
+      <button type="button" data-set="nh" data-src="fig/nh_base.webp" aria-pressed="true">Carte de base</button>
+      <button type="button" data-set="nh" data-src="fig/nh_annot.webp" aria-pressed="false">Avec annotations</button>
+    </div>
+    <div class="map" data-zoom><img id="img-nh" src="fig/nh_base.webp" alt="Géopotentiel 500 hPa, pression mer et température 850 hPa sur l'hémisphère Nord"></div>
+    <figcaption>ECMWF IFS 0,25°, run 28/11 06 UTC +30 h, dimanche 29/11 13 h (heure de Paris). 500 hPa (≈ 5 600 m) en noir (dam), pression mer en blanc (hPa), 850 hPa (≈ 1 500 m) en couleurs (°C). Annotations détectées automatiquement : thalwegs, dorsales, A, D, gouttes froides (cœur froid confirmé).</figcaption>
+  </figure>
+  <h3>Courants-jets à 250 hPa (≈ 10 400 m)</h3>
+  <p>Dimanche 29 midi, 57 nd à 250 hPa (≈ 10 400 m) au-dessus de Rolle ; le jet le plus proche (≥ 80 nd) est à 300 km, 80 nd à 100 km au sud-est de Paris. Lundi 30 midi, 43 nd à 250 hPa (≈ 10 400 m) au-dessus de Rolle ; le jet le plus proche (≥ 80 nd) est à 1 500 km, 80 nd à 250 km à l'ouest de Cork. Mardi 1 midi, 37 nd à 250 hPa (≈ 10 400 m) au-dessus de Rolle ; le jet le plus proche (≥ 80 nd) est à 1 150 km, 80 nd à 100 km à l'est de Cork.</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Courants-jets"><button type="button" data-set="jet" data-src="fig/jet_nh_0_base.webp" aria-pressed="true">Dimanche 29</button><button type="button" data-set="jet" data-src="fig/jet_nh_1_base.webp" aria-pressed="false">Lundi 30</button><button type="button" data-set="jet" data-src="fig/jet_nh_2_base.webp" aria-pressed="false">Mardi 1</button><button type="button" data-set="jet" data-src="fig/jet_nh_3_base.webp" aria-pressed="false">Mercredi 2</button></div>
+    <div class="map" data-zoom><img id="img-jet" src="fig/jet_nh_0_base.webp" alt="Vent à 250 hPa sur l'hémisphère Nord"></div>
+    <figcaption>ECMWF IFS, run 28/11 06 UTC, vent à 250 hPa (≈ 10 400 m) en nd, à midi UTC.</figcaption>
+  </figure>
+</section>
+<section aria-labelledby="h-eu">
+  <h2 id="h-eu">2. Atlantique et Europe <span class="scale">≈ 3 000 km</span></h2>
+  <p>Cartes officielles du DWD, non modifiées : fronts, anticyclones (H) et dépressions (T) tracés par le service météo allemand.</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Cartes DWD avec fronts"><button type="button" data-set="dwd" data-src="fig/dwd_ana_eu.webp" aria-pressed="true">Analyse samedi 28/11 13 h</button><button type="button" data-set="dwd" data-src="fig/dwd_tkb_036.webp" aria-pressed="false">Prévue dimanche 29/11 13 h</button><button type="button" data-set="dwd" data-src="fig/dwd_tkb_060.webp" aria-pressed="false">Prévue lundi 30/11 13 h</button><button type="button" data-set="dwd" data-src="fig/dwd_tkb_084.webp" aria-pressed="false">Prévue mardi 1/12 13 h</button></div>
+    <div class="map" data-zoom><img id="img-dwd" src="fig/dwd_ana_eu.webp" alt="Carte DWD de pression et fronts" loading="lazy"></div>
+    <figcaption>DWD : analyse de surface avec fronts et prévisions ICON. Pression en hPa. Heures de Paris. © Deutscher Wetterdienst.</figcaption>
+  </figure>
+  <h3>500 hPa et pression mer, lundi 30/11 à 1 h, lundi 30/11 à 13 h, mardi 1/12 à 1 h, mardi 1/12 à 13 h (heure suisse)</h3>
+  <figure>
+    <div class="btns" role="group" aria-label="Calques sur la carte DWD 500 hPa">
+      <button type="button" data-layer="htp-ann" aria-pressed="false">Avec annotations</button>
+      <button type="button" data-layer="htp-jet" aria-pressed="false">Courants-jets 250 hPa</button>
+      <button type="button" data-layer="htp-leg" data-inverse aria-pressed="false">Légendes DWD d'origine</button>
+    </div>
+    <div class="map" data-zoom><img src="fig/dwd_htp_036072.webp" alt="Cartes DWD 500 hPa et pression mer, quatre échéances" loading="lazy"><img class="layer" src="fig/dwd_htp_036072_rep.webp" alt=""><img class="layer" id="htp-jet" src="fig/dwd_htp_036072_jet.webp" alt="" hidden><img class="layer" id="htp-ann" src="fig/dwd_htp_036072_ann.webp" alt="" hidden><img class="layer" id="htp-leg" src="fig/dwd_htp_036072_leg.webp" alt=""></div>
+    <figcaption>DWD ICON, run du 28/11 à 12 UTC : 500 hPa (≈ 5 600 m, dam, à gauche) et pression mer (hPa, à droite). Les légendes en clair (jour et heure suisse calculés depuis le run) recouvrent les légendes allemandes ; le bouton « Légendes DWD d'origine » les montre. Calques : les zones d'essai ; « Avec annotations » ajoute les éléments détectés sur ECMWF IFS (run 28/11 06 UTC) aux mêmes heures ; « Courants-jets 250 hPa » ajoute le vent à 250 hPa (≈ 10 400 m) d'IFS aux mêmes heures : isotaches 80 nd (jaune), 100 nd (orange), 120 nd (rouge) et 140 nd (bordeaux), flèches dans le sens du vent.</figcaption>
+  </figure>
+</section>
+<section aria-labelledby="h-reg">
+  <h2 id="h-reg">3. Alpes, Jura et Plateau <span class="scale">≈ 1 000 km</span></h2>
+  <p>Dimanche 29/11 16 h : au-dessus de Rolle, vent d'ouest 1 nd, pression 1 025 hPa ; sur le cadre, 2 % de la surface en eau au-dessus de 18 nd, 0 % au-dessus de 25 nd ; le plus fort 19 nd au-dessus de Venise ; dépression 1 024 hPa à 150 km au sud de Genève, anticyclone 1 029 hPa au-dessus de Milan. Lundi 30/11 16 h : au-dessus de Rolle, vent de nord-est 4 nd, pression 1 028 hPa ; sur le cadre, 7 % de la surface en eau au-dessus de 18 nd, 0 % au-dessus de 25 nd ; le plus fort 21 nd au-dessus de Venise ; anticyclone 1 032 hPa à 150 km au nord-ouest de Strasbourg, dépression 1 027 hPa à 150 km au nord-est de Milan. Mardi 1/12 16 h : au-dessus de Rolle, vent de sud-est 1 nd, pression 1 027 hPa ; sur le cadre, 1 % de la surface en eau au-dessus de 18 nd, 0 % au-dessus de 25 nd ; le plus fort 19 nd à 100 km à l'est de Nice ; dépression 1 025 hPa à 100 km au sud de Genève, dépression 1 025 hPa à 150 km à l'est de Zurich. Avec annotations : trait orange 18 nd, rouge 25 nd, violet pointillé rafales 35 nd.</p>
+  <div class="btns" role="group" aria-label="Jour"><button type="button" data-day="reg" data-v="2026112915" aria-pressed="true">dimanche 29/11 16 h</button><button type="button" data-day="reg" data-v="2026113015" aria-pressed="false">lundi 30/11 16 h</button><button type="button" data-day="reg" data-v="2026120115" aria-pressed="false">mardi 1/12 16 h</button><button type="button" data-ann="reg" aria-pressed="false">Avec annotations</button></div>
+  <figure>
+    <div class="map" data-zoom><img id="img-reg" src="fig/reg_2026112915_base.webp" alt="Vent moyen à 10 m et pression mer" loading="lazy"></div>
+    <figcaption>ECMWF IFS 0,25°, run 28/11 06 UTC. Vent moyen à 10 m en nd (couleurs et barbules), pression mer en hPa. Seuils et maximum calculés sur l'eau.</figcaption>
+  </figure>
+</section>
+<section aria-labelledby="h-loc">
+  <h2 id="h-loc">4. Léman <span class="scale">≈ 70 km</span></h2>
+  <p>Dimanche 29/11 16 h : vent de 0 à 2 nd, rafales jusqu'à 4 nd (le plus fort à 10 km au sud-est de Lausanne). Lundi 30/11 16 h : vent de 1 à 9 nd, rafales jusqu'à 14 nd (le plus fort à 10 km à l'est de Rolle). Mardi 1/12 16 h : vent de 0 à 2 nd, rafales jusqu'à 6 nd (le plus fort à 5 km à l'est de Lausanne).</p>
+  
+  <div class="btns" role="group" aria-label="Jour"><button type="button" data-day="loc" data-v="2026112915" aria-pressed="true">dimanche 29/11 16 h</button><button type="button" data-day="loc" data-v="2026113015" aria-pressed="false">lundi 30/11 16 h</button><button type="button" data-day="loc" data-v="2026120115" aria-pressed="false">mardi 1/12 16 h</button><button type="button" data-ann="loc" aria-pressed="false">Avec annotations</button></div>
+  <figure>
+    <div class="map" data-zoom><img id="img-loc" src="fig/loc_2026112915_base.webp" alt="Vent à l'échelle locale" loading="lazy"></div>
+    <figcaption>Vent moyen en couleurs (nd). Vent DWD ICON-EU 6,5 km (barbules, nd), run 28/11 12 UTC, sur l'eau seulement. Le modèle ICON-EU (6,5 km) lisse les effets du relief autour du lac : pour le détail, voir les modèles ICON-CH de MétéoSuisse.</figcaption>
+  </figure>
+</section>
+<section aria-labelledby="h-sys">
+  <h2 id="h-sys">6. Vent ensemble, toutes les 3 h <span class="scale">≈ 70 km</span></h2>
+  <p>Une carte toutes les 3 heures de jour ; les changements de vent importants (8 nd ou plus, ou 45° ou plus) sont signalés. Le fond est seul au départ : ajoutez les couches une à une.</p>
+  <div class="tblwrap"><table class="sys"><thead><tr><th>Heure (Paris)</th><th>Vent ICON-EU (nd, du)</th><th>Ce que ça donne</th></tr></thead><tbody><tr><td>dimanche 29/11 7 h</td><td>1 · SSO, raf. 3</td><td>conditions calmes</td></tr><tr><td>dimanche 29/11 10 h</td><td>1 · SSO, raf. 2</td><td>conditions calmes</td></tr><tr><td>dimanche 29/11 13 h</td><td>1 · SSO, raf. 2</td><td>conditions calmes</td></tr><tr><td>dimanche 29/11 16 h</td><td>0 · N, raf. 1</td><td>conditions calmes</td></tr><tr><td>dimanche 29/11 19 h</td><td>1 · NO, raf. 2</td><td>conditions calmes</td></tr><tr><td>lundi 30/11 7 h</td><td>4 · NE, raf. 6</td><td>conditions calmes</td></tr><tr><td>lundi 30/11 10 h</td><td>8 · NNE, raf. 12</td><td>conditions calmes</td></tr><tr><td>lundi 30/11 13 h</td><td>11 · NE, raf. 16</td><td>conditions calmes</td></tr><tr><td>lundi 30/11 16 h</td><td>9 · NNE, raf. 13</td><td>conditions calmes</td></tr><tr><td>lundi 30/11 19 h</td><td>8 · NNE, raf. 12</td><td>conditions calmes</td></tr><tr><td>mardi 1/12 7 h</td><td>2 · N, raf. 4</td><td>conditions calmes</td></tr><tr><td>mardi 1/12 10 h</td><td>2 · N, raf. 4</td><td>conditions calmes</td></tr><tr><td>mardi 1/12 13 h</td><td>1 · SO, raf. 2</td><td>conditions calmes</td></tr><tr><td>mardi 1/12 16 h</td><td>1 · S, raf. 2</td><td>conditions calmes</td></tr><tr><td>mardi 1/12 19 h</td><td>2 · O, raf. 2</td><td>conditions calmes</td></tr></tbody></table></div>
+  <p class="meta">Valeurs au point de référence « Large de Rolle ».</p>
+  <div class="btns" role="group" aria-label="Jour" id="sys-days"></div>
+  <div class="btns" role="group" aria-label="Heure" id="sys-hours"></div>
+  <div class="btns" role="group" aria-label="Couches"><button type="button" data-sys-layer="vent" aria-pressed="true">Vent (barbules noires)</button></div>
+  <p class="meta" id="sys-label"></p>
+  <figure>
+    <div class="map" data-zoom><img src="fig/sys_fond.webp" alt="Fond de carte" loading="lazy"><img class="layer" data-sys="vent" src="" alt=""></div>
+    <figcaption>Vent DWD ICON-EU 6,5 km. Flèches de vagues dans le sens de propagation, plus longues quand Hs est plus grande ; flèches de courant dans le sens du courant, plus longues quand il est plus fort.</figcaption>
+  </figure>
+  <script type="application/json" id="sys-data">[{"t": "2026112906", "q": "dimanche 29/11 7 h", "d": "dim. 29", "h": "7 h", "l": ["vent"], "e": []}, {"t": "2026112909", "q": "dimanche 29/11 10 h", "d": "dim. 29", "h": "10 h", "l": ["vent"], "e": []}, {"t": "2026112912", "q": "dimanche 29/11 13 h", "d": "dim. 29", "h": "13 h", "l": ["vent"], "e": []}, {"t": "2026112915", "q": "dimanche 29/11 16 h", "d": "dim. 29", "h": "16 h", "l": ["vent"], "e": []}, {"t": "2026112918", "q": "dimanche 29/11 19 h", "d": "dim. 29", "h": "19 h", "l": ["vent"], "e": []}, {"t": "2026113006", "q": "lundi 30/11 7 h", "d": "lun. 30", "h": "7 h", "l": ["vent"], "e": []}, {"t": "2026113009", "q": "lundi 30/11 10 h", "d": "lun. 30", "h": "10 h", "l": ["vent"], "e": []}, {"t": "2026113012", "q": "lundi 30/11 13 h", "d": "lun. 30", "h": "13 h", "l": ["vent"], "e": []}, {"t": "2026113015", "q": "lundi 30/11 16 h", "d": "lun. 30", "h": "16 h", "l": ["vent"], "e": []}, {"t": "2026113018", "q": "lundi 30/11 19 h", "d": "lun. 30", "h": "19 h", "l": ["vent"], "e": []}, {"t": "2026120106", "q": "mardi 1/12 7 h", "d": "mar. 1", "h": "7 h", "l": ["vent"], "e": []}, {"t": "2026120109", "q": "mardi 1/12 10 h", "d": "mar. 1", "h": "10 h", "l": ["vent"], "e": []}, {"t": "2026120112", "q": "mardi 1/12 13 h", "d": "mar. 1", "h": "13 h", "l": ["vent"], "e": []}, {"t": "2026120115", "q": "mardi 1/12 16 h", "d": "mar. 1", "h": "16 h", "l": ["vent"], "e": []}, {"t": "2026120118", "q": "mardi 1/12 19 h", "d": "mar. 1", "h": "19 h", "l": ["vent"], "e": []}]</script>
+</section>
+<section aria-labelledby="h-src">
+  <h2 id="h-src">Ce qui manque et sources</h2>
+  <ul><li><b>Avis de vent fort et prévisions locales du Léman</b> : <a href="https://www.meteoswiss.admin.ch/" target="_blank" rel="noopener">MétéoSuisse</a>.</li></ul>
+  <div class="src"><span>Sources : ECMWF open data (IFS 0,25°), DWD opendata (ICON-EU, cartes officielles). Cartes, chiffres et texte produits automatiquement par les scripts de NAVIn, avec des règles fixes, sans IA ; Open-Meteo n'est pas utilisé.</span></div>
+</section>
+</div>
+<div id="zoom" hidden role="dialog" aria-label="Carte en plein écran"><div class="stack"></div></div>
+<script>
+(function () {
+  function press(group, btn) {
+    group.forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b === btn));
+    });
+  }
+  function all(sel) {
+    return [].slice.call(document.querySelectorAll(sel));
+  }
+  // Cartes à une image : chaque bouton remplace l'image
+  var sets = {};
+  all('button[data-set]').forEach(function (b) {
+    (sets[b.dataset.set] = sets[b.dataset.set] || []).push(b);
+  });
+  Object.keys(sets).forEach(function (k) {
+    sets[k].forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.getElementById('img-' + k).src = b.dataset.src;
+        press(sets[k], b);
+      });
+    });
+  });
+  // Régional, local, courants : jour + annotations
+  ['reg', 'loc', 'cur'].forEach(function (k) {
+    var days = all('button[data-day="' + k + '"]');
+    var ann = document.querySelector('button[data-ann="' + k + '"]');
+    var img = document.getElementById('img-' + k);
+    if (!days.length || !img) return;
+    var state = { v: days[0].dataset.v, a: false };
+    function draw() {
+      img.src =
+        'fig/' +
+        k +
+        '_' +
+        state.v +
+        '_' +
+        (state.a ? 'annot' : 'base') +
+        '.webp';
+    }
+    days.forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.v = b.dataset.v;
+        press(days, b);
+        draw();
+      });
+    });
+    if (ann)
+      ann.addEventListener('click', function () {
+        state.a = !state.a;
+        ann.setAttribute('aria-pressed', String(state.a));
+        draw();
+      });
+  });
+  // Calques simples (DWD 500 hPa)
+  all('button[data-layer]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var l = document.getElementById(b.dataset.layer);
+      l.hidden = !l.hidden;
+      var on = 'inverse' in b.dataset ? l.hidden : !l.hidden;
+      b.setAttribute('aria-pressed', String(on));
+    });
+  });
+  // Vent, vagues, courants toutes les 3 h
+  var data = document.getElementById('sys-data');
+  if (data) {
+    var H = JSON.parse(data.textContent);
+    var cur = 0;
+    var on = { vent: true };
+    var dayBox = document.getElementById('sys-days');
+    var hourBox = document.getElementById('sys-hours');
+    var label = document.getElementById('sys-label');
+    var days = [];
+    H.forEach(function (h) {
+      if (days.indexOf(h.d) < 0) days.push(h.d);
+    });
+    function draw() {
+      var h = H[cur];
+      all('img[data-sys]').forEach(function (i) {
+        var k = i.dataset.sys;
+        var has = h.l.indexOf(k) >= 0;
+        if (has) i.src = 'fig/sys_' + h.t + '_' + k + '.webp';
+        i.hidden = !(on[k] && has);
+      });
+      label.textContent = h.q + (h.e.length ? ' · ' + h.e.join(' ; ') : '');
+      all('#sys-days button').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.d === h.d));
+      });
+      hourBox.innerHTML = '';
+      var prev = document.createElement('button');
+      prev.type = 'button';
+      prev.textContent = '◀';
+      prev.setAttribute('aria-label', 'Heure précédente');
+      prev.disabled = cur === 0;
+      prev.onclick = function () {
+        cur -= 1;
+        draw();
+      };
+      hourBox.appendChild(prev);
+      H.forEach(function (x, i) {
+        if (x.d !== h.d) return;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = x.h + (x.e.length ? ' •' : '');
+        if (x.e.length) b.title = x.e.join(' ; ');
+        b.setAttribute('aria-pressed', String(i === cur));
+        b.onclick = function () {
+          cur = i;
+          draw();
+        };
+        hourBox.appendChild(b);
+      });
+      var next = document.createElement('button');
+      next.type = 'button';
+      next.textContent = '▶';
+      next.setAttribute('aria-label', 'Heure suivante');
+      next.disabled = cur === H.length - 1;
+      next.onclick = function () {
+        cur += 1;
+        draw();
+      };
+      hourBox.appendChild(next);
+    }
+    days.forEach(function (d) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = d;
+      b.dataset.d = d;
+      b.onclick = function () {
+        for (var i = 0; i < H.length; i++)
+          if (H[i].d === d) {
+            cur = i;
+            break;
+          }
+        draw();
+      };
+      dayBox.appendChild(b);
+    });
+    all('button[data-sys-layer]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var k = b.dataset.sysLayer;
+        on[k] = !on[k];
+        b.setAttribute('aria-pressed', String(!!on[k]));
+        draw();
+      });
+    });
+    draw();
+  }
+  // Plein écran
+  var zoom = document.getElementById('zoom');
+  var stack = zoom.querySelector('.stack');
+  all('[data-zoom]').forEach(function (m) {
+    m.addEventListener('click', function () {
+      stack.innerHTML = '';
+      m.querySelectorAll('img').forEach(function (i) {
+        if (i.hidden) return;
+        var c = i.cloneNode();
+        c.removeAttribute('id');
+        c.removeAttribute('loading');
+        stack.appendChild(c);
+      });
+      zoom.hidden = false;
+    });
+  });
+  zoom.addEventListener('click', function () {
+    zoom.hidden = true;
+    stack.innerHTML = '';
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') zoom.hidden = true;
+  });
+  // Taille du texte
+  var size = 17;
+  try {
+    var s = parseInt(localStorage.getItem('asq-font'), 10);
+    if (s >= 13 && s <= 26) size = s;
+  } catch (e) {}
+  function apply() {
+    document.documentElement.style.fontSize = size + 'px';
+    try {
+      localStorage.setItem('asq-font', String(size));
+    } catch (e) {}
+  }
+  if (size !== 17) apply();
+  document.getElementById('fplus').addEventListener('click', function () {
+    size = Math.min(26, size + 1);
+    apply();
+  });
+  document.getElementById('fminus').addEventListener('click', function () {
+    size = Math.max(13, size - 1);
+    apply();
+  });
+  // Menu déroulant des versions (fichier index.json deux dossiers plus haut)
+  var wrap = document.querySelector('.wrap');
+  var zone = wrap.dataset.zone;
+  var me = wrap.dataset.version;
+  fetch('../../index.json', { cache: 'no-cache' })
+    .then(function (r) {
+      return r.ok ? r.json() : null;
+    })
+    .then(function (idx) {
+      if (!idx || !idx.zones || !idx.zones[zone]) return;
+      var vs = idx.zones[zone].versions;
+      var sel = document.getElementById('vsel');
+      vs.forEach(function (v) {
+        var o = document.createElement('option');
+        o.value = v.path;
+        o.textContent = v.label + (v.auto || v.claude ? '' : ' (relancée)');
+        if (v.id === me) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.onchange = function () {
+        location.href = '../../' + sel.value;
+      };
+      document.getElementById('versions').hidden = false;
+      if (vs.length && vs[0].id !== me) {
+        var a = document.getElementById('vlast');
+        a.href = '../../' + vs[0].path;
+        a.hidden = false;
+      }
+    })
+    .catch(function () {});
+})();
+
+</script>
+</body>
+</html>

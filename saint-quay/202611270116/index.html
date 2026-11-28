@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Analyse Saint-Quay-Portrieux</title>
+<style>
+/* Layout : une colonne de lecture, du plus grand au plus petit, comme on descend une carte marine à l'échelle */
+:root {
+  --bg: #f3f5f6;
+  --paper: #ffffff;
+  --fg: #14212b;
+  --muted: #53636f;
+  --line: #d5dde2;
+  --sea: #0b5d7a;
+  --sea-soft: #e1eff4;
+  --go: #1f8a4c;
+  --warn: #d9822b;
+  --nogo: #c4322f;
+  --display: 'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0e171d;
+    --paper: #15222a;
+    --fg: #e4ecf0;
+    --muted: #9aaab4;
+    --line: #2a3a44;
+    --sea: #5cb8d8;
+    --sea-soft: #163240;
+    --go: #45c27a;
+    --warn: #f0a24e;
+    --nogo: #f06a63;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #0e171d;
+  --paper: #15222a;
+  --fg: #e4ecf0;
+  --muted: #9aaab4;
+  --line: #2a3a44;
+  --sea: #5cb8d8;
+  --sea-soft: #163240;
+  --go: #45c27a;
+  --warn: #f0a24e;
+  --nogo: #f06a63;
+  color-scheme: dark;
+}
+html {
+  font-size: 17px;
+}
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  line-height: 1.55;
+  font-size: 1rem;
+}
+.wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 28px;
+}
+header {
+  display: grid;
+  gap: 6px;
+}
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sea);
+}
+h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.15;
+  margin: 0;
+  text-wrap: balance;
+}
+h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 1.45rem;
+  margin: 0;
+  text-wrap: balance;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+h2 .scale {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+h3 {
+  font-size: 1.02rem;
+  margin: 0;
+  font-weight: 600;
+}
+p {
+  margin: 0;
+  max-width: 68ch;
+}
+.meta {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.fontbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+section {
+  display: grid;
+  gap: 14px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px;
+}
+.essentiel {
+  display: grid;
+  gap: 8px;
+}
+.essentiel li {
+  max-width: 68ch;
+}
+ul {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: 4px;
+}
+.tblwrap {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+}
+th,
+td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+thead th,
+tfoot th {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+tfoot th {
+  border-bottom: 0;
+  border-top: 1px solid var(--line);
+}
+.light {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.dot {
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 50%;
+  display: inline-block;
+}
+.go .dot {
+  background: var(--go);
+}
+.warn .dot {
+  background: var(--warn);
+}
+.nogo .dot {
+  background: var(--nogo);
+}
+.go {
+  color: var(--go);
+}
+.warn {
+  color: var(--warn);
+}
+.nogo {
+  color: var(--nogo);
+}
+figure {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.map {
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+  cursor: zoom-in;
+}
+.map img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.map img.layer {
+  position: absolute;
+  inset: 0;
+}
+figcaption {
+  font-size: 0.84rem;
+  color: var(--muted);
+  max-width: none;
+}
+.btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+button {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--fg);
+  cursor: pointer;
+  min-height: 40px;
+}
+button[aria-pressed='true'] {
+  background: var(--sea);
+  border-color: var(--sea);
+  color: var(--paper);
+}
+button:focus-visible {
+  outline: 3px solid var(--sea);
+  outline-offset: 2px;
+}
+.note {
+  background: var(--sea-soft);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: grid;
+  gap: 6px;
+}
+.note.alert {
+  background: color-mix(in srgb, var(--warn) 16%, var(--paper));
+}
+a {
+  color: var(--sea);
+}
+.src {
+  font-size: 0.84rem;
+  color: var(--muted);
+  display: grid;
+  gap: 4px;
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 14px;
+}
+.grid2 > * {
+  min-width: 0;
+}
+#zoom {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 12, 16, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px)
+    max(12px, env(safe-area-inset-right, 0px))
+    calc(env(safe-area-inset-bottom, 0px) + 12px)
+    max(12px, env(safe-area-inset-left, 0px));
+  overflow: auto;
+  cursor: zoom-out;
+}
+#zoom[hidden] {
+  display: none;
+}
+#zoom .stack {
+  position: relative;
+  max-width: 100%;
+  max-height: 100%;
+}
+#zoom img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 40px);
+  width: auto;
+  height: auto;
+}
+#zoom img.layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 520px) {
+  html {
+    font-size: 16px;
+  }
+  h1 {
+    font-size: 1.7rem;
+  }
+  section {
+    padding: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
+
+.versions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.versions select{font:inherit;font-size:1rem;padding:.35em .5em;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--fg);max-width:100%}
+table.sys td:first-child{white-space:nowrap}
+small.ev{color:var(--nogo);white-space:normal}
+</style>
+</head>
+<body>
+<div class="wrap" data-zone="saint-quay" data-version="202611270116">
+<header>
+  <div class="eyebrow">Zone Atlantique · 48°39,1&#x27; N 002°49,8&#x27; W</div>
+  <h1>Analyse Saint-Quay-Portrieux, de l'hémisphère au local</h1>
+  <p class="meta">Version du 27 novembre 2026 à 2 h 19 (heure de Paris), pour vendredi 27, samedi 28, dimanche 29. Runs : ECMWF IFS 26/11 18 UTC, DWD ICON-EU 26/11 18 UTC, EWAM 26/11 12 UTC. Bateau de référence : Dufour 445 Grand Large, seuils au près.</p>
+  <div class="versions" id="versions" hidden><label>Version <select id="vsel" aria-label="Choisir une version"></select></label> <a id="vlast" href="#" hidden>dernière version</a></div>
+  <div class="fontbar"><button id="fminus" type="button" aria-label="Réduire le texte">A−</button><button id="fplus" type="button" aria-label="Agrandir le texte">A+</button><span class="meta">Touchez une carte pour l'ouvrir en plein écran.</span></div>
+</header>
+<section aria-labelledby="h-ess">
+  <h2 id="h-ess">L'essentiel</h2>
+  <p>Grande échelle : samedi 28 : jet au-dessus de la zone (97 nd) ; l'axe d'une <b>dorsale</b> passe au-dessus de Saint-Quay (au-dessus de Saint-Malo) ; dépression la plus proche 960 hPa à 400 km à l'ouest de Reykjavik ; anticyclone 1 035 hPa à 150 km au nord-ouest de Stockholm.</p>
+  <ul class="essentiel"><li><b>Vendredi 27 : <span class="go">go</span>.</b> Vent de 12 à 15 nd (SSE, S), rafales jusqu'à 20 nd, Hs jusqu'à 0,7 m. Renverses du courant : 8 h 30 (début du jusant), 16 h (début du flot), 21 h (début du jusant).</li><li><b>Samedi 28 : <span class="go">go</span>.</b> Vent de 11 à 17 nd (SSE, S, SSO), rafales jusqu'à 23 nd, Hs jusqu'à 0,9 m. Renverses du courant : 9 h 30 (début du jusant), 16 h 45 (début du flot).</li><li><b>Dimanche 29 : <span class="go">go</span>.</b> Vent de 7 à 9 nd (OSO, O, SSO), rafales jusqu'à 13 nd, Hs jusqu'à 0,7 m. Renverses du courant : 10 h 15 (début du jusant), 17 h 30 (début du flot).</li></ul>
+  <div class="tblwrap"><table><thead><tr><th>Jour</th><th>Feu</th><th>Vent moyen (nd)</th><th>Rafales (nd)</th><th>Hs (m)</th><th>Beaufort / Douglas</th></tr></thead><tbody><tr><td>ven. 27</td><td><span class="light go"><span class="dot"></span>Go</span></td><td>15</td><td>20</td><td>0,7</td><td>4 / 2</td></tr><tr><td>sam. 28</td><td><span class="light go"><span class="dot"></span>Go</span></td><td>17</td><td>23</td><td>0,9</td><td>5 / 2</td></tr><tr><td>dim. 29</td><td><span class="light go"><span class="dot"></span>Go</span></td><td>9</td><td>13</td><td>0,7</td><td>3 / 2</td></tr></tbody><tfoot><tr><th>Jour</th><th>Feu</th><th>Vent moyen (nd)</th><th>Rafales (nd)</th><th>Hs (m)</th><th>Beaufort / Douglas</th></tr></tfoot></table></div>
+  <p class="meta">Valeurs maximales de 7 h à 18 h (heures étudiées toutes les 3 h) au point de référence en mer « Point GPS de test » : vent et rafales DWD ICON-EU, vagues DWD EWAM. Seuils go/no-go de NAVIn pour le Dufour 445 au près (vent 18 / 25 nd, rafales 28 / 35 nd, Hs 2 / 3,5 m ; no-go toujours à partir de 27 nd). Le calcul détaillé reste celui de NAVIn, Météo › Go / no-go.</p>
+  <p class="meta">Depuis la version du 26/11 22 h 58 : pas de changement notable des feux ni du vent maximal.</p>
+</section>
+<section aria-labelledby="h-nh">
+  <h2 id="h-nh">1. Hémisphère Nord <span class="scale">≈ 10 000 km</span></h2>
+  <p>Vendredi 27 midi : l'axe d'une <b>dorsale</b> passe au-dessus de Saint-Quay (au-dessus de Saint-Malo); au sol, dépression 960 hPa à 400 km à l'ouest de Reykjavik; anticyclone 1 035 hPa à 150 km au nord-ouest de Stockholm.</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Carte hémisphérique">
+      <button type="button" data-set="nh" data-src="fig/nh_base.webp" aria-pressed="true">Carte de base</button>
+      <button type="button" data-set="nh" data-src="fig/nh_annot.webp" aria-pressed="false">Avec annotations</button>
+    </div>
+    <div class="map" data-zoom><img id="img-nh" src="fig/nh_base.webp" alt="Géopotentiel 500 hPa, pression mer et température 850 hPa sur l'hémisphère Nord"></div>
+    <figcaption>ECMWF IFS 0,25°, run 26/11 18 UTC +18 h, vendredi 27/11 13 h (heure de Paris). 500 hPa (≈ 5 600 m) en noir (dam), pression mer en blanc (hPa), 850 hPa (≈ 1 500 m) en couleurs (°C). Annotations détectées automatiquement : thalwegs, dorsales, A, D, gouttes froides (cœur froid confirmé).</figcaption>
+  </figure>
+  <h3>Courants-jets à 250 hPa (≈ 10 400 m)</h3>
+  <p>Vendredi 27 midi, 42 nd à 250 hPa (≈ 10 400 m) au-dessus de Saint-Quay ; le jet le plus proche (≥ 80 nd) est à 350 km, 81 nd à 150 km à l'ouest de Plymouth. Samedi 28 midi, 97 nd à 250 hPa (≈ 10 400 m) au-dessus de Saint-Quay : le jet (≥ 80 nd) passe au-dessus de la zone (97 nd au-dessus de Saint-Malo). Dimanche 29 midi, 58 nd à 250 hPa (≈ 10 400 m) au-dessus de Saint-Quay ; le jet le plus proche (≥ 80 nd) est à 450 km, 81 nd à 200 km à l'ouest de Lyon.</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Courants-jets"><button type="button" data-set="jet" data-src="fig/jet_nh_0_base.webp" aria-pressed="true">Vendredi 27</button><button type="button" data-set="jet" data-src="fig/jet_nh_1_base.webp" aria-pressed="false">Samedi 28</button><button type="button" data-set="jet" data-src="fig/jet_nh_2_base.webp" aria-pressed="false">Dimanche 29</button><button type="button" data-set="jet" data-src="fig/jet_nh_3_base.webp" aria-pressed="false">Lundi 30</button></div>
+    <div class="map" data-zoom><img id="img-jet" src="fig/jet_nh_0_base.webp" alt="Vent à 250 hPa sur l'hémisphère Nord"></div>
+    <figcaption>ECMWF IFS, run 26/11 18 UTC, vent à 250 hPa (≈ 10 400 m) en nd, à midi UTC.</figcaption>
+  </figure>
+</section>
+<section aria-labelledby="h-eu">
+  <h2 id="h-eu">2. Atlantique et Europe <span class="scale">≈ 3 000 km</span></h2>
+  <p>Cartes officielles du DWD, non modifiées : fronts, anticyclones (H) et dépressions (T) tracés par le service météo allemand.</p>
+  <figure>
+    <div class="btns" role="group" aria-label="Cartes DWD avec fronts"><button type="button" data-set="dwd" data-src="fig/dwd_ana_eu.webp" aria-pressed="true">Analyse jeudi 26/11 13 h</button><button type="button" data-set="dwd" data-src="fig/dwd_tkb_036.webp" aria-pressed="false">Prévue vendredi 27/11 13 h</button><button type="button" data-set="dwd" data-src="fig/dwd_tkb_060.webp" aria-pressed="false">Prévue samedi 28/11 13 h</button><button type="button" data-set="dwd" data-src="fig/dwd_tkb_084.webp" aria-pressed="false">Prévue dimanche 29/11 13 h</button></div>
+    <div class="map" data-zoom><img id="img-dwd" src="fig/dwd_ana_eu.webp" alt="Carte DWD de pression et fronts" loading="lazy"></div>
+    <figcaption>DWD : analyse de surface avec fronts et prévisions ICON. Pression en hPa. Heures de Paris. © Deutscher Wetterdienst.</figcaption>
+  </figure>
+  <h3>500 hPa et pression mer, samedi 28/11 à 7 h, samedi 28/11 à 19 h, dimanche 29/11 à 7 h, dimanche 29/11 à 19 h (heure suisse)</h3>
+  <figure>
+    <div class="btns" role="group" aria-label="Calques sur la carte DWD 500 hPa">
+      <button type="button" data-layer="htp-ann" aria-pressed="false">Avec annotations</button>
+      <button type="button" data-layer="htp-jet" aria-pressed="false">Courants-jets 250 hPa</button>
+      <button type="button" data-layer="htp-leg" data-inverse aria-pressed="false">Légendes DWD d'origine</button>
+    </div>
+    <div class="map" data-zoom><img src="fig/dwd_htp_036072.webp" alt="Cartes DWD 500 hPa et pression mer, quatre échéances" loading="lazy"><img class="layer" src="fig/dwd_htp_036072_rep.webp" alt=""><img class="layer" id="htp-jet" src="fig/dwd_htp_036072_jet.webp" alt="" hidden><img class="layer" id="htp-ann" src="fig/dwd_htp_036072_ann.webp" alt="" hidden><img class="layer" id="htp-leg" src="fig/dwd_htp_036072_leg.webp" alt=""></div>
+    <figcaption>DWD ICON, run du 26/11 à 18 UTC : 500 hPa (≈ 5 600 m, dam, à gauche) et pression mer (hPa, à droite). Les légendes en clair (jour et heure suisse calculés depuis le run) recouvrent les légendes allemandes ; le bouton « Légendes DWD d'origine » les montre. Calques : les zones d'essai ; « Avec annotations » ajoute les éléments détectés sur ECMWF IFS (run 26/11 18 UTC) aux mêmes heures ; « Courants-jets 250 hPa » ajoute le vent à 250 hPa (≈ 10 400 m) d'IFS aux mêmes heures : isotaches 80 nd (jaune), 100 nd (orange), 120 nd (rouge) et 140 nd (bordeaux), flèches dans le sens du vent.</figcaption>
+  </figure>
+</section>
+<section aria-labelledby="h-reg">
+  <h2 id="h-reg">3. Manche et golfe de Gascogne <span class="scale">≈ 1 000 km</span></h2>
+  <p>Vendredi 27/11 16 h : au-dessus de Saint-Quay, vent de sud 13 nd, pression 1 016 hPa ; sur le cadre, 5 % de la surface en eau au-dessus de 18 nd, 0 % au-dessus de 25 nd ; le plus fort 22 nd à 200 km à l'ouest de Galway ; dépression 1 015 hPa au-dessus de Plymouth, anticyclone 1 017 hPa à 300 km à l'ouest de Brest. Samedi 28/11 16 h : au-dessus de Saint-Quay, vent de sud-sud-ouest 12 nd, pression 1 016 hPa ; sur le cadre, 26 % de la surface en eau au-dessus de 18 nd, 6 % au-dessus de 25 nd ; le plus fort 31 nd à 250 km au nord-est de Londres. Dimanche 29/11 16 h : au-dessus de Saint-Quay, vent d'ouest-sud-ouest 10 nd, pression 1 025 hPa ; sur le cadre, 22 % de la surface en eau au-dessus de 18 nd, 0 % au-dessus de 25 nd ; le plus fort 25 nd à 100 km au nord-ouest de Galway. Avec annotations : trait orange 18 nd, rouge 25 nd, violet pointillé rafales 35 nd.</p>
+  <div class="btns" role="group" aria-label="Jour"><button type="button" data-day="reg" data-v="2026112715" aria-pressed="true">vendredi 27/11 16 h</button><button type="button" data-day="reg" data-v="2026112815" aria-pressed="false">samedi 28/11 16 h</button><button type="button" data-day="reg" data-v="2026112915" aria-pressed="false">dimanche 29/11 16 h</button><button type="button" data-ann="reg" aria-pressed="false">Avec annotations</button></div>
+  <figure>
+    <div class="map" data-zoom><img id="img-reg" src="fig/reg_2026112715_base.webp" alt="Vent moyen à 10 m et pression mer" loading="lazy"></div>
+    <figcaption>ECMWF IFS 0,25°, run 26/11 18 UTC. Vent moyen à 10 m en nd (couleurs et barbules), pression mer en hPa. Seuils et maximum calculés sur l'eau.</figcaption>
+  </figure>
+</section>
+<section aria-labelledby="h-loc">
+  <h2 id="h-loc">4. Baie de Saint-Brieuc <span class="scale">≈ 70 km</span></h2>
+  <p>Vendredi 27/11 16 h : vent de 7 à 19 nd, rafales jusqu'à 25 nd (le plus fort à 35 km au nord du cap Fréhel), Hs de 0,3 à 1,8 m (la plus forte à 30 km au nord-est de Bréhat). Samedi 28/11 16 h : vent de 11 à 20 nd, rafales jusqu'à 29 nd (le plus fort à 35 km au nord du cap Fréhel), Hs de 0,5 à 2,0 m (la plus forte à 20 km au nord-ouest de Bréhat). Dimanche 29/11 16 h : vent de 5 à 13 nd, rafales jusqu'à 17 nd (le plus fort à 25 km au nord-ouest de Bréhat), Hs de 0,3 à 1,6 m (la plus forte à 20 km au nord-ouest de Bréhat).</p>
+  
+  <div class="btns" role="group" aria-label="Jour"><button type="button" data-day="loc" data-v="2026112715" aria-pressed="true">vendredi 27/11 16 h</button><button type="button" data-day="loc" data-v="2026112815" aria-pressed="false">samedi 28/11 16 h</button><button type="button" data-day="loc" data-v="2026112915" aria-pressed="false">dimanche 29/11 16 h</button><button type="button" data-ann="loc" aria-pressed="false">Avec annotations</button></div>
+  <figure>
+    <div class="map" data-zoom><img id="img-loc" src="fig/loc_2026112715_base.webp" alt="Vent et vagues à l'échelle locale" loading="lazy"></div>
+    <figcaption>Vagues DWD EWAM 0,05° (Hs en m, flèches dans le sens de propagation), run 26/11 12 UTC. Vent DWD ICON-EU 6,5 km (barbules, nd), run 26/11 18 UTC, sur l'eau seulement.</figcaption>
+  </figure>
+</section>
+<section aria-labelledby="h-cur">
+  <h2 id="h-cur">5. Courants <span class="scale">≈ 70 km</span></h2>
+  <p>Au point « Point GPS de test », le flot porte au sud-sud-est (149°), le jusant au nord-nord-ouest (329°). Renverses de jour : vendredi 27/11 8 h 30 (début du jusant), vendredi 27/11 16 h (début du flot), vendredi 27/11 21 h (début du jusant), samedi 28/11 9 h 30 (début du jusant), samedi 28/11 16 h 45 (début du flot), dimanche 29/11 10 h 15 (début du jusant), dimanche 29/11 17 h 30 (début du flot).</p>
+  <div class="tblwrap"><table><thead><tr><th>Moment (Paris)</th><th>Phase</th><th>Courant au point (nd, vers)</th><th>Vent ICON-EU (nd, du)</th><th>Effet</th></tr></thead><tbody><tr><td>vendredi 27/11 11 h 45</td><td>jusant</td><td>1,6 · NO (326°)</td><td>15 · SSE</td><td>vent et courant dans le même sens</td></tr><tr><td>vendredi 27/11 18 h</td><td>flot</td><td>1,9 · SSE (151°)</td><td>12 · S</td><td>vent contre courant</td></tr><tr><td>samedi 28/11 6 h 30</td><td>flot</td><td>1,8 · SSE (151°)</td><td>17 · SSE</td><td>vent contre courant</td></tr><tr><td>samedi 28/11 12 h 45</td><td>jusant</td><td>1,5 · NNO (327°)</td><td>13 · S</td><td>vent et courant dans le même sens</td></tr><tr><td>dimanche 29/11 7 h 15</td><td>flot</td><td>1,7 · SSE (151°)</td><td>9 · OSO</td><td>courant de travers au vent</td></tr><tr><td>dimanche 29/11 13 h 15</td><td>jusant</td><td>1,4 · NO (325°)</td><td>7 · O</td><td>courant de travers au vent</td></tr></tbody><tfoot><tr><th>Moment (Paris)</th><th>Phase</th><th>Courant au point (nd, vers)</th><th>Vent ICON-EU (nd, du)</th><th>Effet</th></tr></tfoot></table></div>
+  <div class="btns" role="group" aria-label="Jour"><button type="button" data-day="cur" data-v="202611271045" aria-pressed="true">vendredi 27/11 11 h 45, jusant</button><button type="button" data-day="cur" data-v="202611271700" aria-pressed="false">vendredi 27/11 18 h, flot</button><button type="button" data-day="cur" data-v="202611280530" aria-pressed="false">samedi 28/11 6 h 30, flot</button><button type="button" data-day="cur" data-v="202611281145" aria-pressed="false">samedi 28/11 12 h 45, jusant</button><button type="button" data-day="cur" data-v="202611290615" aria-pressed="false">dimanche 29/11 7 h 15, flot</button><button type="button" data-day="cur" data-v="202611291215" aria-pressed="false">dimanche 29/11 13 h 15, jusant</button><button type="button" data-ann="cur" aria-pressed="false">Avec annotations</button></div>
+  <figure><div class="map" data-zoom><img id="img-cur" src="fig/cur_202611271045_base.webp" alt="Courants de surface" loading="lazy"></div><figcaption>Copernicus Marine IBI 0,027° (marée et météo), champ instantané au quart d'heure. Vitesse en nd, flèches dans le sens du courant. Annotations : vitesse aux points et, en rouge, vent ICON-EU contre le courant (écart de plus de 135°, courant d'au moins 0,5 nd, vent d'au moins 8 nd). Phase flot / jusant d'après la hauteur d'eau du modèle. Les heures de pleine et basse mer restent à lire dans l'annuaire du SHOM.</figcaption></figure>
+</section>
+<section aria-labelledby="h-sys">
+  <h2 id="h-sys">6. Vent, vagues et courants ensemble, toutes les 3 h <span class="scale">≈ 70 km</span></h2>
+  <p>Une carte toutes les 3 heures de jour, plus une à chaque renverse de courant ; les changements de vent importants (8 nd ou plus, ou 45° ou plus) sont signalés. Le fond est seul au départ : ajoutez les couches une à une.</p>
+  <div class="tblwrap"><table class="sys"><thead><tr><th>Heure (Paris)</th><th>Vent ICON-EU (nd, du)</th><th>Vagues EWAM (Hs m, de)</th><th>Courant IBI (nd, vers)</th><th>Ce que ça donne</th></tr></thead><tbody><tr><td>vendredi 27/11 7 h</td><td>12 · SSE, raf. 16</td><td>0,4 · ESE</td><td>1,3 · SSE</td><td>vent contre courant : mer courte, clapot</td></tr><tr><td>vendredi 27/11 9 h<br><small class="ev">renverse, début du jusant</small></td><td>14 · SSE, raf. 18</td><td>0,5 · SE</td><td>0,6 · ONO</td><td>courant de travers au vent : dérive à corriger</td></tr><tr><td>vendredi 27/11 10 h</td><td>15 · SSE, raf. 20</td><td>0,5 · SE</td><td>1,2 · NO</td><td>vent et courant dans le même sens : mer plus longue</td></tr><tr><td>vendredi 27/11 13 h</td><td>13 · S, raf. 19</td><td>0,6 · ESE</td><td>1,5 · NNO</td><td>vent et courant dans le même sens : mer plus longue ; courant fort (1,5 nd)</td></tr><tr><td>vendredi 27/11 16 h<br><small class="ev">renverse, début du flot</small></td><td>14 · S, raf. 19</td><td>0,7 · NE</td><td>0,3 · S</td><td>courant faible ; houle croisée avec le vent</td></tr><tr><td>vendredi 27/11 19 h</td><td>12 · S, raf. 15</td><td>0,8 · N</td><td>1,6 · SSE</td><td>vent contre courant : mer hachée et creuse, prudence ; courant fort (1,6 nd) ; houle croisée avec le vent</td></tr><tr><td>vendredi 27/11 21 h<br><small class="ev">renverse, début du jusant</small></td><td>11 · S, raf. 15</td><td>0,7 · N</td><td>0,3 · OSO</td><td>courant faible ; houle croisée avec le vent</td></tr><tr><td>samedi 28/11 7 h</td><td>17 · SSE, raf. 22</td><td>0,9 · N</td><td>1,7 · SSE</td><td>vent contre courant : mer hachée et creuse, prudence ; courant fort (1,7 nd) ; houle croisée avec le vent</td></tr><tr><td>samedi 28/11 10 h<br><small class="ev">renverse, début du jusant</small></td><td>16 · SSE, raf. 23</td><td>0,9 · N</td><td>0,6 · NO</td><td>vent et courant dans le même sens : mer plus longue ; houle croisée avec le vent</td></tr><tr><td>samedi 28/11 13 h</td><td>13 · S, raf. 20</td><td>0,8 · N</td><td>1,5 · NNO</td><td>vent et courant dans le même sens : mer plus longue ; courant fort (1,5 nd) ; houle croisée avec le vent</td></tr><tr><td>samedi 28/11 16 h</td><td>13 · SSO, raf. 21</td><td>0,8 · N</td><td>0,5 · NO</td><td>courant de travers au vent : dérive à corriger ; houle croisée avec le vent</td></tr><tr><td>samedi 28/11 17 h<br><small class="ev">renverse, début du flot</small></td><td>11 · SSO, raf. 20</td><td>0,7 · N</td><td>0,5 · SSE</td><td>vent contre courant : mer courte, clapot ; houle croisée avec le vent</td></tr><tr><td>samedi 28/11 19 h</td><td>6 · SSO, raf. 11</td><td>0,6 · N</td><td>1,8 · SSE</td><td>courant de travers au vent : dérive à corriger ; courant fort (1,8 nd) ; houle croisée avec le vent</td></tr><tr><td>dimanche 29/11 7 h</td><td>9 · OSO, raf. 13</td><td>0,6 · NNO</td><td>1,7 · SSE</td><td>courant de travers au vent : dérive à corriger ; courant fort (1,7 nd) ; houle croisée avec le vent</td></tr><tr><td>dimanche 29/11 10 h<br><small class="ev">renverse, début du jusant</small></td><td>9 · O, raf. 12</td><td>0,7 · NNO</td><td>0,3 · SSO</td><td>courant faible ; houle croisée avec le vent</td></tr><tr><td>dimanche 29/11 13 h</td><td>7 · O, raf. 11</td><td>0,6 · NNO</td><td>1,4 · NO</td><td>courant de travers au vent : dérive à corriger ; houle croisée avec le vent</td></tr><tr><td>dimanche 29/11 16 h</td><td>7 · OSO, raf. 9</td><td>0,6 · NNO</td><td>1,0 · NO</td><td>courant de travers au vent : dérive à corriger ; houle croisée avec le vent</td></tr><tr><td>dimanche 29/11 18 h<br><small class="ev">renverse, début du flot</small></td><td>7 · SSO, raf. 9</td><td>0,5 · NNO</td><td>0,6 · SSE</td><td>courant de travers au vent : dérive à corriger ; houle croisée avec le vent</td></tr><tr><td>dimanche 29/11 19 h</td><td>7 · SSO, raf. 10</td><td>0,5 · N</td><td>1,4 · SSE</td><td>courant de travers au vent : dérive à corriger ; houle croisée avec le vent</td></tr></tbody></table></div>
+  <p class="meta">Valeurs au point de référence « Point GPS de test ».</p>
+  <div class="btns" role="group" aria-label="Jour" id="sys-days"></div>
+  <div class="btns" role="group" aria-label="Heure" id="sys-hours"></div>
+  <div class="btns" role="group" aria-label="Couches"><button type="button" data-sys-layer="vent" aria-pressed="true">Vent (barbules noires)</button><button type="button" data-sys-layer="vagues" aria-pressed="false">Vagues (flèches bleues)</button><button type="button" data-sys-layer="courants" aria-pressed="false">Courants (flèches violettes)</button><button type="button" data-sys-layer="annot" aria-pressed="false">Avec annotations</button></div>
+  <p class="meta" id="sys-label"></p>
+  <figure>
+    <div class="map" data-zoom><img src="fig/sys_fond.webp" alt="Fond de carte" loading="lazy"><img class="layer" data-sys="vent" src="" alt=""><img class="layer" data-sys="vagues" src="" alt="" hidden><img class="layer" data-sys="courants" src="" alt="" hidden><img class="layer" data-sys="annot" src="" alt="" hidden></div>
+    <figcaption>Vent DWD ICON-EU 6,5 km et vagues DWD EWAM 0,05°, courants Copernicus Marine IBI 0,027° (champ instantané). Flèches de vagues dans le sens de propagation, plus longues quand Hs est plus grande ; flèches de courant dans le sens du courant, plus longues quand il est plus fort. Annotations : en rouge, vent contre courant (écart de plus de 135°, courant d’au moins 0,5 nd, vent d’au moins 8 nd) ; en orange, vagues contre courant (Hs d’au moins 0,5 m).</figcaption>
+  </figure>
+  <script type="application/json" id="sys-data">[{"t": "2026112706", "q": "vendredi 27/11 7 h", "d": "ven. 27", "h": "7 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112708", "q": "vendredi 27/11 9 h", "d": "ven. 27", "h": "9 h", "l": ["vent", "vagues", "courants", "annot"], "e": ["renverse, début du jusant"]}, {"t": "2026112709", "q": "vendredi 27/11 10 h", "d": "ven. 27", "h": "10 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112712", "q": "vendredi 27/11 13 h", "d": "ven. 27", "h": "13 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112715", "q": "vendredi 27/11 16 h", "d": "ven. 27", "h": "16 h", "l": ["vent", "vagues", "courants", "annot"], "e": ["renverse, début du flot"]}, {"t": "2026112718", "q": "vendredi 27/11 19 h", "d": "ven. 27", "h": "19 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112720", "q": "vendredi 27/11 21 h", "d": "ven. 27", "h": "21 h", "l": ["vent", "vagues", "courants", "annot"], "e": ["renverse, début du jusant"]}, {"t": "2026112806", "q": "samedi 28/11 7 h", "d": "sam. 28", "h": "7 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112809", "q": "samedi 28/11 10 h", "d": "sam. 28", "h": "10 h", "l": ["vent", "vagues", "courants", "annot"], "e": ["renverse, début du jusant"]}, {"t": "2026112812", "q": "samedi 28/11 13 h", "d": "sam. 28", "h": "13 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112815", "q": "samedi 28/11 16 h", "d": "sam. 28", "h": "16 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112816", "q": "samedi 28/11 17 h", "d": "sam. 28", "h": "17 h", "l": ["vent", "vagues", "courants", "annot"], "e": ["renverse, début du flot"]}, {"t": "2026112818", "q": "samedi 28/11 19 h", "d": "sam. 28", "h": "19 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112906", "q": "dimanche 29/11 7 h", "d": "dim. 29", "h": "7 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112909", "q": "dimanche 29/11 10 h", "d": "dim. 29", "h": "10 h", "l": ["vent", "vagues", "courants", "annot"], "e": ["renverse, début du jusant"]}, {"t": "2026112912", "q": "dimanche 29/11 13 h", "d": "dim. 29", "h": "13 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112915", "q": "dimanche 29/11 16 h", "d": "dim. 29", "h": "16 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}, {"t": "2026112917", "q": "dimanche 29/11 18 h", "d": "dim. 29", "h": "18 h", "l": ["vent", "vagues", "courants", "annot"], "e": ["renverse, début du flot"]}, {"t": "2026112918", "q": "dimanche 29/11 19 h", "d": "dim. 29", "h": "19 h", "l": ["vent", "vagues", "courants", "annot"], "e": []}]</script>
+</section>
+<section aria-labelledby="h-src">
+  <h2 id="h-src">Ce qui manque et sources</h2>
+  <ul><li><b>Heures et hauteurs de marée officielles</b> : <a href="https://maree.shom.fr/" target="_blank" rel="noopener">annuaire des marées du SHOM</a>.</li><li><b>Bulletin côtier et BMS en cours</b> : ils ne sont pas lus par ce générateur, consultez-les sur <a href="https://meteofrance.com/meteo-marine" target="_blank" rel="noopener">Météo-France marine</a>.</li></ul>
+  <div class="src"><span>Sources : ECMWF open data (IFS 0,25°), DWD opendata (ICON-EU, EWAM, cartes officielles), Copernicus Marine Service (IBI, courants). Cartes, chiffres et texte produits automatiquement par les scripts de NAVIn, avec des règles fixes, sans IA ; Open-Meteo n'est pas utilisé.</span></div>
+</section>
+</div>
+<div id="zoom" hidden role="dialog" aria-label="Carte en plein écran"><div class="stack"></div></div>
+<script>
+(function () {
+  function press(group, btn) {
+    group.forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b === btn));
+    });
+  }
+  function all(sel) {
+    return [].slice.call(document.querySelectorAll(sel));
+  }
+  // Cartes à une image : chaque bouton remplace l'image
+  var sets = {};
+  all('button[data-set]').forEach(function (b) {
+    (sets[b.dataset.set] = sets[b.dataset.set] || []).push(b);
+  });
+  Object.keys(sets).forEach(function (k) {
+    sets[k].forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.getElementById('img-' + k).src = b.dataset.src;
+        press(sets[k], b);
+      });
+    });
+  });
+  // Régional, local, courants : jour + annotations
+  ['reg', 'loc', 'cur'].forEach(function (k) {
+    var days = all('button[data-day="' + k + '"]');
+    var ann = document.querySelector('button[data-ann="' + k + '"]');
+    var img = document.getElementById('img-' + k);
+    if (!days.length || !img) return;
+    var state = { v: days[0].dataset.v, a: false };
+    function draw() {
+      img.src =
+        'fig/' +
+        k +
+        '_' +
+        state.v +
+        '_' +
+        (state.a ? 'annot' : 'base') +
+        '.webp';
+    }
+    days.forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.v = b.dataset.v;
+        press(days, b);
+        draw();
+      });
+    });
+    if (ann)
+      ann.addEventListener('click', function () {
+        state.a = !state.a;
+        ann.setAttribute('aria-pressed', String(state.a));
+        draw();
+      });
+  });
+  // Calques simples (DWD 500 hPa)
+  all('button[data-layer]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var l = document.getElementById(b.dataset.layer);
+      l.hidden = !l.hidden;
+      var on = 'inverse' in b.dataset ? l.hidden : !l.hidden;
+      b.setAttribute('aria-pressed', String(on));
+    });
+  });
+  // Vent, vagues, courants toutes les 3 h
+  var data = document.getElementById('sys-data');
+  if (data) {
+    var H = JSON.parse(data.textContent);
+    var cur = 0;
+    var on = { vent: true };
+    var dayBox = document.getElementById('sys-days');
+    var hourBox = document.getElementById('sys-hours');
+    var label = document.getElementById('sys-label');
+    var days = [];
+    H.forEach(function (h) {
+      if (days.indexOf(h.d) < 0) days.push(h.d);
+    });
+    function draw() {
+      var h = H[cur];
+      all('img[data-sys]').forEach(function (i) {
+        var k = i.dataset.sys;
+        var has = h.l.indexOf(k) >= 0;
+        if (has) i.src = 'fig/sys_' + h.t + '_' + k + '.webp';
+        i.hidden = !(on[k] && has);
+      });
+      label.textContent = h.q + (h.e.length ? ' · ' + h.e.join(' ; ') : '');
+      all('#sys-days button').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.d === h.d));
+      });
+      hourBox.innerHTML = '';
+      var prev = document.createElement('button');
+      prev.type = 'button';
+      prev.textContent = '◀';
+      prev.setAttribute('aria-label', 'Heure précédente');
+      prev.disabled = cur === 0;
+      prev.onclick = function () {
+        cur -= 1;
+        draw();
+      };
+      hourBox.appendChild(prev);
+      H.forEach(function (x, i) {
+        if (x.d !== h.d) return;
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = x.h + (x.e.length ? ' •' : '');
+        if (x.e.length) b.title = x.e.join(' ; ');
+        b.setAttribute('aria-pressed', String(i === cur));
+        b.onclick = function () {
+          cur = i;
+          draw();
+        };
+        hourBox.appendChild(b);
+      });
+      var next = document.createElement('button');
+      next.type = 'button';
+      next.textContent = '▶';
+      next.setAttribute('aria-label', 'Heure suivante');
+      next.disabled = cur === H.length - 1;
+      next.onclick = function () {
+        cur += 1;
+        draw();
+      };
+      hourBox.appendChild(next);
+    }
+    days.forEach(function (d) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = d;
+      b.dataset.d = d;
+      b.onclick = function () {
+        for (var i = 0; i < H.length; i++)
+          if (H[i].d === d) {
+            cur = i;
+            break;
+          }
+        draw();
+      };
+      dayBox.appendChild(b);
+    });
+    all('button[data-sys-layer]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var k = b.dataset.sysLayer;
+        on[k] = !on[k];
+        b.setAttribute('aria-pressed', String(!!on[k]));
+        draw();
+      });
+    });
+    draw();
+  }
+  // Plein écran
+  var zoom = document.getElementById('zoom');
+  var stack = zoom.querySelector('.stack');
+  all('[data-zoom]').forEach(function (m) {
+    m.addEventListener('click', function () {
+      stack.innerHTML = '';
+      m.querySelectorAll('img').forEach(function (i) {
+        if (i.hidden) return;
+        var c = i.cloneNode();
+        c.removeAttribute('id');
+        c.removeAttribute('loading');
+        stack.appendChild(c);
+      });
+      zoom.hidden = false;
+    });
+  });
+  zoom.addEventListener('click', function () {
+    zoom.hidden = true;
+    stack.innerHTML = '';
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') zoom.hidden = true;
+  });
+  // Taille du texte
+  var size = 17;
+  try {
+    var s = parseInt(localStorage.getItem('asq-font'), 10);
+    if (s >= 13 && s <= 26) size = s;
+  } catch (e) {}
+  function apply() {
+    document.documentElement.style.fontSize = size + 'px';
+    try {
+      localStorage.setItem('asq-font', String(size));
+    } catch (e) {}
+  }
+  if (size !== 17) apply();
+  document.getElementById('fplus').addEventListener('click', function () {
+    size = Math.min(26, size + 1);
+    apply();
+  });
+  document.getElementById('fminus').addEventListener('click', function () {
+    size = Math.max(13, size - 1);
+    apply();
+  });
+  // Menu déroulant des versions (fichier index.json deux dossiers plus haut)
+  var wrap = document.querySelector('.wrap');
+  var zone = wrap.dataset.zone;
+  var me = wrap.dataset.version;
+  fetch('../../index.json', { cache: 'no-cache' })
+    .then(function (r) {
+      return r.ok ? r.json() : null;
+    })
+    .then(function (idx) {
+      if (!idx || !idx.zones || !idx.zones[zone]) return;
+      var vs = idx.zones[zone].versions;
+      var sel = document.getElementById('vsel');
+      vs.forEach(function (v) {
+        var o = document.createElement('option');
+        o.value = v.path;
+        o.textContent = v.label + (v.auto || v.claude ? '' : ' (relancée)');
+        if (v.id === me) o.selected = true;
+        sel.appendChild(o);
+      });
+      sel.onchange = function () {
+        location.href = '../../' + sel.value;
+      };
+      document.getElementById('versions').hidden = false;
+      if (vs.length && vs[0].id !== me) {
+        var a = document.getElementById('vlast');
+        a.href = '../../' + vs[0].path;
+        a.hidden = false;
+      }
+    })
+    .catch(function () {});
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,2205 @@
+{
+ "zones": {
+  "saint-quay": {
+   "nom": "Saint-Quay-Portrieux",
+   "court": "Saint-Quay",
+   "lat": 48.6521,
+   "lon": -2.83063,
+   "versions": [
+    {
+     "id": "202611281547",
+     "label": "sam. 28/11 16 h 47 · IFS 28/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-28T16:47+01:00",
+     "path": "saint-quay/202611281547/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112806",
+      "icon": "2026112812",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 17,
+       "rafales_kn": 23,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-12-01",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 24,
+       "hs_m": 0.9
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611281258",
+     "label": "sam. 28/11 13 h 58 · IFS 28/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-28T13:58+01:00",
+     "path": "saint-quay/202611281258/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112806",
+      "icon": "2026112806",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 21,
+       "rafales_kn": 28,
+       "hs_m": 1.1
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 14,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 17,
+       "rafales_kn": 22,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611280953",
+     "label": "sam. 28/11 10 h 53 · IFS 28/11 00 UTC, ICON 06 UTC",
+     "at": "2026-11-28T10:53+01:00",
+     "path": "saint-quay/202611280953/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112800",
+      "icon": "2026112806",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 21,
+       "rafales_kn": 28,
+       "hs_m": 1.1
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 14,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 17,
+       "rafales_kn": 22,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611280749",
+     "label": "sam. 28/11 8 h 49 · IFS 28/11 00 UTC, ICON 00 UTC",
+     "at": "2026-11-28T08:49+01:00",
+     "path": "saint-quay/202611280749/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112800",
+      "icon": "2026112800",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 20,
+       "rafales_kn": 30,
+       "hs_m": 1.1
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611280330",
+     "label": "sam. 28/11 4 h 30 · IFS 27/11 18 UTC, ICON 00 UTC",
+     "at": "2026-11-28T04:30+01:00",
+     "path": "saint-quay/202611280330/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112718",
+      "icon": "2026112800",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 20,
+       "rafales_kn": 30,
+       "hs_m": 1.2
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611280111",
+     "label": "sam. 28/11 2 h 11 · IFS 27/11 18 UTC, ICON 18 UTC",
+     "at": "2026-11-28T02:11+01:00",
+     "path": "saint-quay/202611280111/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112718",
+      "icon": "2026112718",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 20,
+       "rafales_kn": 27,
+       "hs_m": 1.2
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 16,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 16,
+       "rafales_kn": 22,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611272156",
+     "label": "ven. 27/11 22 h 56 · IFS 27/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-27T22:56+01:00",
+     "path": "saint-quay/202611272156/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112712",
+      "icon": "2026112718",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 20,
+       "rafales_kn": 27,
+       "hs_m": 1.2
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 16,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 16,
+       "rafales_kn": 22,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611271959",
+     "label": "ven. 27/11 20 h 59 · IFS 27/11 12 UTC, ICON 12 UTC",
+     "at": "2026-11-27T20:59+01:00",
+     "path": "saint-quay/202611271959/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112712",
+      "icon": "2026112712",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 22,
+       "rafales_kn": 30,
+       "hs_m": 1.2
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611271600",
+     "label": "ven. 27/11 17 h 00 · IFS 27/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-27T17:00+01:00",
+     "path": "saint-quay/202611271600/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112706",
+      "icon": "2026112712",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 22,
+       "rafales_kn": 30,
+       "hs_m": 1.2
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611271232",
+     "label": "ven. 27/11 13 h 32 · IFS 27/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-27T13:32+01:00",
+     "path": "saint-quay/202611271232/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112706",
+      "icon": "2026112706",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 21,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 20,
+       "rafales_kn": 28,
+       "hs_m": 1.0
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 7,
+       "rafales_kn": 10,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611271009",
+     "label": "ven. 27/11 11 h 09 · IFS 27/11 00 UTC, ICON 06 UTC",
+     "at": "2026-11-27T11:09+01:00",
+     "path": "saint-quay/202611271009/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112700",
+      "icon": "2026112706",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 21,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "prudence",
+       "vent_kn": 20,
+       "rafales_kn": 28,
+       "hs_m": 1.0
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 7,
+       "rafales_kn": 10,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611270756",
+     "label": "ven. 27/11 8 h 56 · IFS 27/11 00 UTC, ICON 00 UTC",
+     "at": "2026-11-27T08:56+01:00",
+     "path": "saint-quay/202611270756/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112700",
+      "icon": "2026112700",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 21,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 16,
+       "rafales_kn": 23,
+       "hs_m": 1.0
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 13,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611270401",
+     "label": "ven. 27/11 5 h 01 · IFS 26/11 18 UTC, ICON 00 UTC",
+     "at": "2026-11-27T05:01+01:00",
+     "path": "saint-quay/202611270401/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112618",
+      "icon": "2026112700",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 21,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 16,
+       "rafales_kn": 23,
+       "hs_m": 1.0
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 13,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611270116",
+     "label": "ven. 27/11 2 h 16 · IFS 26/11 18 UTC, ICON 18 UTC",
+     "at": "2026-11-27T02:16+01:00",
+     "path": "saint-quay/202611270116/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112618",
+      "icon": "2026112618",
+      "ewam": "2026112612"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 17,
+       "rafales_kn": 23,
+       "hs_m": 0.9
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 13,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611262155",
+     "label": "jeu. 26/11 22 h 55 · IFS 26/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-26T22:55+01:00",
+     "path": "saint-quay/202611262155/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112612",
+      "icon": "2026112618",
+      "ewam": "2026112612"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 17,
+       "rafales_kn": 23,
+       "hs_m": 0.9
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 13,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611261939",
+     "label": "jeu. 26/11 20 h 39 · IFS 26/11 12 UTC, ICON 12 UTC",
+     "at": "2026-11-26T20:39+01:00",
+     "path": "saint-quay/202611261939/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112612",
+      "icon": "2026112612",
+      "ewam": "2026112612"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 22,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 22,
+       "hs_m": 0.9
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 16,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611261603",
+     "label": "jeu. 26/11 17 h 03 · IFS 26/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-26T17:03+01:00",
+     "path": "saint-quay/202611261603/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112606",
+      "icon": "2026112612",
+      "ewam": "2026112612"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 22,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 22,
+       "hs_m": 0.9
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 16,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611261236",
+     "label": "jeu. 26/11 13 h 36 · IFS 26/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-26T13:36+01:00",
+     "path": "saint-quay/202611261236/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112606",
+      "icon": "2026112606",
+      "ewam": "2026112600"
+     },
+     "jours": [
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 16,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 21,
+       "hs_m": 0.9
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611261012",
+     "label": "jeu. 26/11 11 h 12 · IFS 26/11 00 UTC, ICON 06 UTC",
+     "at": "2026-11-26T11:12+01:00",
+     "path": "saint-quay/202611261012/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112600",
+      "icon": "2026112606",
+      "ewam": "2026112600"
+     },
+     "jours": [
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 16,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 21,
+       "hs_m": 0.9
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611260908",
+     "label": "jeu. 26/11 10 h 08 · IFS 26/11 00 UTC, ICON 00 UTC",
+     "at": "2026-11-26T10:08+01:00",
+     "path": "saint-quay/202611260908/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112600",
+      "icon": "2026112600",
+      "ewam": "2026112600"
+     },
+     "jours": [
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 15,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 16,
+       "rafales_kn": 22,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 23,
+       "hs_m": 0.9
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611251237",
+     "label": "mer. 25/11 13 h 37 · IFS 25/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-25T13:37+01:00",
+     "path": "saint-quay/202611251237/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112506",
+      "icon": "2026112506",
+      "ewam": "2026112500"
+     },
+     "jours": [
+      {
+       "date": "2026-11-25",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 26,
+       "hs_m": 1.3
+      },
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 15,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 20,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611242230",
+     "label": "mar. 24/11 23 h 30 · IFS 24/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-24T23:30+01:00",
+     "path": "saint-quay/202611242230/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112412",
+      "icon": "2026112418",
+      "ewam": "2026112412"
+     },
+     "jours": [
+      {
+       "date": "2026-11-25",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 25,
+       "hs_m": 1.6
+      },
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 15,
+       "hs_m": 0.7
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 16,
+       "rafales_kn": 22,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611232153",
+     "label": "lun. 23/11 22 h 53 · IFS 23/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-23T22:53+01:00",
+     "path": "saint-quay/202611232153/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112312",
+      "icon": "2026112318",
+      "ewam": "2026112312"
+     },
+     "jours": [
+      {
+       "date": "2026-11-24",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 25,
+       "hs_m": 0.9
+      },
+      {
+       "date": "2026-11-25",
+       "feu": "prudence",
+       "vent_kn": 20,
+       "rafales_kn": 28,
+       "hs_m": 1.5
+      },
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": 0.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611222219",
+     "label": "dim. 22/11 23 h 19 · IFS 22/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-22T23:19+01:00",
+     "path": "saint-quay/202611222219/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112212",
+      "icon": "2026112218",
+      "ewam": "2026112212"
+     },
+     "jours": [
+      {
+       "date": "2026-11-23",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 15,
+       "hs_m": 1.0
+      },
+      {
+       "date": "2026-11-24",
+       "feu": "prudence",
+       "vent_kn": 20,
+       "rafales_kn": 28,
+       "hs_m": 0.9
+      },
+      {
+       "date": "2026-11-25",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 24,
+       "hs_m": 1.7
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "202611211657",
+     "label": "sam. 21/11 17 h 57 · IFS 21/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-21T17:57+01:00",
+     "path": "saint-quay/202611211657/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112106",
+      "icon": "2026112112",
+      "ewam": "2026112112"
+     },
+     "jours": [
+      {
+       "date": "2026-11-22",
+       "feu": "nogo",
+       "vent_kn": 26,
+       "rafales_kn": 39,
+       "hs_m": 1.7
+      },
+      {
+       "date": "2026-11-23",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 13,
+       "hs_m": 1.1
+      },
+      {
+       "date": "2026-11-24",
+       "feu": "prudence",
+       "vent_kn": 21,
+       "rafales_kn": 29,
+       "hs_m": 0.9
+      }
+     ],
+     "type": "maree"
+    },
+    {
+     "id": "claude-2026112023",
+     "label": "20/11 23 h 00 · rédigée par Claude",
+     "at": "2026-11-20T23:00+01:00",
+     "path": "../saint-quay/index.html",
+     "auto": false,
+     "claude": true
+    }
+   ]
+  },
+  "porquerolles": {
+   "nom": "Porquerolles, Hyères et Toulon",
+   "court": "Porquerolles",
+   "lat": 43.00025,
+   "lon": 6.2023,
+   "versions": [
+    {
+     "id": "202611211650",
+     "label": "sam. 21/11 17 h 50 · IFS 21/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-21T17:50+01:00",
+     "path": "porquerolles/202611211650/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112106",
+      "icon": "2026112112",
+      "ewam": "2026112112"
+     },
+     "jours": [
+      {
+       "date": "2026-11-22",
+       "feu": "nogo",
+       "vent_kn": 31,
+       "rafales_kn": 44,
+       "hs_m": 3.2
+      },
+      {
+       "date": "2026-11-23",
+       "feu": "nogo",
+       "vent_kn": 31,
+       "rafales_kn": 47,
+       "hs_m": 3.4
+      },
+      {
+       "date": "2026-11-24",
+       "feu": "go",
+       "vent_kn": 6,
+       "rafales_kn": 10,
+       "hs_m": 0.8
+      }
+     ],
+     "type": "mer"
+    }
+   ]
+  },
+  "rolle": {
+   "nom": "Rolle, Léman",
+   "court": "Rolle",
+   "lat": 46.46015,
+   "lon": 6.33805,
+   "versions": [
+    {
+     "id": "202611281550",
+     "label": "sam. 28/11 16 h 50 · IFS 28/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-28T16:50+01:00",
+     "path": "rolle/202611281550/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112806",
+      "icon": "2026112812",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 3,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 16,
+       "hs_m": null
+      },
+      {
+       "date": "2026-12-01",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611281301",
+     "label": "sam. 28/11 14 h 01 · IFS 28/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-28T14:01+01:00",
+     "path": "rolle/202611281301/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112806",
+      "icon": "2026112806",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 16,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 17,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611280956",
+     "label": "sam. 28/11 10 h 56 · IFS 28/11 00 UTC, ICON 06 UTC",
+     "at": "2026-11-28T10:56+01:00",
+     "path": "rolle/202611280956/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112800",
+      "icon": "2026112806",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 16,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 17,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611280752",
+     "label": "sam. 28/11 8 h 52 · IFS 28/11 00 UTC, ICON 00 UTC",
+     "at": "2026-11-28T08:52+01:00",
+     "path": "rolle/202611280752/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112800",
+      "icon": "2026112800",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 3,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 20,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611280333",
+     "label": "sam. 28/11 4 h 33 · IFS 27/11 18 UTC, ICON 00 UTC",
+     "at": "2026-11-28T04:33+01:00",
+     "path": "rolle/202611280333/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112718",
+      "icon": "2026112800",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 3,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 20,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611280114",
+     "label": "sam. 28/11 2 h 14 · IFS 27/11 18 UTC, ICON 18 UTC",
+     "at": "2026-11-28T02:14+01:00",
+     "path": "rolle/202611280114/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112718",
+      "icon": "2026112718",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 3,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 21,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611272159",
+     "label": "ven. 27/11 22 h 59 · IFS 27/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-27T22:59+01:00",
+     "path": "rolle/202611272159/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112712",
+      "icon": "2026112718",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 10,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 3,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 21,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611272001",
+     "label": "ven. 27/11 21 h 01 · IFS 27/11 12 UTC, ICON 12 UTC",
+     "at": "2026-11-27T21:01+01:00",
+     "path": "rolle/202611272001/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112712",
+      "icon": "2026112712",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 3,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 24,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611271603",
+     "label": "ven. 27/11 17 h 03 · IFS 27/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-27T17:03+01:00",
+     "path": "rolle/202611271603/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112706",
+      "icon": "2026112712",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 3,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 15,
+       "rafales_kn": 24,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611271234",
+     "label": "ven. 27/11 13 h 34 · IFS 27/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-27T13:34+01:00",
+     "path": "rolle/202611271234/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112706",
+      "icon": "2026112706",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 3,
+       "rafales_kn": 5,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611271012",
+     "label": "ven. 27/11 11 h 12 · IFS 27/11 00 UTC, ICON 06 UTC",
+     "at": "2026-11-27T11:12+01:00",
+     "path": "rolle/202611271012/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112700",
+      "icon": "2026112706",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 3,
+       "rafales_kn": 5,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611270758",
+     "label": "ven. 27/11 8 h 58 · IFS 27/11 00 UTC, ICON 00 UTC",
+     "at": "2026-11-27T08:58+01:00",
+     "path": "rolle/202611270758/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112700",
+      "icon": "2026112700",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 13,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611270404",
+     "label": "ven. 27/11 5 h 04 · IFS 26/11 18 UTC, ICON 00 UTC",
+     "at": "2026-11-27T05:04+01:00",
+     "path": "rolle/202611270404/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112618",
+      "icon": "2026112700",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 13,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611270119",
+     "label": "ven. 27/11 2 h 19 · IFS 26/11 18 UTC, ICON 18 UTC",
+     "at": "2026-11-27T02:19+01:00",
+     "path": "rolle/202611270119/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112618",
+      "icon": "2026112618",
+      "ewam": "2026112612"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 13,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611262158",
+     "label": "jeu. 26/11 22 h 58 · IFS 26/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-26T22:58+01:00",
+     "path": "rolle/202611262158/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112612",
+      "icon": "2026112618",
+      "ewam": "2026112612"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 13,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611261942",
+     "label": "jeu. 26/11 20 h 42 · IFS 26/11 12 UTC, ICON 12 UTC",
+     "at": "2026-11-26T20:42+01:00",
+     "path": "rolle/202611261942/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112612",
+      "icon": "2026112612",
+      "ewam": "2026112612"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 8,
+       "rafales_kn": 12,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611261607",
+     "label": "jeu. 26/11 17 h 07 · IFS 26/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-26T17:07+01:00",
+     "path": "rolle/202611261607/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112606",
+      "icon": "2026112612",
+      "ewam": "2026112612"
+     },
+     "jours": [
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 8,
+       "rafales_kn": 12,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611261239",
+     "label": "jeu. 26/11 13 h 39 · IFS 26/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-26T13:39+01:00",
+     "path": "rolle/202611261239/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112606",
+      "icon": "2026112606",
+      "ewam": "2026112600"
+     },
+     "jours": [
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 7,
+       "rafales_kn": 10,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 7,
+       "rafales_kn": 10,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611261015",
+     "label": "jeu. 26/11 11 h 15 · IFS 26/11 00 UTC, ICON 06 UTC",
+     "at": "2026-11-26T11:15+01:00",
+     "path": "rolle/202611261015/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112600",
+      "icon": "2026112606",
+      "ewam": "2026112600"
+     },
+     "jours": [
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 7,
+       "rafales_kn": 10,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 7,
+       "rafales_kn": 10,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611260912",
+     "label": "jeu. 26/11 10 h 12 · IFS 26/11 00 UTC, ICON 00 UTC",
+     "at": "2026-11-26T10:12+01:00",
+     "path": "rolle/202611260912/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112600",
+      "icon": "2026112600",
+      "ewam": "2026112600"
+     },
+     "jours": [
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 7,
+       "rafales_kn": 11,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 4,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 8,
+       "rafales_kn": 12,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611251240",
+     "label": "mer. 25/11 13 h 40 · IFS 25/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-25T13:40+01:00",
+     "path": "rolle/202611251240/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112506",
+      "icon": "2026112506",
+      "ewam": "2026112500"
+     },
+     "jours": [
+      {
+       "date": "2026-11-25",
+       "feu": "go",
+       "vent_kn": 5,
+       "rafales_kn": 8,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 8,
+       "rafales_kn": 12,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 5,
+       "rafales_kn": 7,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611242233",
+     "label": "mar. 24/11 23 h 33 · IFS 24/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-24T23:33+01:00",
+     "path": "rolle/202611242233/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112412",
+      "icon": "2026112418",
+      "ewam": "2026112412"
+     },
+     "jours": [
+      {
+       "date": "2026-11-25",
+       "feu": "go",
+       "vent_kn": 4,
+       "rafales_kn": 10,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 14,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-27",
+       "feu": "go",
+       "vent_kn": 4,
+       "rafales_kn": 6,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611232245",
+     "label": "lun. 23/11 23 h 45 · IFS 23/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-23T23:45+01:00",
+     "path": "rolle/202611232245/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112312",
+      "icon": "2026112318",
+      "ewam": "2026112312"
+     },
+     "jours": [
+      {
+       "date": "2026-11-24",
+       "feu": "go",
+       "vent_kn": 6,
+       "rafales_kn": 10,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-25",
+       "feu": "go",
+       "vent_kn": 6,
+       "rafales_kn": 13,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-26",
+       "feu": "go",
+       "vent_kn": 6,
+       "rafales_kn": 10,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611211653",
+     "label": "sam. 21/11 17 h 53 · IFS 21/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-21T17:53+01:00",
+     "path": "rolle/202611211653/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112106",
+      "icon": "2026112112",
+      "ewam": "2026112112"
+     },
+     "jours": [
+      {
+       "date": "2026-11-22",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 31,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-23",
+       "feu": "prudence",
+       "vent_kn": 18,
+       "rafales_kn": 30,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-24",
+       "feu": "go",
+       "vent_kn": 9,
+       "rafales_kn": 14,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    }
+   ]
+  },
+  "gps-46p509_6p498": {
+   "nom": "Morges, District de Morges, Vaud",
+   "court": "Point GPS",
+   "lat": 46.5093,
+   "lon": 6.4983,
+   "versions": [
+    {
+     "id": "202611281553",
+     "label": "sam. 28/11 16 h 53 · IFS 28/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-28T16:53+01:00",
+     "path": "gps-46p509_6p498/202611281553/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112806",
+      "icon": "2026112812",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      },
+      {
+       "date": "2026-12-01",
+       "feu": "go",
+       "vent_kn": 4,
+       "rafales_kn": 6,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611281303",
+     "label": "sam. 28/11 14 h 03 · IFS 28/11 06 UTC, ICON 06 UTC",
+     "at": "2026-11-28T14:03+01:00",
+     "path": "gps-46p509_6p498/202611281303/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112806",
+      "icon": "2026112806",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 19,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611280958",
+     "label": "sam. 28/11 10 h 58 · IFS 28/11 00 UTC, ICON 06 UTC",
+     "at": "2026-11-28T10:58+01:00",
+     "path": "gps-46p509_6p498/202611280958/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112800",
+      "icon": "2026112806",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 12,
+       "rafales_kn": 19,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 2,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611280753",
+     "label": "sam. 28/11 8 h 53 · IFS 28/11 00 UTC, ICON 00 UTC",
+     "at": "2026-11-28T08:53+01:00",
+     "path": "gps-46p509_6p498/202611280753/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112800",
+      "icon": "2026112800",
+      "ewam": "2026112800"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 13,
+       "rafales_kn": 19,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611280335",
+     "label": "sam. 28/11 4 h 35 · IFS 27/11 18 UTC, ICON 00 UTC",
+     "at": "2026-11-28T04:35+01:00",
+     "path": "gps-46p509_6p498/202611280335/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112718",
+      "icon": "2026112800",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 13,
+       "rafales_kn": 19,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611280116",
+     "label": "sam. 28/11 2 h 16 · IFS 27/11 18 UTC, ICON 18 UTC",
+     "at": "2026-11-28T02:16+01:00",
+     "path": "gps-46p509_6p498/202611280116/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112718",
+      "icon": "2026112718",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 13,
+       "rafales_kn": 20,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611272202",
+     "label": "ven. 27/11 23 h 02 · IFS 27/11 12 UTC, ICON 18 UTC",
+     "at": "2026-11-27T23:02+01:00",
+     "path": "gps-46p509_6p498/202611272202/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112712",
+      "icon": "2026112718",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 13,
+       "rafales_kn": 20,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611272003",
+     "label": "ven. 27/11 21 h 03 · IFS 27/11 12 UTC, ICON 12 UTC",
+     "at": "2026-11-27T21:03+01:00",
+     "path": "gps-46p509_6p498/202611272003/index.html",
+     "auto": true,
+     "runs": {
+      "ifs": "2026112712",
+      "icon": "2026112712",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 21,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611271551",
+     "label": "ven. 27/11 16 h 51 · IFS 27/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-27T16:51+01:00",
+     "path": "gps-46p509_6p498/202611271551/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112706",
+      "icon": "2026112712",
+      "ewam": "2026112712"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 21,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    },
+    {
+     "id": "202611271547",
+     "label": "ven. 27/11 16 h 47 · IFS 27/11 06 UTC, ICON 12 UTC",
+     "at": "2026-11-27T16:47+01:00",
+     "path": "gps-46p509_6p498/202611271547/index.html",
+     "auto": false,
+     "runs": {
+      "ifs": "2026112706",
+      "icon": "2026112712",
+      "ewam": "2026112700"
+     },
+     "jours": [
+      {
+       "date": "2026-11-28",
+       "feu": "go",
+       "vent_kn": 11,
+       "rafales_kn": 17,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-29",
+       "feu": "go",
+       "vent_kn": 1,
+       "rafales_kn": 2,
+       "hs_m": null
+      },
+      {
+       "date": "2026-11-30",
+       "feu": "go",
+       "vent_kn": 14,
+       "rafales_kn": 21,
+       "hs_m": null
+      }
+     ],
+     "type": "lac"
+    }
+   ]
+  }
+ },
+ "updated": "2026-11-28T16:53+01:00"
+}

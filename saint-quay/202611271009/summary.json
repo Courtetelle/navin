@@ -1,0 +1,36 @@
+{
+ "id": "202611271009",
+ "zone": "saint-quay",
+ "at": "2026-11-27T11:12+01:00",
+ "label": "27/11 11 h 12",
+ "runs": {
+  "ifs": "2026112700",
+  "icon": "2026112706",
+  "ewam": "2026112700"
+ },
+ "jours": [
+  {
+   "date": "2026-11-27",
+   "feu": "go",
+   "vent_kn": 15,
+   "rafales_kn": 21,
+   "hs_m": 0.7
+  },
+  {
+   "date": "2026-11-28",
+   "feu": "prudence",
+   "vent_kn": 20,
+   "rafales_kn": 28,
+   "hs_m": 1.0
+  },
+  {
+   "date": "2026-11-29",
+   "feu": "go",
+   "vent_kn": 7,
+   "rafales_kn": 10,
+   "hs_m": 0.7
+  }
+ ],
+ "type": "maree",
+ "nom": "Saint-Quay-Portrieux"
+}

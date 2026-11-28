@@ -1,0 +1,36 @@
+{
+ "id": "202611272003",
+ "zone": "gps-46p509_6p498",
+ "at": "2026-11-27T21:04+01:00",
+ "label": "27/11 21 h 04",
+ "runs": {
+  "ifs": "2026112712",
+  "icon": "2026112712",
+  "ewam": "2026112712"
+ },
+ "jours": [
+  {
+   "date": "2026-11-28",
+   "feu": "go",
+   "vent_kn": 11,
+   "rafales_kn": 17,
+   "hs_m": null
+  },
+  {
+   "date": "2026-11-29",
+   "feu": "go",
+   "vent_kn": 1,
+   "rafales_kn": 2,
+   "hs_m": null
+  },
+  {
+   "date": "2026-11-30",
+   "feu": "go",
+   "vent_kn": 14,
+   "rafales_kn": 21,
+   "hs_m": null
+  }
+ ],
+ "type": "lac",
+ "nom": "Morges, District de Morges, Vaud"
+}

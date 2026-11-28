@@ -1,0 +1,27 @@
+{
+ "saint-quay": "2026112806|2026112812",
+ "porquerolles": "2026112106|2026112112",
+ "rolle": "2026112806|2026112812",
+ "suivis": {
+  "saint-quay": {
+   "lat": 48.6521,
+   "lon": -2.8306,
+   "nom": "Saint-Quay-Portrieux, Saint-Brieuc, Côtes-d'Armor",
+   "demande": "2026-11-22T23:00+00:00"
+  },
+  "rolle": {
+   "lat": 46.4602,
+   "lon": 6.338,
+   "nom": "Rolle, District de Nyon, Vaud",
+   "demande": "2026-11-23T22:45+00:00"
+  },
+  "gps-46p509_6p498": {
+   "lat": 46.5093,
+   "lon": 6.4983,
+   "nom": "Morges, District de Morges, Vaud",
+   "demande": "2026-11-27T15:51+00:00"
+  }
+ },
+ "echecs": {},
+ "gps-46p509_6p498": "2026112806|2026112812"
+}

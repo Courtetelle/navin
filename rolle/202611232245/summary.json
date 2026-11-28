@@ -1,0 +1,36 @@
+{
+ "id": "202611232245",
+ "zone": "rolle",
+ "at": "2026-11-23T23:46+01:00",
+ "label": "23/11 23 h 46",
+ "runs": {
+  "ifs": "2026112312",
+  "icon": "2026112318",
+  "ewam": "2026112312"
+ },
+ "jours": [
+  {
+   "date": "2026-11-24",
+   "feu": "go",
+   "vent_kn": 6,
+   "rafales_kn": 10,
+   "hs_m": null
+  },
+  {
+   "date": "2026-11-25",
+   "feu": "go",
+   "vent_kn": 6,
+   "rafales_kn": 13,
+   "hs_m": null
+  },
+  {
+   "date": "2026-11-26",
+   "feu": "go",
+   "vent_kn": 6,
+   "rafales_kn": 10,
+   "hs_m": null
+  }
+ ],
+ "type": "lac",
+ "nom": "Rolle, Léman"
+}
