@@ -20,6 +20,7 @@ import {
   mergeRoutes,
   mergeSiteLinks,
   mergeTraceNames,
+  mergeTraceVoyages,
   mergeUiEdits,
   mergeVoyages,
   openCruise,
@@ -107,6 +108,7 @@ export interface BackupFile {
   current?: string;
   /** @default undefined */
   traceNames?: unknown;
+  traceVoyages?: unknown;
   /** @default undefined */
   keyBook?: unknown;
   /** @default undefined */
@@ -232,6 +234,7 @@ export async function restoreBackup(file: BackupFile): Promise<RestoreResult> {
     }
   }
   mergeTraceNames(file.traceNames);
+  mergeTraceVoyages(file.traceVoyages);
   mergeKeyBook(file.keyBook);
   mergeSiteLinks(file.siteLinks);
   restoreRecords(file);
@@ -269,6 +272,7 @@ export function mergeSynced(file: BackupFile, tracked?: string): void {
     restoreTraceCuts(cruise.id, cuts);
   }
   mergeTraceNames(file.traceNames);
+  mergeTraceVoyages(file.traceVoyages);
   mergeSiteLinks(file.siteLinks);
   restoreRecords(file);
   // Saving a merged cruise marks it current: the open one stays so.
