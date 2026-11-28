@@ -1,0 +1,50 @@
+{
+ "at": "2026-11-28T16:02:57.138Z",
+ "zones": [
+  "antifer",
+  "belge-somme",
+  "camargue-straphael",
+  "casquets",
+  "hague-penmarch",
+  "ouessant",
+  "pas-de-calais",
+  "provence",
+  "somme-hague"
+ ],
+ "last": {
+  "stations": 52,
+  "nets": {
+   "Météo-France": 36,
+   "NOAA NDBC": 4,
+   "OpenWindMap": 8,
+   "METAR": 4
+  }
+ },
+ "days": [
+  {
+   "date": "2026-11-28",
+   "stations": 52,
+   "points": 761
+  },
+  {
+   "date": "2026-11-27",
+   "stations": 53,
+   "points": 1093
+  },
+  {
+   "date": "2026-11-26",
+   "stations": 54,
+   "points": 1063
+  },
+  {
+   "date": "2026-11-25",
+   "stations": 53,
+   "points": 1025
+  },
+  {
+   "date": "2026-11-24",
+   "stations": 34,
+   "points": 245
+  }
+ ]
+}
