@@ -110,7 +110,9 @@ function EditLine({
               return;
             }
             deleteRecord(kind, line.id);
-            toast(`« ${line.name} » ${tr('mis à la Poubelle (30 jours)')}`);
+            toast(
+              `« ${line.name} » ${tr(kind === 'nav' ? 'effacée' : 'mis à la Poubelle (30 jours)')}`,
+            );
           }}
         >
           {tr(sure ? '🗑 Confirmer' : '🗑 Effacer')}

@@ -77,7 +77,7 @@ export function voyageTiles(): VoyageTile[] {
   );
   const records = voyageRecords(id);
   const total =
-    records.navigations.length +
+    records.traces.length +
     records.routes.length +
     records.routings.length +
     records.marks.length;
@@ -86,8 +86,8 @@ export function voyageTiles(): VoyageTile[] {
     title: '🛰 Enregistrements',
     sub:
       total > 0
-        ? `${plural(records.navigations.length, 'navigation')} (traces, photos) · ${plural(records.routes.length, 'route')} · ${plural(records.routings.length, 'routage')} · ${plural(records.marks.length, 'marque')}`
-        : `navigations, traces, photos, routes, routages et marques de la ${lake ? 'sortie' : 'croisière'}`,
+        ? `${plural(records.traces.length, 'trace')} · ${plural(records.routes.length, 'route')} · ${plural(records.routings.length, 'routage')} · ${plural(records.marks.length, 'marque')}`
+        : `traces, routes, routages et marques de la ${lake ? 'sortie' : 'croisière'}`,
   });
   // The day sheet of the navigation under way lives in its cruise or outing.
   const cruise = state.data.cruise.value;

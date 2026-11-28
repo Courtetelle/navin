@@ -1,26 +1,22 @@
 /*
  * The four kinds of records of a cruise or outing (Corban, 27/11): Traces
- * (the navigations, with their traces and photos), Routes, Routages and
+ * (each trace on its own), Routes, Routages and
  * Marques. Each cruise shows its own under « Enregistrements »; data shows
  * them all.
  */
 
 import { buzz } from '../../lib/dom.ts';
 import { fmtShortDate } from '../../lib/format.ts';
-import { runBootHook } from '../../shell/bootHooks.ts';
 import { go } from '../../shell/router.ts';
 import {
-  hooks,
-  openCruise,
-  removeCruise,
   removeMark,
   removeRoute,
   renameMark,
   renameRoute,
+  renameTrace,
   setMarkVoyage,
-  setNavigationVoyage,
+  setTraceVoyage,
   state,
-  toast,
 } from '../../state/index.ts';
 import { marksFly } from '../map/longPress.ts';
 import { editRoute } from '../map/routeEditor.ts';
@@ -31,11 +27,16 @@ import {
   savedRoutings,
   setRoutingVoyage,
 } from '../map/routingState.ts';
+import { showTrace } from '../map/traceActions.ts';
+import { drawTrkList } from '../map/traceList.ts';
+import type { LakeTrack } from '../map/trackStats.ts';
+import { allLakeTracks } from '../map/trackStats.ts';
 import { tracker } from '../map/trackerState.ts';
 import { showZoomOnMap } from '../map/zoomShown.ts';
+import { deleteTrace } from '../prep/index.ts';
 
 import type { VoyageRecords } from './voyageRecords.ts';
-import { setRouteVoyage } from './voyageRecords.ts';
+import { setRouteVoyage, traceOrigin } from './voyageRecords.ts';
 
 /** A kind of record. */
 export type RecordKind = 'nav' | 'route' | 'routing' | 'mark';
@@ -63,8 +64,8 @@ export const RECORD_KINDS: readonly RecordKindInfo[] = [
     title: 'Traces',
     all: 'Toutes les traces',
     allView: 'traces',
-    list: 'navigations',
-    one: 'navigation',
+    list: 'traces',
+    one: 'trace',
   },
   {
     kind: 'route',
@@ -108,6 +109,10 @@ export function recordKind(kind: string | null | undefined): RecordKindInfo {
   return traces;
 }
 
+function traceById(id: string): LakeTrack | undefined {
+  return allLakeTracks().find((track) => track.id === id);
+}
+
 /** One record as a line: its name and date. */
 export interface RecordLine {
   id: string;
@@ -135,15 +140,12 @@ export function recordLines(
 ): RecordLine[] {
   switch (kind) {
     case 'nav': {
-      return records.navigations
-        .map((meta) => ({
-          id: meta.id,
-          name: meta.name,
-          when: day(meta.created),
-          renamable: false,
-          at: meta.created,
-        }))
-        .toSorted((a, b) => b.at.localeCompare(a.at));
+      return records.traces.map((track) => ({
+        id: track.id,
+        name: track.name,
+        when: day(traceOrigin(track).first),
+        renamable: true,
+      }));
     }
     case 'route': {
       return records.routes.map((route) => ({
@@ -188,7 +190,10 @@ export function moveRecord(
 ): void {
   switch (kind) {
     case 'nav': {
-      setNavigationVoyage(id, voyage);
+      const track = traceById(id);
+      if (!track) return;
+      const { cruise, first } = traceOrigin(track);
+      setTraceVoyage(cruise, first, voyage);
       return;
     }
     case 'route': {
@@ -218,7 +223,8 @@ export function renameRecord(kind: RecordKind, id: string, name: string): void {
   if (!text) return;
   switch (kind) {
     case 'nav': {
-      // A navigation keeps its name: it is changed in the navigation.
+      renameTrace(id, text);
+      drawTrkList();
       return;
     }
     case 'route': {
@@ -245,7 +251,7 @@ export function renameRecord(kind: RecordKind, id: string, name: string): void {
 export function deleteRecord(kind: RecordKind, id: string): void {
   switch (kind) {
     case 'nav': {
-      removeCruise(id);
+      if (deleteTrace(id)) drawTrkList();
       return;
     }
     case 'route': {
@@ -265,7 +271,7 @@ export function deleteRecord(kind: RecordKind, id: string): void {
 }
 
 /**
- * Open a record: the navigation on the map of NavIn, the route in its
+ * Open a record: the trace on the map of NavIn, the route in its
  * editor, the routing or the mark on the map.
  * @param kind - Its kind.
  * @param id - Its id.
@@ -274,12 +280,10 @@ export function openRecord(kind: RecordKind, id: string): void {
   buzz();
   switch (kind) {
     case 'nav': {
-      if (state.view.tracking.value) void hooks.stopTracking?.(false);
-      openCruise(id);
-      state.view.currentDay.value = null;
-      toast('Ouverte');
-      runBootHook('autoResumeTrip');
-      go('tracker');
+      const track = traceById(id);
+      if (!track) return;
+      showTrace(track);
+      showZoomOnMap();
       return;
     }
     case 'route': {

@@ -10,6 +10,7 @@ import {
   state,
   traceCutTimes,
   traceNames,
+  traceVoyages,
   voyagesChanged,
 } from '../../state/index.ts';
 import { getPhoto } from '../../storage/photos.ts';
@@ -130,6 +131,9 @@ export function backupAll(): BackupPack {
   // The texts given to traces, only when there are some.
   const names = traceNames();
   if (Object.keys(names).length > 0) content.traceNames = names;
+  // The cruise or outing of each trace, when some were classed.
+  const classed = traceVoyages();
+  if (Object.keys(classed).length > 0) content.traceVoyages = classed;
   // The accounts of the sites of the keys and their guides, when there are
   // some: they go to another device with the backup.
   const book = keyBook();
